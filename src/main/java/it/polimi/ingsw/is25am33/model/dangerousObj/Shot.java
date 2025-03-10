@@ -1,4 +1,4 @@
 package it.polimi.ingsw.is25am33.model.dangerousObj;
 
-public class Shot {
+public abstract class Shot extends DangerousObj {
 }

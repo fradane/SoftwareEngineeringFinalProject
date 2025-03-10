@@ -1,4 +1,4 @@
 package it.polimi.ingsw.is25am33.model.dangerousObj;
 
-public class SmallMeteorite {
+public class SmallMeteorite extends Meteorite {
 }
