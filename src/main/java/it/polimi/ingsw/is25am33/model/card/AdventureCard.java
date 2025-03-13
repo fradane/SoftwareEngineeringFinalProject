@@ -8,6 +8,10 @@ public abstract class AdventureCard {
 
     public abstract void effect(Game game);
 
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
     public int getLevel() {
         return level;
     }

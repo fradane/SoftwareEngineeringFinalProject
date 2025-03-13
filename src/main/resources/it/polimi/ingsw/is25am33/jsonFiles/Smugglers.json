@@ -1,0 +1,17 @@
+[
+  {
+    "level": 1,
+    "cubeMalus": 2,
+    "reward": ["YELLOW", "GREEN", "BLUE"],
+    "stepsBack": -1,
+    "requiredFirePower": 4
+  },
+
+  {
+    "level": 2,
+    "cubeMalus": 3,
+    "reward": ["RED", "YELLOW", "YELLOW"],
+    "stepsBack": -1,
+    "requiredFirePower": 8
+  }
+]

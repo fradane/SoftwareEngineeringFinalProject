@@ -10,7 +10,11 @@ import java.util.Set;
 
 public class Pirates extends AdvancedEnemies implements playerMover {
 
-    private ArrayList<Shot> shots;
+    private List<Shot> shots;
+
+    public void setShots(List<Shot> shots) {
+        this.shots = shots;
+    }
 
     @Override
     public void effect(Game game) {

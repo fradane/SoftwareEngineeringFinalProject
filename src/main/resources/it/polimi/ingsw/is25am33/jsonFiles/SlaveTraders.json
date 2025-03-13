@@ -1,0 +1,17 @@
+[
+  {
+    "level": 1,
+    "crewMalus": 3,
+    "reward": 5,
+    "stepsBack": -1,
+    "requiredFirePower": 6
+  },
+
+  {
+    "level": 2,
+    "crewMalus": 4,
+    "reward": 8,
+    "stepsBack": -2,
+    "requiredFirePower": 7
+  }
+]

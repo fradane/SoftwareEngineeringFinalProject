@@ -1,0 +1,17 @@
+[
+  {
+    "level": 1,
+    "minimumCategories": ["CREW", "ENGINE", "CANNON"],
+    "stepsBack": -3,
+    "crewMalus": 2,
+    "shots": ["SOUTH", "SOUTH"]
+  },
+
+  {
+    "level": 2,
+    "minimumCategories": ["CANNON", "ENGINE", "CREW"],
+    "stepsBack": -4,
+    "crewMalus": 3,
+    "shots": ["NORTH", "EAST", "WEST", "SOUTH"]
+  }
+]

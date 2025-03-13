@@ -1,0 +1,29 @@
+[
+  {
+    "level": 1,
+    "stepsBack": -1,
+    "requiredCrewMembers": 5,
+    "reward": ["YELLOW", "GREEN"]
+  },
+
+  {
+    "level": 1,
+    "stepsBack": -1,
+    "requiredCrewMembers": 6,
+    "reward": ["RED", "RED"]
+  },
+
+  {
+    "level": 2,
+    "stepsBack": -1,
+    "requiredCrewMembers": 7,
+    "reward": ["RED", "YELLOW"]
+  },
+
+  {
+    "level": 2,
+    "stepsBack": -2,
+    "requiredCrewMembers": 8,
+    "reward": ["YELLOW", "YELLOW", "GREEN"]
+  }
+]

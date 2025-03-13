@@ -4,14 +4,30 @@ import it.polimi.ingsw.is25am33.model.Category;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
 import it.polimi.ingsw.is25am33.model.game.Game;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class WarField extends AdventureCard implements playerMover{
 
-    private ArrayList<Category> minimunCategories;
+    private List<Category> minimunCategories;
     private int stepsBack;
     private int crewMalus;
-    private ArrayList<Shoot> shoots;
+    private List<Shot> shots;
+
+    public void setMinimunCategories(List<Category> minimunCategories) {
+        this.minimunCategories = minimunCategories;
+    }
+
+    public void setStepsBack(int stepsBack) {
+        this.stepsBack = stepsBack;
+    }
+
+    public void setCrewMalus(int crewMalus) {
+        this.crewMalus = crewMalus;
+    }
+
+    public void setShots(List<Shot> shots) {
+        this.shots = shots;
+    }
 
     @Override
     public void effect(Game game) {
@@ -32,7 +48,7 @@ public class WarField extends AdventureCard implements playerMover{
 
                 case 2:
 
-                    for(Shot s : shoots) {
+                    for(Shot s : shots) {
 
                         s.setCoordinates(Game.throwDices());
                         minPlayer.getPersonalBoard().handleDangerousObj(s);

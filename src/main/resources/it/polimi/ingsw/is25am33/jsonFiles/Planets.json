@@ -1,0 +1,88 @@
+[
+  {
+    "level":  1,
+    "stepsBack": -3,
+    "availablePlanets": [
+      ["RED", "GREEN", "BLUE", "BLUE", "BLUE"],
+      ["RED", "YELLOW", "BLUE"],
+      ["RED", "BLUE", "BLUE", "BLUE"],
+      ["RED", "GREEN"]
+    ]
+  },
+
+  {
+    "level":  1,
+    "stepsBack": -2,
+    "availablePlanets": [
+      ["RED", "RED"],
+      ["RED", "BLUE", "BLUE"],
+      ["YELLOW"]
+    ]
+  },
+
+  {
+    "level":  1,
+    "stepsBack": -3,
+    "availablePlanets": [
+      ["YELLOW", "GREEN", "BLUE", "BLUE"],
+      ["YELLOW", "YELLOW"]
+    ]
+  },
+
+  {
+    "level":  1,
+    "stepsBack": -1,
+    "availablePlanets": [
+      ["GREEN", "GREEN"],
+      ["YELLOW"],
+      ["BLUE", "BLUE", "BLUE"]
+    ]
+  },
+
+  {
+    "level":  2,
+    "stepsBack": -4,
+    "availablePlanets": [
+      ["RED", "RED", "RED", "YELLOW"],
+      ["RED", "RED", "GREEN", "GREEN"],
+      ["RED", "BLUE", "BLUE", "BLUE", "BLUE"]
+    ]
+  },
+
+  {
+    "level":  2,
+    "stepsBack": -3,
+    "availablePlanets": [
+      ["RED", "RED"],
+      ["GREEN", "GREEN", "GREEN", "GREEN"]
+    ]
+  },
+
+  {
+    "level":  2,
+    "stepsBack": -2,
+    "availablePlanets": [
+      ["RED", "YELLOW"],
+      ["YELLOW", "GREEN", "BLUE"],
+      ["GREEN", "GREEN"],
+      ["YELLOW"]
+    ]
+  },
+
+  {
+    "level":  2,
+    "stepsBack": -3,
+    "availablePlanets": [
+      ["GREEN", "GREEN", "GREEN", "GREEN"],
+      ["YELLOW", "YELLOW"],
+      ["BLUE", "BLUE", "BLUE", "BLUE"]
+    ]
+  }
+]
+
+
+
+
+
+
+

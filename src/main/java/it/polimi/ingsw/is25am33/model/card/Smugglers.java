@@ -4,11 +4,20 @@ import it.polimi.ingsw.is25am33.model.CargoCube;
 import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Smugglers extends Enemies implements cargoCubesHandler, playerMover {
 
     private int cubeMalus;
-    private ArrayList<CargoCube> reward;
+    private List<CargoCube> reward;
+
+    public void setCubeMalus(int cubeMalus) {
+        this.cubeMalus = cubeMalus;
+    }
+
+    public void setReward(List<CargoCube> reward) {
+        this.reward = reward;
+    }
 
     @Override
     public void effect(Game game) {

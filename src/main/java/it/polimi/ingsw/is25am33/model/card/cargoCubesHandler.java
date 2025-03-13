@@ -3,10 +3,11 @@ package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.model.CargoCube;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface cargoCubesHandler {
 
-    default void handleCargoCubesReward(ArrayList<CargoCube> reward, Player player) {
+    default void handleCargoCubesReward(List<CargoCube> reward, Player player) {
 
         ArrayList<Storage> playerPersonalStorage = player.getPersonalBoard().getStorage();
 

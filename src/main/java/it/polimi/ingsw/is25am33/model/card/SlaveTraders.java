@@ -8,10 +8,14 @@ public class SlaveTraders extends AdvancedEnemies implements playerMover {
 
     private int crewMalus;
 
+    public void setCrewMalus(int crewMalus) {
+        this.crewMalus = crewMalus;
+    }
+
     @Override
     public void effect(Game game) {
 
-        ArrayList<Player> playersRanking = game.getFlyingBoard().getCurrentRanking();
+        List<Player> playersRanking = game.getFlyingBoard().getCurrentRanking();
 
         for (Player p : playersRanking) {
 

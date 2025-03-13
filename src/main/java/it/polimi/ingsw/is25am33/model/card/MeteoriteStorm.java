@@ -6,7 +6,12 @@ import java.util.ArrayList;
 
 public class MeteoriteStorm extends AdventureCard{
 
-    private ArrayList<Meteorite> meteorites;
+    private List<Meteorite> meteorites;
+
+    public void setMeteorites(List<Meteorite> meteorites) {
+        this.meteorites = meteorites;
+    }
+
 
     @Override
     public void effect(Game game) {
