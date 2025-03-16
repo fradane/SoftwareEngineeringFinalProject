@@ -1,13 +1,19 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.model.CargoCube;
+import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.game.Game;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListResourceBundle;
 
 public class Planets extends AdventureCard implements cargoCubesHandler, playerMover {
 
     private List<Planet> availablePlanets;
     private int stepsBack;
+    private static final List<GameState> cardStates = List.of(GameState.CHOOSE_PLANET, GameState.HANDLE_CUBES_REWARD);
+    private Planet currentPlanet;
 
     public void setStepsBack(int stepsBack) {
         this.stepsBack = stepsBack;
@@ -17,21 +23,51 @@ public class Planets extends AdventureCard implements cargoCubesHandler, playerM
         this.availablePlanets = availablePlanets;
     }
 
-    @Override
-    public void effect(Game game){
+    public void currPlayerWantsToVisit (int wantsToVisitIndex) throws IllegalStateException, IllegalIndexException, IndexOutOfBoundsException {
 
-        List<Player> playersRanking = game.getFlyingBoard().getCurrentRanking();
+        if (currState != GameState.CHOOSE_PLANET) throw new IllegalStateException("Not the right state");
 
-        for (Player p : playersRanking) {
+        if (wantsToVisitIndex != 0) {
 
-            game.getController().getPreferredPlanetIndex(p, availablePlanets)
-                    .ifPresent(i -> {
+            currentPlanet = availablePlanets.get(wantsToVisitIndex - 1);
 
-                        availablePlanets.get(i).noMoreAvailable();
-                        movePlayer(game.getFlyingBoard(), p, stepsBack);
-                        Planets.this.handleCargoCubesReward(availablePlanets.get(i).getReward(), p);
+            if (currentPlanet.isBusy())
+                throw new IllegalIndexException("Planet has already been chosen");
 
-                    });
+            currentPlanet.noMoreAvailable();
+
+            currState = GameState.HANDLE_CUBES_REWARD;
+            game.setCurrState(currState);
+
+        } else if (game.hasNextPlayer()){
+            game.nextPlayer();
+        } else {
+            game.setCurrState(GameState.END_OF_CARD);
+        }
+
+    }
+
+    public void currPlayerChoseCargoCubeStorage (Storage chosenStorage) throws IllegalStateException {
+
+        if (currState != GameState.HANDLE_CUBES_REWARD) throw new IllegalStateException("Not the right state");
+
+        if(chosenStorage.isFull()) {
+            CargoCube lessValuableCargoCube = chosenStorage.getStockedCubes().sort(CargoCube.byValue).get(0);
+            chosenStorage.removeCube(lessValuableCargoCube);
+        }
+
+        if (currentPlanet.hasNext()) {
+            chosenStorage.add(currentPlanet.getCurrent());
+        } else {
+            chosenStorage.add(currentPlanet.getReward().getLast());
+
+            if (game.hasNextPlayer()) {
+                game.nextPlayer();
+                currState = GameState.CHOOSE_PLANET;
+                game.setCurrState(currState);
+            } else {
+                game.setCurrState(GameState.END_OF_CARD);
+            }
 
         }
 

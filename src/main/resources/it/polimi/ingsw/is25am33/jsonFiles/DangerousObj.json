@@ -1,0 +1,81 @@
+[
+  {
+    "id": "MeteoriteBigNorth",
+    "direction": "NORTH"
+  },
+
+  {
+    "id": "MeteoriteBigSouth",
+    "direction": "SOUTH"
+  },
+
+  {
+    "id": "MeteoriteBigWest",
+    "direction": "WEST"
+  },
+
+  {
+    "id": "MeteoriteBigEast",
+    "direction": "EAST"
+  },
+
+  {
+    "id": "MeteoriteSmallNorth",
+    "direction": "NORTH"
+  },
+
+  {
+    "id": "MeteoriteSmallSouth",
+    "direction": "SOUTH"
+  },
+
+  {
+    "id": "MeteoriteSmallWest",
+    "direction": "WEST"
+  },
+
+  {
+    "id": "MeteoriteSmallEast",
+    "direction": "EAST"
+  },
+
+  {
+    "id": "ShotBigNorth",
+    "direction": "NORTH"
+  },
+
+  {
+    "id": "ShotBigSouth",
+    "direction": "SOUTH"
+  },
+
+  {
+    "id": "ShotBigWest",
+    "direction": "WEST"
+  },
+
+  {
+    "id": "ShotBigEast",
+    "direction": "EAST"
+  },
+
+  {
+    "id": "ShotSmallNorth",
+    "direction": "NORTH"
+  },
+
+  {
+    "id": "ShotSmallSouth",
+    "direction": "SOUTH"
+  },
+
+  {
+    "id": "ShotSmallWest",
+    "direction": "WEST"
+  },
+
+  {
+    "id": "ShotSmallEast",
+    "direction": "EAST"
+  }
+]

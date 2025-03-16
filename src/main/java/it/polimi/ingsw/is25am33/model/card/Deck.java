@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a deck of adventure cards used in the game.
@@ -142,7 +144,7 @@ public class Deck {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.getLogger(Deck.class.getName()).log(Level.SEVERE, "Error loading JSON file: " + filePath, e);
         }
 
         return objects;

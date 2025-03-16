@@ -1,16 +1,23 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.CargoCube;
+import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 public class AbandonedStation extends AdventureCard implements cargoCubesHandler {
 
     private int stepsBack;
     private int requiredCrewMembers;
     private List<CargoCube> reward;
+
+    private Iterator<CargoCube> rewardIterator = reward.iterator();
+
+    private static final List<GameState> cardStates = List.of(GameState.VISIT_LOCATION, GameState.HANDLE_CUBES_REWARD);
 
     public void setRequiredCrewMembers(int requiredCrewMembers) {
         this.requiredCrewMembers = requiredCrewMembers;
@@ -24,24 +31,42 @@ public class AbandonedStation extends AdventureCard implements cargoCubesHandler
         this.stepsBack = stepsBack;
     }
 
-    @Override
-    public void effect(Game game) {
+    public void currPlayerWantsToVisit (boolean wantsToVisit) throws IllegalStateException, IllegalDecisionException {
 
-        ArrayList<Player> playersRanking = game.getFlyingBoard().getCurrentRanking();
+        if (currState != GameState.VISIT_ABANDONED_LOCATION) throw new IllegalStateException("Not the right state");
 
-        for (Player p : playersRanking) {
-
-            if(p.getPersonalBoard().getCrewMembers().size() >= requiredCrewMembers &&
-                    game.getController().wantsToStopOnAbandonedShip(p, this)) {
-
-                this.handleCargoCubesReward(reward, p);
-                game.getFlyingBoard().move(p, stepsBack);
-
-                break;
-            }
-
+        if (wantsToVisit) {
+            if (game.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < requiredCrewMembers) throw new IllegalDecisionException("Player has not enough crew members");
+            currState = GameState.REMOVE_CREW_MEMBERS;
+            game.setCurrState(currState);
+        } else if (game.hasNextPlayer()){
+            game.nextPlayer();
+        } else {
+            game.setCurrState(GameState.END_OF_CARD);
         }
 
     }
+
+    public void currPlayerChoseCargoCubeStorage (Storage chosenStorage) {
+
+        if (currState != GameState.HANDLE_CUBES_REWARD) throw new IllegalStateException("Not the right state");
+
+        if(chosenStorage.isFull()) {
+            CargoCube lessValuableCargoCube = chosenStorage.getStockedCubes().sort(CargoCube.byValue).get(0);
+            chosenStorage.removeCube(lessValuableCargoCube);
+        }
+
+        chosenStorage.add(rewardIterator.next());
+
+        playerMover(game.getFlyingBoard(), game.getCurrPlayer(), stepsBack);
+
+        if (rewardIterator.hasNext()) {
+            rewardIterator.next();
+        } else {
+            game.setCurrState(GameState.END_OF_CARD);
+        }
+
+    }
+
 
 }
