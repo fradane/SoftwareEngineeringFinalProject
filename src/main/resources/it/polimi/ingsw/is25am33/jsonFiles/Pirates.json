@@ -1,0 +1,17 @@
+[
+  {
+    "level": 1,
+    "shots": ["SOUTH", "SOUTH", "SOUTH"],
+    "reward": 4,
+    "stepsBack": -1,
+    "requiredFirePower": 5
+  },
+
+  {
+    "level": 2,
+    "shots": ["NORTH", "NORTH", "NORTH"],
+    "reward": 7,
+    "stepsBack": -2,
+    "requiredFirePower": 6
+  }
+]
