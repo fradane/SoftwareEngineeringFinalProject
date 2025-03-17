@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.CargoCube;
 import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.IllegalIndexException;
 import it.polimi.ingsw.is25am33.model.component.Storage;
 import it.polimi.ingsw.is25am33.model.game.Game;
 import java.util.ArrayList;
@@ -59,7 +60,9 @@ public class Planets extends AdventureCard implements cargoCubesHandler, playerM
         if (currState != GameState.HANDLE_CUBES_REWARD) throw new IllegalStateException("Not the right state");
 
         if(chosenStorage.isFull()) {
-            CargoCube lessValuableCargoCube = chosenStorage.getStockedCubes().sort(CargoCube.byValue).get(0);
+            List<CargoCube> sortedStorage = chosenStorage.getStockedCubes();
+            sortedStorage.sort(CargoCube.byValue);
+            CargoCube lessValuableCargoCube = sortedStorage.getFirst();
             chosenStorage.removeCube(lessValuableCargoCube);
         }
 

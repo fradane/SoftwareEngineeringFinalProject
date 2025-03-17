@@ -59,7 +59,7 @@ public abstract class Storage extends Component {
         return false;
     }
 
-    public boolean isfull(){
+    public boolean isFull(){
         if(stockedCubes.size()==maxCapacity) return true;
         return false;
     }

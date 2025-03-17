@@ -38,7 +38,8 @@ public class AbandonedShip extends AdventureCard implements playerMover {
 
     public void currPlayerWantsToVisit (boolean wantsToVisit) throws IllegalStateException, IllegalDecisionException {
 
-        if (currState != GameState.VISIT_LOCATION) throw new IllegalStateException("Not the right state");
+        if (currState != GameState.VISIT_LOCATION)
+            throw new IllegalStateException("Not the right state");
 
         if (wantsToVisit) {
             if (game.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)

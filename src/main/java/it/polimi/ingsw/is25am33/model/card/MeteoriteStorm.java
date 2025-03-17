@@ -78,7 +78,8 @@ public class MeteoriteStorm extends AdventureCard{
 
     public void playerDecidedHowToDefendTheirSelvesFromBigMeteorite(Optional<DoubleCannon> chosenDoubleCannon, Optional<BatteryBox> chosenBatteryBox) {
 
-        if (currState != GameState.DANGEROUS_ATTACK) throw new IllegalStateException("Not the right state");
+        if (currState != GameState.DANGEROUS_ATTACK)
+            throw new IllegalStateException("Not the right state");
 
         ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
 
@@ -96,7 +97,7 @@ public class MeteoriteStorm extends AdventureCard{
                 if (selectedDoubleCannon.getFireDirection() != currMeteorite.getDirection())
                     throw new IllegalArgumentException("Not correct direction");
 
-                if (canDefendWith(selectedDoubleCannon, currMeteorite)) {
+                if (personalBoard.canDefendWith(selectedDoubleCannon, currMeteorite)) {
                     selectedBatteryBox.useBattery();
                 } else {
                     personalBoard.handleAttack(currMeteorite);

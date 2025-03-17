@@ -16,9 +16,7 @@ public class AbandonedStation extends AdventureCard implements cargoCubesHandler
     private int stepsBack;
     private int requiredCrewMembers;
     private List<CargoCube> reward;
-
-    private final Iterator<CargoCube> rewardIterator = reward.iterator();
-
+    private final Iterator<CargoCube> rewardIterator;
     private static final List<GameState> cardStates = List.of(GameState.VISIT_LOCATION, GameState.HANDLE_CUBES_REWARD);
 
     public void setRequiredCrewMembers(int requiredCrewMembers) {
@@ -36,6 +34,7 @@ public class AbandonedStation extends AdventureCard implements cargoCubesHandler
     public AbandonedStation(int stepsBack, int requiredCrewMembers, List<CargoCube> reward) {
         this.stepsBack = stepsBack;
         this.requiredCrewMembers = requiredCrewMembers;
+        this.rewardIterator = reward.iterator();
         this.reward = reward;
     }
 
@@ -63,7 +62,9 @@ public class AbandonedStation extends AdventureCard implements cargoCubesHandler
             throw new IllegalStateException("Not the right state");
 
         if(chosenStorage.isFull()) {
-            CargoCube lessValuableCargoCube = chosenStorage.getStockedCubes().sort(CargoCube.byValue).get(0);
+            List<CargoCube> sortedStorage = chosenStorage.getStockedCubes();
+            sortedStorage.sort(CargoCube.byValue);
+            CargoCube lessValuableCargoCube = sortedStorage.getFirst();
             chosenStorage.removeCube(lessValuableCargoCube);
         }
 

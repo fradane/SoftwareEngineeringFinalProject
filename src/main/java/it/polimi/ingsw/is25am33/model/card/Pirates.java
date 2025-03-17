@@ -32,7 +32,8 @@ public class Pirates extends AdvancedEnemies implements playerMover {
 
     public void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException, IllegalStateException {
 
-        if (currState != GameState.CHOOSE_CANNONS) throw new IllegalStateException("Not the right state");
+        if (currState != GameState.CHOOSE_CANNONS)
+            throw new IllegalStateException("Not the right state");
 
         if (chosenDoubleCannons.size() != chosenBatteryBoxes.size())
             throw new IllegalArgumentException("The number of engines does not match the number of battery boxes");
@@ -42,7 +43,7 @@ public class Pirates extends AdvancedEnemies implements playerMover {
                 throw new IllegalArgumentException("The number of required batteries is not enough");
         });
 
-        chosenBatteryBoxes.forEach(box -> box.useBattery());
+        chosenBatteryBoxes.forEach(BatteryBox::useBattery);
 
         int currPlayerCannonPower = game.getCurrPlayer().getPersonalBoard().computeTotalCannonPower(chosenDoubleCannons);
 
@@ -74,7 +75,8 @@ public class Pirates extends AdvancedEnemies implements playerMover {
 
     public void throwDices() {
 
-        if (currState != GameState.THROW_DICES) throw new IllegalStateException("Not the right state");
+        if (currState != GameState.THROW_DICES)
+            throw new IllegalStateException("Not the right state");
 
         Shot currShot = shotIterator.next();
         currShot.setCoordinates(Game.throwDices());
@@ -86,7 +88,8 @@ public class Pirates extends AdvancedEnemies implements playerMover {
 
     public void currPlayerDecidedToGetTheReward(boolean hasPlayerAcceptedTheReward) throws IllegalStateException {
 
-        if (currState != GameState.ACCEPT_THE_REWARD) throw new IllegalStateException("Not the right state");
+        if (currState != GameState.ACCEPT_THE_REWARD)
+            throw new IllegalStateException("Not the right state");
 
         if (hasPlayerAcceptedTheReward) {
             game.getCurrPlayer().addCredits(reward);
@@ -104,7 +107,8 @@ public class Pirates extends AdvancedEnemies implements playerMover {
 
     public void playerDecidedHowToDefendTheirSelvesFromSmallShot(Optional<Shield> chosenShield, Optional<BatteryBox> chosenBatteryBox) {
 
-        if (currState != GameState.DANGEROUS_ATTACK) throw new IllegalStateException("Not the right state");
+        if (currState != GameState.DANGEROUS_ATTACK)
+            throw new IllegalStateException("Not the right state");
 
         ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
 
@@ -117,7 +121,7 @@ public class Pirates extends AdvancedEnemies implements playerMover {
                 Shield selectedShield = chosenShield.get();
                 BatteryBox selectedBatteryBox = chosenBatteryBox.get();
 
-                if (selectedBatteryBox.getAvailableBatteries() == 0)
+                if (selectedBatteryBox.getAvailableBattery() == 0)
                     throw new IllegalStateException("Not enough batteries");
                 if (selectedShield.getDirections().stream().anyMatch(d -> d == currShot.getDirection()))
                     throw new IllegalArgumentException("Not correct direction");
@@ -143,7 +147,8 @@ public class Pirates extends AdvancedEnemies implements playerMover {
 
     public void playerIsAttackedByABigShot() {
 
-        if (currState != GameState.DANGEROUS_ATTACK) throw new IllegalStateException("Not the right state");
+        if (currState != GameState.DANGEROUS_ATTACK)
+            throw new IllegalStateException("Not the right state");
 
         ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
 
