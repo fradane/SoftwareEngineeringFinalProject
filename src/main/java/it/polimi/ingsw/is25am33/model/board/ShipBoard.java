@@ -255,7 +255,7 @@ public abstract class ShipBoard {
 
             if(
                     neighborComponent instanceof Cannon
-                    && neighborComponent.fireDirection == neighborDirectionsToCheck[dir]
+                    && neighborComponent.getFireDirection() == neighborDirectionsToCheck[dir]
             )
                 return true;
         }
@@ -290,8 +290,8 @@ public abstract class ShipBoard {
 
             if(
                     neighborComponent instanceof Engine
-                            && (Engine)neighborComponent.fireDirection == SOUTH
-                            && (Engine)neighborComponent.fireDirection == neighborDirectionsToCheck[dir]
+                            && (Engine)neighborComponent.getFireDirection() == SOUTH
+                            && (Engine)neighborComponent.getFireDirection() == neighborDirectionsToCheck[dir]
             )
                 return true;
         }
@@ -304,7 +304,7 @@ public abstract class ShipBoard {
      * This typically happens when a player decides not to place a component.
      */
     public void releaseComponentWithFocus() {
-        focusedComponent.setState(FREE);
+        focusedComponent.setCurrState(FREE);
         focusedComponent = null;
     };
 
@@ -315,7 +315,7 @@ public abstract class ShipBoard {
      * @param y the y-coordinate
      * @throws IllegalArgumentException if (x, y) is outside the board
      */
-    public void removeComponent(int x, int y) throws IllegalArgumentException{
+    public List<Set<int[]>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException{
         if(shipMatrix[x][y] == null)
             throw new IllegalArgumentException("No component in this position");
 
@@ -324,8 +324,7 @@ public abstract class ShipBoard {
 
 
         List<Set<int[]>> shipParts = identifyShipParts(x, y);
-        Set<int[]> partToBeRemoved = game.getController().askWhichPartToRemove(shipParts);
-        removeShipPart (partToBeRemoved);
+        return shipParts;
     }
 
     /**
@@ -348,6 +347,25 @@ public abstract class ShipBoard {
                         : shipMatrix[pos] )
                 .anyMatch(component -> component instanceof Cannon && component.getFireDirection() == direction );
     }
+
+    public boolean isThereADoubleCannon(int pos, Direction direction) {
+        if(pos < 0 || pos >= BOARD_DIMENSION )
+            throw new IllegalArgumentException("Not a valid position");
+
+        return Arrays.stream(
+                        (direction == NORTH || direction == SOUTH) ?
+                                IntStream.range(0, BOARD_DIMENSION)
+                                        .mapToObj(i -> shipMatrix[i][pos])
+                                        .toArray(Component[]::new)
+                                : shipMatrix[pos] )
+                .anyMatch(component -> component instanceof DoubleCannon && component.getFireDirection() == direction );
+    }
+
+    public boolean isItGoingToHitTheShip(DangerousObj obj){
+        Component[] componentsInObjectDirection = getOrderedComponentsInDirection(obj.getCoordinate(), obj.getDirection());
+        return componentsInObjectDirection.length != 0;
+    }
+
 
     /**
      * Returns the components in a row/column in the order that a projectile or effect would encounter them.
@@ -508,13 +526,30 @@ public abstract class ShipBoard {
         return false;
     }
 
+    public Stream<DoubleCannon> getDoubleCannons () {
+        return Arrays.stream(shipMatrix)
+                .flatMap(row -> Arrays.stream(row))
+                .filter(Objects::nonNull)
+                .filter(component -> component instanceof Cannon)
+                .map(component -> (Cannon)component)
+                .filter(cannon -> cannon instanceof DoubleCannon);
+    }
+
+    public Stream<Cannon> getAllCannons () {
+        return Arrays.stream(shipMatrix)
+                .flatMap(row -> Arrays.stream(row))
+                .filter(Objects::nonNull)
+                .filter(component -> component instanceof Cannon)
+                .map(component -> (Cannon)component);
+    }
+
     /**
-     * Calculates total firepower by looking at all cannons,
-     * then asking the controller which double cannons to activate.
+     * ???
      *
      * @return the sum of firepower from active cannons
      */
-    public int countTotalFirePower() {
+    //cannonsActivated include sia i singoli che i doppi attivati
+    public int countTotalFirePower(Stream<Cannon> cannonsToCountFirePower) {
         // Convert all cannons on the board into a stream
         Stream<Cannon> cannonStream = Arrays.stream(shipMatrix)
                                         .flatMap(row -> Arrays.stream(row))
@@ -523,10 +558,8 @@ public abstract class ShipBoard {
                                         .map(component -> (Cannon)component);
 
         // The controller asks the user how many double cannons wants to activate
-        Stream<DoubleCannon> doubleCannonsActivated = game.getController().askWhichDoubleCannonToActivate(
-                cannonStream.filter(cannon -> cannon instanceof DoubleCannon)
-        );
-        Stream <Cannon> singleCannons = cannonStream.filter(cannon -> !(cannon instanceof DoubleCannon));
+        Stream<DoubleCannon> doubleCannonsActivated = cannonsToCountFirePower.filter(cannon -> cannon instanceof DoubleCannon);
+        Stream <Cannon> singleCannons = cannonsToCountFirePower.filter(cannon -> !(cannon instanceof DoubleCannon));
 
         // Cannon aimed NORTH = 1 point, otherwise 1/2.
         // Double cannon aimed NORTH = 2 points, otherwise 1 point.
@@ -536,27 +569,45 @@ public abstract class ShipBoard {
         return totalFirePower;
     }
 
+    public Stream<Engine> getAllEngines () {
+        return Arrays.stream(shipMatrix)
+                .flatMap(row -> Arrays.stream(row))
+                .filter(Objects::nonNull)
+                .filter(component -> component instanceof Engine)
+                .map(component -> (Engine)component);
+    }
+
     /**
-     * Similar logic for engines:
-     * Single engine adds 1 to engine power; double engines may optionally provide 2 if activated.
+     * ???
      *
      * @return the total engine power of the ship
      */
-    public int countTotalEnginePower() {
+    public int countTotalEnginePower(Stream<Engine> enginesToCountEnginePower) {
         Stream<Engine> engineStream = Arrays.stream(shipMatrix)
                 .flatMap(row -> Arrays.stream(row))
                 .filter(Objects::nonNull)
                 .filter(component -> component instanceof Engine)
                 .map(component -> (Engine)component);
 
-        Stream<DoubleEngine> doubleEnginesActivated = game.getController().askWhichDoubleEnginesToActivate(
-                engineStream.filter(engine -> engine instanceof DoubleEngine)
-        );
-        Stream <Engine> singleEngines = engineStream.filter(engine-> !(engine instanceof DoubleEngine));
+        Stream<DoubleEngine> doubleEnginesActivated = enginesToCountEnginePower.filter(Engine -> cannon instanceof DoubleEngine);
+        Stream <Engine> singleEngines = enginesToCountEnginePower.filter(cannon -> !(Engine instanceof DoubleEngine));
 
-        int totalEnginePower = singleEngines.count() + 2 * doubleEnginesActivated.count();
+
+        int totalEnginePower = singleCannons.count() + 2 * doubleEnginesActivated.count();
 
         return totalEnginePower;
+    }
+
+    public int countSingleEnginePower(Stream<Engine> enginesToCountEnginePower) {
+        Stream<Engine> singleEngineStream = Arrays.stream(shipMatrix)
+                .flatMap(row -> Arrays.stream(row))
+                .filter(Objects::nonNull)
+                .filter(component -> component instanceof Engine)
+                .filter(cannon -> !(Engine instanceof DoubleEngine))
+                .map(component -> (Engine)component);
+
+
+        return singleEngineStream.count();
     }
 
     /**
@@ -702,9 +753,10 @@ public abstract class ShipBoard {
                 .filter(Objects::nonNull)
                 .filter(component -> component instanceof Shield)
                 .map(component -> (Shield)component)
-                .flatMap(shield -> shield.getDirections().stream())
+                .flatMap(shield -> shield.getDirection().stream())
                 .anyMatch(dir -> dir == direction);
     }
 
-    public abstract void handleDangerousObject(DangerousObject obj);
+    public abstract void handleDangerousObject(DangerousObj obj);
+    public abstract boolean canDifendItselfWithSingleCannons(DangerousObj);
 }

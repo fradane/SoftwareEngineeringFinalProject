@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static it.polimi.ingsw.is25am33.model.Direction.NORTH;
+
 public class Level2ShipBoard extends ShipBoard{
 
     public void book () {
@@ -19,36 +21,27 @@ public class Level2ShipBoard extends ShipBoard{
 
 
 
-    public void handleDangerousObject(DangerousObject obj){
+    public void handleDangerousObject(DangerousObj obj){
 
-        int[] hitCoordinate = findFirstComponentInDirection(obj.coordinate, obj.direction);
+        int[] hitCoordinate = findFirstComponentInDirection(obj.getCoordinate(), obj.getDirection());
 
-        switch (obj) {
-            case BigShot bigShot -> {
-                removeComponent(hitCoordinate[0], hitCoordinate[1]);
-            }
-            case SmallShot smallShot -> {
-                if (isDirectionCoveredByShield(obj.direction) && !game.getController().wantsToActivateShield())
-                    removeComponent(hitCoordinate[0], hitCoordinate[1]);
-            }
-            case BigMeteorite bigMeteorite -> {
-                if(obj.direction == NORTH){
-                    if(!isThereACannon(obj.coordinate, obj.direction))
-                        removeComponent(hitCoordinate[0], hitCoordinate[1]);
-                }else{
-                    if(
-                            !isThereACannon(obj.coordinate, obj.direction)
-                                    && !isThereACannon(obj.coordinate - 1, obj.direction)
-                                    && !isThereACannon(obj.coordinate + 1, obj.direction)
-                    )
-                        removeComponent(hitCoordinate[0], hitCoordinate[1]);
-                }
-            }
-            case SmallMeteorite smallMeteorite -> {
-                if(isExposed(obj.coordinate, obj.direction) && isDirectionCoveredByShield(obj.direction) && !game.getController().wantsToActivateShield())
-                    removeComponent(hitCoordinate[0], hitCoordinate[1]);
-            }
+        removeComponent(hitCoordinate[0], hitCoordinate[1]);
+
+    }
+
+    boolean canDifendItselfWithSingleCannons(DangerousObj obj){
+        if(obj.getDirection() == NORTH){
+            if(!isThereACannon(obj.getCoordinate(), obj.getDirection()))
+                return false;
+        }else{
+            if(
+                    !isThereACannon(obj.coordinate, obj.getDirection())
+                            && !isThereACannon(obj.getCoordinate() - 1, obj.getDirection())
+                            && !isThereACannon(obj.getCoordinate() + 1, obj.getDirection())
+            )
+                return false;
         }
+        return true;
     }
 
 
