@@ -12,4 +12,7 @@ public class MainCabin extends Cabin {
         super(connectors);
         this.color = color;
     }
+    public PlayerColor getColor() {
+        return color;
+    }
 }

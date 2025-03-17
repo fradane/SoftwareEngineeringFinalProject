@@ -2,7 +2,7 @@ package it.polimi.ingsw.is25am33.model.component;
 
 import it.polimi.ingsw.is25am33.model.ConnectorType;
 import it.polimi.ingsw.is25am33.model.Direction;
-import it.polimi.ingsw.is25am33.model.crew.CrewMember;
+import it.polimi.ingsw.is25am33.model.CrewMember;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +15,16 @@ public class Cabin extends Component{
         super(connectors);
         inhabitants = new ArrayList<CrewMember>();
     }
+
     public List<CrewMember> getInhabitants() {
         return inhabitants;
     }
 
-    public void addMember(CrewMember member) throws IllegalStateException {
-        if(inhabitants.size()==2)
-            throw new IllegalStateException("Full cabin");
+    public void fillCabin(CrewMember member){
+        if(member.equals(CrewMember.HUMAN)) {
+            inhabitants.add(member);
+            inhabitants.add(member);
+        }
         else inhabitants.add(member);
     }
 

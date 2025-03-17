@@ -17,8 +17,8 @@ public class Shield extends Component implements Activable, Rotatable {
 
         public void setDirection() {
             for(int i=0; i<getRotation()%4;i++){
-                for(int j=0; j<2; j++)
-                    this.direction.set(j,shiftDirection(this.direction.get(j)));
+                    this.direction.set(0,shiftDirection(this.direction.get(0)));
+                    this.direction.set(1,shiftDirection(this.direction.get(1)));
             }
         }
 

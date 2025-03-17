@@ -8,7 +8,7 @@ import java.util.Map;
 public class Engine extends Component implements Rotatable{
     private Direction powerDirection;
 
-    public Engine(Map<Direction, ConnectorType> connectors) {
+    public Engine(Map<Direction, ConnectorType> connectors){
         super(connectors);
         this.powerDirection= Direction.SOUTH ;
     }
