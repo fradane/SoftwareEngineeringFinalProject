@@ -4,6 +4,9 @@ import it.polimi.ingsw.is25am33.model.CrewMember;
 import it.polimi.ingsw.is25am33.model.Direction;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.CrewMember;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -131,7 +134,7 @@ public abstract class ShipBoard {
      */
     public boolean isEngineDirectionWrong(Engine componentToPlace) {
         if(componentToPlace instanceof Engine)
-            return componentToPlace.getFireDirection() == SOUTH;
+            return componentToPlace.getPowerDirection() == SOUTH;
         return false;
     }
 
@@ -347,7 +350,7 @@ public abstract class ShipBoard {
                             .mapToObj(i -> shipMatrix[i][pos])
                             .toArray(Component[]::new)
                         : shipMatrix[pos] )
-                .anyMatch(component -> component instanceof Cannon && component.getFireDirection() == direction );
+                .anyMatch(component -> component instanceof Cannon && ((Cannon) component).getFireDirection() == direction );
     }
 
     public boolean isThereADoubleCannon(int pos, Direction direction) {
@@ -360,7 +363,7 @@ public abstract class ShipBoard {
                                         .mapToObj(i -> shipMatrix[i][pos])
                                         .toArray(Component[]::new)
                                 : shipMatrix[pos] )
-                .anyMatch(component -> component instanceof DoubleCannon && component.getFireDirection() == direction );
+                .anyMatch(component -> component instanceof DoubleCannon && ((Cannon) component).getFireDirection() == direction );
     }
 
     public boolean isItGoingToHitTheShip(DangerousObj obj){
@@ -415,10 +418,10 @@ public abstract class ShipBoard {
         if(pos < 0 || pos >= BOARD_DIMENSION )
             throw new IllegalArgumentException("Not a valid position");
 
-        return Arrays.stream( getComponentsInOrderInDirection(pos, direction) )
+        return Arrays.stream( getOrderedComponentsInDirection(pos, direction) )
                 .findFirst()
-                .map(component -> component.getConnectors().get(direction) != EMPTY)
-                .orElse(false);
+                .map(component -> (Boolean) (component.getConnectors().get(direction) != EMPTY))
+                .orElse(Boolean.valueOf(false));
     }
 
     /**
@@ -532,9 +535,8 @@ public abstract class ShipBoard {
         return Arrays.stream(shipMatrix)
                 .flatMap(row -> Arrays.stream(row))
                 .filter(Objects::nonNull)
-                .filter(component -> component instanceof Cannon)
-                .map(component -> (Cannon)component)
-                .filter(cannon -> cannon instanceof DoubleCannon);
+                .filter(component -> component instanceof DoubleCannon)
+                .map(component -> (DoubleCannon)component);
     }
 
     public Stream<Cannon> getAllCannons () {
@@ -560,7 +562,7 @@ public abstract class ShipBoard {
                                         .map(component -> (Cannon)component);
 
         // The controller asks the user how many double cannons wants to activate
-        Stream<DoubleCannon> doubleCannonsActivated = cannonsToCountFirePower.filter(cannon -> cannon instanceof DoubleCannon);
+        Stream<DoubleCannon> doubleCannonsActivated = cannonsToCountFirePower.filter(cannon -> cannon instanceof DoubleCannon).map(cannon -> (DoubleCannon)cannon);
         Stream <Cannon> singleCannons = cannonsToCountFirePower.filter(cannon -> !(cannon instanceof DoubleCannon));
 
         // Cannon aimed NORTH = 1 point, otherwise 1/2.
@@ -591,11 +593,11 @@ public abstract class ShipBoard {
                 .filter(component -> component instanceof Engine)
                 .map(component -> (Engine)component);
 
-        Stream<DoubleEngine> doubleEnginesActivated = enginesToCountEnginePower.filter(Engine -> cannon instanceof DoubleEngine);
-        Stream <Engine> singleEngines = enginesToCountEnginePower.filter(cannon -> !(Engine instanceof DoubleEngine));
+        Stream<DoubleEngine> doubleEnginesActivated = enginesToCountEnginePower.filter(engine -> engine instanceof DoubleEngine).map(engine -> (DoubleEngine)engine);
+        Stream <Engine> singleEngines = enginesToCountEnginePower.filter(engine -> !(engine instanceof DoubleEngine));
 
 
-        int totalEnginePower = singleCannons.count() + 2 * doubleEnginesActivated.count();
+        int totalEnginePower = (int) (singleEngines.count() + 2 * doubleEnginesActivated.count());
 
         return totalEnginePower;
     }
@@ -605,11 +607,11 @@ public abstract class ShipBoard {
                 .flatMap(row -> Arrays.stream(row))
                 .filter(Objects::nonNull)
                 .filter(component -> component instanceof Engine)
-                .filter(cannon -> !(Engine instanceof DoubleEngine))
+                .filter(engine -> !(engine instanceof DoubleEngine))
                 .map(component -> (Engine)component);
 
 
-        return singleEngineStream.count();
+        return (int) singleEngineStream.count();
     }
 
     /**
@@ -702,7 +704,7 @@ public abstract class ShipBoard {
         int x, y;
 
         if( pos < 0 || pos >= BOARD_DIMENSION)
-            throw new IllegalArgumentException("Invalid position: ", pos);
+            throw new IllegalArgumentException("Invalid position: " + pos);
 
         switch (direction) {
             case NORTH:
@@ -754,11 +756,11 @@ public abstract class ShipBoard {
                 .flatMap(row -> Arrays.stream(row))
                 .filter(Objects::nonNull)
                 .filter(component -> component instanceof Shield)
-                .map(component -> (Shield)component)
-                .flatMap(shield -> shield.getDirection().stream())
+                .map(component -> ((Shield)component))
+                .flatMap(shield -> shield.getDirections().stream())
                 .anyMatch(dir -> dir == direction);
     }
 
     public abstract void handleDangerousObject(DangerousObj obj);
-    public abstract boolean canDifendItselfWithSingleCannons(DangerousObj);
+    public abstract boolean canDifendItselfWithSingleCannons(DangerousObj obj);
 }
