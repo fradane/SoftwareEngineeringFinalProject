@@ -20,7 +20,8 @@ public class BatteryBox extends Component {
     public int getAvailableBattery() {
         return availableBattery;
     }
-    public void useBattery() {
+    public void useBattery() throws IllegalStateException {
+        if(availableBattery==0) throw new IllegalStateException("empty battery box");
         availableBattery--;
     }
 }

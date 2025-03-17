@@ -11,9 +11,7 @@ public class StandardStorage extends Storage {
         super(connectors, maxCapacity);
     }
     public void addCube(CargoCube cube) throws IllegalArgumentException {
-        if(cube==CargoCube.RED){
-            throw new IllegalArgumentException("Red cube in StandardStorage");
-        }
-        else getStockedCubes().add(cube);
+        if(cube==CargoCube.RED) throw new IllegalArgumentException("Red cube in StandardStorage");
+        getStockedCubes().add(cube);
     }
 }

@@ -1,8 +1,8 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ComponentState;
 import it.polimi.ingsw.is25am33.model.ConnectorType;
 import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.ComponentState;
 
 import java.util.*;
 
@@ -11,24 +11,21 @@ public abstract class Component {
     private int rotation;
     private Map<Direction, ConnectorType> connectors;
 
-    public Component(Map<Direction, ConnectorType> connectors) {
+    public Component(Map<Direction, ConnectorType> connectors){
         currState = ComponentState.FREE;
         this.connectors = connectors;
         rotation = 0;
     }
 
     public ComponentState getCurrState() {
-
         return currState;
     }
 
     public void setCurrState(ComponentState currState) {
-
         this.currState = currState;
     }
 
     public int getRotation() {
-
         return rotation;
     }
 
@@ -37,6 +34,7 @@ public abstract class Component {
     }
 
     public Map<Direction,ConnectorType> getConnectors() {
+
         return this.connectors;
     }
 
