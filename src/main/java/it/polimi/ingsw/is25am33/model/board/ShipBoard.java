@@ -342,13 +342,32 @@ public abstract class ShipBoard {
             throw new IllegalArgumentException("Not a valid position");
 
         return Arrays.stream(
+                (direction == NORTH || direction == SOUTH) ?
+                        IntStream.range(0, BOARD_DIMENSION)
+                            .mapToObj(i -> shipMatrix[i][pos])
+                            .toArray(Component[]::new)
+                        : shipMatrix[pos] )
+                .anyMatch(component -> component instanceof Cannon && component.getFireDirection() == direction );
+    }
+
+    public boolean isThereADoubleCannon(int pos, Direction direction) {
+        if(pos < 0 || pos >= BOARD_DIMENSION )
+            throw new IllegalArgumentException("Not a valid position");
+
+        return Arrays.stream(
                         (direction == NORTH || direction == SOUTH) ?
                                 IntStream.range(0, BOARD_DIMENSION)
                                         .mapToObj(i -> shipMatrix[i][pos])
                                         .toArray(Component[]::new)
                                 : shipMatrix[pos] )
-                .anyMatch(component -> component instanceof Cannon && ((Cannon) component).getFireDirection() == direction );
+                .anyMatch(component -> component instanceof DoubleCannon && component.getFireDirection() == direction );
     }
+
+    public boolean isItGoingToHitTheShip(DangerousObj obj){
+        Component[] componentsInObjectDirection = getOrderedComponentsInDirection(obj.getCoordinate(), obj.getDirection());
+        return componentsInObjectDirection.length != 0;
+    }
+
 
     /**
      * Returns the components in a row/column in the order that a projectile or effect would encounter them.
@@ -365,19 +384,19 @@ public abstract class ShipBoard {
 
         return switch (direction)  {
             case NORTH -> IntStream.range(0, BOARD_DIMENSION)
-                    .mapToObj(i -> shipMatrix[i][pos])
-                    .toArray(Component[]::new);
+                            .mapToObj(i -> shipMatrix[i][pos])
+                            .toArray(Component[]::new);
             case SOUTH -> IntStream.range(0, BOARD_DIMENSION)
-                    .map(i -> BOARD_DIMENSION - 1 - i)
-                    .mapToObj(i -> shipMatrix[i][pos])
-                    .toArray(Component[]::new);
+                            .map(i -> BOARD_DIMENSION - 1 - i)
+                            .mapToObj(i -> shipMatrix[i][pos])
+                            .toArray(Component[]::new);
             case EAST -> IntStream.range(0, BOARD_DIMENSION)
-                    .map(i -> BOARD_DIMENSION - 1 - i)
-                    .mapToObj(i -> shipMatrix[pos][i])
-                    .toArray(Component[]::new);
+                            .map(i -> BOARD_DIMENSION - 1 - i)
+                            .mapToObj(i -> shipMatrix[pos][i])
+                            .toArray(Component[]::new);
             case WEST -> IntStream.range(0, BOARD_DIMENSION)
-                    .mapToObj(i -> shipMatrix[pos][i])
-                    .toArray(Component[]::new);
+                            .mapToObj(i -> shipMatrix[pos][i])
+                            .toArray(Component[]::new);
             default -> throw new IllegalArgumentException("Not a valid direction");
 
         };
@@ -535,10 +554,10 @@ public abstract class ShipBoard {
     public int countTotalFirePower(Stream<Cannon> cannonsToCountFirePower) {
         // Convert all cannons on the board into a stream
         Stream<Cannon> cannonStream = Arrays.stream(shipMatrix)
-                .flatMap(row -> Arrays.stream(row))
-                .filter(Objects::nonNull)
-                .filter(component -> component instanceof Cannon)
-                .map(component -> (Cannon)component);
+                                        .flatMap(row -> Arrays.stream(row))
+                                        .filter(Objects::nonNull)
+                                        .filter(component -> component instanceof Cannon)
+                                        .map(component -> (Cannon)component);
 
         // The controller asks the user how many double cannons wants to activate
         Stream<DoubleCannon> doubleCannonsActivated = cannonsToCountFirePower.filter(cannon -> cannon instanceof DoubleCannon);
@@ -579,6 +598,18 @@ public abstract class ShipBoard {
         int totalEnginePower = singleCannons.count() + 2 * doubleEnginesActivated.count();
 
         return totalEnginePower;
+    }
+
+    public int countSingleEnginePower(Stream<Engine> enginesToCountEnginePower) {
+        Stream<Engine> singleEngineStream = Arrays.stream(shipMatrix)
+                .flatMap(row -> Arrays.stream(row))
+                .filter(Objects::nonNull)
+                .filter(component -> component instanceof Engine)
+                .filter(cannon -> !(Engine instanceof DoubleEngine))
+                .map(component -> (Engine)component);
+
+
+        return singleEngineStream.count();
     }
 
     /**
@@ -724,9 +755,10 @@ public abstract class ShipBoard {
                 .filter(Objects::nonNull)
                 .filter(component -> component instanceof Shield)
                 .map(component -> (Shield)component)
-                .flatMap(shield -> shield.getDirections().stream())
+                .flatMap(shield -> shield.getDirection().stream())
                 .anyMatch(dir -> dir == direction);
     }
 
     public abstract void handleDangerousObject(DangerousObj obj);
+    public abstract boolean canDifendItselfWithSingleCannons(DangerousObj);
 }
