@@ -1,6 +1,9 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.component.BatteryBox;
+import it.polimi.ingsw.is25am33.model.component.Cabin;
+import it.polimi.ingsw.is25am33.model.component.Cannon;
 import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.ArrayList;
@@ -11,6 +14,10 @@ public class SlaveTraders extends AdvancedEnemies implements playerMover {
 
     private int crewMalus;
     private final static List<GameState> cardStates = List.of(GameState.CHOOSE_CANNONS, GameState.ACCEPT_THE_REWARD, GameState.REMOVE_CREW_MEMBERS);
+
+    public SlaveTraders(int crewMalus) {
+        this.crewMalus = crewMalus;
+    }
 
     public void setCrewMalus(int crewMalus) {
         this.crewMalus = crewMalus;
@@ -24,11 +31,11 @@ public class SlaveTraders extends AdvancedEnemies implements playerMover {
             throw new IllegalArgumentException("The number of engines does not match the number of battery boxes");
 
         chosenBatteryBoxes.stream().distinct().forEach(box -> {
-            if (Collections.frequency(chosenDoubleCannons, box) > box.getAvailableBatteries())
+            if (Collections.frequency(chosenDoubleCannons, box) > box.getAvailableBattery())
                 throw new IllegalArgumentException("The number of required batteries is not enough");
         });
 
-        chosenBatteryBoxes.forEach(box -> box.useBattery());
+        chosenBatteryBoxes.forEach(BatteryBox::useBattery);
 
         int currPlayerCannonPower = game.getCurrPlayer().getPersonalBoard().computeTotalCannonPower(chosenDoubleCannons);
 
@@ -77,7 +84,7 @@ public class SlaveTraders extends AdvancedEnemies implements playerMover {
             if (Collections.frequency(chosenCabins, cabin) > cabin.getInhabitants().size()) throw new IllegalArgumentException("The number of required crew members is not enough");
         });
 
-        chosenCabins.forEach(cabin -> cabin.removeMember());
+        chosenCabins.forEach(Cabin::removeMember);
 
         if (game.hasNextPlayer()) {
             game.nextPlayer();

@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model;
 
 public enum GameState {
+    START_CARD,
     CHOOSE_CANNONS,
     CHOOSE_ENGINES,
     REMOVE_CREW_MEMBERS,

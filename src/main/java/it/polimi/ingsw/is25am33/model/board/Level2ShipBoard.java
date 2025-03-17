@@ -4,6 +4,7 @@ import it.polimi.ingsw.is25am33.model.ConnectorType;
 import it.polimi.ingsw.is25am33.model.Direction;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.crew.CrewMember;
+import it.polimi.ingsw.is25am33.model.dangerousObj.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +20,7 @@ public class Level2ShipBoard extends ShipBoard{
 
 
 
-    public void handleDangerousObject(DangerousObject obj){
+    public void handleDangerousObject(DangerousObj obj){
 
         int[] hitCoordinate = findFirstComponentInDirection(obj.coordinate, obj.direction);
 

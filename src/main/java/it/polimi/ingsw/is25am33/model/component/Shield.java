@@ -11,7 +11,7 @@ public class Shield extends Component implements Activable, Rotatable {
             this.direction=direction;
         }
 
-        public List<Direction> getDirection() {
+        public List<Direction> getDirections() {
             return direction;
         }
 

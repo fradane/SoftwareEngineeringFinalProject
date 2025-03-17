@@ -1,12 +1,14 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import it.polimi.ingsw.is25am33.model.Direction;
-import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.crew.CrewMember;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static it.polimi.ingsw.is25am33.model.ComponentState.*;
 import static it.polimi.ingsw.is25am33.model.ConnectorType.*;
@@ -255,7 +257,7 @@ public abstract class ShipBoard {
 
             if(
                     neighborComponent instanceof Cannon
-                            && neighborComponent.fireDirection == neighborDirectionsToCheck[dir]
+                            && ((Cannon) neighborComponent).getFireDirection() == neighborDirectionsToCheck[dir]
             )
                 return true;
         }
@@ -290,8 +292,8 @@ public abstract class ShipBoard {
 
             if(
                     neighborComponent instanceof Engine
-                            && (Engine)neighborComponent.fireDirection == SOUTH
-                            && (Engine)neighborComponent.fireDirection == neighborDirectionsToCheck[dir]
+                            && ((Engine) neighborComponent).getPowerDirection() == SOUTH
+                            && ((Engine) neighborComponent).getPowerDirection() == neighborDirectionsToCheck[dir]
             )
                 return true;
         }
@@ -304,7 +306,7 @@ public abstract class ShipBoard {
      * This typically happens when a player decides not to place a component.
      */
     public void releaseComponentWithFocus() {
-        focusedComponent.setState(FREE);
+        focusedComponent.setCurrState(FREE);
         focusedComponent = null;
     };
 
@@ -345,7 +347,7 @@ public abstract class ShipBoard {
                                         .mapToObj(i -> shipMatrix[i][pos])
                                         .toArray(Component[]::new)
                                 : shipMatrix[pos] )
-                .anyMatch(component -> component instanceof Cannon && component.getFireDirection() == direction );
+                .anyMatch(component -> component instanceof Cannon && ((Cannon) component).getFireDirection() == direction );
     }
 
     /**
@@ -474,7 +476,7 @@ public abstract class ShipBoard {
                 if (!isValidPosition(i, j)) continue;
                 Component currentCabin = shipMatrix[i][j];
 
-                if(currentCabin instanceof Cabin && currentCabin.hasInhabitants()){
+                if(currentCabin instanceof Cabin && ((Cabin) currentCabin).hasInhabitants()){
                     for (int dir = 0; dir < 4; dir++) {
                         int newI = i + dx[dir];
                         int newJ = j + dy[dir];
@@ -482,7 +484,7 @@ public abstract class ShipBoard {
                         if(!isValidPosition(newI, newJ)) continue;
 
                         Component neighbor = shipMatrix[newI][newJ];
-                        if (neighbor instanceof Cabin && neighbor.hasInhabitants()){
+                        if (neighbor instanceof Cabin && ((Cabin) neighbor).hasInhabitants()){
                             cabinsWithNeighbors.add((Cabin)currentCabin);
                             break;
                         }
@@ -726,5 +728,5 @@ public abstract class ShipBoard {
                 .anyMatch(dir -> dir == direction);
     }
 
-    public abstract void handleDangerousObject(DangerousObject obj);
+    public abstract void handleDangerousObject(DangerousObj obj);
 }

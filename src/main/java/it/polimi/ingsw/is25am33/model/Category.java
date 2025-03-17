@@ -1,5 +1,7 @@
 package it.polimi.ingsw.is25am33.model;
 
+import it.polimi.ingsw.is25am33.model.game.Player;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -10,8 +12,8 @@ public enum Category {
             return ranking.stream()
                     .reduce((p1, p2) -> {
 
-                        int enginePower1 = p1.getShipBoard().countTotalEnginePower();
-                        int enginePower2 = p2.getShipBoard().countTotalEnginePower();
+                        int enginePower1 = p1.getPersonalBoard().countTotalEnginePower();
+                        int enginePower2 = p2.getPersonalBoard().countTotalEnginePower();
 
                         if (enginePower1 == enginePower2) return ranking.indexOf(p1) < ranking.indexOf(p2) ? p1 : p2;
 
@@ -29,8 +31,8 @@ public enum Category {
             return ranking.stream()
                     .reduce((p1, p2) -> {
 
-                        int cannonPower1 = p1.getShipBoard().countTotalCannonPower();
-                        int cannonPower2 = p2.getShipBoard().countTotalCannonPower();
+                        int cannonPower1 = p1.getPersonalBoard().countTotalCannonPower();
+                        int cannonPower2 = p2.getPersonalBoard().countTotalCannonPower();
 
                         if (cannonPower1 == cannonPower2) return ranking.indexOf(p1) < ranking.indexOf(p2) ? p1 : p2;
 
@@ -41,14 +43,15 @@ public enum Category {
 
         }
     },
+
     CREW {
-        public Player getMinimunPlayer(ArrayList<Player> ranking) {
+        public Player getMinimumPlayer(ArrayList<Player> ranking) {
 
             return ranking.stream()
                     .reduce((p1, p2) -> {
 
-                        int crewSize1 = p1.getShipBoard().getCrewMembers().size();
-                        int crewSize2 = p2.getShipBoard().getCrewMembers().size();
+                        int crewSize1 = p1.getPersonalBoard().getCrewMembers().size();
+                        int crewSize2 = p2.getPersonalBoard().getCrewMembers().size();
 
                         if (crewSize1 == crewSize2) return ranking.indexOf(p1) < ranking.indexOf(p2) ? p1 : p2;
 

@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.Category;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
+import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
 import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.List;

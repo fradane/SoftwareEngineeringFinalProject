@@ -17,15 +17,19 @@ public abstract class Storage extends Component {
     public int getMaxCapacity() {
         return maxCapacity;
     }
+
     public List<CargoCube> getStockedCubes() {
         return stockedCubes;
     }
+
     public void addCube(CargoCube cube) {
         stockedCubes.add(cube);
     }
+
     public void removeCube(CargoCube cube) {
         stockedCubes.remove(cube);
     }
+
     public void removeAllCargoCubesOfType(CargoCube cube) {
         for (CargoCube c : stockedCubes) {
             if (cube.equals(c)) {
@@ -33,6 +37,7 @@ public abstract class Storage extends Component {
             }
         }
     }
+
     public void removeCargoCubesOfType(CargoCube cube, int n) {
         int i=0;
         for (CargoCube c : stockedCubes) {
@@ -45,6 +50,7 @@ public abstract class Storage extends Component {
             }
         }
     }
+
     public boolean containsCargoCube(CargoCube cube) {
         for (CargoCube c : stockedCubes) {
             if (cube.equals(c)) {

@@ -5,7 +5,7 @@ import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 public class Player {
     private String nickname;
     private int ownedCredits;
-    private ShipBoard personalBoard;
+    private final ShipBoard personalBoard;
 
     public Player(String nickname, ShipBoard personalBoard) {
         this.nickname = nickname;
@@ -13,5 +13,11 @@ public class Player {
         ownedCredits = 0;
     }
 
+    public void addCredits(int number) {
+        ownedCredits += number;
+    }
 
+    public ShipBoard getPersonalBoard() {
+        return personalBoard;
+    }
 }

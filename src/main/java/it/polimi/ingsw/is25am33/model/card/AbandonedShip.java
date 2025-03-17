@@ -1,6 +1,8 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
+import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.Collections;
@@ -16,6 +18,12 @@ public class AbandonedShip extends AdventureCard implements playerMover {
 
     private static final List<GameState> cardStates = List.of(GameState.VISIT_LOCATION, GameState.REMOVE_CREW_MEMBERS);
 
+    public AbandonedShip(int crewMalus, int stepsBack, int reward) {
+        this.crewMalus = crewMalus;
+        this.stepsBack = stepsBack;
+        this.reward = reward;
+    }
+
     public void setCrewMalus(int crewMalus) {
         this.crewMalus = crewMalus;
     }
@@ -30,7 +38,7 @@ public class AbandonedShip extends AdventureCard implements playerMover {
 
     public void currPlayerWantsToVisit (boolean wantsToVisit) throws IllegalStateException, IllegalDecisionException {
 
-        if (currState != GameState.VISIT_ABANDONED_LOCATION) throw new IllegalStateException("Not the right state");
+        if (currState != GameState.VISIT_LOCATION) throw new IllegalStateException("Not the right state");
 
         if (wantsToVisit) {
             if (game.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)

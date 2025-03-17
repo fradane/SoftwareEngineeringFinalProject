@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.CargoCube;
 import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.component.Storage;
 import it.polimi.ingsw.is25am33.model.game.Game;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,6 +16,11 @@ public class Planets extends AdventureCard implements cargoCubesHandler, playerM
     private static final List<GameState> cardStates = List.of(GameState.CHOOSE_PLANET, GameState.HANDLE_CUBES_REWARD);
     private Planet currentPlanet;
 
+    public Planets(List<Planet> availablePlanets, int stepsBack) {
+        this.availablePlanets = availablePlanets;
+        this.stepsBack = stepsBack;
+    }
+
     public void setStepsBack(int stepsBack) {
         this.stepsBack = stepsBack;
     }
@@ -25,7 +31,8 @@ public class Planets extends AdventureCard implements cargoCubesHandler, playerM
 
     public void currPlayerWantsToVisit (int wantsToVisitIndex) throws IllegalStateException, IllegalIndexException, IndexOutOfBoundsException {
 
-        if (currState != GameState.CHOOSE_PLANET) throw new IllegalStateException("Not the right state");
+        if (currState != GameState.CHOOSE_PLANET)
+            throw new IllegalStateException("Not the right state");
 
         if (wantsToVisitIndex != 0) {
 
@@ -57,9 +64,9 @@ public class Planets extends AdventureCard implements cargoCubesHandler, playerM
         }
 
         if (currentPlanet.hasNext()) {
-            chosenStorage.add(currentPlanet.getCurrent());
+            chosenStorage.addCube(currentPlanet.getCurrent());
         } else {
-            chosenStorage.add(currentPlanet.getReward().getLast());
+            chosenStorage.addCube(currentPlanet.getReward().getLast());
 
             if (game.hasNextPlayer()) {
                 game.nextPlayer();

@@ -2,7 +2,6 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.CargoCube;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 

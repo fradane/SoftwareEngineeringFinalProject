@@ -3,7 +3,13 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.component.BatteryBox;
+import it.polimi.ingsw.is25am33.model.component.Cannon;
+import it.polimi.ingsw.is25am33.model.component.Shield;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
 import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
 
@@ -14,6 +20,10 @@ public class Pirates extends AdvancedEnemies implements playerMover {
     private final List<Player> defeatedPlayers = new ArrayList<>();
     private Iterator<Shot> shotIterator;
     private Iterator<Player> playerIterator;
+
+    public Pirates(List<Shot> shots) {
+        this.shots = shots;
+    }
 
     public void setShots(List<Shot> shots) {
         this.shots = shots;
@@ -28,7 +38,7 @@ public class Pirates extends AdvancedEnemies implements playerMover {
             throw new IllegalArgumentException("The number of engines does not match the number of battery boxes");
 
         chosenBatteryBoxes.stream().distinct().forEach(box -> {
-            if (Collections.frequency(chosenDoubleCannons, box) > box.getAvailableBatteries())
+            if (Collections.frequency(chosenDoubleCannons, box) > box.getAvailableBattery())
                 throw new IllegalArgumentException("The number of required batteries is not enough");
         });
 
@@ -109,10 +119,10 @@ public class Pirates extends AdvancedEnemies implements playerMover {
 
                 if (selectedBatteryBox.getAvailableBatteries() == 0)
                     throw new IllegalStateException("Not enough batteries");
-                if (chosenShield.getDirections().stream().anyMatch(d -> d == currShot.getDirection()))
+                if (selectedShield.getDirections().stream().anyMatch(d -> d == currShot.getDirection()))
                     throw new IllegalArgumentException("Not correct direction");
 
-                chosenBatteryBox.useBattery();
+                selectedBatteryBox.useBattery();
 
             } else {
                 personalBoard.handleAttack(currShot);

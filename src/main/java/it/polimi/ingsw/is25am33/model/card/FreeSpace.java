@@ -1,6 +1,8 @@
 package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
+import it.polimi.ingsw.is25am33.model.component.BatteryBox;
+import it.polimi.ingsw.is25am33.model.component.Engine;
 import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.ArrayList;
@@ -11,11 +13,8 @@ import java.util.List;
 public class FreeSpace extends AdventureCard implements playerMover {
 
     private static final List<GameState> cardStates = List.of(GameState.CHOOSE_ENGINES);
-    private Iterator<GameState> stateIterator = cardStates.iterator();
 
-    public FreeSpace() {
-        currState = stateIterator.next();
-    }
+    public FreeSpace() {}
 
     public void currPlayerChoseEnginesToActivate(List<Engine> chosenDoubleEngines, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException, IllegalStateException {
 
@@ -26,11 +25,11 @@ public class FreeSpace extends AdventureCard implements playerMover {
             throw new IllegalArgumentException("The number of engines does not match the number of battery boxes");
 
         chosenBatteryBoxes.stream().distinct().forEach(box -> {
-            if (Collections.frequency(chosenDoubleEngines, box) > box.getAvailableBatteries())
+            if (Collections.frequency(chosenDoubleEngines, box) > box.getAvailableBattery())
                 throw new IllegalArgumentException("The number of required batteries is not enough");
         });
 
-        chosenBatteryBoxes.forEach(box -> box.useBattery());
+        chosenBatteryBoxes.forEach(BatteryBox::useBattery);
         int stepsForward = game.getCurrPlayer().getPersonalBoard().countSingleEngine() + chosenDoubleEngines.size();
         movePlayer(game.getFlyingBoard(), game.getCurrPlayer(), stepsForward);
 

@@ -2,19 +2,24 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.component.BatteryBox;
+import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
+import it.polimi.ingsw.is25am33.model.component.Shield;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.dangerousObj.Meteorite;
 import it.polimi.ingsw.is25am33.model.game.Game;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 public class MeteoriteStorm extends AdventureCard{
 
     private List<Meteorite> meteorites;
-
-    Iterator<Meteorite> meteoriteIterator = meteorites.iterator();
-
+    private Iterator<Meteorite> meteoriteIterator = meteorites.iterator();
     private static final List<GameState> cardStates = List.of(GameState.THROW_DICES, GameState.DANGEROUS_ATTACK);
+
+    public MeteoriteStorm(List<Meteorite> meteorites) {
+        this.meteorites = meteorites;
+    }
 
     public void setMeteorites(List<Meteorite> meteorites) {
         this.meteorites = meteorites;
@@ -47,12 +52,12 @@ public class MeteoriteStorm extends AdventureCard{
                 Shield selectedShield = chosenShield.get();
                 BatteryBox selectedBatteryBox = chosenBatteryBox.get();
 
-                if (selectedBatteryBox.getAvailableBatteries() == 0)
+                if (selectedBatteryBox.getAvailableBattery() == 0)
                     throw new IllegalStateException("Not enough batteries");
-                if (chosenShield.getDirections().stream().anyMatch(d -> d == currMeteorite.getDirection()))
+                if (selectedShield.getDirections().stream().anyMatch(d -> d == currMeteorite.getDirection()))
                     throw new IllegalArgumentException("Not correct direction");
 
-                chosenBatteryBox.useBattery();
+                selectedBatteryBox.useBattery();
 
             } else {
                 personalBoard.handleAttack(currMeteorite);
@@ -86,13 +91,13 @@ public class MeteoriteStorm extends AdventureCard{
                 DoubleCannon selectedDoubleCannon = chosenDoubleCannon.get();
                 BatteryBox selectedBatteryBox = chosenBatteryBox.get();
 
-                if (selectedBatteryBox.getAvailableBatteries() == 0)
+                if (selectedBatteryBox.getAvailableBattery() == 0)
                     throw new IllegalStateException("Not enough batteries");
-                if (chosenDoubleCannon.getFireDirection() != currMeteorite.getDirection())
+                if (selectedDoubleCannon.getFireDirection() != currMeteorite.getDirection())
                     throw new IllegalArgumentException("Not correct direction");
 
                 if (canDefendWith(selectedDoubleCannon, currMeteorite)) {
-                    chosenBatteryBox.useBattery();
+                    selectedBatteryBox.useBattery();
                 } else {
                     personalBoard.handleAttack(currMeteorite);
                 }

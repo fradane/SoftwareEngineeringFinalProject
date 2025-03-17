@@ -1,7 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.GameState;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.List;
 
@@ -9,6 +8,7 @@ public class Stardust extends AdventureCard implements playerMover {
 
     private static final List<GameState> cardStates = List.of(GameState.STARDUST);
 
+    public Stardust() {}
 
     public void moveNotCorrectlyAssembledShips() throws IllegalStateException {
 

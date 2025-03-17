@@ -1,3 +1,7 @@
+package it.polimi.ingsw.is25am33.model.board;
+
+import it.polimi.ingsw.is25am33.model.game.Player;
+
 import java.util.*;
 import java.util.stream.Collectors;
 

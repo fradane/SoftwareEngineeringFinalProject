@@ -1,5 +1,11 @@
 package it.polimi.ingsw.is25am33.model.card;
 
-public class LargeWonderingMeteorite extends MeteoriteStorm{
+import it.polimi.ingsw.is25am33.model.dangerousObj.Meteorite;
 
+import java.util.List;
+
+public class LargeWonderingMeteorite extends MeteoriteStorm{
+    public LargeWonderingMeteorite(List<Meteorite> meteorites) {
+        super(meteorites);
+    }
 }
