@@ -4,14 +4,11 @@ import it.polimi.ingsw.is25am33.model.CargoCube;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
 import it.polimi.ingsw.is25am33.model.component.Storage;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
-public class AbandonedStation extends AdventureCard implements cargoCubesHandler, playerMover {
+public class AbandonedStation extends AdventureCard implements PlayerMover {
 
     private int stepsBack;
     private int requiredCrewMembers;

@@ -1,12 +1,10 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.CargoCube;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class Smugglers extends Enemies implements cargoCubesHandler, playerMover {
+public class Smugglers extends Enemies implements PlayerMover {
 
     private int cubeMalus;
     private List<CargoCube> reward;

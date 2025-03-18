@@ -3,14 +3,11 @@ package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 
-public class AbandonedShip extends AdventureCard implements playerMover {
+public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMemberRemover {
 
     private int crewMalus;
     private int stepsBack;
@@ -59,15 +56,9 @@ public class AbandonedShip extends AdventureCard implements playerMover {
         if (currState != GameState.REMOVE_CREW_MEMBERS)
             throw new IllegalStateException("Not the right state");
 
-        if (chosenCabins.size() != crewMalus)
-            throw new IllegalArgumentException("Not the right amount of crew members");
+        removeMemberProcess(chosenCabins, crewMalus);
 
-        chosenCabins.stream().distinct().forEach(cabin -> {
-            if (Collections.frequency(chosenCabins, cabin) > cabin.getInhabitants().size())
-                throw new IllegalArgumentException("The number of required crew members is not enough");
-        });
-
-        chosenCabins.forEach(cabin -> cabin.removeMember());
+        chosenCabins.forEach(Cabin::removeMember);
 
         game.getCurrPlayer().addCredits(reward);
         movePlayer(game.getFlyingBoard(), game.getCurrPlayer(), stepsBack);

@@ -4,13 +4,10 @@ import it.polimi.ingsw.is25am33.model.CargoCube;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.IllegalIndexException;
 import it.polimi.ingsw.is25am33.model.component.Storage;
-import it.polimi.ingsw.is25am33.model.game.Game;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListResourceBundle;
 
-public class Planets extends AdventureCard implements cargoCubesHandler, playerMover {
+import java.util.List;
+
+public class Planets extends AdventureCard implements PlayerMover {
 
     private List<Planet> availablePlanets;
     private int stepsBack;

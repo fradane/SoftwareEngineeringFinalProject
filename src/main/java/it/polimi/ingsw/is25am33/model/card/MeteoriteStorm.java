@@ -14,11 +14,12 @@ import java.util.*;
 public class MeteoriteStorm extends AdventureCard{
 
     private List<Meteorite> meteorites;
-    private Iterator<Meteorite> meteoriteIterator = meteorites.iterator();
+    private final Iterator<Meteorite> meteoriteIterator;
     private static final List<GameState> cardStates = List.of(GameState.THROW_DICES, GameState.DANGEROUS_ATTACK);
 
     public MeteoriteStorm(List<Meteorite> meteorites) {
         this.meteorites = meteorites;
+        this.meteoriteIterator = meteorites.iterator();
     }
 
     public void setMeteorites(List<Meteorite> meteorites) {
@@ -37,7 +38,7 @@ public class MeteoriteStorm extends AdventureCard{
 
     }
 
-    public void playerDecidedHowToDefendTheirSelvesFromSmallMeteorite(Optional<Shield> chosenShield, Optional<BatteryBox> chosenBatteryBox) {
+    public void playerDecidedHowToDefendTheirSelvesFromSmallMeteorite(Shield chosenShield, BatteryBox chosenBatteryBox) {
 
         if (currState != GameState.DANGEROUS_ATTACK) throw new IllegalStateException("Not the right state");
 
@@ -45,22 +46,20 @@ public class MeteoriteStorm extends AdventureCard{
 
         DangerousObj currMeteorite = game.getCurrDangerousObj();
 
-        if (personalBoard.isItGoingToHitTheShip() && personalBoard.isExposed(currMeteorite.getCoordinates(), currMeteorite.getDirection())) {
+        if (personalBoard.isItGoingToHitTheShip(currMeteorite) &&
+                personalBoard.isExposed(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
 
-            if (chosenShield.isPresent() && chosenBatteryBox.isPresent()) {
+            if (chosenShield != null && chosenBatteryBox != null) {
 
-                Shield selectedShield = chosenShield.get();
-                BatteryBox selectedBatteryBox = chosenBatteryBox.get();
-
-                if (selectedBatteryBox.getAvailableBattery() == 0)
+                if (chosenBatteryBox.getAvailableBattery() == 0)
                     throw new IllegalStateException("Not enough batteries");
-                if (selectedShield.getDirections().stream().anyMatch(d -> d == currMeteorite.getDirection()))
+                if (chosenShield.getDirections().stream().anyMatch(d -> d == currMeteorite.getDirection()))
                     throw new IllegalArgumentException("Not correct direction");
 
-                selectedBatteryBox.useBattery();
+                chosenBatteryBox.useBattery();
 
             } else {
-                personalBoard.handleAttack(currMeteorite);
+                personalBoard.handleDangerousObject(currMeteorite);
             }
 
         }
@@ -76,7 +75,7 @@ public class MeteoriteStorm extends AdventureCard{
 
     }
 
-    public void playerDecidedHowToDefendTheirSelvesFromBigMeteorite(Optional<DoubleCannon> chosenDoubleCannon, Optional<BatteryBox> chosenBatteryBox) {
+    public void playerDecidedHowToDefendTheirSelvesFromBigMeteorite(DoubleCannon chosenDoubleCannon, BatteryBox chosenBatteryBox) {
 
         if (currState != GameState.DANGEROUS_ATTACK)
             throw new IllegalStateException("Not the right state");
@@ -85,26 +84,23 @@ public class MeteoriteStorm extends AdventureCard{
 
         DangerousObj currMeteorite = game.getCurrDangerousObj();
 
-        if (personalBoard.isItGoingToHitTheShip() && !personalBoard.canDefendItselfWithSingleCannons()) {
+        if (personalBoard.isItGoingToHitTheShip(currMeteorite) && !personalBoard.isThereACannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
 
-            if (chosenDoubleCannon.isPresent() && chosenBatteryBox.isPresent()) {
+            if (chosenDoubleCannon != null && chosenBatteryBox != null) {
 
-                DoubleCannon selectedDoubleCannon = chosenDoubleCannon.get();
-                BatteryBox selectedBatteryBox = chosenBatteryBox.get();
-
-                if (selectedBatteryBox.getAvailableBattery() == 0)
+                if (chosenBatteryBox.getAvailableBattery() == 0)
                     throw new IllegalStateException("Not enough batteries");
-                if (selectedDoubleCannon.getFireDirection() != currMeteorite.getDirection())
+                if (chosenDoubleCannon.getFireDirection() != currMeteorite.getDirection())
                     throw new IllegalArgumentException("Not correct direction");
 
-                if (personalBoard.canDefendWith(selectedDoubleCannon, currMeteorite)) {
-                    selectedBatteryBox.useBattery();
+                if (personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
+                    chosenBatteryBox.useBattery();
                 } else {
-                    personalBoard.handleAttack(currMeteorite);
+                    personalBoard.handleDangerousObject(currMeteorite);
                 }
 
             } else {
-                personalBoard.handleAttack(currMeteorite);
+                personalBoard.handleDangerousObject(currMeteorite);
             }
 
         }
