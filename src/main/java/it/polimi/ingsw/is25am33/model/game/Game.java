@@ -8,7 +8,7 @@ import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import java.util.Iterator;
 import java.util.List;
 
-public abstract class Game {
+public class Game {
 
     private AdventureCard currAdventureCard;
     private GameState currState;
@@ -18,7 +18,7 @@ public abstract class Game {
     private Iterator<Player> playerIterator = currRanking.iterator();
     private DangerousObj currDangerousObj;
 
-    protected Game(FlyingBoard flyingBoard) {
+    public Game(FlyingBoard flyingBoard) {
         this.flyingBoard = flyingBoard;
     }
 
@@ -43,6 +43,10 @@ public abstract class Game {
     public void resetPlayerIterator() {
         playerIterator = currRanking.iterator();
         currPlayer = playerIterator.next();
+    }
+
+    public void setCurrRanking(List<Player> currRanking) {
+        this.currRanking = currRanking;
     }
 
     public void setCurrPlayer(Player player) {

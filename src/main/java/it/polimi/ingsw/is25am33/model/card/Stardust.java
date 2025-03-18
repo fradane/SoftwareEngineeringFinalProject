@@ -4,7 +4,7 @@ import it.polimi.ingsw.is25am33.model.GameState;
 
 import java.util.List;
 
-public class Stardust extends AdventureCard implements playerMover {
+public class Stardust extends AdventureCard implements PlayerMover {
 
     private static final List<GameState> cardStates = List.of(GameState.STARDUST);
 

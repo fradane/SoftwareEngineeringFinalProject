@@ -64,7 +64,7 @@ class ShieldTest {
         coveredDirectionsExpected.add(Direction.WEST);
         coveredDirectionsExpected.add(Direction.NORTH);
 
-        assertEquals(coveredDirectionsExpected, shield.getDirection(), "Different direction covered");
+        assertEquals(coveredDirectionsExpected, shield.getDirections(), "Different direction covered");
 
     }
 

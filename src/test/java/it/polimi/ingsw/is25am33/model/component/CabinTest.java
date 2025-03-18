@@ -52,12 +52,12 @@ class CabinTest {
     void removeMember(){
 
         cabin.fillCabin(CrewMember.HUMAN);
-        cabin.removeMember(CrewMember.HUMAN);
+        cabin.removeMember();
         List<CrewMember> inhabitansExpected= new ArrayList<>();
 
         assertEquals(inhabitansExpected,cabin.getInhabitants(),"inhabitants");
 
-        Exception exception= assertThrows(IllegalArgumentException.class, ()->cabin.removeMember(CrewMember.HUMAN));
+        Exception exception= assertThrows(IllegalArgumentException.class, ()->cabin.removeMember());
         assertEquals(exception.getMessage(),"Empty cabin");
 
     }
@@ -66,7 +66,7 @@ class CabinTest {
     void hasInhabitants(){
         cabin.fillCabin(CrewMember.HUMAN);
         assertTrue(cabin.hasInhabitants(),"inhabitants");
-        cabin.removeMember(CrewMember.HUMAN);
+        cabin.removeMember();
         assertFalse(cabin.hasInhabitants(),"inhabitants");
     }
 

@@ -1,16 +1,12 @@
 package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.model.GameState;
-import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Engine;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
-public class FreeSpace extends AdventureCard implements playerMover {
+public class FreeSpace extends AdventureCard implements PlayerMover {
 
     private static final List<GameState> cardStates = List.of(GameState.CHOOSE_ENGINES);
 
@@ -30,7 +26,7 @@ public class FreeSpace extends AdventureCard implements playerMover {
         });
 
         chosenBatteryBoxes.forEach(BatteryBox::useBattery);
-        int stepsForward = game.getCurrPlayer().getPersonalBoard().countSingleEngine() + chosenDoubleEngines.size();
+        int stepsForward = game.getCurrPlayer().getPersonalBoard().countTotalEnginePower(chosenDoubleEngines.stream());
         movePlayer(game.getFlyingBoard(), game.getCurrPlayer(), stepsForward);
 
         if (game.hasNextPlayer()) {
