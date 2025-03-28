@@ -35,7 +35,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         if (currState != GameState.CHOOSE_CANNONS)
             throw new IllegalStateException("Not the right state");
 
-        int currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, game.getCurrPlayer());
+        double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, game.getCurrPlayer());
 
         if (currPlayerCannonPower > requiredFirePower) {
 

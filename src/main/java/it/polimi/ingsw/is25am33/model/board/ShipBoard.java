@@ -1,15 +1,13 @@
 package it.polimi.ingsw.is25am33.model.board;
 
-import it.polimi.ingsw.is25am33.model.CrewMember;
-import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
-import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.CrewMember;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -19,49 +17,69 @@ import static it.polimi.ingsw.is25am33.model.Direction.*;
 
 public abstract class ShipBoard {
 
-    // The board is represented as a 12x12 matrix.
+    /**
+     * The size of the board where components can be placed. Just one length as the board is squared.
+     */
     public static final int BOARD_DIMENSION = 12;
 
-    // Defines the starting position for the central module.
+    /**
+     * The coordinate where the main cabin is initially placed.
+     */
     public static final int[] STARTING_CABIN_POSITION = {7, 7};
 
     /**
-     * A matrix that indicates which positions on the board can potentially hold a component.
-     * If an index in validPositions is false, you cannot place a component there.
+     * A matrix indicating which board positions are valid for placing components.
+     * If a cell is false, no component can be placed there.
+     * This matrix is what differentiate a Level1ShipBoard from a Level2ShipBoard
      */
     static boolean[][] validPositions;
 
     /**
-     * The main matrix of Components, each cell representing a position on the player's ship.
+     * The main matrix of components. Each cell represents a position on the ship.
      */
     protected Component[][] shipMatrix = new Component[BOARD_DIMENSION][BOARD_DIMENSION];
 
     /**
-     * A list of components that are currently removed from the board. In Level2ShipBoard this list is
-     * used to store booked components too.
+     * A map that groups components based on their class (type).
+     */
+    protected Map<Class<?>, List<Object>> componentsPerType = new HashMap<>();
+
+    /**
+     * A list of components that are not currently active on the board (either removed or awaiting placement).
      */
     protected List<Component> notActiveComponents = new ArrayList<Component>();
 
     /**
-     * The component that the player is currently trying to place (the "focus").
-     * Once placed, this reference is cleared.
+     * The component the player is currently trying to place (focus).
+     * Once placed, this reference is set to null.
      */
     protected Component focusedComponent;
 
     /**
-     * A collection of components marked as incorrectly placed, based on checks such as
-     * orientation, connectors, or adjacency rules.
+     * A set of components marked as incorrectly placed.
      */
     private Set<Component> incorrectlyPositionedComponents = new HashSet<Component>();
 
+    /**
+     * Constructor that creates a ShipBoard with the main cabin placed at the initial coordinates.
+     *
+     * @param color The color associated with the player.
+     */
+    public ShipBoard(PlayerColor color) {
+        Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
+        connectors.put(Direction.NORTH, ConnectorType.UNIVERSAL);
+        connectors.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
+        connectors.put(Direction.WEST,  ConnectorType.UNIVERSAL);
+        connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
 
+        shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
+    }
 
     /**
-     * Initializes the static matrix representing valid positions on the board where components can be placed.
-     * This method should be called exactly once to set up the board’s constraints before any component placement.
+     * Initializes the matrix of valid positions for placing components.
      *
-     * @param positions a boolean matrix indicating valid positions on the board for placing components
-     * @throws IllegalStateException if the validPositions matrix has already been initialized
+     * @param positions Boolean matrix indicating valid or invalid positions.
+     * @throws IllegalStateException If the validPositions matrix has already been initialized.
      */
     public static void initializeValidPositions(boolean[][] positions) throws IllegalStateException {
         if (validPositions == null) {
@@ -72,35 +90,26 @@ public abstract class ShipBoard {
     }
 
     /**
-     * Checks if the given coordinates (x, y) are valid board positions:
-     *  - Within the board’s boundaries
-     *  - Allowed by the validPositions matrix.
+     * Checks whether the specified coordinates are valid and allowed on the board.
      *
-     * @param x the x-coordinate
-     * @param y the y-coordinate
-     * @return true if (x, y) is a valid spot for placing components; false otherwise
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return true if the position is within the board and validPositions[x][y] is true, otherwise false.
      */
     public boolean isValidPosition(int x, int y) {
         return x >= 0 && x < BOARD_DIMENSION && y >= 0 && y < BOARD_DIMENSION && validPositions[x][y];
     }
 
     /**
-     * Attempts to place the currently focused component onto the board at (x, y).
-     * Performs a series of checks to verify:
-     *   - The position is valid
-     *   - The component is connected to the rest of the ship
-     *   - Connectors match or do not improperly face empty connectors
-     *   - Orientation rules for cannons/engines are respected
+     * Attempts to place the focused component at the specified coordinates,
+     * performing various validity and connectivity checks.
+     * If the placed component does not violate an essential rule it is simply added to list of incorrectyle Positioned Components.
      *
-     * If these rules are violated, it throws an exception or flags the component
-     * as incorrectly positioned.
-     *
-     * @param x the x-coordinate
-     * @param y the y-coordinate
-     * @throws IllegalArgumentException if the position is invalid or the component breaks placement rules
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @throws IllegalArgumentException If the position is invalid or violates placement rules.
      */
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
-        // Preliminary validations: boundary and connectivity checks.
         if(!isValidPosition(x, y))
             throw new IllegalArgumentException("Not a valid position");
         else if (!isPositionConnectedToShip(x, y))
@@ -108,50 +117,44 @@ public abstract class ShipBoard {
         else if(!areEmptyConnectorsWellConnected(focusedComponent, x, y))
             throw new IllegalArgumentException("Empty connector not well connected");
         else {
-            // If additional rules (like connector compatibility or orientation) fail,
-            // the component is marked incorrectly.
             if(
                     !areConnectorsWellConnected(focusedComponent, x, y)
                             || isComponentInFireDirection(focusedComponent, x, y)
                             || isComponentInEngineDirection(focusedComponent, x, y)
-                            // If it's an engine, also check that it doesn't fire in a prohibited direction (e.g., not SOUTH).
                             || (!(focusedComponent instanceof Engine) || isEngineDirectionWrong((Engine)focusedComponent))
             )
                 incorrectlyPositionedComponents.add(focusedComponent);
 
-            // If all checks are passed (or the game allows it with a penalty),
-            // place the component in the matrix and clear the focus.
             shipMatrix[x][y] = focusedComponent;
+
+            focusedComponent.insertInComponentsMap(componentsPerType);
+
             focusedComponent = null;
         }
     }
 
     /**
-     * Checks whether an engine is pointed in a "wrong" direction (e.g. not facing SOUTH).
+     * Checks whether the direction of an engine is incorrect (e.g., if it's not SOUTH).
      *
-     * @param componentToPlace the component (engine) being placed
-     * @return true if the engine's direction is invalid, false otherwise
+     * @param componentToPlace The engine to check.
+     * @return true if the direction is invalid, otherwise false.
      */
     public boolean isEngineDirectionWrong(Engine componentToPlace) {
-        if(componentToPlace instanceof Engine)
-            return componentToPlace.getPowerDirection() == SOUTH;
-        return false;
+        return componentToPlace.getPowerDirection() == SOUTH;
     }
 
     /**
-     * Determines if the given position is connected to at least one existing component.
-     * This ensures the ship remains contiguous and no components are placed in isolation.
+     * Verifies whether placing a component at the specified coordinates would be adjacent
+     * to at least one existing component, ensuring continuity of the ship.
      *
-     * @param x the x-coordinate
-     * @param y the y-coordinate
-     * @return true if the new component would be adjacent to an existing one, false otherwise
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return true if the placement is adjacent to an existing component, otherwise false.
      */
     public boolean isPositionConnectedToShip(int x, int y) {
-        // Offsets representing the four cardinal directions.
         int[] dx = {-1, 1, 0, 0};
         int[] dy = {0, 0, -1, 1};
 
-        // Check if any neighbor cell has a component.
         for (int dir = 0; dir < 4; dir++) {
             int neighborX = x + dx[dir];
             int neighborY = y + dy[dir];
@@ -163,20 +166,18 @@ public abstract class ShipBoard {
     }
 
     /**
-     * Ensures that if a neighboring component has an empty connector, the new component's
-     * corresponding side is also empty. This prevents mismatched connectors
-     * (e.g., an open connector facing a blank connector).
+     * Ensures that if an adjacent component has an EMPTY connector,
+     * the newly placed component also has the corresponding EMPTY connector, avoiding mismatches.
      *
-     * @param componentToPlace the component to validate
-     * @param x the x-coordinate of placement
-     * @param y the y-coordinate of placement
-     * @return false if there's a mismatch in empty connectors, true otherwise
+     * @param componentToPlace The component to validate.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return true if there are no conflicts, otherwise false.
      */
     public boolean areEmptyConnectorsWellConnected(Component componentToPlace, int x, int y) {
         int[] dx = {-1, 1, 0, 0};
         int[] dy = {0, 0, -1, 1};
 
-        // For each neighbor, check if there's a conflict in empty connectors.
         for (int dir = 0; dir < 4; dir++) {
             int neighborX = x + dx[dir];
             int neighborY = y + dy[dir];
@@ -197,15 +198,14 @@ public abstract class ShipBoard {
         return true;
     }
 
-
     /**
-     * Checks if the connectors between the new component and neighboring components are
-     * mutually compatible (i.e., no single connector facing a double connector).
+     * Checks connector compatibility between the new component and adjacent components,
+     * to avoid single vs double connector mismatches.
      *
-     * @param componentToPlace the component to validate
-     * @param x the x-coordinate of placement
-     * @param y the y-coordinate of placement
-     * @return false if there is an incompatibility, true otherwise
+     * @param componentToPlace The component to validate.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return true if the connectors are compatible, otherwise false.
      */
     public boolean areConnectorsWellConnected(Component componentToPlace, int x, int y) {
         int[] dx = {-1, 1, 0, 0};
@@ -213,7 +213,6 @@ public abstract class ShipBoard {
         Direction[] neighborDirectionsToCheck = {SOUTH, NORTH, EAST, WEST};
         Direction[] myDirectionsToCheck = {NORTH, SOUTH, WEST, EAST};
 
-        // Check each neighbor for connector compatibility using the static method in ConnectorType.
         for (int dir = 0; dir < 4; dir++) {
             int neighborX = x + dx[dir];
             int neighborY = y + dy[dir];
@@ -234,14 +233,13 @@ public abstract class ShipBoard {
     }
 
     /**
-     * Checks if the component to be placed is targeted by a cannon in an adjacent tile.
-     * For instance, if there's a cannon facing that direction, it might mean an illegal overlap
-     * or friendly-fire scenario.
+     * Checks whether a cannon in an adjacent cell is pointed at the cell
+     * where the new component is being placed.
      *
-     * @param componentToPlace the component being placed
-     * @param x the x-coordinate of placement
-     * @param y the y-coordinate of placement
-     * @return true if there is a cannon pointing at this spot, false otherwise
+     * @param componentToPlace The component being placed.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return true if there is a cannon aimed at this cell, otherwise false.
      */
     public boolean isComponentInFireDirection(Component componentToPlace, int x, int y) {
         int[] dx = {-1, 1, 0, 0};
@@ -249,7 +247,6 @@ public abstract class ShipBoard {
         Direction[] neighborDirectionsToCheck = {SOUTH, NORTH, EAST, WEST};
         Direction[] myDirectionsToCheck = {NORTH, SOUTH, WEST, EAST};
 
-        // Scan around (x, y) to see if any adjacent component is a cannon that points here.
         for (int dir = 0; dir < 4; dir++) {
             int neighborX = x + dx[dir];
             int neighborY = y + dy[dir];
@@ -269,14 +266,13 @@ public abstract class ShipBoard {
     }
 
     /**
-     * Similar to isComponentInFireDirection, but checks for engines that might be facing
-     * into this component’s cell. If the engine is not point SOUTH it will be soon removed so
-     * it doesn't represent a problem for the aimed component.
+     * Checks whether an engine in an adjacent cell is pointed at the cell
+     * where the new component is being placed.
      *
-     * @param componentToPlace the component being placed
-     * @param x the x-coordinate of placement
-     * @param y the y-coordinate of placement
-     * @return true if there is an engine pointing toward this spot, false otherwise
+     * @param componentToPlace The component being placed.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return true if there is an engine aimed at this cell, otherwise false.
      */
     public boolean isComponentInEngineDirection(Component componentToPlace, int x, int y) {
         int[] dx = {-1, 1, 0, 0};
@@ -284,7 +280,6 @@ public abstract class ShipBoard {
         Direction[] neighborDirectionsToCheck = {SOUTH, NORTH, EAST, WEST};
         Direction[] myDirectionsToCheck = {NORTH, SOUTH, WEST, EAST};
 
-        // Scan around (x, y) to see if any adjacent component is an engine that points here.
         for (int dir = 0; dir < 4; dir++) {
             int neighborX = x + dx[dir];
             int neighborY = y + dy[dir];
@@ -305,54 +300,64 @@ public abstract class ShipBoard {
     }
 
     /**
-     * Releases the currently focused component, resetting its state to FREE.
-     * This typically happens when a player decides not to place a component.
+     * Releases the currently focused component by setting its state to FREE and nullifying the reference.
      */
     public void releaseComponentWithFocus() {
         focusedComponent.setCurrState(FREE);
         focusedComponent = null;
-    };
+    }
 
     /**
-     * ???
+     * Removes the component from the specified coordinates and recalculates any disconnected ship parts
+     * that may result from the removal.
      *
-     * @param x the x-coordinate
-     * @param y the y-coordinate
-     * @throws IllegalArgumentException if (x, y) is outside the board
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return A list of sets, where each set contains the coordinates of components in a disconnected part.
+     * @throws IllegalArgumentException If there is no component at the specified position.
      */
-    public List<Set<int[]>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException{
+    public List<Set<List<Integer>>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException {
         if(shipMatrix[x][y] == null)
             throw new IllegalArgumentException("No component in this position");
 
         notActiveComponents.add(shipMatrix[x][y]);
         shipMatrix[x][y] = null;
 
-
-        List<Set<int[]>> shipParts = identifyShipParts(x, y);
+        List<Set<List<Integer>>> shipParts = identifyShipParts(x, y);
         return shipParts;
     }
 
     /**
-     * Checks if there is any cannon in the given row or column (depending on direction)
-     * that faces in that direction.
+     * Determines whether there is a cannon in the specified row or column that is pointed
+     * in the given direction.
      *
-     * @param pos the index of the row or column
-     * @param direction the direction (NORTH, SOUTH, EAST, WEST) to check
-     * @return true if a cannon facing that direction exists, false otherwise
+     * @param pos The row or column index.
+     * @param direction The direction to check.
+     * @return true if there is a cannon firing in that direction, otherwise false.
+     * @throws IllegalArgumentException If the position is invalid.
      */
     public boolean isThereACannon(int pos, Direction direction) {
         if(pos < 0 || pos >= BOARD_DIMENSION )
             throw new IllegalArgumentException("Not a valid position");
 
         return Arrays.stream(
-                (direction == NORTH || direction == SOUTH) ?
-                        IntStream.range(0, BOARD_DIMENSION)
-                            .mapToObj(i -> shipMatrix[i][pos])
-                            .toArray(Component[]::new)
-                        : shipMatrix[pos] )
+                        (direction == NORTH || direction == SOUTH) ?
+                                IntStream.range(0, BOARD_DIMENSION)
+                                        .mapToObj(i -> shipMatrix[i][pos])
+                                        .toArray(Component[]::new)
+                                : shipMatrix[pos] )
                 .anyMatch(component -> component instanceof Cannon && ((Cannon) component).getFireDirection() == direction );
     }
 
+    /**
+     * Determines whether there is a double cannon in the specified row or column that is pointed
+     * in the given direction.
+     *
+     * @param pos The row or column index.
+     * @param direction The direction to check.
+     * @return true if there is a double cannon firing in that direction, otherwise false.
+     * @throws IllegalArgumentException If the position is invalid.
+     */
     public boolean isThereADoubleCannon(int pos, Direction direction) {
         if(pos < 0 || pos >= BOARD_DIMENSION )
             throw new IllegalArgumentException("Not a valid position");
@@ -366,70 +371,79 @@ public abstract class ShipBoard {
                 .anyMatch(component -> component instanceof DoubleCannon && ((Cannon) component).getFireDirection() == direction );
     }
 
+    /**
+     * Checks whether a DangerousObj will actually hit the ship based on its trajectory.
+     *
+     * @param obj The DangerousObj to evaluate.
+     * @return true if the object will impact the ship, otherwise false.
+     */
     public boolean isItGoingToHitTheShip(DangerousObj obj){
         Component[] componentsInObjectDirection = getOrderedComponentsInDirection(obj.getCoordinate(), obj.getDirection());
         return componentsInObjectDirection.length != 0;
     }
 
-
     /**
-     * Returns the components in a row/column in the order that a projectile or effect would encounter them.
-     * For NORTH, we return top-to-bottom; for SOUTH, bottom-to-top; etc.
+     * Returns the components in a row or column in the order they would be hit by an object
+     * (e.g., a projectile).
      *
-     * @param pos the index of the row or column
-     * @param direction the direction (NORTH, SOUTH, EAST, WEST)
-     * @return an array of Components in the path
-     * @throws IllegalArgumentException if pos is out of bounds or direction is invalid
+     * @param pos The row or column index.
+     * @param direction The direction of travel.
+     * @return An array of Components in the order of impact.
+     * @throws IllegalArgumentException If the position or direction is invalid.
      */
-    public Component[] getOrderedComponentsInDirection(int pos, Direction direction) throws IllegalArgumentException{
+    public Component[] getOrderedComponentsInDirection(int pos, Direction direction) throws IllegalArgumentException {
         if(pos < 0 || pos >= BOARD_DIMENSION )
             throw new IllegalArgumentException("Not a valid position");
 
         return switch (direction)  {
             case NORTH -> IntStream.range(0, BOARD_DIMENSION)
-                            .mapToObj(i -> shipMatrix[i][pos])
-                            .toArray(Component[]::new);
+                    .mapToObj(i -> shipMatrix[i][pos])
+                    .toArray(Component[]::new);
             case SOUTH -> IntStream.range(0, BOARD_DIMENSION)
-                            .map(i -> BOARD_DIMENSION - 1 - i)
-                            .mapToObj(i -> shipMatrix[i][pos])
-                            .toArray(Component[]::new);
+                    .map(i -> BOARD_DIMENSION - 1 - i)
+                    .mapToObj(i -> shipMatrix[i][pos])
+                    .toArray(Component[]::new);
             case EAST -> IntStream.range(0, BOARD_DIMENSION)
-                            .map(i -> BOARD_DIMENSION - 1 - i)
-                            .mapToObj(i -> shipMatrix[pos][i])
-                            .toArray(Component[]::new);
+                    .map(i -> BOARD_DIMENSION - 1 - i)
+                    .mapToObj(i -> shipMatrix[pos][i])
+                    .toArray(Component[]::new);
             case WEST -> IntStream.range(0, BOARD_DIMENSION)
-                            .mapToObj(i -> shipMatrix[pos][i])
-                            .toArray(Component[]::new);
+                    .mapToObj(i -> shipMatrix[pos][i])
+                    .toArray(Component[]::new);
             default -> throw new IllegalArgumentException("Not a valid direction");
-
         };
     }
 
     /**
-     * Determines if the first non-null component in the given row or column is "exposed",
-     * meaning it has a non-empty connector facing outward.
+     * Checks whether the first non-null component found in a row or column
+     * has a non-empty connector facing outward.
      *
-     * @param pos the row/column index
-     * @param direction the direction to check
-     * @return true if the first component in that direction has a non-empty connector, false otherwise
-     * @throws IllegalArgumentException if pos is out of bounds
+     * @param pos The row or column index.
+     * @param direction The direction to check.
+     * @return true if the first component found has a non-empty exposed connector, otherwise false.
+     * @throws IllegalArgumentException If the position is invalid.
      */
     public boolean isExposed(int pos, Direction direction) throws IllegalArgumentException {
         if(pos < 0 || pos >= BOARD_DIMENSION )
             throw new IllegalArgumentException("Not a valid position");
 
-        return Arrays.stream( getOrderedComponentsInDirection(pos, direction) )
+        Component[] componentsInDirection = getOrderedComponentsInDirection(pos, direction);
+
+        if(Arrays.stream(componentsInDirection).allMatch(Objects::isNull))
+            return false;
+
+        return Arrays.stream(componentsInDirection)
+                .filter(Objects::nonNull)
                 .findFirst()
-                .map(component -> (Boolean) (component.getConnectors().get(direction) != EMPTY))
-                .orElse(Boolean.valueOf(false));
+                .map(component -> (Boolean) (component != null && component.getConnectors().get(direction) != EMPTY))
+                .orElse(false);
     }
 
     /**
-     * Counts how many exposed connectors are on the board.
-     * An exposed connector is one that, if the adjacent cell is empty,
-     * still has a non-empty connector facing outwards.
+     * Calculates the total number of exposed connectors on the ship.
+     * A connector is exposed if it points to an empty cell and is not EMPTY.
      *
-     * @return the total number of exposed connectors across the whole board
+     * @return The total number of exposed connectors.
      */
     public int countExposed() {
         int counter = 0;
@@ -438,24 +452,20 @@ public abstract class ShipBoard {
         int[] dy = {0, 0, -1, 1};
         Direction[] neighborDirectionsToCheck = {SOUTH, NORTH, EAST, WEST};
 
-        // For every empty cell, check if a neighbor's connector points into it and is not empty.
         for (int i = 0; i < BOARD_DIMENSION; i++) {
             for (int j = 0; j < BOARD_DIMENSION; j++) {
 
                 if(isValidPosition(i, j) && shipMatrix[i][j] == null){
-
                     for (int dir = 0; dir < 4; dir++) {
                         int neighborI = i + dx[dir];
                         int neighborJ = j + dy[dir];
 
                         if(isValidPosition(neighborI, neighborJ)
+                                && shipMatrix[i][j] != null
                                 && shipMatrix[neighborI][neighborJ].getConnectors().get(neighborDirectionsToCheck[dir]) != EMPTY)
                             counter++;
-
                     }
-
                 }
-
             }
         }
 
@@ -463,35 +473,30 @@ public abstract class ShipBoard {
     }
 
     /**
-     * Retrieves all CrewMembers from all the cabins on the board.
-     * In Galaxy Trucker, each cabin may contain one or more inhabitants.
+     * Retrieves all the crew members present in the ship's cabins.
      *
-     * @return a list of all crew members present on this ship
+     * @return A list of CrewMember objects currently on the ship.
      */
     public List<CrewMember> getCrewMembers() {
-        return Arrays.stream(shipMatrix)
-                .flatMap(row -> Arrays.stream(row))
-                .filter(Objects::nonNull)
-                .filter(component -> component instanceof Cabin)
-                .map(component -> (Cabin)component)
-                .map(cabin -> cabin.getInhabitants())
-                .filter(Objects::nonNull)
+        return componentsPerType.get(Cabin.class)
+                .stream()
+                .map(Cabin.class::cast)
+                .map(Cabin::getInhabitants)
                 .flatMap(inhabitants -> inhabitants.stream())
                 .collect(Collectors.toList());
     }
 
     /**
-     * Finds all cabins that have at least one neighboring cabin (orthogonally adjacent)
-     * which also contains crew members.
+     * Finds all cabins occupied by at least one crew member
+     * that are orthogonally adjacent to other occupied cabins.
      *
-     * @return a set of occupied cabins that are directly adjacent to at least one other occupied cabin
+     * @return A set of cabins that meet the adjacency criterion.
      */
     public Set<Cabin> cabinWithNeighbors() {
         Set<Cabin> cabinsWithNeighbors = new HashSet<Cabin>();
 
         int[] dx = {-1, 1, 0, 0};
         int[] dy = {0, 0, -1, 1};
-
 
         for (int i = 0; i < BOARD_DIMENSION; i++) {
             for (int j = 0; j < BOARD_DIMENSION; j++) {
@@ -519,134 +524,191 @@ public abstract class ShipBoard {
     }
 
     /**
-     * Checks if there are no incorrectly placed components on the board.
-     * If the set of incorrectly positioned components is empty, we consider the ship to be "correct."
-     * Components are added to this set during placement (`placeComponentWithFocus`)
-     * if they violate any rules.
+     * Checks whether there are no incorrectly placed components on the ship.
      *
-     * @return true if no components violate placement rules, false otherwise
+     * @return true if the ship has no placement errors, otherwise false.
      */
     public boolean isShipCorrect() {
         if (incorrectlyPositionedComponents.isEmpty()) return true;
         return false;
     }
 
-    public Stream<DoubleCannon> getDoubleCannons () {
-        return Arrays.stream(shipMatrix)
-                .flatMap(row -> Arrays.stream(row))
-                .filter(Objects::nonNull)
-                .filter(component -> component instanceof DoubleCannon)
-                .map(component -> (DoubleCannon)component);
-    }
-
-    public Stream<Cannon> getAllCannons () {
-        return Arrays.stream(shipMatrix)
-                .flatMap(row -> Arrays.stream(row))
-                .filter(Objects::nonNull)
-                .filter(component -> component instanceof Cannon)
-                .map(component -> (Cannon)component);
+    /**
+     * Returns the list of DoubleCannon components present on the ship.
+     *
+     * @return A list of DoubleCannon objects.
+     */
+    public List<DoubleCannon> getDoubleCannons () {
+        return componentsPerType.get(DoubleCannon.class)
+                .stream()
+                .map(DoubleCannon.class::cast)
+                .collect(Collectors.toList());
     }
 
     /**
-     * ???
+     * Returns the list of single Cannon components present on the ship.
      *
-     * @return the sum of firepower from active cannons
+     * @return A list of single Cannon objects.
      */
-    //cannonsActivated include sia i singoli che i doppi attivati
-    public int countTotalFirePower(Stream<Cannon> cannonsToCountFirePower) {
-        // Convert all cannons on the board into a stream
-        Stream<Cannon> cannonStream = Arrays.stream(shipMatrix)
-                                        .flatMap(row -> Arrays.stream(row))
-                                        .filter(Objects::nonNull)
-                                        .filter(component -> component instanceof Cannon)
-                                        .map(component -> (Cannon)component);
-
-        // The controller asks the user how many double cannons wants to activate
-        Stream<DoubleCannon> doubleCannonsActivated = cannonsToCountFirePower.filter(cannon -> cannon instanceof DoubleCannon).map(cannon -> (DoubleCannon)cannon);
-        Stream <Cannon> singleCannons = cannonsToCountFirePower.filter(cannon -> !(cannon instanceof DoubleCannon));
-
-        // Cannon aimed NORTH = 1 point, otherwise 1/2.
-        // Double cannon aimed NORTH = 2 points, otherwise 1 point.
-        int totalFirePower = singleCannons.mapToInt(cannon -> cannon.getFireDirection() == NORTH ? 1 : 1/2).sum()
-                + doubleCannonsActivated.mapToInt(cannon -> cannon.getFireDirection() == NORTH ? 2 : 1).sum();
-
-        return totalFirePower;
-    }
-
-    public Stream<Engine> getAllEngines () {
-        return Arrays.stream(shipMatrix)
-                .flatMap(row -> Arrays.stream(row))
-                .filter(Objects::nonNull)
-                .filter(component -> component instanceof Engine)
-                .map(component -> (Engine)component);
+    public List<Cannon> getSingleCannons () {
+        return componentsPerType.get(Cannon.class)
+                .stream()
+                .map(Cannon.class::cast)
+                .collect(Collectors.toList());
     }
 
     /**
-     * ???
+     * Returns the list of all cannons (single and double) present on the ship.
      *
-     * @return the total engine power of the ship
+     * @return A list of all Cannon objects.
      */
-    public int countTotalEnginePower(Stream<Engine> enginesToCountEnginePower) {
-        Stream<Engine> engineStream = Arrays.stream(shipMatrix)
-                .flatMap(row -> Arrays.stream(row))
-                .filter(Objects::nonNull)
-                .filter(component -> component instanceof Engine)
-                .map(component -> (Engine)component);
+    public List<Cannon> getAllCannons () {
+        return Stream.concat(getSingleCannons().stream(), getDoubleCannons().stream()).collect(Collectors.toList());
+    }
 
-        Stream<DoubleEngine> doubleEnginesActivated = enginesToCountEnginePower.filter(engine -> engine instanceof DoubleEngine).map(engine -> (DoubleEngine)engine);
-        Stream <Engine> singleEngines = enginesToCountEnginePower.filter(engine -> !(engine instanceof DoubleEngine));
+    /**
+     * Calculates the total firepower of a list of cannons,
+     * considering that cannons (single or double) directed NORTH are worth more.
+     *
+     * @param cannonsToCountFirePower A list of cannons to consider.
+     * @return The total firepower.
+     */
+    public double countTotalFirePower(List<Cannon> cannonsToCountFirePower) {
+        Stream<Cannon> singleCannons = cannonsToCountFirePower.stream().filter(cannon -> !(cannon instanceof DoubleCannon));
+        Stream<DoubleCannon> doubleCannons = cannonsToCountFirePower.stream().filter(cannon -> cannon instanceof DoubleCannon).map(cannon -> (DoubleCannon) cannon);
 
+        double singleCannonsFirePower = singleCannons.mapToDouble(cannon -> cannon.getFireDirection() == NORTH ? 1 : 0.5).sum();
+        double doubleCannonsFirePower = doubleCannons.mapToDouble(cannon -> cannon.getFireDirection() == NORTH ? 2 : 1).sum();
 
-        int totalEnginePower = (int) (singleEngines.count() + 2 * doubleEnginesActivated.count());
+        return singleCannonsFirePower + doubleCannonsFirePower;
+    }
+
+    /**
+     * Returns the list of DoubleEngine components present on the ship.
+     *
+     * @return A list of DoubleEngine objects.
+     */
+    public List<DoubleEngine> getDoubleEngines () {
+        return componentsPerType.get(DoubleEngine.class)
+                .stream()
+                .map(DoubleEngine.class::cast)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the list of single Engine components present on the ship.
+     *
+     * @return A list of single Engine objects.
+     */
+    public List<Engine> getSingleEngines () {
+        return componentsPerType.get(Engine.class)
+                .stream()
+                .map(Engine.class::cast)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the list of all engines (single and double) present on the ship.
+     *
+     * @return A list of all Engine objects.
+     */
+    public List<Engine> getAllEngines () {
+        return Stream.concat(getSingleEngines().stream(), getDoubleEngines().stream()).collect(Collectors.toList());
+    }
+
+    /**
+     * Calculates the total power of the provided engines, considering that DoubleEngine counts as double.
+     *
+     * @param enginesToCountEnginePower The list of engines to consider.
+     * @return The total engine power.
+     */
+    public int countTotalEnginePower(List<Engine> enginesToCountEnginePower) {
+        Stream<Engine> singleEngines = enginesToCountEnginePower.stream().filter(engine -> !(engine instanceof DoubleEngine));
+        Stream<DoubleEngine> doubleEngines = enginesToCountEnginePower.stream().filter(engine -> engine instanceof DoubleEngine).map(engine -> (DoubleEngine) engine);
+
+        int totalEnginePower = (int) (singleEngines.count() + 2 * doubleEngines.count());
 
         return totalEnginePower;
     }
 
-    public int countSingleEnginePower(Stream<Engine> enginesToCountEnginePower) {
-        Stream<Engine> singleEngineStream = Arrays.stream(shipMatrix)
-                .flatMap(row -> Arrays.stream(row))
-                .filter(Objects::nonNull)
-                .filter(component -> component instanceof Engine)
-                .filter(engine -> !(engine instanceof DoubleEngine))
-                .map(component -> (Engine)component);
-
-
-        return (int) singleEngineStream.count();
+    /**
+     * Calculates the number of single engines in operation among the provided engines.
+     *
+     * @param enginesToCountEnginePower The list of engines to consider.
+     * @return The number of single engines.
+     */
+    public int countSingleEnginePower(List<Engine> enginesToCountEnginePower) {
+        Stream<Engine> singleEngines = enginesToCountEnginePower.stream().filter(engine -> !(engine instanceof DoubleEngine));
+        return (int) singleEngines.count();
     }
 
     /**
-     * Retrieves all the storage components on the board.
-     * Used to calculate resource capacity or to decide where to store cargoCubes.
+     * Returns the list of StandardStorage components present on the ship.
      *
-     * @return a list of all Storage components
+     * @return A list of StandardStorage objects.
+     */
+    public List<StandardStorage> getStandardStorages() {
+        return componentsPerType.get(StandardStorage.class)
+                .stream()
+                .map(StandardStorage.class::cast)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the list of SpecialStorage components present on the ship.
+     *
+     * @return A list of SpecialStorage objects.
+     */
+    public List<SpecialStorage> getSpecialStorages() {
+        return componentsPerType.get(SpecialStorage.class)
+                .stream()
+                .map(SpecialStorage.class::cast)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a list of all Storage components (both Standard and Special).
+     *
+     * @return A list of Storage objects.
      */
     public List<Storage> getStorages() {
-        return Arrays.stream(shipMatrix)
-                .flatMap(row -> Arrays.stream(row))
-                .filter(Objects::nonNull)
-                .filter(component -> component instanceof Storage)
-                .map(component -> (Storage)component)
+        return Stream.concat(getStandardStorages().stream(), getSpecialStorages().stream()).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the list of BatteryBox components present on the ship.
+     *
+     * @return A list of BatteryBox objects.
+     */
+    public List<BatteryBox> getBatteryBoxes() {
+        return componentsPerType.get(BatteryBox.class)
+                .stream()
+                .map(BatteryBox.class::cast)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Retrieves all the battery boxes (energy storage) on the board.
-     * Used in powering double cannons/engines.
+     * Returns the list of Shield components present on the ship.
      *
-     * @return a list of BatteryBox components
+     * @return A list of Shield objects.
      */
-    public List<BatteryBox> getBatteryBoxes() {
-        return Arrays.stream(shipMatrix)
-                .flatMap(row -> Arrays.stream(row))
-                .filter(Objects::nonNull)
-                .filter(component -> component instanceof BatteryBox)
-                .map(component -> (BatteryBox)component)
+    public List<Shield> getShields() {
+        return componentsPerType.get(Shield.class)
+                .stream()
+                .map(Shield.class::cast)
                 .collect(Collectors.toList());
     }
 
-    public List<Set<int[]>> identifyShipParts(int x, int y) {
+    /**
+     * Identifies contiguous parts of the ship stemming from the specified position.
+     *
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return A list of sets, where each set contains the coordinates of components in a connected part.
+     */
+    public List<Set<List<Integer>>> identifyShipParts(int x, int y) {
         boolean[][] visited = new boolean[BOARD_DIMENSION][BOARD_DIMENSION];
-        List<Set<int[]>> shipParts = new ArrayList<>();
+        List<Set<List<Integer>>> shipParts = new ArrayList<>();
 
         visited[x][y] = true;
 
@@ -657,49 +719,72 @@ public abstract class ShipBoard {
             int newX = x + dx[dir];
             int newY = y + dy[dir];
 
-            if(!isValidPosition(newX, newY)) continue;
+            if(!isValidPosition(newX, newY) || shipMatrix[newX][newY] == null || visited[newX][newY]) continue;
 
-            Set<int[]> currentPart = bfsCollectPart(x, y, visited);
+            Set<List<Integer>> currentPart = bfsCollectPart(newX, newY, visited);
             shipParts.add(currentPart);
         }
         return shipParts;
     }
 
-    public Set<int[]> bfsCollectPart(int startX, int startY, boolean[][] visited) {
-        Queue<int[]> queue = new LinkedList<>();
-        Set<int[]> part = new HashSet<>();
+    /**
+     * Performs a breadth-first search (BFS) to gather all connected cells
+     * starting from the provided coordinates.
+     *
+     * @param startX The starting x-coordinate.
+     * @param startY The starting y-coordinate.
+     * @param visited A matrix of visited nodes.
+     * @return A set of coordinates forming a connected part of the ship.
+     */
+    public Set<List<Integer>> bfsCollectPart(int startX, int startY, boolean[][] visited) {
+        Queue<List<Integer>> queue = new LinkedList<>();
+        Set<List<Integer>> part = new HashSet<>();
 
-        queue.add(new int[]{startX, startY});
+        queue.add(Arrays.asList(startX, startY));
         visited[startX][startY] = true;
 
         int[] dx = {-1, 1, 0, 0};
         int[] dy = {0, 0, -1, 1};
 
         while (!queue.isEmpty()) {
-            int[] pos = queue.poll();
+            List<Integer> pos = queue.poll();
             part.add(pos);
 
             for (int dir=0; dir<4; dir++) {
-                int newX = pos[0] + dx[dir];
-                int newY = pos[1] + dy[dir];
+                int newX = pos.get(0) + dx[dir];
+                int newY = pos.get(1) + dy[dir];
 
                 if (isValidPosition(newX, newY) && shipMatrix[newX][newY] != null && !visited[newX][newY]) {
                     visited[newX][newY] = true;
-                    queue.add(new int[]{newX, newY});
+                    queue.add(Arrays.asList(newX, newY));
                 }
             }
         }
         return part;
     }
 
-    public void removeShipPart (Set<int[]> componentsPositions) {
-        for(int[] componentPosition : componentsPositions) {
-            Component currentComponent = shipMatrix[componentPosition[0]][componentPosition[1]];
+    /**
+     * Removes the specified set of components from the board and marks them as inactive.
+     *
+     * @param componentsPositions A set of coordinates of components to remove.
+     */
+    public void removeShipPart (Set<List<Integer>> componentsPositions) {
+        for(List<Integer> componentPosition : componentsPositions) {
+            Component currentComponent = shipMatrix[componentPosition.get(0)][componentPosition.get(1)];
             notActiveComponents.add(currentComponent);
-            shipMatrix[componentPosition[0]][componentPosition[1]] = null;
+            shipMatrix[componentPosition.get(0)][componentPosition.get(1)] = null;
         }
     }
 
+    /**
+     * Finds the coordinates of the first non-null component in a given direction,
+     * starting from a specified row or column index.
+     *
+     * @param pos The row or column index.
+     * @param direction The direction to search in.
+     * @return An array [x, y] with the coordinates of the first component found.
+     * @throws IllegalArgumentException If the position is invalid.
+     */
     public int[] findFirstComponentInDirection(int pos, Direction direction) {
         int x, y;
 
@@ -728,7 +813,6 @@ public abstract class ShipBoard {
         }
 
         while (shipMatrix[x][y] == null) {
-
             switch (direction) {
                 case NORTH:
                     x ++;
@@ -745,22 +829,36 @@ public abstract class ShipBoard {
                 default:
                     throw new IllegalStateException("Unexpected value: " + direction);
             }
-
         }
 
         return new int[]{x, y};
     }
 
+    /**
+     * Checks whether there is at least one shield covering a specific direction.
+     *
+     * @param direction The direction to check.
+     * @return true if the direction is covered by a shield, otherwise false.
+     */
     public boolean isDirectionCoveredByShield(Direction direction) {
-        return Arrays.stream(shipMatrix)
-                .flatMap(row -> Arrays.stream(row))
-                .filter(Objects::nonNull)
-                .filter(component -> component instanceof Shield)
-                .map(component -> ((Shield)component))
+        return getShields()
+                .stream()
                 .flatMap(shield -> shield.getDirections().stream())
-                .anyMatch(dir -> dir == direction);
+                .anyMatch(shieldDirection -> shieldDirection == direction);
     }
 
+    /**
+     * Handles the effect of a dangerous object (DangerousObj) on the ship.
+     *
+     * @param obj The dangerous object to handle.
+     */
     public abstract void handleDangerousObject(DangerousObj obj);
+
+    /**
+     * Checks whether the ship can defend itself from a dangerous object using single cannons.
+     *
+     * @param obj The dangerous object.
+     * @return true if the ship can defend itself, otherwise false.
+     */
     public abstract boolean canDifendItselfWithSingleCannons(DangerousObj obj);
 }

@@ -12,10 +12,12 @@ public class Engine extends Component implements Rotatable{
         super(connectors);
         this.powerDirection= Direction.SOUTH ;
     }
+
     public Direction getPowerDirection() {
         return powerDirection;
     }
-    public void RotatePowerDirection() {
+
+    public void rotatePowerDirection() {
         for(int i=0; i<getRotation()%4; i++)
             this.powerDirection=shiftDirection(this.powerDirection);
     }

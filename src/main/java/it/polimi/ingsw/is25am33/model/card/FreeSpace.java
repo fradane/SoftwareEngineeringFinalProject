@@ -26,7 +26,7 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
         });
 
         chosenBatteryBoxes.forEach(BatteryBox::useBattery);
-        int stepsForward = game.getCurrPlayer().getPersonalBoard().countTotalEnginePower(chosenDoubleEngines.stream());
+        int stepsForward = game.getCurrPlayer().getPersonalBoard().countTotalEnginePower(chosenDoubleEngines);
         movePlayer(game.getFlyingBoard(), game.getCurrPlayer(), stepsForward);
 
         if (game.hasNextPlayer()) {

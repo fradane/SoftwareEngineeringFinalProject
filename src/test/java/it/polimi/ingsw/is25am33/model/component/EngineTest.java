@@ -53,7 +53,7 @@ class EngineTest {
         engine.rotate();
         engine.rotate();
 
-        engine.RotatePowerDirection();
+        engine.rotatePowerDirection();
 
         Direction powerDirectionExpected = Direction.EAST;
         assertEquals(powerDirectionExpected,engine.getPowerDirection(), "Wrong PowerDirection");

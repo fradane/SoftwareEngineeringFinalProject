@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.board.Level2FlyingBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.game.Game;
@@ -20,9 +21,6 @@ class FreeSpaceTest {
         Game game = new Game(new Level2FlyingBoard(12));
         AdventureCard freeSpace = new FreeSpace();
 
-        game.setCurrRanking(List.of(new Player("fra", new Level2ShipBoard()),
-                                    new Player("sa", new Level2ShipBoard()),
-                                    new Player("gio", new Level2ShipBoard())));
 
 
 
