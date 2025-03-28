@@ -17,11 +17,9 @@ public class Level2FlyingBoard extends FlyingBoard {
     /**
      * Constructs a new Level2FlyingBoard with a specified run length for the flying board.
      * Initializes the hourglass position to the starting point (0).
-     *
-     * @param runLength the length of the run for this flying board
      */
-    public Level2FlyingBoard(int runLength) {
-        super(runLength); // Pass the runLength to the superclass constructor
+    public Level2FlyingBoard() {
+        super(13); // Pass the runLength to the superclass constructor
         this.hourglassPosition = 0; // Initialize the hourglass position
     }
 
