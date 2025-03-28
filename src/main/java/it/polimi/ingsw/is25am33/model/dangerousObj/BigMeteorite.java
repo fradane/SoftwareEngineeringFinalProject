@@ -1,9 +1,19 @@
 package it.polimi.ingsw.is25am33.model.dangerousObj;
 
 import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.card.MeteoriteStorm;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 
 public class BigMeteorite extends Meteorite {
+
     public BigMeteorite(Direction direction) {
         super(direction);
     }
+
+    @Override
+    public void startAttack(PlayerChoicesDataStructure playerChoices, MeteoriteStorm meteoriteStorm) {
+        meteoriteStorm
+                .playerDecidedHowToDefendTheirSelvesFromBigMeteorite(playerChoices.getChosenDoubleCannon().orElseThrow(), playerChoices.getChosenBatteryBox().orElseThrow());
+    }
+
 }

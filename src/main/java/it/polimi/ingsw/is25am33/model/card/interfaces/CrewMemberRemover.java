@@ -1,6 +1,5 @@
-package it.polimi.ingsw.is25am33.model.card;
+package it.polimi.ingsw.is25am33.model.card.interfaces;
 
-import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 
 import java.util.Collections;

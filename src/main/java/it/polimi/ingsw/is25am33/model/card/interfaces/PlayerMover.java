@@ -1,4 +1,4 @@
-package it.polimi.ingsw.is25am33.model.card;
+package it.polimi.ingsw.is25am33.model.card.interfaces;
 
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
 import it.polimi.ingsw.is25am33.model.game.Player;

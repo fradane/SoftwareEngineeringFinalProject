@@ -2,7 +2,10 @@ package it.polimi.ingsw.is25am33.model.card;
 
 
 import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
+import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Cannon;
 import it.polimi.ingsw.is25am33.model.component.Shield;
@@ -21,8 +24,36 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
     private Iterator<Shot> shotIterator;
     private Iterator<Player> playerIterator;
 
-    public Pirates(List<Shot> shots) {
+    public Pirates(List<Shot> shots, Game game) {
+        super(game);
         this.shots = shots;
+    }
+
+    @Override
+    public GameState getFirstState() {
+        return cardStates.getFirst();
+    }
+
+    @Override
+    public void play(PlayerChoicesDataStructure playerChoices) {
+
+        switch (currState) {
+            case CHOOSE_CANNONS:
+                this.currPlayerChoseCannonsToActivate(playerChoices.getChosenDoubleCannons().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
+                break;
+            case ACCEPT_THE_REWARD:
+                this.currPlayerDecidedToGetTheReward(playerChoices.hasAcceptedTheReward());
+                break;
+            case THROW_DICES:
+                this.throwDices();
+                break;
+            case DANGEROUS_ATTACK:
+                ((Shot) game.getCurrDangerousObj()).startAttack(playerChoices, this);
+                break;
+            default:
+                throw new UnknownStateException("Unknown current state");
+        }
+
     }
 
     public void setShots(List<Shot> shots) {
@@ -30,10 +61,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         shotIterator = shots.iterator();
     }
 
-    public void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException, IllegalStateException {
-
-        if (currState != GameState.CHOOSE_CANNONS)
-            throw new IllegalStateException("Not the right state");
+    private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
 
         int currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, game.getCurrPlayer());
 
@@ -63,10 +91,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
     }
 
-    public void throwDices() {
-
-        if (currState != GameState.THROW_DICES)
-            throw new IllegalStateException("Not the right state");
+    private void throwDices() {
 
         Shot currShot = shotIterator.next();
         currShot.setCoordinates(Game.throwDices());
@@ -76,10 +101,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
     }
 
-    public void currPlayerDecidedToGetTheReward(boolean hasPlayerAcceptedTheReward) throws IllegalStateException {
-
-        if (currState != GameState.ACCEPT_THE_REWARD)
-            throw new IllegalStateException("Not the right state");
+    private void currPlayerDecidedToGetTheReward(boolean hasPlayerAcceptedTheReward) {
 
         if (hasPlayerAcceptedTheReward) {
             game.getCurrPlayer().addCredits(reward);
@@ -96,9 +118,6 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
     }
 
     public void playerDecidedHowToDefendTheirSelvesFromSmallShot(Shield chosenShield, BatteryBox chosenBatteryBox) {
-
-        if (currState != GameState.DANGEROUS_ATTACK)
-            throw new IllegalStateException("Not the right state");
 
         ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
 
@@ -133,9 +152,6 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
     }
 
     public void playerIsAttackedByABigShot() {
-
-        if (currState != GameState.DANGEROUS_ATTACK)
-            throw new IllegalStateException("Not the right state");
 
         ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
 

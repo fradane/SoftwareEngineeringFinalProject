@@ -3,7 +3,10 @@ package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.model.CargoCube;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
+import it.polimi.ingsw.is25am33.model.UnknownStateException;
+import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Storage;
+import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +18,34 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
     private List<CargoCube> reward;
     private final Iterator<CargoCube> rewardIterator;
     private static final List<GameState> cardStates = List.of(GameState.VISIT_LOCATION, GameState.HANDLE_CUBES_REWARD);
+
+    @Override
+    public GameState getFirstState() {
+        return cardStates.getFirst();
+    }
+
+    @Override
+    public void play(PlayerChoicesDataStructure playerChoices) throws UnknownStateException {
+
+        switch (currState) {
+            case VISIT_LOCATION:
+                try {
+                    this.currPlayerWantsToVisit(playerChoices.isWantsToVisit());
+                } catch (IllegalDecisionException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case HANDLE_CUBES_REWARD:
+                this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
+                break;
+
+            default:
+                throw new UnknownStateException("Unknown current state");
+
+        }
+
+    }
 
     public void setRequiredCrewMembers(int requiredCrewMembers) {
         this.requiredCrewMembers = requiredCrewMembers;
@@ -28,24 +59,22 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         this.stepsBack = stepsBack;
     }
 
-    public AbandonedStation(int stepsBack, int requiredCrewMembers, List<CargoCube> reward) {
+    public AbandonedStation(int stepsBack, int requiredCrewMembers, List<CargoCube> reward, Game game) {
+        super(game);
         this.stepsBack = stepsBack;
         this.requiredCrewMembers = requiredCrewMembers;
         this.rewardIterator = reward.iterator();
         this.reward = reward;
     }
 
-    public void currPlayerWantsToVisit (boolean wantsToVisit) throws IllegalStateException, IllegalDecisionException {
-
-        if (currState != GameState.VISIT_LOCATION)
-            throw new IllegalStateException("Not the right state");
+    private void currPlayerWantsToVisit (boolean wantsToVisit) throws IllegalDecisionException {
 
         if (wantsToVisit) {
             if (game.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < requiredCrewMembers)
                 throw new IllegalDecisionException("Player has not enough crew members");
             currState = GameState.REMOVE_CREW_MEMBERS;
             game.setCurrState(currState);
-        } else if (game.hasNextPlayer()){
+        } else if (game.hasNextPlayer()) {
             game.nextPlayer();
         } else {
             game.setCurrState(GameState.END_OF_CARD);
@@ -53,10 +82,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
 
     }
 
-    public void currPlayerChoseCargoCubeStorage (Storage chosenStorage) {
-
-        if (currState != GameState.HANDLE_CUBES_REWARD)
-            throw new IllegalStateException("Not the right state");
+    private void currPlayerChoseCargoCubeStorage (Storage chosenStorage) {
 
         if(chosenStorage.isFull()) {
             List<CargoCube> sortedStorage = chosenStorage.getStockedCubes();

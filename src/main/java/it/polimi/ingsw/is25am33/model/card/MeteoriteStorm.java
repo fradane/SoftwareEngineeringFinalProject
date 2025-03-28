@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
@@ -11,24 +12,44 @@ import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.*;
 
-public class MeteoriteStorm extends AdventureCard{
+public class MeteoriteStorm extends AdventureCard {
 
     private List<Meteorite> meteorites;
     private final Iterator<Meteorite> meteoriteIterator;
     private static final List<GameState> cardStates = List.of(GameState.THROW_DICES, GameState.DANGEROUS_ATTACK);
 
-    public MeteoriteStorm(List<Meteorite> meteorites) {
+    public MeteoriteStorm(List<Meteorite> meteorites, Game game) {
+        super(game);
         this.meteorites = meteorites;
         this.meteoriteIterator = meteorites.iterator();
+    }
+
+    @Override
+    public GameState getFirstState() {
+        return cardStates.getFirst();
+    }
+
+    @Override
+    public void play(PlayerChoicesDataStructure playerChoices) throws UnknownStateException {
+
+        switch (currState) {
+            case THROW_DICES:
+                this.throwDices();
+                break;
+            case DANGEROUS_ATTACK:
+                ((Meteorite) game.getCurrDangerousObj()).startAttack(playerChoices, this);
+                break;
+            default:
+                throw new UnknownStateException("Unknown current state");
+        }
+
     }
 
     public void setMeteorites(List<Meteorite> meteorites) {
         this.meteorites = meteorites;
     }
 
-    public void throwDices() {
-
-        if (currState != GameState.THROW_DICES) throw new IllegalStateException("Not the right state");
+    private void throwDices() {
 
         Meteorite currMeteorite = meteoriteIterator.next();
         currMeteorite.setCoordinates(Game.throwDices());
@@ -39,8 +60,6 @@ public class MeteoriteStorm extends AdventureCard{
     }
 
     public void playerDecidedHowToDefendTheirSelvesFromSmallMeteorite(Shield chosenShield, BatteryBox chosenBatteryBox) {
-
-        if (currState != GameState.DANGEROUS_ATTACK) throw new IllegalStateException("Not the right state");
 
         ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
 
@@ -76,9 +95,6 @@ public class MeteoriteStorm extends AdventureCard{
     }
 
     public void playerDecidedHowToDefendTheirSelvesFromBigMeteorite(DoubleCannon chosenDoubleCannon, BatteryBox chosenBatteryBox) {
-
-        if (currState != GameState.DANGEROUS_ATTACK)
-            throw new IllegalStateException("Not the right state");
 
         ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
 

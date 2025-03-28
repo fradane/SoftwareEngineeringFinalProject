@@ -2,7 +2,11 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
+import it.polimi.ingsw.is25am33.model.UnknownStateException;
+import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
+import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
+import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.List;
 
@@ -15,10 +19,38 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
 
     private static final List<GameState> cardStates = List.of(GameState.VISIT_LOCATION, GameState.REMOVE_CREW_MEMBERS);
 
-    public AbandonedShip(int crewMalus, int stepsBack, int reward) {
+    public AbandonedShip(int crewMalus, int stepsBack, int reward, Game game) {
+        super(game);
         this.crewMalus = crewMalus;
         this.stepsBack = stepsBack;
         this.reward = reward;
+    }
+
+    @Override
+    public GameState getFirstState() {
+        return cardStates.getFirst();
+    }
+
+    @Override
+    public void play(PlayerChoicesDataStructure playerChoices) throws UnknownStateException {
+
+        switch (currState) {
+            case VISIT_LOCATION:
+                try {
+                    this.currPlayerWantsToVisit(playerChoices.isWantsToVisit());
+                } catch (IllegalDecisionException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case REMOVE_CREW_MEMBERS:
+                this.currPlayerChoseRemovableCrewMembers(playerChoices.getChosenCabins().orElseThrow());
+                break;
+
+            default:
+                throw new UnknownStateException("Unknown current state");
+        }
+
     }
 
     public void setCrewMalus(int crewMalus) {
@@ -33,10 +65,7 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
         this.reward = reward;
     }
 
-    public void currPlayerWantsToVisit (boolean wantsToVisit) throws IllegalStateException, IllegalDecisionException {
-
-        if (currState != GameState.VISIT_LOCATION)
-            throw new IllegalStateException("Not the right state");
+    private void currPlayerWantsToVisit(boolean wantsToVisit) throws IllegalDecisionException {
 
         if (wantsToVisit) {
             if (game.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)
@@ -51,10 +80,7 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
 
     }
 
-    public void currPlayerChoseRemovableCrewMembers (List<Cabin> chosenCabins) throws IllegalStateException, IllegalArgumentException {
-
-        if (currState != GameState.REMOVE_CREW_MEMBERS)
-            throw new IllegalStateException("Not the right state");
+    private void currPlayerChoseRemovableCrewMembers(List<Cabin> chosenCabins) throws IllegalArgumentException {
 
         removeMemberProcess(chosenCabins, crewMalus);
 

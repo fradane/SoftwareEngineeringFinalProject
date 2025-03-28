@@ -5,6 +5,7 @@ import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,13 +14,20 @@ public class Game {
     private AdventureCard currAdventureCard;
     private GameState currState;
     private final FlyingBoard flyingBoard;
+    private final List<Player> players;
     private List<Player> currRanking;
     private Player currPlayer;
-    private Iterator<Player> playerIterator = currRanking.iterator();
+    private Iterator<Player> playerIterator;
     private DangerousObj currDangerousObj;
 
-    public Game(FlyingBoard flyingBoard) {
+    public Game(FlyingBoard flyingBoard, List<Player> players) {
         this.flyingBoard = flyingBoard;
+        currAdventureCard = null;
+        currState = null;
+        currRanking = new ArrayList<>();
+        currPlayer = null;
+        currDangerousObj = null;
+        this.players = players;
     }
 
     public static int throwDices() {
@@ -72,4 +80,32 @@ public class Game {
     public List<Player> getPlayers() {
         return currRanking;
     }
+
+    public GameState getCurrState() {
+        return currState;
+    }
+
+    public void setCurrAdventureCard(AdventureCard currAdventureCard) {
+        this.currAdventureCard = currAdventureCard;
+    }
+
+    /**
+     * Starts the current card phase: updates the game's currState and the card's currState to
+     * the first of the actual card, sets the currPlayer to the first based on the provided
+     * ranking.
+     *
+     * @throws IllegalStateException if the card phase is not started yet.
+     */
+    public void startCard() throws IllegalStateException{
+
+        if (currAdventureCard == null || currState != GameState.START_CARD)
+            throw new IllegalStateException("Not the right state");
+
+        currState = currAdventureCard.getFirstState();
+        playerIterator = currRanking.iterator();
+        currPlayer = playerIterator.next();
+        currAdventureCard.setCurrState(currState);
+
+    }
+
 }
