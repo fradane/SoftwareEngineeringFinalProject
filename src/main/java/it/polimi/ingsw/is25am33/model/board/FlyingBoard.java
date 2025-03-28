@@ -35,6 +35,16 @@ public abstract class FlyingBoard {
     }
 
     /**
+     * Retrieves the current position of the specified player in the ranking.
+     *
+     * @param player The player whose position is to be retrieved.
+     * @return The integer position of the given player.
+     */
+    public int getPlayerPosition(Player player) {
+        return ranking.get(player);
+    }
+
+    /**
      * Returns the set of players who have been doubled.
      *
      * @return A set of players who are out of the game.

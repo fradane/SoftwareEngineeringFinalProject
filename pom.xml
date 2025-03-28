@@ -59,6 +59,21 @@
         </dependency>
         <!--JACKSON dependencies - END -->
 
+        <!--MOCKITO dependencies - START -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.2.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.4</version>
+        </dependency>
+        <!--MOCKITO dependencies - END -->
+
     </dependencies>
 
     <build>
