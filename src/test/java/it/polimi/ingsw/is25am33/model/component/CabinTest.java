@@ -6,10 +6,7 @@ import it.polimi.ingsw.is25am33.model.Direction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,11 +50,11 @@ class CabinTest {
 
         cabin.fillCabin(CrewMember.HUMAN);
         cabin.removeMember();
-        List<CrewMember> inhabitansExpected= new ArrayList<>();
 
-        assertEquals(inhabitansExpected,cabin.getInhabitants(),"inhabitants");
+        assertEquals(CrewMember.HUMAN, cabin.getInhabitants().getFirst(),"inhabitants");
 
-        Exception exception= assertThrows(IllegalArgumentException.class, ()->cabin.removeMember());
+        cabin.removeMember();
+        Exception exception= assertThrows(NoSuchElementException.class, ()->cabin.removeMember());
         assertEquals(exception.getMessage(),"Empty cabin");
 
     }
@@ -66,6 +63,7 @@ class CabinTest {
     void hasInhabitants(){
         cabin.fillCabin(CrewMember.HUMAN);
         assertTrue(cabin.hasInhabitants(),"inhabitants");
+        cabin.removeMember();
         cabin.removeMember();
         assertFalse(cabin.hasInhabitants(),"inhabitants");
     }

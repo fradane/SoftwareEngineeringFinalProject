@@ -33,7 +33,7 @@ class FreeSpaceTest {
     @BeforeEach
     void setUp() {
 
-         shipBoard = new Level2ShipBoard() {
+         shipBoard = new Level2ShipBoard(null) {
 
             public int countTotalEnginePower(Stream<Engine> engineStream) {
                 return 5;
@@ -41,7 +41,7 @@ class FreeSpaceTest {
 
          };
 
-         flyingBoard = new Level2FlyingBoard(12) {
+         flyingBoard = new Level2FlyingBoard() {
 
             public void movePlayer(Player player, int offset) {}
 

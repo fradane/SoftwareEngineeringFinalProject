@@ -7,6 +7,7 @@ import it.polimi.ingsw.is25am33.model.CrewMember;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Represents a cabin component capable of housing crew members.
@@ -54,7 +55,11 @@ public class Cabin extends Component {
      *
      * @throws java.util.NoSuchElementException if the cabin has no inhabitants
      */
-    public void removeMember() {
+    public void removeMember() throws NoSuchElementException {
+
+        if (inhabitants.size() == 0)
+            throw new NoSuchElementException("Empty cabin");
+
         inhabitants.removeFirst();
     }
 

@@ -42,7 +42,7 @@ class EpidemicTest {
         cabin21.fillCabin(CrewMember.PURPLE_ALIEN);
         cabin22.fillCabin(CrewMember.BROWN_ALIEN);
 
-        ShipBoard shipBoard = new Level2ShipBoard() {
+        ShipBoard shipBoard = new Level2ShipBoard(null) {
 
             public Set<Cabin> cabinWithNeighbors() {
                 return new HashSet<>();
@@ -50,7 +50,7 @@ class EpidemicTest {
 
         };
 
-        ShipBoard shipBoard1 = new Level2ShipBoard() {
+        ShipBoard shipBoard1 = new Level2ShipBoard(null) {
 
             public Set<Cabin> cabinWithNeighbors() {
                 return new HashSet<>(Set.of(cabin11, cabin12));
@@ -58,7 +58,7 @@ class EpidemicTest {
 
         };
 
-        ShipBoard shipBoard2 = new Level2ShipBoard() {
+        ShipBoard shipBoard2 = new Level2ShipBoard(null) {
             public Set<Cabin> cabinWithNeighbors() {
                 return new HashSet<>(Set.of(cabin21, cabin22));
             }

@@ -18,9 +18,8 @@ public class Cannon extends Component implements Rotatable {
      * Constructs a Cannon with specified connectors and initial firing direction.
      *
      * @param connectors    a map associating directions with connector types
-     * @param fireDirection the initial direction in which the cannon fires
      */
-    public Cannon(Map<Direction, ConnectorType> connectors, Direction fireDirection) {
+    public Cannon(Map<Direction, ConnectorType> connectors) {
         super(connectors);
         this.fireDirection= Direction.NORTH;
     }
@@ -40,7 +39,7 @@ public class Cannon extends Component implements Rotatable {
      * The direction is shifted clockwise once for each rotation step modulo 4.
      * </p>
      */
-    public void RotateFireDirection() {
+    public void rotateFireDirection() {
         for (int i = 0; i < getRotation() % 4; i++)
             this.fireDirection = shiftDirection(this.fireDirection);
     }
