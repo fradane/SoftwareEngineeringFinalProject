@@ -22,6 +22,11 @@ public class Shield extends Component implements Activable, Rotatable {
             }
         }
 
+    @Override
+    public void changeOrientation() {
+        super.changeOrientation();
+        setDirection();
     }
+}
 
 

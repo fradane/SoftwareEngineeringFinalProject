@@ -15,9 +15,15 @@ public class Engine extends Component implements Rotatable{
     public Direction getPowerDirection() {
         return powerDirection;
     }
-    public void RotatePowerDirection() {
+    public void rotatePowerDirection() {
         for(int i=0; i<getRotation()%4; i++)
             this.powerDirection=shiftDirection(this.powerDirection);
+    }
+
+    @Override
+    public void changeOrientation() {
+        super.changeOrientation();
+        rotatePowerDirection();
     }
 }
 

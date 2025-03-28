@@ -9,17 +9,23 @@ public class Cannon extends Component implements Rotatable {
 
     private Direction fireDirection;
 
-    public Cannon(Map<Direction, ConnectorType> connectors, Direction fireDirection) {
+    public Cannon(Map<Direction, ConnectorType> connectors) {
         super(connectors);
-        this.fireDirection= fireDirection;
+        this.fireDirection= Direction.NORTH;
     }
 
     public Direction getFireDirection() {
         return fireDirection;
     }
 
-    public void RotateFireDirection() {
+    public void rotateFireDirection() {
         for(int i=0; i<getRotation()%4; i++)
             this.fireDirection=shiftDirection(this.fireDirection);
+    }
+
+    @Override
+    public void changeOrientation() {
+        super.changeOrientation();
+        rotateFireDirection();
     }
 }
