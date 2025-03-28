@@ -23,7 +23,7 @@ Il software deve:
 1. **Gestire** le meccaniche di gioco (dall’assemblaggio della nave spaziale alla fase di volo).
 2. **Implementare** le regole di Galaxy Trucker, in conformità con la documentazione fornita (in particolare le “regole semplificate” e le “regole complete”).
 3. **Prevedere** un’architettura **client-server** (basata su JavaSE) che sfrutti un protocollo di rete (socket TCP/IP e/o RMI).
-4. **Consentire** l’utilizzo del **pattern MVC** per la suddivisione delle responsabilità (Model, View, Controller).
+4. **Consentire** l’utilizzo del **pattern MVC** per la suddivisione delle responsabilità (Model, View, it.polimi.ingsw.is25am33.Controller).
 5. **Fornire** un’interfaccia utente **grafica (GUI)** o **testuale (TUI)** realizzata con JavaFX/Swing (per la GUI) o console (per la TUI).
 6. **Essere corredato** di documentazione UML, JavaDoc, test di unità, peer review e documentazione del protocollo di comunicazione.
 
@@ -101,7 +101,7 @@ The software must:
 1. **Handle** the game mechanics (from assembling the spaceship to the flight phase).
 2. **Implement** the rules of Galaxy Trucker, following the provided documentation (specifically both the "simplified rules" and "complete rules").
 3. **Adopt** a **client-server** architecture (based on JavaSE) that uses a network protocol (TCP/IP sockets and/or RMI).
-4. **Utilize** the **MVC pattern** (Model, View, Controller) to separate responsibilities.
+4. **Utilize** the **MVC pattern** (Model, View, it.polimi.ingsw.is25am33.Controller) to separate responsibilities.
 5. **Provide** a user interface in either **Graphical (GUI)** or **Textual (TUI)** form, using JavaFX/Swing (for GUI) or the console (for TUI).
 6. **Include** supporting materials such as UML documentation, JavaDoc, unit tests, peer review documents, and communication protocol documentation.
 

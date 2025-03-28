@@ -15,9 +15,6 @@ public class Level2ShipBoard extends ShipBoard{
         focusedComponent = null;
     }
 
-
-
-
     public void handleDangerousObject(DangerousObj obj){
 
         int[] hitCoordinate = findFirstComponentInDirection(obj.getCoordinate(), obj.getDirection());

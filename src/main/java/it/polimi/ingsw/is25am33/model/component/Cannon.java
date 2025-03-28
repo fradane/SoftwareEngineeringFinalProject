@@ -7,10 +7,11 @@ import java.util.Map;
 
 public class Cannon extends Component implements Rotatable {
 
-    private Direction fireDirection = Direction.NORTH;
+    private Direction fireDirection;
 
     public Cannon(Map<Direction, ConnectorType> connectors) {
         super(connectors);
+        this.fireDirection= Direction.NORTH;
     }
 
     public Direction getFireDirection() {
@@ -20,5 +21,11 @@ public class Cannon extends Component implements Rotatable {
     public void rotateFireDirection() {
         for(int i=0; i<getRotation()%4; i++)
             this.fireDirection=shiftDirection(this.fireDirection);
+    }
+
+    @Override
+    public void changeOrientation() {
+        super.changeOrientation();
+        rotateFireDirection();
     }
 }
