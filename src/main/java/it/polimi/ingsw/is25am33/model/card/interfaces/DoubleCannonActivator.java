@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface DoubleCannonActivator {
 
-    default int activateDoubleCannonsProcess(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes, Player player) throws IllegalArgumentException, IllegalStateException {
+    default double activateDoubleCannonsProcess(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes, Player player) throws IllegalArgumentException, IllegalStateException {
 
         if (chosenDoubleCannons.size() != chosenBatteryBoxes.size())
             throw new IllegalArgumentException("The number of engines does not match the number of battery boxes");
@@ -21,7 +21,7 @@ public interface DoubleCannonActivator {
 
         chosenBatteryBoxes.forEach(BatteryBox::useBattery);
 
-        return player.getPersonalBoard().countTotalFirePower(chosenDoubleCannons.stream());
+        return player.getPersonalBoard().countTotalFirePower(chosenDoubleCannons);
 
     }
 

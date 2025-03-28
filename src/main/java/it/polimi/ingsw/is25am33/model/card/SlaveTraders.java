@@ -52,7 +52,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
     private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
 
-        int currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, game.getCurrPlayer());
+        double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, game.getCurrPlayer());
 
         if (currPlayerCannonPower > requiredFirePower) {
 
