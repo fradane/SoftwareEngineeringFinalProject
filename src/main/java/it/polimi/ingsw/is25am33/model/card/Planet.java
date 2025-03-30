@@ -7,14 +7,20 @@ import java.util.List;
 
 public class Planet {
 
-    private boolean isBusy;
-    private final List<CargoCube> reward;
-    private final Iterator<CargoCube> rewardIterator;
+    private boolean isBusy = false;
+    private List<CargoCube> reward;
+    private Iterator<CargoCube> rewardIterator;
 
     public Planet(List<CargoCube> cargoCubes) {
         this.isBusy = false;
         this.reward = cargoCubes;
         rewardIterator = reward.iterator();
+    }
+
+    public Planet() {}
+
+    public void setReward(List<CargoCube> reward) {
+        this.reward = reward;
     }
 
     public CargoCube getCurrent() {

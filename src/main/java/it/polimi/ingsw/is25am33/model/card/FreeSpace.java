@@ -1,5 +1,5 @@
 package it.polimi.ingsw.is25am33.model.card;
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
@@ -11,14 +11,12 @@ import java.util.List;
 
 public class FreeSpace extends AdventureCard implements PlayerMover {
 
-    private static final List<GameState> cardStates = List.of(GameState.CHOOSE_ENGINES);
+    private static final List<CardState> cardStates = List.of(CardState.CHOOSE_ENGINES);
 
-    public FreeSpace(Game game) {
-        super(game);
-    }
+    public FreeSpace() {}
 
     @Override
-    public GameState getFirstState() {
+    public CardState getFirstState() {
         return cardStates.getFirst();
     }
 
@@ -56,7 +54,7 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
         if (game.hasNextPlayer()) {
             game.nextPlayer();
         } else {
-            game.setCurrState(GameState.END_OF_CARD);
+            currState = CardState.END_OF_CARD;
         }
 
     }

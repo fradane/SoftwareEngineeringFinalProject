@@ -1,9 +1,8 @@
 package it.polimi.ingsw.is25am33.model.card;
 
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.board.Level2FlyingBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
@@ -54,10 +53,10 @@ class FreeSpaceTest {
 
          game = new Game(flyingBoard, players);
 
-         card = new FreeSpace(game);
+         card = new FreeSpace();
 
          game.setCurrAdventureCard(card);
-         game.setCurrState(GameState.START_CARD);
+         card.setCurrState(CardState.START_CARD);
          game.setCurrRanking(players);
 
          game.startCard();
@@ -80,7 +79,7 @@ class FreeSpaceTest {
 
         });
 
-        assertEquals(GameState.END_OF_CARD, game.getCurrState());
+        assertEquals(CardState.END_OF_CARD, card.getCurrState());
 
     }
 
@@ -157,7 +156,7 @@ class FreeSpaceTest {
 
         });
 
-        assertEquals(GameState.END_OF_CARD, game.getCurrState());
+        assertEquals(CardState.END_OF_CARD, card.getCurrState());
 
     }
 
@@ -176,8 +175,7 @@ class FreeSpaceTest {
                 .setChosenDoubleEngines(doubleEngines)
                 .build();
 
-        game.setCurrState(GameState.START_CARD);
-        card.setCurrState(GameState.START_CARD);
+        card.setCurrState(CardState.START_CARD);
 
         Exception e = assertThrows(UnknownStateException.class, () -> {
             card.play(playerChoices);

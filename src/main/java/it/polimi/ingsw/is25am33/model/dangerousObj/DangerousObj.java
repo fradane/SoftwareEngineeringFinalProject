@@ -12,6 +12,11 @@ public abstract class DangerousObj {
         this.coordinate = 0;
     }
 
+    public DangerousObj() {
+        this.direction = null;
+        this.coordinate = 0;
+    }
+
     public Direction getDirection() {
         return direction;
     }

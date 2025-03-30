@@ -1,6 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
 import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
@@ -15,15 +15,16 @@ import java.util.List;
 public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMemberRemover, DoubleCannonActivator {
 
     private int crewMalus;
-    private final static List<GameState> cardStates = List.of(GameState.CHOOSE_CANNONS, GameState.ACCEPT_THE_REWARD, GameState.REMOVE_CREW_MEMBERS);
+    private final static List<CardState> cardStates = List.of(CardState.CHOOSE_CANNONS, CardState.ACCEPT_THE_REWARD, CardState.REMOVE_CREW_MEMBERS);
 
-    public SlaveTraders(int crewMalus, Game game) {
-        super(game);
+    public SlaveTraders(int crewMalus) {
         this.crewMalus = crewMalus;
     }
 
+    public SlaveTraders() {}
+
     @Override
-    public GameState getFirstState() {
+    public CardState getFirstState() {
         return cardStates.getFirst();
     }
 
@@ -56,21 +57,19 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         if (currPlayerCannonPower > requiredFirePower) {
 
-            currState = GameState.ACCEPT_THE_REWARD;
-            game.setCurrState(currState);
+            currState = CardState.ACCEPT_THE_REWARD;
 
         } else if (currPlayerCannonPower == requiredFirePower) {
 
             if (game.hasNextPlayer()) {
                 game.nextPlayer();
             } else {
-                game.setCurrState(GameState.END_OF_CARD);
+                currState = CardState.END_OF_CARD;
             }
 
         } else {
 
-            currState = GameState.REMOVE_CREW_MEMBERS;
-            game.setCurrState(currState);
+            currState = CardState.REMOVE_CREW_MEMBERS;
 
         }
 
@@ -83,7 +82,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
             movePlayer(game.getFlyingBoard(), game.getCurrPlayer(), stepsBack);
         }
 
-        game.setCurrState(GameState.END_OF_CARD);
+        currState = CardState.END_OF_CARD;
 
     }
 
@@ -93,10 +92,9 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         if (game.hasNextPlayer()) {
             game.nextPlayer();
-            currState = GameState.CHOOSE_CANNONS;
-            game.setCurrState(currState);
+            currState = CardState.CHOOSE_CANNONS;
         } else {
-            game.setCurrState(GameState.END_OF_CARD);
+            currState = CardState.END_OF_CARD;
         }
 
     }

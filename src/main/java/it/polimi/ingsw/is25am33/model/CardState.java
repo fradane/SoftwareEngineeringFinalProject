@@ -1,0 +1,18 @@
+package it.polimi.ingsw.is25am33.model;
+
+public enum CardState {
+    START_CARD,
+    CHOOSE_CANNONS,
+    CHOOSE_ENGINES,
+    REMOVE_CREW_MEMBERS,
+    HANDLE_CUBES_REWARD,
+    HANDLE_CUBES_MALUS,
+    CHOOSE_PLANET,
+    VISIT_LOCATION,
+    DANGEROUS_ATTACK,
+    THROW_DICES,
+    EPIDEMIC,
+    STARDUST,
+    ACCEPT_THE_REWARD,
+    END_OF_CARD
+}

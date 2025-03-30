@@ -1,0 +1,129 @@
+[
+  {
+    "level":  1,
+    "stepsBack": -3,
+    "availablePlanets": [
+      {
+        "reward": ["RED", "GREEN", "BLUE", "BLUE", "BLUE"]
+      },
+      {
+        "reward": ["RED", "YELLOW", "BLUE"]
+      },
+      {
+        "reward": ["RED", "BLUE", "BLUE", "BLUE"]
+      },
+      {
+        "reward": ["RED", "GREEN"]
+      }
+    ]
+  },
+
+  {
+    "level":  1,
+    "stepsBack": -2,
+    "availablePlanets": [
+      {
+        "reward": ["RED", "RED"]
+      },
+      {
+        "reward": ["RED", "BLUE", "BLUE"]
+      },
+      {
+        "reward": ["YELLOW"]
+      }
+    ]
+  },
+
+  {
+    "level":  1,
+    "stepsBack": -3,
+    "availablePlanets": [
+      {
+        "reward": ["YELLOW", "GREEN", "BLUE", "BLUE"]
+      },
+      {
+        "reward": ["YELLOW", "YELLOW"]
+      }
+    ]
+  },
+
+  {
+    "level":  1,
+    "stepsBack": -1,
+    "availablePlanets": [
+      {
+        "reward": ["GREEN", "GREEN"]
+      },
+      {
+        "reward": ["YELLOW"]
+      },
+      {
+        "reward": ["BLUE", "BLUE", "BLUE"]
+      }
+    ]
+  },
+
+  {
+    "level":  2,
+    "stepsBack": -4,
+    "availablePlanets": [
+      {
+        "reward": ["RED", "RED", "RED", "YELLOW"]
+      },
+      {
+        "reward": ["RED", "RED", "GREEN","GREEN"]
+      },
+      {
+        "reward": ["RED", "BLUE", "BLUE", "BLUE", "BLUE"]
+      }
+    ]
+  },
+
+  {
+    "level":  2,
+    "stepsBack": -3,
+    "availablePlanets": [
+      {
+        "reward": ["RED", "RED"]
+      },
+      {
+        "reward": ["GREEN", "GREEN", "GREEN", "GREEN"]
+      }
+    ]
+  },
+
+  {
+    "level":  2,
+    "stepsBack": -2,
+    "availablePlanets": [
+      {
+        "reward": ["RED", "YELLOW"]
+      },
+      {
+        "reward": ["YELLOW", "GREEN", "BLUE"]
+      },
+      {
+        "reward": ["GREEN", "GREEN"]
+      },
+      {
+        "reward": ["YELLOW"]
+      }
+    ]
+  },
+
+  {
+    "level":  2,
+    "stepsBack": -3,
+    "availablePlanets": [
+      {
+        "reward": ["GREEN", "GREEN", "GREEN", "GREEN"]
+      },
+      {
+        "reward": ["YELLOW", "YELLOW"]
+      },
+      {
+        "reward": ["BLUE", "BLUE", "BLUE", "BLUE"]
+      }
+    ]
+  }
+]

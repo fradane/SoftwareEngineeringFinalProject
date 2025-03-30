@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.CargoCube;
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.game.Game;
 
@@ -12,9 +12,7 @@ public class Smugglers extends Enemies implements PlayerMover {
     private int cubeMalus;
     private List<CargoCube> reward;
 
-    public Smugglers(Game game) {
-        super(game);
-    }
+    public Smugglers() {}
 
     public void setCubeMalus(int cubeMalus) {
         this.cubeMalus = cubeMalus;
@@ -25,7 +23,7 @@ public class Smugglers extends Enemies implements PlayerMover {
     }
 
     @Override
-    public GameState getFirstState() {
+    public CardState getFirstState() {
         return null;
     }
 

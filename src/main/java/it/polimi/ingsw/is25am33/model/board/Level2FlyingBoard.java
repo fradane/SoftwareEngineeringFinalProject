@@ -13,6 +13,7 @@ public class Level2FlyingBoard extends FlyingBoard {
      * The current position of the hourglass on this board.
      */
     private int hourglassPosition;
+    private final int prettiestShipReward;
 
     /**
      * Constructs a new Level2FlyingBoard with a specified run length for the flying board.
@@ -21,6 +22,11 @@ public class Level2FlyingBoard extends FlyingBoard {
     public Level2FlyingBoard() {
         super(13); // Pass the runLength to the superclass constructor
         this.hourglassPosition = 0; // Initialize the hourglass position
+        this.prettiestShipReward = 90000;
     }
 
+    @Override
+    public int getPrettiestShipReward() {
+        return prettiestShipReward;
+    }
 }

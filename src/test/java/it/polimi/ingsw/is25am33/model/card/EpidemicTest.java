@@ -1,21 +1,18 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.CrewMember;
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
-import it.polimi.ingsw.is25am33.model.board.Level2FlyingBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
-import it.polimi.ingsw.is25am33.model.component.Engine;
 import it.polimi.ingsw.is25am33.model.game.Game;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -72,12 +69,12 @@ class EpidemicTest {
 
         game = new Game(flyingBoard, players);
 
-        card = new Epidemic(game);
+        card = new Epidemic();
 
         game.setCurrAdventureCard(card);
-        game.setCurrState(GameState.START_CARD);
         game.setCurrRanking(players);
 
+        card.setCurrState(CardState.START_CARD);
         game.startCard();
 
     }
@@ -86,7 +83,7 @@ class EpidemicTest {
     void TestToCheckIfTheMethodEndsProperly() {
 
         card.play(null);
-        assertEquals(GameState.END_OF_CARD, game.getCurrState());
+        assertEquals(CardState.END_OF_CARD, card.getCurrState());
 
     }
 
@@ -101,15 +98,14 @@ class EpidemicTest {
         assertEquals(0, cabin21.getInhabitants().size());
         assertEquals(0, cabin22.getInhabitants().size());
 
-        assertEquals(GameState.END_OF_CARD, game.getCurrState());
+        assertEquals(CardState.END_OF_CARD, card.getCurrState());
 
     }
 
     @Test
     void TestToCheckIfTheUnknownStateExceptionIsThrown() {
 
-        game.setCurrState(GameState.END_OF_CARD);
-        card.setCurrState(GameState.END_OF_CARD);
+        card.setCurrState(CardState.END_OF_CARD);
 
         Exception e = assertThrows(UnknownStateException.class, () -> {
             card.play(null);

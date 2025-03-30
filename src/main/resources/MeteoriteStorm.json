@@ -1,0 +1,32 @@
+[
+  {
+    "level":  1,
+    "meteoriteID": ["big_north", "small_west", "small_east"]
+  },
+
+  {
+    "level":  1,
+    "meteoriteID": ["small_north", "small_north", "small_west", "small_east", "small_south"]
+  },
+
+  {
+    "level":  1,
+    "meteoriteID": ["big_north", "small_north", "big_north"]
+  },
+
+  {
+    "level":  2,
+    "meteoriteID": ["small_north", "small_north", "big_west", "small_west", "small_west"]
+  },
+
+  {
+    "level":  2,
+    "meteoriteID": ["big_north", "big_north", "small_south", "small_south"]
+  },
+
+  {
+    "level":  2,
+    "meteoriteID": ["small_north", "small_north", "big_east", "small_east", "small_east"]
+  }
+
+]

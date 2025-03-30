@@ -1,18 +1,55 @@
 package it.polimi.ingsw.is25am33.model.card;
 
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
+import it.polimi.ingsw.is25am33.model.Direction;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
+import it.polimi.ingsw.is25am33.model.dangerousObj.*;
 import it.polimi.ingsw.is25am33.model.game.Game;
+
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 public abstract class AdventureCard {
 
     protected int level;
-    protected GameState currState;
+    protected CardState currState;
     protected static Game game;
 
-    public AdventureCard(Game game) {
-        this.game = game;
-    }
+    /**
+     * A static map that associates string identifiers with factory functions
+     * for creating specific types of {@link Meteorite} objects.
+     * <p>
+     * This is used by cards that contain meteorites, allowing them to dynamically
+     * instantiate the appropriate meteorite object based on a given ID (e.g., "big_north").
+     */
+    protected static Map<String, Callable<Meteorite>> meteoriteCreator = Map.of(
+            "big_north", () -> new BigMeteorite(Direction.NORTH),
+            "big_east", () -> new BigMeteorite(Direction.EAST),
+            "big_west", () -> new BigMeteorite(Direction.WEST),
+            "big_south", () -> new BigMeteorite(Direction.SOUTH),
+            "small_north", () -> new SmallMeteorite(Direction.NORTH),
+            "small_south", () -> new SmallMeteorite(Direction.SOUTH),
+            "small_west", () -> new SmallMeteorite(Direction.WEST),
+            "small_east", () -> new SmallMeteorite(Direction.EAST)
+    );
+
+    /**
+     * A static map that associates string identifiers with factory functions
+     * for creating specific types of {@link Shot} objects.
+     * <p>
+     * This is used by cards that involve shots, allowing them to dynamically
+     * instantiate the correct shot object based on a given ID (e.g., "small_east").
+     */
+    protected static Map<String, Callable<Shot>> shotCreator = Map.of(
+            "big_north", () -> new BigShot(Direction.NORTH),
+            "big_east", () -> new BigShot(Direction.EAST),
+            "big_west", () -> new BigShot(Direction.WEST),
+            "big_south", () -> new BigShot(Direction.SOUTH),
+            "small_north", () -> new SmallShot(Direction.NORTH),
+            "small_south", () -> new SmallShot(Direction.SOUTH),
+            "small_west", () -> new SmallShot(Direction.WEST),
+            "small_east", () -> new SmallShot(Direction.EAST)
+    );
 
     public void setLevel(int level) {
         this.level = level;
@@ -22,10 +59,14 @@ public abstract class AdventureCard {
         return level;
     }
 
-    public abstract GameState getFirstState();
+    public abstract CardState getFirstState();
 
-    public void setCurrState(GameState currState) {
+    public void setCurrState(CardState currState) {
         this.currState = currState;
+    }
+
+    public CardState getCurrState() {
+        return currState;
     }
 
     public void setGame(Game game) {

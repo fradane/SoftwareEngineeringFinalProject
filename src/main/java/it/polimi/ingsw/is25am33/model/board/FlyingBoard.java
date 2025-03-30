@@ -9,9 +9,11 @@ import java.util.stream.Collectors;
  * Abstract class representing a FlyingBoard that keeps track of players and their positions.
  */
 public abstract class FlyingBoard {
+
     private Set<Player> outPlayers;  // Set to store players who have been 'doubled'
     private int runLenght;
     private Map<Player, Integer> ranking;  // A map to store players and their positions in the ranking
+    private int getPrettiestShipReward;
 
     /**
      * Constructor to initialize runLength, outPlayers, and ranking.
@@ -123,4 +125,11 @@ public abstract class FlyingBoard {
                 .sorted(Comparator.comparing(ranking::get).reversed())
                 .collect(Collectors.toList()));
     }
+
+    public Integer creditsForPosition(Player player) {
+        return null;
+    }
+
+    public abstract int getPrettiestShipReward();
+
 }

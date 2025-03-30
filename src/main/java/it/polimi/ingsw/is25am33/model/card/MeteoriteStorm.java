@@ -1,6 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
@@ -15,17 +15,19 @@ import java.util.*;
 public class MeteoriteStorm extends AdventureCard {
 
     private List<Meteorite> meteorites;
-    private final Iterator<Meteorite> meteoriteIterator;
-    private static final List<GameState> cardStates = List.of(GameState.THROW_DICES, GameState.DANGEROUS_ATTACK);
+    private List<String> meteoriteIDs;
+    private Iterator<Meteorite> meteoriteIterator;
+    private static final List<CardState> cardStates = List.of(CardState.THROW_DICES, CardState.DANGEROUS_ATTACK);
 
-    public MeteoriteStorm(List<Meteorite> meteorites, Game game) {
-        super(game);
+    public MeteoriteStorm(List<Meteorite> meteorites) {
         this.meteorites = meteorites;
         this.meteoriteIterator = meteorites.iterator();
     }
 
+    public MeteoriteStorm() {}
+
     @Override
-    public GameState getFirstState() {
+    public CardState getFirstState() {
         return cardStates.getFirst();
     }
 
@@ -45,8 +47,22 @@ public class MeteoriteStorm extends AdventureCard {
 
     }
 
+    public void convertIdsToMeteorites() {
+
+        meteorites = meteoriteIDs.stream()
+                .map(id -> {
+                    try {
+                        return meteoriteCreator.get(id).call();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).toList();
+
+    }
+
     public void setMeteorites(List<Meteorite> meteorites) {
         this.meteorites = meteorites;
+        this.meteoriteIterator = meteorites.iterator();
     }
 
     private void throwDices() {
@@ -54,9 +70,12 @@ public class MeteoriteStorm extends AdventureCard {
         Meteorite currMeteorite = meteoriteIterator.next();
         currMeteorite.setCoordinates(Game.throwDices());
         game.setCurrDangerousObj(currMeteorite);
-        currState = GameState.DANGEROUS_ATTACK;
-        game.setCurrState(currState);
+        currState = CardState.DANGEROUS_ATTACK;
 
+    }
+
+    public void setMeteoriteID(List<String> meteoriteID) {
+        this.meteoriteIDs = meteoriteID;
     }
 
     public void playerDecidedHowToDefendTheirSelvesFromSmallMeteorite(Shield chosenShield, BatteryBox chosenBatteryBox) {
@@ -86,10 +105,10 @@ public class MeteoriteStorm extends AdventureCard {
         if(game.hasNextPlayer()) {
             game.nextPlayer();
         } else if (meteoriteIterator.hasNext()) {
-            currState = GameState.THROW_DICES;
+            currState = CardState.THROW_DICES;
             game.resetPlayerIterator();
         } else {
-            game.setCurrState(GameState.END_OF_CARD);
+            currState = CardState.END_OF_CARD;
         }
 
     }
@@ -124,10 +143,10 @@ public class MeteoriteStorm extends AdventureCard {
         if(game.hasNextPlayer()) {
             game.nextPlayer();
         } else if (meteoriteIterator.hasNext()) {
-            currState = GameState.THROW_DICES;
+            currState = CardState.THROW_DICES;
             game.resetPlayerIterator();
         } else {
-            game.setCurrState(GameState.END_OF_CARD);
+            currState = CardState.END_OF_CARD;
         }
 
     }

@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.CargoCube;
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalIndexException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
@@ -14,17 +14,18 @@ public class Planets extends AdventureCard implements PlayerMover {
 
     private List<Planet> availablePlanets;
     private int stepsBack;
-    private static final List<GameState> cardStates = List.of(GameState.CHOOSE_PLANET, GameState.HANDLE_CUBES_REWARD);
+    private static final List<CardState> cardStates = List.of(CardState.CHOOSE_PLANET, CardState.HANDLE_CUBES_REWARD);
     private Planet currentPlanet;
 
-    public Planets(List<Planet> availablePlanets, int stepsBack, Game game) {
-        super(game);
+    public Planets(List<Planet> availablePlanets, int stepsBack) {
         this.availablePlanets = availablePlanets;
         this.stepsBack = stepsBack;
     }
 
+    public Planets() {}
+
     @Override
-    public GameState getFirstState() {
+    public CardState getFirstState() {
         return cardStates.getFirst();
     }
 
@@ -67,13 +68,12 @@ public class Planets extends AdventureCard implements PlayerMover {
 
             currentPlanet.noMoreAvailable();
 
-            currState = GameState.HANDLE_CUBES_REWARD;
-            game.setCurrState(currState);
+            currState = CardState.HANDLE_CUBES_REWARD;
 
         } else if (game.hasNextPlayer()){
             game.nextPlayer();
         } else {
-            game.setCurrState(GameState.END_OF_CARD);
+            currState = CardState.END_OF_CARD;
         }
 
     }
@@ -94,10 +94,9 @@ public class Planets extends AdventureCard implements PlayerMover {
 
             if (game.hasNextPlayer()) {
                 game.nextPlayer();
-                currState = GameState.CHOOSE_PLANET;
-                game.setCurrState(currState);
+                currState = CardState.CHOOSE_PLANET;
             } else {
-                game.setCurrState(GameState.END_OF_CARD);
+                currState = CardState.END_OF_CARD;
             }
 
         }
