@@ -1,7 +1,7 @@
 [
   {
     "level": 1,
-    "shots": ["SOUTH", "SOUTH", "SOUTH"],
+    "shotIDs": ["small_north", "big_north", "small_north"],
     "reward": 4,
     "stepsBack": -1,
     "requiredFirePower": 5
@@ -9,7 +9,7 @@
 
   {
     "level": 2,
-    "shots": ["NORTH", "NORTH", "NORTH"],
+    "shotIDs": ["big_north", "small_north", "big_north"],
     "reward": 7,
     "stepsBack": -2,
     "requiredFirePower": 6

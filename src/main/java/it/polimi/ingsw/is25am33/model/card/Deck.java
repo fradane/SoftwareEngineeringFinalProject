@@ -1,6 +1,9 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+
 import java.util.*;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 /**
  * Represents a deck of adventure cards used in the game.
@@ -120,23 +124,30 @@ public class Deck {
         allCards.addAll(Deck.loadSlaveTradersFromJson());
         allCards.addAll(Deck.loadSmugglersFromJson());
         allCards.addAll(Deck.loadStardustFromJson());
-        allCards.addAll(Deck.loadWarFieldFromJson());
+        //TODO allCards.addAll(Deck.loadWarFieldFromJson());
     }
 
     /**
      * Loads a list of objects from a JSON file.
      * This method is generic and can be used to load any type of adventure card.
      *
-     * @param filePath The path to the JSON file.
+     * @param fileName The path to the JSON file.
      * @param type The class type of the objects to be deserialized.
      * @return A list of objects of the specified type.
      */
-    private static <T> List<T> loadFromJson(String filePath, Class<T> type) {
+    private static <T> List<T> loadFromJson(String fileName, Class<T> type) {
         ObjectMapper objectMapper = new ObjectMapper();
         List<T> objects = new ArrayList<>();
 
         try {
-            JsonNode rootNode = objectMapper.readTree(new File(filePath));
+            ClassLoader classLoader = Deck.class.getClassLoader();
+            InputStream inputStream = classLoader.getResourceAsStream(fileName);
+
+            if (inputStream == null) {
+                throw new FileNotFoundException("File not found: " + fileName);
+            }
+
+            JsonNode rootNode = objectMapper.readTree(inputStream);
 
             for (JsonNode node : rootNode) {
                 T obj = objectMapper.treeToValue(node, type);
@@ -144,7 +155,7 @@ public class Deck {
             }
 
         } catch (IOException e) {
-            Logger.getLogger(Deck.class.getName()).log(Level.SEVERE, "Error loading JSON file: " + filePath, e);
+            Logger.getLogger(Deck.class.getName()).log(Level.SEVERE, "Error loading JSON file: " + fileName, e);
         }
 
         return objects;
@@ -183,7 +194,10 @@ public class Deck {
      * @return A list of MeteoriteStorm objects.
      */
     private static List<MeteoriteStorm> loadMeteoriteStormFromJson() {
-        return loadFromJson("MeteoriteStorm.json", MeteoriteStorm.class);
+
+        List<MeteoriteStorm> meteoriteStorms = new ArrayList<>(loadFromJson("MeteoriteStorm.json", MeteoriteStorm.class));
+        meteoriteStorms.forEach(MeteoriteStorm::convertIdsToMeteorites);
+        return meteoriteStorms;
     }
 
     /**
@@ -192,7 +206,9 @@ public class Deck {
      * @return A list of Pirates objects.
      */
     private static List<Pirates> loadPiratesFromJson() {
-        return loadFromJson("Pirates.json", Pirates.class);
+        List<Pirates> pirates = new ArrayList<>(loadFromJson("Pirates.json", Pirates.class));
+        pirates.forEach(Pirates::convertIdsToShots);
+        return pirates;
     }
 
     /**
@@ -239,4 +255,9 @@ public class Deck {
     private static List<WarField> loadWarFieldFromJson() {
         return loadFromJson("WarField.json", WarField.class);
     }
+
+    public List<AdventureCard> getAllCards() {
+        return allCards;
+    }
+
 }

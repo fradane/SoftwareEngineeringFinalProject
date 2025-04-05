@@ -125,7 +125,7 @@ public abstract class FlyingBoard {
 
     public abstract int getCreditsForPosition(Player player);
 
-    // getPrettiestShipReward
+
 
 
 

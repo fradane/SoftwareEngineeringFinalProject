@@ -861,4 +861,8 @@ public abstract class ShipBoard {
      * @return true if the ship can defend itself, otherwise false.
      */
     public abstract boolean canDifendItselfWithSingleCannons(DangerousObj obj);
+
+    public List<Component> getNotActiveComponents() {
+        return notActiveComponents;
+    }
 }

@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.CargoCube;
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
@@ -16,11 +16,11 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
     private int stepsBack;
     private int requiredCrewMembers;
     private List<CargoCube> reward;
-    private final Iterator<CargoCube> rewardIterator;
-    private static final List<GameState> cardStates = List.of(GameState.VISIT_LOCATION, GameState.HANDLE_CUBES_REWARD);
+    private Iterator<CargoCube> rewardIterator;
+    private static final List<CardState> cardStates = List.of(CardState.VISIT_LOCATION, CardState.HANDLE_CUBES_REWARD);
 
     @Override
-    public GameState getFirstState() {
+    public CardState getFirstState() {
         return cardStates.getFirst();
     }
 
@@ -53,18 +53,34 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
 
     public void setReward(List<CargoCube> reward) {
         this.reward = reward;
+        this.rewardIterator = reward.iterator();
     }
 
     public void setStepsBack(int stepsBack) {
         this.stepsBack = stepsBack;
     }
 
-    public AbandonedStation(int stepsBack, int requiredCrewMembers, List<CargoCube> reward, Game game) {
-        super(game);
+    public int getStepsBack() {
+        return stepsBack;
+    }
+
+    public int getRequiredCrewMembers() {
+        return requiredCrewMembers;
+    }
+
+    public List<CargoCube> getReward() {
+        return reward;
+    }
+
+    public AbandonedStation(int stepsBack, int requiredCrewMembers, List<CargoCube> reward) {
         this.stepsBack = stepsBack;
         this.requiredCrewMembers = requiredCrewMembers;
         this.rewardIterator = reward.iterator();
         this.reward = reward;
+    }
+
+    public AbandonedStation() {
+        this.cardName = this.getClass().getSimpleName();
     }
 
     private void currPlayerWantsToVisit (boolean wantsToVisit) throws IllegalDecisionException {
@@ -72,12 +88,11 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         if (wantsToVisit) {
             if (game.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < requiredCrewMembers)
                 throw new IllegalDecisionException("Player has not enough crew members");
-            currState = GameState.REMOVE_CREW_MEMBERS;
-            game.setCurrState(currState);
+            currState = CardState.REMOVE_CREW_MEMBERS;
         } else if (game.hasNextPlayer()) {
             game.nextPlayer();
         } else {
-            game.setCurrState(GameState.END_OF_CARD);
+            currState = CardState.END_OF_CARD;
         }
 
     }
@@ -98,7 +113,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         if (rewardIterator.hasNext()) {
             rewardIterator.next();
         } else {
-            game.setCurrState(GameState.END_OF_CARD);
+            currState = CardState.END_OF_CARD;
         }
 
     }

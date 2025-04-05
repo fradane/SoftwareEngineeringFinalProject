@@ -10,5 +10,8 @@ module it.polimi.ingsw.is25am33 {
     opens it.polimi.ingsw.is25am33 to javafx.fxml;
     opens it.polimi.ingsw.is25am33.model to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.is25am33.model.component to com.fasterxml.jackson.databind;
+    opens it.polimi.ingsw.is25am33.model.card to com.fasterxml.jackson.databind;
+    opens it.polimi.ingsw.is25am33.model.game to com.fasterxml.jackson.databind;
+    exports it.polimi.ingsw.is25am33.model.board to com.fasterxml.jackson.databind;
     exports it.polimi.ingsw.is25am33;
 }

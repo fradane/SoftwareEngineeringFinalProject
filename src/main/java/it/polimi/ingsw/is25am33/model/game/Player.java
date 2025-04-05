@@ -20,4 +20,13 @@ public class Player {
     public ShipBoard getPersonalBoard() {
         return personalBoard;
     }
+
+    public int getOwnedCredits() {
+        return ownedCredits;
+    }
+
+    public void setOwnedCredits(int ownedCredits) {
+        this.ownedCredits = ownedCredits;
+    }
 }
+

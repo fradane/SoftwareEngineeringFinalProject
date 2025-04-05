@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.Category;
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
 import it.polimi.ingsw.is25am33.model.game.Game;
@@ -15,14 +15,17 @@ public class WarField extends AdventureCard implements PlayerMover {
     private int crewMalus;
     private List<Shot> shots;
 
-    public WarField(List<Category> minimunCategories, List<Shot> shots, Game game) {
-        super(game);
+    public WarField(List<Category> minimunCategories, List<Shot> shots) {
         this.minimunCategories = minimunCategories;
         this.shots = shots;
     }
 
+    public WarField() {
+        this.cardName = this.getClass().getSimpleName();
+    }
+
     @Override
-    public GameState getFirstState() {
+    public CardState getFirstState() {
         return null;
     }
 

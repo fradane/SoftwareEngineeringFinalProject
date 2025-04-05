@@ -1,18 +1,82 @@
 package it.polimi.ingsw.is25am33.model;
 
+import it.polimi.ingsw.is25am33.model.card.AdventureCard;
+import it.polimi.ingsw.is25am33.model.game.Game;
+
+import java.util.List;
+
 public enum GameState {
-    START_CARD,
-    CHOOSE_CANNONS,
-    CHOOSE_ENGINES,
-    REMOVE_CREW_MEMBERS,
-    HANDLE_CUBES_REWARD,
-    HANDLE_CUBES_MALUS,
-    CHOOSE_PLANET,
-    VISIT_LOCATION,
-    DANGEROUS_ATTACK,
-    THROW_DICES,
-    EPIDEMIC,
-    STARDUST,
-    ACCEPT_THE_REWARD,
-    END_OF_CARD
+
+    SETUP {
+        @Override
+        public void run(Game game) {
+            game.getDeck().setUpLittleDecks();
+            //TODO creazione tessere e posizionamento tessere nel tavolo
+        }
+    },
+
+    BUILD_SHIPBOARD {
+
+        @Override
+        public void run(Game game) {
+
+        }
+
+    },
+
+    CHECK_SHIPBOARD {
+
+        @Override
+        public void run(Game game) {
+
+        }
+
+    },
+
+    CREATE_DECK {
+
+        @Override
+        public void run(Game game) {
+            game.getDeck().mergeIntoGameDeck();
+        }
+
+    },
+
+    DRAW_CARD {
+
+        @Override
+        public void run(Game game) {
+            game.setCurrAdventureCard(game.getDeck().drawCard());
+        }
+
+    },
+
+    PLAY_CARD {
+
+        @Override
+        public void run(Game game) {
+            game.startCard();
+        }
+
+    },
+
+    CHECK_PLAYERS {
+
+        @Override
+        public void run(Game game) {
+            game.getFlyingBoard().getDoubledPlayers();
+        }
+
+    },
+
+    END_GAME {
+
+        @Override
+        public void run(Game game) {
+            game.calculatePlayersCredits();
+        }
+
+    };
+
+    public abstract void run(Game game);
 }

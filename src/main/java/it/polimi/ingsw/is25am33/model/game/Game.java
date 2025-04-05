@@ -1,33 +1,49 @@
 package it.polimi.ingsw.is25am33.model.game;
 
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
+import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+
+import static it.polimi.ingsw.is25am33.model.CargoCube.*;
 
 public class Game {
 
+    // TODO aggiungere gameState
     private AdventureCard currAdventureCard;
-    private GameState currState;
     private final FlyingBoard flyingBoard;
     private final List<Player> players;
     private List<Player> currRanking;
     private Player currPlayer;
     private Iterator<Player> playerIterator;
     private DangerousObj currDangerousObj;
+    private GameState currGameState = GameState.SETUP;
+    private Deck deck;
+
+    public void setCurrGameState(GameState currGameState) {
+        this.currGameState = currGameState;
+    }
+
+    public GameState getCurrGameState() {
+        return currGameState;
+    }
+
+    public Deck getDeck() {
+        return deck;
+    }
 
     public Game(FlyingBoard flyingBoard, List<Player> players) {
         this.flyingBoard = flyingBoard;
         currAdventureCard = null;
-        currState = null;
         currRanking = new ArrayList<>();
         currPlayer = null;
         currDangerousObj = null;
         this.players = players;
+        deck = new Deck();
     }
 
     public static int throwDices() {
@@ -65,10 +81,6 @@ public class Game {
         currPlayer = playerIterator.next();
     }
 
-    public void setCurrState(GameState currState) {
-        this.currState = currState;
-    }
-
     public Player getCurrPlayer() {
         return currPlayer;
     }
@@ -79,10 +91,6 @@ public class Game {
 
     public List<Player> getPlayers() {
         return currRanking;
-    }
-
-    public GameState getCurrState() {
-        return currState;
     }
 
     public void setCurrAdventureCard(AdventureCard currAdventureCard) {
@@ -98,13 +106,69 @@ public class Game {
      */
     public void startCard() throws IllegalStateException{
 
-        if (currAdventureCard == null || currState != GameState.START_CARD)
+        if (currAdventureCard == null || currAdventureCard.getCurrState() != CardState.START_CARD)
             throw new IllegalStateException("Not the right state");
 
-        currState = currAdventureCard.getFirstState();
+        setCurrRanking(flyingBoard.getCurrentRanking());
+        currAdventureCard.setGame(this);
         playerIterator = currRanking.iterator();
         currPlayer = playerIterator.next();
-        currAdventureCard.setCurrState(currState);
+        currAdventureCard.setCurrState(currAdventureCard.getFirstState());
+
+    }
+
+    public List<Player> getPlayerWithPrettiestShip() {
+
+        Map<Player, Integer> x = new HashMap<>();
+
+        players.forEach(player -> {
+            x.put(player, player.getPersonalBoard().countExposed());
+        });
+
+        Integer minValue = Collections.min(x.values());
+
+        return x.keySet().stream().filter(player -> x.get(player).equals(minValue)).toList();
+
+    }
+
+    public void calculatePlayersCredits() {
+
+        players.forEach(player -> {
+
+            int credits = player.getOwnedCredits();
+
+            credits += flyingBoard.creditsForPosition(player);
+
+            if (getPlayerWithPrettiestShip().contains(player))
+                credits += flyingBoard.getPrettiestShipReward();
+
+            credits += player.getPersonalBoard().getStorages()
+                                .stream()
+                                .flatMap(storage -> storage.getStockedCubes().stream())
+                                .mapToInt(stockedCube -> {
+                                    switch (stockedCube) {
+                                        case BLUE -> {
+                                            return 1;
+                                        }
+                                        case GREEN -> {
+                                            return 2;
+                                        }
+                                        case YELLOW -> {
+                                            return 3;
+                                        }
+                                        case RED -> {
+                                            return 4;
+                                        }
+                                        default -> {return 0;}
+                                    }
+                                }).sum();
+
+            credits -= player.getPersonalBoard().getNotActiveComponents().size();
+
+            player.setOwnedCredits(credits);
+        });
+
+
 
     }
 

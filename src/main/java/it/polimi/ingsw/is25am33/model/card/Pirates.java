@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
@@ -19,18 +19,22 @@ import java.util.*;
 public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCannonActivator {
 
     private List<Shot> shots;
-    private static final List<GameState> cardStates = List.of(GameState.CHOOSE_CANNONS, GameState.ACCEPT_THE_REWARD, GameState.THROW_DICES, GameState.DANGEROUS_ATTACK);
+    private List<String> shotIDs;
+    private static final List<CardState> cardStates = List.of(CardState.CHOOSE_CANNONS, CardState.ACCEPT_THE_REWARD, CardState.THROW_DICES, CardState.DANGEROUS_ATTACK);
     private final List<Player> defeatedPlayers = new ArrayList<>();
     private Iterator<Shot> shotIterator;
     private Iterator<Player> playerIterator;
 
-    public Pirates(List<Shot> shots, Game game) {
-        super(game);
+    public Pirates(List<Shot> shots) {
         this.shots = shots;
     }
 
+    public Pirates() {
+        this.cardName = this.getClass().getSimpleName();
+    }
+
     @Override
-    public GameState getFirstState() {
+    public CardState getFirstState() {
         return cardStates.getFirst();
     }
 
@@ -56,9 +60,30 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
     }
 
+    public void setShotIDs(List<String> shotIDs) {
+        this.shotIDs = shotIDs;
+    }
+
     public void setShots(List<Shot> shots) {
         this.shots = shots;
         shotIterator = shots.iterator();
+    }
+
+    public List<Shot> getShots() {
+        return shots;
+    }
+
+    public void convertIdsToShots() {
+
+        shots = shotIDs.stream()
+                .map(id -> {
+                    try {
+                        return shotCreator.get(id).call();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).toList();
+
     }
 
     private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
@@ -67,8 +92,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
         if (currPlayerCannonPower > requiredFirePower) {
 
-            currState = GameState.ACCEPT_THE_REWARD;
-            game.setCurrState(currState);
+            currState = CardState.ACCEPT_THE_REWARD;
 
         } else {
 
@@ -79,10 +103,9 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
             } else {
 
                 if (defeatedPlayers.isEmpty()) {
-                    game.setCurrState(GameState.END_OF_CARD);
+                    currState = CardState.END_OF_CARD;
                 } else {
-                    currState = GameState.THROW_DICES;
-                    game.setCurrState(currState);
+                    currState = CardState.THROW_DICES;
                 }
 
             }
@@ -96,8 +119,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         Shot currShot = shotIterator.next();
         currShot.setCoordinates(Game.throwDices());
         game.setCurrDangerousObj(currShot);
-        currState = GameState.DANGEROUS_ATTACK;
-        game.setCurrState(currState);
+        currState = CardState.DANGEROUS_ATTACK;
 
     }
 
@@ -109,10 +131,9 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         }
 
         if (defeatedPlayers.isEmpty()) {
-            game.setCurrState(GameState.END_OF_CARD);
+            currState = CardState.END_OF_CARD;
         } else {
-            currState = GameState.THROW_DICES;
-            game.setCurrState(currState);
+            currState = CardState.THROW_DICES;
         }
 
     }
@@ -143,10 +164,10 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         if(playerIterator.hasNext()) {
             game.nextPlayer();
         } else if (shotIterator.hasNext()) {
-            currState = GameState.THROW_DICES;
+            currState = CardState.THROW_DICES;
             playerIterator = defeatedPlayers.iterator();
         } else {
-            game.setCurrState(GameState.END_OF_CARD);
+            currState = CardState.END_OF_CARD;
         }
 
     }
@@ -164,10 +185,10 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         if(playerIterator.hasNext()) {
             game.nextPlayer();
         } else if (shotIterator.hasNext()) {
-            currState = GameState.THROW_DICES;
+            currState = CardState.THROW_DICES;
             playerIterator = defeatedPlayers.iterator();
         } else {
-            game.setCurrState(GameState.END_OF_CARD);
+            currState = CardState.END_OF_CARD;
         }
 
     }
