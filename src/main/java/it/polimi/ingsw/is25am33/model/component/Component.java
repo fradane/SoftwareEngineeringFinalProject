@@ -13,27 +13,42 @@ import java.util.*;
 public abstract class Component {
 
     /** Current operational state of the component. */
-    private ComponentState currState;
+    private ComponentState currState = ComponentState.FREE ;
 
     /** Current rotation/orientation of the component. */
-    private int rotation;
+    private int rotation = 0;
 
     /** Map associating directions with their respective connector types. */
     private Map<Direction, ConnectorType> connectors;
 
+    private List<ComponentObserver> componentObservers;
+
+    /**
+     * Default constructor for {@code Component}.
+     */
+    public Component() {}
+
     /**
      * Constructs a Component with specified directional connectors.
      *
-     * <p>The initial state is set to {@link ComponentState#FREE}, and initial rotation is zero.</p>
+     * <p>The initial initial rotation is zero.</p>
      *
      * @param connectors a map associating directions to their connector types
      */
     public Component(Map<Direction, ConnectorType> connectors) {
-        this.currState = ComponentState.FREE;
         this.connectors = connectors;
-        this.rotation = 0;
+        componentObservers=new ArrayList<>();
     }
 
+    public void addObserver(ComponentObserver observer) {
+        componentObservers.add(observer);
+    }
+
+    void notifyObservers(ComponentEvent event) {
+        for (ComponentObserver observer : componentObservers) {
+            observer.update(event);
+        }
+    }
     /**
      * Retrieves the current operational state of this component.
      *
@@ -50,6 +65,7 @@ public abstract class Component {
      */
     public void setCurrState(ComponentState currState) {
         this.currState = currState;
+        notifyObservers(new ComponentEvent(this, "state", currState ));
     }
 
     /**
@@ -77,6 +93,11 @@ public abstract class Component {
         return connectors;
     }
 
+    public void setConnectors(Map<Direction, ConnectorType> connectors) {
+        this.connectors = connectors;
+        notifyObservers(new ComponentEvent(this, "connectors", connectors ));
+    }
+
     /**
      * Adjusts the orientation of connectors based on the component's current rotation.
      *
@@ -88,16 +109,22 @@ public abstract class Component {
         if (rotation != 0) {
             List<Direction> keys = new ArrayList<>(connectors.keySet());
             List<ConnectorType> values = new ArrayList<>(connectors.values());
-
             Collections.rotate(values, rotation);
-
             for (int i = 0; i < keys.size(); i++) {
                 connectors.put(keys.get(i), values.get(i));
             }
         }
     }
 
-    public void insertInComponentsMap(Map<Class<?>, List<Object>> map){
+    /**
+     * Inserts the current instance into a map of components, where the key is the class type of the instance,
+     * and the value is a list of objects of that class.
+     * If the class type is not already present in the map, a new list is created.
+     *
+     * @param map a map where the key is a {@code Class<?>} representing the component's class type,
+     *            and the value is a list of objects of that class type
+     */
+    public void insertInComponentsMap(Map<Class<?>, List<Object>> map) {
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
     }
 }

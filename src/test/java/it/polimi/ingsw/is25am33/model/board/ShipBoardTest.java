@@ -457,7 +457,7 @@ public class ShipBoardTest {
     @Test
     @DisplayName("Test: isDirectionCoveredByShield returns true if any Shield covers that direction")
     void testIsDirectionCoveredByShield() {
-        Shield shield = new Shield(createSimpleConnectors(), List.of(Direction.NORTH, Direction.WEST));
+        Shield shield = new Shield(createSimpleConnectors());
         shipBoard.focusedComponent = shield;
         shipBoard.placeComponentWithFocus(7, 8);
 

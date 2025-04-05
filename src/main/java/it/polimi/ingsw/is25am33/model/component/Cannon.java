@@ -12,7 +12,12 @@ import java.util.Map;
 public class Cannon extends Component implements Rotatable {
 
     /** The current direction in which this cannon fires. */
-    private Direction fireDirection;
+    private Direction fireDirection = Direction.NORTH;
+
+    /**
+     * Default constructor for {@code Cannon}.
+     */
+    public Cannon() {}
 
     /**
      * Constructs a Cannon with specified connectors and initial firing direction.
@@ -21,7 +26,6 @@ public class Cannon extends Component implements Rotatable {
      */
     public Cannon(Map<Direction, ConnectorType> connectors) {
         super(connectors);
-        this.fireDirection= Direction.NORTH;
     }
 
     /**
@@ -42,8 +46,12 @@ public class Cannon extends Component implements Rotatable {
     public void rotateFireDirection() {
         for (int i = 0; i < getRotation() % 4; i++)
             this.fireDirection = shiftDirection(this.fireDirection);
+        notifyObservers(new ComponentEvent(this, "fireDirection", this.fireDirection ));
     }
 
+    /**
+     * Changes the cannon's orientation and updates the power direction accordingly.
+     */
     @Override
     public void changeOrientation() {
         super.changeOrientation();

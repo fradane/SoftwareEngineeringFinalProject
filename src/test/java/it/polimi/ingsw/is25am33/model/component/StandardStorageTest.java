@@ -96,5 +96,4 @@ class StandardStorageTest {
         assertFalse(storage.containsCargoCube(CargoCube.RED));
     }
 
-
 }
