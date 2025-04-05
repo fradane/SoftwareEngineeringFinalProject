@@ -18,18 +18,16 @@ class Level2FlyingBoardTest {
         player1 = new Player("Alice", new Level1ShipBoard(null));
         player2 = new Player("Luca", new Level1ShipBoard(null));
         player3 = new Player("Marco", new Level1ShipBoard(null));
-        player4 = new Player("Francesco", new Level1ShipBoard(null));
 
-        board.insertPlayer(player1, 25);
-        board.insertPlayer(player2, 15);
-        board.insertPlayer(player3, 2);
-        board.insertPlayer(player4, 5);
+        board.insertPlayer(player1);
+        board.insertPlayer(player2);
+        board.insertPlayer(player3);
     }
 
     @Test
     void TestInsertPlayer() {
         Player player5 = new Player("Luigi", new Level1ShipBoard(null));
-        board.insertPlayer(player5, 3);
+        board.insertPlayer(player5);
         assertTrue(board.getCurrentRanking().contains(player5));
     }
 
@@ -77,7 +75,7 @@ class Level2FlyingBoardTest {
         List<Player> currentRanking = board.getCurrentRanking();
         assertEquals(4, currentRanking.size());
         assertTrue(board.getCurrentRanking().contains(player4));
-        assertTrue(board.getCurrentRanking().get(0).equals(player1));
-        assertTrue(board.getCurrentRanking().get(2).equals(player4));
+        assertEquals(board.getCurrentRanking().get(0), player1);
+        assertEquals(board.getCurrentRanking().get(2), player4);
     }
 }
