@@ -15,7 +15,12 @@ import java.util.NoSuchElementException;
 public class Cabin extends Component {
 
     /** List containing crew members currently inhabiting this cabin. */
-    private final List<CrewMember> inhabitants;
+    private List<CrewMember> inhabitants;
+
+    /**
+     * Default constructor for {@code Cabin}.
+     */
+    public Cabin() {}
 
     /**
      * Constructs a Cabin with specified connectors and initializes an empty inhabitants list.
@@ -48,6 +53,7 @@ public class Cabin extends Component {
         } else {
             inhabitants.add(member);
         }
+        notifyObservers(new ComponentEvent(this, "inhabitants", inhabitants ));
     }
 
     /**
@@ -57,10 +63,11 @@ public class Cabin extends Component {
      */
     public void removeMember() throws NoSuchElementException {
 
-        if (inhabitants.size() == 0)
+        if (inhabitants.isEmpty())
             throw new NoSuchElementException("Empty cabin");
 
         inhabitants.removeFirst();
+        notifyObservers(new ComponentEvent(this, "inhabitants", inhabitants ));
     }
 
     /**

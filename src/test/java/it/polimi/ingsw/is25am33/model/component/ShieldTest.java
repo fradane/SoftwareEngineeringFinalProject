@@ -23,11 +23,7 @@ class ShieldTest {
         connectors.put(Direction.SOUTH, ConnectorType.EMPTY);
         connectors.put(Direction.WEST, ConnectorType.EMPTY);
 
-        List<Direction> coveredDirections = new ArrayList<>();
-        coveredDirections.add(Direction.SOUTH);
-        coveredDirections.add(Direction.WEST);
-
-        shield= new Shield(connectors,coveredDirections);
+        shield= new Shield(connectors);
     }
 
     @Test

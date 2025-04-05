@@ -5,7 +5,23 @@ import it.polimi.ingsw.is25am33.model.Direction;
 
 import java.util.Map;
 
-public class DoubleEngine extends Engine implements Activable{
+/**
+ * Represents a double engine, extending the {@code Engine} class.
+ * Implements the {@code Activable} interface.
+ */
+public class DoubleEngine extends Engine implements Activable {
+
+    /**
+     * Default constructor for {@code DoubleEngine}.
+     */
+    public DoubleEngine() {}
+
+    /**
+     * Constructor that allows initializing the double engine
+     * with specified connectors.
+     *
+     * @param connectors a map associating a {@code Direction} with a {@code ConnectorType}
+     */
     public DoubleEngine(Map<Direction, ConnectorType> connectors) {
         super(connectors);
     }

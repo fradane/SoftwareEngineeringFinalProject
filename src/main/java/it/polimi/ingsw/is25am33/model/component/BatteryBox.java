@@ -11,10 +11,15 @@ import java.util.Map;
 public class BatteryBox extends Component {
 
     /** The maximum battery capacity of this battery box. */
-    private final int maxBatteryCapacity;
+    private int maxBatteryCapacity;
 
     /** The number of currently available battery units. */
     private int availableBattery;
+
+    /**
+     * Default constructor for {@code Battery}.
+     */
+    public BatteryBox(){}
 
     /**
      * Constructs a BatteryBox component with specified connectors and maximum battery capacity.
@@ -26,6 +31,15 @@ public class BatteryBox extends Component {
         super(connectors);
         this.maxBatteryCapacity = maxBatteryCapacity;
         this.availableBattery = maxBatteryCapacity;
+    }
+
+    @Override
+    public String toString() {
+        return "BatteryBox{" +
+                "connectors" + this.getConnectors() +
+                "maxBatteryCapacity=" + maxBatteryCapacity +
+                ", availableBattery=" + availableBattery +
+                '}';
     }
 
     /**
@@ -52,10 +66,26 @@ public class BatteryBox extends Component {
      * @throws IllegalStateException if no battery units are available
      */
 
+    /**
+     * Sets the maximum battery capacity.
+     *
+     * @param maxBatteryCapacity the maximum capacity of the battery
+     */
+    public void setMaxBatteryCapacity(int maxBatteryCapacity) {
+        this.maxBatteryCapacity = maxBatteryCapacity;
+    }
+
+    /**
+     * Uses one unit of the available battery.
+     *
+     * @throws IllegalStateException if the battery is empty (availableBattery == 0)
+     */
     public void useBattery() throws IllegalStateException {
         if (availableBattery == 0) {
             throw new IllegalStateException("empty battery box");
         }
         availableBattery--;
+        notifyObservers(new ComponentEvent(this, "avaiableBattery", availableBattery ));
     }
+
 }
