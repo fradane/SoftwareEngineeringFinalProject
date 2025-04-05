@@ -1,0 +1,142 @@
+[
+  {
+    "connectors" : {
+      "NORTH": "DOUBLE",
+      "EAST": "SINGLE",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "EMPTY"
+    },
+    "maxCapacity": 2
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "DOUBLE",
+      "EAST": "SINGLE",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "SINGLE"
+    },
+    "maxCapacity": 2
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "DOUBLE",
+      "EAST": "UNIVERSAL",
+      "SOUTH": "EMPTY",
+      "WEST": "SINGLE"
+    },
+    "maxCapacity": 2
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "UNIVERSAL"
+    },
+    "maxCapacity": 2
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "SINGLE",
+      "SOUTH": "EMPTY",
+      "WEST": "UNIVERSAL"
+    },
+    "maxCapacity": 2
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "DOUBLE",
+      "SOUTH": "EMPTY",
+      "WEST": "UNIVERSAL"
+    },
+    "maxCapacity": 2
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "DOUBLE",
+      "EAST": "SINGLE",
+      "SOUTH": "DOUBLE",
+      "WEST": "UNIVERSAL"
+    },
+    "maxCapacity": 2
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "UNIVERSAL",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "UNIVERSAL"
+    },
+    "maxCapacity": 2
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "SINGLE"
+    },
+    "maxCapacity": 3
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "SINGLE",
+      "EAST": "EMPTY",
+      "SOUTH": "SINGLE",
+      "WEST": "EMPTY"
+    },
+    "maxCapacity": 3
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "DOUBLE"
+    },
+    "maxCapacity": 3
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "DOUBLE",
+      "EAST": "EMPTY",
+      "SOUTH": "DOUBLE",
+      "WEST": "EMPTY"
+    },
+    "maxCapacity": 3
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "SINGLE",
+      "EAST": "EMPTY",
+      "SOUTH": "DOUBLE",
+      "WEST": "SINGLE"
+    },
+    "maxCapacity": 3
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "DOUBLE",
+      "EAST": "EMPTY",
+      "SOUTH": "SINGLE",
+      "WEST": "DOUBLE"
+    },
+    "maxCapacity": 3
+  }
+
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "connectors" : {
+      "NORTH": "UNIVERSAL",
+      "EAST": "UNIVERSAL",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "UNIVERSAL"
+    },
+    "color": "BLUE"
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "UNIVERSAL",
+      "EAST": "UNIVERSAL",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "UNIVERSAL"
+    },
+    "color": "GREEN"
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "UNIVERSAL",
+      "EAST": "UNIVERSAL",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "UNIVERSAL"
+    },
+    "color": "RED"
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "UNIVERSAL",
+      "EAST": "UNIVERSAL",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "UNIVERSAL"
+    },
+    "color": "YELLOW"
+  }
+
+]
