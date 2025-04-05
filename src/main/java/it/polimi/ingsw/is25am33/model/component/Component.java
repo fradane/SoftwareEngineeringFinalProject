@@ -100,4 +100,5 @@ public abstract class Component {
     public void insertInComponentsMap(Map<Class<?>, List<Object>> map){
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
     }
+
 }
