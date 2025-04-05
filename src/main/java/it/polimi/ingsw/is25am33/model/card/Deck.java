@@ -131,20 +131,20 @@ public class Deck {
      * Loads a list of objects from a JSON file.
      * This method is generic and can be used to load any type of adventure card.
      *
-     * @param filePath The path to the JSON file.
+     * @param fileName The path to the JSON file.
      * @param type The class type of the objects to be deserialized.
      * @return A list of objects of the specified type.
      */
-    private static <T> List<T> loadFromJson(String filePath, Class<T> type) {
+    private static <T> List<T> loadFromJson(String fileName, Class<T> type) {
         ObjectMapper objectMapper = new ObjectMapper();
         List<T> objects = new ArrayList<>();
 
         try {
             ClassLoader classLoader = Deck.class.getClassLoader();
-            InputStream inputStream = classLoader.getResourceAsStream(filePath);
+            InputStream inputStream = classLoader.getResourceAsStream(fileName);
 
             if (inputStream == null) {
-                throw new FileNotFoundException("File not found: " + filePath);
+                throw new FileNotFoundException("File not found: " + fileName);
             }
 
             JsonNode rootNode = objectMapper.readTree(inputStream);
@@ -155,7 +155,7 @@ public class Deck {
             }
 
         } catch (IOException e) {
-            Logger.getLogger(Deck.class.getName()).log(Level.SEVERE, "Error loading JSON file: " + filePath, e);
+            Logger.getLogger(Deck.class.getName()).log(Level.SEVERE, "Error loading JSON file: " + fileName, e);
         }
 
         return objects;

@@ -13,6 +13,7 @@ import static it.polimi.ingsw.is25am33.model.CargoCube.*;
 
 public class Game {
 
+    // TODO aggiungere gameState
     private AdventureCard currAdventureCard;
     private final FlyingBoard flyingBoard;
     private final List<Player> players;

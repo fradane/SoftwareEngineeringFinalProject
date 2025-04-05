@@ -7,11 +7,14 @@ import it.polimi.ingsw.is25am33.model.PlayerColor;
 import java.util.Map;
 
 public class MainCabin extends Cabin {
+
     private PlayerColor color;
+
     public MainCabin(Map<Direction, ConnectorType>connectors, PlayerColor color) {
         super(connectors);
         this.color = color;
     }
+
     public PlayerColor getColor() {
         return color;
     }

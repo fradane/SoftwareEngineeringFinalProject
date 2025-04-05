@@ -11,7 +11,9 @@ public class Stardust extends AdventureCard implements PlayerMover {
 
     private static final List<CardState> cardStates = List.of(CardState.STARDUST);
 
-    public Stardust() {}
+    public Stardust() {
+        this.cardName = this.getClass().getSimpleName();
+    }
 
     @Override
     public CardState getFirstState() {

@@ -12,7 +12,9 @@ public class Smugglers extends Enemies implements PlayerMover {
     private int cubeMalus;
     private List<CargoCube> reward;
 
-    public Smugglers() {}
+    public Smugglers() {
+        this.cardName = this.getClass().getSimpleName();
+    }
 
     public void setCubeMalus(int cubeMalus) {
         this.cubeMalus = cubeMalus;

@@ -22,7 +22,21 @@ public class Planets extends AdventureCard implements PlayerMover {
         this.stepsBack = stepsBack;
     }
 
-    public Planets() {}
+    public Planets() {
+        this.cardName = this.getClass().getSimpleName();
+    }
+
+    public List<Planet> getAvailablePlanets() {
+        return availablePlanets;
+    }
+
+    public int getStepsBack() {
+        return stepsBack;
+    }
+
+    public Planet getCurrentPlanet() {
+        return currentPlanet;
+    }
 
     @Override
     public CardState getFirstState() {

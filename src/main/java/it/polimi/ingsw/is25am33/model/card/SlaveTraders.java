@@ -21,7 +21,13 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
         this.crewMalus = crewMalus;
     }
 
-    public SlaveTraders() {}
+    public SlaveTraders() {
+        this.cardName = this.getClass().getSimpleName();
+    }
+
+    public int getCrewMalus() {
+        return crewMalus;
+    }
 
     @Override
     public CardState getFirstState() {

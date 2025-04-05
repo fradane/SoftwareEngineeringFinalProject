@@ -60,6 +60,18 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         this.stepsBack = stepsBack;
     }
 
+    public int getStepsBack() {
+        return stepsBack;
+    }
+
+    public int getRequiredCrewMembers() {
+        return requiredCrewMembers;
+    }
+
+    public List<CargoCube> getReward() {
+        return reward;
+    }
+
     public AbandonedStation(int stepsBack, int requiredCrewMembers, List<CargoCube> reward) {
         this.stepsBack = stepsBack;
         this.requiredCrewMembers = requiredCrewMembers;
@@ -67,7 +79,9 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         this.reward = reward;
     }
 
-    public AbandonedStation() {}
+    public AbandonedStation() {
+        this.cardName = this.getClass().getSimpleName();
+    }
 
     private void currPlayerWantsToVisit (boolean wantsToVisit) throws IllegalDecisionException {
 

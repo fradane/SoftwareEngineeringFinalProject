@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.Direction;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
@@ -14,6 +15,7 @@ public abstract class AdventureCard {
     protected int level;
     protected CardState currState;
     protected static Game game;
+    protected String cardName;
 
     /**
      * A static map that associates string identifiers with factory functions
@@ -59,12 +61,14 @@ public abstract class AdventureCard {
         return level;
     }
 
+    @JsonIgnore
     public abstract CardState getFirstState();
 
     public void setCurrState(CardState currState) {
         this.currState = currState;
     }
 
+    @JsonIgnore
     public CardState getCurrState() {
         return currState;
     }
@@ -75,4 +79,20 @@ public abstract class AdventureCard {
 
     public abstract void play(PlayerChoicesDataStructure playerChoices) throws UnknownStateException;
 
+    public String getCardName() {
+        return cardName;
+    }
+
+    public void setCardName(String cardName) {
+        this.cardName = cardName;
+    }
+
+    @Override
+    public String toString() {
+        return "AdventureCard{" +
+                "cardName='" + cardName + '\'' +
+                ", level=" + level +
+                '}';
+    }
 }
+

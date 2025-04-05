@@ -10,7 +10,9 @@ public class Epidemic extends AdventureCard{
 
     private static final List<CardState> cardStates = List.of(CardState.EPIDEMIC);
 
-    public Epidemic() {}
+    public Epidemic() {
+        this.cardName = this.getClass().getSimpleName();
+    }
 
     @Override
     public CardState getFirstState() {

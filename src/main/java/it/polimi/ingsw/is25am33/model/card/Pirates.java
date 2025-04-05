@@ -29,7 +29,9 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         this.shots = shots;
     }
 
-    public Pirates() {}
+    public Pirates() {
+        this.cardName = this.getClass().getSimpleName();
+    }
 
     @Override
     public CardState getFirstState() {
@@ -65,6 +67,10 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
     public void setShots(List<Shot> shots) {
         this.shots = shots;
         shotIterator = shots.iterator();
+    }
+
+    public List<Shot> getShots() {
+        return shots;
     }
 
     public void convertIdsToShots() {

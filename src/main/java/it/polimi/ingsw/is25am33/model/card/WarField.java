@@ -20,7 +20,9 @@ public class WarField extends AdventureCard implements PlayerMover {
         this.shots = shots;
     }
 
-    public WarField() {}
+    public WarField() {
+        this.cardName = this.getClass().getSimpleName();
+    }
 
     @Override
     public CardState getFirstState() {

@@ -24,7 +24,13 @@ public class MeteoriteStorm extends AdventureCard {
         this.meteoriteIterator = meteorites.iterator();
     }
 
-    public MeteoriteStorm() {}
+    public List<Meteorite> getMeteorites() {
+        return meteorites;
+    }
+
+    public MeteoriteStorm() {
+        this.cardName = this.getClass().getSimpleName();
+    }
 
     @Override
     public CardState getFirstState() {

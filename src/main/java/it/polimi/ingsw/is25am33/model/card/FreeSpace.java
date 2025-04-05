@@ -13,7 +13,9 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
 
     private static final List<CardState> cardStates = List.of(CardState.CHOOSE_ENGINES);
 
-    public FreeSpace() {}
+    public FreeSpace() {
+        this.cardName = this.getClass().getSimpleName();
+    }
 
     @Override
     public CardState getFirstState() {
@@ -35,6 +37,8 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
     }
 
     public void currPlayerChoseEnginesToActivate(List<Engine> chosenDoubleEngines, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
+
+        // TODO controllare se un giocatore non ha engine
 
         if (chosenDoubleEngines == null || chosenBatteryBoxes == null)
             throw new IllegalArgumentException("Null lists");
