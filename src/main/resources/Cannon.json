@@ -1,0 +1,227 @@
+[
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "SINGLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "SINGLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "DOUBLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "DOUBLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "SINGLE",
+      "SOUTH": "EMPTY",
+      "WEST": "EMPTY"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "SINGLE",
+      "SOUTH": "DOUBLE",
+      "WEST": "EMPTY"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "SINGLE",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "EMPTY"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "DOUBLE",
+      "SOUTH": "EMPTY",
+      "WEST": "EMPTY"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "DOUBLE",
+      "SOUTH": "SINGLE",
+      "WEST": "EMPTY"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "DOUBLE",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "EMPTY"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "UNIVERSAL",
+      "SOUTH": "SINGLE",
+      "WEST": "EMPTY"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "SINGLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "DOUBLE",
+      "WEST": "SINGLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "SINGLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "SINGLE",
+      "SOUTH": "SINGLE",
+      "WEST": "SINGLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "DOUBLE",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "SINGLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "UNIVERSAL",
+      "SOUTH": "EMPTY",
+      "WEST": "SINGLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "DOUBLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "SINGLE",
+      "WEST": "DOUBLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "DOUBLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "SINGLE",
+      "SOUTH": "EMPTY",
+      "WEST": "DOUBLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "SINGLE",
+      "SOUTH": "UNIVERSAL",
+      "WEST": "DOUBLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "DOUBLE",
+      "SOUTH": "DOUBLE",
+      "WEST": "DOUBLE"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "DOUBLE",
+      "WEST": "UNIVERSAL"
+    }
+  },
+
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "DOUBLE",
+      "SOUTH": "EMPTY",
+      "WEST": "UNIVERSAL"
+    }
+  }
+
+]
