@@ -46,7 +46,7 @@ public class Cannon extends Component implements Rotatable {
     public void rotateFireDirection() {
         for (int i = 0; i < getRotation() % 4; i++)
             this.fireDirection = shiftDirection(this.fireDirection);
-        notifyObservers(new ComponentEvent(this, "fireDirection", this.fireDirection ));
+//        notifyObservers(new ComponentEvent(this, "fireDirection", this.fireDirection ));
     }
 
     /**

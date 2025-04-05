@@ -21,7 +21,7 @@ public abstract class Component {
     /** Map associating directions with their respective connector types. */
     private Map<Direction, ConnectorType> connectors;
 
-    private List<ComponentObserver> componentObservers;
+//    private List<ComponentObserver> componentObservers;
 
     /**
      * Default constructor for {@code Component}.
@@ -37,18 +37,18 @@ public abstract class Component {
      */
     public Component(Map<Direction, ConnectorType> connectors) {
         this.connectors = connectors;
-        componentObservers=new ArrayList<>();
+//        componentObservers=new ArrayList<>();
     }
-
-    public void addObserver(ComponentObserver observer) {
-        componentObservers.add(observer);
-    }
-
-    void notifyObservers(ComponentEvent event) {
-        for (ComponentObserver observer : componentObservers) {
-            observer.update(event);
-        }
-    }
+//
+//    public void addObserver(ComponentObserver observer) {
+//        componentObservers.add(observer);
+//    }
+//
+//    void notifyObservers(ComponentEvent event) {
+//        for (ComponentObserver observer : componentObservers) {
+//            observer.update(event);
+//        }
+//    }
     /**
      * Retrieves the current operational state of this component.
      *
@@ -65,7 +65,7 @@ public abstract class Component {
      */
     public void setCurrState(ComponentState currState) {
         this.currState = currState;
-        notifyObservers(new ComponentEvent(this, "state", currState ));
+//        notifyObservers(new ComponentEvent(this, "state", currState ));
     }
 
     /**
@@ -93,10 +93,10 @@ public abstract class Component {
         return connectors;
     }
 
-    public void setConnectors(Map<Direction, ConnectorType> connectors) {
-        this.connectors = connectors;
-        notifyObservers(new ComponentEvent(this, "connectors", connectors ));
-    }
+//    public void setConnectors(Map<Direction, ConnectorType> connectors) {
+//        this.connectors = connectors;
+//        notifyObservers(new ComponentEvent(this, "connectors", connectors ));
+//    }
 
     /**
      * Adjusts the orientation of connectors based on the component's current rotation.

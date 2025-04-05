@@ -85,7 +85,7 @@ public class BatteryBox extends Component {
             throw new IllegalStateException("empty battery box");
         }
         availableBattery--;
-        notifyObservers(new ComponentEvent(this, "avaiableBattery", availableBattery ));
+//        notifyObservers(new ComponentEvent(this, "avaiableBattery", availableBattery ));
     }
 
 }

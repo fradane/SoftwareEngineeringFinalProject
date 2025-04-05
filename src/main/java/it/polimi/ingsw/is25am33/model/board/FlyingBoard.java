@@ -28,7 +28,6 @@ public abstract class FlyingBoard {
      * Inserts a player into the ranking with a specified position.
      *
      * @param player The player to be inserted.
-     * @param pos The position at which the player is placed.
      */
     public abstract void insertPlayer(Player player);
 
@@ -125,9 +124,6 @@ public abstract class FlyingBoard {
 
     public abstract int getCreditsForPosition(Player player);
 
-
-
-
-
+    public abstract int getPrettiestShipReward();
 
 }

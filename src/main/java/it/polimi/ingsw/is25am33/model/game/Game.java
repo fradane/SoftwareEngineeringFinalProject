@@ -137,7 +137,7 @@ public class Game {
 
             int credits = player.getOwnedCredits();
 
-            credits += flyingBoard.creditsForPosition(player);
+            credits += flyingBoard.getCreditsForPosition(player);
 
             if (getPlayerWithPrettiestShip().contains(player))
                 credits += flyingBoard.getPrettiestShipReward();

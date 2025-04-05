@@ -45,7 +45,6 @@ public class ClientDeserializer {
 
         try {
             ClientDeserializer.deserialize("""
-            {"idSocket": 1234},
             {"level":1,"cardName":"AbandonedStation","stepsBack":-1,"requiredCrewMembers":5,"reward":["YELLOW","GREEN"]}
             """, AbandonedStation.class);
         } catch (Exception e) {

@@ -44,6 +44,7 @@ public class Level2FlyingBoard extends FlyingBoard {
         this.initialPositionIterator = initialPositions.iterator();
     }
 
+    @Override
     public int getPrettiestShipReward() {
         return prettiestShipReward;
     }

@@ -34,6 +34,7 @@ public class Level1FlyingBoard extends FlyingBoard {
         super(18);
     }
 
+    @Override
     public int getPrettiestShipReward() {
         return prettiestShipReward;
     }

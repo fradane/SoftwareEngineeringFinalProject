@@ -53,7 +53,7 @@ public class Cabin extends Component {
         } else {
             inhabitants.add(member);
         }
-        notifyObservers(new ComponentEvent(this, "inhabitants", inhabitants ));
+//        notifyObservers(new ComponentEvent(this, "inhabitants", inhabitants ));
     }
 
     /**
@@ -67,7 +67,7 @@ public class Cabin extends Component {
             throw new NoSuchElementException("Empty cabin");
 
         inhabitants.removeFirst();
-        notifyObservers(new ComponentEvent(this, "inhabitants", inhabitants ));
+//        notifyObservers(new ComponentEvent(this, "inhabitants", inhabitants ));
     }
 
     /**
