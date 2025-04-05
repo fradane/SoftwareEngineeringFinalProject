@@ -772,6 +772,8 @@ public abstract class ShipBoard {
         for(List<Integer> componentPosition : componentsPositions) {
             Component currentComponent = shipMatrix[componentPosition.get(0)][componentPosition.get(1)];
             notActiveComponents.add(currentComponent);
+            if(incorrectlyPositionedComponents.contains(currentComponent))
+                incorrectlyPositionedComponents.remove(currentComponent);
             shipMatrix[componentPosition.get(0)][componentPosition.get(1)] = null;
         }
     }
