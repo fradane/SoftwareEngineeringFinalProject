@@ -14,7 +14,7 @@ public class ComponentEvent {
     public ComponentEvent(Component component, String attribute, Object newValue) {
         this.component = component;
         this.attribute = attribute;
-        this.newValue = newValue;
+        this.newValue  = newValue;
     }
 
     public Component getComponent() {

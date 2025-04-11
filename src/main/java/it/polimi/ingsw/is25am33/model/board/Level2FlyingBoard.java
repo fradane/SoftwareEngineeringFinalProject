@@ -1,5 +1,8 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import it.polimi.ingsw.is25am33.model.ObserverManager;
+import it.polimi.ingsw.is25am33.model.game.DTO;
+import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
@@ -66,6 +69,10 @@ public class Level2FlyingBoard extends FlyingBoard {
     @Override
     public void insertPlayer(Player player) {
         ranking.put(player, initialPositionIterator.next());
+
+        DTO dto = new DTO();
+        dto.setFlyingBoard(this);
+        ObserverManager.getInstance().notifyAll(new GameEvent("Flyingboard",dto));
     }
 
 }

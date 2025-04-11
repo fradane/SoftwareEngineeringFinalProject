@@ -1,6 +1,9 @@
 package it.polimi.ingsw.is25am33.model.board;
+import it.polimi.ingsw.is25am33.model.ObserverManager;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
+import it.polimi.ingsw.is25am33.model.game.DTO;
+import it.polimi.ingsw.is25am33.model.game.GameEvent;
 
 import static it.polimi.ingsw.is25am33.model.Direction.NORTH;
 
@@ -13,6 +16,11 @@ public class Level2ShipBoard extends ShipBoard{
     public void book () {
         notActiveComponents.add(focusedComponent);
         focusedComponent = null;
+
+        DTO dto = new DTO();
+        dto.setPlayer(player);
+        ObserverManager.getInstance().notifyAll(new GameEvent("bookFocusedComponent",dto));
+
     }
 
     public void handleDangerousObject(DangerousObj obj){

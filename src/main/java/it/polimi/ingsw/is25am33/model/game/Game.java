@@ -1,15 +1,19 @@
 package it.polimi.ingsw.is25am33.model.game;
 
-import it.polimi.ingsw.is25am33.model.CardState;
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.*;
+import it.polimi.ingsw.is25am33.model.Observer;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
+import javax.management.remote.rmi.RMIServer;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-import static it.polimi.ingsw.is25am33.model.CargoCube.*;
 
 public class Game {
 
@@ -23,6 +27,9 @@ public class Game {
     private DangerousObj currDangerousObj;
     private GameState currGameState = GameState.SETUP;
     private Deck deck;
+    private ComponentTable componentTable;
+    private ObserverManager observerManager;
+    private VirtualServer virtualServer;
 
     public void setCurrGameState(GameState currGameState) {
         this.currGameState = currGameState;
@@ -36,7 +43,8 @@ public class Game {
         return deck;
     }
 
-    public Game(FlyingBoard flyingBoard, List<Player> players) {
+
+    public Game(FlyingBoard flyingBoard, List<Player> players, List<Component> components) {
         this.flyingBoard = flyingBoard;
         currAdventureCard = null;
         currRanking = new ArrayList<>();
@@ -44,6 +52,38 @@ public class Game {
         currDangerousObj = null;
         this.players = players;
         deck = new Deck();
+        componentTable = new ComponentTable(components);
+        observerManager = new ObserverManager();
+    }
+
+    public void chooseFocusComponent(Player player, Coordinates coordinates){
+        Component component = componentTable.getComponent(coordinates);
+
+        player.getPersonalBoard().setFocusedComponent(component);
+        component.setCurrState(ComponentState.USED);
+
+        DTO dto = new DTO();
+        dto.setComponentTable(componentTable);
+        ObserverManager.getInstance().notifyAll(new GameEvent( "pickUpCoveredComponent", dto ));
+
+        DTO dto1 = new DTO();
+        dto.setPlayer(player);
+        dto.setComponent(component);
+        ObserverManager.getInstance().notifyObserver(player.getNickname(), new GameEvent( "showFocusComponent", dto ));
+    }
+
+    public void releaseComponentWithFocus(Player player){
+        Component component = player.getPersonalBoard().getFocusedComponent();
+        component.setCurrState(ComponentState.FREE);
+        player.getPersonalBoard().setFocusedComponent(null);
+
+        DTO dto = new DTO();
+        dto.setComponentTable(componentTable);
+        ObserverManager.getInstance().notifyAll(new GameEvent( "replaceFocusedComponentOnTable", dto ));
+
+        DTO dto1 = new DTO();
+        dto.setPlayer(player);
+        ObserverManager.getInstance().notifyObserver(player.getNickname(), new GameEvent( "releaseFocusComponent", dto ));
     }
 
     public static int throwDices() {
@@ -57,6 +97,10 @@ public class Game {
 
     public void setCurrDangerousObj(DangerousObj dangerousObj) {
         this.currDangerousObj = dangerousObj;
+
+        DTO dto = new DTO();
+        dto.setDangerousObj(dangerousObj);
+        ObserverManager.getInstance().notifyAll(new GameEvent( "dangerousObjAttack", dto ));
     }
 
     public Boolean hasNextPlayer() {
@@ -75,6 +119,20 @@ public class Game {
 
     public void setCurrPlayer(Player player) {
         this.currPlayer = player;
+
+        DTO dto = new DTO();
+        dto.setPlayer(player);
+
+        ObserverManager.getInstance().notifyAll(new GameEvent( "currPlayerUpdate", dto ));
+    }
+
+    public void watchVisibleDeck(Player player, int index){
+
+        DTO dto = new DTO();
+        dto.setPlayer(player);
+        dto.setNum(index);
+        ObserverManager.getInstance().notifyAll(new GameEvent( "playerWatchesLittleDeck", dto ));
+
     }
 
     public void nextPlayer() {
@@ -95,7 +153,16 @@ public class Game {
 
     public void setCurrAdventureCard(AdventureCard currAdventureCard) {
         this.currAdventureCard = currAdventureCard;
-    }
+
+        DTO dto = new DTO();
+        dto.setAdventureCard(currAdventureCard);
+
+        BiConsumer<Observer,String> notify= (observer, message)-> {
+            observer.notifyCurrAdventureCard(message);
+        };
+
+        virtualServer.notifyClient(observerManager.getObservers(), new GameEvent( "drawnCard", dto ), notify);
+}
 
     /**
      * Starts the current card phase: updates the game's currState and the card's currState to

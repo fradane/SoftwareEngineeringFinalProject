@@ -4,6 +4,9 @@ import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.CrewMember;
+import it.polimi.ingsw.is25am33.model.game.DTO;
+import it.polimi.ingsw.is25am33.model.game.GameEvent;
+import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,6 +58,8 @@ public abstract class ShipBoard {
      */
     protected Component focusedComponent;
 
+    protected Player player;
+
     /**
      * A set of components marked as incorrectly placed.
      */
@@ -73,6 +78,15 @@ public abstract class ShipBoard {
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
 
         shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
+    }
+
+    public Component getFocusedComponent() {
+        return focusedComponent;
+    }
+
+    public void setFocusedComponent(Component focusedComponent) {
+        this.focusedComponent = focusedComponent;
+
     }
 
     /**
@@ -131,6 +145,12 @@ public abstract class ShipBoard {
 
             focusedComponent = null;
         }
+
+        DTO dto = new DTO();
+        dto.setPlayer(player);
+        dto.setCoordinates(new Coordinates(x,y));
+        ObserverManager.getInstance().notifyAll(new GameEvent("placeFocusedComponent",dto));
+
     }
 
     /**
@@ -297,14 +317,6 @@ public abstract class ShipBoard {
         }
 
         return false;
-    }
-
-    /**
-     * Releases the currently focused component by setting its state to FREE and nullifying the reference.
-     */
-    public void releaseComponentWithFocus() {
-        focusedComponent.setCurrState(FREE);
-        focusedComponent = null;
     }
 
     /**

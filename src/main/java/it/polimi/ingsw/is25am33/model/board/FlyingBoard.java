@@ -1,5 +1,8 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import it.polimi.ingsw.is25am33.model.ObserverManager;
+import it.polimi.ingsw.is25am33.model.game.DTO;
+import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
@@ -58,6 +61,10 @@ public abstract class FlyingBoard {
     public void addOutPlayer(Player player) {
         outPlayers.add(player);
         ranking.remove(player);
+
+        DTO dto = new DTO();
+        dto.setFlyingBoard(this);
+        ObserverManager.getInstance().notifyAll(new GameEvent("Flyingboard",dto));
     }
 
     /**
@@ -98,6 +105,10 @@ public abstract class FlyingBoard {
             }
         }
         ranking.put(player, newPosition);
+
+        DTO dto = new DTO();
+        dto.setFlyingBoard(this);
+        ObserverManager.getInstance().notifyAll(new GameEvent("Flyingboard",dto));
     }
 
     /**
