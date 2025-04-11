@@ -4,7 +4,6 @@ import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Engine;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,11 +51,11 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
         });
 
         chosenBatteryBoxes.forEach(BatteryBox::useBattery);
-        int stepsForward = game.getCurrPlayer().getPersonalBoard().countTotalEnginePower(chosenDoubleEngines);
-        movePlayer(game.getFlyingBoard(), game.getCurrPlayer(), stepsForward);
+        int stepsForward = gameModel.getCurrPlayer().getPersonalBoard().countTotalEnginePower(chosenDoubleEngines);
+        movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsForward);
 
-        if (game.hasNextPlayer()) {
-            game.nextPlayer();
+        if (gameModel.hasNextPlayer()) {
+            gameModel.nextPlayer();
         } else {
             currState = CardState.END_OF_CARD;
         }

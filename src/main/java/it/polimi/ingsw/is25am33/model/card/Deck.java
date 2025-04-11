@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 
 /**
- * Represents a deck of adventure cards used in the game.
+ * Represents a deck of adventure cards used in the gameModel.
  * It manages different levels of cards, organizes them into decks,
  * and provides methods for drawing and shuffling.
  */
@@ -42,7 +42,7 @@ public class Deck {
     }
 
     /**
-     * Merges the smaller decks into the main game deck and shuffles it.
+     * Merges the smaller decks into the main gameModel deck and shuffles it.
      */
     public void mergeIntoGameDeck() {
         gameDeck.addAll(littleNotVisibleDeck);
@@ -51,10 +51,10 @@ public class Deck {
     }
 
     /**
-     * Draws a card from the game deck.
+     * Draws a card from the gameModel deck.
      *
      * @return The top AdventureCard from the deck.
-     * @throws EmptyStackException if the game deck is empty.
+     * @throws EmptyStackException if the gameModel deck is empty.
      */
     public AdventureCard drawCard() throws EmptyStackException {
         return gameDeck.pop();

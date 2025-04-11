@@ -4,12 +4,13 @@ import it.polimi.ingsw.is25am33.model.ConnectorType;
 import it.polimi.ingsw.is25am33.model.Direction;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Represents the main cabin of a structure, extending the {@code Cabin} class.
  */
-public class MainCabin extends Cabin {
+public class MainCabin extends Cabin implements Serializable {
 
     /**
      * The color associated with the main cabin, representing the player's color.

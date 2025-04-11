@@ -2,27 +2,68 @@ package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.GameState;
-import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
+import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static it.polimi.ingsw.is25am33.model.CargoCube.*;
 
-public class Game {
+public class GameModel {
+    private final String gameId;
+    private final boolean isTestFlight;
+    private final int maxPlayers;
+    private boolean isStarted;
 
     // TODO aggiungere gameState
     private AdventureCard currAdventureCard;
     private final FlyingBoard flyingBoard;
-    private final List<Player> players;
+    private final ConcurrentHashMap<String, Player> players;
     private List<Player> currRanking;
     private Player currPlayer;
     private Iterator<Player> playerIterator;
     private DangerousObj currDangerousObj;
-    private GameState currGameState = GameState.SETUP;
+    private GameState currGameState;
     private Deck deck;
+
+    public GameModel(String gameId, int maxPlayers, boolean isTestFlight) {
+        this.gameId = gameId;
+        this.maxPlayers = maxPlayers;
+        this.isTestFlight = isTestFlight;
+        this.flyingBoard = isTestFlight ? new Level1FlyingBoard() : new Level2FlyingBoard();
+        currAdventureCard = null;
+        currRanking = new ArrayList<>();
+        currPlayer = null;
+        currDangerousObj = null;
+        currGameState = GameState.SETUP;
+        this.players = new ConcurrentHashMap<>();
+        deck = new Deck();
+        isStarted = false;
+    }
+
+    public String getGameId() {
+        return gameId;
+    }
+
+    public ConcurrentHashMap<String, Player> getPlayers() {
+        return players;
+    }
+
+    public boolean isTestFlight() {
+        return isTestFlight;
+    }
+
+    public boolean isStarted() {
+        return isStarted;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
 
     public void setCurrGameState(GameState currGameState) {
         this.currGameState = currGameState;
@@ -36,15 +77,6 @@ public class Game {
         return deck;
     }
 
-    public Game(FlyingBoard flyingBoard, List<Player> players) {
-        this.flyingBoard = flyingBoard;
-        currAdventureCard = null;
-        currRanking = new ArrayList<>();
-        currPlayer = null;
-        currDangerousObj = null;
-        this.players = players;
-        deck = new Deck();
-    }
 
     public static int throwDices() {
         double random = Math.random();
@@ -89,7 +121,7 @@ public class Game {
         return flyingBoard;
     }
 
-    public List<Player> getPlayers() {
+    public List<Player> getCurrRanking() {
         return currRanking;
     }
 
@@ -98,7 +130,7 @@ public class Game {
     }
 
     /**
-     * Starts the current card phase: updates the game's currState and the card's currState to
+     * Starts the current card phase: updates the gameModel's currState and the card's currState to
      * the first of the actual card, sets the currPlayer to the first based on the provided
      * ranking.
      *
@@ -121,7 +153,7 @@ public class Game {
 
         Map<Player, Integer> x = new HashMap<>();
 
-        players.forEach(player -> {
+        players.values().forEach(player -> {
             x.put(player, player.getPersonalBoard().countExposed());
         });
 
@@ -133,7 +165,7 @@ public class Game {
 
     public void calculatePlayersCredits() {
 
-        players.forEach(player -> {
+        players.values().forEach(player -> {
 
             int credits = player.getOwnedCredits();
 
@@ -172,4 +204,13 @@ public class Game {
 
     }
 
+    public void addPlayer(String nickname, PlayerColor color) {
+        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color) : new Level2ShipBoard(color);
+        Player player = new Player(nickname, shipBoard);
+        players.put(nickname, player);
+    }
+
+    public void removePlayer(String nickname) {
+        players.remove(nickname);
+    }
 }

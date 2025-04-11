@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * The {@code Level1FlyingBoard} class extends {@code FlyingBoard} to represent
- * a basic flying board used in the first level of the game.
+ * a basic flying board used in the first level of the gameModel.
  * <p>
  * It features a fixed credit distribution and no hourglass mechanic.
  */

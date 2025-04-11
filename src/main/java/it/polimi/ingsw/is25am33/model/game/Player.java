@@ -2,7 +2,9 @@ package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 
-public class Player {
+import java.io.Serializable;
+
+public class Player implements Serializable {
     private String nickname;
     private int ownedCredits;
     private final ShipBoard personalBoard;
@@ -27,6 +29,10 @@ public class Player {
 
     public void setOwnedCredits(int ownedCredits) {
         this.ownedCredits = ownedCredits;
+    }
+
+    public String getNickname() {
+        return nickname;
     }
 }
 

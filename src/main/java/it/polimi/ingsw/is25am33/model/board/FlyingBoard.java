@@ -44,7 +44,7 @@ public abstract class FlyingBoard {
     /**
      * Returns the set of players who have been doubled.
      *
-     * @return A set of players who are out of the game.
+     * @return A set of players who are out of the gameModel.
      */
     public Set<Player> getOutPlayers() {
         return outPlayers;
@@ -64,7 +64,7 @@ public abstract class FlyingBoard {
      * Identifies and returns the players who have been doubled, based on their position.
      * Doubled players are added to the outPlayers set and removed from the ranking.
      *
-     * @return A list of players who are out of the game.
+     * @return A list of players who are out of the gameModel.
      */
     public List<Player> getDoubledPlayers() {
         int maxPosition = Collections.max(ranking.values());

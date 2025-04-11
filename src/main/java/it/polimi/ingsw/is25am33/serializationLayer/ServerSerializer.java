@@ -1,16 +1,12 @@
 package it.polimi.ingsw.is25am33.serializationLayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
-import it.polimi.ingsw.is25am33.model.component.Cannon;
-import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
 public class ServerSerializer{
 
-    // TODO aggiornamenti della view, guardare la classe game e simili e il diagramma di marco il negro
+    // TODO aggiornamenti della view, guardare la classe gameModel e simili e il diagramma di marco il negro
 
     // TODO serializzare i cambiamenti sulle shipBoard
 
@@ -39,3 +35,6 @@ public class ServerSerializer{
     }
 
 }
+
+
+

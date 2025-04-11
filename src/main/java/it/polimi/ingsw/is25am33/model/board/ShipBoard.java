@@ -5,6 +5,7 @@ import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.CrewMember;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -15,7 +16,7 @@ import static it.polimi.ingsw.is25am33.model.ComponentState.*;
 import static it.polimi.ingsw.is25am33.model.ConnectorType.*;
 import static it.polimi.ingsw.is25am33.model.Direction.*;
 
-public abstract class ShipBoard {
+public abstract class ShipBoard implements Serializable {
 
     /**
      * The size of the board where components can be placed. Just one length as the board is squared.

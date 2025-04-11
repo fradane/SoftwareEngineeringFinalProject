@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ClientDeserializer {
 
-    // TODO aggiornamenti della view, guardare la classe game e simili e il diagramma di marco ilnegro
+    // TODO aggiornamenti della view, guardare la classe gameModel e simili e il diagramma di marco ilnegro
 
     // TODO serializzare i cambiamenti sulle shipBoard
 

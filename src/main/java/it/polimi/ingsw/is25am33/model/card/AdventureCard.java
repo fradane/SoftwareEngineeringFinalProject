@@ -5,7 +5,7 @@ import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.Direction;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
-import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -14,7 +14,7 @@ public abstract class AdventureCard {
 
     protected int level;
     protected CardState currState;
-    protected static Game game;
+    protected static GameModel gameModel;
     protected String cardName;
 
     /**
@@ -73,8 +73,8 @@ public abstract class AdventureCard {
         return currState;
     }
 
-    public void setGame(Game game) {
-        this.game = game;
+    public void setGame(GameModel gameModel) {
+        this.gameModel = gameModel;
     }
 
     public abstract void play(PlayerChoicesDataStructure playerChoices) throws UnknownStateException;

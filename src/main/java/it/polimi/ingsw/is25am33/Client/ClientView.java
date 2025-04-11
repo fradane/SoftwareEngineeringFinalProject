@@ -1,0 +1,112 @@
+package it.polimi.ingsw.is25am33.Client;
+
+import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.game.GameInfo;
+
+/**
+ * Interfaccia che definisce le operazioni di visualizzazione del client.
+ * Può essere implementata sia da una CLI che da una GUI.
+ */
+public interface ClientView {
+    /**
+     * Inizializza la view
+     */
+    void initialize();
+
+    /**
+     * Mostra un messaggio all'utente
+     * @param message Il messaggio da mostrare
+     */
+    void showMessage(String message);
+
+    /**
+     * Mostra un messaggio di errore all'utente
+     * @param errorMessage Il messaggio di errore
+     */
+    void showError(String errorMessage);
+
+    /**
+     * Chiede all'utente di inserire un nickname
+     * @return Il nickname inserito
+     */
+    String askNickname();
+
+    /**
+     * Chiede all'utente di inserire l'indirizzo del server
+     * @return L'indirizzo del server
+     */
+    String askServerAddress();
+
+    /**
+     * Mostra la lista dei giochi disponibili
+     * @param games La lista dei giochi disponibili
+     */
+    void showAvailableGames(Iterable<GameInfo> games);
+
+    /**
+     * Chiede all'utente di creare un nuovo gioco
+     * @return Un array contenente [numeroGiocatori, isTestFlight (0/1), coloreGiocatore (int)]
+     */
+    int[] askCreateGame();
+
+    /**
+     * Chiede all'utente di unirsi a un gioco esistente
+     * @param games La lista dei giochi disponibili
+     * @return Un array contenente [indiceGioco, coloreGiocatore (int)]
+     */
+    String[] askJoinGame(Iterable<GameInfo> games);
+
+    /**
+     * Mostra il menù principale
+     * @return La scelta dell'utente
+     */
+    int showMainMenu();
+
+    /**
+     * Mostra il menù di gioco quando l'utente è in una partita in attesa
+     * @return La scelta dell'utente
+     */
+    int showGameMenu();
+
+    /**
+     * Notifica la view che un giocatore si è unito a un gioco
+     * @param nickname Il nickname del giocatore
+     * @param gameInfo Le informazioni aggiornate sul gioco
+     */
+    void notifyPlayerJoined(String nickname, GameInfo gameInfo);
+
+    /**
+     * Notifica la view che un giocatore ha lasciato un gioco
+     * @param nickname Il nickname del giocatore
+     * @param gameInfo Le informazioni aggiornate sul gioco
+     */
+    void notifyPlayerLeft(String nickname, GameInfo gameInfo);
+
+    /**
+     * Notifica la view che il gioco è iniziato
+     * @param gameState Lo stato iniziale del gioco
+     */
+    void notifyGameStarted(GameState gameState);
+
+    /**
+     * Notifica la view che il gioco è terminato
+     * @param reason La ragione della terminazione
+     */
+    void notifyGameEnded(String reason);
+
+    /**
+     * Converte un intero in un colore del giocatore
+     * @param colorChoice L'indice del colore (1-4)
+     * @return Il colore del giocatore corrispondente
+     */
+    default PlayerColor intToPlayerColor(int colorChoice) {
+        switch (colorChoice) {
+            case 1: return PlayerColor.RED;
+            case 2: return PlayerColor.BLUE;
+            case 3: return PlayerColor.GREEN;
+            case 4: return PlayerColor.YELLOW;
+            default: return PlayerColor.RED;
+        }
+    }
+}
