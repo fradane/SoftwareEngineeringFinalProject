@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -47,7 +48,7 @@ public abstract class ShipBoard {
     /**
      * A list of components that are not currently active on the board (either removed or awaiting placement).
      */
-    protected List<Component> notActiveComponents = new ArrayList<Component>();
+    protected List<Component> notActiveComponents = new ArrayList<>();
 
     /**
      * The component the player is currently trying to place (focus).
@@ -58,7 +59,7 @@ public abstract class ShipBoard {
     /**
      * A set of components marked as incorrectly placed.
      */
-    private Set<Component> incorrectlyPositionedComponents = new HashSet<Component>();
+    private Set<Component> incorrectlyPositionedComponents = new HashSet<>();
 
     /**
      * Constructor that creates a ShipBoard with the main cabin placed at the initial coordinates.
@@ -73,6 +74,14 @@ public abstract class ShipBoard {
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
 
         shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
+    }
+
+    public Component[][] getShipMatrix() {
+        return shipMatrix;
+    }
+
+    public Component getFocusedComponent() {
+        return focusedComponent;
     }
 
     /**
@@ -323,8 +332,7 @@ public abstract class ShipBoard {
         notActiveComponents.add(shipMatrix[x][y]);
         shipMatrix[x][y] = null;
 
-        List<Set<List<Integer>>> shipParts = identifyShipParts(x, y);
-        return shipParts;
+        return identifyShipParts(x, y);
     }
 
     /**
@@ -435,7 +443,7 @@ public abstract class ShipBoard {
         return Arrays.stream(componentsInDirection)
                 .filter(Objects::nonNull)
                 .findFirst()
-                .map(component -> (Boolean) (component != null && component.getConnectors().get(direction) != EMPTY))
+                .map(component -> (Boolean) (component.getConnectors().get(direction) != EMPTY))
                 .orElse(false);
     }
 
@@ -477,12 +485,13 @@ public abstract class ShipBoard {
      *
      * @return A list of CrewMember objects currently on the ship.
      */
+    @JsonIgnore
     public List<CrewMember> getCrewMembers() {
         return componentsPerType.get(Cabin.class)
                 .stream()
                 .map(Cabin.class::cast)
                 .map(Cabin::getInhabitants)
-                .flatMap(inhabitants -> inhabitants.stream())
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
@@ -493,7 +502,7 @@ public abstract class ShipBoard {
      * @return A set of cabins that meet the adjacency criterion.
      */
     public Set<Cabin> cabinWithNeighbors() {
-        Set<Cabin> cabinsWithNeighbors = new HashSet<Cabin>();
+        Set<Cabin> cabinsWithNeighbors = new HashSet<>();
 
         int[] dx = {-1, 1, 0, 0};
         int[] dy = {0, 0, -1, 1};
@@ -529,8 +538,7 @@ public abstract class ShipBoard {
      * @return true if the ship has no placement errors, otherwise false.
      */
     public boolean isShipCorrect() {
-        if (incorrectlyPositionedComponents.isEmpty()) return true;
-        return false;
+        return incorrectlyPositionedComponents.isEmpty();
     }
 
     /**
@@ -538,6 +546,7 @@ public abstract class ShipBoard {
      *
      * @return A list of DoubleCannon objects.
      */
+    @JsonIgnore
     public List<DoubleCannon> getDoubleCannons () {
         return componentsPerType.get(DoubleCannon.class)
                 .stream()
@@ -550,6 +559,7 @@ public abstract class ShipBoard {
      *
      * @return A list of single Cannon objects.
      */
+    @JsonIgnore
     public List<Cannon> getSingleCannons () {
         return componentsPerType.get(Cannon.class)
                 .stream()
@@ -562,6 +572,7 @@ public abstract class ShipBoard {
      *
      * @return A list of all Cannon objects.
      */
+    @JsonIgnore
     public List<Cannon> getAllCannons () {
         return Stream.concat(getSingleCannons().stream(), getDoubleCannons().stream()).collect(Collectors.toList());
     }
@@ -588,6 +599,7 @@ public abstract class ShipBoard {
      *
      * @return A list of DoubleEngine objects.
      */
+    @JsonIgnore
     public List<DoubleEngine> getDoubleEngines () {
         return componentsPerType.get(DoubleEngine.class)
                 .stream()
@@ -600,6 +612,7 @@ public abstract class ShipBoard {
      *
      * @return A list of single Engine objects.
      */
+    @JsonIgnore
     public List<Engine> getSingleEngines () {
         return componentsPerType.get(Engine.class)
                 .stream()
@@ -612,6 +625,7 @@ public abstract class ShipBoard {
      *
      * @return A list of all Engine objects.
      */
+    @JsonIgnore
     public List<Engine> getAllEngines () {
         return Stream.concat(getSingleEngines().stream(), getDoubleEngines().stream()).collect(Collectors.toList());
     }
@@ -647,6 +661,7 @@ public abstract class ShipBoard {
      *
      * @return A list of StandardStorage objects.
      */
+    @JsonIgnore
     public List<StandardStorage> getStandardStorages() {
         return componentsPerType.get(StandardStorage.class)
                 .stream()
@@ -659,6 +674,7 @@ public abstract class ShipBoard {
      *
      * @return A list of SpecialStorage objects.
      */
+    @JsonIgnore
     public List<SpecialStorage> getSpecialStorages() {
         return componentsPerType.get(SpecialStorage.class)
                 .stream()
@@ -671,6 +687,7 @@ public abstract class ShipBoard {
      *
      * @return A list of Storage objects.
      */
+    @JsonIgnore
     public List<Storage> getStorages() {
         return Stream.concat(getStandardStorages().stream(), getSpecialStorages().stream()).collect(Collectors.toList());
     }
@@ -680,6 +697,7 @@ public abstract class ShipBoard {
      *
      * @return A list of BatteryBox objects.
      */
+    @JsonIgnore
     public List<BatteryBox> getBatteryBoxes() {
         return componentsPerType.get(BatteryBox.class)
                 .stream()
@@ -692,6 +710,7 @@ public abstract class ShipBoard {
      *
      * @return A list of Shield objects.
      */
+    @JsonIgnore
     public List<Shield> getShields() {
         return componentsPerType.get(Shield.class)
                 .stream()
@@ -772,8 +791,7 @@ public abstract class ShipBoard {
         for(List<Integer> componentPosition : componentsPositions) {
             Component currentComponent = shipMatrix[componentPosition.get(0)][componentPosition.get(1)];
             notActiveComponents.add(currentComponent);
-            if(incorrectlyPositionedComponents.contains(currentComponent))
-                incorrectlyPositionedComponents.remove(currentComponent);
+            incorrectlyPositionedComponents.remove(currentComponent);
             shipMatrix[componentPosition.get(0)][componentPosition.get(1)] = null;
         }
     }
@@ -867,4 +885,5 @@ public abstract class ShipBoard {
     public List<Component> getNotActiveComponents() {
         return notActiveComponents;
     }
+
 }

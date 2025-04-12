@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,8 +76,9 @@ public class Deck {
      * Sets up the smaller decks by categorizing cards into levels,
      * shuffling them, and distributing them into the visible and non-visible decks.
      */
-    public void setUpLittleDecks() {
+    public void setUpLittleDecks(Game game) {
         loadCards();
+        allCards.forEach(adventureCard -> adventureCard.setGame(game));
         List<AdventureCard> level1Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 1).toList());
         List<AdventureCard> level2Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 2).toList());
 

@@ -1,16 +1,14 @@
 package it.polimi.ingsw.is25am33.model;
 
-import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.game.Game;
 
-import java.util.List;
 
 public enum GameState {
 
     SETUP {
         @Override
         public void run(Game game) {
-            game.getDeck().setUpLittleDecks();
+            game.getDeck().setUpLittleDecks(game);
             //TODO creazione tessere e posizionamento tessere nel tavolo
         }
     },
@@ -79,4 +77,5 @@ public enum GameState {
     };
 
     public abstract void run(Game game);
+
 }

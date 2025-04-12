@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.CargoCube;
 import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalIndexException;
@@ -34,6 +35,7 @@ public class Planets extends AdventureCard implements PlayerMover {
         return stepsBack;
     }
 
+    @JsonIgnore
     public Planet getCurrentPlanet() {
         return currentPlanet;
     }

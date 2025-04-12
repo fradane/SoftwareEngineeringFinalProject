@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
@@ -60,12 +61,22 @@ public abstract class FlyingBoard {
         ranking.remove(player);
     }
 
+    @JsonIgnore
+    public int getRunLenght() {
+        return runLenght;
+    }
+
+    public Map<Player, Integer> getRanking() {
+        return ranking;
+    }
+
     /**
      * Identifies and returns the players who have been doubled, based on their position.
      * Doubled players are added to the outPlayers set and removed from the ranking.
      *
      * @return A list of players who are out of the game.
      */
+    @JsonIgnore
     public List<Player> getDoubledPlayers() {
         int maxPosition = Collections.max(ranking.values());
 
@@ -122,8 +133,10 @@ public abstract class FlyingBoard {
                 .collect(Collectors.toList());
     }
 
+    @JsonIgnore
     public abstract int getCreditsForPosition(Player player);
 
+    @JsonIgnore
     public abstract int getPrettiestShipReward();
 
 }

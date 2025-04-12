@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
@@ -44,6 +45,7 @@ public class Level2FlyingBoard extends FlyingBoard {
         this.initialPositionIterator = initialPositions.iterator();
     }
 
+    @JsonIgnore
     @Override
     public int getPrettiestShipReward() {
         return prettiestShipReward;

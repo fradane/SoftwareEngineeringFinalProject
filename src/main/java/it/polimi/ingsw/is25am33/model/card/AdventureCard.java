@@ -12,10 +12,10 @@ import java.util.concurrent.Callable;
 
 public abstract class AdventureCard {
 
+    protected String cardName;
     protected int level;
     protected CardState currState;
     protected static Game game;
-    protected String cardName;
 
     /**
      * A static map that associates string identifiers with factory functions
@@ -57,6 +57,10 @@ public abstract class AdventureCard {
         this.level = level;
     }
 
+    public String getCardName() {
+        return cardName;
+    }
+
     public int getLevel() {
         return level;
     }
@@ -78,10 +82,6 @@ public abstract class AdventureCard {
     }
 
     public abstract void play(PlayerChoicesDataStructure playerChoices) throws UnknownStateException;
-
-    public String getCardName() {
-        return cardName;
-    }
 
     public void setCardName(String cardName) {
         this.cardName = cardName;

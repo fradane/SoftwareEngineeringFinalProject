@@ -32,6 +32,7 @@ public class Level1FlyingBoard extends FlyingBoard {
      */
     public Level1FlyingBoard() {
         super(18);
+        initialPositionIterator = initialPositions.iterator();
     }
 
     @Override
