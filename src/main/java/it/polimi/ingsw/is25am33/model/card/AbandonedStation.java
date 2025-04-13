@@ -1,15 +1,15 @@
 package it.polimi.ingsw.is25am33.model.card;
 
-import it.polimi.ingsw.is25am33.model.CargoCube;
-import it.polimi.ingsw.is25am33.model.CardState;
-import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
-import it.polimi.ingsw.is25am33.model.UnknownStateException;
+import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Storage;
+import it.polimi.ingsw.is25am33.model.game.DTO;
 import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameEvent;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class AbandonedStation extends AdventureCard implements PlayerMover {
 
@@ -88,11 +88,11 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         if (wantsToVisit) {
             if (game.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < requiredCrewMembers)
                 throw new IllegalDecisionException("Player has not enough crew members");
-            currState = CardState.REMOVE_CREW_MEMBERS;
+            setCurrState( CardState.REMOVE_CREW_MEMBERS);
         } else if (game.hasNextPlayer()) {
             game.nextPlayer();
         } else {
-            currState = CardState.END_OF_CARD;
+            setCurrState( CardState.END_OF_CARD);
         }
 
     }
@@ -113,7 +113,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         if (rewardIterator.hasNext()) {
             rewardIterator.next();
         } else {
-            currState = CardState.END_OF_CARD;
+            setCurrState( CardState.END_OF_CARD);
         }
 
     }

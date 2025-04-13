@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.component;
 import it.polimi.ingsw.is25am33.model.ConnectorType;
 import it.polimi.ingsw.is25am33.model.Direction;
 import it.polimi.ingsw.is25am33.model.ComponentState;
+import it.polimi.ingsw.is25am33.model.GameContext;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 
 import java.util.*;
@@ -37,7 +38,6 @@ public abstract class Component {
      */
     public Component(Map<Direction, ConnectorType> connectors) {
         this.connectors = connectors;
-
     }
 
     public Coordinates getTableCoordinates() {

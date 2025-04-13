@@ -26,16 +26,16 @@ public class DTO {
     private FlyingBoard flyingBoard;
     private ShipBoard shipBoard;
     private AdventureCard adventureCard;
-    private List<AdventureCard> deck;
+    private List<AdventureCard> littleDeck;
     private DangerousObj dangerousObj;
     private ComponentTable componentTable;
 
-    public List<AdventureCard> getDeck() {
-        return deck;
+    public List<AdventureCard> getLittleDeck() {
+        return littleDeck;
     }
 
-    public void setDeck(List<AdventureCard> deck) {
-        this.deck = deck;
+    public void setLittleDeck(List<AdventureCard> littleDeck) {
+        this.littleDeck = littleDeck;
     }
 
     public ComponentTable getComponentTable() {

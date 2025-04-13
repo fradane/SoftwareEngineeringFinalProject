@@ -38,7 +38,7 @@ public class Stardust extends AdventureCard implements PlayerMover {
         game.getPlayers()
                 .forEach(p -> movePlayer(game.getFlyingBoard(), p, p.getPersonalBoard().countExposed() * -1));
 
-        currState = CardState.END_OF_CARD;
+        setCurrState( CardState.END_OF_CARD);
 
     }
 

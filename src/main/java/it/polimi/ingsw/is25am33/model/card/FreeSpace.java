@@ -58,7 +58,7 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
         if (game.hasNextPlayer()) {
             game.nextPlayer();
         } else {
-            currState = CardState.END_OF_CARD;
+            setCurrState(CardState.END_OF_CARD);
         }
 
     }

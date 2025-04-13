@@ -1,11 +1,13 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.ObserverManager;
 import it.polimi.ingsw.is25am33.model.game.DTO;
 import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 /**
  * The {@code Level2FlyingBoard} class extends {@code FlyingBoard} to represent
@@ -72,7 +74,10 @@ public class Level2FlyingBoard extends FlyingBoard {
 
         DTO dto = new DTO();
         dto.setFlyingBoard(this);
-        ObserverManager.getInstance().notifyAll(new GameEvent("Flyingboard",dto));
+
+        BiConsumer<it.polimi.ingsw.is25am33.model.Observer,String> notifyFlyingBoard = Observer::notifyFlyingBoardChanged;
+
+        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
     }
 
 }

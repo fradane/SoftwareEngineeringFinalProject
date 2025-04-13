@@ -63,19 +63,19 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         if (currPlayerCannonPower > requiredFirePower) {
 
-            currState = CardState.ACCEPT_THE_REWARD;
+            setCurrState( CardState.ACCEPT_THE_REWARD);
 
         } else if (currPlayerCannonPower == requiredFirePower) {
 
             if (game.hasNextPlayer()) {
                 game.nextPlayer();
             } else {
-                currState = CardState.END_OF_CARD;
+               setCurrState( CardState.END_OF_CARD);
             }
 
         } else {
 
-            currState = CardState.REMOVE_CREW_MEMBERS;
+            setCurrState( CardState.REMOVE_CREW_MEMBERS );
 
         }
 
@@ -88,7 +88,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
             movePlayer(game.getFlyingBoard(), game.getCurrPlayer(), stepsBack);
         }
 
-        currState = CardState.END_OF_CARD;
+        setCurrState( CardState.END_OF_CARD);
 
     }
 
@@ -98,9 +98,9 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         if (game.hasNextPlayer()) {
             game.nextPlayer();
-            currState = CardState.CHOOSE_CANNONS;
+            setCurrState( CardState.CHOOSE_CANNONS);
         } else {
-            currState = CardState.END_OF_CARD;
+            setCurrState( CardState.END_OF_CARD);
         }
 
     }

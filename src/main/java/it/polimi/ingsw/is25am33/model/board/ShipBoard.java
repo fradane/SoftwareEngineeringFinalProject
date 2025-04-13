@@ -1,14 +1,17 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import it.polimi.ingsw.is25am33.model.*;
+import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.CrewMember;
 import it.polimi.ingsw.is25am33.model.game.DTO;
+import it.polimi.ingsw.is25am33.model.game.Game;
 import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -19,6 +22,8 @@ import static it.polimi.ingsw.is25am33.model.ConnectorType.*;
 import static it.polimi.ingsw.is25am33.model.Direction.*;
 
 public abstract class ShipBoard {
+
+    protected GameContext gameContext;
 
     /**
      * The size of the board where components can be placed. Just one length as the board is squared.
@@ -80,13 +85,16 @@ public abstract class ShipBoard {
         shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
     }
 
+    public void setGameContext(GameContext gameContext) {
+        this.gameContext = gameContext;
+    }
+
     public Component getFocusedComponent() {
         return focusedComponent;
     }
 
     public void setFocusedComponent(Component focusedComponent) {
         this.focusedComponent = focusedComponent;
-
     }
 
     /**
@@ -149,7 +157,9 @@ public abstract class ShipBoard {
         DTO dto = new DTO();
         dto.setPlayer(player);
         dto.setCoordinates(new Coordinates(x,y));
-        ObserverManager.getInstance().notifyAll(new GameEvent("placeFocusedComponent",dto));
+
+        BiConsumer<Observer,String> notifyPlacingComponent= Observer::notifyPlacedComponent;
+        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "placeFocusedComponent", dto ), notifyPlacingComponent);
 
     }
 
@@ -788,6 +798,14 @@ public abstract class ShipBoard {
                 incorrectlyPositionedComponents.remove(currentComponent);
             shipMatrix[componentPosition.get(0)][componentPosition.get(1)] = null;
         }
+
+        DTO dto = new DTO();
+        dto.setShipBoard(this);
+
+        BiConsumer<Observer,String> notifyShipBoard= Observer::notifyShipBoardUpdate;
+
+        virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "ShipBoardUpdate", dto ), notifyShipBoard);
+
     }
 
     /**

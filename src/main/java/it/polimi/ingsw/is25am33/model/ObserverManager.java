@@ -4,38 +4,31 @@ import it.polimi.ingsw.is25am33.model.game.GameEvent;
 
 import javax.management.remote.rmi.RMIServer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ObserverManager {
-    private List<Observer> observers;
+    private static ObserverManager instance;
+    private Map<String, GameContext> games;
 
     private ObserverManager() {
-        observers = new ArrayList<>();
+        games = new HashMap<>();
     }
 
-    public void addObserver(Observer observer) {
-        observers.add(observer);
+    public static ObserverManager getInstance() {
+        if (instance == null)
+            instance = new ObserverManager();
+        return instance;
     }
 
-    public void removeObserver(Observer observer) {
-        observers.remove(observer);
+    public void registerGame(GameContext context) {
+        games.put(context.getGameId(), context);
     }
 
-    public Observer getObserver(int index) {
-        return observers.get(index);
-    }
-
-    public List<Observer> getObservers() {
-        return observers;
-    }
-
-
-    public void notifyObserver(String id,GameEvent event) {
-        for (Observer observer : observers) {
-            if(observer.getId().equals(id)) {
-                observer.notify(event);
-            }
-        }
+    public GameContext getGameContext(String gameId) {
+        return games.get(gameId);
     }
 }
+
 

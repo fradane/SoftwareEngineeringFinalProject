@@ -92,7 +92,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
         if (currPlayerCannonPower > requiredFirePower) {
 
-            currState = CardState.ACCEPT_THE_REWARD;
+            setCurrState( CardState.ACCEPT_THE_REWARD);
 
         } else {
 
@@ -103,9 +103,9 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
             } else {
 
                 if (defeatedPlayers.isEmpty()) {
-                    currState = CardState.END_OF_CARD;
+                    setCurrState( CardState.END_OF_CARD);
                 } else {
-                    currState = CardState.THROW_DICES;
+                    setCurrState(CardState.THROW_DICES );
                 }
 
             }
@@ -119,7 +119,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         Shot currShot = shotIterator.next();
         currShot.setCoordinates(Game.throwDices());
         game.setCurrDangerousObj(currShot);
-        currState = CardState.DANGEROUS_ATTACK;
+        setCurrState(CardState.DANGEROUS_ATTACK);
 
     }
 
@@ -131,9 +131,9 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         }
 
         if (defeatedPlayers.isEmpty()) {
-            currState = CardState.END_OF_CARD;
+            setCurrState( CardState.END_OF_CARD);
         } else {
-            currState = CardState.THROW_DICES;
+            setCurrState( CardState.THROW_DICES);
         }
 
     }
@@ -164,10 +164,10 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         if(playerIterator.hasNext()) {
             game.nextPlayer();
         } else if (shotIterator.hasNext()) {
-            currState = CardState.THROW_DICES;
+            setCurrState( CardState.THROW_DICES);
             playerIterator = defeatedPlayers.iterator();
         } else {
-            currState = CardState.END_OF_CARD;
+            setCurrState( CardState.END_OF_CARD);
         }
 
     }
@@ -185,10 +185,10 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         if(playerIterator.hasNext()) {
             game.nextPlayer();
         } else if (shotIterator.hasNext()) {
-            currState = CardState.THROW_DICES;
+            setCurrState( CardState.THROW_DICES);
             playerIterator = defeatedPlayers.iterator();
         } else {
-            currState = CardState.END_OF_CARD;
+            setCurrState( CardState.END_OF_CARD);
         }
 
     }
