@@ -121,7 +121,7 @@ public class Game {
 
         BiConsumer<Observer,String> notifyLittleDeck= Observer::notifyChoosenLittleDeck;
 
-        virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname()), new GameEvent("playerWatchesLittleDeck", dto), notifyLittleDeck)
+        virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname()), new GameEvent("playerWatchesLittleDeck", dto), notifyLittleDeck);
     }
 
     public Boolean hasNextPlayer() {
