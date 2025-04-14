@@ -1,13 +1,19 @@
 package it.polimi.ingsw.is25am33.network.rmi.client;
 
+import it.polimi.ingsw.is25am33.client.ClientController;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.Client.ClientController;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.card.AdventureCard;
+import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.common.ClientNetworkManager;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.common.VirtualServer;
+import it.polimi.ingsw.is25am33.serializationLayer.ClientDeserializer;
 
+import java.io.IOException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -18,12 +24,20 @@ public class RMIClientNetworkManager extends UnicastRemoteObject implements Clie
     private String gameId;
     private VirtualServer server;
     private boolean connected;
-    private ClientController controller;
+    private transient ClientController clientController;
 
     public RMIClientNetworkManager(ClientController controller) throws RemoteException {
         super();
         this.connected = false;
         this.controller = controller;
+    }
+
+    public void setClientController(ClientController clientController) {
+        this.clientController = clientController;
+    }
+
+    public VirtualServer getServer() {
+        return server;
     }
 
     @Override
@@ -165,4 +179,41 @@ public class RMIClientNetworkManager extends UnicastRemoteObject implements Clie
     public String getNickname() throws RemoteException {
         return nickname;
     }
+
+    @Override
+    public void notifyGameStateChange(String json) throws RemoteException {
+        try {
+            clientController.setCurrGameState(ClientDeserializer.deserialize(json, GameState.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void notifyComponentTableUpdate(String json) throws RemoteException {
+        try {
+            clientController.componentTableUpdate(ClientDeserializer.deserialize(json, ComponentTable.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void notifyCurrAdventureCard(String json) throws RemoteException {
+        try {
+            clientController.setCurrAdventureCard(ClientDeserializer.deserialize(json, AdventureCard.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void notifyCardStateChange(String json) throws RemoteException {
+        try {
+            clientController.setCurrCardState(ClientDeserializer.deserialize(json, CardState.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

@@ -5,6 +5,7 @@ import it.polimi.ingsw.is25am33.model.Direction;
 import it.polimi.ingsw.is25am33.model.ComponentState;
 import it.polimi.ingsw.is25am33.model.GameContext;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 
 import java.util.*;
 
@@ -15,7 +16,7 @@ import java.util.*;
 public abstract class Component {
 
     /** Current operational state of the component. */
-    private ComponentState currState = ComponentState.FREE ;
+    private ComponentState currState = ComponentState.HIDDEN ;
 
     /** Current rotation/orientation of the component. */
     private int rotation = 0;

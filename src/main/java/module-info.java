@@ -24,6 +24,9 @@ module it.polimi.ingsw.is25am33 {
 
     // Esportazioni
     exports it.polimi.ingsw.is25am33;
+    exports it.polimi.ingsw.is25am33.model.component;
+    exports it.polimi.ingsw.is25am33.model.card;
+    exports it.polimi.ingsw.is25am33.client;
 
     // Esportazioni aggiuntive per RMI
     exports it.polimi.ingsw.is25am33.network.common to java.rmi;  // AGGIUNTO

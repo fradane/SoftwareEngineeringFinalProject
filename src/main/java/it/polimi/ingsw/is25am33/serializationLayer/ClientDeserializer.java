@@ -2,6 +2,13 @@ package it.polimi.ingsw.is25am33.serializationLayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.is25am33.model.card.Planets;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.AbandonedShip;
+import it.polimi.ingsw.is25am33.model.card.AbandonedStation;
+import it.polimi.ingsw.is25am33.model.component.BatteryBox;
+import it.polimi.ingsw.is25am33.model.component.Cannon;
+import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +28,7 @@ public class ClientDeserializer {
     // TODO serializzare i dangerousObj
 
 
-    public static <T> void deserialize(String json, Class<T> type) throws IOException {
+    public static <T> T deserialize(String json, Class<T> type) throws IOException {
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -30,10 +37,12 @@ public class ClientDeserializer {
 
         // 1° JSON: Coordinates
         String jsonLine = reader.readLine();
-        Object result = mapper.readValue(jsonLine, type);
-        System.out.println(result.toString());
+        T result = mapper.readValue(jsonLine, type);
+        //System.out.println(result.toString());
 
         reader.close();
+
+        return result;
     }
 
     public static void main(String[] args) {

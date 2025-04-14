@@ -26,7 +26,6 @@ public class GameModel {
     private final int maxPlayers;
     private boolean isStarted;
 
-    // TODO aggiungere gameState
     private AdventureCard currAdventureCard;
     private final FlyingBoard flyingBoard;
     private final ConcurrentHashMap<String, Player> players;
@@ -278,7 +277,9 @@ public class GameModel {
                                         case RED -> {
                                             return 4;
                                         }
-                                        default -> {return 0;}
+                                        default -> {
+                                            return 0;
+                                        }
                                     }
                                 }).sum();
 

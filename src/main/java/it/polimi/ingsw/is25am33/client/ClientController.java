@@ -1,9 +1,15 @@
-package it.polimi.ingsw.is25am33.Client;
+package it.polimi.ingsw.is25am33.client;
 
 import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.CardState;
+import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.card.AdventureCard;
+import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.common.ClientNetworkManager;
+import it.polimi.ingsw.is25am33.network.rmi.client.RMIClientNetworkManager;
+import it.polimi.ingsw.is25am33.network.rmi.server.RMIServerNetworkManager;
 
 import java.rmi.RemoteException;
 import java.util.List;
@@ -15,6 +21,8 @@ public class ClientController {
     private String currentGameId;
     private boolean inGame;
     private boolean gameStarted;
+    private GameState currGameState;
+    private CardState currCardState;
 
     /**
      * Costruttore del controller
@@ -31,8 +39,18 @@ public class ClientController {
         this.networkManager = networkManager;
     }
 
+    public void setCurrGameState(GameState currGameState) {
+        this.currGameState = currGameState;
+        showNewGameState(currGameState.toString());
+    }
+
+    public void setCurrCardState(CardState currCardState) {
+        this.currCardState = currCardState;
+        showNewGameState(currCardState.toString());
+    }
+
     /**
-     * Inizia l'esecuzione dell'applicazione
+     * Starts the application execution.
      */
     public void start() {
         view.initialize();
@@ -77,8 +95,9 @@ public class ClientController {
     }
 
     /**
-     * Configura la connessione al server
-     * @throws RemoteException in caso di errori di comunicazione
+     * Sets up the connection to the server.
+     *
+     * @throws RemoteException in case of communication errors
      */
     private void setupConnection() throws RemoteException {
         String serverAddress = view.askServerAddress();
@@ -99,8 +118,9 @@ public class ClientController {
     }
 
     /**
-     * Gestisce il menu principale
-     * @return true per continuare l'esecuzione, false per terminare
+     * Handles the main menu.
+     *
+     * @return true to continue execution, false to exit
      */
     private boolean handleMainMenu() {
         int choice = view.showMainMenu();
@@ -133,12 +153,15 @@ public class ClientController {
     }
 
     /**
-     * Gestisce lo stato di gioco
-     * @return true per continuare l'esecuzione, false per terminare
+     * Handles the game state.
+     *
+     * @return true to continue execution, false to exit
      */
     private boolean handleGameState() {
+
         if (gameStarted) {
-            // Qui andrebbe la logica di gioco effettiva
+            // TODO logica di gioco
+
             view.showMessage("Game in progress...");
             return true;
         }
@@ -165,7 +188,7 @@ public class ClientController {
     }
 
     /**
-     * Mostra i giochi disponibili
+     * Displays the list of available games.
      */
     private void listAvailableGames() throws RemoteException {
         List<GameInfo> games = networkManager.getAvailableGames();
@@ -173,7 +196,7 @@ public class ClientController {
     }
 
     /**
-     * Crea un nuovo gioco
+     * Creates a new game.
      */
     private void createGame() throws RemoteException {
         int[] gameSettings = view.askCreateGame();
@@ -191,7 +214,7 @@ public class ClientController {
     }
 
     /**
-     * Unisciti a un gioco esistente
+     * Joins an existing game.
      */
     private void joinGame() throws RemoteException {
         try {
@@ -236,7 +259,7 @@ public class ClientController {
     }
 
     /**
-     * Lascia il gioco corrente
+     * Leaves the current game.
      */
     private void leaveGame() {
         try {
@@ -253,7 +276,7 @@ public class ClientController {
     }
 
     /**
-     * Disconnette il client dal server
+     * Disconnects the client from the server.
      */
     private void disconnect() {
         if (networkManager != null) {
@@ -283,4 +306,61 @@ public class ClientController {
             ((ClientCLIView) view).cancelInputWaiting();
         }
     }
+
+    /**
+     * Informs the view to display the latest game state as a string.
+     *
+     * @param gameState the string representation of the new game state
+     */
+    public void showNewGameState(String gameState) {
+        view.showNewGameState(gameState);
+    }
+
+    /**
+     * Updates the view with a new ComponentTable.
+     * If no previous table exists, it is shown immediately.
+     *
+     * @param componentTable the updated component table to display
+     */
+    public void componentTableUpdate(ComponentTable componentTable) {
+
+        if (view.getLatestComponentTable() == null) {
+            view.setLatestComponentTable(componentTable);
+            view.showComponentTable();
+        } else {
+            view.setLatestComponentTable(componentTable);
+        }
+
+    }
+
+    /**
+     * Initiates the ship board building phase by showing the build menu
+     * and executing the selected action on the server using the current nickname.
+     */
+    public void buildShipBoardPhase() {
+
+        boolean hasPlayerEndedThisPhase = false;
+
+        while(currGameState == GameState.BUILD_SHIPBOARD && !hasPlayerEndedThisPhase) {
+            hasPlayerEndedThisPhase = view.showBuildShipBoardMenu()
+                    .apply((RMIServerNetworkManager) ((RMIClientNetworkManager) networkManager).getServer(), nickname);
+
+
+        }
+
+        while(currGameState == GameState.BUILD_SHIPBOARD) {
+            view.showShipBoardsMenu();
+        }
+
+    }
+
+    public void setCurrAdventureCard(AdventureCard card) {
+        view.setCurrAdventureCard(card);
+    }
+
+    public void cardPhase() {
+        // TODO
+    }
+
+
 }

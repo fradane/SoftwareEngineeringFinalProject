@@ -1,11 +1,11 @@
 package it.polimi.ingsw.is25am33.model.board;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.CrewMember;
+import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.model.game.DTO;
 import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import it.polimi.ingsw.is25am33.model.game.Player;

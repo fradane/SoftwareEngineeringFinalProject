@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.network.common;
 
 import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 
 import java.rmi.Remote;
@@ -58,6 +59,18 @@ public interface VirtualServer extends Remote {
      * @return true se il nickname è già in uso
      */
     boolean isNicknameInUse(String nickname) throws RemoteException;
+
+    String playerChoseComponentFromTable(String nickname, String coordinatesJson) throws RemoteException;
+
+    void playerChoseToEndBuildShipBoardPhase(String nickname) throws RemoteException;
+
+    boolean playerWantsToSeeShipBoardOf(String chosenPlayerNickname, String nickname) throws RemoteException;
+
+    void playerWantsToPlaceFocusedComponent(String nickname, String coordinatesJson) throws RemoteException;
+
+    void playerWantsToReserveFocusedComponent(String nickname) throws RemoteException;
+
+    void playerWantsToReleaseFocusedComponent(String nickname) throws RemoteException;
 
     boolean isColorAvailable(String gameId, PlayerColor color) throws RemoteException;
 }

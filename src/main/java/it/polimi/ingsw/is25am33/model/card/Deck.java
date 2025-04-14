@@ -7,8 +7,10 @@ import java.io.FileNotFoundException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
+import javax.smartcardio.Card;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -58,7 +60,9 @@ public class Deck {
      * @throws EmptyStackException if the gameModel deck is empty.
      */
     public AdventureCard drawCard() throws EmptyStackException {
-        return gameDeck.pop();
+        AdventureCard card = gameDeck.pop();
+        card.setCurrState(CardState.START_CARD);
+        return card;
     }
 
     /**
