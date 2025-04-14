@@ -3,15 +3,12 @@ package it.polimi.ingsw.is25am33.model.game;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.board.Level2FlyingBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
-import it.polimi.ingsw.is25am33.model.card.MeteoriteStorm;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class GameTest {
+class GameModelTest {
 
     @Test
     void Test() {
@@ -24,9 +21,9 @@ class GameTest {
 
         List<Player> players = new ArrayList<>(List.of(player1, player2, player3, player4));
 
-        Game game = new Game(new Level2FlyingBoard(), players);
+        GameModel gameModel = new GameModel(new Level2FlyingBoard(), players);
 
-        game.getCurrGameState().run(game);
+        gameModel.getCurrGameState().run(gameModel);
 
     }
 

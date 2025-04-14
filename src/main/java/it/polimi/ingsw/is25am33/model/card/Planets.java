@@ -7,7 +7,6 @@ import it.polimi.ingsw.is25am33.model.IllegalIndexException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Storage;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.List;
 
@@ -86,8 +85,8 @@ public class Planets extends AdventureCard implements PlayerMover {
 
             setCurrState( CardState.HANDLE_CUBES_REWARD);
 
-        } else if (game.hasNextPlayer()){
-            game.nextPlayer();
+        } else if (gameModel.hasNextPlayer()){
+            gameModel.nextPlayer();
         } else {
             setCurrState(CardState.END_OF_CARD);
         }
@@ -108,8 +107,8 @@ public class Planets extends AdventureCard implements PlayerMover {
         } else {
             chosenStorage.addCube(currentPlanet.getReward().getLast());
 
-            if (game.hasNextPlayer()) {
-                game.nextPlayer();
+            if (gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
                 setCurrState(CardState.CHOOSE_PLANET);
             } else {
                 setCurrState(CardState.END_OF_CARD);

@@ -1,14 +1,13 @@
 package it.polimi.ingsw.is25am33.model;
 
-import it.polimi.ingsw.is25am33.model.game.Game;
-
+import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 public enum GameState {
 
     SETUP {
         @Override
-        public void run(Game game) {
-            game.getDeck().setUpLittleDecks(game);
+        public void run(GameModel gameModel) {
+            gameModel.getDeck().setUpLittleDecks(gameModel);
             //TODO creazione tessere e posizionamento tessere nel tavolo
         }
     },
@@ -16,7 +15,7 @@ public enum GameState {
     BUILD_SHIPBOARD {
 
         @Override
-        public void run(Game game) {
+        public void run(GameModel gameModel) {
 
         }
 
@@ -25,7 +24,7 @@ public enum GameState {
     CHECK_SHIPBOARD {
 
         @Override
-        public void run(Game game) {
+        public void run(GameModel gameModel) {
 
         }
 
@@ -34,8 +33,8 @@ public enum GameState {
     CREATE_DECK {
 
         @Override
-        public void run(Game game) {
-            game.getDeck().mergeIntoGameDeck();
+        public void run(GameModel gameModel) {
+            gameModel.getDeck().mergeIntoGameDeck();
         }
 
     },
@@ -43,8 +42,8 @@ public enum GameState {
     DRAW_CARD {
 
         @Override
-        public void run(Game game) {
-            game.setCurrAdventureCard(game.getDeck().drawCard());
+        public void run(GameModel gameModel) {
+            gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard());
         }
 
     },
@@ -52,8 +51,8 @@ public enum GameState {
     PLAY_CARD {
 
         @Override
-        public void run(Game game) {
-            game.startCard();
+        public void run(GameModel gameModel) {
+            gameModel.startCard();
         }
 
     },
@@ -61,8 +60,8 @@ public enum GameState {
     CHECK_PLAYERS {
 
         @Override
-        public void run(Game game) {
-            game.getFlyingBoard().getDoubledPlayers();
+        public void run(GameModel gameModel) {
+            gameModel.getFlyingBoard().getDoubledPlayers();
         }
 
     },
@@ -70,12 +69,12 @@ public enum GameState {
     END_GAME {
 
         @Override
-        public void run(Game game) {
-            game.calculatePlayersCredits();
+        public void run(GameModel gameModel) {
+            gameModel.calculatePlayersCredits();
         }
 
     };
 
-    public abstract void run(Game game);
+    public abstract void run(GameModel gameModel);
 
 }

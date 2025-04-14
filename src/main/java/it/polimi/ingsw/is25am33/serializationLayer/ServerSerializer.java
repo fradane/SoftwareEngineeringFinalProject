@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.serializationLayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.board.*;
+import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.game.DTO;
 import it.polimi.ingsw.is25am33.model.game.GameEvent;
@@ -13,6 +14,9 @@ import java.util.function.Function;
 
 public class ServerSerializer{
 
+    // TODO aggiornamenti della view, guardare la classe gameModel e simili e il diagramma di marco il negro
+
+    // TODO serializzare i cambiamenti sulle shipBoard
     private static final Map<String, Function<GameEvent, String>> serializers = Map.ofEntries(
             Map.entry("drawnCard", (gameEvent) -> ServerSerializer.serializeObj(gameEvent.getDTO().getAdventureCard())),
             Map.entry("playerWatchesLittleDeck", (gameEvent) -> ServerSerializer.serializeObj(gameEvent.getDTO().getLittleDeck())),
@@ -29,7 +33,7 @@ public class ServerSerializer{
     );
 
     public static String serialize(GameEvent gameEvent) {
-        return serializers.get(gameEvent.getEventID()).apply(gameEvent);
+        return serializers.get(gameEvent.getEventId()).apply(gameEvent);
     }
 
     private static <T> String serializeObj(T objToSerialize) {
@@ -120,3 +124,6 @@ public class ServerSerializer{
      */
 
 }
+
+
+

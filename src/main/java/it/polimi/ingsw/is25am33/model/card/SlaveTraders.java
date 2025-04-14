@@ -8,7 +8,6 @@ import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Cannon;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.List;
 
@@ -59,7 +58,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
     private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
 
-        double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, game.getCurrPlayer());
+        double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
 
         if (currPlayerCannonPower > requiredFirePower) {
 
@@ -67,8 +66,8 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         } else if (currPlayerCannonPower == requiredFirePower) {
 
-            if (game.hasNextPlayer()) {
-                game.nextPlayer();
+            if (gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
             } else {
                setCurrState( CardState.END_OF_CARD);
             }
@@ -84,8 +83,8 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
     private void currPlayerDecidedToGetTheReward(boolean hasPlayerAcceptedTheReward) {
 
         if (hasPlayerAcceptedTheReward) {
-            game.getCurrPlayer().addCredits(reward);
-            movePlayer(game.getFlyingBoard(), game.getCurrPlayer(), stepsBack);
+            gameModel.getCurrPlayer().addCredits(reward);
+            movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
         }
 
         setCurrState( CardState.END_OF_CARD);
@@ -96,8 +95,8 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         removeMemberProcess(chosenCabins, crewMalus);
 
-        if (game.hasNextPlayer()) {
-            game.nextPlayer();
+        if (gameModel.hasNextPlayer()) {
+            gameModel.nextPlayer();
             setCurrState( CardState.CHOOSE_CANNONS);
         } else {
             setCurrState( CardState.END_OF_CARD);

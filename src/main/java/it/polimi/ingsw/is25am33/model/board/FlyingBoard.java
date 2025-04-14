@@ -4,7 +4,7 @@ import it.polimi.ingsw.is25am33.model.GameContext;
 import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.ObserverManager;
 import it.polimi.ingsw.is25am33.model.game.DTO;
-import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
@@ -57,7 +57,7 @@ public abstract class FlyingBoard {
     /**
      * Returns the set of players who have been doubled.
      *
-     * @return A set of players who are out of the game.
+     * @return A set of players who are out of the gameModel.
      */
     public Set<Player> getOutPlayers() {
         return outPlayers;
@@ -94,7 +94,7 @@ public abstract class FlyingBoard {
      * Identifies and returns the players who have been doubled, based on their position.
      * Doubled players are added to the outPlayers set and removed from the ranking.
      *
-     * @return A list of players who are out of the game.
+     * @return A list of players who are out of the gameModel.
      */
     public List<Player> getDoubledPlayers() {
         int maxPosition = Collections.max(ranking.values());

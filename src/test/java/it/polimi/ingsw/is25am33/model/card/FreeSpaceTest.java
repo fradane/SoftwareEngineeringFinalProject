@@ -9,7 +9,7 @@ import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.DoubleEngine;
 import it.polimi.ingsw.is25am33.model.component.Engine;
-import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,45 +23,45 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FreeSpaceTest {
 
-    private Game game;
+    private GameModel gameModel;
     private List<Player> players;
     private AdventureCard card;
     private FlyingBoard flyingBoard;
     private ShipBoard shipBoard;
 
     @BeforeEach
-    void setUp() {
-
-         shipBoard = new Level2ShipBoard(null) {
-
-            public int countTotalEnginePower(Stream<Engine> engineStream) {
-                return 5;
-            }
-
-         };
-
-         flyingBoard = new Level2FlyingBoard() {
-
-            public void movePlayer(Player player, int offset) {}
-
-         };
-
-         players = new ArrayList<>(List.of( new Player("fra", shipBoard),
-                new Player("ali", shipBoard),
-                new Player("luc", shipBoard),
-                new Player("mar", shipBoard)));
-
-         game = new Game(flyingBoard, players);
-
-         card = new FreeSpace();
-
-         game.setCurrAdventureCard(card);
-         card.setCurrState(CardState.START_CARD);
-         game.setCurrRanking(players);
-
-         game.startCard();
-
-    }
+//    void setUp() {
+//
+//         shipBoard = new Level2ShipBoard(null) {
+//
+//            public int countTotalEnginePower(Stream<Engine> engineStream) {
+//                return 5;
+//            }
+//
+//         };
+//
+//         flyingBoard = new Level2FlyingBoard() {
+//
+//            public void movePlayer(Player player, int offset) {}
+//
+//         };
+//
+//         players = new ArrayList<>(List.of( new Player("fra", shipBoard),
+//                new Player("ali", shipBoard),
+//                new Player("luc", shipBoard),
+//                new Player("mar", shipBoard)));
+//
+//         gameModel = new GameModel(flyingBoard, players);
+//
+//         card = new FreeSpace();
+//
+//         gameModel.setCurrAdventureCard(card);
+//         card.setCurrState(CardState.START_CARD);
+//         gameModel.setCurrRanking(players);
+//
+//         gameModel.startCard();
+//
+//    }
 
     @Test
     void TestToCheckIfTheMethodIsAppliedForEveryPlayerInOrder() {
@@ -74,7 +74,7 @@ class FreeSpaceTest {
 
         IntStream.range(0, 4).forEach(i -> {
 
-            assertEquals(game.getCurrPlayer(), players.get(i));
+            assertEquals(gameModel.getCurrPlayer(), players.get(i));
             ((FreeSpace) card).currPlayerChoseEnginesToActivate(doubleEngines, batteryBoxes);
 
         });
@@ -86,7 +86,7 @@ class FreeSpaceTest {
     @Test
     void TestToCheckIfIllegalArgumentExceptionIsThrownWithNullParameters() {
 
-        assertEquals(game.getCurrPlayer(), players.getFirst());
+        assertEquals(gameModel.getCurrPlayer(), players.getFirst());
 
         Exception e = assertThrows(IllegalArgumentException.class, () -> {
             ((FreeSpace) card).currPlayerChoseEnginesToActivate(null, null);
@@ -99,7 +99,7 @@ class FreeSpaceTest {
     @Test
     void TestToCheckIfIllegalArgumentExceptionIsThrownWithDifferentSizeParameters() {
 
-        assertEquals(game.getCurrPlayer(), players.getFirst());
+        assertEquals(gameModel.getCurrPlayer(), players.getFirst());
 
         DoubleEngine doubleEngine = new DoubleEngine(null);
         List<Engine> doubleEngines = new ArrayList<>(List.of(doubleEngine, doubleEngine));
@@ -118,7 +118,7 @@ class FreeSpaceTest {
     @Test
     void TestToCheckIfIllegalArgumentExceptionIsThrownWithNotEnoughBatteries() {
 
-        assertEquals(game.getCurrPlayer(), players.getFirst());
+        assertEquals(gameModel.getCurrPlayer(), players.getFirst());
 
         DoubleEngine doubleEngine = new DoubleEngine(null);
         List<Engine> doubleEngines = new ArrayList<>(List.of(doubleEngine, doubleEngine, doubleEngine));
@@ -151,7 +151,7 @@ class FreeSpaceTest {
 
         IntStream.range(0, 4).forEach(i -> {
 
-            assertEquals(game.getCurrPlayer(), players.get(i));
+            assertEquals(gameModel.getCurrPlayer(), players.get(i));
             card.play(playerChoices);
 
         });

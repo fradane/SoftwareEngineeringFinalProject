@@ -3,7 +3,6 @@ package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.model.CargoCube;
 import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.List;
 
@@ -35,9 +34,9 @@ public class Smugglers extends Enemies implements PlayerMover {
     }
 
     // TODO
-//    public void effect(Game game) {
+//    public void effect(GameModel gameModel) {
 //
-//        ArrayList<Player> playersRanking = game.getFlyingBoard().getCurrentRanking();
+//        ArrayList<Player> playersRanking = gameModel.getFlyingBoard().getCurrentRanking();
 //
 //        for (Player p : playersRanking) {
 //
@@ -45,13 +44,13 @@ public class Smugglers extends Enemies implements PlayerMover {
 //
 //            if(currPlayerTotalCannonPower > requiredFirePower) {
 //
-//                movePlayer(game.getFlyingBoard(), p, stepsBack);
+//                movePlayer(gameModel.getFlyingBoard(), p, stepsBack);
 //                this.handleCargoCubesReward(reward, p);
 //                break;
 //
 //            } else if(currPlayerTotalCannonPower < requiredFirePower) {
 //
-//                this.removeMostValuableCargoCubes(p, game.getController());
+//                this.removeMostValuableCargoCubes(p, gameModel.getController());
 //
 //            }
 //

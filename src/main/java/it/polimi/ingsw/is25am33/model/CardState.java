@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model;
 
 import it.polimi.ingsw.is25am33.model.component.*;
-import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.serializationLayer.ServerDeserializer;
 
@@ -14,7 +14,7 @@ public enum CardState {
 
     START_CARD {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             // implementazione specifica
             return null;
         }
@@ -22,7 +22,7 @@ public enum CardState {
 
     CHOOSE_CANNONS {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) throws IOException {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) throws IOException {
             BufferedReader reader = new BufferedReader(new StringReader(json));
             String doubleCannonLine = reader.readLine();
             List<Cannon> DoubleCannonsChoice = ServerDeserializer.fromComponentToDoubleCannon(doubleCannonLine, game.getCurrPlayer());
@@ -39,7 +39,7 @@ public enum CardState {
 
     CHOOSE_ENGINES {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) throws IOException {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) throws IOException {
             BufferedReader reader = new BufferedReader(new StringReader(json));
             String doubleEnginesLine = reader.readLine();
             List<Engine> doubleEnginesChoice = ServerDeserializer.fromComponentToDoubleEngine(doubleEnginesLine, game.getCurrPlayer());
@@ -56,7 +56,7 @@ public enum CardState {
 
     REMOVE_CREW_MEMBERS {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             List<Cabin> cabinsChoice = ServerDeserializer.fromComponentToCabin(json, game.getCurrPlayer());
             return new PlayerChoicesDataStructure
                     .Builder()
@@ -67,7 +67,7 @@ public enum CardState {
 
     HANDLE_CUBES_REWARD {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json)  {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json)  {
             Storage storageChoice = ServerDeserializer.deserializeObj(json, Storage.class);
             return new PlayerChoicesDataStructure
                     .Builder()
@@ -78,7 +78,7 @@ public enum CardState {
 
     HANDLE_CUBES_MALUS {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             Storage storageChoice = ServerDeserializer.deserializeObj(json, Storage.class);
             return new PlayerChoicesDataStructure
                     .Builder()
@@ -89,7 +89,7 @@ public enum CardState {
 
     CHOOSE_PLANET {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             int playerChoice = ServerDeserializer.deserializeObj(json, Integer.class);
             return new PlayerChoicesDataStructure
                     .Builder()
@@ -100,7 +100,7 @@ public enum CardState {
 
     VISIT_LOCATION {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             boolean playerChoice = ServerDeserializer.deserializeObj(json, Boolean.class);
             return new PlayerChoicesDataStructure
                     .Builder()
@@ -111,7 +111,7 @@ public enum CardState {
 
     DANGEROUS_ATTACK {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) throws IOException {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) throws IOException {
             BufferedReader reader = new BufferedReader(new StringReader(json));
             String doubleEnginesLine = reader.readLine();
             Shield shieldChoice = ServerDeserializer.deserializeObj(doubleEnginesLine, Shield.class);
@@ -127,25 +127,25 @@ public enum CardState {
     },
     THROW_DICES {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
         }
     },
     EPIDEMIC {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
         }
     },
     STARDUST {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
         }
     },
     ACCEPT_THE_REWARD {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             boolean playerChoice = ServerDeserializer.deserializeObj(json, Boolean.class);
             return new PlayerChoicesDataStructure
                     .Builder()
@@ -155,10 +155,10 @@ public enum CardState {
     },
     END_OF_CARD {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) {
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
         }
     };
 
-    public abstract PlayerChoicesDataStructure handleJsonDeserialization(Game game, String json) throws IOException;
+    public abstract PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) throws IOException;
 }

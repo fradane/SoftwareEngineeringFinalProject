@@ -9,7 +9,7 @@ import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
 import it.polimi.ingsw.is25am33.model.component.Shield;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Meteorite;
-import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.util.*;
 
@@ -51,7 +51,7 @@ public class MeteoriteStorm extends AdventureCard {
                 this.throwDices();
                 break;
             case DANGEROUS_ATTACK:
-                ((Meteorite) game.getCurrDangerousObj()).startAttack(playerChoices, this);
+                ((Meteorite) gameModel.getCurrDangerousObj()).startAttack(playerChoices, this);
                 break;
             default:
                 throw new UnknownStateException("Unknown current state");
@@ -80,8 +80,8 @@ public class MeteoriteStorm extends AdventureCard {
     private void throwDices() {
 
         Meteorite currMeteorite = meteoriteIterator.next();
-        currMeteorite.setCoordinates(Game.throwDices());
-        game.setCurrDangerousObj(currMeteorite);
+        currMeteorite.setCoordinates(GameModel.throwDices());
+        gameModel.setCurrDangerousObj(currMeteorite);
         setCurrState(  CardState.DANGEROUS_ATTACK);
 
     }
@@ -92,9 +92,9 @@ public class MeteoriteStorm extends AdventureCard {
 
     public void playerDecidedHowToDefendTheirSelvesFromSmallMeteorite(Shield chosenShield, BatteryBox chosenBatteryBox) {
 
-        ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
+        ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
 
-        DangerousObj currMeteorite = game.getCurrDangerousObj();
+        DangerousObj currMeteorite = gameModel.getCurrDangerousObj();
 
         if (personalBoard.isItGoingToHitTheShip(currMeteorite) &&
                 personalBoard.isExposed(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
@@ -114,11 +114,11 @@ public class MeteoriteStorm extends AdventureCard {
 
         }
 
-        if(game.hasNextPlayer()) {
-            game.nextPlayer();
+        if(gameModel.hasNextPlayer()) {
+            gameModel.nextPlayer();
         } else if (meteoriteIterator.hasNext()) {
             setCurrState( CardState.THROW_DICES);
-            game.resetPlayerIterator();
+            gameModel.resetPlayerIterator();
         } else {
             setCurrState( CardState.END_OF_CARD);
         }
@@ -127,9 +127,9 @@ public class MeteoriteStorm extends AdventureCard {
 
     public void playerDecidedHowToDefendTheirSelvesFromBigMeteorite(DoubleCannon chosenDoubleCannon, BatteryBox chosenBatteryBox) {
 
-        ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
+        ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
 
-        DangerousObj currMeteorite = game.getCurrDangerousObj();
+        DangerousObj currMeteorite = gameModel.getCurrDangerousObj();
 
         if (personalBoard.isItGoingToHitTheShip(currMeteorite) && !personalBoard.isThereACannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
 
@@ -152,11 +152,11 @@ public class MeteoriteStorm extends AdventureCard {
 
         }
 
-        if(game.hasNextPlayer()) {
-            game.nextPlayer();
+        if(gameModel.hasNextPlayer()) {
+            gameModel.nextPlayer();
         } else if (meteoriteIterator.hasNext()) {
             setCurrState( CardState.THROW_DICES);
-            game.resetPlayerIterator();
+            gameModel.resetPlayerIterator();
         } else {
             setCurrState( CardState.END_OF_CARD);
         }

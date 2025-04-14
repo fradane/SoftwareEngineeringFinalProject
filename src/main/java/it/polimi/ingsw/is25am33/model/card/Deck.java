@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 
 /**
- * Represents a deck of adventure cards used in the game.
+ * Represents a deck of adventure cards used in the gameModel.
  * It manages different levels of cards, organizes them into decks,
  * and provides methods for drawing and shuffling.
  */
@@ -43,7 +43,7 @@ public class Deck {
     }
 
     /**
-     * Merges the smaller decks into the main game deck and shuffles it.
+     * Merges the smaller decks into the main gameModel deck and shuffles it.
      */
     public void mergeIntoGameDeck() {
         gameDeck.addAll(littleNotVisibleDeck);
@@ -52,10 +52,10 @@ public class Deck {
     }
 
     /**
-     * Draws a card from the game deck.
+     * Draws a card from the gameModel deck.
      *
      * @return The top AdventureCard from the deck.
-     * @throws EmptyStackException if the game deck is empty.
+     * @throws EmptyStackException if the gameModel deck is empty.
      */
     public AdventureCard drawCard() throws EmptyStackException {
         return gameDeck.pop();
@@ -76,9 +76,9 @@ public class Deck {
      * Sets up the smaller decks by categorizing cards into levels,
      * shuffling them, and distributing them into the visible and non-visible decks.
      */
-    public void setUpLittleDecks(Game game) {
+    public void setUpLittleDecks(GameModel gameModel) {
         loadCards();
-        allCards.forEach(adventureCard -> adventureCard.setGame(game));
+        allCards.forEach(adventureCard -> adventureCard.setGame(gameModel));
         List<AdventureCard> level1Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 1).toList());
         List<AdventureCard> level2Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 2).toList());
 

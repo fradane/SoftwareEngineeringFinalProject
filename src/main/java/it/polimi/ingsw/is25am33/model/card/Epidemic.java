@@ -5,7 +5,7 @@ import it.polimi.ingsw.is25am33.model.ObserverManager;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.game.DTO;
-import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.game.GameEvent;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class Epidemic extends AdventureCard{
 
     public void removeInfectedCrewMembers() {
 
-        game.getPlayers()
+        gameModel.getCurrRanking()
                 .stream()
                 .flatMap(p -> p.getPersonalBoard().cabinWithNeighbors().stream())
                 .forEach(Cabin::removeMember);

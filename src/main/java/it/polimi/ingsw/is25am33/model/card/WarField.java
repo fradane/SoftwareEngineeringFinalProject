@@ -4,7 +4,6 @@ import it.polimi.ingsw.is25am33.model.Category;
 import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.List;
 
@@ -51,16 +50,16 @@ public class WarField extends AdventureCard implements PlayerMover {
     }
 
     // TODO
-//    public void effect(Game game) {
+//    public void effect(GameModel gameModel) {
 //
-//        FlyingBoard flyingBoard = game.getFlyingBoard();
+//        FlyingBoard flyingBoard = gameModel.getFlyingBoard();
 //
 //        minimunCategories.forEach(cat -> {
 //            Player minPlayer = cat.getMinimumPlayer(flyingBoard.getCurrentRanking());
 //
 //            switch (minimunCategories.indexOf(cat)) {
 //                case 0:
-//                    movePlayer(game.getFlyingBoard, minPlayer, stepsBack);
+//                    movePlayer(gameModel.getFlyingBoard, minPlayer, stepsBack);
 //                    break;
 //
 //                case 1:
@@ -71,7 +70,7 @@ public class WarField extends AdventureCard implements PlayerMover {
 //
 //                    for(Shot s : shots) {
 //
-//                        s.setCoordinates(Game.throwDices());
+//                        s.setCoordinates(GameModel.throwDices());
 //                        minPlayer.getPersonalBoard().handleDangerousObj(s);
 //
 //                    }

@@ -1,5 +1,7 @@
 package it.polimi.ingsw.is25am33.model;
 
+import it.polimi.ingsw.is25am33.network.common.VirtualServer;
+
 import java.util.ArrayList;
 import java.util.List;
 

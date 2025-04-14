@@ -96,9 +96,9 @@ Il progetto dovrà includere:
   *Email:* [francesco.danese@mail.polimi.it](mailto:francesco.danese@mail.polimi.it)
 
 #### Project Description
-This project involves developing a software version of the board game **Galaxy Trucker**.  
+This project involves developing a software version of the board gameModel **Galaxy Trucker**.  
 The software must:
-1. **Handle** the game mechanics (from assembling the spaceship to the flight phase).
+1. **Handle** the gameModel mechanics (from assembling the spaceship to the flight phase).
 2. **Implement** the rules of Galaxy Trucker, following the provided documentation (specifically both the "simplified rules" and "complete rules").
 3. **Adopt** a **client-server** architecture (based on JavaSE) that uses a network protocol (TCP/IP sockets and/or RMI).
 4. **Utilize** the **MVC pattern** (Model, View, it.polimi.ingsw.is25am33.Controller) to separate responsibilities.
@@ -106,10 +106,10 @@ The software must:
 6. **Include** supporting materials such as UML documentation, JavaDoc, unit tests, peer review documents, and communication protocol documentation.
 
 Additionally, the project may feature **advanced functionalities** (optional) such as:
-- **Test Flight**: A simplified game mode.
+- **Test Flight**: A simplified gameModel mode.
 - **Multiple Games**: The ability for the server to manage several games simultaneously.
-- **Persistence**: Periodic saving of the game state to disk.
-- **Disconnection Resilience**: Mechanisms to allow clients to reconnect without losing their game session.
+- **Persistence**: Periodic saving of the gameModel state to disk.
+- **Disconnection Resilience**: Mechanisms to allow clients to reconnect without losing their gameModel session.
 
 #### Project Materials and Deliverables
 The project should include:

@@ -3,34 +3,87 @@ package it.polimi.ingsw.is25am33.model.game;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.board.*;
+import it.polimi.ingsw.is25am33.model.CardState;
+import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.network.common.VirtualServer;
 
 import javax.management.remote.rmi.RMIServer;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.concurrent.ConcurrentHashMap;
 
 
-public class Game {
+public class GameModel {
+    private final String gameId;
+    private final boolean isTestFlight;
+    private final int maxPlayers;
+    private boolean isStarted;
 
     // TODO aggiungere gameState
     private AdventureCard currAdventureCard;
     private final FlyingBoard flyingBoard;
-    private final List<Player> players;
+    private final ConcurrentHashMap<String, Player> players;
     private List<Player> currRanking;
     private Player currPlayer;
     private Iterator<Player> playerIterator;
     private DangerousObj currDangerousObj;
-    private GameState currGameState = GameState.SETUP;
+    private GameState currGameState;
     private Deck deck;
     private ComponentTable componentTable;
     private GameContext gameContext;
 
+    public GameModel(String gameId, int maxPlayers, boolean isTestFlight, VirtualServer virtualServer) {
+        this.gameId = gameId;
+        this.maxPlayers = maxPlayers;
+        this.isTestFlight = isTestFlight;
+        this.flyingBoard = isTestFlight ? new Level1FlyingBoard() : new Level2FlyingBoard();
+        flyingBoard.setGameContext(gameContext);
+        currAdventureCard = null;
+        currRanking = new ArrayList<>();
+        currPlayer = null;
+        currDangerousObj = null;
+        currGameState = GameState.SETUP;
+        this.players = new ConcurrentHashMap<>();
+        deck = new Deck();
+        isStarted = false;
+        gameContext = new GameContext(gameId, virtualServer);
+        componentTable = new ComponentTable();
+        ObserverManager.getInstance().registerGame(gameContext);
+    }
+
+    public String getGameId() {
+        return gameId;
+    }
+
+    public ConcurrentHashMap<String, Player> getPlayers() {
+        return players;
+    }
+
+    public boolean isTestFlight() {
+        return isTestFlight;
+    }
+
+    public boolean isStarted() {
+        return isStarted;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
     public void setCurrGameState(GameState currGameState) {
         this.currGameState = currGameState;
+    }
+
+    public GameContext getGameContext() {
+        return gameContext;
     }
 
     public GameState getCurrGameState() {
@@ -39,25 +92,6 @@ public class Game {
 
     public Deck getDeck() {
         return deck;
-    }
-
-
-    public Game(VirtualServer virtualServer, FlyingBoard flyingBoard, List<Player> players, List<Component> components, String gameId) {
-        this.flyingBoard = flyingBoard;
-        currAdventureCard = null;
-        currRanking = new ArrayList<>();
-        currPlayer = null;
-        currDangerousObj = null;
-        this.players = players;
-        deck = new Deck();
-        componentTable = new ComponentTable(components);
-        gameContext = new GameContext(gameId, virtualServer);
-        flyingBoard.setGameContext(gameContext);
-        ObserverManager.getInstance().registerGame(gameContext);
-    }
-
-    public GameContext getGameContext() {
-        return gameContext;
     }
 
     public void setFocusComponent(Player player, Coordinates coordinates){
@@ -162,7 +196,7 @@ public class Game {
         return flyingBoard;
     }
 
-    public List<Player> getPlayers() {
+    public List<Player> getCurrRanking() {
         return currRanking;
     }
 
@@ -183,7 +217,7 @@ public class Game {
     }
 
     /**
-     * Starts the current card phase: updates the game's currState and the card's currState to
+     * Starts the current card phase: updates the gameModel's currState and the card's currState to
      * the first of the actual card, sets the currPlayer to the first based on the provided
      * ranking.
      *
@@ -206,7 +240,7 @@ public class Game {
 
         Map<Player, Integer> x = new HashMap<>();
 
-        players.forEach(player -> {
+        players.values().forEach(player -> {
             x.put(player, player.getPersonalBoard().countExposed());
         });
 
@@ -218,7 +252,7 @@ public class Game {
 
     public void calculatePlayersCredits() {
 
-        players.forEach(player -> {
+        players.values().forEach(player -> {
 
             int credits = player.getOwnedCredits();
 
@@ -258,9 +292,13 @@ public class Game {
     public void addPlayer(String nickname, PlayerColor color) {
         ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color) : new Level2ShipBoard(color);
         shipBoard.setGameContext(gameContext);
-        Player player = new Player(nickname, shipBoard);
+        Player player = new Player(nickname, shipBoard, color);
         player.setGameContext(gameContext);
         players.put(nickname, player);
+    }
+
+    public void removePlayer(String nickname) {
+        players.remove(nickname);
     }
 
 }

@@ -12,7 +12,7 @@ import it.polimi.ingsw.is25am33.model.component.Cannon;
 import it.polimi.ingsw.is25am33.model.component.Shield;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
-import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
@@ -53,7 +53,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
                 this.throwDices();
                 break;
             case DANGEROUS_ATTACK:
-                ((Shot) game.getCurrDangerousObj()).startAttack(playerChoices, this);
+                ((Shot) gameModel.getCurrDangerousObj()).startAttack(playerChoices, this);
                 break;
             default:
                 throw new UnknownStateException("Unknown current state");
@@ -94,7 +94,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
     private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
 
-        double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, game.getCurrPlayer());
+        double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
 
         if (currPlayerCannonPower > requiredFirePower) {
 
@@ -102,10 +102,10 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
         } else {
 
-            if (currPlayerCannonPower < requiredFirePower) defeatedPlayers.add(game.getCurrPlayer());
+            if (currPlayerCannonPower < requiredFirePower) defeatedPlayers.add(gameModel.getCurrPlayer());
 
-            if (game.hasNextPlayer()) {
-                game.nextPlayer();
+            if (gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
             } else {
 
                 if (defeatedPlayers.isEmpty()) {
@@ -123,8 +123,8 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
     private void throwDices() {
 
         Shot currShot = shotIterator.next();
-        currShot.setCoordinates(Game.throwDices());
-        game.setCurrDangerousObj(currShot);
+        currShot.setCoordinates(GameModel.throwDices());
+        gameModel.setCurrDangerousObj(currShot);
         setCurrState(CardState.DANGEROUS_ATTACK);
 
     }
@@ -132,8 +132,8 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
     private void currPlayerDecidedToGetTheReward(boolean hasPlayerAcceptedTheReward) {
 
         if (hasPlayerAcceptedTheReward) {
-            game.getCurrPlayer().addCredits(reward);
-            movePlayer(game.getFlyingBoard(), game.getCurrPlayer(), stepsBack);
+            gameModel.getCurrPlayer().addCredits(reward);
+            movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
         }
 
         if (defeatedPlayers.isEmpty()) {
@@ -146,9 +146,9 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
     public void playerDecidedHowToDefendTheirSelvesFromSmallShot(Shield chosenShield, BatteryBox chosenBatteryBox) {
 
-        ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
+        ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
 
-        DangerousObj currShot = game.getCurrDangerousObj();
+        DangerousObj currShot = gameModel.getCurrDangerousObj();
 
         if (personalBoard.isItGoingToHitTheShip(currShot)) {
 
@@ -168,7 +168,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         }
 
         if(playerIterator.hasNext()) {
-            game.nextPlayer();
+            gameModel.nextPlayer();
         } else if (shotIterator.hasNext()) {
             setCurrState( CardState.THROW_DICES);
             playerIterator = defeatedPlayers.iterator();
@@ -180,16 +180,16 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
     public void playerIsAttackedByABigShot() {
 
-        ShipBoard personalBoard = game.getCurrPlayer().getPersonalBoard();
+        ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
 
-        DangerousObj currShot = game.getCurrDangerousObj();
+        DangerousObj currShot = gameModel.getCurrDangerousObj();
 
         if (!personalBoard.isItGoingToHitTheShip(currShot)) {
             personalBoard.handleDangerousObject(currShot);
         }
 
         if(playerIterator.hasNext()) {
-            game.nextPlayer();
+            gameModel.nextPlayer();
         } else if (shotIterator.hasNext()) {
             setCurrState( CardState.THROW_DICES);
             playerIterator = defeatedPlayers.iterator();

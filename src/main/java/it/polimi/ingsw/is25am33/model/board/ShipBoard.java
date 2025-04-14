@@ -1,27 +1,26 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.CrewMember;
 import it.polimi.ingsw.is25am33.model.game.DTO;
-import it.polimi.ingsw.is25am33.model.game.Game;
 import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.polimi.ingsw.is25am33.model.ComponentState.*;
 import static it.polimi.ingsw.is25am33.model.ConnectorType.*;
 import static it.polimi.ingsw.is25am33.model.Direction.*;
 
-public abstract class ShipBoard {
+public abstract class ShipBoard implements Serializable {
 
     protected GameContext gameContext;
 
@@ -347,6 +346,7 @@ public abstract class ShipBoard {
             throw new IllegalArgumentException("No component in this position");
 
         notActiveComponents.add(shipMatrix[x][y]);
+        incorrectlyPositionedComponents.remove(shipMatrix[x][y]);
         shipMatrix[x][y] = null;
 
         return identifyShipParts(x, y);

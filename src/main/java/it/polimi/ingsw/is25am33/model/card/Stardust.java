@@ -3,7 +3,6 @@ package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
-import it.polimi.ingsw.is25am33.model.game.Game;
 
 import java.util.List;
 
@@ -35,8 +34,8 @@ public class Stardust extends AdventureCard implements PlayerMover {
 
     private void moveNotCorrectlyAssembledShips() {
 
-        game.getPlayers()
-                .forEach(p -> movePlayer(game.getFlyingBoard(), p, p.getPersonalBoard().countExposed() * -1));
+        gameModel.getCurrRanking()
+                .forEach(p -> movePlayer(gameModel.getFlyingBoard(), p, p.getPersonalBoard().countExposed() * -1));
 
         setCurrState( CardState.END_OF_CARD);
 

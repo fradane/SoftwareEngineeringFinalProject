@@ -7,7 +7,7 @@ import java.util.Optional;
 
 /**
  * This class represents a structured collection of player-selected options used to communicate
- * the player's decisions to the game model. It encapsulates all possible choices made by the user
+ * the player's decisions to the gameModel model. It encapsulates all possible choices made by the user
  * during various phases of gameplay, including component selections, planet visits, and reward acceptance.
  *
  * <p>The contained choices are utilized by the model to process and execute player actions accordingly.</p>
