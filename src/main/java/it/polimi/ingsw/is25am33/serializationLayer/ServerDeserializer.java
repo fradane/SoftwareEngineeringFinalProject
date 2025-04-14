@@ -12,8 +12,6 @@ import java.util.stream.Stream;
 
 public class ServerDeserializer {
 
-    // TODO guardare la classe playerChoicesDataStructure che sicuramente quelle cose vanno deserializzate
-
     public static <T> T deserializeObj(String jsonStringWithData, Class<T> type) {
 
         try {
