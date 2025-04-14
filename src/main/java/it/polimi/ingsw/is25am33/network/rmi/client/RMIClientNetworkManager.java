@@ -1,6 +1,6 @@
 package it.polimi.ingsw.is25am33.network.rmi.client;
 
-import it.polimi.ingsw.is25am33.Client.ClientController;
+import it.polimi.ingsw.is25am33.client.ClientController;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;

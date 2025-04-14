@@ -1,4 +1,4 @@
-package it.polimi.ingsw.is25am33.Client;
+package it.polimi.ingsw.is25am33.client;
 
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -18,7 +18,7 @@ public class ClientCLIView implements ClientView {
     private volatile boolean waitingForInput = false;
 
 
-    // Definizione di un colore rosso ANSI per gli errori (funziona nei terminali che supportano i colori ANSI)
+    // Definizione di un colore rosso ANSI per gli errori (funziona nei terminali che supportano i colori ANSI).
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_RESET = "\u001B[0m";
 

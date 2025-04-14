@@ -1,11 +1,8 @@
 package it.polimi.ingsw.is25am33.network.common;
 
-import it.polimi.ingsw.is25am33.Client.ClientController;
-import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
