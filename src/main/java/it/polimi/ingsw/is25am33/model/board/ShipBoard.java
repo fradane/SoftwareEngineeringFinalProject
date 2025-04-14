@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.component.*;
@@ -162,7 +163,7 @@ public abstract class ShipBoard implements Serializable {
         dto.setCoordinates(new Coordinates(x,y));
 
         BiConsumer<Observer,String> notifyPlacingComponent= Observer::notifyPlacedComponent;
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "placeFocusedComponent", dto ), notifyPlacingComponent);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "placeFocusedComponent", dto ), notifyPlacingComponent);
 
     }
 
@@ -817,7 +818,7 @@ public abstract class ShipBoard implements Serializable {
 
         BiConsumer<Observer,String> notifyShipBoard= Observer::notifyShipBoardUpdate;
 
-        virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "ShipBoardUpdate", dto ), notifyShipBoard);
+        //virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "ShipBoardUpdate", dto ), notifyShipBoard);
 
     }
 

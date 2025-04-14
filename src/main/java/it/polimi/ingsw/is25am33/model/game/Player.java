@@ -52,7 +52,7 @@ public class Player implements Serializable {
 
         BiConsumer<Observer,String> notifyCredits= Observer::notifyPlayerCredits;
 
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "creditsUpdate", dto ), notifyCredits);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "creditsUpdate", dto ), notifyCredits);
 
     }
 

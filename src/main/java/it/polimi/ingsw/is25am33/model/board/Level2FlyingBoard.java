@@ -79,7 +79,7 @@ public class Level2FlyingBoard extends FlyingBoard {
 
         BiConsumer<it.polimi.ingsw.is25am33.model.Observer,String> notifyFlyingBoard = Observer::notifyFlyingBoardChanged;
 
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
     }
 
 }

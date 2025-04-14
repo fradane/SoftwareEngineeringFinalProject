@@ -77,7 +77,7 @@ public abstract class FlyingBoard {
 
         BiConsumer<Observer,String> notifyFlyingBoard = Observer::notifyFlyingBoardChanged;
 
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
 
     }
 
@@ -134,7 +134,7 @@ public abstract class FlyingBoard {
 
         BiConsumer<Observer,String> notifyFlyingBoard = Observer::notifyFlyingBoardChanged;
 
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
 
     }
 

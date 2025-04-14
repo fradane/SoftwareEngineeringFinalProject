@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.network.rmi.client;
 
 import it.polimi.ingsw.is25am33.client.ClientController;
 import it.polimi.ingsw.is25am33.model.CardState;
+import it.polimi.ingsw.is25am33.client.ClientController;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
@@ -28,7 +29,7 @@ public class RMIClientNetworkManager extends UnicastRemoteObject implements Clie
     public RMIClientNetworkManager(ClientController controller) throws RemoteException {
         super();
         this.connected = false;
-        this.controller = controller;
+        this.clientController = controller;
     }
 
     public void setClientController(ClientController clientController) {
@@ -166,7 +167,7 @@ public class RMIClientNetworkManager extends UnicastRemoteObject implements Clie
 
     @Override
     public void notifyGameStarted(GameState gameState) throws RemoteException {
-        controller.notifyGameStarted(gameState);
+        clientController.notifyGameStarted(gameState);
     }
 
     @Override

@@ -78,7 +78,7 @@ public abstract class AdventureCard {
         dto.setCardState(currState);
         BiConsumer<Observer,String> notifyCardState= Observer::notifyCardStateChanged;
 
-        game.getGameContext().getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(game.getGameContext().getGameId()), new GameEvent( "cardStateUpdate", dto ), notifyCardState);
+        //game.getGameContext().getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(game.getGameContext().getGameId()), new GameEvent( "cardStateUpdate", dto ), notifyCardState);
     }
 
     @JsonIgnore

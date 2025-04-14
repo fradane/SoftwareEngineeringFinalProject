@@ -27,7 +27,7 @@ public class Level2ShipBoard extends ShipBoard{
         dto.setComponentState(ComponentState.BOOKED);
 
         BiConsumer<Observer,String> notifyBookingComponent= Observer::notifyBookedComponent;
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "BookFocusComponent", dto ), notifyBookingComponent);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "BookFocusComponent", dto ), notifyBookingComponent);
         focusedComponent = null;
 
     }

@@ -1,12 +1,15 @@
 package it.polimi.ingsw.is25am33.network.common;
 
+import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public interface VirtualServer extends Remote {
     /**
@@ -59,6 +62,8 @@ public interface VirtualServer extends Remote {
      * @return true se il nickname è già in uso
      */
     boolean isNicknameInUse(String nickname) throws RemoteException;
+
+    //void notifyClient(List<Observer> observers, GameEvent event, BiConsumer<Observer, String> biConsumer);
 
     String playerChoseComponentFromTable(String nickname, String coordinatesJson) throws RemoteException;
 

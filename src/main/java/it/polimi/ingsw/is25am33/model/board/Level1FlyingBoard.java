@@ -68,6 +68,6 @@ public class Level1FlyingBoard extends FlyingBoard {
 
         BiConsumer<Observer,String> notifyFlyingBoard = Observer::notifyFlyingBoardChanged;
 
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
     }
 }

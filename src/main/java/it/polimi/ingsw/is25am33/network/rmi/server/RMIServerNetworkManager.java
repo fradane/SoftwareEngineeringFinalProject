@@ -2,8 +2,10 @@ package it.polimi.ingsw.is25am33.network.rmi.server;
 
 import it.polimi.ingsw.is25am33.controller.GameController;
 import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.common.VirtualClient;
@@ -338,6 +340,11 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
     public void playerWantsToReleaseFocusedComponent(String nickname) throws RemoteException {
 
     }
+
+//    @Override
+//    public void notifyClient(List<Observer> observers, GameEvent event, BiConsumer<Observer, String> biConsumer) {
+//
+//    }
 
     public static void main(String args[]) throws Exception {
         RMIServerNetworkManager server = null;

@@ -104,27 +104,27 @@ public class GameModel {
 
         BiConsumer<Observer,String> notifyComponentTable= Observer::notifyComponentTableChanged;
 
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "componentTableUpdate", dto ), notifyComponentTable);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "componentTableUpdate", dto ), notifyComponentTable);
 
         DTO dto1 = new DTO();
         dto.setComponent(component);
 
         BiConsumer<Observer,String> notifyComponent= Observer::notifyChoosenComponent;
 
-        gameContext.getVirtualServer().notifyClient(List.of(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname())), new GameEvent( "showFocusComponent", dto ), notifyComponent);
+        //gameContext.getVirtualServer().notifyClient(List.of(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname())), new GameEvent( "showFocusComponent", dto ), notifyComponent);
 
 
     }
 
     public void releaseComponentWithFocus(Player player){
-        player.getPersonalBoard().getFocusedComponent().setCurrState(ComponentState.FREE);
+        player.getPersonalBoard().getFocusedComponent().setCurrState(ComponentState.VISIBLE);
         player.getPersonalBoard().setFocusedComponent(null);
 
         DTO dto = new DTO();
         dto.setComponentTable(componentTable);
 
         BiConsumer<Observer,String> notifyComponentTable= Observer::notifyComponentTableChanged;
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "componentTableUpdate", dto ), notifyComponentTable);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "componentTableUpdate", dto ), notifyComponentTable);
 
     }
 
@@ -145,7 +145,7 @@ public class GameModel {
 
         BiConsumer<Observer,String> notifyAttack= Observer::notifyDangerousObjAttack;
 
-        virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "dangerousObjAttack", dto ), notifyAttack);
+        //virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "dangerousObjAttack", dto ), notifyAttack);
     }
 
     public void watchVisibileDeck(Player player, int index){
@@ -154,7 +154,7 @@ public class GameModel {
 
         BiConsumer<Observer,String> notifyLittleDeck= Observer::notifyChoosenLittleDeck;
 
-        virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname()), new GameEvent("playerWatchesLittleDeck", dto), notifyLittleDeck);
+        //virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname()), new GameEvent("playerWatchesLittleDeck", dto), notifyLittleDeck);
     }
 
     public Boolean hasNextPlayer() {
@@ -179,7 +179,7 @@ public class GameModel {
 
         BiConsumer<Observer,String> notifyCurrPlayer= Observer::notifyCurrPlayerChanged;
 
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "currPlayerUpdate", dto ), notifyCurrPlayer);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "currPlayerUpdate", dto ), notifyCurrPlayer);
 
     }
 
@@ -207,7 +207,7 @@ public class GameModel {
 
         BiConsumer<Observer,String> notifyAdventureCard= Observer::notifyCurrAdventureCard;
 
-        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "drawnCard", dto ), notifyAdventureCard);
+        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "drawnCard", dto ), notifyAdventureCard);
 
 }
 

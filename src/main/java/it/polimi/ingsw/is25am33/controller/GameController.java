@@ -19,7 +19,7 @@ public class GameController {
     private RMIServerNetworkManager rmiServer;
 
     public GameController(String gameId, int maxPlayers, boolean isTestFlight) {
-        this.gameModel = new GameModel(gameId, maxPlayers, isTestFlight);
+        this.gameModel = new GameModel(gameId, maxPlayers, isTestFlight, rmiServer);
     }
 
     /**
@@ -39,8 +39,8 @@ public class GameController {
 
     public void playCard(String jsonString) throws IOException {
 
-        AdventureCard currCard = game.getCurrAdventureCard();
-        currCard.play(currCard.getCurrState().handleJsonDeserialization(game, jsonString));
+        AdventureCard currCard = gameModel.getCurrAdventureCard();
+        currCard.play(currCard.getCurrState().handleJsonDeserialization(gameModel, jsonString));
 
     }
 

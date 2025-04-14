@@ -27,7 +27,7 @@ public class ServerSerializer{
             Map.entry("dangerousObjAttack", (gameEvent) -> ServerSerializer.serializeObj(gameEvent.getDTO().getDangerousObj())),
             Map.entry("flyingBoardUpdate", (gameEvent) -> ServerSerializer.serializeObj(gameEvent.getDTO().getFlyingBoard())),
             Map.entry("shipBoardUpdate", (gameEvent) -> ServerSerializer.serializeObj(gameEvent.getDTO().getShipBoard())),
-            Map.entry("checkOnShipBoard", (gameEvent) -> ServerSerializer.serializeObj(gameEvent.getDTO().getIsShipBoardOK())),
+            Map.entry("checkOnShipBoard", (gameEvent) -> ServerSerializer.serializeObj(gameEvent.getDTO().getShipboardOK())),
             Map.entry("updateComponentTable", (gameEvent) -> ServerSerializer.serializeObj(gameEvent.getDTO().getComponentTable()))
             // TODO id relativi ai components
     );
@@ -62,8 +62,7 @@ public class ServerSerializer{
 
 
         FlyingBoard f = new Level1FlyingBoard();
-        f.insertPlayer(new Player("fra", null));
-        f.insertPlayer(new Player("giu", null));
+
         System.out.println(ServerSerializer.serializeObj(f));
 
         ShipBoard s = new Level2ShipBoard(PlayerColor.BLUE);

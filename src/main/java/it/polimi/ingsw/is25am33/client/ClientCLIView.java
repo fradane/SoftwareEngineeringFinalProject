@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementazione dell'interfaccia ClientView per una Command Line Interface
@@ -25,6 +28,16 @@ public class ClientCLIView implements ClientView {
     private ComponentTable latestComponentTable;
     private List<String> playersNickname;
     private AdventureCard currAdventureCard;
+    private volatile boolean waitingForGameStart = false;
+    private final BlockingQueue<String> inputQueue = new LinkedBlockingQueue<>();
+    private volatile boolean waitingForInput = false;
+
+
+    // Definizione di un colore rosso ANSI per gli errori (funziona nei terminali che supportano i colori ANSI).
+    private static final String ANSI_RED = "\u001B[31m";
+    private static final String ANSI_RESET = "\u001B[0m";
+
+
 
     public ClientCLIView() {
         this.scanner = new Scanner(System.in);
@@ -32,7 +45,60 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void initialize() {
+        // Avvia il thread di input
+        Thread inputThread = new Thread(() -> {
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    // Leggi l'input e mettilo nella coda
+                    if (scanner.hasNextLine()) {
+                        String input = scanner.nextLine();
+                        inputQueue.put(input);
+                    }
+                    // Piccola pausa per evitare uso eccessivo della CPU
+                    Thread.sleep(50);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        inputThread.setDaemon(true); // Termina quando il thread principale termina
+        inputThread.start();
+
         System.out.println("=== Galaxy Trucker Client ===");
+    }
+
+    /**
+     * Richiede input all'utente in modo non bloccante
+     * @param prompt Il messaggio da mostrare
+     * @return L'input dell'utente o stringa vuota in caso di interruzione
+     */
+    private String askForInput(String prompt) {
+        System.out.print(prompt);
+        waitingForInput = true;
+
+        try {
+            String input = null;
+            // Controlla periodicamente se è arrivato input
+            while (input == null && waitingForInput) {
+                input = inputQueue.poll(200, TimeUnit.MILLISECONDS);
+                // Qui puoi inserire codice per gestire notifiche dal server
+            }
+
+            return input != null ? input : "";
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "";
+        } finally {
+            waitingForInput = false;
+        }
+    }
+
+    /**
+     * Metodo per interrompere l'attesa dell'input in caso di eventi importanti
+     * Questo metodo va chiamato quando arriva una notifica importante dal server
+     */
+    public void cancelInputWaiting() {
+        waitingForInput = false;
     }
 
     @Override
@@ -42,19 +108,17 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showError(String errorMessage) {
-        System.err.println("Error: " + errorMessage);
+        System.out.println(ANSI_RED + "Error: " + errorMessage + ANSI_RESET);
     }
 
     @Override
     public String askNickname() {
-        System.out.print("Enter your nickname: ");
-        return scanner.nextLine();
+        return askForInput("Enter your nickname: ");
     }
 
     @Override
     public String askServerAddress() {
-        System.out.print("Enter server address (default: localhost): ");
-        String address = scanner.nextLine();
+        String address = askForInput("Enter server address (default: localhost): ");
         return address.isEmpty() ? "localhost" : address;
     }
 
@@ -81,9 +145,9 @@ public class ClientCLIView implements ClientView {
 
         // Chiedi numero di giocatori
         while (true) {
+            String input = askForInput("Number of players (2-4): ");
             try {
-                System.out.print("Number of players (2-4): ");
-                int numPlayers = Integer.parseInt(scanner.nextLine());
+                int numPlayers = Integer.parseInt(input);
                 if (numPlayers >= 2 && numPlayers <= 4) {
                     result[0] = numPlayers;
                     break;
@@ -96,8 +160,8 @@ public class ClientCLIView implements ClientView {
         }
 
         // Chiedi se è un volo di prova
-        System.out.print("Test flight (y/n): ");
-        result[1] = scanner.nextLine().equalsIgnoreCase("y") ? 1 : 0;
+        String isTest = askForInput("Test flight (y/n): ");
+        result[1] = isTest.equalsIgnoreCase("y") ? 1 : 0;
 
         // Scegli il colore
         result[2] = Integer.parseInt(askPlayerColor());
@@ -109,29 +173,24 @@ public class ClientCLIView implements ClientView {
     public String[] askJoinGame(Iterable<GameInfo> games) {
         showAvailableGames(games);
 
-        String[] result = new String[2]; // [gameIndex, colorChoice]
-
-        // Chiedi quale gioco
-        System.out.print("Enter game ID to join: ");
-        String gameId = scanner.nextLine();
-        result[0] = gameId; // Usa l'ID come stringa, non un indice
-
-        // Scegli il colore
+        String[] result = new String[2]; // [gameId, colorChoice]
+        result[0] = askForInput("Enter game ID to join: ");
         result[1] = askPlayerColor();
 
         return result;
     }
 
-    private String askPlayerColor() {
+    public String askPlayerColor() {
+        System.out.println("Choose your color: ");
+        System.out.println("1. RED");
+        System.out.println("2. BLUE");
+        System.out.println("3. GREEN");
+        System.out.println("4. YELLOW");
+
         while (true) {
+            String input = askForInput("Your choice: ");
             try {
-                System.out.println("Choose your color: ");
-                System.out.println("1. RED");
-                System.out.println("2. BLUE");
-                System.out.println("3. GREEN");
-                System.out.println("4. YELLOW");
-                System.out.print("Your choice: ");
-                int colorChoice = Integer.parseInt(scanner.nextLine());
+                int colorChoice = Integer.parseInt(input);
                 if (colorChoice >= 1 && colorChoice <= 4) {
                     return Integer.toString(colorChoice);
                 } else {
@@ -146,14 +205,15 @@ public class ClientCLIView implements ClientView {
     @Override
     public int showMainMenu() {
         while (true) {
+            System.out.println("\nChoose an option:");
+            System.out.println("1. List available games");
+            System.out.println("2. Create a new game");
+            System.out.println("3. Join a game");
+            System.out.println("4. Exit");
+
+            String input = askForInput("Your choice: ");
             try {
-                System.out.println("\nChoose an option:");
-                System.out.println("1. List available games");
-                System.out.println("2. Create a new game");
-                System.out.println("3. Join a game");
-                System.out.println("4. Exit");
-                System.out.print("Your choice: ");
-                int choice = Integer.parseInt(scanner.nextLine());
+                int choice = Integer.parseInt(input);
                 if (choice >= 1 && choice <= 4) {
                     return choice;
                 } else {
@@ -167,27 +227,34 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public int showGameMenu() {
-        while (true) {
-            try {
-                System.out.println("\nGame options:");
-                System.out.println("1. Wait for game to start");
-                System.out.println("2. Leave game");
-                System.out.print("Your choice: ");
-                int choice = Integer.parseInt(scanner.nextLine());
-                if (choice >= 1 && choice <= 2) {
-                    return choice;
-                } else {
-                    System.out.println("Invalid choice. Please select 1-2.");
+        System.out.println("\nEnter 1 if you want to leave the game otherwise wait for the game to start...\n");
+        waitingForGameStart = true;
+
+        try {
+            while (waitingForGameStart) {
+                // Controlla l'input per 500ms alla volta
+                String input = inputQueue.poll(500, TimeUnit.MILLISECONDS);
+                if (input != null && input.equals("1")) {
+                    waitingForGameStart = false;
+                    return 1; // Lascia il gioco
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number.");
+
+                // Se il gioco è iniziato nel frattempo (tramite notifica dal server)
+                if (!waitingForGameStart) {
+                    return 0; // Il gioco è iniziato
+                }
             }
+
+            return 0; // Il gioco è iniziato
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return 1; // In caso di interruzione, esci
         }
     }
 
     @Override
     public void notifyPlayerJoined(String nickname, GameInfo gameInfo) {
-        System.out.println(nickname + " joined the game. Players: " +
+        System.out.println(nickname + " joined the game with color "+ gameInfo.getPlayersAndColors().get(nickname) + ". Players: " +
                 gameInfo.getConnectedPlayersNicknames().size() + "/" +
                 gameInfo.getMaxPlayers());
     }
@@ -199,8 +266,13 @@ public class ClientCLIView implements ClientView {
                 gameInfo.getMaxPlayers());
     }
 
+    public void notifyGameCreated(String gameId) {
+        System.out.println("Game created! ID: " + gameId);
+    }
+
     @Override
     public void notifyGameStarted(GameState gameState) {
+        waitingForGameStart = false;
         System.out.println("Game started! Initial state: " + gameState);
         System.out.println("The game is now in progress...");
     }
