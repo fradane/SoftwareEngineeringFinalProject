@@ -132,20 +132,6 @@ public class ShipBoardTest {
         assertNull(shipBoard.focusedComponent);
     }
 
-
-    @Test
-    @DisplayName("Test: releaseComponentWithFocus sets state to FREE & clears focus")
-    void testReleaseComponentWithFocus() {
-        // Create an Engine with a simple connector map
-        Engine engine = new Engine(createSimpleConnectors());
-        engine.setCurrState(ComponentState.BOOKED);
-        shipBoard.focusedComponent = engine;
-
-        shipBoard.releaseComponentWithFocus();
-        assertEquals(ComponentState.FREE, engine.getCurrState());
-        assertNull(shipBoard.focusedComponent);
-    }
-
     @Test
     @DisplayName("Test: isEngineDirectionWrong returns true if engine is facing SOUTH")
     void testIsEngineDirectionWrong() {

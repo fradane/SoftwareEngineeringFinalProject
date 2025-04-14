@@ -3,16 +3,16 @@ package it.polimi.ingsw.is25am33.model.game;
 import it.polimi.ingsw.is25am33.model.component.Component;
 
 public class GameEvent {
-    private final String eventID;
-    private final DTO gameDTO;
+    private String eventId;
+    private DTO gameDTO;
 
-    public GameEvent(String eventID, DTO gameDTO) {
-        this.eventID = eventID;
+    public GameEvent( String eventId, DTO gameDTO) {
+        this.eventId = eventId;
         this.gameDTO  = gameDTO;
     }
 
-    public String getEventID() {
-        return eventID;
+    public String getEventId() {
+        return eventId;
     }
 
     public DTO getDTO() {

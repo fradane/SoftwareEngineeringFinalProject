@@ -21,7 +21,7 @@ public class DTO {
     private Component component;
     private Coordinates coordinates;
     private Integer num;
-    private Boolean isShipBoardOK;
+    private Boolean shipboardOK;
     private FlyingBoard flyingBoard;
     private ShipBoard shipBoard;
     private AdventureCard adventureCard;
@@ -125,12 +125,12 @@ public class DTO {
         this.shipBoard = shipBoard;
     }
 
-    public Boolean getIsShipBoardOK() {
-        return isShipBoardOK;
+    public Boolean getShipboardOK() {
+        return shipboardOK;
     }
 
-    public void setIsShipBoardOK(Boolean isShipBoardOK) {
-        this.isShipBoardOK = isShipBoardOK;
+    public void setShipboardOK(Boolean shipboardOK) {
+        this.shipboardOK = shipboardOK;
     }
 
     public AdventureCard getAdventureCard() {

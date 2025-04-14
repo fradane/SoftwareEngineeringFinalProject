@@ -1,9 +1,16 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.Observer;
+import it.polimi.ingsw.is25am33.model.ObserverManager;
+import it.polimi.ingsw.is25am33.model.game.DTO;
+import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -13,6 +20,7 @@ public abstract class FlyingBoard {
     private Set<Player> outPlayers;
     protected int runLenght;
     protected Map<Player, Integer> ranking;
+    protected GameContext gameContext;
 
     /**
      * Constructor to initialize runLength, outPlayers, and ranking.
@@ -23,6 +31,10 @@ public abstract class FlyingBoard {
         this.runLenght = runLength;
         this.outPlayers = new HashSet<>();
         this.ranking = new HashMap<>();
+    }
+
+    public void setGameContext(GameContext gameContext) {
+        this.gameContext = gameContext;
     }
 
     /**
@@ -59,6 +71,14 @@ public abstract class FlyingBoard {
     public void addOutPlayer(Player player) {
         outPlayers.add(player);
         ranking.remove(player);
+
+        DTO dto = new DTO();
+        dto.setFlyingBoard(this);
+
+        BiConsumer<Observer,String> notifyFlyingBoard = Observer::notifyFlyingBoardChanged;
+
+        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
+
     }
 
     @JsonIgnore
@@ -76,7 +96,6 @@ public abstract class FlyingBoard {
      *
      * @return A list of players who are out of the game.
      */
-    @JsonIgnore
     public List<Player> getDoubledPlayers() {
         int maxPosition = Collections.max(ranking.values());
 
@@ -109,6 +128,14 @@ public abstract class FlyingBoard {
             }
         }
         ranking.put(player, newPosition);
+
+        DTO dto = new DTO();
+        dto.setFlyingBoard(this);
+
+        BiConsumer<Observer,String> notifyFlyingBoard = Observer::notifyFlyingBoardChanged;
+
+        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
+
     }
 
     /**

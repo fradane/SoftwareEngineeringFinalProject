@@ -15,8 +15,6 @@ import java.util.logging.Logger;
 
 public class ComponentLoader {
 
-    List<Component> allComponents = new ArrayList<>();
-
     private static <T> List<T> loadFromJson(String filePath, Class<T> type) {
         ObjectMapper objectMapper = new ObjectMapper();
         List<T> objects = new ArrayList<>();
@@ -47,11 +45,71 @@ public class ComponentLoader {
         return ComponentLoader.loadFromJson("BatteryBox.json", BatteryBox.class);
     }
 
-    public void loadComponents() {
-        allComponents.addAll(ComponentLoader.loadBatteryBoxes());
+    private static List<Cabin> loadCabin() {
+        return ComponentLoader.loadFromJson("Cabin.json", Cabin.class);
+    }
 
-        Collections.shuffle(allComponents);
+    private static List<Cannon> loadCannon() {
+        return ComponentLoader.loadFromJson("Cannon.json", Cannon.class);
+    }
+
+    private static List<DoubleCannon> loadDoubleCannon() {
+        return ComponentLoader.loadFromJson("DoubleCannon.json", DoubleCannon.class);
+    }
+
+    private static List<DoubleEngine> loadDoubleEngine() {
+        return ComponentLoader.loadFromJson("DoubleEngine.json", DoubleEngine.class);
+    }
+
+    private static List<Engine> loadEngine() {
+        return ComponentLoader.loadFromJson("Engine.json", Engine.class);
+    }
+
+    private static List<LifeSupport> loadLifeSupport() {
+        return ComponentLoader.loadFromJson("LifeSupport.json", LifeSupport.class);
+    }
+
+    private static List<MainCabin> loadMainCabin() {
+        return ComponentLoader.loadFromJson("MainCabin.json", MainCabin.class);
+    }
+
+    private static List<Shield> loadShield() {
+        return ComponentLoader.loadFromJson("Shield.json", Shield.class);
+    }
+
+    private static List<SpecialStorage> loadSpecialStorage() {
+        return ComponentLoader.loadFromJson("SpecialStorage.json", SpecialStorage.class);
+    }
+
+    private static List<StandardStorage> loadStandardStorage() {
+        return ComponentLoader.loadFromJson("StandardStoarage.json", StandardStorage.class);
+    }
+
+    private static List<StructuralModules> loadStructuralModules() {
+        return ComponentLoader.loadFromJson("StructuralModules.json", StructuralModules.class);
+    }
+
+    public static List<Component> loadComponents() {
+
+        List<Component> components = new ArrayList<>();
+
+        components.addAll(ComponentLoader.loadBatteryBoxes());
+        components.addAll(ComponentLoader.loadCabin());
+        components.addAll(ComponentLoader.loadCannon());
+        components.addAll(ComponentLoader.loadDoubleCannon());
+        components.addAll(ComponentLoader.loadDoubleEngine());
+        components.addAll(ComponentLoader.loadEngine());
+        components.addAll(ComponentLoader.loadLifeSupport());
+        components.addAll(ComponentLoader.loadMainCabin());
+        components.addAll(ComponentLoader.loadShield());
+        components.addAll(ComponentLoader.loadSpecialStorage());
+        components.addAll(ComponentLoader.loadStandardStorage());
+        components.addAll(ComponentLoader.loadStructuralModules());
+
+        return components;
     }
 
 
 }
+
+

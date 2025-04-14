@@ -1,15 +1,18 @@
 package it.polimi.ingsw.is25am33.model.game;
 
-import it.polimi.ingsw.is25am33.model.CardState;
-import it.polimi.ingsw.is25am33.model.GameState;
-import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
+import it.polimi.ingsw.is25am33.model.*;
+import it.polimi.ingsw.is25am33.model.Observer;
+import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
+import javax.management.remote.rmi.RMIServer;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-import static it.polimi.ingsw.is25am33.model.CargoCube.*;
 
 public class Game {
 
@@ -23,6 +26,8 @@ public class Game {
     private DangerousObj currDangerousObj;
     private GameState currGameState = GameState.SETUP;
     private Deck deck;
+    private ComponentTable componentTable;
+    private GameContext gameContext;
 
     public void setCurrGameState(GameState currGameState) {
         this.currGameState = currGameState;
@@ -36,7 +41,8 @@ public class Game {
         return deck;
     }
 
-    public Game(FlyingBoard flyingBoard, List<Player> players) {
+
+    public Game(VirtualServer virtualServer, FlyingBoard flyingBoard, List<Player> players, List<Component> components, String gameId) {
         this.flyingBoard = flyingBoard;
         currAdventureCard = null;
         currRanking = new ArrayList<>();
@@ -44,6 +50,49 @@ public class Game {
         currDangerousObj = null;
         this.players = players;
         deck = new Deck();
+        componentTable = new ComponentTable(components);
+        gameContext = new GameContext(gameId, virtualServer);
+        flyingBoard.setGameContext(gameContext);
+        ObserverManager.getInstance().registerGame(gameContext);
+    }
+
+    public GameContext getGameContext() {
+        return gameContext;
+    }
+
+    public void setFocusComponent(Player player, Coordinates coordinates){
+        Component component = componentTable.getComponent(coordinates);
+
+        player.getPersonalBoard().setFocusedComponent(component);
+        component.setCurrState(ComponentState.USED);
+
+        DTO dto = new DTO();
+        dto.setComponentTable(componentTable);
+
+        BiConsumer<Observer,String> notifyComponentTable= Observer::notifyComponentTableChanged;
+
+        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "componentTableUpdate", dto ), notifyComponentTable);
+
+        DTO dto1 = new DTO();
+        dto.setComponent(component);
+
+        BiConsumer<Observer,String> notifyComponent= Observer::notifyChoosenComponent;
+
+        gameContext.getVirtualServer().notifyClient(List.of(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname())), new GameEvent( "showFocusComponent", dto ), notifyComponent);
+
+
+    }
+
+    public void releaseComponentWithFocus(Player player){
+        player.getPersonalBoard().getFocusedComponent().setCurrState(ComponentState.FREE);
+        player.getPersonalBoard().setFocusedComponent(null);
+
+        DTO dto = new DTO();
+        dto.setComponentTable(componentTable);
+
+        BiConsumer<Observer,String> notifyComponentTable= Observer::notifyComponentTableChanged;
+        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "componentTableUpdate", dto ), notifyComponentTable);
+
     }
 
     public static int throwDices() {
@@ -57,6 +106,22 @@ public class Game {
 
     public void setCurrDangerousObj(DangerousObj dangerousObj) {
         this.currDangerousObj = dangerousObj;
+
+        DTO dto = new DTO();
+        dto.setDangerousObj(dangerousObj);
+
+        BiConsumer<Observer,String> notifyAttack= Observer::notifyDangerousObjAttack;
+
+        virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "dangerousObjAttack", dto ), notifyAttack);
+    }
+
+    public void watchVisibileDeck(Player player, int index){
+        DTO dto = new DTO();
+        dto.setLittleDeck(deck.getVisibleDeck(index));
+
+        BiConsumer<Observer,String> notifyLittleDeck= Observer::notifyChoosenLittleDeck;
+
+        virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname()), new GameEvent("playerWatchesLittleDeck", dto), notifyLittleDeck)
     }
 
     public Boolean hasNextPlayer() {
@@ -75,6 +140,14 @@ public class Game {
 
     public void setCurrPlayer(Player player) {
         this.currPlayer = player;
+
+        DTO dto = new DTO();
+        dto.setPlayer(player);
+
+        BiConsumer<Observer,String> notifyCurrPlayer= Observer::notifyCurrPlayerChanged;
+
+        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "currPlayerUpdate", dto ), notifyCurrPlayer);
+
     }
 
     public void nextPlayer() {
@@ -95,7 +168,15 @@ public class Game {
 
     public void setCurrAdventureCard(AdventureCard currAdventureCard) {
         this.currAdventureCard = currAdventureCard;
-    }
+
+        DTO dto = new DTO();
+        dto.setAdventureCard(currAdventureCard);
+
+        BiConsumer<Observer,String> notifyAdventureCard= Observer::notifyCurrAdventureCard;
+
+        gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "drawnCard", dto ), notifyAdventureCard);
+
+}
 
     public AdventureCard getCurrAdventureCard() {
         return currAdventureCard;
@@ -172,8 +253,14 @@ public class Game {
             player.setOwnedCredits(credits);
         });
 
+    }
 
-
+    public void addPlayer(String nickname, PlayerColor color) {
+        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color) : new Level2ShipBoard(color);
+        shipBoard.setGameContext(gameContext);
+        Player player = new Player(nickname, shipBoard);
+        player.setGameContext(gameContext);
+        players.put(nickname, player);
     }
 
 }

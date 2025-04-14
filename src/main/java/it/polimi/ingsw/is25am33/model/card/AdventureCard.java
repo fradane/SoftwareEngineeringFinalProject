@@ -1,14 +1,15 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.polimi.ingsw.is25am33.model.CardState;
-import it.polimi.ingsw.is25am33.model.Direction;
-import it.polimi.ingsw.is25am33.model.UnknownStateException;
+import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
+import it.polimi.ingsw.is25am33.model.game.DTO;
 import it.polimi.ingsw.is25am33.model.game.Game;
+import it.polimi.ingsw.is25am33.model.game.GameEvent;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
 
 public abstract class AdventureCard {
 
@@ -70,6 +71,13 @@ public abstract class AdventureCard {
 
     public void setCurrState(CardState currState) {
         this.currState = currState;
+
+        DTO dto = new DTO();
+        dto.setAdventureCard(this);
+        dto.setCardState(currState);
+        BiConsumer<Observer,String> notifyCardState= Observer::notifyCardStateChanged;
+
+        game.getGameContext().getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(game.getGameContext().getGameId()), new GameEvent( "cardStateUpdate", dto ), notifyCardState);
     }
 
     @JsonIgnore

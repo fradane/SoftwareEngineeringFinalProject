@@ -82,7 +82,7 @@ public class MeteoriteStorm extends AdventureCard {
         Meteorite currMeteorite = meteoriteIterator.next();
         currMeteorite.setCoordinates(Game.throwDices());
         game.setCurrDangerousObj(currMeteorite);
-        currState = CardState.DANGEROUS_ATTACK;
+        setCurrState(  CardState.DANGEROUS_ATTACK);
 
     }
 
@@ -117,10 +117,10 @@ public class MeteoriteStorm extends AdventureCard {
         if(game.hasNextPlayer()) {
             game.nextPlayer();
         } else if (meteoriteIterator.hasNext()) {
-            currState = CardState.THROW_DICES;
+            setCurrState( CardState.THROW_DICES);
             game.resetPlayerIterator();
         } else {
-            currState = CardState.END_OF_CARD;
+            setCurrState( CardState.END_OF_CARD);
         }
 
     }
@@ -155,10 +155,10 @@ public class MeteoriteStorm extends AdventureCard {
         if(game.hasNextPlayer()) {
             game.nextPlayer();
         } else if (meteoriteIterator.hasNext()) {
-            currState = CardState.THROW_DICES;
+            setCurrState( CardState.THROW_DICES);
             game.resetPlayerIterator();
         } else {
-            currState = CardState.END_OF_CARD;
+            setCurrState( CardState.END_OF_CARD);
         }
 
     }

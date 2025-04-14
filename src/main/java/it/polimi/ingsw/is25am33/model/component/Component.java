@@ -3,6 +3,8 @@ package it.polimi.ingsw.is25am33.model.component;
 import it.polimi.ingsw.is25am33.model.ConnectorType;
 import it.polimi.ingsw.is25am33.model.Direction;
 import it.polimi.ingsw.is25am33.model.ComponentState;
+import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 
 import java.util.*;
 
@@ -21,8 +23,7 @@ public abstract class Component {
     /** Map associating directions with their respective connector types. */
     private Map<Direction, ConnectorType> connectors;
 
-//    private List<ComponentObserver> componentObservers;
-
+    private Coordinates tableCoordinates;
     /**
      * Default constructor for {@code Component}.
      */
@@ -37,18 +38,16 @@ public abstract class Component {
      */
     public Component(Map<Direction, ConnectorType> connectors) {
         this.connectors = connectors;
-//        componentObservers=new ArrayList<>();
     }
-//
-//    public void addObserver(ComponentObserver observer) {
-//        componentObservers.add(observer);
-//    }
-//
-//    void notifyObservers(ComponentEvent event) {
-//        for (ComponentObserver observer : componentObservers) {
-//            observer.update(event);
-//        }
-//    }
+
+    public Coordinates getTableCoordinates() {
+        return tableCoordinates;
+    }
+
+    public void setTableCoordinates(Coordinates tableCoordinates) {
+        this.tableCoordinates = tableCoordinates;
+    }
+
     /**
      * Retrieves the current operational state of this component.
      *
@@ -65,7 +64,6 @@ public abstract class Component {
      */
     public void setCurrState(ComponentState currState) {
         this.currState = currState;
-//        notifyObservers(new ComponentEvent(this, "state", currState ));
     }
 
     /**
@@ -93,10 +91,9 @@ public abstract class Component {
         return connectors;
     }
 
-//    public void setConnectors(Map<Direction, ConnectorType> connectors) {
-//        this.connectors = connectors;
-//        notifyObservers(new ComponentEvent(this, "connectors", connectors ));
-//    }
+    public void setConnectors(Map<Direction, ConnectorType> connectors) {
+        this.connectors = connectors;
+    }
 
     /**
      * Adjusts the orientation of connectors based on the component's current rotation.

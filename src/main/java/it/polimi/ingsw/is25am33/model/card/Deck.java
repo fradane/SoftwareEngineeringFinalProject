@@ -68,7 +68,7 @@ public class Deck {
      * @return The list of AdventureCards in the selected deck.
      * @throws IndexOutOfBoundsException if the index is out of range.
      */
-    public List<AdventureCard> watchVisibleDeck(int index) throws IndexOutOfBoundsException {
+    public List<AdventureCard> getVisibleDeck(int index) throws IndexOutOfBoundsException {
         return littleVisibleDecks.get(index);
     }
 

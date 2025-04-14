@@ -84,12 +84,12 @@ public class Planets extends AdventureCard implements PlayerMover {
 
             currentPlanet.noMoreAvailable();
 
-            currState = CardState.HANDLE_CUBES_REWARD;
+            setCurrState( CardState.HANDLE_CUBES_REWARD);
 
         } else if (game.hasNextPlayer()){
             game.nextPlayer();
         } else {
-            currState = CardState.END_OF_CARD;
+            setCurrState(CardState.END_OF_CARD);
         }
 
     }
@@ -110,9 +110,9 @@ public class Planets extends AdventureCard implements PlayerMover {
 
             if (game.hasNextPlayer()) {
                 game.nextPlayer();
-                currState = CardState.CHOOSE_PLANET;
+                setCurrState(CardState.CHOOSE_PLANET);
             } else {
-                currState = CardState.END_OF_CARD;
+                setCurrState(CardState.END_OF_CARD);
             }
 
         }

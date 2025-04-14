@@ -5,6 +5,7 @@ module it.polimi.ingsw.is25am33 {
     requires java.smartcardio;
     requires java.logging;
     requires java.desktop;
+    requires java.management.rmi;
 
 
     opens it.polimi.ingsw.is25am33 to javafx.fxml;
