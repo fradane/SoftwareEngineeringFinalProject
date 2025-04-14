@@ -304,7 +304,7 @@ public abstract class ShipBoard implements Serializable {
      * Releases the currently focused component by setting its state to FREE and nullifying the reference.
      */
     public void releaseComponentWithFocus() {
-        focusedComponent.setCurrState(FREE);
+        focusedComponent.setCurrState(VISIBLE);
         focusedComponent = null;
     }
 

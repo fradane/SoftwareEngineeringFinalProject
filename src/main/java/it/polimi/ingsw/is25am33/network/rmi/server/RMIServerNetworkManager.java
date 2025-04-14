@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.network.rmi.server;
 import it.polimi.ingsw.is25am33.controller.GameController;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.common.ClientNetworkManager;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
@@ -236,6 +237,38 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
         } while (gameControllers.containsKey(gameId));
 
         return gameId;
+    }
+
+    @Override
+    public String playerChoseComponentFromTable(String nickname, String coordinatesJson) throws RemoteException {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public void playerChoseToEndBuildShipBoardPhase(String nickname) throws RemoteException {
+        // TODO
+    }
+
+    @Override
+    public boolean playerWantsToSeeShipBoardOf(String chosenPlayerNickname, String nickname) throws RemoteException{
+        // TODO
+        return false;
+    }
+
+    @Override
+    public void playerWantsToPlaceFocusedComponent(String nickname, String coordinatesJson) throws RemoteException {
+
+    }
+
+    @Override
+    public void playerWantsToReserveFocusedComponent(String nickname) throws RemoteException {
+
+    }
+
+    @Override
+    public void playerWantsToReleaseFocusedComponent(String nickname) throws RemoteException {
+
     }
 
     public static void main(String args[]) throws Exception {

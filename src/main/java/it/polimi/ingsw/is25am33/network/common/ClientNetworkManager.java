@@ -15,4 +15,8 @@ public interface ClientNetworkManager extends VirtualClient {
     boolean joinGame(String gameId, PlayerColor color) throws RemoteException;
     void leaveGame(String gameId) throws RemoteException;
     void disconnect() throws RemoteException;
+    void notifyGameStateChange(String json) throws RemoteException;
+    void notifyComponentTableUpdate(String json) throws RemoteException;
+    void notifyCurrAdventureCard(String json) throws RemoteException;
+    void notifyCardStateChange(String json) throws RemoteException;
 }

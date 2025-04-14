@@ -142,7 +142,7 @@ public class ShipBoardTest {
         shipBoard.focusedComponent = engine;
 
         shipBoard.releaseComponentWithFocus();
-        assertEquals(ComponentState.FREE, engine.getCurrState());
+        assertEquals(ComponentState.VISIBLE, engine.getCurrState());
         assertNull(shipBoard.focusedComponent);
     }
 

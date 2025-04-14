@@ -15,8 +15,6 @@ import java.util.logging.Logger;
 
 public class ComponentLoader {
 
-    List<Component> allComponents = new ArrayList<>();
-
     private static <T> List<T> loadFromJson(String filePath, Class<T> type) {
         ObjectMapper objectMapper = new ObjectMapper();
         List<T> objects = new ArrayList<>();
@@ -47,10 +45,14 @@ public class ComponentLoader {
         return ComponentLoader.loadFromJson("BatteryBox.json", BatteryBox.class);
     }
 
-    public void loadComponents() {
-        allComponents.addAll(ComponentLoader.loadBatteryBoxes());
+    public static List<Component> loadComponents() {
 
-        Collections.shuffle(allComponents);
+        List<Component> components = new ArrayList<>();
+
+        //TODO aggiungere le altre tessere
+        components.addAll(ComponentLoader.loadBatteryBoxes());
+
+        return components;
     }
 
 

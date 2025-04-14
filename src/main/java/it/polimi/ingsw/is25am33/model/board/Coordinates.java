@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,4 +67,32 @@ public class Coordinates {
     public List<Integer> getCoordinates() {
         return coordinates;
     }
+
+    /**
+     * Checks if both X and Y coordinates are non-negative.
+     *
+     * @return true if both coordinates are greater than or equal to 0; false otherwise
+     */
+    public boolean isPositive() {
+        return getX() >= 0 && getY() >= 0;
+    }
+
+    /**
+     * Determines whether the current coordinates are valid for use in a ComponentTable.
+     * The coordinates must be non-negative, within the bounds of the table,
+     * and correspond to a non-null component in the table.
+     *
+     * @param componentTable the ComponentTable to validate against
+     * @return true if the coordinates are valid for the given ComponentTable; false otherwise
+     */
+    public boolean isValidForComponentTable(ComponentTable componentTable) {
+
+        if (!isPositive() || componentTable == null) return false;
+
+        if (getX() >= 13 || getY() >= 12) return false;
+
+        return componentTable.getComponent(this) != null;
+
+    }
+
 }

@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.component;
 import it.polimi.ingsw.is25am33.model.ConnectorType;
 import it.polimi.ingsw.is25am33.model.Direction;
 import it.polimi.ingsw.is25am33.model.ComponentState;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 
 import java.util.*;
 
@@ -13,13 +14,15 @@ import java.util.*;
 public abstract class Component {
 
     /** Current operational state of the component. */
-    private ComponentState currState = ComponentState.FREE ;
+    private ComponentState currState = ComponentState.HIDDEN ;
 
     /** Current rotation/orientation of the component. */
     private int rotation = 0;
 
     /** Map associating directions with their respective connector types. */
     private Map<Direction, ConnectorType> connectors;
+
+    private Coordinates tableCoordinates;
 
 //    private List<ComponentObserver> componentObservers;
 
@@ -126,6 +129,10 @@ public abstract class Component {
      */
     public void insertInComponentsMap(Map<Class<?>, List<Object>> map) {
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
+    }
+
+    public void setTableCoordinates(Coordinates tableCoordinates) {
+        this.tableCoordinates = tableCoordinates;
     }
 
 }

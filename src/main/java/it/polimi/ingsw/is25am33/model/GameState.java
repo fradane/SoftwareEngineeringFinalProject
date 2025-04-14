@@ -9,6 +9,7 @@ public enum GameState {
         public void run(GameModel gameModel) {
             gameModel.getDeck().setUpLittleDecks();
             //TODO creazione tessere e posizionamento tessere nel tavolo
+            gameModel.setCurrGameState(GameState.BUILD_SHIPBOARD);
         }
     },
 

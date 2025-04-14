@@ -1,4 +1,4 @@
-package it.polimi.ingsw.is25am33.Client;
+package it.polimi.ingsw.is25am33.client;
 
 import it.polimi.ingsw.is25am33.network.common.ClientNetworkManager;
 import it.polimi.ingsw.is25am33.network.rmi.client.RMIClientNetworkManager;
@@ -22,6 +22,7 @@ public class ClientMain {
 
         // Creiamo il controller e avviamo l'applicazione
         ClientController controller = new ClientController(view, networkManager);
+        ((RMIClientNetworkManager) networkManager).setClientController(controller);
         controller.start();
     }
 
