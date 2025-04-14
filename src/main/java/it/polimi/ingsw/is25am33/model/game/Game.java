@@ -97,6 +97,10 @@ public class Game {
         this.currAdventureCard = currAdventureCard;
     }
 
+    public AdventureCard getCurrAdventureCard() {
+        return currAdventureCard;
+    }
+
     /**
      * Starts the current card phase: updates the game's currState and the card's currState to
      * the first of the actual card, sets the currPlayer to the first based on the provided

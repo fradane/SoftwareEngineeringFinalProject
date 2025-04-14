@@ -867,4 +867,9 @@ public abstract class ShipBoard {
     public List<Component> getNotActiveComponents() {
         return notActiveComponents;
     }
+
+    public Component getComponentAt(Coordinates coordinates) {
+        return this.shipMatrix[coordinates.getX()][coordinates.getY()];
+    }
+
 }

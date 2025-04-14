@@ -66,4 +66,9 @@ public class Coordinates {
     public List<Integer> getCoordinates() {
         return coordinates;
     }
+
+    @Override
+    public String toString() {
+        return "Coordinates{x=" + getX() + ", y=" + getY() + "}";
+    }
 }
