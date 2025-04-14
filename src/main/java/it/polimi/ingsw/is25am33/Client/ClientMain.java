@@ -15,13 +15,16 @@ public class ClientMain {
         // Selezione dell'interfaccia utente
         ClientView view = selectUserInterface(scanner);
 
-        String nickname = view.askNickname();
+        //String nickname = view.askNickname();
+
+        // Creiamo il controller
+        ClientController controller = new ClientController(view);
 
         // Selezione del protocollo di rete
-        ClientNetworkManager networkManager = selectNetworkProtocol(scanner, nickname);
+        ClientNetworkManager networkManager = selectNetworkProtocol(scanner, controller);
 
-        // Creiamo il controller e avviamo l'applicazione
-        ClientController controller = new ClientController(view, networkManager);
+        // Avviamo l'applicazione
+        controller.setNetworkManager(networkManager);
         controller.start();
     }
 
@@ -58,7 +61,7 @@ public class ClientMain {
      * @param scanner Scanner per leggere l'input dell'utente
      * @return L'implementazione di NetworkManager scelta
      */
-    private static ClientNetworkManager selectNetworkProtocol(Scanner scanner, String nickname) throws RemoteException {
+    private static ClientNetworkManager selectNetworkProtocol(Scanner scanner, ClientController controller) throws RemoteException {
         System.out.println("Select network protocol:");
         System.out.println("1. RMI (Remote Method Invocation)");
         System.out.println("2. Socket TCP/IP");
@@ -69,7 +72,7 @@ public class ClientMain {
                 int choice = Integer.parseInt(scanner.nextLine());
                 switch (choice) {
                     case 1:
-                        return new RMIClientNetworkManager(nickname);
+                        return new RMIClientNetworkManager(controller);
                     case 2:
                         //return new SocketNetworkManager(nickname);
                     default:

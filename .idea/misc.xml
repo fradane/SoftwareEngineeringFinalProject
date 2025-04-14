@@ -5,6 +5,7 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/../../../../Università/3_Anno/PF_INGSW_Prova_Finale_Ingegneria_del_Software/IS25-AM33/pom.xml" />
       </list>
     </option>
   </component>
@@ -13,6 +14,6 @@
     <option name="wasEnabledAtLeastOnce" value="true" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_23" default="true" project-jdk-name="openjdk-23" project-jdk-type="JavaSDK">
-    <output url="file://$PROJECT_DIR$/out" />
+    <output url="file://$PROJECT_DIR$/../../../../Università/3_Anno/PF_INGSW_Prova_Finale_Ingegneria_del_Software/IS25-AM33/out" />
   </component>
 </project>

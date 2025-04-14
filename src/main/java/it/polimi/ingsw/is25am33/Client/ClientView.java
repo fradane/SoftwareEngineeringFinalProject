@@ -14,6 +14,8 @@ public interface ClientView {
      */
     void initialize();
 
+    void cancelInputWaiting();
+
     /**
      * Mostra un messaggio all'utente
      * @param message Il messaggio da mostrare
@@ -83,6 +85,8 @@ public interface ClientView {
      */
     void notifyPlayerLeft(String nickname, GameInfo gameInfo);
 
+    void notifyGameCreated(String gameId);
+
     /**
      * Notifica la view che il gioco è iniziato
      * @param gameState Lo stato iniziale del gioco
@@ -94,6 +98,8 @@ public interface ClientView {
      * @param reason La ragione della terminazione
      */
     void notifyGameEnded(String reason);
+
+    String askPlayerColor();
 
     /**
      * Converte un intero in un colore del giocatore

@@ -4,7 +4,12 @@ import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
+import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.network.rmi.server.RMIServerNetworkManager;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GameController {
     private final GameModel gameModel;
@@ -30,10 +35,16 @@ public class GameController {
     }
 
     public GameInfo getGameInfo() {
+        Collection<Player> players = gameModel.getPlayers().values();
+        Map<String, PlayerColor> playerAndColors = new HashMap<>();
+        for (Player player : players) {
+            playerAndColors.put(player.getNickname(), player.getPlayerColor());
+        }
+
         return new GameInfo(
                 gameModel.getGameId(),
                 gameModel.getMaxPlayers(),
-                gameModel.getPlayers().keySet(),
+                playerAndColors,
                 gameModel.isStarted(),
                 gameModel.isTestFlight()
 

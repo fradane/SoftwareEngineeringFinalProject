@@ -2,8 +2,6 @@ package it.polimi.ingsw.is25am33.network.common;
 
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.network.common.ClientNetworkManager;
-import it.polimi.ingsw.is25am33.network.common.VirtualClient;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -31,12 +29,13 @@ public interface VirtualServer extends Remote {
 
     /**
      * Crea una nuova partita
-     * @param nickname Il creatore della partita
-     * @param numPlayers Numero di giocatori attesi
+     *
+     * @param nickname     Il creatore della partita
+     * @param numPlayers   Numero di giocatori attesi
      * @param isTestFlight Se è un volo di prova
      * @return ID della partita creata
      */
-    String createGame(String nickname, PlayerColor color,  int numPlayers, boolean isTestFlight) throws RemoteException;
+    GameInfo createGame(String nickname, PlayerColor color,  int numPlayers, boolean isTestFlight) throws RemoteException;
 
     /**
      * Unisce un giocatore a una partita esistente
@@ -59,4 +58,6 @@ public interface VirtualServer extends Remote {
      * @return true se il nickname è già in uso
      */
     boolean isNicknameInUse(String nickname) throws RemoteException;
+
+    boolean isColorAvailable(String gameId, PlayerColor color) throws RemoteException;
 }

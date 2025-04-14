@@ -4,7 +4,6 @@ import it.polimi.ingsw.is25am33.controller.GameController;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.network.common.ClientNetworkManager;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.common.VirtualClient;
 import it.polimi.ingsw.is25am33.network.common.VirtualServer;
@@ -65,7 +64,7 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
     }
 
     @Override
-    public synchronized String createGame(String nickname, PlayerColor color, int numPlayers, boolean isTestFlight) throws RemoteException {
+    public synchronized GameInfo createGame(String nickname, PlayerColor color, int numPlayers, boolean isTestFlight) throws RemoteException {
         if (!clients.containsKey(nickname)) {
             throw new RemoteException("Client not registered");
         }
@@ -88,9 +87,9 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
                 " for " + numPlayers + " players" + (isTestFlight ? " (Test Flight)" : ""));
 
         // Aggiungi il player alla partita
-        joinGame(gameId, nickname, color);
+        controller.addPlayer(nickname, color);
 
-        return gameId;
+        return controller.getGameInfo();
     }
 
     @Override
@@ -117,6 +116,10 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
             throw new RemoteException("You are already in this gameModel");
         }
 
+        if (gameInfo.getPlayersAndColors().values().contains(color)) {
+            throw new RemoteException("This color has already been taken");
+        }
+
         //TODO aggiungere: ObserverManager.addObserver(clientCallback);
 
         // Aggiungi il player alla partita
@@ -134,7 +137,7 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
             }
         }
 
-        System.out.println("Player " + nickname + " joined gameModel " + gameId);
+        System.out.println("Player " + nickname + " joined gameModel " + gameId + " with color " + color);
 
         // Se abbiamo raggiunto il numero di giocatori, avvia la partita
         if (players.size() == gameInfo.getMaxPlayers()) {
@@ -224,6 +227,11 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
     @Override
     public boolean isNicknameInUse(String nickname) throws RemoteException {
         return clients.containsKey(nickname);
+    }
+
+    @Override
+    public boolean isColorAvailable(String gameId, PlayerColor color) throws RemoteException {
+        return !gameControllers.get(gameId).getGameInfo().getPlayersAndColors().containsValue(color);
     }
 
     /**

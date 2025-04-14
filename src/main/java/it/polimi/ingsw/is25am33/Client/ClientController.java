@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.Client;
 
+import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.common.ClientNetworkManager;
@@ -19,10 +20,14 @@ public class ClientController {
      * Costruttore del controller
      * @param view La view da utilizzare (CLI o GUI)
      */
-    public ClientController(ClientView view, ClientNetworkManager networkManager) {
+    public ClientController(ClientView view){
+        super();
         this.view = view;
         this.inGame = false;
         this.gameStarted = false;
+    }
+
+    public void setNetworkManager(ClientNetworkManager networkManager) {
         this.networkManager = networkManager;
     }
 
@@ -55,6 +60,22 @@ public class ClientController {
         }
     }
 
+    public String getValidNickname() throws RemoteException {
+        while (true) {
+            String attemptedNickname = view.askNickname();
+            try {
+                if (networkManager.isNicknameAvailable(attemptedNickname)) {
+                    return attemptedNickname;
+                } else {
+                    view.showError("Nickname already in use");
+                }
+            } catch (RemoteException e) {
+                view.showError("Error checking nickname: " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
     /**
      * Configura la connessione al server
      * @throws RemoteException in caso di errori di comunicazione
@@ -65,6 +86,11 @@ public class ClientController {
         // Crea un'implementazione RMI con callback per le notifiche
         try {
             networkManager.connectToServer(serverAddress);
+
+            // Ottenere un nickname valido dopo aver stabilito la connessione
+            this.nickname = getValidNickname();
+            networkManager.registerWithNickname(this.nickname);
+
             view.showMessage("Connected to server as " + nickname);
         } catch (RemoteException e) {
             view.showError("Connection failed: " + e.getMessage());
@@ -121,11 +147,10 @@ public class ClientController {
 
         try {
             switch (choice) {
-                case 1: // Attendi inizio gioco
-                    view.showMessage("Waiting for game to start...");
+                case 0:
+                    gameStarted = true;
                     return true;
-
-                case 2: // Lascia il gioco
+                case 1: // Lascia il gioco
                     leaveGame();
                     return true;
 
@@ -156,11 +181,12 @@ public class ClientController {
         boolean isTestFlight = gameSettings[1] == 1;
         PlayerColor color = view.intToPlayerColor(gameSettings[2]);
 
-        String gameId = networkManager.createGame(color, numPlayers, isTestFlight);
-        currentGameId = gameId;
+        GameInfo gameInfo = networkManager.createGame(color, numPlayers, isTestFlight);
+        currentGameId = gameInfo.getGameId();
         inGame = true;
 
-        view.showMessage("Game created! ID: " + gameId);
+        view.notifyGameCreated(currentGameId);
+        view.notifyPlayerJoined(this.nickname, gameInfo);
         view.showMessage("Waiting for other players to join...");
     }
 
@@ -182,6 +208,13 @@ public class ClientController {
             // Break down the conversion to make it clearer for the compiler
             int colorChoice = Integer.parseInt(joinSettings[1]);
             PlayerColor color = view.intToPlayerColor(colorChoice);
+
+            while(!networkManager.isColorAvailable(gameId, color)){
+                view.showError("Color already in use");
+                joinSettings[1] = view.askPlayerColor();
+                colorChoice = Integer.parseInt(joinSettings[1]);
+                color = view.intToPlayerColor(colorChoice);
+            }
 
             boolean success = networkManager.joinGame(gameId, color);
 
@@ -231,6 +264,23 @@ public class ClientController {
                 view.showError("Error disconnecting from server: " + e.getMessage());
             }
 
+        }
+    }
+
+    public String askNickname() throws RemoteException {
+        return view.askNickname();
+    }
+
+    public void showError(String error) throws RemoteException {
+        view.showError(error);
+    }
+
+    public void notifyGameStarted(GameState gameState) throws RemoteException {
+        gameStarted = true;
+        view.notifyGameStarted(gameState);
+        // Se la view è di tipo ClientCLIView, possiamo interrompere l'attesa
+        if (view instanceof ClientCLIView) {
+            ((ClientCLIView) view).cancelInputWaiting();
         }
     }
 }

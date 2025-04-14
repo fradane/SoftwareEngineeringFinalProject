@@ -1,17 +1,19 @@
 package it.polimi.ingsw.is25am33.model.game;
 
+import it.polimi.ingsw.is25am33.model.PlayerColor;
+
 import java.io.Serializable;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class GameInfo implements Serializable {
     private final String gameId;
     private final int maxPlayers;
-    private final Set<String> connectedPlayers;
+    private final Map<String, PlayerColor> connectedPlayers;
     private final boolean isStarted;
     private final boolean isTestFlight;
 
-    public GameInfo(String gameId, int maxPlayers, Set<String> connectedPlayers, boolean isStarted, boolean isTestFlight) {
+    public GameInfo(String gameId, int maxPlayers, Map<String, PlayerColor> connectedPlayers, boolean isStarted, boolean isTestFlight) {
         this.gameId = gameId;
         this.maxPlayers = maxPlayers;
         this.connectedPlayers = connectedPlayers;
@@ -28,6 +30,10 @@ public class GameInfo implements Serializable {
     }
 
     public Set<String> getConnectedPlayersNicknames() {
+        return connectedPlayers.keySet();
+    }
+
+    public Map<String, PlayerColor> getPlayersAndColors() {
         return connectedPlayers;
     }
 

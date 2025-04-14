@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.network.rmi.client;
 
+import it.polimi.ingsw.is25am33.Client.ClientController;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -13,35 +14,57 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 
 public class RMIClientNetworkManager extends UnicastRemoteObject implements ClientNetworkManager {
-    private final String nickname;
+    private String nickname;
+    private String gameId;
     private VirtualServer server;
     private boolean connected;
+    private ClientController controller;
 
-    public RMIClientNetworkManager(String nickname) throws RemoteException {
+    public RMIClientNetworkManager(ClientController controller) throws RemoteException {
         super();
-        this.nickname = nickname;
         this.connected = false;
+        this.controller = controller;
     }
 
     @Override
     public void connectToServer(String serverHost) throws RemoteException {
-        try{
+        try {
             server = (VirtualServer) Naming.lookup("rmi://" + serverHost + ":" +
                     NetworkConfiguration.RMI_PORT + "/" + NetworkConfiguration.RMI_SERVER_NAME);
 
-            // Verifica se il nickname è disponibile
-            if (server.isNicknameInUse(nickname)) {
-                throw new Exception("Nickname already in use");
-            }
-
-            server.registerClient(nickname, this);
-
             connected = true;
-            System.out.println("Connected to server as " + nickname);
-
-        }catch (Exception e){
+            System.out.println("Connected to server");
+        } catch (Exception e) {
             throw new RemoteException("Could not connect to server: " + e.getMessage());
         }
+    }
+
+    @Override
+    public boolean isNicknameAvailable(String nickname) throws RemoteException {
+        if (!connected || server == null) {
+            throw new RemoteException("Not connected to server");
+        }
+
+        return !server.isNicknameInUse(nickname);
+    }
+
+    @Override
+    public boolean isColorAvailable(String gameId, PlayerColor color) throws RemoteException {
+        if (!connected || server == null) {
+            throw new RemoteException("Not connected to server");
+        }
+
+        return server.isColorAvailable(gameId, color);
+    }
+
+    @Override
+    public void registerWithNickname(String nickname) throws RemoteException {
+        if (!connected || server == null) {
+            throw new RemoteException("Not connected to server");
+        }
+
+        this.nickname = nickname;
+        server.registerClient(nickname, this);
     }
 
     @Override
@@ -53,14 +76,16 @@ public class RMIClientNetworkManager extends UnicastRemoteObject implements Clie
         return server.getAvailableGames();
     }
 
-    public String createGame(PlayerColor color, int numPlayers, boolean isTestFlight) throws RemoteException {
+    public GameInfo createGame(PlayerColor color, int numPlayers, boolean isTestFlight) throws RemoteException {
         if (!connected || server == null) {
             throw new RemoteException("Not connected to server");
         }
 
-        String gameId = server.createGame(nickname, color, numPlayers, isTestFlight);
+        GameInfo gameInfo = server.createGame(nickname, color, numPlayers, isTestFlight);
 
-        return gameId;
+        this.gameId = gameInfo.getGameId();
+
+        return gameInfo;
     }
 
     @Override
@@ -128,8 +153,7 @@ public class RMIClientNetworkManager extends UnicastRemoteObject implements Clie
 
     @Override
     public void notifyGameStarted(GameState gameState) throws RemoteException {
-        System.out.println("Game started! Initial state: " + gameState);
-        System.out.println("The game is now in progress...");
+        controller.notifyGameStarted(gameState);
     }
 
     @Override

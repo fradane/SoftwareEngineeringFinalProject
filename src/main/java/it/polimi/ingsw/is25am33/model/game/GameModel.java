@@ -206,7 +206,7 @@ public class GameModel {
 
     public void addPlayer(String nickname, PlayerColor color) {
         ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color) : new Level2ShipBoard(color);
-        Player player = new Player(nickname, shipBoard);
+        Player player = new Player(nickname, shipBoard, color);
         players.put(nickname, player);
     }
 

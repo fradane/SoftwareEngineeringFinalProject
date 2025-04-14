@@ -322,6 +322,7 @@ public abstract class ShipBoard implements Serializable {
             throw new IllegalArgumentException("No component in this position");
 
         notActiveComponents.add(shipMatrix[x][y]);
+        incorrectlyPositionedComponents.remove(shipMatrix[x][y]);
         shipMatrix[x][y] = null;
 
         List<Set<List<Integer>>> shipParts = identifyShipParts(x, y);
