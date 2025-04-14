@@ -14,7 +14,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class RMIServerNetworkManager extends UnicastRemoteObject implements VirtualServer {
@@ -24,10 +25,38 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
     // Mappa che associa gameId ai controller di gioco
     private final Map<String, GameController> gameControllers;
 
+    private final ExecutorService gameExecutor;
+
     public RMIServerNetworkManager() throws RemoteException {
         super();
         this.clients = new ConcurrentHashMap<>();
         this.gameControllers = new ConcurrentHashMap<>();
+
+        // Crea un pool di thread basato sul numero di core disponibili
+        int threadPoolSize = Math.max(2, Runtime.getRuntime().availableProcessors());
+        this.gameExecutor = Executors.newFixedThreadPool(threadPoolSize, r -> {
+            Thread t = new Thread(r, "GameServerWorker");
+            t.setDaemon(true);
+            return t;
+        });
+    }
+
+    /**
+     * Chiude ordinatamente l'ExecutorService
+     */
+    public void shutdown() {
+        System.out.println("Shutting down server executor...");
+        if (gameExecutor != null && !gameExecutor.isShutdown()) {
+            gameExecutor.shutdown();
+            try {
+                if (!gameExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    gameExecutor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                gameExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     @Override
@@ -122,22 +151,24 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
 
         //TODO aggiungere: ObserverManager.addObserver(clientCallback);
 
-        // Aggiungi il player alla partita
         controller.addPlayer(nickname, color);
-        // Aggiorno le gameModel info
         gameInfo = controller.getGameInfo();
 
-        Set<String> players = gameInfo.getConnectedPlayersNicknames();
-        // Notifica tutti i client della partita
-        for (String player : players) {
-            try {
-                clients.get(player).notifyPlayerJoined(nickname, gameInfo);
-            } catch (RemoteException e) {
-                System.err.println("Error notifying player " + player + ": " + e.getMessage());
-            }
-        }
+        // creo una copia finale di gameInfo
+        final GameInfo finalGameInfo = gameInfo;
 
-        System.out.println("Player " + nickname + " joined gameModel " + gameId + " with color " + color);
+        Set<String> players = gameInfo.getConnectedPlayersNicknames();
+
+        // Usa il nuovo metodo per notificare i giocatori
+        notifyPlayers(players, (player, client) -> {
+            try {
+                client.notifyPlayerJoined(nickname, finalGameInfo);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        System.out.println("Player " + nickname + " joined game " + gameId + " with color " + color);
 
         // Se abbiamo raggiunto il numero di giocatori, avvia la partita
         if (players.size() == gameInfo.getMaxPlayers()) {
@@ -148,26 +179,49 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
     }
 
     private void startGame(String gameId) {
-        try {
-            GameController controller = gameControllers.get(gameId);
-            GameState initialState = controller.startGame();
+        // Esegui l'avvio della partita in un thread separato
+        gameExecutor.submit(() -> {
+            try {
+                GameController controller = gameControllers.get(gameId);
+                GameState initialState = controller.startGame();
+                GameInfo gameInfo = controller.getGameInfo();
 
-            GameInfo gameInfo = controller.getGameInfo();
+                // Usa il nuovo metodo per notificare tutti i client
+                notifyPlayers(gameInfo.getConnectedPlayersNicknames(), (player, client) -> {
+                    try {
+                        client.notifyGameStarted(initialState);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
-            // Notifica tutti i client dell'inizio della partita
-            for (String player : gameInfo.getConnectedPlayersNicknames()) {
-                try {
-                    clients.get(player).notifyGameStarted(initialState);
-                } catch (RemoteException e) {
-                    System.err.println("Error notifying player " + player + ": " + e.getMessage());
-                }
+                System.out.println("Game " + gameId + " started");
+            } catch (Exception e) {
+                System.err.println("Error starting game: " + e.getMessage());
             }
+        });
+    }
 
-            System.out.println("GameModel " + gameId + " started");
+    /**
+     * Metodo generico per inviare notifiche ai client in parallelo
+     */
+    private void notifyPlayers(Set<String> players, BiConsumer<String, VirtualClient> notificationFunction) {
+        // Crea un CompletableFuture per ogni notifica da inviare
+        List<CompletableFuture<Void>> notificationFutures = players.stream()
+                .map(player -> CompletableFuture.runAsync(() -> {
+                    try {
+                        VirtualClient client = clients.get(player);
+                        if (client != null) {
+                            notificationFunction.accept(player, client);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error notifying player " + player + ": " + e.getMessage());
+                    }
+                }, gameExecutor))
+                .collect(Collectors.toList());
 
-        } catch (Exception e) {
-            System.err.println("Error starting gameModel: " + e.getMessage());
-        }
+        // Attendi che tutte le notifiche siano state inviate
+        CompletableFuture.allOf(notificationFutures.toArray(new CompletableFuture[0])).join();
     }
 
     @Override
@@ -206,22 +260,28 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
     }
 
     private void endGame(String gameId, String reason) {
-        GameController controller = gameControllers.get(gameId);
-        Set<String> players = controller.getGameInfo().getConnectedPlayersNicknames();
-
-        // Notifica tutti i client della fine della partita
-        for (String player : players) {
+        gameExecutor.submit(() -> {
             try {
-                clients.get(player).notifyGameEnded(reason);
-            } catch (RemoteException e) {
-                System.err.println("Error notifying player " + player + ": " + e.getMessage());
+                GameController controller = gameControllers.get(gameId);
+                Set<String> players = controller.getGameInfo().getConnectedPlayersNicknames();
+
+                // Usa il nuovo metodo per notificare i giocatori
+                notifyPlayers(players, (player, client) -> {
+                    try {
+                        client.notifyGameEnded(reason);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+                // Rimuovi la partita
+                gameControllers.remove(gameId);
+
+                System.out.println("Game " + gameId + " ended: " + reason);
+            } catch (Exception e) {
+                System.err.println("Error ending game: " + e.getMessage());
             }
-        }
-
-        // Rimuovi la partita
-        gameControllers.remove(gameId);
-
-        System.out.println("GameModel " + gameId + " ended: " + reason);
+        });
     }
 
     @Override
@@ -247,6 +307,7 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
     }
 
     public static void main(String args[]) throws Exception {
+        RMIServerNetworkManager server = null;
         try {
             System.out.println("Starting Galaxy Trucker Server...");
 
@@ -254,7 +315,7 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
             Registry registry = LocateRegistry.createRegistry(NetworkConfiguration.RMI_PORT);
 
             // Crea il server
-            RMIServerNetworkManager server = new RMIServerNetworkManager();
+            server = new RMIServerNetworkManager();
 
             // Registra il server nel registry
             registry.rebind(NetworkConfiguration.RMI_SERVER_NAME, server);
@@ -262,11 +323,22 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
             System.out.println("Galaxy Trucker Server started on port " + NetworkConfiguration.RMI_PORT);
             System.out.println("Server ready to accept connections");
 
+            // Aggiungi un hook per lo shutdown
+            final RMIServerNetworkManager finalServer = server;
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("Server shutdown hook triggered");
+                finalServer.shutdown();
+            }));
+
         } catch (Exception e) {
             System.err.println("Server error: " + e.getMessage());
             e.printStackTrace();
+            if (server != null) {
+                server.shutdown();
+            }
         }
     }
+
 
 //    public notifyClients(DTO dto, List<observer> observers, Runnable callback ){
 //        String message = serialize(dto);
