@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
@@ -24,8 +25,13 @@ public class MeteoriteStorm extends AdventureCard {
         this.meteoriteIterator = meteorites.iterator();
     }
 
+    @JsonIgnore
     public List<Meteorite> getMeteorites() {
         return meteorites;
+    }
+
+    public List<String> getMeteoriteIDs() {
+        return meteoriteIDs;
     }
 
     public MeteoriteStorm() {

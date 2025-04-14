@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.CargoCube;
 
 import java.util.Iterator;
@@ -23,6 +24,7 @@ public class Planet {
         this.reward = reward;
     }
 
+    @JsonIgnore
     public CargoCube getCurrent() {
         return rewardIterator.next();
     }
@@ -39,7 +41,12 @@ public class Planet {
         return isBusy;
     }
 
+    public void setBusy(boolean busy) {
+        isBusy = busy;
+    }
+
     public List<CargoCube> getReward() {
         return reward;
     }
+    
 }
