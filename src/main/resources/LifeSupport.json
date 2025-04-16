@@ -7,7 +7,7 @@
       "WEST": "SINGLE"
     },
 
-    "color": "BROWN"
+    "lifeSupportColor": "BROWN"
   },
 
   {
@@ -18,7 +18,7 @@
       "WEST": "SINGLE"
     },
 
-    "color": "BROWN"
+    "lifeSupportColor": "BROWN"
   },
 
   {
@@ -29,7 +29,7 @@
       "WEST": "UNIVERSAL"
     },
 
-    "color": "BROWN"
+    "lifeSupportColor": "BROWN"
   },
 
   {
@@ -40,7 +40,7 @@
       "WEST": "UNIVERSAL"
     },
 
-    "color": "BROWN"
+    "lifeSupportColor": "BROWN"
   },
 
   {
@@ -51,7 +51,7 @@
       "WEST": "UNIVERSAL"
     },
 
-    "color": "BROWN"
+    "lifeSupportColor": "BROWN"
   },
 
   {
@@ -62,7 +62,7 @@
       "WEST": "UNIVERSAL"
     },
 
-    "color": "BROWN"
+    "lifeSupportColor": "BROWN"
   },
 
   {
@@ -73,7 +73,7 @@
       "WEST": "DOUBLE"
     },
 
-    "color": "PURPLE"
+    "lifeSupportColor": "PURPLE"
   },
 
   {
@@ -84,7 +84,7 @@
       "WEST": "DOUBLE"
     },
 
-    "color": "PURPLE"
+    "lifeSupportColor": "PURPLE"
   },
 
   {
@@ -95,7 +95,7 @@
       "WEST": "UNIVERSAL"
     },
 
-    "color": "PURPLE"
+    "lifeSupportColor": "PURPLE"
   },
 
   {
@@ -106,7 +106,7 @@
       "WEST": "UNIVERSAL"
     },
 
-    "color": "PURPLE"
+    "lifeSupportColor": "PURPLE"
   },
 
   {
@@ -117,7 +117,7 @@
       "WEST": "UNIVERSAL"
     },
 
-    "color": "PURPLE"
+    "lifeSupportColor": "PURPLE"
   },
 
   {
@@ -128,7 +128,7 @@
       "WEST": "UNIVERSAL"
     },
 
-    "color": "PURPLE"
+    "lifeSupportColor": "PURPLE"
   }
 
 ]

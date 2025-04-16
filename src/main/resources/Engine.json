@@ -177,6 +177,14 @@
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     }
-  }
+  },
 
+  {
+    "connectors" : {
+      "NORTH": "SINGLE",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "EMPTY"
+    }
+  }
 ]

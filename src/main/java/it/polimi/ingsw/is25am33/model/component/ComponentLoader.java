@@ -82,7 +82,7 @@ public class ComponentLoader {
     }
 
     private static List<StandardStorage> loadStandardStorage() {
-        return ComponentLoader.loadFromJson("StandardStoarage.json", StandardStorage.class);
+        return ComponentLoader.loadFromJson("StandardStorage.json", StandardStorage.class);
     }
 
     private static List<StructuralModules> loadStructuralModules() {
@@ -100,7 +100,7 @@ public class ComponentLoader {
         components.addAll(ComponentLoader.loadDoubleEngine());
         components.addAll(ComponentLoader.loadEngine());
         components.addAll(ComponentLoader.loadLifeSupport());
-        components.addAll(ComponentLoader.loadMainCabin());
+        //components.addAll(ComponentLoader.loadMainCabin());
         components.addAll(ComponentLoader.loadShield());
         components.addAll(ComponentLoader.loadSpecialStorage());
         components.addAll(ComponentLoader.loadStandardStorage());

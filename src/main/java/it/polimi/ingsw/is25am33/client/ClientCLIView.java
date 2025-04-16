@@ -31,6 +31,7 @@ public class ClientCLIView implements ClientView {
     private volatile boolean waitingForGameStart = false;
     private final BlockingQueue<String> inputQueue = new LinkedBlockingQueue<>();
     private volatile boolean waitingForInput = false;
+    private static final String INPUT_INTERRUPT = "";
 
 
     // Definizione di un colore rosso ANSI per gli errori (funziona nei terminali che supportano i colori ANSI).
@@ -332,8 +333,8 @@ public class ClientCLIView implements ClientView {
     @Override
     public void showComponentTable() {
 
-        final int rows = 13;
-        final int cols = 12;
+        final int rows = 19;
+        final int cols = 8;
 
         // Riga superiore con intestazioni di riga
         System.out.print("     "); // spazio per i numeri di colonna
@@ -417,8 +418,12 @@ public class ClientCLIView implements ClientView {
                 System.out.println("2. Show the latest component table");
                 System.out.println("3. End your shipBoard setup phase");
                 System.out.println("4. Show one of the ship boards");
-                System.out.print("Your choice: ");
-                int choice = Integer.parseInt(scanner.nextLine());
+                String input = askForInput("Your choice: ");
+
+                // TODO
+                //if (input.equals(INPUT_INTERRUPT)) return ;
+
+                int choice = Integer.parseInt(input);
                 switch (choice) {
                     case 1:
                         Coordinates chosenCoordinates = readCoordinatesFromUserInput();
@@ -642,9 +647,7 @@ public class ClientCLIView implements ClientView {
 
         view.showShipBoardsMenu();
 
-
         view.showBuildShipBoardMenu();
-
 
     }
 

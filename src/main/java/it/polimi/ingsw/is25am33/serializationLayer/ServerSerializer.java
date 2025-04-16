@@ -3,11 +3,9 @@ package it.polimi.ingsw.is25am33.serializationLayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.board.*;
-import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.game.DTO;
 import it.polimi.ingsw.is25am33.model.game.GameEvent;
-import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.Map;
 import java.util.function.Function;

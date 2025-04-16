@@ -159,6 +159,12 @@ public class ClientController {
     private boolean handleGameState() {
 
         if (gameStarted) {
+
+            setCurrGameState(GameState.BUILD_SHIPBOARD);
+            view.setLatestComponentTable(new ComponentTable());
+            view.showComponentTable();
+            buildShipBoardPhase();
+
             // TODO logica di gioco
 
             view.showMessage("Game in progress...");
@@ -343,7 +349,6 @@ public class ClientController {
         while(currGameState == GameState.BUILD_SHIPBOARD && !hasPlayerEndedThisPhase) {
             hasPlayerEndedThisPhase = view.showBuildShipBoardMenu()
                     .apply((RMIServerNetworkManager) ((RMIClientNetworkManager) networkManager).getServer(), nickname);
-
 
         }
 

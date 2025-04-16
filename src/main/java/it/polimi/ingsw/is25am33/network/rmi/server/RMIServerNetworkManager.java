@@ -109,7 +109,7 @@ public class RMIServerNetworkManager extends UnicastRemoteObject implements Virt
         String gameId = generateUniqueGameId();
 
         // Crea un nuovo controller per questa partita
-        GameController controller = new GameController(gameId, numPlayers, isTestFlight);
+        GameController controller = new GameController(gameId, numPlayers, isTestFlight, this);
         controller.setRMIServer(this); // Passa un riferimento al server
 
         // Registra il controller

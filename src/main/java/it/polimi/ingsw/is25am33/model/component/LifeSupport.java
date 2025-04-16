@@ -14,7 +14,7 @@ public class LifeSupport extends Component {
     /**
      * The color associated with the life support system.
      */
-    private ColorLifeSupport color;
+    private ColorLifeSupport lifeSupportColor;
 
     /**
      * Default constructor for {@code LifeSupport}.
@@ -29,7 +29,7 @@ public class LifeSupport extends Component {
      */
     public LifeSupport(Map<Direction, ConnectorType> connectors, ColorLifeSupport color) {
         super(connectors);
-        this.color = color;
+        this.lifeSupportColor = color;
     }
 
     /**
@@ -38,7 +38,7 @@ public class LifeSupport extends Component {
      * @return the {@code ColorLifeSupport} of this component
      */
     public ColorLifeSupport getLifeSupportColor() {
-        return color;
+        return lifeSupportColor;
     }
 
     /**
@@ -47,7 +47,7 @@ public class LifeSupport extends Component {
      * @param color the new {@code ColorLifeSupport} to be assigned
      */
     public void setLifeSupportColor(ColorLifeSupport color) {
-        this.color = color;
+        this.lifeSupportColor = color;
     }
 }
 

@@ -18,8 +18,9 @@ public class GameController {
     private final GameModel gameModel;
     private RMIServerNetworkManager rmiServer;
 
-    public GameController(String gameId, int maxPlayers, boolean isTestFlight) {
+    public GameController(String gameId, int maxPlayers, boolean isTestFlight, RMIServerNetworkManager rmiServer) {
         this.gameModel = new GameModel(gameId, maxPlayers, isTestFlight, rmiServer);
+        this.rmiServer = rmiServer;
     }
 
     /**

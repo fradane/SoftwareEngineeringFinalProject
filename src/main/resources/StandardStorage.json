@@ -137,6 +137,15 @@
       "WEST": "DOUBLE"
     },
     "maxCapacity": 3
-  }
+  },
 
+  {
+    "connectors" : {
+      "NORTH": "EMPTY",
+      "EAST": "EMPTY",
+      "SOUTH": "EMPTY",
+      "WEST": "UNIVERSAL"
+    },
+    "maxCapacity": 2
+  }
 ]

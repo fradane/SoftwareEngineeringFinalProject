@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 
 public class ComponentTable {
 
-    int rows = 12;
-    int cols = 13;
+    final int rows = 8;
+    final int cols = 19;
     private final Component[][] componentTable = new Component[rows][cols];
 
     public ComponentTable() {
@@ -22,8 +22,9 @@ public class ComponentTable {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (index == components.size() - 1) return;
-                componentTable[i][j] = components.get(index++);
-                components.get(index++).setTableCoordinates(new Coordinates(i, j));
+                componentTable[i][j] = components.get(index);
+                components.get(index).setTableCoordinates(new Coordinates(i, j));
+                index++;
             }
         }
     }
