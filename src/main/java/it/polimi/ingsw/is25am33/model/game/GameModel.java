@@ -6,17 +6,13 @@ import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.CardState;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
-import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
-import it.polimi.ingsw.is25am33.network.common.VirtualServer;
 
-import javax.management.remote.rmi.RMIServer;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -38,7 +34,7 @@ public class GameModel {
     private ComponentTable componentTable;
     private GameContext gameContext;
 
-    public GameModel(String gameId, int maxPlayers, boolean isTestFlight, VirtualServer virtualServer) {
+    public GameModel(String gameId, int maxPlayers, boolean isTestFlight) {
         this.gameId = gameId;
         this.maxPlayers = maxPlayers;
         this.isTestFlight = isTestFlight;
@@ -52,9 +48,9 @@ public class GameModel {
         this.players = new ConcurrentHashMap<>();
         deck = new Deck();
         isStarted = false;
-        gameContext = new GameContext(gameId, virtualServer);
+        //gameContext = new GameContext(gameId, );
         componentTable = new ComponentTable();
-        ObserverManager.getInstance().registerGame(gameContext);
+        //ObserverManager.getInstance().registerGame(gameContext);
     }
 
     public String getGameId() {
@@ -94,7 +90,7 @@ public class GameModel {
     }
 
     public void setFocusComponent(Player player, Coordinates coordinates){
-        Component component = componentTable.getComponent(coordinates);
+        Component component = null;//= componentTable.getComponent(coordinates);
 
         player.getPersonalBoard().setFocusedComponent(component);
         component.setCurrState(ComponentState.USED);

@@ -1,18 +1,13 @@
-package it.polimi.ingsw.is25am33.serializationLayer;
+package it.polimi.ingsw.is25am33.serializationLayer.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import it.polimi.ingsw.is25am33.model.card.Planets;
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.card.AbandonedShip;
-import it.polimi.ingsw.is25am33.model.card.AbandonedStation;
-import it.polimi.ingsw.is25am33.model.component.BatteryBox;
-import it.polimi.ingsw.is25am33.model.component.Cannon;
-import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.List;
 
 public class ClientDeserializer {
 
@@ -45,6 +40,18 @@ public class ClientDeserializer {
         return result;
     }
 
+    public static <T> List<T> deserializeListOfObj(String json, Class<T> type) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        // Create a type reference for a List of T objects
+        CollectionType listType = mapper.getTypeFactory().constructCollectionType(List.class, type);
+
+        // Deserialize the JSON array into a List<T>
+
+        return mapper.readValue(json, listType);
+    }
+
+
     public static void main(String[] args) {
 
         try {
@@ -57,5 +64,7 @@ public class ClientDeserializer {
 
     }
 
-
 }
+
+
+

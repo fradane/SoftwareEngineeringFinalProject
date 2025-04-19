@@ -1,6 +1,6 @@
 package it.polimi.ingsw.is25am33.model;
 
-import it.polimi.ingsw.is25am33.network.common.VirtualServer;
+import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,19 +8,19 @@ import java.util.List;
 public class GameContext {
     private final String gameId;
     private final List<Observer> observers = new ArrayList<>();
-    private final VirtualServer virtualServer;
+    private final CallableOnClientController clientController;
 
-    public GameContext(String gameId, VirtualServer virtualServer) {
+    public GameContext(String gameId, CallableOnClientController clientController) {
         this.gameId = gameId;
-        this.virtualServer = virtualServer;
+        this.clientController = clientController;
     }
 
     public String getGameId() {
         return gameId;
     }
 
-    public VirtualServer getVirtualServer(){
-        return virtualServer;
+    public CallableOnClientController getVirtualServer(){
+        return clientController;
     }
 
     public void addObserver(Observer observer) {

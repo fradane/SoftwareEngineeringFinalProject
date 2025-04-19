@@ -1,4 +1,4 @@
-package it.polimi.ingsw.is25am33.serializationLayer;
+package it.polimi.ingsw.is25am33.serializationLayer.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
@@ -30,7 +30,17 @@ public class ServerSerializer{
             // TODO id relativi ai components
     );
 
-    public static String serialize(GameEvent gameEvent) {
+    public static <T> String serialize(T objToSerialize) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            return mapper.writeValueAsString(objToSerialize);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String serializeGameEvent(GameEvent gameEvent) {
         return serializers.get(gameEvent.getEventId()).apply(gameEvent);
     }
 
@@ -54,7 +64,7 @@ public class ServerSerializer{
         DTO dto = new DTO();
         deck.getAllCards().forEach(card -> {
             dto.setAdventureCard(card);
-            System.out.println(ServerSerializer.serialize(new GameEvent("drawnCard", dto)));
+            System.out.println(ServerSerializer.serializeGameEvent(new GameEvent("drawnCard", dto)));
         });
 
 

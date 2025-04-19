@@ -1,16 +1,13 @@
-package it.polimi.ingsw.is25am33.client;
+package it.polimi.ingsw.is25am33.client.view;
 
+import it.polimi.ingsw.is25am33.client.ClientModel;
 import it.polimi.ingsw.is25am33.model.GameState;
 import it.polimi.ingsw.is25am33.model.PlayerColor;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
-import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.network.rmi.server.RMIServerNetworkManager;
 
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
 /**
  * Interfaccia che definisce le operazioni di visualizzazione del client.
@@ -21,6 +18,8 @@ public interface ClientView {
      * Inizializza la view
      */
     void initialize();
+
+    String askForInput(String question);
 
     void cancelInputWaiting();
 
@@ -65,7 +64,7 @@ public interface ClientView {
      * @param games La lista dei giochi disponibili
      * @return Un array contenente [indiceGioco, coloreGiocatore (int)]
      */
-    String[] askJoinGame(Iterable<GameInfo> games);
+    String[] askJoinGame(List<GameInfo> games);
 
     /**
      * Mostra il menù principale
@@ -124,15 +123,7 @@ public interface ClientView {
         }
     }
 
-    ComponentTable getLatestComponentTable();
-
-    void setLatestComponentTable(ComponentTable latestComponentTable);
-
-    void setCurrAdventureCard(AdventureCard card);
-
-    void setPlayersNickname(List<String> playersNickname);
-
-    void showComponentTable();
+    String askPlayerColor(List<PlayerColor> availableColors);
 
     void showNewGameState(String gameState);
 
@@ -140,10 +131,12 @@ public interface ClientView {
 
     void showCurrAdventureCard(boolean isFirstTime);
 
-    BiFunction<RMIServerNetworkManager, String, Boolean> showBuildShipBoardMenu();
+    ClientModel getClientModel();
 
-    BiFunction<RMIServerNetworkManager, String, Boolean> showShipBoardsMenu();
-
-    BiConsumer<RMIServerNetworkManager, String> showChosenComponentAndMenu(Component component);
+//    BiFunction<RMIServerNetworkManager, String, Boolean> showBuildShipBoardMenu();
+//
+//    BiFunction<RMIServerNetworkManager, String, Boolean> showShipBoardsMenu();
+//
+//    BiConsumer<RMIServerNetworkManager, String> showChosenComponentAndMenu(Component component);
 
 }

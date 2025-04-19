@@ -2,7 +2,9 @@ package it.polimi.ingsw.is25am33.model;
 
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
-public enum GameState {
+import java.io.Serializable;
+
+public enum GameState implements Serializable {
 
     SETUP {
         @Override

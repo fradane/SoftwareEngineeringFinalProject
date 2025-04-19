@@ -1,40 +1,48 @@
 package it.polimi.ingsw.is25am33.model.game;
 
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.ComponentLoader;
+import javafx.util.Pair;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class ComponentTable {
 
-    final int rows = 8;
-    final int cols = 19;
-    private final Component[][] componentTable = new Component[rows][cols];
+    private final Stack<Component> hiddenComponents = new Stack<>();
+    private final Map<Integer, Component> visibleComponents = new ConcurrentHashMap<>();
+    private Integer currVisibleIndex = 1;
 
     public ComponentTable() {
-        List<Component> components = ComponentLoader.loadComponents();
-        Collections.shuffle(components);
-        int index = 0;
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                if (index == components.size() - 1) return;
-                componentTable[i][j] = components.get(index);
-                components.get(index).setTableCoordinates(new Coordinates(i, j));
-                index++;
+        hiddenComponents.addAll(ComponentLoader.loadComponents());
+        Collections.shuffle(hiddenComponents);
+    }
+
+    public Component pickHiddenComponent(){
+        synchronized (hiddenComponents) {
+            try {
+                return hiddenComponents.pop();
+            } catch (EmptyStackException e) {
+                return null;
             }
         }
     }
 
-    public Component getComponent(Coordinates coordinates){
-        return componentTable[coordinates.getX()][coordinates.getY()];
+    public void addVisibleComponent(Component component){
+        // although visibleComponents it's already synchronized, this method needs currVisibleIndex to be synchronized too,
+        synchronized (visibleComponents) {
+            visibleComponents.put(currVisibleIndex, component);
+            currVisibleIndex++;
+        }
     }
 
-    public Stream<Component> getComponentsAsStream(){
-        return Arrays.stream(componentTable).flatMap(Arrays::stream);
+    public Component pickVisibleComponent(int index){
+        return visibleComponents.remove(index);
+    }
+
+    public Stream<Pair<Integer, Component>> getVisibleComponentsAsStream(){
+        return visibleComponents.keySet().stream().map(index -> new Pair<>(index, visibleComponents.get(index)));
     }
 
 }

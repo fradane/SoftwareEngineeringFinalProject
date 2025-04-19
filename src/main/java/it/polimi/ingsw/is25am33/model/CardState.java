@@ -3,7 +3,7 @@ package it.polimi.ingsw.is25am33.model;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
-import it.polimi.ingsw.is25am33.serializationLayer.ServerDeserializer;
+import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
 
 import java.io.BufferedReader;
 import java.io.IOException;

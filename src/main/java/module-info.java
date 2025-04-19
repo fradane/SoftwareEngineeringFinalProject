@@ -1,39 +1,61 @@
 module it.polimi.ingsw.is25am33 {
+    // Required external modules and libraries
+    // JavaFX dependencies for the GUI
     requires javafx.controls;
     requires javafx.fxml;
+    // JSON serialization library
     requires com.fasterxml.jackson.databind;
+    // Java standard libraries
     requires java.smartcardio;
     requires java.desktop;
     requires java.management.rmi;
     requires java.logging;
     requires java.rmi;
 
-    // Aperture per JavaFX e Jackson
+    // JavaFX Configuration
+    // Allows JavaFX to access the main package for FXML loading
     opens it.polimi.ingsw.is25am33 to javafx.fxml;
-    opens it.polimi.ingsw.is25am33.model to com.fasterxml.jackson.databind, java.rmi;  // Combinato
+
+    // JSON Serialization Configuration
+    // Open model packages to Jackson for JSON serialization/deserialization
+    opens it.polimi.ingsw.is25am33.model to com.fasterxml.jackson.databind, java.rmi;
     opens it.polimi.ingsw.is25am33.model.component to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.is25am33.model.card to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.is25am33.model.game to com.fasterxml.jackson.databind;
+    opens it.polimi.ingsw.is25am33.model.board to com.fasterxml.jackson.databind;
+    opens it.polimi.ingsw.is25am33.serializationLayer to com.fasterxml.jackson.databind;
+    opens it.polimi.ingsw.is25am33.serializationLayer.client to com.fasterxml.jackson.databind;
+    opens it.polimi.ingsw.is25am33.serializationLayer.server to com.fasterxml.jackson.databind;
+
+    // RMI (Remote Method Invocation) Configuration
+    // Open packages needed for RMI functionality
+    opens it.polimi.ingsw.is25am33.network.common to java.rmi;
+    opens it.polimi.ingsw.is25am33.network.rmi to java.rmi;
+    opens it.polimi.ingsw.is25am33.network to java.rmi;
+
+    // Public API Exports
+    // Main game model exports
+    exports it.polimi.ingsw.is25am33.model;
     exports it.polimi.ingsw.is25am33.model.card;
     exports it.polimi.ingsw.is25am33.model.game;
     exports it.polimi.ingsw.is25am33.model.component;
-    exports it.polimi.ingsw.is25am33.serializationLayer to com.fasterxml.jackson.databind;
     exports it.polimi.ingsw.is25am33.model.dangerousObj;
-    exports it.polimi.ingsw.is25am33.model;
     exports it.polimi.ingsw.is25am33.model.board to com.fasterxml.jackson.databind;
-
-    // Esportazioni
-    exports it.polimi.ingsw.is25am33;
+    
+    // Controller and network exports
+    exports it.polimi.ingsw.is25am33.controller;
+    exports it.polimi.ingsw.is25am33.network.common to java.rmi;
+    
+    // Client-side exports
     exports it.polimi.ingsw.is25am33.client;
-
-    // Esportazioni aggiuntive per RMI
-    exports it.polimi.ingsw.is25am33.network.common to java.rmi;  // AGGIUNTO
-    exports it.polimi.ingsw.is25am33.network.rmi.server to java.rmi;
-    exports it.polimi.ingsw.is25am33.network.rmi.client to java.rmi;
-
-    // Aperture aggiuntive per RMI
-    opens it.polimi.ingsw.is25am33.network.common to java.rmi;  // AGGIUNTO
-    opens it.polimi.ingsw.is25am33.network.rmi.server to java.rmi;
-    opens it.polimi.ingsw.is25am33.network.rmi.client to java.rmi;
-    opens it.polimi.ingsw.is25am33.model.board to java.rmi;
+    exports it.polimi.ingsw.is25am33.client.view;
+    exports it.polimi.ingsw.is25am33.client.controller;
+    
+    // Serialization layer exports
+    exports it.polimi.ingsw.is25am33.serializationLayer to com.fasterxml.jackson.databind;
+    exports it.polimi.ingsw.is25am33.serializationLayer.client to com.fasterxml.jackson.databind;
+    exports it.polimi.ingsw.is25am33.serializationLayer.server to com.fasterxml.jackson.databind;
+    
+    // Main application export
+    exports it.polimi.ingsw.is25am33;
 }
