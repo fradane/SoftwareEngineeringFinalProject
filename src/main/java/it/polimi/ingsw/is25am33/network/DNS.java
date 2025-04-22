@@ -2,11 +2,11 @@ package it.polimi.ingsw.is25am33.network;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.controller.GameController;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.common.ConnectionManager;
 import it.polimi.ingsw.is25am33.network.rmi.RMIServerRunnable;
-import it.polimi.ingsw.is25am33.network.socket.SocketServerRunnable;
+import it.polimi.ingsw.is25am33.network.socket.SocketServerManager;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -24,7 +24,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         // create the dns to handle any type of connection
         DNS dns = new DNS();
 
-        Thread socketThread = new Thread(new SocketServerRunnable(dns));
+        Thread socketThread = new Thread(new SocketServerManager(dns));
         socketThread.start();
 
         // starts RMI thread

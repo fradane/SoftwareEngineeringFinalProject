@@ -1,7 +1,9 @@
-package it.polimi.ingsw.is25am33.model;
+package it.polimi.ingsw.is25am33.model.enumFiles;
 
 public enum ConnectorType {
-    SINGLE, DOUBLE, UNIVERSAL, EMPTY;
+
+    // DO NOT CHANGE ORDER OF VALUES
+    EMPTY, SINGLE, DOUBLE, UNIVERSAL;
 
     public static boolean areConnectorsCompatible (ConnectorType conn1, ConnectorType conn2) {
         // Lati lisci possono connettersi solo con lati lisci
@@ -19,6 +21,11 @@ public enum ConnectorType {
 
         return true;
     }
+
+    public int fromConnectorTypeToValue() {
+        return this.ordinal();
+    }
+
 }
 
 

@@ -1,19 +1,35 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
-import it.polimi.ingsw.is25am33.model.ComponentState;
-import it.polimi.ingsw.is25am33.model.GameContext;
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Abstract representation of a generic component within the system.
  * A component has a state, orientation, and directional connectors.
  */
-public abstract class Component {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = BatteryBox.class, name = "BatteryBox"),
+        @JsonSubTypes.Type(value = Cabin.class, name = "Cabin"),
+        @JsonSubTypes.Type(value = Cannon.class, name = "Cannon"),
+        @JsonSubTypes.Type(value = DoubleCannon.class, name = "DoubleCannon"),
+        @JsonSubTypes.Type(value = DoubleEngine.class, name = "DoubleEngine"),
+        @JsonSubTypes.Type(value = Engine.class, name = "Engine"),
+        @JsonSubTypes.Type(value = LifeSupport.class, name = "LifeSupport"),
+        @JsonSubTypes.Type(value = MainCabin.class, name = "MainCabin"),
+        @JsonSubTypes.Type(value = Shield.class, name = "Shield"),
+        @JsonSubTypes.Type(value = SpecialStorage.class, name = "SpecialStorage"),
+        @JsonSubTypes.Type(value = StandardStorage.class, name = "StandardStorage"),
+        @JsonSubTypes.Type(value = StructuralModules.class, name = "StructuralModules")
+})
+public abstract class Component implements Serializable {
 
     /** Current operational state of the component. */
     private ComponentState currState = ComponentState.HIDDEN ;
@@ -24,7 +40,8 @@ public abstract class Component {
     /** Map associating directions with their respective connector types. */
     private Map<Direction, ConnectorType> connectors;
 
-    private Coordinates tableCoordinates;
+    protected String type;
+
     /**
      * Default constructor for {@code Component}.
      */
@@ -39,14 +56,6 @@ public abstract class Component {
      */
     public Component(Map<Direction, ConnectorType> connectors) {
         this.connectors = connectors;
-    }
-
-    public Coordinates getTableCoordinates() {
-        return tableCoordinates;
-    }
-
-    public void setTableCoordinates(Coordinates tableCoordinates) {
-        this.tableCoordinates = tableCoordinates;
     }
 
     /**

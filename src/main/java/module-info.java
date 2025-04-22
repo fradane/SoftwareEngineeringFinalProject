@@ -58,4 +58,6 @@ module it.polimi.ingsw.is25am33 {
     
     // Main application export
     exports it.polimi.ingsw.is25am33;
+    exports it.polimi.ingsw.is25am33.model.enumFiles;
+    opens it.polimi.ingsw.is25am33.model.enumFiles to com.fasterxml.jackson.databind, java.rmi;
 }

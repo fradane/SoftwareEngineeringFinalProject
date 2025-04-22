@@ -2,8 +2,10 @@ package it.polimi.ingsw.is25am33.network.socket;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
-import it.polimi.ingsw.is25am33.model.GameState;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.DNS;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
@@ -22,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class SocketServerRunnable implements Runnable, CallableOnClientController {
+public class SocketServerManager implements Runnable, CallableOnClientController {
 
     final int port = 1234;
     DNS dns;
@@ -30,7 +32,7 @@ public class SocketServerRunnable implements Runnable, CallableOnClientControlle
     private final Map<String, CallableOnGameController> gameControllers = new ConcurrentHashMap<>();
     private final Map<String, PrintWriter> writers = new ConcurrentHashMap<>();
 
-    public SocketServerRunnable(DNS dns) {
+    public SocketServerManager(DNS dns) {
         this.dns = dns;
     }
 
@@ -78,7 +80,7 @@ public class SocketServerRunnable implements Runnable, CallableOnClientControlle
         executor.shutdown();
     }
 
-    private void performAction(SocketMessage inMessage, PrintWriter out) throws RemoteException {
+    private void performAction(SocketMessage inMessage, PrintWriter out) throws IOException {
 
         String nickname = inMessage.getSenderNickname();
         String action = inMessage.getActions();
@@ -128,6 +130,27 @@ public class SocketServerRunnable implements Runnable, CallableOnClientControlle
                 out.println(ServerSerializer.serialize(outMessage));
                 break;
 
+            case "playerPicksHiddenComponent":
+                Component component = gameControllers.get(nickname).playerPicksHiddenComponent(nickname);
+                outMessage = new SocketMessage("server", "notifyPickedComponent");
+                outMessage.setParamComponent(component);
+
+                out.println(ServerSerializer.serialize(outMessage));
+                break;
+
+            case "playerWantsToPlaceFocusedComponent":
+                Coordinates coordinates = inMessage.getParamCoordinates();
+                gameControllers.get(nickname).playerWantsToPlaceFocusedComponent(nickname, coordinates);
+                break;
+
+            case "getShipBoardOf":
+                Component[][] shipBoardAsMatrix = gameControllers.get(nickname).getShipBoardOf(inMessage.getParamString(), nickname);
+                outMessage = new SocketMessage("server", "showShipBoard");
+                outMessage.setParamShipBoardAsMatrix(shipBoardAsMatrix);
+
+                out.println(ServerSerializer.serialize(outMessage));
+                break;
+
             // TODO debug
             case "showMessage":
                 String message = inMessage.getParamString();
@@ -153,9 +176,10 @@ public class SocketServerRunnable implements Runnable, CallableOnClientControlle
     }
 
     @Override
-    public void notifyGameStarted(String nicknameToNotify, GameState gameState){
+    public void notifyGameStarted(String nicknameToNotify, GameState gameState, GameInfo gameInfo){
         SocketMessage outMessage = new SocketMessage("server", "notifyGameStarted");
         outMessage.setParamGameState(gameState);
+        outMessage.setParamGameInfo(List.of(gameInfo));
 
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }

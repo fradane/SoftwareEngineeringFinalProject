@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 import java.util.Map;
 
@@ -14,7 +14,9 @@ public class DoubleEngine extends Engine implements Activable {
     /**
      * Default constructor for {@code DoubleEngine}.
      */
-    public DoubleEngine() {}
+    public DoubleEngine() {
+        type = "DoubleEngine";
+    }
 
     /**
      * Constructor that allows initializing the double engine

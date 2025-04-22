@@ -1,8 +1,12 @@
 package it.polimi.ingsw.is25am33.serializationLayer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.polimi.ingsw.is25am33.model.GameState;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.component.BatteryBox;
+import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 
@@ -23,6 +27,8 @@ public class SocketMessage {
     private Boolean paramBoolean;
     private PlayerColor paramPlayerColor;
     private GameState paramGameState;
+    private Component paramComponent;
+    private Component[][] paramShipBoardAsMatrix;
 
     public SocketMessage(String senderNickname, String actions) {
         this.senderNickname = senderNickname;
@@ -33,10 +39,22 @@ public class SocketMessage {
         this.paramInt = 0;
         this.paramBoolean = false;
         this.paramPlayerColor = PlayerColor.GREEN;
+        this.paramShipBoardAsMatrix = new Component[0][0];
+        this.paramGameState = GameState.SETUP;
+        this.paramComponent = new BatteryBox(new HashMap<>(), 0);
+        this.paramGameId = "";
     }
 
     public SocketMessage() {
 
+    }
+
+    public Component[][] getParamShipBoardAsMatrix() {
+        return paramShipBoardAsMatrix;
+    }
+
+    public void setParamShipBoardAsMatrix(Component[][] paramShipBoardAsMatrix) {
+        this.paramShipBoardAsMatrix = paramShipBoardAsMatrix;
     }
 
     public GameState getParamGameState() {
@@ -117,6 +135,14 @@ public class SocketMessage {
 
     public void setParamGameInfo(List<GameInfo> paramGameInfo) {
         this.paramGameInfo = paramGameInfo;
+    }
+
+    public Component getParamComponent() {
+        return paramComponent;
+    }
+
+    public void setParamComponent(Component paramComponent) {
+        this.paramComponent = paramComponent;
     }
 
     @JsonIgnore

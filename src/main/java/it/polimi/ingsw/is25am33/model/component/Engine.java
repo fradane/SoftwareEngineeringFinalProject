@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 import java.util.Map;
 
@@ -20,7 +20,9 @@ public class Engine extends Component implements Rotatable {
     /**
      * Default constructor for {@code Engine}.
      */
-    public Engine() {}
+    public Engine() {
+        type = "Engine";
+    }
 
     /**
      * Constructor that allows initializing the engine with specified connectors.

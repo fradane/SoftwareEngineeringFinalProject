@@ -1,4 +1,4 @@
-package it.polimi.ingsw.is25am33.model;
+package it.polimi.ingsw.is25am33.model.enumFiles;
 
 import java.util.Comparator;
 

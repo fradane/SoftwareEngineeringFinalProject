@@ -1,6 +1,7 @@
 [
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "UNIVERSAL",
       "EAST": "SINGLE",
@@ -12,6 +13,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "UNIVERSAL",
       "EAST": "DOUBLE",
@@ -23,6 +25,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "UNIVERSAL",
       "EAST": "DOUBLE",
@@ -34,6 +37,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "DOUBLE",
       "EAST": "SINGLE",
@@ -45,6 +49,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "UNIVERSAL",
       "EAST": "EMPTY",
@@ -56,6 +61,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "UNIVERSAL",
       "EAST": "SINGLE",
@@ -67,6 +73,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "UNIVERSAL",
       "EAST": "DOUBLE",
@@ -78,6 +85,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -89,6 +97,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -100,6 +109,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "UNIVERSAL",
@@ -111,6 +121,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "UNIVERSAL",
       "EAST": "EMPTY",
@@ -122,6 +133,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "SINGLE",
       "EAST": "EMPTY",
@@ -133,6 +145,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "SINGLE",
       "EAST": "SINGLE",
@@ -144,6 +157,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "DOUBLE",
       "EAST": "EMPTY",
@@ -155,6 +169,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "DOUBLE",
       "EAST": "SINGLE",
@@ -166,6 +181,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "DOUBLE",
       "EAST": "DOUBLE",
@@ -177,6 +193,7 @@
   },
 
   {
+    "type": "BatteryBox",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",

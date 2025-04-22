@@ -4,8 +4,8 @@ import it.polimi.ingsw.is25am33.client.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
-import it.polimi.ingsw.is25am33.model.GameState;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
@@ -94,6 +94,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         this.dns = dns;
     }
 
+    public ClientModel getClientModel() {
+        return clientModel;
+    }
+
+    public void setClientModel(ClientModel clientModel) {
+        this.clientModel = clientModel;
+    }
+
     private void start() {
         boolean running = true;
 
@@ -115,9 +123,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             // Qui andrebbe la logica di gioco effettiva
 
             view.showMessage("Game in progress...");
-            view.askForInput("Se inserisci qualcosa qui dentro esplode tutto 💥");
 
-            //buildShipBoardPhase();
+            buildShipBoardPhase();
+
+            view.askForInput("FINE PER ADESSO");
 
             return true;
         }
@@ -162,7 +171,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                     yield true;
                 }
                 case 4 -> {
-                    // Esci
+                    // TODO disconnessione
                     yield false;
                 }
                 default -> {
@@ -395,9 +404,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyGameStarted(String nickname, GameState gameState) throws RemoteException{
+    public void notifyGameStarted(String nickname, GameState gameState, GameInfo gameInfo) throws RemoteException{
         gameStarted = true;
-
+        clientModel.setGameState(gameState);
+        clientModel.setPlayersNickname(gameInfo.getConnectedPlayersNicknames());
         view.notifyGameStarted(gameState);
         // Se la view è di tipo ClientCLIView, possiamo interrompere l'attesa
         if (view instanceof ClientCLIView) {
@@ -431,21 +441,20 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * Initiates the ship board building phase by showing the build menu
      * and executing the selected action on the server using the current nickname.
      */
-//    public void buildShipBoardPhase() {
-//
-//        boolean hasPlayerEndedThisPhase = false;
-//
-//        while(clientModel.getGameState() == GameState.BUILD_SHIPBOARD && !hasPlayerEndedThisPhase) {
-//            hasPlayerEndedThisPhase = view.showBuildShipBoardMenu()
-//                    .apply((RMIServerNetworkManager) ((RMIClientNetworkManager) networkManager).getServer(), nickname);
-//
-//        }
-//
-//        while(currGameState == GameState.BUILD_SHIPBOARD) {
-//            view.showShipBoardsMenu();
-//        }
-//
-//    }
+    public void buildShipBoardPhase() {
+
+        boolean hasPlayerEndedThisPhase = false;
+
+        while(clientModel.getGameState() == GameState.BUILD_SHIPBOARD && !hasPlayerEndedThisPhase) {
+            hasPlayerEndedThisPhase = view.showBuildShipBoardMenu()
+                    .apply(serverController, nickname);
+        }
+
+        while(clientModel.getGameState() == GameState.BUILD_SHIPBOARD) {
+            view.showShipBoardsMenu();
+        }
+
+    }
 
 
     public void cardPhase() {

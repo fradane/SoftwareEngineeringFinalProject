@@ -1,8 +1,8 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ColorLifeSupport;
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 import java.util.Map;
 
@@ -19,7 +19,9 @@ public class LifeSupport extends Component {
     /**
      * Default constructor for {@code LifeSupport}.
      */
-    public LifeSupport() {}
+    public LifeSupport() {
+        type = "LifeSupport";
+    }
 
     /**
      * Constructor that allows initializing the life support with specified connectors and color.

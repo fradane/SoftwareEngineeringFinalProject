@@ -1,7 +1,6 @@
 package it.polimi.ingsw.is25am33.model.dangerousObj;
 
-import it.polimi.ingsw.is25am33.model.Direction;
-import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 public abstract class DangerousObj {
     private final Direction direction;

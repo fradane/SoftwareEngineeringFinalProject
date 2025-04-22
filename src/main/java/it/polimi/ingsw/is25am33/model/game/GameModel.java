@@ -3,9 +3,10 @@ package it.polimi.ingsw.is25am33.model.game;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.board.*;
-import it.polimi.ingsw.is25am33.model.CardState;
-import it.polimi.ingsw.is25am33.model.GameState;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
+import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -51,6 +52,26 @@ public class GameModel {
         //gameContext = new GameContext(gameId, );
         componentTable = new ComponentTable();
         //ObserverManager.getInstance().registerGame(gameContext);
+    }
+
+    public void setStarted(boolean started) {
+        isStarted = started;
+    }
+
+    public void setDeck(Deck deck) {
+        this.deck = deck;
+    }
+
+    public ComponentTable getComponentTable() {
+        return componentTable;
+    }
+
+    public void setComponentTable(ComponentTable componentTable) {
+        this.componentTable = componentTable;
+    }
+
+    public void setGameContext(GameContext gameContext) {
+        this.gameContext = gameContext;
     }
 
     public String getGameId() {

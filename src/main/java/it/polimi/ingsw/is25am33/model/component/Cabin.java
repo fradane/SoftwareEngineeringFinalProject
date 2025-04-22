@@ -1,8 +1,8 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
-import it.polimi.ingsw.is25am33.model.CrewMember;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,9 @@ public class Cabin extends Component {
     /**
      * Default constructor for {@code Cabin}.
      */
-    public Cabin() {}
+    public Cabin() {
+        type = "Cabin";
+    }
 
     /**
      * Constructs a Cabin with specified connectors and initializes an empty inhabitants list.

@@ -1,6 +1,7 @@
 [
   {
-    "connectors" : {
+    "type": "SpecialStorage",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",
       "SOUTH": "SINGLE",
@@ -8,9 +9,9 @@
     },
     "maxCapacity": 1
   },
-
   {
-    "connectors" : {
+    "type": "SpecialStorage",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "UNIVERSAL",
       "SOUTH": "EMPTY",
@@ -18,9 +19,9 @@
     },
     "maxCapacity": 1
   },
-
   {
-    "connectors" : {
+    "type": "SpecialStorage",
+    "connectors": {
       "NORTH": "SINGLE",
       "EAST": "SINGLE",
       "SOUTH": "SINGLE",
@@ -28,9 +29,9 @@
     },
     "maxCapacity": 1
   },
-
   {
-    "connectors" : {
+    "type": "SpecialStorage",
+    "connectors": {
       "NORTH": "DOUBLE",
       "EAST": "SINGLE",
       "SOUTH": "EMPTY",
@@ -38,9 +39,9 @@
     },
     "maxCapacity": 1
   },
-
   {
-    "connectors" : {
+    "type": "SpecialStorage",
+    "connectors": {
       "NORTH": "DOUBLE",
       "EAST": "DOUBLE",
       "SOUTH": "DOUBLE",
@@ -48,9 +49,9 @@
     },
     "maxCapacity": 1
   },
-
   {
-    "connectors" : {
+    "type": "SpecialStorage",
+    "connectors": {
       "NORTH": "UNIVERSAL",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
@@ -58,9 +59,9 @@
     },
     "maxCapacity": 1
   },
-
   {
-    "connectors" : {
+    "type": "SpecialStorage",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
@@ -68,9 +69,9 @@
     },
     "maxCapacity": 2
   },
-
   {
-    "connectors" : {
+    "type": "SpecialStorage",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",
       "SOUTH": "EMPTY",
@@ -78,9 +79,9 @@
     },
     "maxCapacity": 2
   },
-
   {
-    "connectors" : {
+    "type": "SpecialStorage",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
@@ -88,5 +89,4 @@
     },
     "maxCapacity": 2
   }
-
 ]

@@ -1,4 +1,4 @@
-package it.polimi.ingsw.is25am33.model;
+package it.polimi.ingsw.is25am33.model.enumFiles;
 
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.game.GameModel;

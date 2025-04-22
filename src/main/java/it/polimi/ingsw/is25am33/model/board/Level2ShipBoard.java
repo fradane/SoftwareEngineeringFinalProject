@@ -1,20 +1,38 @@
 package it.polimi.ingsw.is25am33.model.board;
-import it.polimi.ingsw.is25am33.model.ComponentState;
+import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import it.polimi.ingsw.is25am33.model.Observer;
-import it.polimi.ingsw.is25am33.model.ObserverManager;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
 import it.polimi.ingsw.is25am33.model.game.DTO;
-import it.polimi.ingsw.is25am33.model.game.GameEvent;
 
 import java.util.function.BiConsumer;
 
-import static it.polimi.ingsw.is25am33.model.Direction.NORTH;
+import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.NORTH;
 
 public class Level2ShipBoard extends ShipBoard{
 
+    static boolean[][] level2ValidPositions = {
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, true, false, true, false, false, false, false},
+            {false, false, false, false, true, true, true, true, true, false, false, false},
+            {false, false, false, true, true, true, true, true, true, true, false, false},
+            {false, false, false, true, true, true, true, true, true, true, false, false},
+            {false, false, false, true, true, true, false, true, true, true, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false}
+    };
+
     public Level2ShipBoard(PlayerColor playerColor) {
         super(playerColor);
+        this.validPositions = level2ValidPositions;
+    }
+
+    public static boolean isOutsideShipboard(int x, int y) {
+        return !level2ValidPositions[x][y];
     }
 
     public void book () {

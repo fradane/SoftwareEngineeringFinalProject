@@ -1,5 +1,6 @@
 [
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -9,6 +10,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -18,6 +20,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -27,6 +30,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -36,7 +40,8 @@
   },
 
   {
-    "connectors" : {
+    "type": "Cannon",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
       "SOUTH": "EMPTY",
@@ -45,6 +50,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
@@ -54,6 +60,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
@@ -63,6 +70,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",
@@ -72,6 +80,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",
@@ -81,6 +90,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",
@@ -90,6 +100,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "UNIVERSAL",
@@ -99,6 +110,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -108,6 +120,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -117,6 +130,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -126,6 +140,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
@@ -135,6 +150,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",
@@ -144,6 +160,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "UNIVERSAL",
@@ -153,6 +170,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -162,6 +180,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -171,6 +190,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -180,6 +200,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
@@ -189,6 +210,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
@@ -198,6 +220,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",
@@ -207,6 +230,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -216,6 +240,7 @@
   },
 
   {
+    "type": "Cannon",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",

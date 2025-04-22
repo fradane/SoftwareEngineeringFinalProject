@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 import java.util.List;
 import java.util.Map;
@@ -21,7 +21,9 @@ public class Shield extends Component implements Activable, Rotatable {
     /**
      * Default constructor for {@code Shield}.
      */
-    public Shield() {}
+    public Shield() {
+        type = "Shield";
+    }
 
     /**
      * Constructor that allows initializing the shield with specified connectors.

@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.polimi.ingsw.is25am33.model.CargoCube;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 
 import java.util.Iterator;
 import java.util.List;

@@ -1,8 +1,8 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -20,7 +20,9 @@ public class MainCabin extends Cabin implements Serializable {
     /**
      * Default constructor for {@code MainCabin}.
      */
-    public MainCabin() {}
+    public MainCabin() {
+        type = "MainCabin";
+    }
 
     /**
      * Constructor that allows initializing the main cabin with specified connectors and player color.

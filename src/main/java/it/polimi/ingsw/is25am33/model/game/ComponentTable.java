@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.ComponentLoader;
+import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import javafx.util.Pair;
 
 import java.util.*;
@@ -32,6 +33,7 @@ public class ComponentTable {
     public void addVisibleComponent(Component component){
         // although visibleComponents it's already synchronized, this method needs currVisibleIndex to be synchronized too,
         synchronized (visibleComponents) {
+            component.setCurrState(ComponentState.VISIBLE);
             visibleComponents.put(currVisibleIndex, component);
             currVisibleIndex++;
         }
@@ -45,4 +47,7 @@ public class ComponentTable {
         return visibleComponents.keySet().stream().map(index -> new Pair<>(index, visibleComponents.get(index)));
     }
 
+    public Map<Integer, Component> getVisibleComponents() {
+        return visibleComponents;
+    }
 }

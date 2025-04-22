@@ -1,5 +1,6 @@
 [
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
@@ -9,6 +10,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "SINGLE",
       "EAST": "DOUBLE",
@@ -18,6 +20,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "SINGLE",
       "EAST": "DOUBLE",
@@ -27,6 +30,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "DOUBLE",
       "EAST": "EMPTY",
@@ -36,6 +40,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "DOUBLE",
       "EAST": "SINGLE",
@@ -45,6 +50,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "DOUBLE",
       "EAST": "SINGLE",
@@ -54,6 +60,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
@@ -63,6 +70,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "SINGLE",
       "EAST": "DOUBLE",
@@ -72,6 +80,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "DOUBLE",
       "EAST": "SINGLE",
@@ -81,6 +90,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "UNIVERSAL",
       "EAST": "EMPTY",
@@ -90,6 +100,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
@@ -99,6 +110,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
@@ -108,6 +120,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",
@@ -117,6 +130,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "SINGLE",
       "EAST": "EMPTY",
@@ -126,6 +140,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "SINGLE",
       "EAST": "EMPTY",
@@ -135,6 +150,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "DOUBLE",
       "EAST": "EMPTY",
@@ -144,6 +160,7 @@
   },
 
   {
+    "type": "Cabin",
     "connectors" : {
       "NORTH": "DOUBLE",
       "EAST": "DOUBLE",

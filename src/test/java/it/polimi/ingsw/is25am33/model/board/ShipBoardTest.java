@@ -1,8 +1,8 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import it.polimi.ingsw.is25am33.model.component.*;
-import it.polimi.ingsw.is25am33.model.*;
 
+import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import org.junit.jupiter.api.*;
 
 import java.util.*;

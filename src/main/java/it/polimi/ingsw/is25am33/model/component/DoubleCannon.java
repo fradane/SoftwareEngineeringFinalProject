@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 import java.util.Map;
 
@@ -15,7 +15,9 @@ public class DoubleCannon extends Cannon implements Activable {
     /**
      * Default constructor for {@code DoubleCannon}.
      */
-    public DoubleCannon() {}
+    public DoubleCannon() {
+        type = "DoubleCannon";
+    }
 
     /**
      * Constructor that allows initializing the double cannon

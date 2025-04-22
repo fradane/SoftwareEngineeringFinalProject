@@ -1,134 +1,122 @@
 [
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "SINGLE",
       "EAST": "SINGLE",
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
     },
-
     "lifeSupportColor": "BROWN"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "DOUBLE",
       "EAST": "SINGLE",
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
     },
-
     "lifeSupportColor": "BROWN"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-
     "lifeSupportColor": "BROWN"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
       "SOUTH": "SINGLE",
       "WEST": "UNIVERSAL"
     },
-
     "lifeSupportColor": "BROWN"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-
     "lifeSupportColor": "BROWN"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "SINGLE",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-
     "lifeSupportColor": "BROWN"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "SINGLE",
       "EAST": "DOUBLE",
       "SOUTH": "EMPTY",
       "WEST": "DOUBLE"
     },
-
     "lifeSupportColor": "PURPLE"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "DOUBLE",
       "EAST": "DOUBLE",
       "SOUTH": "EMPTY",
       "WEST": "DOUBLE"
     },
-
     "lifeSupportColor": "PURPLE"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-
     "lifeSupportColor": "PURPLE"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
       "SOUTH": "DOUBLE",
       "WEST": "UNIVERSAL"
     },
-
     "lifeSupportColor": "PURPLE"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-
     "lifeSupportColor": "PURPLE"
   },
-
   {
-    "connectors" : {
+    "type": "LifeSupport",
+    "connectors": {
       "NORTH": "DOUBLE",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-
     "lifeSupportColor": "PURPLE"
   }
-
 ]

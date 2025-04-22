@@ -1,8 +1,8 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.CargoCube;
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 import java.util.Map;
 
@@ -14,7 +14,9 @@ public class StandardStorage extends Storage {
     /**
      * Default constructor for {@code StandardStorage}.
      */
-    public StandardStorage() {}
+    public StandardStorage() {
+        type = "StandardStorage";
+    }
 
     /**
      * Constructor that allows initializing the standard storage with specified connectors and capacity.

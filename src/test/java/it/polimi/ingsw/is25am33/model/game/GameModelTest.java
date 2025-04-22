@@ -1,12 +1,6 @@
 package it.polimi.ingsw.is25am33.model.game;
 
-import it.polimi.ingsw.is25am33.model.PlayerColor;
-import it.polimi.ingsw.is25am33.model.board.Level2FlyingBoard;
-import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class GameModelTest {
 

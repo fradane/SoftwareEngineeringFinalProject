@@ -1,15 +1,18 @@
 package it.polimi.ingsw.is25am33.client;
 
-import it.polimi.ingsw.is25am33.model.GameState;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 
 import java.util.List;
+import java.util.Set;
 
 public class ClientModel {
 
-    private List<String> playersNickname;
+    private Set<String> playersNickname;
     private AdventureCard currAdventureCard;
     private GameState gameState;
+    private ShipBoard shipBoard;
 
 
     public GameState getGameState() {
@@ -28,11 +31,11 @@ public class ClientModel {
         return currAdventureCard;
     }
 
-    public void setPlayersNickname(List<String> playersNickname) {
+    public void setPlayersNickname(Set<String> playersNickname) {
         this.playersNickname = playersNickname;
     }
 
-    public List<String> getPlayersNickname() {
+    public Set<String> getPlayersNickname() {
         return playersNickname;
     }
 

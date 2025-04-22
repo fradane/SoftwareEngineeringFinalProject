@@ -1,186 +1,187 @@
 [
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "UNIVERSAL",
       "SOUTH": "EMPTY",
       "WEST": "EMPTY"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "UNIVERSAL",
       "SOUTH": "EMPTY",
       "WEST": "EMPTY"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "SINGLE",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "EMPTY"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "SINGLE",
       "EAST": "SINGLE",
       "SOUTH": "EMPTY",
       "WEST": "EMPTY"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "DOUBLE",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "EMPTY"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "DOUBLE",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "EMPTY"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "DOUBLE",
       "EAST": "UNIVERSAL",
       "SOUTH": "EMPTY",
       "WEST": "EMPTY"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "UNIVERSAL",
       "EAST": "DOUBLE",
       "SOUTH": "EMPTY",
       "WEST": "EMPTY"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "UNIVERSAL",
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "DOUBLE",
       "EAST": "SINGLE",
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "UNIVERSAL",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "UNIVERSAL",
       "EAST": "DOUBLE",
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "SINGLE",
       "SOUTH": "EMPTY",
       "WEST": "DOUBLE"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "SINGLE",
       "EAST": "DOUBLE",
       "SOUTH": "EMPTY",
       "WEST": "DOUBLE"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "DOUBLE",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "DOUBLE"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "UNIVERSAL",
       "EAST": "SINGLE",
       "SOUTH": "EMPTY",
       "WEST": "DOUBLE"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "EMPTY",
       "EAST": "DOUBLE",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "SINGLE",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     }
   },
-
   {
-    "connectors" : {
+    "type": "Engine",
+    "connectors": {
       "NORTH": "SINGLE",
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",

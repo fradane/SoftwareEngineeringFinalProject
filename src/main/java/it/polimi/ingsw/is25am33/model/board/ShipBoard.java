@@ -5,11 +5,12 @@ import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
-import it.polimi.ingsw.is25am33.model.CrewMember;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.model.game.DTO;
-import it.polimi.ingsw.is25am33.model.game.GameEvent;
-import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.io.Serializable;
 import java.util.*;
@@ -18,8 +19,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.polimi.ingsw.is25am33.model.ConnectorType.*;
-import static it.polimi.ingsw.is25am33.model.Direction.*;
+import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.*;
+import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 
 public abstract class ShipBoard implements Serializable {
 
@@ -33,19 +34,19 @@ public abstract class ShipBoard implements Serializable {
     /**
      * The coordinate where the main cabin is initially placed.
      */
-    public static final int[] STARTING_CABIN_POSITION = {7, 7};
+    public static final int[] STARTING_CABIN_POSITION = {6, 6};
 
     /**
      * A matrix indicating which board positions are valid for placing components.
      * If a cell is false, no component can be placed there.
-     * This matrix is what differentiate a Level1ShipBoard from a Level2ShipBoard
+     * This matrix is what differentiates a Level1ShipBoard from a Level2ShipBoard
      */
-    static boolean[][] validPositions;
+    protected boolean[][] validPositions;
 
     /**
      * The main matrix of components. Each cell represents a position on the ship.
      */
-    protected Component[][] shipMatrix = new Component[BOARD_DIMENSION][BOARD_DIMENSION];
+    protected final Component[][] shipMatrix = new Component[BOARD_DIMENSION][BOARD_DIMENSION];
 
     /**
      * A map that groups components based on their class (type).
@@ -86,7 +87,9 @@ public abstract class ShipBoard implements Serializable {
     }
 
     public Component[][] getShipMatrix() {
-        return shipMatrix;
+        synchronized (shipMatrix) {
+            return shipMatrix;
+        }
     }
 
     public Component getFocusedComponent() {
@@ -101,19 +104,19 @@ public abstract class ShipBoard implements Serializable {
         this.focusedComponent = focusedComponent;
     }
 
-    /**
-     * Initializes the matrix of valid positions for placing components.
-     *
-     * @param positions Boolean matrix indicating valid or invalid positions.
-     * @throws IllegalStateException If the validPositions matrix has already been initialized.
-     */
-    public static void initializeValidPositions(boolean[][] positions) throws IllegalStateException {
-        if (validPositions == null) {
-            validPositions = positions;
-        } else {
-            throw new IllegalStateException("validPositions has already been initialized.");
-        }
-    }
+//    /**
+//     * Initializes the matrix of valid positions for placing components.
+//     *
+//     * @param positions Boolean matrix indicating valid or invalid positions.
+//     * @throws IllegalStateException If the validPositions matrix has already been initialized.
+//     */
+//    public static void initializeValidPositions(boolean[][] positions) throws IllegalStateException {
+//        if (validPositions == null) {
+//            validPositions = positions;
+//        } else {
+//            throw new IllegalStateException("validPositions has already been initialized.");
+//        }
+//    }
 
     /**
      * Checks whether the specified coordinates are valid and allowed on the board.
@@ -136,26 +139,28 @@ public abstract class ShipBoard implements Serializable {
      * @throws IllegalArgumentException If the position is invalid or violates placement rules.
      */
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
-        if(!isValidPosition(x, y))
-            throw new IllegalArgumentException("Not a valid position");
-        else if (!isPositionConnectedToShip(x, y))
-            throw new IllegalArgumentException("Not connected to the ship");
-        else if(!areEmptyConnectorsWellConnected(focusedComponent, x, y))
-            throw new IllegalArgumentException("Empty connector not well connected");
-        else {
-            if(
-                    !areConnectorsWellConnected(focusedComponent, x, y)
-                            || isComponentInFireDirection(focusedComponent, x, y)
-                            || isComponentInEngineDirection(focusedComponent, x, y)
-                            || (!(focusedComponent instanceof Engine) || isEngineDirectionWrong((Engine)focusedComponent))
-            )
-                incorrectlyPositionedComponents.add(focusedComponent);
+        synchronized (shipMatrix) {
+            if(!isValidPosition(x, y))
+                throw new IllegalArgumentException("Not a valid position");
+            else if (!isPositionConnectedToShip(x, y))
+                throw new IllegalArgumentException("Not connected to the ship");
+            else if(!areEmptyConnectorsWellConnected(focusedComponent, x, y))
+                throw new IllegalArgumentException("Empty connector not well connected");
+            else {
+                if(
+                        !areConnectorsWellConnected(focusedComponent, x, y)
+                                || isComponentInFireDirection(focusedComponent, x, y)
+                                || isComponentInEngineDirection(focusedComponent, x, y)
+                                || (!(focusedComponent instanceof Engine) || isEngineDirectionWrong((Engine)focusedComponent))
+                )
+                    incorrectlyPositionedComponents.add(focusedComponent);
 
-            shipMatrix[x][y] = focusedComponent;
+                shipMatrix[x][y] = focusedComponent;
 
-            focusedComponent.insertInComponentsMap(componentsPerType);
+                focusedComponent.insertInComponentsMap(componentsPerType);
 
-            focusedComponent = null;
+                focusedComponent = null;
+            }
         }
 
         DTO dto = new DTO();
@@ -914,6 +919,12 @@ public abstract class ShipBoard implements Serializable {
 
     public Component getComponentAt(Coordinates coordinates) {
         return this.shipMatrix[coordinates.getX()][coordinates.getY()];
+    }
+
+    public Component releaseFocusedComponent() {
+        Component component = getFocusedComponent();
+        setFocusedComponent(null);
+        return component;
     }
 
 }

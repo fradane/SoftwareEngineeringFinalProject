@@ -1,6 +1,7 @@
 [
   {
-    "connectors" : {
+    "type": "MainCabin",
+    "connectors": {
       "NORTH": "UNIVERSAL",
       "EAST": "UNIVERSAL",
       "SOUTH": "UNIVERSAL",
@@ -8,9 +9,9 @@
     },
     "color": "BLUE"
   },
-
   {
-    "connectors" : {
+    "type": "MainCabin",
+    "connectors": {
       "NORTH": "UNIVERSAL",
       "EAST": "UNIVERSAL",
       "SOUTH": "UNIVERSAL",
@@ -18,9 +19,9 @@
     },
     "color": "GREEN"
   },
-
   {
-    "connectors" : {
+    "type": "MainCabin",
+    "connectors": {
       "NORTH": "UNIVERSAL",
       "EAST": "UNIVERSAL",
       "SOUTH": "UNIVERSAL",
@@ -28,9 +29,9 @@
     },
     "color": "RED"
   },
-
   {
-    "connectors" : {
+    "type": "MainCabin",
+    "connectors": {
       "NORTH": "UNIVERSAL",
       "EAST": "UNIVERSAL",
       "SOUTH": "UNIVERSAL",
@@ -38,5 +39,4 @@
     },
     "color": "YELLOW"
   }
-
 ]

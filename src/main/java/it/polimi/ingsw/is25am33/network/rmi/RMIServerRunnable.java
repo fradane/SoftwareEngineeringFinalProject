@@ -28,7 +28,7 @@ public class RMIServerRunnable implements Runnable {
             // Binding dello stub col nome desiderato
             registry.rebind(NetworkConfiguration.DNS_NAME, dns);
 
-            System.out.println("[RMI] Server RMI pronto");
+            System.out.println("[RMI] Server ready");
 
         } catch (Exception e) {
             e.printStackTrace();

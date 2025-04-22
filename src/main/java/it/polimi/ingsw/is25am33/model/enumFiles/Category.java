@@ -1,9 +1,4 @@
-package it.polimi.ingsw.is25am33.model;
-
-import it.polimi.ingsw.is25am33.model.game.Player;
-
-import java.util.ArrayList;
-import java.util.Comparator;
+package it.polimi.ingsw.is25am33.model.enumFiles;
 
 public enum Category {
 //    ENGINE {

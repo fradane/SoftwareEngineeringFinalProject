@@ -1,13 +1,17 @@
 package it.polimi.ingsw.is25am33.client.view;
 
 import it.polimi.ingsw.is25am33.client.ClientModel;
-import it.polimi.ingsw.is25am33.model.GameState;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
-import it.polimi.ingsw.is25am33.model.card.AdventureCard;
-import it.polimi.ingsw.is25am33.model.game.ComponentTable;
+import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 /**
  * Interfaccia che definisce le operazioni di visualizzazione del client.
@@ -133,10 +137,15 @@ public interface ClientView {
 
     ClientModel getClientModel();
 
-//    BiFunction<RMIServerNetworkManager, String, Boolean> showBuildShipBoardMenu();
-//
-//    BiFunction<RMIServerNetworkManager, String, Boolean> showShipBoardsMenu();
-//
-//    BiConsumer<RMIServerNetworkManager, String> showChosenComponentAndMenu(Component component);
+    BiFunction<CallableOnGameController, String, Boolean> showBuildShipBoardMenu();
 
+    void notifyNoMoreComponentAvailable();
+
+    BiFunction<CallableOnGameController, String, Boolean> showShipBoardsMenu();
+
+    BiFunction<CallableOnGameController, String, Boolean> showPickedComponentAndMenu(Component component);
+
+    void showShipBoard(Component[][] shipBoard, String shipBoardOwnerNickname);
+
+    BiFunction<CallableOnGameController, String, Component> showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
 }

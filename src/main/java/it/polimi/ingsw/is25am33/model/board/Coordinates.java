@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.board;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
  * This class stores a pair of integer values corresponding to the X and Y positions.
  * Coordinates are immutable once created.
  */
-public class Coordinates {
+public class Coordinates implements Serializable {
 
     private List<Integer> coordinates;
 
@@ -84,6 +85,6 @@ public class Coordinates {
 
     @Override
     public String toString() {
-        return "Coordinates{x=" + getX() + ", y=" + getY() + "}";
+        return "{x = " + getX() + ", y = " + getY() + "}";
     }
 }

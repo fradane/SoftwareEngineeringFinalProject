@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 import java.util.Map;
 
@@ -17,7 +17,9 @@ public class Cannon extends Component implements Rotatable {
     /**
      * Default constructor for {@code Cannon}.
      */
-    public Cannon() {}
+    public Cannon() {
+        type = "Cannon";
+    }
 
     /**
      * Constructs a Cannon with specified connectors and initial firing direction.

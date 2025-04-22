@@ -2,7 +2,7 @@ package it.polimi.ingsw.is25am33.model.game;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 
 import java.io.Serializable;
 import java.util.Map;

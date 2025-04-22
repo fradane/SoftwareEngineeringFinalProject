@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.serializationLayer.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.game.DTO;

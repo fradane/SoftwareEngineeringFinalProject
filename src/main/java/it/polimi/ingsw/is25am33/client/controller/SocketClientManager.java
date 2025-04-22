@@ -2,8 +2,12 @@ package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.controller.GameController;
-import it.polimi.ingsw.is25am33.model.GameState;
-import it.polimi.ingsw.is25am33.model.PlayerColor;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 import it.polimi.ingsw.is25am33.serializationLayer.client.ClientDeserializer;
@@ -228,7 +232,8 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                 case "notifyGameStarted":
                     if (clientController != null) {
                         this.gameState = notification.getParamGameState();
-                        clientController.notifyGameStarted(nickname, gameState);
+                        ((ClientController) clientController).getClientModel().setGameState(gameState);
+                        clientController.notifyGameStarted(nickname, gameState, notification.getParamGameInfo().getFirst());
                     }
                     break;
                 // Altri casi...
@@ -240,6 +245,54 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         }
     }
 
+    @Override
+    public Component playerPicksHiddenComponent(String nickname) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerPicksHiddenComponent");
+        SocketMessage response = sendAndWaitForSpecificResponse(outMessage, Set.of("notifyPickedComponent"));
+        return response.getParamComponent();
+    }
+
+    @Override
+    public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToPlaceFocusedComponent");
+        outMessage.setParamCoordinates(coordinates);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerWantsToReserveFocusedComponent(String nickname) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToReserveFocusedComponent");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerWantsToReleaseFocusedComponent(String nickname) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToReleaseFocusedComponent");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerChoseToEndBuildShipBoardPhase(String nickname) {
+        // TODO
+    }
+
+    @Override
+    public Component[][] getShipBoardOf(String otherPlayerNickname, String askerNickname) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "getShipBoardOf");
+        outMessage.setParamString(otherPlayerNickname);
+        SocketMessage response = sendAndWaitForSpecificResponse(outMessage, Set.of("showShipBoard"));
+        return response.getParamShipBoardAsMatrix();
+    }
+
+    @Override
+    public Component playerPicksVisibleComponent(String nickname, Integer choice) throws RemoteException {
+        return null;
+    }
+
+    @Override
+    public Map<Integer, Component> showPlayerVisibleComponent(String nickname) throws RemoteException {
+        return null;
+    }
 
     
 

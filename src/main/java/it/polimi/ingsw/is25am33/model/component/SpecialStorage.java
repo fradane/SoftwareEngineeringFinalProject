@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import it.polimi.ingsw.is25am33.model.ConnectorType;
-import it.polimi.ingsw.is25am33.model.Direction;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 import java.util.Map;
 
@@ -13,7 +13,9 @@ public class SpecialStorage extends Storage {
     /**
      * Default constructor for {@code SpecialStorage}.
      */
-    public SpecialStorage() {}
+    public SpecialStorage() {
+        type = "SpecialStorage";
+    }
 
     /**
      * Constructor that allows initializing the special storage with specified connectors and capacity.
