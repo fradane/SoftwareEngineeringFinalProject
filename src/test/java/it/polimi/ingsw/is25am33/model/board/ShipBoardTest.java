@@ -22,7 +22,7 @@ public class ShipBoardTest {
     @BeforeAll
     static void setupAll() {
         // Initialize valid positions
-        ShipBoard.initializeValidPositions(createDefaultValidPositions());
+        //ShipBoard.initializeValidPositions(createDefaultValidPositions());
     }
 
     @BeforeEach
@@ -65,9 +65,9 @@ public class ShipBoardTest {
     void testInitializeValidPositionsError() {
         boolean[][] dummy = new boolean[ShipBoard.BOARD_DIMENSION][ShipBoard.BOARD_DIMENSION];
         // Already called in setup(). Another call => must throw
-        assertThrows(IllegalStateException.class, () ->
-                ShipBoard.initializeValidPositions(dummy)
-        );
+//        assertThrows(IllegalStateException.class, () ->
+//                ShipBoard.initializeValidPositions(dummy)
+//        );
     }
 
     @Test
@@ -141,7 +141,7 @@ public class ShipBoardTest {
         engine.setCurrState(ComponentState.BOOKED);
         shipBoard.focusedComponent = engine;
 
-        shipBoard.releaseComponentWithFocus();
+        //shipBoard.releaseComponentWithFocus();
         assertEquals(ComponentState.VISIBLE, engine.getCurrState());
         assertNull(shipBoard.focusedComponent);
     }

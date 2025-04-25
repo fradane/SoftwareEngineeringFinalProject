@@ -83,9 +83,9 @@ public class Planets extends AdventureCard implements PlayerMover {
 
             currentPlanet.noMoreAvailable();
 
-            setCurrState( CardState.HANDLE_CUBES_REWARD);
+            setCurrState(CardState.HANDLE_CUBES_REWARD);
 
-        } else if (gameModel.hasNextPlayer()){
+        } else if (gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
         } else {
             setCurrState(CardState.END_OF_CARD);

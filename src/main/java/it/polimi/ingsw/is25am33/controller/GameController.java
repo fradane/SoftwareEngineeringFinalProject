@@ -6,7 +6,11 @@ import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
+import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.component.Engine;
+import it.polimi.ingsw.is25am33.model.component.Shield;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.io.IOException;
@@ -17,10 +21,7 @@ import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GameController extends UnicastRemoteObject implements CallableOnGameController {
@@ -154,6 +155,60 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         if (chosenComponent == null) return null;
         gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(chosenComponent);
         return chosenComponent;
+    }
+
+    @Override
+    public void playerWantsToVisitLocation(String nickname, Boolean choice) {
+
+        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
+                .Builder()
+                .setWantsToVisit(choice)
+                .build();
+
+        gameModel.getCurrAdventureCard().play(playerChoice);
+    }
+
+    @Override
+    public void playerWantsToThrowDices(String nickname) {
+        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure.Builder().build();
+        gameModel.getCurrAdventureCard().play(playerChoice);
+    }
+
+    @Override
+    public void playerWantsToVisitPlanet(String nickname, int choice){
+
+        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenPlanetIndex(choice)
+                .build();
+
+        gameModel.getCurrAdventureCard().play(playerChoice);
+    }
+
+    @Override
+    public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException {
+
+        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+
+        List<Engine> engines = doubleEnginesCoords
+                        .stream()
+                        .map(shipBoard::getComponentAt)
+                        .map(Engine.class::cast)
+                        .toList();
+
+        List<BatteryBox> batteryBoxes = batteryBoxesCoords
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(BatteryBox.class::cast)
+                .toList();
+
+        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenDoubleEngines(engines)
+                .setChosenBatteryBoxes(batteryBoxes)
+                .build();
+
+        gameModel.getCurrAdventureCard().play(playerChoice);
     }
 
 }

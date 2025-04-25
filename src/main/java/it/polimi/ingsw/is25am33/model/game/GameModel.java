@@ -13,6 +13,7 @@ import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -130,7 +131,6 @@ public class GameModel {
 
         //gameContext.getVirtualServer().notifyClient(List.of(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname())), new GameEvent( "showFocusComponent", dto ), notifyComponent);
 
-
     }
 
     public void releaseComponentWithFocus(Player player){
@@ -146,7 +146,6 @@ public class GameModel {
     }
 
     public static int throwDices() {
-        double random = Math.random();
         return (int) (Math.random() * 12) + 1;
     }
 
@@ -231,6 +230,7 @@ public class GameModel {
     public AdventureCard getCurrAdventureCard() {
         return currAdventureCard;
     }
+
 
     /**
      * Starts the current card phase: updates the gameModel's currState and the card's currState to

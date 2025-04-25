@@ -224,11 +224,13 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     private void processNotification(SocketMessage notification) {
         try {
             switch (notification.getActions()) {
+
                 case "notifyNewPlayerJoined":
                     if (clientController != null) {
                         clientController.notifyNewPlayerJoined(null, notification.getParamGameId(), notification.getParamString(), notification.getParamPlayerColor());
                     }
                     break;
+
                 case "notifyGameStarted":
                     if (clientController != null) {
                         this.gameState = notification.getParamGameState();
@@ -236,6 +238,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                         clientController.notifyGameStarted(nickname, gameState, notification.getParamGameInfo().getFirst());
                     }
                     break;
+
                 // Altri casi...
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
@@ -292,6 +295,35 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     @Override
     public Map<Integer, Component> showPlayerVisibleComponent(String nickname) throws RemoteException {
         return null;
+    }
+
+    @Override
+    public void playerWantsToVisitLocation(String nickname, Boolean choice) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToVisitLocation");
+        outMessage.setParamBoolean(choice);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerWantsToThrowDices(String nickname) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToThrowDices");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerWantsToVisitPlanet(String nickname, int choice){
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToVisitPlanet");
+        outMessage.setParamInt(choice);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseDoubleEngines");
+        outMessage.setParamActivableCoordinates(doubleEnginesCoords);
+        outMessage.setParamBatteryBoxCoordinates(batteryBoxesCoords);
+
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     

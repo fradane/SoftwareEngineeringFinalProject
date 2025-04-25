@@ -16,6 +16,8 @@ public abstract class DangerousObj {
         this.coordinate = 0;
     }
 
+    public abstract String getDangerousObjType();
+
     public Direction getDirection() {
         return direction;
     }

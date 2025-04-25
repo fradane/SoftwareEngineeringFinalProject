@@ -1,10 +1,12 @@
 package it.polimi.ingsw.is25am33.client;
 
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ClientModel {
@@ -13,7 +15,27 @@ public class ClientModel {
     private AdventureCard currAdventureCard;
     private GameState gameState;
     private ShipBoard shipBoard;
+    private CardState cardState;
+    private boolean isMyTurn;
+    private String nickname;
+    private DangerousObj currDangerousObj;
 
+
+    public boolean isMyTurn() {
+        return isMyTurn;
+    }
+
+    public void setMyTurn(boolean myTurn) {
+        isMyTurn = myTurn;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
 
     public GameState getGameState() {
         return gameState;
@@ -39,6 +61,20 @@ public class ClientModel {
         return playersNickname;
     }
 
+    public CardState getCardState() {
+        return cardState;
+    }
 
+    public ShipBoard getShipBoard() {
+        return shipBoard;
+    }
+
+    public DangerousObj getCurrDangerousObj() {
+        return currDangerousObj;
+    }
+
+    public void setCurrDangerousObj(DangerousObj currDangerousObj) {
+        this.currDangerousObj = currDangerousObj;
+    }
 
 }

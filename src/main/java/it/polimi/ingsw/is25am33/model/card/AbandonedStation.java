@@ -90,7 +90,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         } else if (gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
         } else {
-            setCurrState( CardState.END_OF_CARD);
+            setCurrState(CardState.END_OF_CARD);
         }
 
     }

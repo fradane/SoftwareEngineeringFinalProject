@@ -151,6 +151,22 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 out.println(ServerSerializer.serialize(outMessage));
                 break;
 
+            case "playerWantsToVisitLocation":
+                gameControllers.get(nickname).playerWantsToVisitLocation(nickname, inMessage.getParamBoolean());
+                break;
+
+            case "playerWantsToThrowDices":
+                gameControllers.get(nickname).playerWantsToThrowDices(nickname);
+                break;
+
+            case "playerWantsToVisitPlanet":
+                gameControllers.get(nickname).playerWantsToVisitPlanet(nickname, inMessage.getParamInt());
+                break;
+
+            case "playerChoseDoubleEngines":
+                gameControllers.get(nickname).playerChoseDoubleEngines(nickname, inMessage.getParamActivableCoordinates(), inMessage.getParamBatteryBoxCoordinates());
+                break;
+
             // TODO debug
             case "showMessage":
                 String message = inMessage.getParamString();
@@ -183,7 +199,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
-
 
 
 

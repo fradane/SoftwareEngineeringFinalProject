@@ -121,10 +121,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     private boolean handleGameState() {
         if (gameStarted) {
             // Qui andrebbe la logica di gioco effettiva
-
             view.showMessage("Game in progress...");
 
             buildShipBoardPhase();
+
+            // TODO
+
+            cardPhase();
 
             view.askForInput("FINE PER ADESSO");
 
@@ -456,9 +459,15 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     }
 
-
     public void cardPhase() {
-        // TODO
+
+        while(clientModel.getGameState() == GameState.PLAY_CARD) {
+
+            if (clientModel.isMyTurn())
+                clientModel.getCardState().showRelatedMenu(view).accept(serverController, nickname);
+
+        }
+
     }
 
 

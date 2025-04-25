@@ -148,4 +148,16 @@ public interface ClientView {
     void showShipBoard(Component[][] shipBoard, String shipBoardOwnerNickname);
 
     BiFunction<CallableOnGameController, String, Component> showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
+
+    BiConsumer<CallableOnGameController, String> showVisitLocationMenu();
+
+    BiConsumer<CallableOnGameController, String> showThrowDicesMenu();
+
+    BiConsumer<CallableOnGameController, String> showChoosePlanetMenu();
+
+    BiConsumer<CallableOnGameController, String> showChooseEnginesMenu();
+
+    BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu();
+
+    BiConsumer<CallableOnGameController, String> showDangerousAttackMenu();
 }

@@ -22,6 +22,8 @@ public class SocketMessage {
     private String paramString;
     private String paramGameId;
     private Coordinates paramCoordinates;
+    private List<Coordinates> paramActivableCoordinates;
+    private List<Coordinates> paramBatteryBoxCoordinates;
     private List<GameInfo> paramGameInfo;
     private Integer paramInt;
     private Boolean paramBoolean;
@@ -43,10 +45,28 @@ public class SocketMessage {
         this.paramGameState = GameState.SETUP;
         this.paramComponent = new BatteryBox(new HashMap<>(), 0);
         this.paramGameId = "";
+        this.paramActivableCoordinates = new ArrayList<>();
+        this.paramBatteryBoxCoordinates = new ArrayList<>();
     }
 
     public SocketMessage() {
 
+    }
+
+    public List<Coordinates> getParamActivableCoordinates() {
+        return paramActivableCoordinates;
+    }
+
+    public void setParamActivableCoordinates(List<Coordinates> paramActivableCoordinates) {
+        this.paramActivableCoordinates = paramActivableCoordinates;
+    }
+
+    public List<Coordinates> getParamBatteryBoxCoordinates() {
+        return paramBatteryBoxCoordinates;
+    }
+
+    public void setParamBatteryBoxCoordinates(List<Coordinates> paramBatteryBoxCoordinates) {
+        this.paramBatteryBoxCoordinates = paramBatteryBoxCoordinates;
     }
 
     public Component[][] getParamShipBoardAsMatrix() {
