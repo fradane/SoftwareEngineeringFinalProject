@@ -28,4 +28,13 @@ public class DoubleCannon extends Cannon implements Activable {
     public DoubleCannon(Map<Direction, ConnectorType> connectors) {
         super(connectors);
     }
+
+    @Override
+    public String toString() {
+        return "DoubleCannon{" +
+                ", connectors = " + this.getConnectors() +
+                ", fireDirection = " + this.getFireDirection() +
+                '}';
+    }
+
 }

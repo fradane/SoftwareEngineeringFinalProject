@@ -1,6 +1,9 @@
 package it.polimi.ingsw.is25am33.model.enumFiles;
 
+import it.polimi.ingsw.is25am33.client.view.ClientView;
+import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
@@ -9,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public enum CardState {
 
@@ -18,6 +22,13 @@ public enum CardState {
             // implementazione specifica
             return null;
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            // TODO
+            return null;
+        }
+
     },
 
     CHOOSE_CANNONS {
@@ -34,6 +45,11 @@ public enum CardState {
                     .setChosenDoubleCannons(DoubleCannonsChoice)
                     .setChosenBatteryBoxes(batteryBoxesChoice)
                     .build();
+        }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            return view.showChooseCannonsMenu();
         }
     },
 
@@ -52,6 +68,11 @@ public enum CardState {
                     .setChosenBatteryBoxes(batteryBoxesChoice)
                     .build();
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            return view.showChooseEnginesMenu();
+        }
     },
 
     REMOVE_CREW_MEMBERS {
@@ -62,6 +83,11 @@ public enum CardState {
                     .Builder()
                     .setChosenCabins(cabinsChoice)
                     .build();
+        }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view){
+            return view.showHandleRemoveCrewMembersMenu();
         }
     },
 
@@ -74,6 +100,11 @@ public enum CardState {
                     .setChosenStorage(storageChoice)
                     .build();
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            return view.showHandleCubesRewardMenu();
+        }
     },
 
     HANDLE_CUBES_MALUS {
@@ -84,6 +115,12 @@ public enum CardState {
                     .Builder()
                     .setChosenStorage(storageChoice)
                     .build();
+        }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            // TODO
+            return null;
         }
     },
 
@@ -96,6 +133,11 @@ public enum CardState {
                     .setChosenPlanetIndex(playerChoice)
                     .build();
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            return view.showChoosePlanetMenu();
+        }
     },
 
     VISIT_LOCATION {
@@ -106,6 +148,11 @@ public enum CardState {
                     .Builder()
                     .setWantsToVisit(playerChoice)
                     .build();
+        }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            return view.showVisitLocationMenu();
         }
     },
 
@@ -124,17 +171,33 @@ public enum CardState {
                     .setChosenBatteryBoxes(batteryBoxesChoice)
                     .build();
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            DangerousObj currDangerousObject = view.getClientModel().getCurrDangerousObj();
+            return currDangerousObject.showRelatedMenu(view);
+        }
     },
+
     THROW_DICES {
         @Override
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            return view.showThrowDicesMenu();
+        }
     },
+
     EPIDEMIC {
         @Override
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
+        }
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view){
+            return view.showEpidemicMenu();
         }
     },
     STARDUST {
@@ -142,7 +205,13 @@ public enum CardState {
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            return view.showStardustMenu();
+        }
     },
+
     ACCEPT_THE_REWARD {
         @Override
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
@@ -152,13 +221,28 @@ public enum CardState {
                     .setHasAcceptedTheReward(playerChoice)
                     .build();
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            return view.showAcceptTheRewardMenu();
+        }
     },
+    
     END_OF_CARD {
         @Override
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            // TODO
+            return null;
+        }
     };
 
     public abstract PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) throws IOException;
+
+    public abstract BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view);
+
 }

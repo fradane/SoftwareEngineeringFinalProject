@@ -33,7 +33,7 @@ public class Planet {
         return rewardIterator.hasNext();
     }
 
-    public void noMoreAvailable() {
+    public void isNoMoreAvailable() {
         isBusy = true;
     }
 

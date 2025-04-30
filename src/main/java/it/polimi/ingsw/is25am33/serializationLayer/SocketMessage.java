@@ -29,6 +29,9 @@ public class SocketMessage {
     private String paramString;
     private String paramGameId;
     private Coordinates paramCoordinates;
+    private List<Coordinates> paramActivableCoordinates;
+    private List<Coordinates> paramCabinCoordinates;
+    private List<Coordinates> paramBatteryBoxCoordinates;
     private List<GameInfo> paramGameInfo;
     private Integer paramInt;
     private Boolean paramBoolean;
@@ -60,10 +63,31 @@ public class SocketMessage {
         this.paramAdventureCard= new Planets();
         this.paramVisibleComponents=new ConcurrentHashMap<>();
         this.paramFlyingBoard=new Level1FlyingBoard();
+        this.paramActivableCoordinates = new ArrayList<>();
+        this.paramBatteryBoxCoordinates = new ArrayList<>();
+        this.paramCabinCoordinates = new ArrayList<>();
     }
 
     public SocketMessage() {
+    }
 
+    public List<Coordinates> getParamActivableCoordinates() {
+        return paramActivableCoordinates;
+    }
+
+    public void setParamActivableCoordinates(List<Coordinates> paramActivableCoordinates) {
+        this.paramActivableCoordinates = paramActivableCoordinates;
+    }
+
+    public List<Coordinates> getParamCabinCoordinates(){ return paramCabinCoordinates; }
+
+    public void setParamCabinCoordinates(List<Coordinates> paramCabinCoordinates){
+        this.paramCabinCoordinates = paramCabinCoordinates;
+    }
+    public List<Coordinates> getParamBatteryBoxCoordinates() { return paramBatteryBoxCoordinates; }
+
+    public void setParamBatteryBoxCoordinates(List<Coordinates> paramBatteryBoxCoordinates) {
+        this.paramBatteryBoxCoordinates = paramBatteryBoxCoordinates;
     }
 
     public Component[][] getParamShipBoardAsMatrix() {

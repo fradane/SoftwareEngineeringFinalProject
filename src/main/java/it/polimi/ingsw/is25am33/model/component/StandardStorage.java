@@ -28,6 +28,15 @@ public class StandardStorage extends Storage {
         super(connectors, maxCapacity);
     }
 
+    @Override
+    public String toString() {
+        return "StandardStorage{" +
+                ", connectors = " + this.getConnectors() +
+                ", maxCapacity = " + this.getMaxCapacity() +
+                '}';
+    }
+
+
     /**
      * Adds a {@code CargoCube} to the storage, ensuring that only non-red cubes are added.
      *

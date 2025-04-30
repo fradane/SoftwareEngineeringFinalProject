@@ -167,12 +167,63 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).playerWantsToReleaseFocusedComponent(nickname);
                 break;
 
+            case "playerWantsToVisitLocation":
+                gameControllers.get(nickname).playerWantsToVisitLocation(nickname, inMessage.getParamBoolean());
+                break;
+
+            case "playerWantsToThrowDices":
+                gameControllers.get(nickname).playerWantsToThrowDices(nickname);
+                break;
+
+            case "playerWantsToVisitPlanet":
+                gameControllers.get(nickname).playerWantsToVisitPlanet(nickname, inMessage.getParamInt());
+                break;
+
+            case "playerWantsToAcceptTheReward":
+                gameControllers.get(nickname).playerWantsToAcceptTheReward(nickname, inMessage.getParamBoolean());
+                break;
+
+            case "playerChoseDoubleEngines":
+                gameControllers.get(nickname).playerChoseDoubleEngines(nickname, inMessage.getParamActivableCoordinates(), inMessage.getParamBatteryBoxCoordinates());
+                break;
+
+            case "playerChoseDoubleCannons":
+                gameControllers.get(nickname).playerChoseDoubleCannons(nickname, inMessage.getParamActivableCoordinates(), inMessage.getParamBatteryBoxCoordinates());
+                break;
+
+            case "playerChoseCabin":
+                gameControllers.get(nickname).playerChoseCabin(nickname, inMessage.getParamCabinCoordinates());
+                break;
+
+            case "playerHandleSmallMeteorite":
+                gameControllers.get(nickname).playerHandleSmallDanObj(nickname, inMessage.getParamActivableCoordinates().getFirst(), inMessage.getParamBatteryBoxCoordinates().getFirst());
+                break;
+
+            case "playerHandleBigMeteorite":
+                gameControllers.get(nickname).playerHandleBigMeteorite(nickname, inMessage.getParamActivableCoordinates().getFirst(), inMessage.getParamBatteryBoxCoordinates().getFirst());
+                break;
+
+            case "playerHandleBigShot":
+                gameControllers.get(nickname).playerHandleBigShot(nickname);
+                break;
+
+            case "playerChoseStorage":
+                gameControllers.get(nickname).playerChoseStorage(nickname, inMessage.getParamCoordinates());
+                break;
+
+            case "spreadEpidemic":
+                gameControllers.get(nickname).spreadEpidemic(nickname);
+                break;
+
+            case "stardustEvent":
+                gameControllers.get(nickname).stardustEvent(nickname);
+                break;
+
             // TODO debug
             case "showMessage":
                 String message = inMessage.getParamString();
                 gameControllers.get(nickname).showMessage(message);
                 break;
-            // other cases
 
             default:
                 System.err.println("Invalid action: " + action);

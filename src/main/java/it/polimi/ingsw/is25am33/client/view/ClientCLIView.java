@@ -4,6 +4,8 @@ import it.polimi.ingsw.is25am33.client.ClientModel;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.card.Planets;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
@@ -14,13 +16,11 @@ import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 /**
@@ -391,7 +391,7 @@ public class ClientCLIView implements ClientView {
                 String input = askForInput("Your choice: ");
 
                 // TODO
-                //if (input.equals(INPUT_INTERRUPT)) return ;
+                //if (input.equals(INPUT_INTERRUPT)) return;
 
                 int choice = Integer.parseInt(input);
 
@@ -487,6 +487,7 @@ public class ClientCLIView implements ClientView {
         this.showMessage("Tip: if you want more components to build your shipboard look among the visible ones.");
     }
 
+
     /**
      * Displays a menu with actions the player can perform on the selected component.
      * The component is initially displayed in its current state.
@@ -528,7 +529,7 @@ public class ClientCLIView implements ClientView {
                         break;
 
                     case 2:
-                        Coordinates coords = readCoordinatesFromUserInput();
+                        Coordinates coords = readCoordinatesFromUserInput("Select coordinates (row column): ");
                         return (server, nickname) -> {
                             try {
                                 server.playerWantsToPlaceFocusedComponent(nickname, coords);
@@ -594,10 +595,15 @@ public class ClientCLIView implements ClientView {
      *         The coordinates are zero-indexed, meaning (1,1) input by the user is converted
      *         to (0,0) in the Coordinates object.
      */
-    public Coordinates readCoordinatesFromUserInput() {
+    public Coordinates readCoordinatesFromUserInput(String prompt) {
 
         while (true) {
-            String input = this.askForInput("Select coordinates (row column): ");
+            String input = this.askForInput(prompt);
+            if (input.isEmpty()
+                    && (prompt.equals("Select the coordinates (row column) for the double engines you would like to activate or press enter to skip: ")
+                    || prompt.equals("Select the coordinates (row column) for the battery box you would like to activate or press enter to skip: ")
+                    || prompt.equals("Choose the coordinates (row column) of the storage where you would like to store the cargo cube or press enter to skip this reward: ")))
+                return null;
             String[] tokens = input.trim().split("\\s+");
             if (tokens.length == 2) {
                 try {
@@ -747,6 +753,379 @@ public class ClientCLIView implements ClientView {
             } catch (NumberFormatException e) {
                 showMessage("Invalid choice. Please enter a valid number.");
             }
+        }
+
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showVisitLocationMenu() {
+
+        while (true) {
+            String input = askForInput("Do you want to visit the card location? [Y/n] ");
+            if (input.equalsIgnoreCase("Y") || input.isEmpty()) {
+                return (server, nickname) -> {
+                    try {
+                        server.playerWantsToVisitLocation(nickname, true);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+
+            } else if (input.equalsIgnoreCase("N")) {
+                return (server, nickname) -> {
+                    try {
+                        server.playerWantsToVisitLocation(nickname, false);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+
+            } else {
+                showMessage("Invalid input. Please enter Y or N.");
+            }
+        }
+
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showThrowDicesMenu(){
+        askForInput("Press any key to throw dices ");
+
+        return (server, nickname) -> {
+            try {
+                server.playerWantsToThrowDices(nickname);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showChoosePlanetMenu(){
+        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip): "));
+        return(server, nickname) -> {
+            try {
+                server.playerWantsToVisitPlanet(nickname, choice);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showChooseEnginesMenu() {
+
+        this.showMyShipBoard();
+        System.out.println();
+        List<Coordinates> doubleEnginesCoordinates = new ArrayList<>();
+        List<Coordinates> batteryBoxesCoordinates = new ArrayList<>();
+        ShipBoard shipBoard = clientModel.getShipBoard();
+
+        while(true) {
+
+            Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double engines you would like to activate or press enter to skip: ");
+            if (coords == null) break;
+            if (shipBoard.getDoubleEngines().contains(shipBoard.getComponentAt(coords)))
+                doubleEnginesCoordinates.add(coords);
+            else {
+                showMessage("The selected coordinates are not related to any double engine, try again");
+                continue;
+            }
+
+            while(true) {
+
+                Coordinates batterycoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
+                if(batterycoords == null){
+                    showMessage("You have to select a battery box after choosing a double engine.");
+                    continue;
+                }
+                if (shipBoard.getBatteryBoxes().contains(shipBoard.getComponentAt(batterycoords))) {
+                    batteryBoxesCoordinates.add(batterycoords);
+                    break;
+                }
+                else
+                    showMessage("The selected coordinates are not related to any battery box, try again");
+            }
+        }
+
+        return (server, nickname) -> {
+            try {
+                server.playerChoseDoubleEngines(nickname, doubleEnginesCoordinates, batteryBoxesCoordinates);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    private void showMyShipBoard() {
+        // TODO dopo che abbiamo fatto la merge con luca
+        // String nickname = clientModel.getNickname();
+        // this.showShipBoard(clientModel.getShipBoard(), nickname);
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu() {
+
+        while(true) {
+            String input = askForInput("Do you want to accept the reward? [Y/n] ");
+            if (input.equalsIgnoreCase("Y") || input.isEmpty()) {
+                return (server, nickname) -> {
+                    try {
+                        server.playerWantsToAcceptTheReward(nickname, true);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+
+            } else if (input.equalsIgnoreCase("N")) {
+                return (server, nickname) -> {
+                    try {
+                        server.playerWantsToAcceptTheReward(nickname, false);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+            } else {
+                showMessage("Invalid input. Please enter Y or N.");
+            }
+        }
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showChooseCannonsMenu(){
+        this.showMyShipBoard();
+        System.out.println();
+        List<Coordinates> doubleCannonsCoordinates = new ArrayList<>();
+        List<Coordinates> batteryBoxesCoordinates = new ArrayList<>();
+        ShipBoard shipBoard = clientModel.getShipBoard();
+
+        while(true) {
+
+            Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double cannon you would like to activate or press enter to skip: ");
+            if (coords == null) break;
+            if (shipBoard.getDoubleCannons().contains(shipBoard.getComponentAt(coords)))
+                doubleCannonsCoordinates.add(coords);
+            else {
+                showMessage("The selected coordinates are not related to any double cannons, try again");
+                continue;
+            }
+
+            while(true) {
+
+                Coordinates batteryCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
+                if(batteryCoords == null){
+                    showMessage("You have to select a battery box after choosing a double engine.");
+                    continue;
+                }
+                if (shipBoard.getBatteryBoxes().contains(shipBoard.getComponentAt(batteryCoords))) {
+                    batteryBoxesCoordinates.add(batteryCoords);
+                    break;
+                }
+                else
+                    showMessage("The selected coordinates are not related to any battery box, try again");
+            }
+        }
+
+        return (server, nickname) -> {
+            try {
+                server.playerChoseDoubleCannons(nickname, doubleCannonsCoordinates, batteryBoxesCoordinates);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showHandleRemoveCrewMembersMenu() {
+        this.showMyShipBoard();
+        System.out.println();
+        List<Coordinates> cabinCoordinates = new ArrayList<>();
+        ShipBoard shipBoard = clientModel.getShipBoard();
+
+        while (true) {
+            Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) of the cabins from which you want to remove the crew members: ");
+            if (coords == null) {
+                showMessage("You have to select cabins");
+                continue;
+            }
+            if (shipBoard.getCabin().contains(shipBoard.getComponentAt(coords))) {
+                cabinCoordinates.add(coords);
+                break;
+            } else {
+                showMessage("The selected coordinates are not related to any cabin, try again");
+            }
+        }
+
+        return (server, nickname) -> {
+            try {
+                server.playerChoseCabin(nickname, cabinCoordinates);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        };
+
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showSmallDanObjMenu() {
+
+        showMessage(clientModel.getCurrDangerousObj().getDangerousObjType() + " incoming!!!");
+        showMessage("Choose how to defend from it");
+        ShipBoard shipBoard = clientModel.getShipBoard();
+
+        while (true) {
+            Coordinates activableCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the shield you would like to activate or press enter if you don't need to activate one: ");
+            if (activableCoords == null)
+                return (server, nickname) -> {
+                    try {
+                        server.playerHandleSmallDanObj(nickname, new Coordinates(), new Coordinates());
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+
+            if(shipBoard.getShields().contains(shipBoard.getComponentAt(activableCoords))) {
+                showMessage("The selected coordinates are not related to any shield, try again");
+                continue;
+            }
+
+            Coordinates batteryBoxCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
+            if(shipBoard.getBatteryBoxes().contains(shipBoard.getComponentAt(batteryBoxCoords))) {
+                showMessage("The selected coordinates are not related to any battery box, try again");
+                continue;
+            }
+
+            return (server, nickname) -> {
+                try {
+                    server.playerHandleSmallDanObj(nickname, activableCoords, batteryBoxCoords);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        }
+
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showBigMeteoriteMenu() {
+
+        showMessage(clientModel.getCurrDangerousObj().getDangerousObjType() + " incoming!!!");
+        showMessage("Choose how to defend from it");
+        ShipBoard shipBoard = clientModel.getShipBoard();
+
+        while (true) {
+            Coordinates doubleCannonCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double cannon you would like to activate or press enter if you don't need to activate one: ");
+            if (doubleCannonCoords == null)
+                return (server, nickname) -> {
+                    try {
+                        server.playerHandleBigMeteorite(nickname, new Coordinates(), new Coordinates());
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+
+            if(shipBoard.getDoubleCannons().contains(shipBoard.getComponentAt(doubleCannonCoords))) {
+                showMessage("The selected coordinates are not related to any double cannon, try again");
+                continue;
+            }
+
+            Coordinates batteryBoxCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
+            if(shipBoard.getBatteryBoxes().contains(shipBoard.getComponentAt(batteryBoxCoords))) {
+                showMessage("The selected coordinates are not related to any battery box, try again");
+                continue;
+            }
+
+            return (server, nickname) -> {
+                try {
+                    server.playerHandleBigMeteorite(nickname, doubleCannonCoords, batteryBoxCoords);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        }
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showBigShotMenu() {
+
+        showMessage("Big shot incoming!!!\nLet's hope it will miss your ship because there is nothing you can do :(");
+        return (server, nickname) -> {
+            try {
+                server.playerHandleBigShot(nickname);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showEpidemicMenu() {
+        showMessage("An epidemic is spreading!\nRemoving 1 crew member (human or alien) from every occupied cabin connected to another occupied cabin...");
+        return(server, nickname) -> {
+            try {
+                server.spreadEpidemic(nickname);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showStardustMenu() {
+        showMessage("Stardust is coming!\nMaking one step back for every exposed component on you ship...");
+        return(server, nickname) -> {
+            try {
+                server.stardustEvent(nickname);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+    @Override
+    public BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu() {
+
+        while (true){
+            Coordinates coords = readCoordinatesFromUserInput("Choose the coordinates (row column) of the storage where you would like to store the cargo cube or press enter to skip this reward: ");
+            if (coords == null) return (server, nickname) -> {
+                try {
+                    server.playerChoseStorage(nickname, new Coordinates());
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+            ShipBoard shipBoard = clientModel.getShipBoard();
+
+            if (shipBoard.getStorages().contains(shipBoard.getComponentAt(coords)))
+                return (server, nickname) -> {
+                    try {
+                        server.playerChoseStorage(nickname, coords);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+            else
+                showMessage("The selected coordinates are not related to any storage, try again");
+        }
+
+    }
+
+    @Override
+    public BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu() {
+
+        while (true){
+            Coordinates coords = readCoordinatesFromUserInput("Choose the coordinates (row column) of the storage where you would like to remove one cargo cube: ");
+            ShipBoard shipBoard = clientModel.getShipBoard();
+
+            if (shipBoard.getStorages().contains(shipBoard.getComponentAt(coords)))
+                return (server, nickname) -> {
+                    try {
+                        server.playerChoseStorage(nickname, coords);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+            else
+                showMessage("The selected coordinates are not related to any storage, try again");
         }
 
     }

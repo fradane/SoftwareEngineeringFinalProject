@@ -3,8 +3,6 @@ package it.polimi.ingsw.is25am33.client.controller;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.controller.GameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -224,93 +222,111 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     private void processNotification(SocketMessage notification) {
         try {
             switch (notification.getActions()) {
+
                 case "notifyNewPlayerJoined":
                     if (clientController != null) {
                         clientController.notifyNewPlayerJoined(null, notification.getParamGameId(), notification.getParamString(), notification.getParamPlayerColor());
                     }
                     break;
+
                 case "notifyGameStarted":
                     if (clientController != null) {
                         this.gameState = notification.getParamGameState();
                         clientController.notifyGameStarted(nickname, gameState, notification.getParamGameInfo().getFirst());
                     }
                     break;
+
                 case "notifyGameState":
                     if (clientController != null) {
                         this.gameState = notification.getParamGameState();
                         clientController.notifyGameState(nickname, gameState);
                     }
                     break;
+
                 case "notifyDangerousObjAttack":
                     if (clientController != null) {
                         clientController.notifyDangerousObjAttack(nickname, notification.getParamDangerousObj());
                     }
                     break;
+
                 case "notifyCurrPlayerChanged":
                     if (clientController != null) {
                         clientController.notifyCurrPlayerChanged(nickname, notification.getParamString());
                     }
                     break;
+
                 case "notifyCurrAdventureCard":
                     if (clientController != null) {
                         clientController.notifyCurrAdventureCard(nickname, notification.getParamAdventureCard());
                     }
                     break;
+
                 case "notifyCardState":
                     if (clientController != null) {
                         clientController.notifyCardState(nickname, notification.getParamCardState());
                     }
                     break;
+
                 case "notifyChooseComponent":
                     if (clientController != null) {
                         clientController.notifyChooseComponent(null, notification.getParamString(), notification.getParamComponent());
                     }
                     break;
+
                 case "notifyReleaseComponent":
                     if (clientController != null) {
                         clientController.notifyReleaseComponent(null, notification.getParamString());
                     }
                     break;
+
                 case "notifyBookedComponent":
                     if (clientController != null) {
                         clientController.notifyBookedComponent(null, notification.getParamString(), notification.getParamComponent());
                     }
                     break;
+
                 case "notifyVisibleComponents":
                     if (clientController != null) {
                         clientController.notifyVisibleComponents( notification.getParamString(), notification.getParamVisibleComponents());
                     }
                     break;
+
                 case "notifyComponentPlaced":
                     if (clientController != null) {
                         clientController.notifyComponentPlaced( null, notification.getParamString(), notification.getParamComponent(), notification.getParamCoordinates());
                     }
                     break;
+
                 case "notifyShipBoardUpdate":
                     if (clientController != null) {
                         clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix());
                     }
                     break;
+
                 case "notifyPlayerCredits":
                     if (clientController != null) {
                         clientController.notifyPlayerCredits(null, notification.getParamString(), notification.getParamInt());
                     }
                     break;
+
                 case "notifyEliminatedPlayer":
                     if (clientController != null) {
                         clientController.notifyEliminatedPlayer(null, notification.getParamString(), notification.getParamFlyingBoard());
                     }
                     break;
+
                 case "notifyFlyingBoardUpdate":
                     if (clientController != null) {
                         clientController.notifyFlyingBoardUpdate(notification.getParamString(), notification.getParamFlyingBoard());
                     }
                     break;
+
                 case "notifyVisibleDeck":
                     if (clientController != null) {
                         clientController.notifyVisibleDeck(notification.getParamString(), notification.getParamLittleVisibleDecks());
                     }
                     break;
+
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
@@ -370,8 +386,101 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         return null;
     }
 
+    @Override
+    public void playerWantsToVisitLocation(String nickname, Boolean choice) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToVisitLocation");
+        outMessage.setParamBoolean(choice);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerWantsToThrowDices(String nickname) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToThrowDices");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerWantsToVisitPlanet(String nickname, int choice){
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToVisitPlanet");
+        outMessage.setParamInt(choice);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerWantsToAcceptTheReward(String nickname, Boolean choice) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToAcceptTheReward");
+        outMessage.setParamBoolean(choice);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
 
 
-    
+    @Override
+    public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseDoubleEngines");
+        outMessage.setParamActivableCoordinates(doubleEnginesCoords);
+        outMessage.setParamBatteryBoxCoordinates(batteryBoxesCoords);
+
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseDoubleCannons");
+        outMessage.setParamActivableCoordinates(doubleCannonsCoords);
+        outMessage.setParamBatteryBoxCoordinates(batteryBoxesCoords);
+
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseCabin");
+        outMessage.setParamCabinCoordinates(cabinCoords);
+
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "playerHandleSmallMeteorite");
+        outMessage.setParamActivableCoordinates(List.of(shieldCoords));
+        outMessage.setParamBatteryBoxCoordinates(List.of(batteryBoxCoords));
+
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerHandleBigMeteorite");
+        outMessage.setParamActivableCoordinates(List.of(doubleCannonCoords));
+        outMessage.setParamBatteryBoxCoordinates(List.of(batteryBoxCoords));
+
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerHandleBigShot(String nickname) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerHandleBigShot");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerChoseStorage(String nickname, Coordinates storageCoords) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseStorage");
+        outMessage.setParamCoordinates(storageCoords);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void spreadEpidemic(String nickname) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "spreadEpidemic");
+        out.println(outMessage);
+    }
+
+    @Override
+    public void stardustEvent(String nickname) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "stardustEvent");
+        out.println(outMessage);
+    }
 
 }

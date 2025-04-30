@@ -12,6 +12,8 @@ import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -99,8 +101,8 @@ public class GameModel {
         try {
             this.currGameState = currGameState;
 
-            for (String s : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyGameState(s, currGameState);
+            for (String nickname : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nickname).notifyGameState(nickname, currGameState);
             }
         }
         catch(RemoteException e){
@@ -121,7 +123,6 @@ public class GameModel {
     }
 
     public static int throwDices() {
-        double random = Math.random();
         return (int) (Math.random() * 12) + 1;
     }
 

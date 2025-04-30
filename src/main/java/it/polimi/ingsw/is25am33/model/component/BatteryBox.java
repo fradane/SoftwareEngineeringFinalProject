@@ -38,10 +38,14 @@ public class BatteryBox extends Component {
     @Override
     public String toString() {
         return "BatteryBox{" +
-                "connectors" + this.getConnectors() +
-                "maxBatteryCapacity=" + maxBatteryCapacity +
-                ", availableBattery=" + availableBattery +
+                "connectors " + this.getConnectors() +
+                "maxBatteryCapacity = " + maxBatteryCapacity +
+                ", availableBattery = " + availableBattery +
                 '}';
+        /*System.out.printf("""
+                *------------*
+                | %1s        |
+                """, 3);*/
     }
 
     /**

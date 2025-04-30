@@ -74,4 +74,5 @@ public class ComponentTable {
     public Map<Integer, Component> getVisibleComponents() {
         return visibleComponents;
     }
+
 }

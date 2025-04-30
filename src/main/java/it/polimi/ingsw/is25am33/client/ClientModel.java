@@ -5,6 +5,9 @@ import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.game.ComponentTable;
@@ -12,6 +15,7 @@ import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,9 +33,18 @@ public class ClientModel {
     private Map<Integer, Component> visibleComponents;
     private FlyingBoard flyingBoard;
     private List<List<AdventureCard>> littleVisibleDecks;
+    private boolean isMyTurn;
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public boolean isMyTurn() {
+        return isMyTurn;
+    }
+
+    public void setMyTurn(boolean myTurn) {
+        isMyTurn = myTurn;
     }
 
     public void setCardState(CardState cardState){

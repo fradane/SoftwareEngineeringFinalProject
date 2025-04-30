@@ -36,6 +36,15 @@ public class Shield extends Component implements Activable, Rotatable {
         super(connectors);
     }
 
+    @Override
+    public String toString() {
+        return "Shield{" +
+                ", connectors = " + this.getConnectors() +
+                ", direction = " + direction +
+                '}';
+    }
+
+
     /**
      * Gets the active shield directions.
      *

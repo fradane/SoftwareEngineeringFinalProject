@@ -81,11 +81,11 @@ public class Planets extends AdventureCard implements PlayerMover {
             if (currentPlanet.isBusy())
                 throw new IllegalIndexException("Planet has already been chosen");
 
-            currentPlanet.noMoreAvailable();
+            currentPlanet.isNoMoreAvailable();
 
-            setCurrState( CardState.HANDLE_CUBES_REWARD);
+            setCurrState(CardState.HANDLE_CUBES_REWARD);
 
-        } else if (gameModel.hasNextPlayer()){
+        } else if (gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
         } else {
             setCurrState(CardState.END_OF_CARD);
@@ -115,7 +115,6 @@ public class Planets extends AdventureCard implements PlayerMover {
             }
 
         }
-
     }
 
 }
