@@ -3,8 +3,10 @@ package it.polimi.ingsw.is25am33.model.component;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Represents a shield component, extending the {@code Component} class.
@@ -16,7 +18,7 @@ public class Shield extends Component implements Activable, Rotatable {
      * The directions in which the shield is active.
      * By default, it is set to {@code Direction.NORTH} and {@code Direction.EAST}.
      */
-    private List<Direction> direction = List.of(Direction.NORTH, Direction.EAST);
+    private final List<Direction> direction = new ArrayList<>(List.of(Direction.NORTH, Direction.EAST));
 
     /**
      * Default constructor for {@code Shield}.

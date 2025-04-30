@@ -286,11 +286,13 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     @Override
     public Component playerPicksVisibleComponent(String nickname, Integer choice) throws RemoteException {
+        // TODO dopo che luca ha fatto la merge
         return null;
     }
 
     @Override
     public Map<Integer, Component> showPlayerVisibleComponent(String nickname) throws RemoteException {
+        // TODO dopo che luca ha fatto la merge
         return null;
     }
 

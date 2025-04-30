@@ -151,6 +151,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 out.println(ServerSerializer.serialize(outMessage));
                 break;
 
+            case "playerWantsToReserveFocusedComponent":
+                gameControllers.get(nickname).playerWantsToReserveFocusedComponent(nickname);
+                break;
+
+            case "playerWantsToReleaseFocusedComponent":
+                gameControllers.get(nickname).playerWantsToReleaseFocusedComponent(nickname);
+                break;
+
             // TODO debug
             case "showMessage":
                 String message = inMessage.getParamString();
