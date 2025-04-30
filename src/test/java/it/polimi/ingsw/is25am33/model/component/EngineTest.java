@@ -36,7 +36,7 @@ class EngineTest {
         engine.rotate();
         engine.rotate();
 
-        engine.changeOrientation();
+        engine.rotate();
 
         Map<Direction, ConnectorType> connectorsExpected = new LinkedHashMap<>();
         connectorsExpected.put(Direction.NORTH, ConnectorType.DOUBLE);

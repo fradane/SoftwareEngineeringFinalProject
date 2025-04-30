@@ -1,19 +1,17 @@
 package it.polimi.ingsw.is25am33.model.game;
 
+import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.*;
-import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
-import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
+import java.rmi.RemoteException;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -40,7 +38,6 @@ public class GameModel {
         this.maxPlayers = maxPlayers;
         this.isTestFlight = isTestFlight;
         this.flyingBoard = isTestFlight ? new Level1FlyingBoard() : new Level2FlyingBoard();
-        flyingBoard.setGameContext(gameContext);
         currAdventureCard = null;
         currRanking = new ArrayList<>();
         currPlayer = null;
@@ -49,11 +46,12 @@ public class GameModel {
         this.players = new ConcurrentHashMap<>();
         deck = new Deck();
         isStarted = false;
-        //gameContext = new GameContext(gameId, );
         componentTable = new ComponentTable();
-        //ObserverManager.getInstance().registerGame(gameContext);
     }
 
+    public void setObservers(Map<String, CallableOnClientController> clientControllers){
+
+    }
     public void setStarted(boolean started) {
         isStarted = started;
     }
@@ -70,8 +68,11 @@ public class GameModel {
         this.componentTable = componentTable;
     }
 
-    public void setGameContext(GameContext gameContext) {
-        this.gameContext = gameContext;
+    public void createGameContext(Map<String, CallableOnClientController> clientControllers) {
+        this.gameContext= new GameContext(clientControllers);
+        deck.setGameContext(gameContext);
+        flyingBoard.setGameContext(gameContext);
+        componentTable.setGameContext(gameContext);
     }
 
     public String getGameId() {
@@ -95,7 +96,16 @@ public class GameModel {
     }
 
     public void setCurrGameState(GameState currGameState) {
-        this.currGameState = currGameState;
+        try {
+            this.currGameState = currGameState;
+
+            for (String s : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(s).notifyGameState(s, currGameState);
+            }
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
     }
 
     public GameContext getGameContext() {
@@ -110,41 +120,6 @@ public class GameModel {
         return deck;
     }
 
-    public void setFocusComponent(Player player, Coordinates coordinates){
-        Component component = null;//= componentTable.getComponent(coordinates);
-
-        player.getPersonalBoard().setFocusedComponent(component);
-        component.setCurrState(ComponentState.USED);
-
-        DTO dto = new DTO();
-        dto.setComponentTable(componentTable);
-
-        BiConsumer<Observer,String> notifyComponentTable= Observer::notifyComponentTableChanged;
-
-        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "componentTableUpdate", dto ), notifyComponentTable);
-
-        DTO dto1 = new DTO();
-        dto.setComponent(component);
-
-        BiConsumer<Observer,String> notifyComponent= Observer::notifyChoosenComponent;
-
-        //gameContext.getVirtualServer().notifyClient(List.of(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname())), new GameEvent( "showFocusComponent", dto ), notifyComponent);
-
-
-    }
-
-    public void releaseComponentWithFocus(Player player){
-        player.getPersonalBoard().getFocusedComponent().setCurrState(ComponentState.VISIBLE);
-        player.getPersonalBoard().setFocusedComponent(null);
-
-        DTO dto = new DTO();
-        dto.setComponentTable(componentTable);
-
-        BiConsumer<Observer,String> notifyComponentTable= Observer::notifyComponentTableChanged;
-        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "componentTableUpdate", dto ), notifyComponentTable);
-
-    }
-
     public static int throwDices() {
         double random = Math.random();
         return (int) (Math.random() * 12) + 1;
@@ -155,23 +130,17 @@ public class GameModel {
     }
 
     public void setCurrDangerousObj(DangerousObj dangerousObj) {
-        this.currDangerousObj = dangerousObj;
 
-        DTO dto = new DTO();
-        dto.setDangerousObj(dangerousObj);
+        try{
+            this.currDangerousObj = dangerousObj;
 
-        BiConsumer<Observer,String> notifyAttack= Observer::notifyDangerousObjAttack;
+            for(String nickname : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nickname).notifyDangerousObjAttack(nickname, currDangerousObj);
+            }
+        } catch(RemoteException e) {
+            System.err.println("Remote Exception");
+        }
 
-        //virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "dangerousObjAttack", dto ), notifyAttack);
-    }
-
-    public void watchVisibileDeck(Player player, int index){
-        DTO dto = new DTO();
-        dto.setLittleDeck(deck.getVisibleDeck(index));
-
-        BiConsumer<Observer,String> notifyLittleDeck= Observer::notifyChoosenLittleDeck;
-
-        //virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()).getObserver(player.getNickname()), new GameEvent("playerWatchesLittleDeck", dto), notifyLittleDeck);
     }
 
     public Boolean hasNextPlayer() {
@@ -188,15 +157,17 @@ public class GameModel {
         this.currRanking = currRanking;
     }
 
-    public void setCurrPlayer(Player player) {
-        this.currPlayer = player;
+    public void setCurrPlayer(Player player){
+        try{
+            this.currPlayer = player;
 
-        DTO dto = new DTO();
-        dto.setPlayer(player);
-
-        BiConsumer<Observer,String> notifyCurrPlayer= Observer::notifyCurrPlayerChanged;
-
-        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "currPlayerUpdate", dto ), notifyCurrPlayer);
+            for(String nickname: gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nickname).notifyCurrPlayerChanged(nickname, player.getNickname());
+            }
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
 
     }
 
@@ -217,16 +188,18 @@ public class GameModel {
     }
 
     public void setCurrAdventureCard(AdventureCard currAdventureCard) {
-        this.currAdventureCard = currAdventureCard;
 
-        DTO dto = new DTO();
-        dto.setAdventureCard(currAdventureCard);
+        try {
+            this.currAdventureCard = currAdventureCard;
 
-        BiConsumer<Observer,String> notifyAdventureCard= Observer::notifyCurrAdventureCard;
-
-        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "drawnCard", dto ), notifyAdventureCard);
-
-}
+            for (String nickname : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nickname).notifyCurrAdventureCard(nickname, currAdventureCard);
+            }
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
+    }
 
     public AdventureCard getCurrAdventureCard() {
         return currAdventureCard;
@@ -239,7 +212,7 @@ public class GameModel {
      *
      * @throws IllegalStateException if the card phase is not started yet.
      */
-    public void startCard() throws IllegalStateException{
+    public void startCard() throws IllegalStateException {
 
         if (currAdventureCard == null || currAdventureCard.getCurrState() != CardState.START_CARD)
             throw new IllegalStateException("Not the right state");
@@ -307,12 +280,25 @@ public class GameModel {
 
     }
 
-    public void addPlayer(String nickname, PlayerColor color) {
-        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color) : new Level2ShipBoard(color);
-        shipBoard.setGameContext(gameContext);
-        Player player = new Player(nickname, shipBoard, color);
-        player.setGameContext(gameContext);
-        players.put(nickname, player);
+    public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController){
+        try{
+            gameContext.getClientControllers().put(nickname, clientController);
+            ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color) : new Level2ShipBoard(color);
+            shipBoard.setGameContext(gameContext);
+            Player player = new Player(nickname, shipBoard, color);
+            player.setGameContext(gameContext);
+            players.put(nickname, player);
+            shipBoard.setPlayer(player);
+
+            for(String nicknameToNotify : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nicknameToNotify).notifyShipBoardUpdate(nicknameToNotify, player.getNickname(), shipBoard.getShipMatrix());
+                gameContext.getClientControllers().get(nicknameToNotify).notifyPlayerCredits(nicknameToNotify, player.getNickname(), 0);
+            }
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
+
     }
 
     public void removePlayer(String nickname) {

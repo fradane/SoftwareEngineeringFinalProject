@@ -55,8 +55,8 @@ public class Engine extends Component implements Rotatable {
      * Changes the engine's orientation and updates the power direction accordingly.
      */
     @Override
-    public void changeOrientation() {
-        super.changeOrientation();
+    public void rotate() {
+        super.rotate();
         rotatePowerDirection();
     }
 }

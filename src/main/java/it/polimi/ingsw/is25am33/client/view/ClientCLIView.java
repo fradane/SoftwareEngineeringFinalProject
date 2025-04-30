@@ -5,10 +5,12 @@ import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -339,24 +341,26 @@ public class ClientCLIView implements ClientView {
         System.out.println("Current adventure card: " + clientModel.getCurrAdventureCard().toString());
     }
 
-    /**
-     * Displays an updated game state message on the command line.
-     *
-     * @param gameState the new game state description
-     */
     @Override
-    public void showNewGameState(String gameState) {
+    public void showNewGameState() {
         System.out.println("===================================");
         System.out.println("📢  [Game Update]");
-        System.out.println("🎮  New Game State: " + gameState);
+        System.out.println("🎮  New Game State: " + clientModel.getGameState().toString());
+        System.out.println("===================================");
+    }
+
+    public void showDangerousObj(){
+        System.out.println("===================================");
+        System.out.println(" [Dangerous Object Attack] ");
+        System.out.println(" New Dangerous Object: " + clientModel.getCurrentDangerousObj().toString());
         System.out.println("===================================");
     }
 
     @Override
-    public void showNewCardState(String cardState) {
+    public void showNewCardState() {
         System.out.println("===================================");
         System.out.println("🃏  [Card Update]");
-        System.out.println("🆕  New Card State: " + cardState);
+        System.out.println("🆕  New Card State: " + clientModel.getCurrCardState().toString());
         System.out.println("===================================");
     }
 

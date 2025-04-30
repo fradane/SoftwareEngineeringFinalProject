@@ -232,11 +232,85 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                 case "notifyGameStarted":
                     if (clientController != null) {
                         this.gameState = notification.getParamGameState();
-                        ((ClientController) clientController).getClientModel().setGameState(gameState);
                         clientController.notifyGameStarted(nickname, gameState, notification.getParamGameInfo().getFirst());
                     }
                     break;
-                // Altri casi...
+                case "notifyGameState":
+                    if (clientController != null) {
+                        this.gameState = notification.getParamGameState();
+                        clientController.notifyGameState(nickname, gameState);
+                    }
+                    break;
+                case "notifyDangerousObjAttack":
+                    if (clientController != null) {
+                        clientController.notifyDangerousObjAttack(nickname, notification.getParamDangerousObj());
+                    }
+                    break;
+                case "notifyCurrPlayerChanged":
+                    if (clientController != null) {
+                        clientController.notifyCurrPlayerChanged(nickname, notification.getParamString());
+                    }
+                    break;
+                case "notifyCurrAdventureCard":
+                    if (clientController != null) {
+                        clientController.notifyCurrAdventureCard(nickname, notification.getParamAdventureCard());
+                    }
+                    break;
+                case "notifyCardState":
+                    if (clientController != null) {
+                        clientController.notifyCardState(nickname, notification.getParamCardState());
+                    }
+                    break;
+                case "notifyChooseComponent":
+                    if (clientController != null) {
+                        clientController.notifyChooseComponent(null, notification.getParamString(), notification.getParamComponent());
+                    }
+                    break;
+                case "notifyReleaseComponent":
+                    if (clientController != null) {
+                        clientController.notifyReleaseComponent(null, notification.getParamString());
+                    }
+                    break;
+                case "notifyBookedComponent":
+                    if (clientController != null) {
+                        clientController.notifyBookedComponent(null, notification.getParamString(), notification.getParamComponent());
+                    }
+                    break;
+                case "notifyVisibleComponents":
+                    if (clientController != null) {
+                        clientController.notifyVisibleComponents( notification.getParamString(), notification.getParamVisibleComponents());
+                    }
+                    break;
+                case "notifyComponentPlaced":
+                    if (clientController != null) {
+                        clientController.notifyComponentPlaced( null, notification.getParamString(), notification.getParamComponent(), notification.getParamCoordinates());
+                    }
+                    break;
+                case "notifyShipBoardUpdate":
+                    if (clientController != null) {
+                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix());
+                    }
+                    break;
+                case "notifyPlayerCredits":
+                    if (clientController != null) {
+                        clientController.notifyPlayerCredits(null, notification.getParamString(), notification.getParamInt());
+                    }
+                    break;
+                case "notifyEliminatedPlayer":
+                    if (clientController != null) {
+                        clientController.notifyEliminatedPlayer(null, notification.getParamString(), notification.getParamFlyingBoard());
+                    }
+                    break;
+                case "notifyFlyingBoardUpdate":
+                    if (clientController != null) {
+                        clientController.notifyFlyingBoardUpdate(notification.getParamString(), notification.getParamFlyingBoard());
+                    }
+                    break;
+                case "notifyVisibleDeck":
+                    if (clientController != null) {
+                        clientController.notifyVisibleDeck(notification.getParamString(), notification.getParamLittleVisibleDecks());
+                    }
+                    break;
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
@@ -293,6 +367,8 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     public Map<Integer, Component> showPlayerVisibleComponent(String nickname) throws RemoteException {
         return null;
     }
+
+
 
     
 

@@ -1,14 +1,12 @@
 package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.model.GameContext;
-import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 
-import java.util.function.BiConsumer;
-
 import java.io.Serializable;
+import java.rmi.RemoteException;
 
 public class Player implements Serializable {
     private final String nickname;
@@ -41,16 +39,16 @@ public class Player implements Serializable {
     }
 
     public void addCredits(int number) {
-        ownedCredits += number;
+        try{
+            ownedCredits += number;
 
-        DTO dto = new DTO();
-        dto.setPlayer(this);
-        dto.setNum(ownedCredits);
-
-        BiConsumer<Observer,String> notifyCredits = Observer::notifyPlayerCredits;
-
-        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "creditsUpdate", dto ), notifyCredits);
-
+            for(String s: gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(s).notifyPlayerCredits(s, nickname, ownedCredits );
+            }
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
     }
 
     public ShipBoard getPersonalBoard() {

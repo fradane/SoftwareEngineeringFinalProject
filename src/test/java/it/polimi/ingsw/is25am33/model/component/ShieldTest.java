@@ -34,7 +34,7 @@ class ShieldTest {
         shield.rotate();
         shield.rotate();
 
-        shield.changeOrientation();
+        shield.rotate();
 
         Map<Direction, ConnectorType> connectorsExpected = new LinkedHashMap<>();
         connectorsExpected.put(Direction.NORTH, ConnectorType.EMPTY);

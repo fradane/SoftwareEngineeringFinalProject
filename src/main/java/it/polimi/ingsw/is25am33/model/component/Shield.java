@@ -57,8 +57,8 @@ public class Shield extends Component implements Activable, Rotatable {
      * Changes the shield's orientation and updates its active directions accordingly.
      */
     @Override
-    public void changeOrientation() {
-        super.changeOrientation();
+    public void rotate() {
+        super.rotate();
         setDirection();
     }
 }

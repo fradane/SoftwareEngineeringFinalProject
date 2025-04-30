@@ -154,7 +154,7 @@ public class ShipBoardTest {
         assertTrue(shipBoard.isEngineDirectionWrong(eng)); // because it's SOUTH
 
         eng.rotate();
-        eng.changeOrientation();
+        eng.rotate();
         eng.rotatePowerDirection();
         assertFalse(shipBoard.isEngineDirectionWrong(eng));
     }
@@ -474,7 +474,7 @@ public class ShipBoardTest {
         Cannon singleFront = new Cannon(createSimpleConnectors());
         Cannon singleSide  = new Cannon(createSimpleConnectors());
         singleSide.rotate();
-        singleSide.changeOrientation();
+        singleSide.rotate();
         singleSide.rotateFireDirection();
         DoubleCannon doubleFront = new DoubleCannon(createSimpleConnectors());
 

@@ -129,19 +129,17 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
     }
 
-    private void currPlayerDecidedToGetTheReward(boolean hasPlayerAcceptedTheReward) {
-
+    private void currPlayerDecidedToGetTheReward(boolean hasPlayerAcceptedTheReward){
         if (hasPlayerAcceptedTheReward) {
             gameModel.getCurrPlayer().addCredits(reward);
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
         }
 
         if (defeatedPlayers.isEmpty()) {
-            setCurrState( CardState.END_OF_CARD);
+            setCurrState(CardState.END_OF_CARD);
         } else {
-            setCurrState( CardState.THROW_DICES);
+            setCurrState(CardState.THROW_DICES);
         }
-
     }
 
     public void playerDecidedHowToDefendTheirSelvesFromSmallShot(Shield chosenShield, BatteryBox chosenBatteryBox) {

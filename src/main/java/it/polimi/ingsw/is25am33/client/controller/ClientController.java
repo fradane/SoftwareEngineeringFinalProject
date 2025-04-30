@@ -3,10 +3,21 @@ package it.polimi.ingsw.is25am33.client.controller;
 import it.polimi.ingsw.is25am33.client.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
+import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.card.AdventureCard;
+import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
+import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 
@@ -15,10 +26,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class ClientController extends UnicastRemoteObject implements CallableOnClientController {
 
@@ -415,28 +423,82 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Informs the view to display the latest game state as a string.
-     *
-     * @param gameState the string representation of the new game state
-     */
-    public void showNewGameState(String gameState) {
-        view.showNewGameState(gameState);
+    public void notifyGameState(String nickname, GameState gameState) throws RemoteException{
+        clientModel.setGameState(gameState);
+        view.showNewGameState();
     }
 
+    public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws RemoteException{
+        clientModel.setCurrentDangerousObj(dangerousObj);
+        view.showDangerousObj();
+    }
 
+    public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws RemoteException{
+        clientModel.setCurrentPlayer(nickname);
+        view.showMessage("Current player is: "+ nickname);
+    }
+
+    public void notifyCurrAdventureCard(String nickname, AdventureCard adventureCard) throws RemoteException{
+        clientModel.setCurrAdventureCard(adventureCard);
+        view.showCurrAdventureCard(true);
+    }
+
+    public void notifyVisibleComponents(String nickname, Map<Integer, Component> visibleComponents) throws RemoteException{
+        clientModel.setVisibleComponents(visibleComponents);
+    }
+
+    public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException{
+        clientModel.getShipboards().get(nickname).getShipBoardMatrix()[coordinates.getX()][coordinates.getY()]=component;
+    }
+
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException{
+        if (clientModel.getShipboards().containsValue(nickname)) {
+            ShipBoardClient shipBoardClient= clientModel.getShipboards().get(nickname);
+            shipBoardClient.setShipBoardMatrix(shipMatrix);
+            clientModel.getShipboards().replace(nickname, shipBoardClient);
+        } else {
+            clientModel.getShipboards().put(nickname, new ShipBoardClient(shipMatrix,null, null));
+        }
+    }
+
+    public void notifyChooseComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws RemoteException{
+        clientModel.getShipboards().get(nickname).setFocusedComponent(focusedComponent);
+    }
+
+    public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws RemoteException{
+        clientModel.getShipboards().get(nickname).setFocusedComponent(null);
+    }
+
+    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ){
+        clientModel.getShipboards().get(nickname).getBookedComponent().add(component);
+    }
+
+    public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException{
+        if(clientModel.getCredits().containsValue(nickname))
+            clientModel.getCredits().replace(nickname,credits);
+        else
+            clientModel.getCredits().put(nickname, credits);
+
+        view.showMessage(nickname+ "has "+credits + "credits.");
+    }
+
+    public void notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException{
+        clientModel.setFlyingBoard(flyingBoard);
+    }
+
+    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname, FlyingBoard flyingBoard) throws RemoteException{
+        clientModel.setFlyingBoard(flyingBoard);
+        view.showMessage(nickname+"was eliminated.");
+    }
+
+    public void notifyCardState(String nickname, CardState cardState) throws RemoteException{
+        clientModel.setCardState(cardState);
+        view.showNewCardState();
+    }
+
+    public void notifyVisibleDeck(String nickname, List<List<AdventureCard>> littleVisibleDeck) throws RemoteException{
+        clientModel.setLittleVisibleDeck(littleVisibleDeck);
+    }
     /**
      * Initiates the ship board building phase by showing the build menu
      * and executing the selected action on the server using the current nickname.
@@ -455,6 +517,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
 
     }
+
+
 
 
     public void cardPhase() {

@@ -7,6 +7,7 @@ import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 
+import java.rmi.RemoteException;
 import java.util.List;
 
 

@@ -1,14 +1,10 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.polimi.ingsw.is25am33.model.Observer;
-import it.polimi.ingsw.is25am33.model.ObserverManager;
-import it.polimi.ingsw.is25am33.model.game.DTO;
-import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
+import java.rmi.RemoteException;
 import java.util.*;
-import java.util.function.BiConsumer;
 
 /**
  * The {@code Level2FlyingBoard} class extends {@code FlyingBoard} to represent
@@ -71,15 +67,16 @@ public class Level2FlyingBoard extends FlyingBoard {
     }
 
     @Override
-    public void insertPlayer(Player player) {
-        ranking.put(player, initialPositionIterator.next());
+    public void insertPlayer(Player player){
+        try{
+            ranking.put(player, initialPositionIterator.next());
 
-        DTO dto = new DTO();
-        dto.setFlyingBoard(this);
-
-        BiConsumer<it.polimi.ingsw.is25am33.model.Observer,String> notifyFlyingBoard = Observer::notifyFlyingBoardChanged;
-
-        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
+            for (String s : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(s).notifyFlyingBoardUpdate(s,this);
+            }
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
     }
-
 }
