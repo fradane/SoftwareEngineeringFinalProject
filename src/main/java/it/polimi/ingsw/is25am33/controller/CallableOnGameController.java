@@ -35,7 +35,24 @@ public interface CallableOnGameController extends Remote {
 
     void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException;
 
+    void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException;
+
+    void playerChoseCabin(String nickname, List<Coordinates> cabin) throws RemoteException;
+
     void playerWantsToVisitPlanet(String nickname, int choice) throws RemoteException;
 
     void playerWantsToAcceptTheReward(String nickname, Boolean choice) throws RemoteException;
+
+    void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords) throws RemoteException;
+
+    void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords) throws RemoteException;
+
+    void playerHandleBigShot(String nickname) throws RemoteException;
+
+    void playerChoseStorage(String nickname, Coordinates storageCoords) throws RemoteException;
+
+    void spreadEpidemic(String nickname) throws RemoteException;
+
+    void stardustEvent(String nickname) throws RemoteException;
+
 }

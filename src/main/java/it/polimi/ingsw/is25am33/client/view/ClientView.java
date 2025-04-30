@@ -159,5 +159,21 @@ public interface ClientView {
 
     BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu();
 
-    BiConsumer<CallableOnGameController, String> showDangerousAttackMenu();
+    BiConsumer<CallableOnGameController, String> showChooseCannonsMenu();
+
+    BiConsumer<CallableOnGameController, String> showSmallDanObjMenu();
+
+    BiConsumer<CallableOnGameController, String> showBigMeteoriteMenu();
+
+    BiConsumer<CallableOnGameController, String> showBigShotMenu();
+
+    BiConsumer<CallableOnGameController, String> showHandleRemoveCrewMembersMenu();
+
+    BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu();
+
+    BiConsumer<CallableOnGameController, String> showEpidemicMenu();
+
+    BiConsumer<CallableOnGameController, String> showStardustMenu();
+
+    BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu();
 }

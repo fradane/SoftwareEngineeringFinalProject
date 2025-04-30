@@ -1,6 +1,10 @@
 package it.polimi.ingsw.is25am33.model.dangerousObj;
 
+import it.polimi.ingsw.is25am33.client.view.ClientView;
+import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
+
+import java.util.function.BiConsumer;
 
 public abstract class DangerousObj {
     private final Direction direction;
@@ -29,6 +33,8 @@ public abstract class DangerousObj {
     public void setCoordinates(int coordinate) {
         this.coordinate = coordinate;
     }
+
+    public abstract BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view);
 }
 
 

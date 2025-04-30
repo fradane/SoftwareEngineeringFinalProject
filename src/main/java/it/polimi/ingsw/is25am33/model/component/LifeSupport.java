@@ -34,6 +34,15 @@ public class LifeSupport extends Component {
         this.lifeSupportColor = color;
     }
 
+    @Override
+    public String toString() {
+        return "LifeSupport {" +
+                ", connectors = " + this.getConnectors() +
+                ", lifeSupportColor = " + lifeSupportColor +
+                '}';
+    }
+
+
     /**
      * Gets the color of the life support system.
      *

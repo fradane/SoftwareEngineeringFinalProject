@@ -34,6 +34,16 @@ public class Cabin extends Component {
         inhabitants = new ArrayList<CrewMember>();
     }
 
+
+    @Override
+    public String toString() {
+        return "Cabin{" +
+                ", connectors=" + this.getConnectors() +
+                ", inhabitants = " + inhabitants +
+                '}';
+    }
+
+
     /**
      * Retrieves the list of crew members currently inhabiting the cabin.
      *

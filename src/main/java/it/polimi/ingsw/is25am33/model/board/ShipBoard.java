@@ -519,6 +519,19 @@ public abstract class ShipBoard implements Serializable {
     }
 
     /**
+     * Returns the list of Cabin components present on the ship.
+     *
+     * @return A list of Cabin objects.
+     */
+    @JsonIgnore
+    public List<Cabin> getCabin() {
+        return componentsPerType.get(Cabin.class)
+                .stream()
+                .map(Cabin.class::cast)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Finds all cabins occupied by at least one crew member
      * that are orthogonally adjacent to other occupied cabins.
      *

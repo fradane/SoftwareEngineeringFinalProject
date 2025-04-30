@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.enumFiles;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
@@ -21,6 +22,13 @@ public enum CardState {
             // implementazione specifica
             return null;
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            // TODO
+            return null;
+        }
+
     },
 
     CHOOSE_CANNONS {
@@ -76,6 +84,11 @@ public enum CardState {
                     .setChosenCabins(cabinsChoice)
                     .build();
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view){
+            return view.showHandleRemoveCrewMembersMenu();
+        }
     },
 
     HANDLE_CUBES_REWARD {
@@ -106,7 +119,8 @@ public enum CardState {
 
         @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showHandleCubesMalusMenu();
+            // TODO
+            return null;
         }
     },
 
@@ -160,9 +174,11 @@ public enum CardState {
 
         @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showDangerousAttackMenu();
+            DangerousObj currDangerousObject = view.getClientModel().getCurrDangerousObj();
+            return currDangerousObject.showRelatedMenu(view);
         }
     },
+
     THROW_DICES {
         @Override
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
@@ -174,10 +190,14 @@ public enum CardState {
             return view.showThrowDicesMenu();
         }
     },
+
     EPIDEMIC {
         @Override
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
+        }
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view){
+            return view.showEpidemicMenu();
         }
     },
     STARDUST {
@@ -185,7 +205,13 @@ public enum CardState {
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
         }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            return view.showStardustMenu();
+        }
     },
+
     ACCEPT_THE_REWARD {
         @Override
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
@@ -201,9 +227,16 @@ public enum CardState {
             return view.showAcceptTheRewardMenu();
         }
     },
+    
     END_OF_CARD {
         @Override
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
+            return null;
+        }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            // TODO
             return null;
         }
     };

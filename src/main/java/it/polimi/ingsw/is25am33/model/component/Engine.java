@@ -33,6 +33,15 @@ public class Engine extends Component implements Rotatable {
         super(connectors);
     }
 
+    @Override
+    public String toString() {
+        return "Engine{" +
+                ", connectors = " + this.getConnectors() +
+                ", powerDirection = " + powerDirection +
+                '}';
+    }
+
+
     /**
      * Gets the current power direction of the engine.
      *

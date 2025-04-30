@@ -24,6 +24,18 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
         this.reward = reward;
     }
 
+    @Override
+    public String toString(){
+
+        return "AbandonedShip{" +
+                "crewMalus = " + crewMalus +
+                ", stepsBack = " + stepsBack +
+                ", reward = " + reward +
+                ", currentState = " + currState
+                + '}';
+
+    }
+
     public AbandonedShip() {
         this.cardName = this.getClass().getSimpleName();
     }

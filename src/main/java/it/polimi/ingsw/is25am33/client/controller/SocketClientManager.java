@@ -3,8 +3,6 @@ package it.polimi.ingsw.is25am33.client.controller;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.controller.GameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -318,7 +316,15 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException {
+    public void playerWantsToAcceptTheReward(String nickname, Boolean choice) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToAcceptTheReward");
+        outMessage.setParamBoolean(choice);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+
+    @Override
+    public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "playerChoseDoubleEngines");
         outMessage.setParamActivableCoordinates(doubleEnginesCoords);
         outMessage.setParamBatteryBoxCoordinates(batteryBoxesCoords);
@@ -326,6 +332,64 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
-    
+    @Override
+    public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseDoubleCannons");
+        outMessage.setParamActivableCoordinates(doubleCannonsCoords);
+        outMessage.setParamBatteryBoxCoordinates(batteryBoxesCoords);
+
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseCabin");
+        outMessage.setParamCabinCoordinates(cabinCoords);
+
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "playerHandleSmallMeteorite");
+        outMessage.setParamActivableCoordinates(List.of(shieldCoords));
+        outMessage.setParamBatteryBoxCoordinates(List.of(batteryBoxCoords));
+
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerHandleBigMeteorite");
+        outMessage.setParamActivableCoordinates(List.of(doubleCannonCoords));
+        outMessage.setParamBatteryBoxCoordinates(List.of(batteryBoxCoords));
+
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerHandleBigShot(String nickname) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerHandleBigShot");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerChoseStorage(String nickname, Coordinates storageCoords) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseStorage");
+        outMessage.setParamCoordinates(storageCoords);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void spreadEpidemic(String nickname) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "spreadEpidemic");
+        out.println(outMessage);
+    }
+
+    @Override
+    public void stardustEvent(String nickname) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "stardustEvent");
+        out.println(outMessage);
+    }
 
 }

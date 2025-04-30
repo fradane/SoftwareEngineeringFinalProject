@@ -87,4 +87,9 @@ public class Coordinates implements Serializable {
     public String toString() {
         return "{x = " + getX() + ", y = " + getY() + "}";
     }
+
+    @JsonIgnore
+    public boolean isCoordinateInvalid() {
+        return coordinates.getFirst() == -1 && coordinates.getLast() == -1;
+    }
 }

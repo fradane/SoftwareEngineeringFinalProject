@@ -7,10 +7,7 @@ import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
-import it.polimi.ingsw.is25am33.model.component.BatteryBox;
-import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.component.Engine;
-import it.polimi.ingsw.is25am33.model.component.Shield;
+import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.io.IOException;
@@ -186,15 +183,27 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
+    public void playerWantsToAcceptTheReward(String nickname, Boolean choice) {
+
+        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
+                .Builder()
+                .setHasAcceptedTheReward(choice)
+                .build();
+
+        gameModel.getCurrAdventureCard().play(playerChoice);
+
+    }
+
+    @Override
     public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException {
 
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
 
         List<Engine> engines = doubleEnginesCoords
-                        .stream()
-                        .map(shipBoard::getComponentAt)
-                        .map(Engine.class::cast)
-                        .toList();
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Engine.class::cast)
+                .toList();
 
         List<BatteryBox> batteryBoxes = batteryBoxesCoords
                 .stream()
@@ -209,6 +218,140 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 .build();
 
         gameModel.getCurrAdventureCard().play(playerChoice);
+    }
+
+
+    @Override
+    public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException{
+
+        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+
+        List<Cannon> cannons = doubleCannonsCoords
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Cannon.class::cast)
+                .toList();
+
+        List<BatteryBox> batteryBoxes = batteryBoxesCoords
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(BatteryBox.class::cast)
+                .toList();
+
+        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenDoubleCannons(cannons)
+                .setChosenBatteryBoxes(batteryBoxes)
+                .build();
+
+        gameModel.getCurrAdventureCard().play(playerChoice);
+    }
+
+    @Override
+    public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords) throws RemoteException{
+        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+
+        List<Cabin> cabins = cabinCoords
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Cabin.class::cast)
+                .toList();
+
+        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenCabins(cabins)
+                .build();
+
+        gameModel.getCurrAdventureCard().play(playerChoice);
+    }
+
+    @Override
+    public void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords) throws RemoteException {
+
+        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+        BatteryBox batteryBox = null;
+        Shield shield = null;
+
+        // check whether the coordinates are valid
+        if (!shieldCoords.isCoordinateInvalid() && !batteryBoxCoords.isCoordinateInvalid()) {
+            shield = ((Shield) shipBoard.getComponentAt(shieldCoords));
+            batteryBox = ((BatteryBox) shipBoard.getComponentAt(batteryBoxCoords));
+        }
+
+        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenBatteryBox(batteryBox)
+                .setChosenShield(shield)
+                .build();
+
+        gameModel.getCurrAdventureCard().play(choice);
+    }
+
+    @Override
+    public void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords) {
+
+        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+        BatteryBox batteryBox = null;
+        DoubleCannon doubleCannon = null;
+
+        // check whether the coordinates are valid
+        if (!doubleCannonCoords.isCoordinateInvalid() && !batteryBoxCoords.isCoordinateInvalid()) {
+            doubleCannon = ((DoubleCannon) shipBoard.getComponentAt(doubleCannonCoords));
+            batteryBox = ((BatteryBox) shipBoard.getComponentAt(batteryBoxCoords));
+        }
+
+        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenBatteryBox(batteryBox)
+                .setChosenDoubleCannon(doubleCannon)
+                .build();
+
+        gameModel.getCurrAdventureCard().play(choice);
+    }
+
+    @Override
+    public void playerHandleBigShot(String nickname) throws RemoteException {
+
+        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        gameModel.getCurrAdventureCard().play(choice);
+
+    }
+
+    @Override
+    public void playerChoseStorage(String nickname, Coordinates storageCoords) throws RemoteException {
+
+        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+        Storage storage = storageCoords.isCoordinateInvalid() ? null : ((Storage) shipBoard.getComponentAt(storageCoords));
+
+        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenStorage(storage)
+                .build();
+
+        gameModel.getCurrAdventureCard().play(choice);
+    }
+
+    @Override
+    public void spreadEpidemic(String nickname) throws RemoteException{
+
+        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        gameModel.getCurrAdventureCard().play(choice);
+    }
+
+    @Override
+    public void stardustEvent(String nickname) throws RemoteException{
+
+        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        gameModel.getCurrAdventureCard().play(choice);
     }
 
 }

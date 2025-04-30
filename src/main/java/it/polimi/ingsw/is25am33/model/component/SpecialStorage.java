@@ -26,4 +26,13 @@ public class SpecialStorage extends Storage {
     public SpecialStorage(Map<Direction, ConnectorType> connectors, int maxCapacity) {
         super(connectors, maxCapacity);
     }
+
+    @Override
+    public String toString() {
+        return "SpecialStorage{" +
+                ", connectors = " + this.getConnectors() +
+                ", maxCapacity = " + this.getMaxCapacity() +
+                '}';
+    }
+
 }

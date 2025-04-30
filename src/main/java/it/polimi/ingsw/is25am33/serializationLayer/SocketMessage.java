@@ -1,8 +1,6 @@
 package it.polimi.ingsw.is25am33.serializationLayer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
@@ -23,6 +21,7 @@ public class SocketMessage {
     private String paramGameId;
     private Coordinates paramCoordinates;
     private List<Coordinates> paramActivableCoordinates;
+    private List<Coordinates> paramCabinCoordinates;
     private List<Coordinates> paramBatteryBoxCoordinates;
     private List<GameInfo> paramGameInfo;
     private Integer paramInt;
@@ -47,10 +46,10 @@ public class SocketMessage {
         this.paramGameId = "";
         this.paramActivableCoordinates = new ArrayList<>();
         this.paramBatteryBoxCoordinates = new ArrayList<>();
+        this.paramCabinCoordinates = new ArrayList<>();
     }
 
     public SocketMessage() {
-
     }
 
     public List<Coordinates> getParamActivableCoordinates() {
@@ -61,9 +60,12 @@ public class SocketMessage {
         this.paramActivableCoordinates = paramActivableCoordinates;
     }
 
-    public List<Coordinates> getParamBatteryBoxCoordinates() {
-        return paramBatteryBoxCoordinates;
+    public List<Coordinates> getParamCabinCoordinates(){ return paramCabinCoordinates; }
+
+    public void setParamCabinCoordinates(List<Coordinates> paramCabinCoordinates){
+        this.paramCabinCoordinates = paramCabinCoordinates;
     }
+    public List<Coordinates> getParamBatteryBoxCoordinates() { return paramBatteryBoxCoordinates; }
 
     public void setParamBatteryBoxCoordinates(List<Coordinates> paramBatteryBoxCoordinates) {
         this.paramBatteryBoxCoordinates = paramBatteryBoxCoordinates;

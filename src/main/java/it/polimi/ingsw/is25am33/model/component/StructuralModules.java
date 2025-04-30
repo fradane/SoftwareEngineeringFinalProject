@@ -26,4 +26,12 @@ public class StructuralModules extends Component {
     public StructuralModules(Map<Direction, ConnectorType> connectors) {
         super(connectors);
     }
+
+    @Override
+    public String toString() {
+        return "StructuralModules{" +
+                ", connectors = " + this.getConnectors() +
+                '}';
+    }
+
 }

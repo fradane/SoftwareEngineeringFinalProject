@@ -30,6 +30,14 @@ public class Cannon extends Component implements Rotatable {
         super(connectors);
     }
 
+    @Override
+    public String toString() {
+        return "Cannon {" +
+                ", connectors = " + this.getConnectors() +
+                ", fireDirection = " + fireDirection +
+                '}';
+    }
+
     /**
      * Returns the current firing direction of the cannon.
      *

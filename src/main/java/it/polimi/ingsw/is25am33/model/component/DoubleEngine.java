@@ -27,4 +27,13 @@ public class DoubleEngine extends Engine implements Activable {
     public DoubleEngine(Map<Direction, ConnectorType> connectors) {
         super(connectors);
     }
+
+    @Override
+    public String toString() {
+        return "DoubleEngine{" +
+                ", connectors = " + this.getConnectors() +
+                ", powerDirection = " + this.getPowerDirection() +
+                '}';
+    }
+
 }

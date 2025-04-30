@@ -31,13 +31,19 @@ import java.util.*;
 })
 public abstract class Component implements Serializable {
 
-    /** Current operational state of the component. */
-    private ComponentState currState = ComponentState.HIDDEN ;
+    /**
+     * Current operational state of the component.
+     */
+    private ComponentState currState = ComponentState.HIDDEN;
 
-    /** Current rotation/orientation of the component. */
+    /**
+     * Current rotation/orientation of the component.
+     */
     private int rotation = 0;
 
-    /** Map associating directions with their respective connector types. */
+    /**
+     * Map associating directions with their respective connector types.
+     */
     private Map<Direction, ConnectorType> connectors;
 
     protected String type;
@@ -45,7 +51,8 @@ public abstract class Component implements Serializable {
     /**
      * Default constructor for {@code Component}.
      */
-    public Component() {}
+    public Component() {
+    }
 
     /**
      * Constructs a Component with specified directional connectors.
@@ -134,5 +141,4 @@ public abstract class Component implements Serializable {
     public void insertInComponentsMap(Map<Class<?>, List<Object>> map) {
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
     }
-
 }
