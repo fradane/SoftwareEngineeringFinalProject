@@ -9,7 +9,6 @@ import java.io.Serializable;
 
 public abstract class DangerousObj implements Serializable {
 
-public abstract class DangerousObj {
     private final Direction direction;
     private int coordinate;
 

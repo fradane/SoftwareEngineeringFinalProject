@@ -117,4 +117,24 @@ public class Planets extends AdventureCard implements PlayerMover {
         }
     }
 
+    @Override
+    public String toString() {
+        /*List<String> leftBox = String.format("""
+           ┌────────────────────────────┐
+           │          Planets           │
+           ├────────────────────────────┤
+           │ Planets:           x%-2d     │
+           │ Steps Back:        x%-2d     │
+           └────────────────────────────┘
+           
+           """, availablePlanets.size(), stepsBack);
+        return null;*/
+        return null;
+    }
+
+    public static void main(String[] args) {
+        AdventureCard x = new SlaveTraders();
+        System.out.println(x);
+    }
+
 }

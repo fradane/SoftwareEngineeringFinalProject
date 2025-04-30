@@ -132,4 +132,9 @@ public abstract class Component implements Serializable {
     public void insertInComponentsMap(Map<Class<?>, List<Object>> map) {
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
     }
+
+    public abstract String getLabel();
+
+    public abstract String getMainAttribute();
+
 }

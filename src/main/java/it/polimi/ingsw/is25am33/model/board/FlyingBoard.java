@@ -154,7 +154,7 @@ public abstract class FlyingBoard {
      */
     public List<Player> getCurrentRanking() {
         return ranking.entrySet().stream()
-                .sorted(Map.Entry.<Player, Integer>comparingByValue().reversed())
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
     }

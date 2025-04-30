@@ -75,7 +75,7 @@ class ShieldTest {
 
         shield.turnOn(batteryBox);
 
-        assertEquals(1, batteryBox.getAvailableBattery(), "Available battery");
+        assertEquals(1, batteryBox.getRemainingBatteries(), "Available battery");
 
     }
 

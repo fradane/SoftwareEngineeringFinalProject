@@ -35,7 +35,7 @@ class BatteryBoxTest {
 
         batteryBox.useBattery();
         batteryBox.useBattery();
-        assertEquals(0,batteryBox.getAvailableBattery(),"Number of available battery");
+        assertEquals(0,batteryBox.getRemainingBatteries(),"Number of available battery");
 
         Exception exception= assertThrows(Exception.class,batteryBox::useBattery);
         assertEquals("empty battery box", exception.getMessage());

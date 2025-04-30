@@ -4,6 +4,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,12 +39,29 @@ public class Shield extends Component implements Activable, Rotatable {
 
     @Override
     public String toString() {
-        return "Shield{" +
-                ", connectors = " + this.getConnectors() +
-                ", direction = " + direction +
-                '}';
-    }
+        String north = getConnectors().get(Direction.NORTH) != null
+                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
+                : " ";
+        String south = getConnectors().get(Direction.SOUTH) != null
+                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
+                : " ";
+        String west  = getConnectors().get(Direction.WEST) != null
+                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
+                : " ";
+        String east  = getConnectors().get(Direction.EAST) != null
+                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
+                : " ";
 
+        return String.format("""
+            Shield
+            +---------+
+            |    %s    |
+            | %s     %s |
+            |    %s    |
+            +---------+
+            powerDirection: %s
+            """, north, west, east, south, direction);
+    }
 
     /**
      * Gets the active shield directions.
@@ -55,21 +73,29 @@ public class Shield extends Component implements Activable, Rotatable {
     }
 
     /**
-     * Rotates the shield's active directions based on its rotation.
-     */
-    public void setDirection() {
-        for (int i = 0; i < getRotation() % 4; i++) {
-            this.direction.set(0, shiftDirection(this.direction.get(0)));
-            this.direction.set(1, shiftDirection(this.direction.get(1)));
-        }
-    }
-
-    /**
      * Changes the shield's orientation and updates its active directions accordingly.
      */
     @Override
     public void rotate() {
         super.rotate();
-        setDirection();
+        direction.replaceAll(this::shiftDirection);
     }
+
+    @Override
+    public String getLabel() {
+        return "SLD";
+    }
+
+    @Override
+    public String getMainAttribute() {
+        return direction.stream()
+                .map(direction -> switch (direction) {
+                    case NORTH -> "N";
+                    case SOUTH -> "S";
+                    case WEST -> "W";
+                    case EAST -> "E";
+                })
+                .collect(Collectors.joining());
+    }
+
 }

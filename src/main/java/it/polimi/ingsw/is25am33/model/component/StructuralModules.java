@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.component;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
+import java.util.EnumMap;
 import java.util.Map;
 
 /**
@@ -29,9 +30,38 @@ public class StructuralModules extends Component {
 
     @Override
     public String toString() {
-        return "StructuralModules{" +
-                ", connectors = " + this.getConnectors() +
-                '}';
+        String north = getConnectors().get(Direction.NORTH) != null
+                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
+                : " ";
+        String south = getConnectors().get(Direction.SOUTH) != null
+                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
+                : " ";
+        String west  = getConnectors().get(Direction.WEST) != null
+                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
+                : " ";
+        String east  = getConnectors().get(Direction.EAST) != null
+                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
+                : " ";
+
+        return String.format("""
+            StructuralModules
+            +---------+
+            |    %s    |
+            | %s     %s |
+            |    %s    |
+            +---------+
+            MaxCapacity: %d
+            """, north, west, east, south);
+    }
+
+    @Override
+    public String getLabel() {
+        return "STR";
+    }
+
+    @Override
+    public String getMainAttribute() {
+        return "";
     }
 
 }

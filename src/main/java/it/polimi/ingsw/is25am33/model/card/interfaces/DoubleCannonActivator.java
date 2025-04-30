@@ -15,7 +15,7 @@ public interface DoubleCannonActivator {
             throw new IllegalArgumentException("The number of engines does not match the number of battery boxes");
 
         chosenBatteryBoxes.stream().distinct().forEach(box -> {
-            if (Collections.frequency(chosenDoubleCannons, box) > box.getAvailableBattery())
+            if (Collections.frequency(chosenDoubleCannons, box) > box.getRemainingBatteries())
                 throw new IllegalArgumentException("The number of required batteries is not enough");
         });
 

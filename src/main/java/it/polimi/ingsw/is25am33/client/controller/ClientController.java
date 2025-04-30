@@ -7,17 +7,13 @@ import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
-import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 
@@ -432,13 +428,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws RemoteException{
-        clientModel.setCurrentDangerousObj(dangerousObj);
+        clientModel.setCurrDangerousObj(dangerousObj);
         view.showDangerousObj();
     }
 
     public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws RemoteException{
         clientModel.setCurrentPlayer(nickname);
-        view.showMessage("Current player is: "+ nickname);
+        view.showMessage("Current player is: " + nickname);
     }
 
     public void notifyCurrAdventureCard(String nickname, AdventureCard adventureCard) throws RemoteException{
@@ -450,11 +446,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.setVisibleComponents(visibleComponents);
     }
 
-    public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException{
+    public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
         clientModel.getShipboards().get(nickname).getShipBoardMatrix()[coordinates.getX()][coordinates.getY()]=component;
     }
 
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException{
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException {
         if (clientModel.getShipboards().containsValue(nickname)) {
             ShipBoardClient shipBoardClient= clientModel.getShipboards().get(nickname);
             shipBoardClient.setShipBoardMatrix(shipMatrix);
@@ -464,15 +460,15 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void notifyChooseComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws RemoteException{
+    public void notifyChooseComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws RemoteException {
         clientModel.getShipboards().get(nickname).setFocusedComponent(focusedComponent);
     }
 
-    public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws RemoteException{
+    public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws RemoteException {
         clientModel.getShipboards().get(nickname).setFocusedComponent(null);
     }
 
-    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ){
+    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) throws RemoteException{
         clientModel.getShipboards().get(nickname).getBookedComponent().add(component);
     }
 
@@ -482,16 +478,16 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         else
             clientModel.getCredits().put(nickname, credits);
 
-        view.showMessage(nickname+ "has "+credits + "credits.");
+        view.showMessage(nickname + " has " + credits + " credits.");
     }
 
     public void notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException{
-        clientModel.setFlyingBoard(flyingBoard);
+        //clientModel.setFlyingBoard(flyingBoard);
     }
 
     public void notifyEliminatedPlayer(String nicknameToNotify, String nickname, FlyingBoard flyingBoard) throws RemoteException{
-        clientModel.setFlyingBoard(flyingBoard);
-        view.showMessage(nickname+"was eliminated.");
+        //clientModel.setFlyingBoard(flyingBoard);
+        view.showMessage(nickname + " was eliminated.");
     }
 
     public void notifyCardState(String nickname, CardState cardState) throws RemoteException{
@@ -522,15 +518,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     }
 
-
-
-
     public void cardPhase() {
 
         while(clientModel.getGameState() == GameState.PLAY_CARD) {
 
             if (clientModel.isMyTurn())
-                clientModel.getCardState().showRelatedMenu(view).accept(serverController, nickname);
+                clientModel.getCurrCardState().showRelatedMenu(view).accept(serverController, nickname);
 
         }
 

@@ -9,7 +9,7 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -21,7 +21,7 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -33,7 +33,7 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -45,7 +45,7 @@
       "WEST": "SINGLE"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -57,7 +57,7 @@
       "WEST": "SINGLE"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -69,7 +69,7 @@
       "WEST": "SINGLE"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -81,7 +81,7 @@
       "WEST": "DOUBLE"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -93,7 +93,7 @@
       "WEST": "UNIVERSAL"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -105,7 +105,7 @@
       "WEST": "UNIVERSAL"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -117,7 +117,7 @@
       "WEST": "UNIVERSAL"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -129,7 +129,7 @@
       "WEST": "UNIVERSAL"
     },
     "maxBatteryCapacity": 2,
-    "availableBattery": 2
+    "remainingBatteries": 2
   },
 
   {
@@ -141,7 +141,7 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 3,
-    "availableBattery": 3
+    "remainingBatteries": 3
   },
 
   {
@@ -153,7 +153,7 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 3,
-    "availableBattery": 3
+    "remainingBatteries": 3
   },
 
   {
@@ -165,7 +165,7 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 3,
-    "availableBattery": 3
+    "remainingBatteries": 3
   },
 
   {
@@ -177,7 +177,7 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 3,
-    "availableBattery": 3
+    "remainingBatteries": 3
   },
 
   {
@@ -189,7 +189,7 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 3,
-    "availableBattery": 3
+    "remainingBatteries": 3
   },
 
   {
@@ -201,7 +201,7 @@
       "WEST": "SINGLE"
     },
     "maxBatteryCapacity": 3,
-    "availableBattery": 3
+    "remainingBatteries": 3
   }
 
 ]

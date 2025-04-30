@@ -32,13 +32,19 @@ public class Stardust extends AdventureCard implements PlayerMover {
 
     }
 
+    @Override
+    public String toString() {
+        return """
+           ┌────────────────────────┐
+           │       Stardust         │
+           └────────────────────────┘
+           """;
+    }
+
     private void moveNotCorrectlyAssembledShips() {
 
         gameModel.getCurrRanking()
                 .forEach(p -> movePlayer(gameModel.getFlyingBoard(), p, p.getPersonalBoard().countExposed() * -1));
-
         setCurrState( CardState.END_OF_CARD);
-
     }
-
 }

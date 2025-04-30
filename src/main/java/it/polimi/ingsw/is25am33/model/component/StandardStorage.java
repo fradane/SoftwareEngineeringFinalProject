@@ -4,6 +4,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
+import java.util.EnumMap;
 import java.util.Map;
 
 /**
@@ -30,12 +31,29 @@ public class StandardStorage extends Storage {
 
     @Override
     public String toString() {
-        return "StandardStorage{" +
-                ", connectors = " + this.getConnectors() +
-                ", maxCapacity = " + this.getMaxCapacity() +
-                '}';
-    }
+        String north = getConnectors().get(Direction.NORTH) != null
+                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
+                : " ";
+        String south = getConnectors().get(Direction.SOUTH) != null
+                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
+                : " ";
+        String west  = getConnectors().get(Direction.WEST) != null
+                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
+                : " ";
+        String east  = getConnectors().get(Direction.EAST) != null
+                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
+                : " ";
 
+        return String.format("""
+            StandardStorage
+            +---------+
+            |    %s    |
+            | %s     %s |
+            |    %s    |
+            +---------+
+            MaxCapacity: %d
+            """, north, west, east, south, getMaxCapacity());
+    }
 
     /**
      * Adds a {@code CargoCube} to the storage, ensuring that only non-red cubes are added.
@@ -49,4 +67,10 @@ public class StandardStorage extends Storage {
         }
         getStockedCubes().add(cube);
     }
+
+    @Override
+    public String getLabel() {
+        return "STS";
+    }
+
 }

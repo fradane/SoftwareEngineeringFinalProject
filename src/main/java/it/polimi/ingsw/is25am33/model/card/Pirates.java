@@ -152,7 +152,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
             if (chosenShield != null && chosenBatteryBox != null) {
 
-                if (chosenBatteryBox.getAvailableBattery() == 0)
+                if (chosenBatteryBox.getRemainingBatteries() == 0)
                     throw new IllegalStateException("Not enough batteries");
                 if (chosenShield.getDirections().stream().anyMatch(d -> d == currShot.getDirection()))
                     throw new IllegalArgumentException("Not correct direction");

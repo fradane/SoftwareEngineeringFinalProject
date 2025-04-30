@@ -101,7 +101,7 @@ public class MeteoriteStorm extends AdventureCard {
 
             if (chosenShield != null && chosenBatteryBox != null) {
 
-                if (chosenBatteryBox.getAvailableBattery() == 0)
+                if (chosenBatteryBox.getRemainingBatteries() == 0)
                     throw new IllegalStateException("Not enough batteries");
                 if (chosenShield.getDirections().stream().anyMatch(d -> d == currMeteorite.getDirection()))
                     throw new IllegalArgumentException("Not correct direction");
@@ -135,7 +135,7 @@ public class MeteoriteStorm extends AdventureCard {
 
             if (chosenDoubleCannon != null && chosenBatteryBox != null) {
 
-                if (chosenBatteryBox.getAvailableBattery() == 0)
+                if (chosenBatteryBox.getRemainingBatteries() == 0)
                     throw new IllegalStateException("Not enough batteries");
                 if (chosenDoubleCannon.getFireDirection() != currMeteorite.getDirection())
                     throw new IllegalArgumentException("Not correct direction");

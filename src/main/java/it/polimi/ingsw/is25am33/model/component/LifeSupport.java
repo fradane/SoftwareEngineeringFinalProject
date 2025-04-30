@@ -4,6 +4,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
+import java.util.EnumMap;
 import java.util.Map;
 
 /**
@@ -36,12 +37,29 @@ public class LifeSupport extends Component {
 
     @Override
     public String toString() {
-        return "LifeSupport {" +
-                ", connectors = " + this.getConnectors() +
-                ", lifeSupportColor = " + lifeSupportColor +
-                '}';
-    }
+        String north = getConnectors().get(Direction.NORTH) != null
+                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
+                : " ";
+        String south = getConnectors().get(Direction.SOUTH) != null
+                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
+                : " ";
+        String west  = getConnectors().get(Direction.WEST) != null
+                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
+                : " ";
+        String east  = getConnectors().get(Direction.EAST) != null
+                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
+                : " ";
 
+        return String.format("""
+            LifeSupport
+            +---------+
+            |    %s    |
+            | %s     %s |
+            |    %s    |
+            +---------+
+            lifeSupportColor: %s
+            """, north, west, east, south, lifeSupportColor);
+    }
 
     /**
      * Gets the color of the life support system.
@@ -60,5 +78,16 @@ public class LifeSupport extends Component {
     public void setLifeSupportColor(ColorLifeSupport color) {
         this.lifeSupportColor = color;
     }
+
+    @Override
+    public String getLabel() {
+        return "LSP";
+    }
+
+    @Override
+    public String getMainAttribute() {
+        return lifeSupportColor.equals(ColorLifeSupport.PURPLE) ? "P" : "B";
+    }
+
 }
 

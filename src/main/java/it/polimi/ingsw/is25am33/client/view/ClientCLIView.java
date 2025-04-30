@@ -1,13 +1,13 @@
 package it.polimi.ingsw.is25am33.client.view;
 
 import it.polimi.ingsw.is25am33.client.ClientModel;
+import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.Planets;
-import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -22,6 +22,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * The ClientCLIView class provides a command-line interface for interactions with the client-side
@@ -42,7 +43,6 @@ public class ClientCLIView implements ClientView {
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BLUE = "\u001B[34m";
-
 
 
     public ClientCLIView(ClientModel clientModel) {
@@ -352,7 +352,7 @@ public class ClientCLIView implements ClientView {
     public void showDangerousObj(){
         System.out.println("===================================");
         System.out.println(" [Dangerous Object Attack] ");
-        System.out.println(" New Dangerous Object: " + clientModel.getCurrentDangerousObj().toString());
+        System.out.println(" New Dangerous Object: " + clientModel.getCurrDangerousObj().toString());
         System.out.println("===================================");
     }
 
@@ -668,6 +668,26 @@ public class ClientCLIView implements ClientView {
      */
     @Override
     public void showShipBoard(Component[][] shipBoard, String shipBoardOwnerNickname) {
+
+        String[] legendLines = {
+                "LEGEND - component label and explanation on attributes:",
+                "",
+                "• BBX = battery box - number of remaining batteries",
+                "• CAB = cabin - number and type of members",
+                "• CAN = cannon - fire direction",
+                "• 2CN = double cannons - fire direction",
+                "• 2EN = double engines - power direction",
+                "• ENG = engine - power direction",
+                "• LSP = life support - type of life support",
+                "• MCB = main cabin - number and type of members",
+                "• SLD = shield - covered directions",
+                "• SPS = special storage - left storages",
+                "• STS = standard storage - left storages",
+                "• STR = structural modules"
+        };
+
+        int legendIndex = 0;
+
         System.out.println("Here's the ship board of " + shipBoardOwnerNickname + ":");
 
         // Stampa numeri delle colonne
@@ -675,6 +695,7 @@ public class ClientCLIView implements ClientView {
         for (int col = 4; col <= 10; col++) {
             System.out.printf("   %2d     ", col);
         }
+
         System.out.println();
 
         // TODO generalizzare il caso per il livello 1
@@ -698,20 +719,24 @@ public class ClientCLIView implements ClientView {
                             break;
 
                         case 2: System.out.printf("| %1s %3s %1s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.WEST).fromConnectorTypeToValue()),
-                                Level2ShipBoard.isOutsideShipboard(i, j) ? (ANSI_RED + "out" + ANSI_RESET) : (cell == null ? "" : "val"),
+                                Level2ShipBoard.isOutsideShipboard(i, j) ? (ANSI_RED + "OUT" + ANSI_RESET) : (cell == null ? "" : cell.getLabel()),
                                 Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.EAST).fromConnectorTypeToValue()));
                             break;
 
-                        case 3: System.out.printf("|    %1s    ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()));
+                        case 3: System.out.printf("|    %1s %2s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()),
+                                Level2ShipBoard.isOutsideShipboard(i, j) ? "" : (cell == null ? "" : (ANSI_BLUE + (cell.getMainAttribute().length() == 2 ? "" : " ") + cell.getMainAttribute() + ANSI_RESET)));
                             break;
                     }
                 }
 
                 if (line == 0) {
-                    System.out.println("+");
+                    System.out.print("+");
                 } else {
-                    System.out.println("|");
+                    System.out.print("|");
                 }
+
+                System.out.println(legendIndex <= legendLines.length - 1 ? ("\t\t" + legendLines[legendIndex++]) : "");
+
             }
         }
 
@@ -819,13 +844,13 @@ public class ClientCLIView implements ClientView {
         System.out.println();
         List<Coordinates> doubleEnginesCoordinates = new ArrayList<>();
         List<Coordinates> batteryBoxesCoordinates = new ArrayList<>();
-        ShipBoard shipBoard = clientModel.getShipBoard();
+        ShipBoardClient shipBoard = getMyShipBoard();
 
         while(true) {
 
             Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double engines you would like to activate or press enter to skip: ");
             if (coords == null) break;
-            if (shipBoard.getDoubleEngines().contains(shipBoard.getComponentAt(coords)))
+            if (shipBoard.getComponentByType(DoubleEngine.class).contains(shipBoard.getComponentAt(coords)))
                 doubleEnginesCoordinates.add(coords);
             else {
                 showMessage("The selected coordinates are not related to any double engine, try again");
@@ -839,7 +864,7 @@ public class ClientCLIView implements ClientView {
                     showMessage("You have to select a battery box after choosing a double engine.");
                     continue;
                 }
-                if (shipBoard.getBatteryBoxes().contains(shipBoard.getComponentAt(batterycoords))) {
+                if (shipBoard.getComponentByType(BatteryBox.class).contains(shipBoard.getComponentAt(batterycoords))) {
                     batteryBoxesCoordinates.add(batterycoords);
                     break;
                 }
@@ -855,6 +880,10 @@ public class ClientCLIView implements ClientView {
                 throw new RuntimeException(e);
             }
         };
+    }
+
+    private ShipBoardClient getMyShipBoard() {
+        return clientModel.getShipboards().get(clientModel.getMyNickname());
     }
 
     private void showMyShipBoard() {
@@ -897,13 +926,13 @@ public class ClientCLIView implements ClientView {
         System.out.println();
         List<Coordinates> doubleCannonsCoordinates = new ArrayList<>();
         List<Coordinates> batteryBoxesCoordinates = new ArrayList<>();
-        ShipBoard shipBoard = clientModel.getShipBoard();
+        ShipBoardClient myShipBoard = getMyShipBoard();
 
         while(true) {
 
             Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double cannon you would like to activate or press enter to skip: ");
             if (coords == null) break;
-            if (shipBoard.getDoubleCannons().contains(shipBoard.getComponentAt(coords)))
+            if (myShipBoard.getComponentByType(DoubleCannon.class).contains(myShipBoard.getComponentAt(coords)))
                 doubleCannonsCoordinates.add(coords);
             else {
                 showMessage("The selected coordinates are not related to any double cannons, try again");
@@ -917,7 +946,7 @@ public class ClientCLIView implements ClientView {
                     showMessage("You have to select a battery box after choosing a double engine.");
                     continue;
                 }
-                if (shipBoard.getBatteryBoxes().contains(shipBoard.getComponentAt(batteryCoords))) {
+                if (myShipBoard.getComponentByType(BatteryBox.class).contains(myShipBoard.getComponentAt(batteryCoords))) {
                     batteryBoxesCoordinates.add(batteryCoords);
                     break;
                 }
@@ -940,7 +969,7 @@ public class ClientCLIView implements ClientView {
         this.showMyShipBoard();
         System.out.println();
         List<Coordinates> cabinCoordinates = new ArrayList<>();
-        ShipBoard shipBoard = clientModel.getShipBoard();
+        ShipBoardClient myShipBoard = getMyShipBoard();
 
         while (true) {
             Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) of the cabins from which you want to remove the crew members: ");
@@ -948,7 +977,7 @@ public class ClientCLIView implements ClientView {
                 showMessage("You have to select cabins");
                 continue;
             }
-            if (shipBoard.getCabin().contains(shipBoard.getComponentAt(coords))) {
+            if (myShipBoard.getComponentByType(Cabin.class).contains(myShipBoard.getComponentAt(coords))) {
                 cabinCoordinates.add(coords);
                 break;
             } else {
@@ -971,7 +1000,7 @@ public class ClientCLIView implements ClientView {
 
         showMessage(clientModel.getCurrDangerousObj().getDangerousObjType() + " incoming!!!");
         showMessage("Choose how to defend from it");
-        ShipBoard shipBoard = clientModel.getShipBoard();
+        ShipBoardClient myShipBoard = getMyShipBoard();
 
         while (true) {
             Coordinates activableCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the shield you would like to activate or press enter if you don't need to activate one: ");
@@ -984,13 +1013,13 @@ public class ClientCLIView implements ClientView {
                     }
                 };
 
-            if(shipBoard.getShields().contains(shipBoard.getComponentAt(activableCoords))) {
+            if(myShipBoard.getComponentByType(Shield.class).contains(myShipBoard.getComponentAt(activableCoords))) {
                 showMessage("The selected coordinates are not related to any shield, try again");
                 continue;
             }
 
             Coordinates batteryBoxCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
-            if(shipBoard.getBatteryBoxes().contains(shipBoard.getComponentAt(batteryBoxCoords))) {
+            if(myShipBoard.getComponentByType(BatteryBox.class).contains(myShipBoard.getComponentAt(batteryBoxCoords))) {
                 showMessage("The selected coordinates are not related to any battery box, try again");
                 continue;
             }
@@ -1011,7 +1040,7 @@ public class ClientCLIView implements ClientView {
 
         showMessage(clientModel.getCurrDangerousObj().getDangerousObjType() + " incoming!!!");
         showMessage("Choose how to defend from it");
-        ShipBoard shipBoard = clientModel.getShipBoard();
+        ShipBoardClient myShipBoard = getMyShipBoard();
 
         while (true) {
             Coordinates doubleCannonCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double cannon you would like to activate or press enter if you don't need to activate one: ");
@@ -1024,13 +1053,13 @@ public class ClientCLIView implements ClientView {
                     }
                 };
 
-            if(shipBoard.getDoubleCannons().contains(shipBoard.getComponentAt(doubleCannonCoords))) {
+            if(myShipBoard.getComponentByType(DoubleCannon.class).contains(myShipBoard.getComponentAt(doubleCannonCoords))) {
                 showMessage("The selected coordinates are not related to any double cannon, try again");
                 continue;
             }
 
             Coordinates batteryBoxCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
-            if(shipBoard.getBatteryBoxes().contains(shipBoard.getComponentAt(batteryBoxCoords))) {
+            if(myShipBoard.getComponentByType(BatteryBox.class).contains(myShipBoard.getComponentAt(batteryBoxCoords))) {
                 showMessage("The selected coordinates are not related to any battery box, try again");
                 continue;
             }
@@ -1093,9 +1122,14 @@ public class ClientCLIView implements ClientView {
                     throw new RuntimeException(e);
                 }
             };
-            ShipBoard shipBoard = clientModel.getShipBoard();
 
-            if (shipBoard.getStorages().contains(shipBoard.getComponentAt(coords)))
+            ShipBoardClient myShipBoard = getMyShipBoard();
+
+            List<Component> storages = new ArrayList<>();
+            storages.addAll(myShipBoard.getComponentByType(SpecialStorage.class));
+            storages.addAll(myShipBoard.getComponentByType(StandardStorage.class));
+
+            if (storages.contains(myShipBoard.getComponentAt(coords)))
                 return (server, nickname) -> {
                     try {
                         server.playerChoseStorage(nickname, coords);
@@ -1114,9 +1148,13 @@ public class ClientCLIView implements ClientView {
 
         while (true){
             Coordinates coords = readCoordinatesFromUserInput("Choose the coordinates (row column) of the storage where you would like to remove one cargo cube: ");
-            ShipBoard shipBoard = clientModel.getShipBoard();
+            ShipBoardClient myShipBoard = getMyShipBoard();
 
-            if (shipBoard.getStorages().contains(shipBoard.getComponentAt(coords)))
+            List<Component> storages = new ArrayList<>();
+            storages.addAll(myShipBoard.getComponentByType(SpecialStorage.class));
+            storages.addAll(myShipBoard.getComponentByType(StandardStorage.class));
+
+            if (storages.contains(myShipBoard.getComponentAt(coords)))
                 return (server, nickname) -> {
                     try {
                         server.playerChoseStorage(nickname, coords);
@@ -1128,6 +1166,43 @@ public class ClientCLIView implements ClientView {
                 showMessage("The selected coordinates are not related to any storage, try again");
         }
 
+    }
+
+    public void showCurrentRanking() {
+        System.out.println("==========  Ranking  ==========");
+
+        List<String> sortedRanking = clientModel.getSortedRanking();
+
+        int topScore = clientModel.getRanking().get(sortedRanking.getFirst());
+
+        for (String player : sortedRanking) {
+            int playerScore = clientModel.getRanking().get(player);
+            int diff = topScore - playerScore;
+            System.out.printf("%-20s | %-10d%n", player, -diff);
+        }
+
+        System.out.println("===============================");
+        System.out.println("Legend: the score shows how many points behind the leader each player is.\n");
+    }
+
+    public static void main(String[] args) {
+        ClientModel clientModel = new ClientModel();
+        clientModel.updatePlayerPosition("pippo", 30);
+        clientModel.updatePlayerPosition("pluto", 15);
+        clientModel.updatePlayerPosition("alice", 1);
+        ClientCLIView cli = new ClientCLIView(clientModel);
+
+        cli.showCurrentRanking();
+        Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
+        connectors.put(Direction.NORTH, ConnectorType.SINGLE);
+        connectors.put(Direction.SOUTH, ConnectorType.DOUBLE);
+        connectors.put(Direction.WEST, ConnectorType.EMPTY);
+        connectors.put(Direction.EAST, ConnectorType.UNIVERSAL);
+
+        Component[][] griglia = new Component[12][12];
+        griglia[7][7] = new BatteryBox(connectors, 3);
+        griglia[7][8] = new Cabin(connectors);
+        cli.showShipBoard(griglia, "pippo");
     }
 
 }

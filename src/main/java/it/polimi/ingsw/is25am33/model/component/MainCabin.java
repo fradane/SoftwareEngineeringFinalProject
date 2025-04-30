@@ -35,15 +35,6 @@ public class MainCabin extends Cabin implements Serializable {
         this.color = color;
     }
 
-    @Override
-    public String toString() {
-        return "MainCabin {" +
-                ", connectors = " + this.getConnectors() +
-                ", MainCabinColor = " + color +
-                '}';
-    }
-
-
     /**
      * Gets the color of the main cabin.
      *
@@ -51,5 +42,10 @@ public class MainCabin extends Cabin implements Serializable {
      */
     public PlayerColor getColor() {
         return color;
+    }
+
+    @Override
+    public String getLabel() {
+        return "MCB";
     }
 }

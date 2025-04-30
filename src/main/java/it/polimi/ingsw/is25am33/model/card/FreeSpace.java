@@ -5,7 +5,6 @@ import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Engine;
 
-import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,7 +45,7 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
             throw new IllegalArgumentException("The number of engines does not match the number of battery boxes");
 
         chosenBatteryBoxes.stream().distinct().forEach(box -> {
-            if (Collections.frequency(chosenBatteryBoxes, box) > box.getAvailableBattery())
+            if (Collections.frequency(chosenBatteryBoxes, box) > box.getRemainingBatteries())
                 throw new IllegalArgumentException("The number of required batteries is not enough");
         });
 

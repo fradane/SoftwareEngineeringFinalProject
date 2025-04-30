@@ -143,4 +143,9 @@ public abstract class Storage extends Component {
     public boolean isFull() {
         return stockedCubes.size() == maxCapacity;
     }
+
+    @Override
+    public String getMainAttribute() {
+        return Integer.toString(maxCapacity - stockedCubes.size());
+    }
 }
