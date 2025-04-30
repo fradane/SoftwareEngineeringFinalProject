@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
 
 import java.io.Serializable;
 import java.util.*;
@@ -86,13 +85,6 @@ public abstract class Component implements Serializable {
     }
 
     /**
-     * Increments the rotation of this component by one unit.
-     */
-    public void rotate() {
-        this.rotation = getRotation() + 1;
-    }
-
-    /**
      * Retrieves the map of connectors for this component, associating directions to connector types.
      *
      * @return the map of directional connectors
@@ -111,16 +103,15 @@ public abstract class Component implements Serializable {
      * <p>If rotation is a multiple of 4 (original orientation), no changes occur. Otherwise,
      * connectors' positions are rotated accordingly.</p>
      */
-    public void changeOrientation() {
-        int rotation = getRotation() % 4;
-        if (rotation != 0) {
-            List<Direction> keys = new ArrayList<>(connectors.keySet());
-            List<ConnectorType> values = new ArrayList<>(connectors.values());
-            Collections.rotate(values, rotation);
-            for (int i = 0; i < keys.size(); i++) {
-                connectors.put(keys.get(i), values.get(i));
-            }
+    public void rotate() {
+
+        List<Direction> keys = new ArrayList<>(connectors.keySet());
+        List<ConnectorType> values = new ArrayList<>(connectors.values());
+        Collections.rotate(values, 1);
+        for (int i = 0; i < keys.size(); i++) {
+            connectors.put(keys.get(i), values.get(i));
         }
+
     }
 
     /**

@@ -6,6 +6,7 @@ import it.polimi.ingsw.is25am33.model.component.Storage;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 
+import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.List;
 

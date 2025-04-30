@@ -54,8 +54,8 @@ public class Cannon extends Component implements Rotatable {
      * Changes the cannon's orientation and updates the power direction accordingly.
      */
     @Override
-    public void changeOrientation() {
-        super.changeOrientation();
+    public void rotate() {
+        super.rotate();
         rotateFireDirection();
     }
 }

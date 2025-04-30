@@ -1,14 +1,10 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import it.polimi.ingsw.is25am33.model.GameContext;
-import it.polimi.ingsw.is25am33.model.Observer;
-import it.polimi.ingsw.is25am33.model.ObserverManager;
-import it.polimi.ingsw.is25am33.model.game.DTO;
-import it.polimi.ingsw.is25am33.model.game.GameModel;
-import it.polimi.ingsw.is25am33.model.game.GameEvent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -69,16 +65,17 @@ public abstract class FlyingBoard {
      * @param player The player to be marked as out.
      */
     public void addOutPlayer(Player player) {
-        outPlayers.add(player);
-        ranking.remove(player);
+        try{
+            outPlayers.add(player);
+            ranking.remove(player);
 
-        DTO dto = new DTO();
-        dto.setFlyingBoard(this);
-
-        BiConsumer<Observer,String> notifyFlyingBoard = Observer::notifyFlyingBoardChanged;
-
-        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
-
+            for(String s: gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(s).notifyEliminatedPlayer(s,player.getNickname(), this);
+            }
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
     }
 
     @JsonIgnore
@@ -116,25 +113,27 @@ public abstract class FlyingBoard {
      * @param player The player to be moved.
      * @param offset The number of positions to move (can be positive or negative).
      */
-    public void movePlayer(Player player, int offset) {
-        int currentPosition = ranking.get(player);
-        int newPosition = currentPosition + offset;
+    public void movePlayer(Player player, int offset){
+        try{
+            int currentPosition = ranking.get(player);
+            int newPosition = currentPosition + offset;
 
-        while (checkPosition(newPosition)) {
-            if (offset > 0) {
-                newPosition++;
-            } else {
-                newPosition--;
+            while (checkPosition(newPosition)) {
+                if (offset > 0) {
+                    newPosition++;
+                } else {
+                    newPosition--;
+                }
+            }
+            ranking.put(player, newPosition);
+
+            for(String s: gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(s).notifyFlyingBoardUpdate(s,this);
             }
         }
-        ranking.put(player, newPosition);
-
-        DTO dto = new DTO();
-        dto.setFlyingBoard(this);
-
-        BiConsumer<Observer,String> notifyFlyingBoard = Observer::notifyFlyingBoardChanged;
-
-        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "FlyingBoardUpdate", dto ), notifyFlyingBoard);
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
 
     }
 

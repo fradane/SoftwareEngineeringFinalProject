@@ -2,7 +2,6 @@ package it.polimi.ingsw.is25am33.model.board;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.*;
-import it.polimi.ingsw.is25am33.model.Observer;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
@@ -10,11 +9,10 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.Player;
-import it.polimi.ingsw.is25am33.model.game.DTO;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -86,6 +84,10 @@ public abstract class ShipBoard implements Serializable {
         shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
     }
 
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
     public Component[][] getShipMatrix() {
         synchronized (shipMatrix) {
             return shipMatrix;
@@ -100,8 +102,17 @@ public abstract class ShipBoard implements Serializable {
         this.gameContext = gameContext;
     }
 
-    public void setFocusedComponent(Component focusedComponent) {
-        this.focusedComponent = focusedComponent;
+    public void setFocusedComponent(Component focusedComponent)  {
+        try {
+            this.focusedComponent = focusedComponent;
+
+            for (String s : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(s).notifyChooseComponent(s, player.getNickname(), focusedComponent);
+            }
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
     }
 
 //    /**
@@ -139,36 +150,38 @@ public abstract class ShipBoard implements Serializable {
      * @throws IllegalArgumentException If the position is invalid or violates placement rules.
      */
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
-        synchronized (shipMatrix) {
-            if(!isValidPosition(x, y))
-                throw new IllegalArgumentException("Not a valid position");
-            else if (!isPositionConnectedToShip(x, y))
-                throw new IllegalArgumentException("Not connected to the ship");
-            else if(!areEmptyConnectorsWellConnected(focusedComponent, x, y))
-                throw new IllegalArgumentException("Empty connector not well connected");
-            else {
-                if(
-                        !areConnectorsWellConnected(focusedComponent, x, y)
-                                || isComponentInFireDirection(focusedComponent, x, y)
-                                || isComponentInEngineDirection(focusedComponent, x, y)
-                                || (!(focusedComponent instanceof Engine) || isEngineDirectionWrong((Engine)focusedComponent))
-                )
-                    incorrectlyPositionedComponents.add(focusedComponent);
+        try {
+            synchronized (shipMatrix) {
+                if (!isValidPosition(x, y))
+                    throw new IllegalArgumentException("Not a valid position");
+                else if (!isPositionConnectedToShip(x, y))
+                    throw new IllegalArgumentException("Not connected to the ship");
+                else if (!areEmptyConnectorsWellConnected(focusedComponent, x, y))
+                    throw new IllegalArgumentException("Empty connector not well connected");
+                else {
+                    if (
+                            !areConnectorsWellConnected(focusedComponent, x, y)
+                                    || isComponentInFireDirection(focusedComponent, x, y)
+                                    || isComponentInEngineDirection(focusedComponent, x, y)
+                                    || (!(focusedComponent instanceof Engine) || isEngineDirectionWrong((Engine) focusedComponent))
+                    )
+                        incorrectlyPositionedComponents.add(focusedComponent);
 
-                shipMatrix[x][y] = focusedComponent;
+                    shipMatrix[x][y] = focusedComponent;
 
-                focusedComponent.insertInComponentsMap(componentsPerType);
+                    focusedComponent.insertInComponentsMap(componentsPerType);
 
-                focusedComponent = null;
+                    for (String s : gameContext.getClientControllers().keySet()) {
+                        gameContext.getClientControllers().get(s).notifyComponentPlaced(s, player.getNickname(), focusedComponent, new Coordinates(x, y));
+                    }
+
+                    focusedComponent = null;
+                }
             }
         }
-
-        DTO dto = new DTO();
-        dto.setPlayer(player);
-        dto.setCoordinates(new Coordinates(x,y));
-
-        BiConsumer<Observer,String> notifyPlacingComponent= Observer::notifyPlacedComponent;
-        //gameContext.getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "placeFocusedComponent", dto ), notifyPlacingComponent);
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
 
     }
 
@@ -811,20 +824,22 @@ public abstract class ShipBoard implements Serializable {
      * @param componentsPositions A set of coordinates of components to remove.
      */
     public void removeShipPart (Set<List<Integer>> componentsPositions) {
-        for(List<Integer> componentPosition : componentsPositions) {
-            Component currentComponent = shipMatrix[componentPosition.get(0)][componentPosition.get(1)];
-            notActiveComponents.add(currentComponent);
-            incorrectlyPositionedComponents.remove(currentComponent);
-            shipMatrix[componentPosition.get(0)][componentPosition.get(1)] = null;
+        try{
+            for(List<Integer> componentPosition : componentsPositions) {
+                Component currentComponent = shipMatrix[componentPosition.get(0)][componentPosition.get(1)];
+                notActiveComponents.add(currentComponent);
+                incorrectlyPositionedComponents.remove(currentComponent);
+                shipMatrix[componentPosition.get(0)][componentPosition.get(1)] = null;
+            }
+
+
+            for(String s: gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(s).notifyShipBoardUpdate(s,player.getNickname(), shipMatrix );
+            }
         }
-
-        DTO dto = new DTO();
-        dto.setShipBoard(this);
-
-        BiConsumer<Observer,String> notifyShipBoard= Observer::notifyShipBoardUpdate;
-
-        //virtualServer.notifyClient(ObserverManager.getInstance().getGameContext(gameContext.getGameId()), new GameEvent( "ShipBoardUpdate", dto ), notifyShipBoard);
-
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
     }
 
     /**
@@ -922,9 +937,21 @@ public abstract class ShipBoard implements Serializable {
     }
 
     public Component releaseFocusedComponent() {
-        Component component = getFocusedComponent();
-        setFocusedComponent(null);
-        return component;
+
+        try {
+            Component component = getFocusedComponent();
+            setFocusedComponent(null);
+
+            for (String s : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(s).notifyReleaseComponent(s, player.getNickname());
+            }
+            return component;
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+            return null;
+        }
+
     }
 
 }

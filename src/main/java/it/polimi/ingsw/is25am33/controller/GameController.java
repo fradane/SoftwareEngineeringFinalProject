@@ -36,10 +36,11 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     public GameController(String gameId, int maxPlayers, boolean isTestFlight) throws RemoteException {
         this.gameModel = new GameModel(gameId, maxPlayers, isTestFlight);
         clientControllers = new ConcurrentHashMap<>();
+        gameModel.createGameContext(clientControllers);
     }
 
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController) {
-        gameModel.addPlayer(nickname, color);
+        gameModel.addPlayer(nickname, color, clientController);
         clientControllers.put(nickname, clientController);
     }
 
@@ -127,7 +128,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerWantsToReleaseFocusedComponent(String nickname) {
+    public void playerWantsToReleaseFocusedComponent(String nickname) throws RemoteException {
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
         Component component = shipBoard.releaseFocusedComponent();
         gameModel.getComponentTable().addVisibleComponent(component);

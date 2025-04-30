@@ -1,12 +1,14 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 
+import java.rmi.RemoteException;
 import java.util.*;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.polimi.ingsw.is25am33.model.GameContext;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
@@ -23,23 +25,29 @@ import java.util.logging.Logger;
 public class Deck {
 
     private final List<AdventureCard> allCards;
-    private final List<List<AdventureCard>> littleVisibleDecks;
+    private final List<List<AdventureCard>> freeLittleVisibleDecks;
+    private List<List<AdventureCard>> bookedLittleVisibleDecks = new ArrayList<>();
     private final List<AdventureCard> littleNotVisibleDeck;
     private final Stack<AdventureCard> gameDeck;
+    private GameContext gameContext;
 
     /**
      * Constructs a new Deck instance, initializing all internal card lists.
      */
     public Deck() {
         allCards = new Stack<>();
-        littleVisibleDecks = new ArrayList<>();
+        freeLittleVisibleDecks = new ArrayList<>();
 
         for (int i = 0; i < 3; i++) {
-            littleVisibleDecks.add(new ArrayList<>());
+            freeLittleVisibleDecks.add(new ArrayList<>());
         }
 
         littleNotVisibleDeck = new ArrayList<>();
         gameDeck = new Stack<>();
+    }
+
+    public void setGameContext(GameContext gameContext){
+        this.gameContext=gameContext;
     }
 
     /**
@@ -47,7 +55,7 @@ public class Deck {
      */
     public void mergeIntoGameDeck() {
         gameDeck.addAll(littleNotVisibleDeck);
-        littleVisibleDecks.forEach(gameDeck::addAll);
+        freeLittleVisibleDecks.forEach(gameDeck::addAll);
         Collections.shuffle(gameDeck);
     }
 
@@ -70,11 +78,23 @@ public class Deck {
      * @return The list of AdventureCards in the selected deck.
      * @throws IndexOutOfBoundsException if the index is out of range.
      */
-    public List<AdventureCard> getVisibleDeck(int index) throws IndexOutOfBoundsException {
-        return littleVisibleDecks.get(index);
-    }
+    public List<AdventureCard> getVisibleDeck(int index) throws IndexOutOfBoundsException{
+        try {
+            List<AdventureCard> littleVisibleDeck = freeLittleVisibleDecks.get(index);
+            freeLittleVisibleDecks.remove(littleVisibleDeck);
+            bookedLittleVisibleDecks.add(littleVisibleDeck);
+            for (String s : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(s).notifyVisibleDeck(s, freeLittleVisibleDecks);
+            }
+            return littleVisibleDeck;
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+            return null;
+        }
+        }
 
-    /**
+        /**
      * Sets up the smaller decks by categorizing cards into levels,
      * shuffling them, and distributing them into the visible and non-visible decks.
      */
@@ -87,7 +107,7 @@ public class Deck {
         Collections.shuffle(level1Cards);
         Collections.shuffle(level2Cards);
 
-        littleVisibleDecks.forEach(l -> composeLittleDecks(level1Cards, level2Cards, l));
+        freeLittleVisibleDecks.forEach(l -> composeLittleDecks(level1Cards, level2Cards, l));
         composeLittleDecks(level1Cards, level2Cards, littleNotVisibleDeck);
     }
 

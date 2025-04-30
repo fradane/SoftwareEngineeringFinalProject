@@ -5,10 +5,11 @@ import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
-import it.polimi.ingsw.is25am33.model.game.DTO;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.io.Serializable;
+import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
@@ -71,15 +72,18 @@ public abstract class AdventureCard implements Serializable {
     @JsonIgnore
     public abstract CardState getFirstState();
 
-    public void setCurrState(CardState currState) {
-        this.currState = currState;
+    public void setCurrState(CardState currState)  {
+        try {
+            this.currState = currState;
 
-        DTO dto = new DTO();
-        dto.setAdventureCard(this);
-        dto.setCardState(currState);
-        BiConsumer<Observer,String> notifyCardState= Observer::notifyCardStateChanged;
+            for (String s : gameModel.getGameContext().getClientControllers().keySet()) {
+                gameModel.getGameContext().getClientControllers().get(s).notifyCardState(s, currState);
+            }
+        }
+        catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
 
-        //game.getGameContext().getVirtualServer().notifyClient(ObserverManager.getInstance().getGameContext(game.getGameContext().getGameId()), new GameEvent( "cardStateUpdate", dto ), notifyCardState);
     }
 
     @JsonIgnore

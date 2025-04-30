@@ -2,7 +2,9 @@ package it.polimi.ingsw.is25am33.model.dangerousObj;
 
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
-public abstract class DangerousObj {
+import java.io.Serializable;
+
+public abstract class DangerousObj implements Serializable {
     private final Direction direction;
     private int coordinate;
 

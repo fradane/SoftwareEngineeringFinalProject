@@ -82,7 +82,7 @@ public class MeteoriteStorm extends AdventureCard {
         Meteorite currMeteorite = meteoriteIterator.next();
         currMeteorite.setCoordinates(GameModel.throwDices());
         gameModel.setCurrDangerousObj(currMeteorite);
-        setCurrState(  CardState.DANGEROUS_ATTACK);
+        setCurrState(CardState.DANGEROUS_ATTACK);
 
     }
 
