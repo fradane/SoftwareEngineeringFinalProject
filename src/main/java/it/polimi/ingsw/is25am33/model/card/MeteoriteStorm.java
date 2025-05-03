@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
@@ -163,5 +164,50 @@ public class MeteoriteStorm extends AdventureCard {
 
     }
 
+    public String toString() {
+        // Box sinistro con nome e numero meteoriti
+        String firstString = String.format("""  
+       ┌────────────────────────────┐
+       │       MeteoriteStorm       │
+       ├────────────────────────────┤
+       │ Meteorites:        x%-2d     │
+       └────────────────────────────┘
+       """, meteorites != null ? meteorites.size() : 0);
 
+        StringBuilder secondString = new StringBuilder();
+        if (meteorites != null && !meteorites.isEmpty()) {
+            for (int i = 0; i < meteorites.size(); i++) {
+                Meteorite meteorite = meteorites.get(i);
+                String direction = meteorite.getDirection().name();
+                String arrow = directionArrows.get(direction);
+                String type;
+                if (meteoriteIDs != null && i < meteoriteIDs.size()) {
+                    String fullId = meteoriteIDs.get(i);
+                    type = fullId.split("_")[0]; // prende solo la parte prima di "_"
+                } else {
+                    type = meteoriteIDs.getClass().getSimpleName();
+                }
+                secondString.append(String.format("Shot %d: %s %s \n", i + 1, arrow, type));
+            }
+        }
+        return firstString + secondString;
+    }
+    // Mappa delle direzioni → frecce
+    private static final Map<String, String> directionArrows = Map.of(
+            "NORTH", "↑",
+            "SOUTH", "↓",
+            "EAST",  "→",
+            "WEST",  "←"
+    );
+
+    public static void main(String[] args) {
+        new MeteoriteStorm();
+        AdventureCard x;
+        Deck deck = new Deck();
+        deck.loadCards();
+        x = deck.getAllCards().stream().filter(card -> card instanceof MeteoriteStorm).toList().get(4);
+        System.out.println(x);
+    }
 }
+
+

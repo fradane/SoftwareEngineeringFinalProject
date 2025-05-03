@@ -120,7 +120,7 @@ public class Planets extends AdventureCard implements PlayerMover {
 
     @Override
     public String toString() {
-        String leftBox = String.format("""
+        String firstString = String.format("""
            ┌────────────────────────────┐
            │          Planets           │
            ├────────────────────────────┤
@@ -131,9 +131,9 @@ public class Planets extends AdventureCard implements PlayerMover {
                 availablePlanets != null ? availablePlanets.size() : 0,
                 stepsBack);
 
-        StringBuilder rightBlock = new StringBuilder("   ");
+        StringBuilder secondString = new StringBuilder("   ");
         if (availablePlanets != null && !availablePlanets.isEmpty()) {
-            rightBlock.append("Planet Rewards:\n");
+            secondString.append("Planet Rewards:\n");
             for (int i = 0; i < availablePlanets.size(); i++) {
                 List<CargoCube> reward = availablePlanets.get(i).getReward();
                 String cubes = reward
@@ -142,10 +142,19 @@ public class Planets extends AdventureCard implements PlayerMover {
                         .toList()
                         .toString()
                         .replaceAll("[\\[\\]]", "");
-                rightBlock.append(String.format("   Planet %d: %s%n", i + 1, cubes));
+                secondString.append(String.format("   Planet %d: %s%n", i + 1, cubes));
             }
         }
 
-        return leftBox + rightBlock.toString();
+        return firstString + secondString;
+    }
+
+    public static void main(String[] args) {
+        new Planets();
+        AdventureCard x;
+        Deck deck = new Deck();
+        deck.loadCards();
+        x = deck.getAllCards().stream().filter(card -> card instanceof Planets).toList().get(4);
+        System.out.println(x);
     }
 }

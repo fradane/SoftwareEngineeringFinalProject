@@ -200,7 +200,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
     @Override
     public String toString() {
         // Box sinistro
-        String leftBox = String.format("""
+        String firstString = String.format("""
         ┌────────────────────────────┐
         │          Pirates           │
         ├────────────────────────────┤
@@ -211,8 +211,8 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         └────────────────────────────┘
         """, requiredFirePower, reward, stepsBack, shots != null ? shots.size() : 0);
 
-        // Colonna destra con freccia e tipo
-        StringBuilder rightColumn = new StringBuilder();
+
+        StringBuilder secondString = new StringBuilder();
         if (shots != null && !shots.isEmpty()) {
             for (int i = 0; i < shots.size(); i++) {
                 Shot shot = shots.get(i);
@@ -225,10 +225,10 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
                 } else {
                     type = shot.getClass().getSimpleName();
                 }
-                rightColumn.append(String.format("Shot %d: %s %s \n", i + 1, arrow, type));
+                secondString.append(String.format("Shot %d: %s %s \n", i + 1, arrow, type));
             }
         }
-        return leftBox + rightColumn;
+        return firstString + secondString;
     }
 
     // Mappa per frecce direzionali

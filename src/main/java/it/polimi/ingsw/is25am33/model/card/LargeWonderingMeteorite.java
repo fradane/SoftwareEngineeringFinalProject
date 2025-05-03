@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Meteorite;
 
 import java.util.List;
+import java.util.Map;
 
 public class LargeWonderingMeteorite extends MeteoriteStorm{
 
@@ -10,5 +11,5 @@ public class LargeWonderingMeteorite extends MeteoriteStorm{
         super(meteorites);
         this.cardName = this.getClass().getSimpleName();
     }
-
 }
+

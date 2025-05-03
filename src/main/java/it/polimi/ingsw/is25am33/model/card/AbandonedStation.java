@@ -117,5 +117,37 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
 
     }
 
+    @Override
+    public String toString() {
+        // Parte sinistra: box dati statici
+        String firstString = String.format("""
+        ┌────────────────────────────┐
+        │     AbandonedStation       │
+        ├────────────────────────────┤
+        │ Crew Required:     x%-2d     │
+        │ Steps Back:        x%-2d     │
+        │ Rewards:           x%-2d     │
+        └────────────────────────────┘
+        """, requiredCrewMembers, stepsBack, reward != null ? reward.size() : 0);
+
+        StringBuilder secondString = new StringBuilder("   ");
+        if (reward != null && !reward.isEmpty()) {
+            secondString.append("Rewards:\n");
+            for (int i = 0; i < reward.size(); i++) {
+                secondString.append(String.format("   Reward %d: %s%n", i + 1, reward.get(i).name()));            }
+        }
+        return firstString + secondString;
+    }
+
+    public static void main(String[] args) {
+        new AbandonedStation();
+        AdventureCard x;
+        Deck deck = new Deck();
+        deck.loadCards();
+        x = deck.getAllCards().stream().filter(card -> card instanceof AbandonedStation).toList().get(2);
+        System.out.println(x);
+    }
+
+
 
 }

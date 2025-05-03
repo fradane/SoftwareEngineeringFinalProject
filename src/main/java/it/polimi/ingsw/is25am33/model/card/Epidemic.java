@@ -39,7 +39,15 @@ public class Epidemic extends AdventureCard{
                 .forEach(Cabin::removeMember);
 
         setCurrState(CardState.END_OF_CARD);
+    }
 
+    @Override
+    public String toString() {
+        return """
+           ┌────────────────────────────┐
+           │          Epidemic          │
+           └────────────────────────────┘
+           """;
     }
 
 }

@@ -58,6 +58,15 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
         } else {
             setCurrState(CardState.END_OF_CARD);
         }
-
     }
+
+    @Override
+    public String toString() {
+        return """
+           ┌────────────────────────────┐
+           │         FreeSpace          │
+           └────────────────────────────┘
+           """;
+    }
+
 }

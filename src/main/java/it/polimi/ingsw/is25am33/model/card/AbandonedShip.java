@@ -25,18 +25,6 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
         this.reward = reward;
     }
 
-    @Override
-    public String toString(){
-
-        return "AbandonedShip{" +
-                "crewMalus = " + crewMalus +
-                ", stepsBack = " + stepsBack +
-                ", reward = " + reward +
-                ", currentState = " + currState
-                + '}';
-
-    }
-
     public AbandonedShip() {
         this.cardName = this.getClass().getSimpleName();
     }
@@ -123,5 +111,28 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
         setCurrState(CardState.END_OF_CARD);
 
     }
+
+    @Override
+    public String toString() {
+        return String.format("""
+           ┌────────────────────────────┐
+           │       AbandonedShip        │
+           ├────────────────────────────┤
+           │ Crew Lost:         x%-2d     │
+           │ Reward:            x%-2d     │
+           │ Steps Back:        %-2d      │
+           └────────────────────────────┘
+           """, crewMalus, reward, stepsBack);
+    }
+
+    public static void main(String[] args) {
+        new AbandonedShip();
+        AdventureCard x;
+        Deck deck = new Deck();
+        deck.loadCards();
+        x = deck.getAllCards().stream().filter(card -> card instanceof AbandonedShip).toList().get(2);
+        System.out.println(x);
+    }
+
 
 }
