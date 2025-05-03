@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class Cabin extends Component {
 
     /** List containing crew members currently inhabiting this cabin. */
-    private List<CrewMember> inhabitants;
+    private List<CrewMember> inhabitants = new ArrayList<>();
 
     /**
      * Default constructor for {@code Cabin}.

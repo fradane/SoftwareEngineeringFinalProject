@@ -7,22 +7,22 @@ import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.Planets;
 import it.polimi.ingsw.is25am33.model.component.*;
-import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
+
+import it.polimi.ingsw.is25am33.model.component.ComponentLoader;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 /**
  * The ClientCLIView class provides a command-line interface for interactions with the client-side
@@ -39,7 +39,7 @@ public class ClientCLIView implements ClientView {
     private static final String INPUT_INTERRUPT = "";
     private final ClientModel clientModel;
 
-    // Definizione di un colore rosso ANSI per gli errori (funziona nei terminali che supportano i colori ANSI).
+    // Definizione dei colori ANSI (funziona nei terminali che supportano i colori ANSI).
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BLUE = "\u001B[34m";
@@ -173,8 +173,18 @@ public class ClientCLIView implements ClientView {
         }
 
         // Chiedi se è un volo di prova
-        String isTest = askForInput("Test flight [y/N]: ");
-        result[1] = (isTest.equalsIgnoreCase("n") || isTest.isEmpty()) ? 0 : 1;
+        while (true) {
+            String isTest = askForInput("Test flight [y/N]: ");
+            if (isTest.equalsIgnoreCase("n") || isTest.isEmpty()) {
+                result[1] = 0;
+                break;
+            } else if (isTest.equalsIgnoreCase("y")) {
+                result[1] = 1;
+                break;
+            } else {
+                System.out.println("Invalid input. Please enter y or n.");
+            }
+        }
 
         // Scegli il colore
         result[2] = Integer.parseInt(askPlayerColor());
@@ -388,6 +398,7 @@ public class ClientCLIView implements ClientView {
                 System.out.println("3. End your shipBoard setup phase");
                 System.out.println("4. Show one of the ship boards");
                 System.out.println("5. Restart hourglass");
+                System.out.println("6. Watch a little deck");
                 String input = askForInput("Your choice: ");
 
                 // TODO
@@ -471,8 +482,37 @@ public class ClientCLIView implements ClientView {
                         System.out.println("Restart hourglass but not implemented yet!");
                         break;
 
+                    case 6:
+                        int littleDeckChoice;
+                        while (true) {
+                            littleDeckChoice = Integer.parseInt(askForInput("Which little deck would you like to watch? (1-3) "));
+                            if (littleDeckChoice >= 1 && littleDeckChoice <= 3) break;
+                            showMessage("Invalid choice. Please select 1-3.");
+                        }
+
+                        int finalLittleDeckChoice = littleDeckChoice;
+                        return (server, nickname) -> {
+                            boolean response;
+                            try {
+                                response = server.playerWantsToWatchLittleDeck(nickname, finalLittleDeckChoice);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            if (!response) {
+                                showMessage("The little deck is not available right now!\nTry again later.");
+                                return false;
+                            }
+                            ClientCLIView.this.showLittleDeck(finalLittleDeckChoice);
+                            try {
+                                server.playerWantsToReleaseLittleDeck(nickname, finalLittleDeckChoice);
+                            } catch (RemoteException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return false;
+                        };
+
                     default:
-                        System.out.println("Invalid choice. Please select 1-5.");
+                        System.out.println("Invalid choice. Please select 1-6.");
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Please enter a valid number.");
@@ -482,11 +522,17 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void showLittleDeck(int littleDeckChoice) {
+        System.out.println("Here is the little deck you chose: ");
+        clientModel.getLittleVisibleDecks().get(littleDeckChoice - 1).forEach(System.out::println);
+        askForInput("Press enter to continue...");
+    }
+
+    @Override
     public void notifyNoMoreComponentAvailable() {
         this.showMessage("No more component available.");
         this.showMessage("Tip: if you want more components to build your shipboard look among the visible ones.");
     }
-
 
     /**
      * Displays a menu with actions the player can perform on the selected component.
@@ -1089,7 +1135,7 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public BiConsumer<CallableOnGameController, String> showEpidemicMenu() {
-        showMessage("An epidemic is spreading!\nRemoving 1 crew member (human or alien) from every occupied cabin connected to another occupied cabin...");
+        showMessage("An epidemic is spreading!!!\nRemoving 1 crew member (human or alien) from every occupied cabin connected to another occupied cabin...");
         return(server, nickname) -> {
             try {
                 server.spreadEpidemic(nickname);
@@ -1193,15 +1239,18 @@ public class ClientCLIView implements ClientView {
         ClientCLIView cli = new ClientCLIView(clientModel);
 
         cli.showCurrentRanking();
-        Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
-        connectors.put(Direction.NORTH, ConnectorType.SINGLE);
-        connectors.put(Direction.SOUTH, ConnectorType.DOUBLE);
-        connectors.put(Direction.WEST, ConnectorType.EMPTY);
-        connectors.put(Direction.EAST, ConnectorType.UNIVERSAL);
 
+        List<Component> components = ComponentLoader.loadComponents();
         Component[][] griglia = new Component[12][12];
-        griglia[7][7] = new BatteryBox(connectors, 3);
-        griglia[7][8] = new Cabin(connectors);
+
+        // Fill random positions with random components
+        for (int i = 0; i < 12; i++) {
+            for (int j = 0; j < 12; j++) {
+                if (Level2ShipBoard.isOutsideShipboard(i, j)) continue;
+                griglia[i][j] = components.get(new Random().nextInt(components.size()));
+            }
+        }
+
         cli.showShipBoard(griglia, "pippo");
     }
 

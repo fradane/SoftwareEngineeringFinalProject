@@ -15,6 +15,8 @@ import it.polimi.ingsw.is25am33.model.game.GameModel;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 /**
@@ -25,24 +27,26 @@ import java.util.logging.Logger;
 public class Deck {
 
     private final List<AdventureCard> allCards;
-    private final List<List<AdventureCard>> freeLittleVisibleDecks;
-    private List<List<AdventureCard>> bookedLittleVisibleDecks = new ArrayList<>();
+    private final List<List<AdventureCard>> littleVisibleDecks;
     private final List<AdventureCard> littleNotVisibleDeck;
+    private final List<List<String>> littleVisibleDecksString;
     private final Stack<AdventureCard> gameDeck;
     private GameContext gameContext;
+    private final List<Boolean> isLittleDeckFree = new ArrayList<>(List.of(true, true, true));
 
     /**
      * Constructs a new Deck instance, initializing all internal card lists.
      */
     public Deck() {
         allCards = new Stack<>();
-        freeLittleVisibleDecks = new ArrayList<>();
+        littleVisibleDecks = new ArrayList<>();
 
         for (int i = 0; i < 3; i++) {
-            freeLittleVisibleDecks.add(new ArrayList<>());
+            littleVisibleDecks.add(new ArrayList<>());
         }
 
         littleNotVisibleDeck = new ArrayList<>();
+        littleVisibleDecksString = new ArrayList<>();
         gameDeck = new Stack<>();
     }
 
@@ -55,7 +59,7 @@ public class Deck {
      */
     public void mergeIntoGameDeck() {
         gameDeck.addAll(littleNotVisibleDeck);
-        freeLittleVisibleDecks.forEach(gameDeck::addAll);
+        littleVisibleDecks.forEach(gameDeck::addAll);
         Collections.shuffle(gameDeck);
     }
 
@@ -72,43 +76,52 @@ public class Deck {
     }
 
     /**
-     * Allows players to view a specific visible deck by its index.
-     *
-     * @param index The index of the visible deck (0-2).
-     * @return The list of AdventureCards in the selected deck.
-     * @throws IndexOutOfBoundsException if the index is out of range.
-     */
-    public List<AdventureCard> getVisibleDeck(int index) throws IndexOutOfBoundsException{
-        try {
-            List<AdventureCard> littleVisibleDeck = freeLittleVisibleDecks.get(index);
-            freeLittleVisibleDecks.remove(littleVisibleDeck);
-            bookedLittleVisibleDecks.add(littleVisibleDeck);
-            for (String s : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyVisibleDeck(s, freeLittleVisibleDecks);
-            }
-            return littleVisibleDeck;
-        }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
-            return null;
-        }
-        }
-
-        /**
      * Sets up the smaller decks by categorizing cards into levels,
      * shuffling them, and distributing them into the visible and non-visible decks.
      */
     public void setUpLittleDecks(GameModel gameModel) {
-        loadCards();
-        allCards.forEach(adventureCard -> adventureCard.setGame(gameModel));
-        List<AdventureCard> level1Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 1).toList());
-        List<AdventureCard> level2Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 2).toList());
+        try {
+            loadCards();
+            allCards.forEach(adventureCard -> adventureCard.setGame(gameModel));
+            List<AdventureCard> level1Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 1).collect(Collectors.toList()));
+            List<AdventureCard> level2Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 2).collect(Collectors.toList()));
 
-        Collections.shuffle(level1Cards);
-        Collections.shuffle(level2Cards);
+            Collections.shuffle(level1Cards);
+            Collections.shuffle(level2Cards);
 
-        freeLittleVisibleDecks.forEach(l -> composeLittleDecks(level1Cards, level2Cards, l));
-        composeLittleDecks(level1Cards, level2Cards, littleNotVisibleDeck);
+            littleVisibleDecks.forEach(littleDeck -> composeLittleDecks(level1Cards, level2Cards, littleDeck));
+            composeLittleDecks(level1Cards, level2Cards, littleNotVisibleDeck);
+
+            mapLittleDecksToString();
+
+            for (String nickname : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nickname).notifyVisibleDeck(nickname, littleVisibleDecksString);
+            }
+
+        } catch(RemoteException e){
+            System.err.println("Remote Exception");
+        }
+
+    }
+
+    /**
+     * Maps the content of the little visible decks to their string representations.
+     * This method initializes the string representation lists for the little visible decks
+     * and iterates over each card in the decks, converting them into their string form
+     * using the {@code toString} method of the {@code AdventureCard} class.
+     * The resulting string representations are stored in the {@code littleVisibleDecksString}.
+     * All of this is done to avoid sending the whole {@code AdventureCard} instances over RMI.
+     */
+    private void mapLittleDecksToString() {
+
+        IntStream.range(0, 3).forEach(_ -> littleVisibleDecksString.add(new ArrayList<>()));
+
+        IntStream.range(0, 3).forEach(littleDeckIndex -> {
+            IntStream.range(0, littleVisibleDecks.get(littleDeckIndex).size()).forEach(cardIndex -> {
+                littleVisibleDecksString.get(littleDeckIndex).add(littleVisibleDecks.get(littleDeckIndex).get(cardIndex).toString());
+            });
+        });
+
     }
 
     /**
@@ -284,4 +297,17 @@ public class Deck {
         return allCards;
     }
 
+    public boolean isLittleDeckAvailable(int littleDeckChoice) {
+        synchronized (isLittleDeckFree) {
+            if (!isLittleDeckFree.get(littleDeckChoice - 1)) return false;
+            isLittleDeckFree.set(littleDeckChoice - 1, false);
+            return true;
+        }
+    }
+
+    public void releaseLittleDeck(int littleDeckChoice) {
+        synchronized (isLittleDeckFree) {
+            isLittleDeckFree.set(littleDeckChoice - 1, true);
+        }
+    }
 }

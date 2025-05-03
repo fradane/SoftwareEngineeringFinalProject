@@ -11,7 +11,6 @@ public enum GameState implements Serializable {
         @Override
         public void run(GameModel gameModel) {
             gameModel.getDeck().setUpLittleDecks(gameModel);
-            //TODO creazione tessere e posizionamento tessere nel tavolo
             gameModel.setCurrGameState(GameState.BUILD_SHIPBOARD);
         }
     },
@@ -20,7 +19,7 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
-
+            gameModel.getDeck().setUpLittleDecks(gameModel);
         }
 
     },
@@ -79,6 +78,6 @@ public enum GameState implements Serializable {
 
     };
 
-    public abstract void run(GameModel gameModel) throws RemoteException;
+    public abstract void run(GameModel gameModel);
 
 }

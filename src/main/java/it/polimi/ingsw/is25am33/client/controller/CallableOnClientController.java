@@ -2,17 +2,13 @@ package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
-import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -53,6 +49,6 @@ public interface CallableOnClientController extends Remote {
 
     void notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException;
 
-    void notifyVisibleDeck(String nickname, List<List<AdventureCard>> littleVisibleDeck) throws RemoteException;
+    void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws RemoteException;
 
 }

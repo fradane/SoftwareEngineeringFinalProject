@@ -159,6 +159,18 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 out.println(ServerSerializer.serialize(outMessage));
                 break;
 
+            case "playerWantsToWatchLittleDeck":
+                boolean response = gameControllers.get(nickname).playerWantsToWatchLittleDeck(nickname, inMessage.getParamInt());
+                outMessage = new SocketMessage("server", "notifyLittleDeckVisibility");
+                outMessage.setParamBoolean(response);
+
+                out.println(ServerSerializer.serialize(outMessage));
+                break;
+
+            case "playerWantsToReleaseVisibleDeck":
+                gameControllers.get(nickname).playerWantsToReleaseLittleDeck(nickname, inMessage.getParamInt());
+                break;
+
             case "playerWantsToReserveFocusedComponent":
                 gameControllers.get(nickname).playerWantsToReserveFocusedComponent(nickname);
                 break;
@@ -315,34 +327,34 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException{
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyShipBoardUpdate");
         outMessage.setParamString(nickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
-    public void  notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException{
+    public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerCredits");
         outMessage.setParamString(nickname);
         outMessage.setParamInt(credits);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
-    public void  notifyEliminatedPlayer(String nicknameToNotify, String nickname, FlyingBoard flyingBoard) throws RemoteException{
+    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname, FlyingBoard flyingBoard) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyEliminatedPlayer");
         outMessage.setParamString(nickname);
         outMessage.setParamFlyingBoard(flyingBoard);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
-    public void  notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException{
+    public void notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyFlyingBoardUpdate");
         outMessage.setParamFlyingBoard(flyingBoard);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
-    public void  notifyVisibleDeck(String nickname, List<List<AdventureCard>> littleVisibleDeck) throws RemoteException{
+    public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyFlyingBoardUpdate");
         outMessage.setParamLittleVisibleDecks(littleVisibleDeck);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));

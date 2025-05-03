@@ -44,7 +44,7 @@ public class SocketMessage {
     private AdventureCard paramAdventureCard;
     private Map<Integer, Component> paramVisibleComponents;
     private FlyingBoard paramFlyingBoard;
-    private List<List<AdventureCard>> paramLittleVisibleDecks;
+    private List<List<String>> paramLittleVisibleDecks;
 
     public SocketMessage(String senderNickname, String actions) {
         this.senderNickname = senderNickname;
@@ -226,11 +226,11 @@ public class SocketMessage {
         this.paramFlyingBoard = flyingBoard;
     }
 
-    public List<List<AdventureCard>> getParamLittleVisibleDecks() {
+    public List<List<String>> getParamLittleVisibleDecks() {
         return paramLittleVisibleDecks;
     }
 
-    public void setParamLittleVisibleDecks(List<List<AdventureCard>> paramLittleVisibleDecks) {
+    public void setParamLittleVisibleDecks(List<List<String>> paramLittleVisibleDecks) {
         this.paramLittleVisibleDecks = paramLittleVisibleDecks;
     }
 

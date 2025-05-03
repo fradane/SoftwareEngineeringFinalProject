@@ -51,9 +51,8 @@ public class GameModel {
         componentTable = new ComponentTable();
     }
 
-    public void setObservers(Map<String, CallableOnClientController> clientControllers){
+    public void setObservers(Map<String, CallableOnClientController> clientControllers){}
 
-    }
     public void setStarted(boolean started) {
         isStarted = started;
     }
@@ -100,6 +99,7 @@ public class GameModel {
     public void setCurrGameState(GameState currGameState) {
         try {
             this.currGameState = currGameState;
+            currGameState.run(this);
 
             for (String nickname : gameContext.getClientControllers().keySet()) {
                 gameContext.getClientControllers().get(nickname).notifyGameState(nickname, currGameState);
@@ -134,7 +134,6 @@ public class GameModel {
 
         try{
             this.currDangerousObj = dangerousObj;
-
             for(String nickname : gameContext.getClientControllers().keySet()) {
                 gameContext.getClientControllers().get(nickname).notifyDangerousObjAttack(nickname, currDangerousObj);
             }
@@ -145,8 +144,7 @@ public class GameModel {
     }
 
     public Boolean hasNextPlayer() {
-        if (playerIterator.hasNext()) return true;
-        return false;
+        return playerIterator.hasNext();
     }
 
     public void resetPlayerIterator() {
@@ -173,7 +171,7 @@ public class GameModel {
     }
 
     public void nextPlayer() {
-        currPlayer = playerIterator.next();
+        setCurrPlayer(playerIterator.next());
     }
 
     public Player getCurrPlayer() {

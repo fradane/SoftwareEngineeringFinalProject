@@ -39,8 +39,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BLUE = "\u001B[34m";
 
-    public ClientController() throws RemoteException {
+    public ClientController(ClientModel clientModel) throws RemoteException {
         super();
+        this.clientModel = clientModel;
     }
 
     public static void main(String[] args) throws RemoteException {
@@ -48,11 +49,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         System.out.println("=== Galaxy Trucker Client ===");
 
+        ClientModel clientModel = new ClientModel();
+
         // Selezione dell'interfaccia utente
-        ClientView view = selectUserInterface(scanner, new ClientModel());
+        ClientView view = selectUserInterface(scanner, clientModel);
 
         // Creiamo il controller
-        ClientController clientController = new ClientController();
+        ClientController clientController = new ClientController(clientModel);
         clientController.setView(view);
         view.initialize();
 
@@ -481,22 +484,22 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.showMessage(nickname + " has " + credits + " credits.");
     }
 
-    public void notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException{
+    public void notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException {
         //clientModel.setFlyingBoard(flyingBoard);
     }
 
-    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname, FlyingBoard flyingBoard) throws RemoteException{
+    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname, FlyingBoard flyingBoard) throws RemoteException {
         //clientModel.setFlyingBoard(flyingBoard);
         view.showMessage(nickname + " was eliminated.");
     }
 
-    public void notifyCardState(String nickname, CardState cardState) throws RemoteException{
+    public void notifyCardState(String nickname, CardState cardState) throws RemoteException {
         clientModel.setCardState(cardState);
         view.showNewCardState();
     }
 
-    public void notifyVisibleDeck(String nickname, List<List<AdventureCard>> littleVisibleDeck) throws RemoteException{
-        clientModel.setLittleVisibleDeck(littleVisibleDeck);
+    public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDecks) throws RemoteException {
+        clientModel.setLittleVisibleDeck(littleVisibleDecks);
     }
 
     /**
@@ -521,10 +524,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void cardPhase() {
 
         while(clientModel.getGameState() == GameState.PLAY_CARD) {
-
             if (clientModel.isMyTurn())
                 clientModel.getCurrCardState().showRelatedMenu(view).accept(serverController, nickname);
-
         }
 
     }

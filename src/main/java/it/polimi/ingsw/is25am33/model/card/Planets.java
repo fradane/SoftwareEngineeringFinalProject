@@ -117,24 +117,35 @@ public class Planets extends AdventureCard implements PlayerMover {
         }
     }
 
+
     @Override
     public String toString() {
-        /*List<String> leftBox = String.format("""
+        String leftBox = String.format("""
            ┌────────────────────────────┐
            │          Planets           │
            ├────────────────────────────┤
            │ Planets:           x%-2d     │
-           │ Steps Back:        x%-2d     │
+           │ Steps Back:        %-2d      │
            └────────────────────────────┘
-           
-           """, availablePlanets.size(), stepsBack);
-        return null;*/
-        return null;
-    }
+           """,
+                availablePlanets != null ? availablePlanets.size() : 0,
+                stepsBack);
 
-    public static void main(String[] args) {
-        AdventureCard x = new SlaveTraders();
-        System.out.println(x);
-    }
+        StringBuilder rightBlock = new StringBuilder("   ");
+        if (availablePlanets != null && !availablePlanets.isEmpty()) {
+            rightBlock.append("Planet Rewards:\n");
+            for (int i = 0; i < availablePlanets.size(); i++) {
+                List<CargoCube> reward = availablePlanets.get(i).getReward();
+                String cubes = reward
+                        .stream()
+                        .map(Enum::name)
+                        .toList()
+                        .toString()
+                        .replaceAll("[\\[\\]]", "");
+                rightBlock.append(String.format("   Planet %d: %s%n", i + 1, cubes));
+            }
+        }
 
+        return leftBox + rightBlock.toString();
+    }
 }

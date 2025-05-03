@@ -355,4 +355,14 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getCurrAdventureCard().play(choice);
     }
 
+    @Override
+    public boolean playerWantsToWatchLittleDeck(String nickname, int littleDeckChoice) {
+        return gameModel.getDeck().isLittleDeckAvailable(littleDeckChoice);
+    }
+
+    @Override
+    public void playerWantsToReleaseLittleDeck(String nickname, int littleDeckChoice) {
+        gameModel.getDeck().releaseLittleDeck(littleDeckChoice);
+    }
+
 }

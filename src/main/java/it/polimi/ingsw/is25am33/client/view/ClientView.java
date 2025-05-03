@@ -180,4 +180,6 @@ public interface ClientView {
     BiConsumer<CallableOnGameController, String> showStardustMenu();
 
     BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu();
+
+    void showLittleDeck(int littleDeckChoice);
 }

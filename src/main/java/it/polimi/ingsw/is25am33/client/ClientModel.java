@@ -6,10 +6,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientModel {
@@ -25,7 +22,7 @@ public class ClientModel {
     private String currentPlayer;
     private Map<Integer, Component> visibleComponents = new ConcurrentHashMap<>();
     private final Map<String, Integer> ranking = new ConcurrentHashMap<>();
-    private List<List<AdventureCard>> littleVisibleDecks;
+    private List<List<String>> littleVisibleDecks = new ArrayList<>();
     private boolean isMyTurn;
 
     public void setMyNickname(String myNickname) {
@@ -136,11 +133,11 @@ public class ClientModel {
         return currDangerousObj;
     }
 
-    public List<List<AdventureCard>> getLittleVisibleDecks() {
+    public List<List<String>> getLittleVisibleDecks() {
         return littleVisibleDecks;
     }
 
-    public void setLittleVisibleDeck(List<List<AdventureCard>> littleVisibleDecks) {
+    public void setLittleVisibleDeck(List<List<String>> littleVisibleDecks) {
         this.littleVisibleDecks = littleVisibleDecks;
     }
 

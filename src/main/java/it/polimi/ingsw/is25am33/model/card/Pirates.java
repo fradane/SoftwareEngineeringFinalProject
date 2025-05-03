@@ -197,4 +197,57 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
     }
 
-}
+    @Override
+    public String toString() {
+        // Box sinistro
+        String leftBox = String.format("""
+        ┌────────────────────────────┐
+        │          Pirates           │
+        ├────────────────────────────┤
+        │ FirePower:         x%-2d     │
+        │ Reward:            x%-2d     │
+        │ StepsBack:         %-2d      │
+        │ Shots:             x%-2d     │
+        └────────────────────────────┘
+        """, requiredFirePower, reward, stepsBack, shots != null ? shots.size() : 0);
+
+        // Colonna destra con freccia e tipo
+        StringBuilder rightColumn = new StringBuilder();
+        if (shots != null && !shots.isEmpty()) {
+            for (int i = 0; i < shots.size(); i++) {
+                Shot shot = shots.get(i);
+                String direction = shot.getDirection().name();
+                String arrow = directionArrows.get(direction);
+                String type;
+                if (shotIDs != null && i < shotIDs.size()) {
+                    String fullId = shotIDs.get(i);
+                    type = fullId.split("_")[0]; // prende solo la parte prima di "_"
+                } else {
+                    type = shot.getClass().getSimpleName();
+                }
+                rightColumn.append(String.format("Shot %d: %s %s \n", i + 1, arrow, type));
+            }
+        }
+        return leftBox + rightColumn;
+    }
+
+    // Mappa per frecce direzionali
+    private static final Map<String, String> directionArrows = Map.of(
+            "NORTH", "↑",
+            "SOUTH", "↓",
+            "EAST",  "→",
+            "WEST",  "←"
+    );
+
+    public static void main(String[] args) {
+        new Pirates();
+        AdventureCard x;
+        Deck deck = new Deck();
+        deck.loadCards();
+        x = deck.getAllCards().stream().filter(card -> card instanceof Pirates).toList().getLast();
+        System.out.println(x);
+        }
+
+    }
+
+

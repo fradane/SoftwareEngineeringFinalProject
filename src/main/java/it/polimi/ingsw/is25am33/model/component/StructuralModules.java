@@ -61,7 +61,7 @@ public class StructuralModules extends Component {
 
     @Override
     public String getMainAttribute() {
-        return "";
+        return " ";
     }
 
 }

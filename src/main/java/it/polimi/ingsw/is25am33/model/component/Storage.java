@@ -22,7 +22,7 @@ public abstract class Storage extends Component {
     /**
      * The list of stocked cargo cubes currently in storage.
      */
-    private List<CargoCube> stockedCubes;
+    private List<CargoCube> stockedCubes = new ArrayList<>();
 
     /**
      * Default constructor for {@code Storage}.
