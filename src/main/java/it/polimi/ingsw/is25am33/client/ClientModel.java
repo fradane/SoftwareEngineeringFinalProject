@@ -27,6 +27,7 @@ public class ClientModel {
     private final Map<String, Integer> ranking = new ConcurrentHashMap<>();
     private List<List<AdventureCard>> littleVisibleDecks;
     private boolean isMyTurn;
+    private Hourglass hourglass;
 
     public void setMyNickname(String myNickname) {
         this.myNickname = myNickname;
@@ -144,13 +145,17 @@ public class ClientModel {
         this.littleVisibleDecks = littleVisibleDecks;
     }
 
+    public void setHourglass(Hourglass hourglass) {
+        this.hourglass = hourglass;
+    }
+
+    public Hourglass getHourglass(){
+        return hourglass;
+    }
     /*
     * TODO:
     *  - notificare solo il cambiamento della shipboard tramite due notify del tipo removeComponent(coordinate) e una notifyAddComponent(component, coordinate),
     *       notifyAddComponent deve chiamare il metodo addComponent della shipBoard in modo che venga aggiunto tutto anche nella mappa che serve per altre cose
-    *  - notificare solo il cambiamento delle visible component in modo simile a quello di prima, non passare tutta la mappa intero componente, ma solo cosa togliere o aggiungere
-    *  - mettere Override sui metodi di cui fai override
-    *  - la flyingBoard non va passata tutta ma solo i cambiamenti della mappa ranking del client model quindi tipo notifyNewPosition(nickname, newPosition) tramite il metodo del model updatePlayerPosition
     *  - completare la classe hourglass con le tue notify
     * */
 

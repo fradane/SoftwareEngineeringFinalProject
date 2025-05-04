@@ -42,7 +42,6 @@ public class SocketMessage {
     private Component[][] paramShipBoardAsMatrix;
     private DangerousObj paramDangerousObj;
     private AdventureCard paramAdventureCard;
-    private Map<Integer, Component> paramVisibleComponents;
     private FlyingBoard paramFlyingBoard;
     private List<List<AdventureCard>> paramLittleVisibleDecks;
 
@@ -61,7 +60,6 @@ public class SocketMessage {
         this.paramGameId = "";
         this.paramDangerousObj= new BigShot(Direction.NORTH);
         this.paramAdventureCard= new Planets();
-        this.paramVisibleComponents=new ConcurrentHashMap<>();
         this.paramFlyingBoard=new Level1FlyingBoard();
         this.paramActivableCoordinates = new ArrayList<>();
         this.paramBatteryBoxCoordinates = new ArrayList<>();
@@ -208,14 +206,6 @@ public class SocketMessage {
 
     public DangerousObj getParamDangerousObj() {
         return paramDangerousObj;
-    }
-
-    public Map<Integer, Component> getParamVisibleComponents() {
-        return paramVisibleComponents;
-    }
-
-    public void setParamVisibleComponents(Map<Integer, Component> paramVisibleComponents) {
-        this.paramVisibleComponents = paramVisibleComponents;
     }
 
     public FlyingBoard getParamFlyingBoard() {

@@ -285,9 +285,15 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
-                case "notifyVisibleComponents":
+                case "notifyAddVisibleComponents":
                     if (clientController != null) {
-                        clientController.notifyVisibleComponents( notification.getParamString(), notification.getParamVisibleComponents());
+                        clientController.notifyAddVisibleComponents( notification.getParamString(), notification.getParamInt(),notification.getParamComponent());
+                    }
+                    break;
+
+                case "notifyRemoveVisibleComponents":
+                    if (clientController != null) {
+                        clientController.notifyRemoveVisibleComponents( notification.getParamString(), notification.getParamInt());
                     }
                     break;
 
@@ -311,19 +317,25 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
                 case "notifyEliminatedPlayer":
                     if (clientController != null) {
-                        clientController.notifyEliminatedPlayer(null, notification.getParamString(), notification.getParamFlyingBoard());
+                        clientController.notifyEliminatedPlayer(null, notification.getParamString());
                     }
                     break;
 
-                case "notifyFlyingBoardUpdate":
+                case "notifyRankingUpdate":
                     if (clientController != null) {
-                        clientController.notifyFlyingBoardUpdate(notification.getParamString(), notification.getParamFlyingBoard());
+                        clientController.notifyRankingUpdate(null,notification.getParamString(), notification.getParamInt());
                     }
                     break;
 
                 case "notifyVisibleDeck":
                     if (clientController != null) {
                         clientController.notifyVisibleDeck(notification.getParamString(), notification.getParamLittleVisibleDecks());
+                    }
+                    break;
+
+                case "notifyHourglassStarted":
+                    if (clientController != null) {
+                        clientController.notifyHourglassStarted(null);
                     }
                     break;
 

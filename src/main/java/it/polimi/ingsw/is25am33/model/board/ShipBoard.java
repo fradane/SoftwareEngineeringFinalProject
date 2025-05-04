@@ -106,8 +106,8 @@ public abstract class ShipBoard implements Serializable {
         try {
             this.focusedComponent = focusedComponent;
 
-            for (String s : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyChooseComponent(s, player.getNickname(), focusedComponent);
+            for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nicknameToNotify).notifyChooseComponent(nicknameToNotify, player.getNickname(), focusedComponent);
             }
         }
         catch(RemoteException e){
@@ -171,8 +171,8 @@ public abstract class ShipBoard implements Serializable {
 
                     focusedComponent.insertInComponentsMap(componentsPerType);
 
-                    for (String s : gameContext.getClientControllers().keySet()) {
-                        gameContext.getClientControllers().get(s).notifyComponentPlaced(s, player.getNickname(), focusedComponent, new Coordinates(x, y));
+                    for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
+                        gameContext.getClientControllers().get(nicknameToNotify).notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
                     }
 
                     focusedComponent = null;

@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.game;
 
+import it.polimi.ingsw.is25am33.client.Hourglass;
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.board.*;
@@ -22,7 +23,6 @@ public class GameModel {
     private final boolean isTestFlight;
     private final int maxPlayers;
     private boolean isStarted;
-
     private AdventureCard currAdventureCard;
     private final FlyingBoard flyingBoard;
     private final ConcurrentHashMap<String, Player> players;
@@ -34,6 +34,7 @@ public class GameModel {
     private Deck deck;
     private ComponentTable componentTable;
     private GameContext gameContext;
+    private Hourglass hourglass;
 
     public GameModel(String gameId, int maxPlayers, boolean isTestFlight) {
         this.gameId = gameId;
@@ -51,9 +52,6 @@ public class GameModel {
         componentTable = new ComponentTable();
     }
 
-    public void setObservers(Map<String, CallableOnClientController> clientControllers){
-
-    }
     public void setStarted(boolean started) {
         isStarted = started;
     }
@@ -130,6 +128,10 @@ public class GameModel {
         return currDangerousObj;
     }
 
+    public void setHourglass(Hourglass hourglass) {
+        this.hourglass = hourglass;
+    }
+
     public void setCurrDangerousObj(DangerousObj dangerousObj) {
 
         try{
@@ -142,6 +144,16 @@ public class GameModel {
             System.err.println("Remote Exception");
         }
 
+    }
+
+    public void startHourglassTimer(){
+        try {
+            for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nicknameToNotify).notifyHourglassStarted(nicknameToNotify);
+            }
+        } catch(RemoteException e) {
+            System.err.println("Remote Exception");
+        }
     }
 
     public Boolean hasNextPlayer() {
