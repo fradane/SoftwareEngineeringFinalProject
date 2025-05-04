@@ -5,6 +5,8 @@ import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
+import it.polimi.ingsw.is25am33.model.game.Hourglass;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,18 +14,24 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ClientModel {
 
     private String myNickname;
-    private Set<String> playersNickname;
+    private final Map<String, PlayerClientData> playerClientData = new ConcurrentHashMap<>();
     private AdventureCard currAdventureCard;
     private CardState currCardState;
     private GameState gameState;
-    private Map<String, ShipBoardClient> shipboards = new ConcurrentHashMap<>();
-    private Map<String, Integer> credits = new ConcurrentHashMap<>();
     private DangerousObj currDangerousObj;
     private String currentPlayer;
     private Map<Integer, Component> visibleComponents = new ConcurrentHashMap<>();
-    private final Map<String, Integer> ranking = new ConcurrentHashMap<>();
     private List<List<String>> littleVisibleDecks = new ArrayList<>();
     private boolean isMyTurn;
+    private Hourglass hourglass;
+
+    public Hourglass getHourglass() {
+        return hourglass;
+    }
+
+    public void setHourglass(Hourglass hourglass) {
+        this.hourglass = hourglass;
+    }
 
     public void setMyNickname(String myNickname) {
         this.myNickname = myNickname;
@@ -53,14 +61,6 @@ public class ClientModel {
         return gameState;
     }
 
-    public void updatePlayerPosition(String nickname, int newPosition) {
-        ranking.put(nickname, newPosition);
-    }
-
-    public Map<String, Integer> getRanking() {
-        return ranking;
-    }
-
     public void setGameState(GameState gameState) {
         this.gameState = gameState;
     }
@@ -71,22 +71,6 @@ public class ClientModel {
 
     public AdventureCard getCurrAdventureCard() {
         return currAdventureCard;
-    }
-
-    public Map<String, ShipBoardClient> getShipboards() {
-        return shipboards;
-    }
-
-    public Map<String, Integer> getCredits() {
-        return credits;
-    }
-
-    public Set<String> getPlayersNickname() {
-        return playersNickname;
-    }
-
-    public void setPlayersNickname(Set<String> playersNickname) {
-        this.playersNickname = playersNickname;
     }
 
     public void setCurrDangerousObj(DangerousObj currDangerousObj) {
@@ -101,24 +85,26 @@ public class ClientModel {
         return currentPlayer;
     }
 
-    public List<String> getSortedRanking() {
-        return ranking.entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .map(Map.Entry::getKey)
-                .toList();
+    public Map<String, PlayerClientData> getPlayerClientData() {
+        return playerClientData;
     }
 
-    public void setCredits(Map<String, Integer> credits) {
-        this.credits = credits;
+    /**
+     * Retrieves a sorted list of player nicknames based on their flying board position in ascending order,
+     * with the list then being reversed to get a descending order ranking.
+     *
+     * @return a list of player nicknames representing the sorted ranking in descending order of their flying board position.
+     */
+    public List<String> getSortedRanking() {
+        return playerClientData.keySet()
+                .stream()
+                .sorted((a, b) -> Integer.compare(playerClientData.get(a).getFlyingBoardPosition(), playerClientData.get(b).getFlyingBoardPosition()))
+                .toList()
+                .reversed();
     }
 
     public void setCurrCardState(CardState currCardState) {
         this.currCardState = currCardState;
-    }
-
-    public void setShipboards(Map<String, ShipBoardClient> shipboards) {
-        this.shipboards = shipboards;
     }
 
     public void setCurrentPlayer(String currentPlayer) {
@@ -140,6 +126,28 @@ public class ClientModel {
     public void setLittleVisibleDeck(List<List<String>> littleVisibleDecks) {
         this.littleVisibleDecks = littleVisibleDecks;
     }
+
+    public void updatePlayerCredits(String nickname, int newOwnedCredits) {
+        playerClientData.get(nickname).setCredits(newOwnedCredits);
+    }
+
+    public void updatePlayerPosition(String nickname, int newPosition) {
+        playerClientData.get(nickname).setFlyingBoardPosition(newPosition);
+    }
+
+    public void addPlayer(String nickname, PlayerColor color) {
+        playerClientData.put(nickname, new PlayerClientData(nickname, color));
+    }
+
+    public ShipBoardClient getShipboardOf(String nickname) {
+        return playerClientData.get(nickname).getShipBoard();
+    }
+
+    public List<String> getPlayersNickname() {
+        return new ArrayList<>(playerClientData.keySet());
+    }
+
+
 
     /*
     * TODO:

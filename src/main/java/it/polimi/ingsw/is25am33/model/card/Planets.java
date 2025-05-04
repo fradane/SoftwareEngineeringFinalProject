@@ -149,12 +149,4 @@ public class Planets extends AdventureCard implements PlayerMover {
         return firstString + secondString;
     }
 
-    public static void main(String[] args) {
-        new Planets();
-        AdventureCard x;
-        Deck deck = new Deck();
-        deck.loadCards();
-        x = deck.getAllCards().stream().filter(card -> card instanceof Planets).toList().get(4);
-        System.out.println(x);
-    }
 }

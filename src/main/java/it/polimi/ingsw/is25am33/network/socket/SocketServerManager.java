@@ -4,17 +4,13 @@ import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
-import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.network.DNS;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerSerializer;
@@ -175,6 +171,10 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).playerWantsToReserveFocusedComponent(nickname);
                 break;
 
+            case "playerWantsToRestartHourglass":
+                gameControllers.get(nickname).playerWantsToRestartHourglass(nickname);
+                break;
+
             case "playerWantsToReleaseFocusedComponent":
                 gameControllers.get(nickname).playerWantsToReleaseFocusedComponent(nickname);
                 break;
@@ -255,10 +255,18 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyGameStarted(String nicknameToNotify, GameState gameState, GameInfo gameInfo) throws RemoteException{
+    public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyGameStarted");
-        outMessage.setParamGameState(gameState);
         outMessage.setParamGameInfo(List.of(gameInfo));
+
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyHourglassRestarted");
+        outMessage.setParamInt(flipsLeft);
+        outMessage.setParamString(nickname);
 
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }

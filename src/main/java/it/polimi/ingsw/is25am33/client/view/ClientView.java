@@ -182,4 +182,10 @@ public interface ClientView {
     BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu();
 
     void showLittleDeck(int littleDeckChoice);
+
+    void updateTimeLeft(int timeLeft);
+
+    void notifyTimerEnded(int flipsLeft);
+
+    void notifyHourglassRestarted(int flipsLeft);
 }

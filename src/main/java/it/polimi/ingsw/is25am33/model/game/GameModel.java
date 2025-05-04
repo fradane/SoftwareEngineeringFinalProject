@@ -31,9 +31,11 @@ public class GameModel {
     private Iterator<Player> playerIterator;
     private DangerousObj currDangerousObj;
     private GameState currGameState;
-    private Deck deck;
-    private ComponentTable componentTable;
+    private final Deck deck;
+    private final ComponentTable componentTable;
     private GameContext gameContext;
+    private final Object lock = new Object();
+    private Integer flipsLeft;
 
     public GameModel(String gameId, int maxPlayers, boolean isTestFlight) {
         this.gameId = gameId;
@@ -49,6 +51,25 @@ public class GameModel {
         deck = new Deck();
         isStarted = false;
         componentTable = new ComponentTable();
+        flipsLeft = isTestFlight ? 1 : 3;
+    }
+
+    public void restartHourglass(String nickname) {
+        synchronized (lock) {
+            if (flipsLeft > 0)
+                flipsLeft--;
+            else
+                return;
+        }
+
+        gameContext.getClientControllers()
+                .forEach((nicknameToNotify, controller) -> {
+                    try {
+                        controller.notifyHourglassRestarted(nicknameToNotify, nickname, flipsLeft);
+                    } catch (RemoteException e) {
+                        System.err.println("Remote Exception");
+                    }
+                });
     }
 
     public void setObservers(Map<String, CallableOnClientController> clientControllers){}
@@ -57,20 +78,12 @@ public class GameModel {
         isStarted = started;
     }
 
-    public void setDeck(Deck deck) {
-        this.deck = deck;
-    }
-
     public ComponentTable getComponentTable() {
         return componentTable;
     }
 
-    public void setComponentTable(ComponentTable componentTable) {
-        this.componentTable = componentTable;
-    }
-
     public void createGameContext(Map<String, CallableOnClientController> clientControllers) {
-        this.gameContext= new GameContext(clientControllers);
+        this.gameContext = new GameContext(clientControllers);
         deck.setGameContext(gameContext);
         flyingBoard.setGameContext(gameContext);
         componentTable.setGameContext(gameContext);
@@ -280,24 +293,13 @@ public class GameModel {
     }
 
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController){
-        try{
-            gameContext.getClientControllers().put(nickname, clientController);
-            ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color) : new Level2ShipBoard(color);
-            shipBoard.setGameContext(gameContext);
-            Player player = new Player(nickname, shipBoard, color);
-            player.setGameContext(gameContext);
-            players.put(nickname, player);
-            shipBoard.setPlayer(player);
-
-            for(String nicknameToNotify : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nicknameToNotify).notifyShipBoardUpdate(nicknameToNotify, player.getNickname(), shipBoard.getShipMatrix());
-                gameContext.getClientControllers().get(nicknameToNotify).notifyPlayerCredits(nicknameToNotify, player.getNickname(), 0);
-            }
-        }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
-
+        gameContext.getClientControllers().put(nickname, clientController);
+        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color) : new Level2ShipBoard(color);
+        shipBoard.setGameContext(gameContext);
+        Player player = new Player(nickname, shipBoard, color);
+        player.setGameContext(gameContext);
+        players.put(nickname, player);
+        shipBoard.setPlayer(player);
     }
 
     public void removePlayer(String nickname) {

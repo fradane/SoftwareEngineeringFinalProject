@@ -9,19 +9,14 @@ public enum GameState implements Serializable {
 
     SETUP {
         @Override
-        public void run(GameModel gameModel) {
-            gameModel.getDeck().setUpLittleDecks(gameModel);
-            gameModel.setCurrGameState(GameState.BUILD_SHIPBOARD);
-        }
+        public void run(GameModel gameModel) {}
     },
 
     BUILD_SHIPBOARD {
-
         @Override
         public void run(GameModel gameModel) {
             gameModel.getDeck().setUpLittleDecks(gameModel);
         }
-
     },
 
     CHECK_SHIPBOARD {

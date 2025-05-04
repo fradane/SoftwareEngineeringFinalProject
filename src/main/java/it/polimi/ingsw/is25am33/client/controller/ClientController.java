@@ -3,7 +3,6 @@ package it.polimi.ingsw.is25am33.client.controller;
 import it.polimi.ingsw.is25am33.client.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
-import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
@@ -14,6 +13,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.Hourglass;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 
@@ -126,9 +126,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     private boolean handleGameState() {
+
         if (gameStarted) {
-            // Qui andrebbe la logica di gioco effettiva
-            view.showMessage("Game in progress...");
 
             buildShipBoardPhase();
 
@@ -190,7 +189,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 }
             };
         } catch (Exception e) {
-            view.showError(e.getMessage());
+            e.printStackTrace();
+            //view.showError(e.getMessage());
             return true;
         }
     }
@@ -414,15 +414,26 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyGameStarted(String nickname, GameState gameState, GameInfo gameInfo) throws RemoteException{
+    public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws RemoteException {
         gameStarted = true;
-        clientModel.setGameState(gameState);
-        clientModel.setPlayersNickname(gameInfo.getConnectedPlayersNicknames());
-        view.notifyGameStarted(gameState);
+        clientModel.setGameState(GameState.BUILD_SHIPBOARD);
+        gameInfo.getConnectedPlayers()
+                .forEach((nickname, color) ->
+                    clientModel.addPlayer(nickname, color)
+                );
+        view.notifyGameStarted(GameState.BUILD_SHIPBOARD);
+        clientModel.setHourglass(new Hourglass(gameInfo.isTestFlight()));
+        clientModel.getHourglass().start(view);
+
         // Se la view è di tipo ClientCLIView, possiamo interrompere l'attesa
-        if (view instanceof ClientCLIView) {
-            ((ClientCLIView) view).cancelInputWaiting();
-        }
+        if (view instanceof ClientCLIView)
+            view.cancelInputWaiting();
+    }
+
+    @Override
+    public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException {
+        clientModel.getHourglass().start(view);
+        view.notifyHourglassRestarted(flipsLeft);
     }
 
     public void notifyGameState(String nickname, GameState gameState) throws RemoteException{
@@ -450,37 +461,27 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
-        clientModel.getShipboards().get(nickname).getShipBoardMatrix()[coordinates.getX()][coordinates.getY()]=component;
+        clientModel.getShipboardOf(nickname).getShipBoardMatrix()[coordinates.getX()][coordinates.getY()] = component;
     }
 
     public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException {
-        if (clientModel.getShipboards().containsValue(nickname)) {
-            ShipBoardClient shipBoardClient= clientModel.getShipboards().get(nickname);
-            shipBoardClient.setShipBoardMatrix(shipMatrix);
-            clientModel.getShipboards().replace(nickname, shipBoardClient);
-        } else {
-            clientModel.getShipboards().put(nickname, new ShipBoardClient(shipMatrix,null, null));
-        }
+        clientModel.getShipboardOf(nickname).setShipBoardMatrix(shipMatrix);
     }
 
     public void notifyChooseComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws RemoteException {
-        clientModel.getShipboards().get(nickname).setFocusedComponent(focusedComponent);
+        clientModel.getShipboardOf(nickname).setFocusedComponent(focusedComponent);
     }
 
     public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws RemoteException {
-        clientModel.getShipboards().get(nickname).setFocusedComponent(null);
+        clientModel.getShipboardOf(nickname).setFocusedComponent(null);
     }
 
-    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) throws RemoteException{
-        clientModel.getShipboards().get(nickname).getBookedComponent().add(component);
+    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) throws RemoteException {
+        clientModel.getShipboardOf(nickname).getBookedComponent().add(component);
     }
 
-    public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException{
-        if(clientModel.getCredits().containsValue(nickname))
-            clientModel.getCredits().replace(nickname,credits);
-        else
-            clientModel.getCredits().put(nickname, credits);
-
+    public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException {
+        clientModel.updatePlayerCredits(nickname, credits);
         view.showMessage(nickname + " has " + credits + " credits.");
     }
 

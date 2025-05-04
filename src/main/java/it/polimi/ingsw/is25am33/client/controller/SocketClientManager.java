@@ -231,8 +231,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
                 case "notifyGameStarted":
                     if (clientController != null) {
-                        this.gameState = notification.getParamGameState();
-                        clientController.notifyGameStarted(nickname, gameState, notification.getParamGameInfo().getFirst());
+                        clientController.notifyGameStarted(nickname, notification.getParamGameInfo().getFirst());
                     }
                     break;
 
@@ -254,6 +253,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                         clientController.notifyCurrPlayerChanged(nickname, notification.getParamString());
                     }
                     break;
+
+                case "notifyHourglassRestarted":
+                    if (clientController != null) {
+                        clientController.notifyHourglassRestarted(nickname, notification.getParamString(), notification.getParamInt());
+                    }
 
                 case "notifyCurrAdventureCard":
                     if (clientController != null) {
@@ -287,13 +291,13 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
                 case "notifyVisibleComponents":
                     if (clientController != null) {
-                        clientController.notifyVisibleComponents( notification.getParamString(), notification.getParamVisibleComponents());
+                        clientController.notifyVisibleComponents(notification.getParamString(), notification.getParamVisibleComponents());
                     }
                     break;
 
                 case "notifyComponentPlaced":
                     if (clientController != null) {
-                        clientController.notifyComponentPlaced( null, notification.getParamString(), notification.getParamComponent(), notification.getParamCoordinates());
+                        clientController.notifyComponentPlaced(null, notification.getParamString(), notification.getParamComponent(), notification.getParamCoordinates());
                     }
                     break;
 
@@ -358,6 +362,12 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     @Override
     public void playerWantsToReleaseFocusedComponent(String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToReleaseFocusedComponent");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerWantsToRestartHourglass(String nickname) {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToRestartHourglass");
         out.println(ClientSerializer.serialize(outMessage));
     }
 

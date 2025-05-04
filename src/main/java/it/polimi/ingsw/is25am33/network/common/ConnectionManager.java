@@ -93,9 +93,6 @@ public class ConnectionManager {
 
             System.out.println("[" + gameId + "] " + nickname + " joined game with color " + color);
 
-//            notifyNewPlayerThread.join();
-
-
             // if the game is completed, it starts automatically
             if (players.size() == gameInfo.getMaxPlayers()) {
                 controller.startGame();

@@ -239,15 +239,4 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
             "WEST",  "←"
     );
 
-    public static void main(String[] args) {
-        new Pirates();
-        AdventureCard x;
-        Deck deck = new Deck();
-        deck.loadCards();
-        x = deck.getAllCards().stream().filter(card -> card instanceof Pirates).toList().getLast();
-        System.out.println(x);
-        }
-
-    }
-
-
+}

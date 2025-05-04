@@ -26,10 +26,10 @@ public class ShipBoardClient {
             Map.entry(StructuralModules.class, new ArrayList<StructuralModules>())
     ));
 
-    public ShipBoardClient(Component[][] shipBoardMatrix, Component focusComponent, List<Component> bookedComponent){
-        this.shipBoardMatrix = shipBoardMatrix;
-        this.focusedComponent = focusComponent;
-        this.bookedComponent = bookedComponent;
+    public ShipBoardClient() {
+        focusedComponent = null;
+        bookedComponent = new ArrayList<>();
+        shipBoardMatrix = new Component[12][12];
     }
 
     @SuppressWarnings("unchecked")

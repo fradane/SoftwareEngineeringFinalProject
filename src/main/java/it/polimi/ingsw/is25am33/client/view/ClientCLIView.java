@@ -336,8 +336,8 @@ public class ClientCLIView implements ClientView {
     @Override
     public void notifyGameStarted(GameState gameState) {
         waitingForGameStart = false;
-        System.out.println("Game started! Initial state: " + gameState);
         System.out.println("The game is now in progress...");
+        System.out.println("Game started! Initial state: " + gameState);
     }
 
     @Override
@@ -422,8 +422,9 @@ public class ClientCLIView implements ClientView {
                                     hasFocusComponent = consumer.apply(server, nickname);
                                 }
                             } catch (Exception e) {
-                                System.out.println("Error connecting to server: " + e.getMessage());
-                                System.out.println("Please try again.");
+                                e.printStackTrace();
+//                                System.out.println("Error connecting to server: " + e.getMessage());
+//                                System.out.println("Please try again.");
                             }
                             return false;
                         };
@@ -478,9 +479,19 @@ public class ClientCLIView implements ClientView {
                         return showShipBoardsMenu();
 
                     case 5:
-                        //TODO restart hourglass
-                        System.out.println("Restart hourglass but not implemented yet!");
-                        break;
+                        if (clientModel.getHourglass().isRunning()) {
+                            showMessage("The hourglass is already running, please wait for it to end.");
+                            break;
+                        }
+
+                        return (server, nickname) -> {
+                            try {
+                                server.playerWantsToRestartHourglass(nickname);
+                            } catch (RemoteException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return false;
+                        };
 
                     case 6:
                         int littleDeckChoice;
@@ -519,6 +530,11 @@ public class ClientCLIView implements ClientView {
             }
 
         }
+    }
+
+    @Override
+    public void notifyHourglassRestarted(int flipsLeft) {
+        System.out.println("Hourglass restarted!!! There will be " + flipsLeft + " flips left at the end of this timer.");
     }
 
     @Override
@@ -580,11 +596,12 @@ public class ClientCLIView implements ClientView {
                             try {
                                 server.playerWantsToPlaceFocusedComponent(nickname, coords);
                                 coords.setCoordinates(List.of(coords.getX() + 1, coords.getY() + 1));
-                                ClientCLIView.this.showMessage("You placed the component at: " + coords.toString() + ".");
+                                ClientCLIView.this.showMessage("You placed the component at: " + coords + ".");
                                 return false;
                             } catch (IOException e) {
-                                ClientCLIView.this.showError(e.getMessage());
-                                ClientCLIView.this.showError("Try again.");
+                                e.printStackTrace();
+//                                ClientCLIView.this.showError(e.getMessage());
+//                                ClientCLIView.this.showError("Try again.");
                                 return true;
                             }
                         };
@@ -905,13 +922,13 @@ public class ClientCLIView implements ClientView {
 
             while(true) {
 
-                Coordinates batterycoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
-                if(batterycoords == null){
+                Coordinates batteryCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
+                if(batteryCoords == null){
                     showMessage("You have to select a battery box after choosing a double engine.");
                     continue;
                 }
-                if (shipBoard.getComponentByType(BatteryBox.class).contains(shipBoard.getComponentAt(batterycoords))) {
-                    batteryBoxesCoordinates.add(batterycoords);
+                if (shipBoard.getComponentByType(BatteryBox.class).contains(shipBoard.getComponentAt(batteryCoords))) {
+                    batteryBoxesCoordinates.add(batteryCoords);
                     break;
                 }
                 else
@@ -929,7 +946,7 @@ public class ClientCLIView implements ClientView {
     }
 
     private ShipBoardClient getMyShipBoard() {
-        return clientModel.getShipboards().get(clientModel.getMyNickname());
+        return clientModel.getShipboardOf(clientModel.getMyNickname());
     }
 
     private void showMyShipBoard() {
@@ -1219,20 +1236,38 @@ public class ClientCLIView implements ClientView {
 
         List<String> sortedRanking = clientModel.getSortedRanking();
 
-        int topScore = clientModel.getRanking().get(sortedRanking.getFirst());
+        int topScore = clientModel.getPlayerClientData().get(sortedRanking.getFirst()).getFlyingBoardPosition();
 
         for (String player : sortedRanking) {
-            int playerScore = clientModel.getRanking().get(player);
+            int playerScore = clientModel.getPlayerClientData().get(player).getFlyingBoardPosition();
             int diff = topScore - playerScore;
             System.out.printf("%-20s | %-10d%n", player, -diff);
         }
 
         System.out.println("===============================");
-        System.out.println("Legend: the score shows how many points behind the leader each player is.\n");
+        System.out.println("Legend: the score shows how many steps behind the leader each player is.\n");
+    }
+
+    @Override
+    public void notifyTimerEnded(int flipsLeft) {
+        if (flipsLeft == 0)
+            showMessage("Timer ended! You cannot build your ship anymore.");
+        else
+            showMessage("Timer ended! There are now " + flipsLeft + " flips left.");
+    }
+
+    @Override
+    public void updateTimeLeft(int timeLeft) {
+        if (timeLeft % 10 == 0) {
+            showMessage("Time left: " + timeLeft);
+        }
     }
 
     public static void main(String[] args) {
         ClientModel clientModel = new ClientModel();
+        clientModel.addPlayer("pippo", PlayerColor.BLUE);
+        clientModel.addPlayer("pluto", PlayerColor.BLUE);
+        clientModel.addPlayer("alice", PlayerColor.BLUE);
         clientModel.updatePlayerPosition("pippo", 30);
         clientModel.updatePlayerPosition("pluto", 15);
         clientModel.updatePlayerPosition("alice", 1);

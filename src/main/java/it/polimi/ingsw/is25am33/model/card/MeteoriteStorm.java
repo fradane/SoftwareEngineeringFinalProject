@@ -200,14 +200,6 @@ public class MeteoriteStorm extends AdventureCard {
             "WEST",  "←"
     );
 
-    public static void main(String[] args) {
-        new MeteoriteStorm();
-        AdventureCard x;
-        Deck deck = new Deck();
-        deck.loadCards();
-        x = deck.getAllCards().stream().filter(card -> card instanceof MeteoriteStorm).toList().get(4);
-        System.out.println(x);
-    }
 }
 
 

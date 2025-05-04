@@ -125,14 +125,4 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
            """, crewMalus, reward, stepsBack);
     }
 
-    public static void main(String[] args) {
-        new AbandonedShip();
-        AdventureCard x;
-        Deck deck = new Deck();
-        deck.loadCards();
-        x = deck.getAllCards().stream().filter(card -> card instanceof AbandonedShip).toList().get(2);
-        System.out.println(x);
-    }
-
-
 }

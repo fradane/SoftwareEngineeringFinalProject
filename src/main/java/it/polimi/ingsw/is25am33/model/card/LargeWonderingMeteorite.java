@@ -11,5 +11,6 @@ public class LargeWonderingMeteorite extends MeteoriteStorm{
         super(meteorites);
         this.cardName = this.getClass().getSimpleName();
     }
+
 }
 

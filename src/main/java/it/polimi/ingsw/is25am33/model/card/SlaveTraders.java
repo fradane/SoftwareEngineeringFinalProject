@@ -118,12 +118,4 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
            """, requiredFirePower, crewMalus, reward, stepsBack);
     }
 
-    public static void main(String[] args) {
-        new SlaveTraders();
-        AdventureCard x;
-        Deck deck = new Deck();
-        deck.loadCards();
-        x = deck.getAllCards().stream().filter(card -> card instanceof SlaveTraders).toList().getFirst();
-        System.out.println(x);
-    }
 }

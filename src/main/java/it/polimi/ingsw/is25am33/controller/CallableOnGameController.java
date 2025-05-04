@@ -58,4 +58,6 @@ public interface CallableOnGameController extends Remote {
     boolean playerWantsToWatchLittleDeck(String nickname, int littleDeckChoice) throws IOException;
 
     void playerWantsToReleaseLittleDeck(String nickname, int littleDeckChoice) throws RemoteException;
+
+    void playerWantsToRestartHourglass(String nickname)  throws RemoteException;
 }

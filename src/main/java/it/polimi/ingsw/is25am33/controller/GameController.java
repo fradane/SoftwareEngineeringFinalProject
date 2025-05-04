@@ -84,13 +84,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         });
     }
 
-    public void notifyGameStarted (Set<String> players, GameState currGameState) {
+    public void notifyGameStarted() {
         new Thread( () -> {
             clientControllers.keySet()
                     .stream()
                     .forEach(nickname -> {
                         try {
-                            clientControllers.get(nickname).notifyGameStarted(nickname, currGameState, getGameInfo());
+                            clientControllers.get(nickname).notifyGameStarted(nickname, getGameInfo());
                         } catch (RemoteException e) {
                             throw new RuntimeException(e);
                         }
@@ -101,7 +101,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     public void startGame() {
         GameInfo gameInfo = getGameInfo();
         gameModel.setCurrGameState(GameState.BUILD_SHIPBOARD);
-        notifyGameStarted(gameInfo.getConnectedPlayers().keySet(), gameModel.getCurrGameState());
+        notifyGameStarted();
         System.out.println("[" + gameInfo.getGameId() + "] Game started");
     }
 
@@ -363,6 +363,11 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerWantsToReleaseLittleDeck(String nickname, int littleDeckChoice) {
         gameModel.getDeck().releaseLittleDeck(littleDeckChoice);
+    }
+
+    @Override
+    public void playerWantsToRestartHourglass(String nickname) {
+        gameModel.restartHourglass(nickname);
     }
 
 }

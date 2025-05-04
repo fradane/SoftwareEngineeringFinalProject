@@ -139,15 +139,4 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         return firstString + secondString;
     }
 
-    public static void main(String[] args) {
-        new AbandonedStation();
-        AdventureCard x;
-        Deck deck = new Deck();
-        deck.loadCards();
-        x = deck.getAllCards().stream().filter(card -> card instanceof AbandonedStation).toList().get(2);
-        System.out.println(x);
-    }
-
-
-
 }

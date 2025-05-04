@@ -106,11 +106,10 @@ public abstract class ShipBoard implements Serializable {
         try {
             this.focusedComponent = focusedComponent;
 
-            for (String s : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyChooseComponent(s, player.getNickname(), focusedComponent);
+            for (String nickname : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nickname).notifyChooseComponent(nickname, player.getNickname(), focusedComponent);
             }
-        }
-        catch(RemoteException e){
+        } catch(RemoteException e){
             System.err.println("Remote Exception");
         }
     }

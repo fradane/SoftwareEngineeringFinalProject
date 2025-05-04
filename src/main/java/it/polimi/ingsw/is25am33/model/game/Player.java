@@ -39,14 +39,13 @@ public class Player implements Serializable {
     }
 
     public void addCredits(int number) {
-        try{
+        try {
             ownedCredits += number;
 
             for(String s: gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyPlayerCredits(s, nickname, ownedCredits );
+                gameContext.getClientControllers().get(s).notifyPlayerCredits(s, nickname, ownedCredits);
             }
-        }
-        catch(RemoteException e){
+        } catch(RemoteException e){
             System.err.println("Remote Exception");
         }
     }

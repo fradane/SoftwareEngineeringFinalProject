@@ -19,7 +19,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws RemoteException;
 
-    void notifyGameStarted(String nickname, GameState gameState, GameInfo gameInfo) throws RemoteException;
+    void notifyGameStarted(String nickname, GameInfo gameInfo) throws RemoteException;
 
     void notifyGameState(String nickname, GameState gameState) throws RemoteException;
 
@@ -50,5 +50,7 @@ public interface CallableOnClientController extends Remote {
     void notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException;
 
     void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws RemoteException;
+
+    void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException;
 
 }
