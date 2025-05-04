@@ -72,8 +72,6 @@ public class GameModel {
                 });
     }
 
-    public void setObservers(Map<String, CallableOnClientController> clientControllers){}
-
     public void setStarted(boolean started) {
         isStarted = started;
     }

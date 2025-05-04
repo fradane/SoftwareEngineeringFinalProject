@@ -43,11 +43,12 @@ public class ComponentTable {
             synchronized (visibleComponents) {
                 component.setCurrState(ComponentState.VISIBLE);
                 visibleComponents.put(currVisibleIndex, component);
-                currVisibleIndex++;
 
-                for (String s : gameContext.getClientControllers().keySet()) {
-                    gameContext.getClientControllers().get(s).notifyVisibleComponents(s, visibleComponents);
+                for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
+                    gameContext.getClientControllers().get(nicknameToNotify).notifyAddVisibleComponents(nicknameToNotify, currVisibleIndex, component);
                 }
+
+                currVisibleIndex++;
 
             }
         }
@@ -58,8 +59,8 @@ public class ComponentTable {
 
     public Component pickVisibleComponent(int index) {
         try {
-            for (String s : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyVisibleComponents(s, visibleComponents);
+            for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nicknameToNotify).notifyRemoveVisibleComponents(nicknameToNotify, index);
             }
         } catch (RemoteException e) {
             System.err.println("Remote Exception");

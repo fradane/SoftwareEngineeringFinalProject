@@ -189,8 +189,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 }
             };
         } catch (Exception e) {
-            e.printStackTrace();
-            //view.showError(e.getMessage());
+            view.showError(e.getMessage());
             return true;
         }
     }
@@ -436,42 +435,56 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.notifyHourglassRestarted(flipsLeft);
     }
 
+    @Override
     public void notifyGameState(String nickname, GameState gameState) throws RemoteException{
         clientModel.setGameState(gameState);
         view.showNewGameState();
     }
 
+    @Override
     public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws RemoteException{
         clientModel.setCurrDangerousObj(dangerousObj);
         view.showDangerousObj();
     }
 
+    @Override
     public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws RemoteException{
         clientModel.setCurrentPlayer(nickname);
         view.showMessage("Current player is: " + nickname);
     }
 
+    @Override
     public void notifyCurrAdventureCard(String nickname, AdventureCard adventureCard) throws RemoteException{
         clientModel.setCurrAdventureCard(adventureCard);
         view.showCurrAdventureCard(true);
     }
 
-    public void notifyVisibleComponents(String nickname, Map<Integer, Component> visibleComponents) throws RemoteException{
-        clientModel.setVisibleComponents(visibleComponents);
+    @Override
+    public void notifyAddVisibleComponents(String nickname, int index, Component component) throws RemoteException{
+        clientModel.getVisibleComponents().put(index, component);
     }
 
+    @Override
+    public void notifyRemoveVisibleComponents(String nickname, int index) throws RemoteException{
+        clientModel.getVisibleComponents().remove(index);
+    }
+
+    @Override
     public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
         clientModel.getShipboardOf(nickname).getShipBoardMatrix()[coordinates.getX()][coordinates.getY()] = component;
     }
 
+    @Override
     public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException {
         clientModel.getShipboardOf(nickname).setShipBoardMatrix(shipMatrix);
     }
 
+    @Override
     public void notifyChooseComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws RemoteException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(focusedComponent);
     }
 
+    @Override
     public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws RemoteException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
     }
@@ -485,20 +498,24 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.showMessage(nickname + " has " + credits + " credits.");
     }
 
-    public void notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException {
-        //clientModel.setFlyingBoard(flyingBoard);
+    @Override
+    public void notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) throws RemoteException{
+        clientModel.updatePlayerPosition(nickname,newPosition);
     }
 
-    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname, FlyingBoard flyingBoard) throws RemoteException {
-        //clientModel.setFlyingBoard(flyingBoard);
+    @Override
+    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws RemoteException{
+        clientModel.getRanking().remove(nickname);
         view.showMessage(nickname + " was eliminated.");
     }
 
+    @Override
     public void notifyCardState(String nickname, CardState cardState) throws RemoteException {
         clientModel.setCardState(cardState);
         view.showNewCardState();
     }
 
+    @Override
     public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDecks) throws RemoteException {
         clientModel.setLittleVisibleDeck(littleVisibleDecks);
     }

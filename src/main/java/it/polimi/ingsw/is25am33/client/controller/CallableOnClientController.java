@@ -37,7 +37,9 @@ public interface CallableOnClientController extends Remote {
 
     void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws RemoteException;
 
-    void notifyVisibleComponents(String nickname, Map<Integer, Component> visibleComponents) throws RemoteException;
+    void notifyAddVisibleComponents(String nicknameToNotify, int index, Component component) throws RemoteException;
+
+    void notifyRemoveVisibleComponents(String nicknameToNotify, int index) throws RemoteException;
 
     void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException;
 
@@ -45,12 +47,13 @@ public interface CallableOnClientController extends Remote {
 
     void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException;
 
-    void notifyEliminatedPlayer(String nicknameToNotify, String nickname, FlyingBoard flyingBoard) throws RemoteException;
+    void notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws RemoteException;
 
-    void notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException;
+    void notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) throws RemoteException;
 
     void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws RemoteException;
 
     void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException;
 
+    void notifyHourglassStarted(String nicknameToNotify) throws RemoteException;
 }

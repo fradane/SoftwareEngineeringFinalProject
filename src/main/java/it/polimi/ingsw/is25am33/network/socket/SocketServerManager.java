@@ -271,36 +271,42 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
     public void notifyGameState(String nickname, GameState gameState) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyGameState");
         outMessage.setParamGameState(gameState);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
     public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyDangerousObjAttack");
         outMessage.setParamDangerousObj(dangerousObj);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
     public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname){
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrPlayerChanged");
         outMessage.setParamString(nickname);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
     public void notifyCurrAdventureCard(String nickname, AdventureCard adventureCard) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCard");
         outMessage.setParamAdventureCard(adventureCard);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
     public void notifyCardState(String nickname, CardState cardState) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyCardState");
         outMessage.setParamCardState(cardState);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
     public void notifyChooseComponent(String nicknameToNotify, String nickname, Component component) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyChooseComponent");
         outMessage.setParamString(nickname);
@@ -308,12 +314,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
     public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyReleaseComponent");
         outMessage.setParamString(nickname);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
     public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyBookedComponent");
         outMessage.setParamString(nickname);
@@ -321,12 +329,22 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
-    public void notifyVisibleComponents(String nickname, Map<Integer, Component> visibleComponents) throws RemoteException{
-        SocketMessage outMessage = new SocketMessage("server", "notifyVisibleComponents");
-        outMessage.setParamVisibleComponents(visibleComponents);
+    @Override
+    public void notifyAddVisibleComponents(String nickname, int index, Component component) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage("server", "notifyAddVisibleComponents");
+        outMessage.setParamInt(index);
+        outMessage.setParamComponent(component);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
+    public void notifyRemoveVisibleComponents(String nickname, int index) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage("server", "notifyRemoveVisibleComponents");
+        outMessage.setParamInt(index);
+        writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
     public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyComponentPlaced");
         outMessage.setParamString(nickname);
@@ -335,6 +353,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
     public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyShipBoardUpdate");
         outMessage.setParamString(nickname);
@@ -342,17 +361,26 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
-    public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException {
+    @Override
+    public void  notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerCredits");
         outMessage.setParamString(nickname);
         outMessage.setParamInt(credits);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
-    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname, FlyingBoard flyingBoard) throws RemoteException {
+    @Override
+    public void  notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyEliminatedPlayer");
         outMessage.setParamString(nickname);
-        outMessage.setParamFlyingBoard(flyingBoard);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void  notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage("server", "notifyRankingUpdate");
+        outMessage.setParamString(nickname);
+        outMessage.setParamInt(newPosition);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
@@ -362,6 +390,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
     public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyFlyingBoardUpdate");
         outMessage.setParamLittleVisibleDecks(littleVisibleDeck);

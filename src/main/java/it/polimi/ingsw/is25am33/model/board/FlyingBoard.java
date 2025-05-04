@@ -69,8 +69,8 @@ public abstract class FlyingBoard {
             outPlayers.add(player);
             ranking.remove(player);
 
-            for(String s: gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyEliminatedPlayer(s,player.getNickname(), this);
+            for(String nicknameToNotify: gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nicknameToNotify).notifyEliminatedPlayer(nicknameToNotify,player.getNickname());
             }
         }
         catch(RemoteException e){
@@ -127,8 +127,8 @@ public abstract class FlyingBoard {
             }
             ranking.put(player, newPosition);
 
-            for(String s: gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyFlyingBoardUpdate(s,this);
+            for(String nicknameToNotify: gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nicknameToNotify).notifyRankingUpdate(nicknameToNotify,player.getNickname(),newPosition);
             }
         }
         catch(RemoteException e){
