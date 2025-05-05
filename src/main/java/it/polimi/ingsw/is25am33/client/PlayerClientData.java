@@ -62,4 +62,9 @@ public class PlayerClientData {
     public void setShipBoard(ShipBoardClient shipBoard) {
         this.shipBoard = shipBoard;
     }
+
+    public boolean isOut() {
+        return flyingBoardPosition == -1;
+    }
+
 }

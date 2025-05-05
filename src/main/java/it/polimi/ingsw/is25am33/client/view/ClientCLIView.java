@@ -11,6 +11,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.client.Hourglass;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -38,6 +39,7 @@ public class ClientCLIView implements ClientView {
     private volatile boolean waitingForInput = false;
     private static final String INPUT_INTERRUPT = "";
     private final ClientModel clientModel;
+    private final Object consoleLock = new Object();
 
     // Definizione dei colori ANSI (funziona nei terminali che supportano i colori ANSI).
     private static final String ANSI_RED = "\u001B[31m";
@@ -85,23 +87,25 @@ public class ClientCLIView implements ClientView {
      * @return L'input dell'utente o stringa vuota in caso di interruzione
      */
     public String askForInput(String prompt) {
-        System.out.print(prompt);
-        waitingForInput = true;
+        synchronized (consoleLock) {
+            System.out.print(prompt);
+            waitingForInput = true;
 
-        try {
-            String input = null;
-            // Controlla periodicamente se è arrivato input
-            while (input == null && waitingForInput) {
-                input = inputQueue.poll(200, TimeUnit.MILLISECONDS);
-                // Qui puoi inserire codice per gestire notifiche dal server
+            try {
+                String input = null;
+                // Controlla periodicamente se è arrivato input
+                while (input == null && waitingForInput) {
+                    input = inputQueue.poll(200, TimeUnit.MILLISECONDS);
+                    // Qui puoi inserire codice per gestire notifiche dal server
+                }
+
+                return input != null ? input : INPUT_INTERRUPT;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return INPUT_INTERRUPT;
+            } finally {
+                waitingForInput = false;
             }
-
-            return input != null ? input : "";
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return "";
-        } finally {
-            waitingForInput = false;
         }
     }
 
@@ -115,7 +119,9 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showMessage(String message) {
-        System.out.println(message);
+        synchronized (consoleLock) {
+            System.out.println(message);
+        }
     }
 
     @Override
@@ -392,14 +398,16 @@ public class ClientCLIView implements ClientView {
         while (true) {
 
             try {
-                System.out.println("\nChoose an option:");
-                System.out.println("1. Pick a random covered component from the table");
-                System.out.println("2. Pick a visible component from the table");
-                System.out.println("3. End your shipBoard setup phase");
-                System.out.println("4. Show one of the ship boards");
-                System.out.println("5. Restart hourglass");
-                System.out.println("6. Watch a little deck");
-                String input = askForInput("Your choice: ");
+
+                String input = askForInput("""
+                    \nChoose an option:
+                    1. Pick a random covered component from the table
+                    2. Pick a visible component from the table
+                    3. End your shipBoard setup phase
+                    4. Show one of the ship boards
+                    5. Restart hourglass
+                    6. Watch a little deck
+                    Your choice:\s""");
 
                 // TODO
                 //if (input.equals(INPUT_INTERRUPT)) return;
@@ -1259,7 +1267,7 @@ public class ClientCLIView implements ClientView {
     @Override
     public void updateTimeLeft(int timeLeft) {
         if (timeLeft % 10 == 0) {
-            showMessage("Time left: " + timeLeft);
+            showMessage(ANSI_BLUE + "Time left: " + timeLeft + ANSI_RESET);
         }
     }
 

@@ -6,10 +6,12 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
-import it.polimi.ingsw.is25am33.model.game.Hourglass;
+import it.polimi.ingsw.is25am33.client.Hourglass;
 
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class ClientModel {
 
@@ -31,6 +33,10 @@ public class ClientModel {
 
     public void setHourglass(Hourglass hourglass) {
         this.hourglass = hourglass;
+    }
+
+    public void eliminatePlayer(String nickname) {
+        playerClientData.get(nickname).setFlyingBoardPosition(-1);
     }
 
     public void setMyNickname(String myNickname) {
@@ -98,6 +104,7 @@ public class ClientModel {
     public List<String> getSortedRanking() {
         return playerClientData.keySet()
                 .stream()
+                .filter(player -> !playerClientData.get(player).isOut())
                 .sorted((a, b) -> Integer.compare(playerClientData.get(a).getFlyingBoardPosition(), playerClientData.get(b).getFlyingBoardPosition()))
                 .toList()
                 .reversed();
@@ -143,10 +150,16 @@ public class ClientModel {
         return playerClientData.get(nickname).getShipBoard();
     }
 
-    public List<String> getPlayersNickname() {
-        return new ArrayList<>(playerClientData.keySet());
+    public Set<String> getPlayersNickname() {
+        return new HashSet<>(playerClientData.keySet());
     }
 
+    public Set<String> getEliminatedPlayers() {
+        return playerClientData.keySet()
+                .stream()
+                .filter(player -> playerClientData.get(player).isOut())
+                .collect(Collectors.toSet());
+    }
 
 
     /*

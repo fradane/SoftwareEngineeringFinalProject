@@ -87,14 +87,14 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     public void notifyGameStarted() {
         new Thread( () -> {
             clientControllers.keySet()
-                    .stream()
-                    .forEach(nickname -> {
-                        try {
-                            clientControllers.get(nickname).notifyGameStarted(nickname, getGameInfo());
-                        } catch (RemoteException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                .stream()
+                .forEach(nickname -> {
+                    try {
+                        clientControllers.get(nickname).notifyGameStarted(nickname, getGameInfo());
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
         }).start();
     }
 

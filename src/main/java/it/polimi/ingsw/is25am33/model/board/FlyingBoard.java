@@ -69,9 +69,10 @@ public abstract class FlyingBoard {
             outPlayers.add(player);
             ranking.remove(player);
 
-            for(String nicknameToNotify: gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nicknameToNotify).notifyEliminatedPlayer(nicknameToNotify,player.getNickname());
+            for(String nicknameToNotify : gameContext.getClientControllers().keySet()) {
+                gameContext.getClientControllers().get(nicknameToNotify).notifyEliminatedPlayer(nicknameToNotify, player.getNickname());
             }
+
         }
         catch(RemoteException e){
             System.err.println("Remote Exception");

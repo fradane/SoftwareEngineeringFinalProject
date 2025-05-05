@@ -55,5 +55,4 @@ public interface CallableOnClientController extends Remote {
 
     void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException;
 
-    void notifyHourglassStarted(String nicknameToNotify) throws RemoteException;
 }

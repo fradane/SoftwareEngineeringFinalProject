@@ -5,7 +5,6 @@ import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -13,7 +12,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.model.game.Hourglass;
+import it.polimi.ingsw.is25am33.client.Hourglass;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 
@@ -505,7 +504,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws RemoteException{
-        clientModel.getRanking().remove(nickname);
+        clientModel.eliminatePlayer(nickname);
         view.showMessage(nickname + " was eliminated.");
     }
 
@@ -547,6 +546,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
 
     }
+
 
 
 }

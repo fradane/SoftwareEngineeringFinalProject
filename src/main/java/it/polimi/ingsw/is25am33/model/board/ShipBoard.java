@@ -177,8 +177,7 @@ public abstract class ShipBoard implements Serializable {
                     focusedComponent = null;
                 }
             }
-        }
-        catch(RemoteException e){
+        } catch(RemoteException e) {
             System.err.println("Remote Exception");
         }
 
