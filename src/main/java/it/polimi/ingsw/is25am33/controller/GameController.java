@@ -2,7 +2,6 @@ package it.polimi.ingsw.is25am33.controller;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
@@ -366,8 +365,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerWantsToRestartHourglass(String nickname) {
+    public void playerWantsToRestartHourglass(String nickname) throws RemoteException {
         gameModel.restartHourglass(nickname);
+    }
+
+    @Override
+    public void notifyHourglassEnded(String nickname) {
+        gameModel.hourglassEnded();
     }
 
 }

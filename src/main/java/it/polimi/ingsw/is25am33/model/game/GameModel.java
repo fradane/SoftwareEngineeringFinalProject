@@ -12,8 +12,6 @@ import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
 import java.rmi.RemoteException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -34,8 +32,12 @@ public class GameModel {
     private final Deck deck;
     private final ComponentTable componentTable;
     private GameContext gameContext;
-    private final Object lock = new Object();
+
+    // attributes useful for hourglass restarting
+    private final Object hourglassLock = new Object();
     private Integer flipsLeft;
+    private Integer numClientsFinishedTimer = 0;
+    private Boolean isRestartInProgress = false;
 
     public GameModel(String gameId, int maxPlayers, boolean isTestFlight) {
         this.gameId = gameId;
@@ -54,22 +56,52 @@ public class GameModel {
         flipsLeft = isTestFlight ? 1 : 3;
     }
 
-    public void restartHourglass(String nickname) {
-        synchronized (lock) {
-            if (flipsLeft > 0)
+    /**
+     * Restarts the hourglass for a game session. This method ensures that all players have completed
+     * their timers before notifying them about the restart, and it decrements the number of flips left.
+     * Throws a RemoteException if there are no flips left or if another player is already restarting the hourglass.
+     *
+     * @param nickname the nickname of the player who initiated the restart
+     * @throws RemoteException if there are no more flips available, a restart is already in progress,
+     *                         or an interruption occurs during the waiting process
+     */
+    public void restartHourglass(String nickname) throws RemoteException {
+
+        synchronized (hourglassLock) {
+            if (flipsLeft == 0)
+                throw new RemoteException("No more flips available");
+            if (isRestartInProgress)
+                throw new RemoteException("Another player is already restarting the hourglass. Please wait.");
+
+            isRestartInProgress = true;
+
+            try {
+                while (numClientsFinishedTimer < players.size()) {
+                    try {
+                        hourglassLock.wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RemoteException("Interrupted while waiting for all clients to finish the timer.");
+                    }
+                }
+
+                gameContext.getClientControllers()
+                        .forEach((nicknameToNotify, controller) -> {
+                            try {
+                                controller.notifyHourglassRestarted(nicknameToNotify, nickname, flipsLeft);
+                            } catch (RemoteException e) {
+                                System.err.println("Remote Exception");
+                            }
+                        });
+
                 flipsLeft--;
-            else
-                return;
+                numClientsFinishedTimer = 0;
+
+            } finally {
+                isRestartInProgress = false;
+            }
         }
 
-        gameContext.getClientControllers()
-                .forEach((nicknameToNotify, controller) -> {
-                    try {
-                        controller.notifyHourglassRestarted(nicknameToNotify, nickname, flipsLeft);
-                    } catch (RemoteException e) {
-                        System.err.println("Remote Exception");
-                    }
-                });
     }
 
     public void setStarted(boolean started) {
@@ -115,8 +147,7 @@ public class GameModel {
             for (String nickname : gameContext.getClientControllers().keySet()) {
                 gameContext.getClientControllers().get(nickname).notifyGameState(nickname, currGameState);
             }
-        }
-        catch(RemoteException e){
+        } catch(RemoteException e){
             System.err.println("Remote Exception");
         }
     }
@@ -302,6 +333,33 @@ public class GameModel {
 
     public void removePlayer(String nickname) {
         players.remove(nickname);
+    }
+
+    public void hourglassEnded() {
+
+        synchronized (hourglassLock) {
+            numClientsFinishedTimer++;
+
+            if (flipsLeft > 0 || isRestartInProgress)
+                hourglassLock.notifyAll();
+
+            else {
+                isRestartInProgress = true;
+
+                while (numClientsFinishedTimer < players.size()) {
+                    try {
+                        hourglassLock.wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        System.err.println(e.getMessage());
+                    }
+                }
+
+                setCurrGameState(GameState.CHECK_SHIPBOARD);
+
+            }
+
+        }
     }
 
 }

@@ -515,4 +515,10 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    @Override
+    public void notifyHourglassEnded(String nickname) {
+        SocketMessage outMessage = new SocketMessage(nickname, "notifyHourglassEnded");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
 }

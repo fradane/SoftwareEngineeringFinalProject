@@ -136,7 +136,6 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public String askServerAddress() {
-        System.out.print("Enter server address: ");
         String address = askForInput("Enter server address (default: localhost): ");
         return address.isEmpty() ? "localhost" : address;
     }
@@ -494,9 +493,23 @@ public class ClientCLIView implements ClientView {
 
                         return (server, nickname) -> {
                             try {
+                                showMessage("Restarting the hourglass...");
                                 server.playerWantsToRestartHourglass(nickname);
+                                showMessage("The hourglass has been restarted.");
                             } catch (RemoteException e) {
-                                throw new RuntimeException(e);
+                                switch (e.getMessage()) {
+
+                                    case "No more flips available.",
+                                         "Interrupted while waiting for all clients to finish the timer.",
+                                         "Another player is already restarting the hourglass. Please wait.":
+                                        showMessage(e.getMessage());
+                                        break;
+
+                                    default:
+                                        showMessage("An error occurred: " + e.getMessage());
+                                        break;
+
+                                }
                             }
                             return false;
                         };
@@ -540,9 +553,28 @@ public class ClientCLIView implements ClientView {
         }
     }
 
+    /**
+     * Notifies that the hourglass timer has started or restarted, providing the number of flips left
+     * and the nickname of the player or entity responsible for the action.
+     *
+     * @param flipsLeft the number of flips remaining for the hourglass timer
+     * @param nickname the nickname associated with the player initiating the timer action or "game" if it is the first time
+     */
     @Override
-    public void notifyHourglassRestarted(int flipsLeft) {
-        System.out.println("Hourglass restarted!!! There will be " + flipsLeft + " flips left at the end of this timer.");
+    public void notifyHourglassStarted(int flipsLeft, String nickname) {
+
+        if (nickname.equals("game")) {
+            showMessage(ANSI_BLUE + "Hourglass started!!! There will be " + flipsLeft + " flips left at the end of this timer." + ANSI_RESET);
+            return;
+        }
+
+        if (flipsLeft == 0)
+            showMessage(ANSI_BLUE + "Hourglass restarted by " + nickname + "!!! There will be no flips left at the end of this timer." + ANSI_RESET);
+        else if (flipsLeft == 1)
+            showMessage(ANSI_BLUE + "Hourglass restarted by " + nickname + "!!! There will be " + flipsLeft + " flip left at the end of this timer." + ANSI_RESET);
+        else
+            showMessage(ANSI_BLUE + "Hourglass restarted by " + nickname + "!!! There will be " + flipsLeft + " flips left at the end of this timer." + ANSI_RESET);
+
     }
 
     @Override
@@ -554,8 +586,9 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void notifyNoMoreComponentAvailable() {
-        this.showMessage("No more component available.");
-        this.showMessage("Tip: if you want more components to build your shipboard look among the visible ones.");
+        this.showMessage("""
+                No more component available.
+                Tip: if you want more components to build your shipboard look among the visible ones.""");
     }
 
     /**
@@ -583,13 +616,14 @@ public class ClientCLIView implements ClientView {
         while (true) {
 
             try {
-                System.out.println("\nChoose an action:");
-                System.out.println("1. Rotate the component");
-                System.out.println("2. Place component on ship board");
-                System.out.println("3. Reserve component");
-                System.out.println("4. Release component");
-                System.out.println("5. Show your ship board");
-                int choice = Integer.parseInt(askForInput("Your choice: "));
+                int choice = Integer.parseInt(askForInput("""
+                        \nChoose an action:
+                        1. Rotate the component
+                        2. Place component on ship board
+                        3. Reserve component
+                        4. Release component
+                        5. Show your ship board
+                        Your choice:\s"""));
 
                 switch (choice) {
                     case 1:
@@ -1259,14 +1293,16 @@ public class ClientCLIView implements ClientView {
     @Override
     public void notifyTimerEnded(int flipsLeft) {
         if (flipsLeft == 0)
-            showMessage("Timer ended! You cannot build your ship anymore.");
+            showMessage(ANSI_BLUE + "Timer ended! You cannot build your ship anymore." + ANSI_RESET);
+        else if (flipsLeft == 1)
+            showMessage(ANSI_BLUE + "Timer ended! There is now " + flipsLeft + " flip left." + ANSI_RESET);
         else
-            showMessage("Timer ended! There are now " + flipsLeft + " flips left.");
+            showMessage(ANSI_BLUE + "Timer ended! There are now " + flipsLeft + " flips left." + ANSI_RESET);
     }
 
     @Override
     public void updateTimeLeft(int timeLeft) {
-        if (timeLeft % 10 == 0) {
+        if (timeLeft % 20 == 0 && timeLeft != 0 && timeLeft != 60) {
             showMessage(ANSI_BLUE + "Time left: " + timeLeft + ANSI_RESET);
         }
     }
@@ -1295,6 +1331,12 @@ public class ClientCLIView implements ClientView {
         }
 
         cli.showShipBoard(griglia, "pippo");
+
+        String RESET = "\u001B[0m";
+        String CYAN = "\u001B[36m";
+        String YELLOW = "\u001B[33m";
+        String MAGENTA = "\u001B[35m";
+
     }
 
 }

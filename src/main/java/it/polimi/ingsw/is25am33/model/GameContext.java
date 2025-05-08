@@ -5,6 +5,7 @@ import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class GameContext {
     private  Map<String, CallableOnClientController> clientControllers;
@@ -16,6 +17,5 @@ public class GameContext {
     public Map<String, CallableOnClientController> getClientControllers() {
         return clientControllers;
     }
-
 }
 

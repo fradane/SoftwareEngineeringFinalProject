@@ -359,10 +359,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                     default:
                         System.out.println("Invalid choice. Please enter 1 or 2.");
                 }
-            } catch (RemoteException e) {
-                System.out.println("Connection refused: " + e.getMessage());
             } catch (IOException e) {
-                System.out.println(e.getMessage());
+                view.showError("Connection refused: " + e.getMessage());
+            } catch (NumberFormatException e) {
+                view.showMessage("Invalid choice. Please enter 1 or 2.");
             }
         }
     }
@@ -420,8 +420,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                     clientModel.addPlayer(nickname, color)
                 );
         view.notifyGameStarted(GameState.BUILD_SHIPBOARD);
-        clientModel.setHourglass(new Hourglass(gameInfo.isTestFlight()));
-        clientModel.getHourglass().start(view);
+        clientModel.setHourglass(new Hourglass(gameInfo.isTestFlight(), this));
+        clientModel.getHourglass().start(view, "game");
 
         // Se la view è di tipo ClientCLIView, possiamo interrompere l'attesa
         if (view instanceof ClientCLIView)
@@ -430,8 +430,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException {
-        clientModel.getHourglass().start(view);
-        view.notifyHourglassRestarted(flipsLeft);
+        if (nickname.equals(this.nickname))
+            nickname = "you";
+
+        clientModel.getHourglass().start(view, nickname);
     }
 
     @Override
@@ -547,6 +549,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     }
 
-
+    public void notifyHourglassEnded() throws RemoteException {
+        serverController.notifyHourglassEnded(nickname);
+        if (clientModel.getHourglass().getFlipsLeft() == 0) {
+            //TODO
+            clientModel.setGameState(GameState.CHECK_SHIPBOARD);
+            view.showNewGameState();
+        }
+    }
 
 }

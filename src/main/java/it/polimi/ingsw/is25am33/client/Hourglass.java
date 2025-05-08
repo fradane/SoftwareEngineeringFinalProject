@@ -1,7 +1,9 @@
 package it.polimi.ingsw.is25am33.client;
 
+import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 
+import java.rmi.RemoteException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +18,7 @@ public class Hourglass {
     private int timeLeft;
     private int flipsLeft;
     private boolean isRunning;
+    private final ClientController controller;
 
     /**
      * Constructs an Hourglass instance with a specified mode indicating if it is for a test flight.
@@ -23,9 +26,10 @@ public class Hourglass {
      * @param isTestFlight if true, the Hourglass is initialized for a test flight with zero flips left;
      *                     if false, it is initialized with two flips left.
      */
-    public Hourglass(boolean isTestFlight) {
+    public Hourglass(boolean isTestFlight, ClientController controller) {
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.isRunning = false;
+        this.controller = controller;
 
         if (isTestFlight)
             this.flipsLeft = 0;
@@ -50,11 +54,13 @@ public class Hourglass {
      * @param view the client view used to update the remaining time
      *             and notify when the timer ends
      */
-    public void start(ClientView view) {
+    public void start(ClientView view, String nickname) {
 
         if (scheduler != null) {
             scheduler.shutdown();
         }
+
+        view.notifyHourglassStarted(flipsLeft, nickname);
 
         scheduler = Executors.newScheduledThreadPool(1);
 
@@ -62,13 +68,20 @@ public class Hourglass {
         flipsLeft--;
         timeLeft = 60;
         scheduler.scheduleAtFixedRate(() -> {
-            view.updateTimeLeft(timeLeft);
 
             if (timeLeft > 0) {
+                view.updateTimeLeft(timeLeft);
                 timeLeft--;
             } else {
                 scheduler.shutdown();
                 view.notifyTimerEnded(flipsLeft);
+
+                try {
+                    controller.notifyHourglassEnded();
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+
                 isRunning = false;
             }
 

@@ -2,13 +2,10 @@ package it.polimi.ingsw.is25am33.client.view;
 
 import it.polimi.ingsw.is25am33.client.ClientModel;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.List;
 import java.util.Map;
@@ -187,5 +184,5 @@ public interface ClientView {
 
     void notifyTimerEnded(int flipsLeft);
 
-    void notifyHourglassRestarted(int flipsLeft);
+    void notifyHourglassStarted(int flipsLeft, String nickname);
 }

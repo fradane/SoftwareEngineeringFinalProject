@@ -231,6 +231,10 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).stardustEvent(nickname);
                 break;
 
+            case "notifyHourglassEnded":
+                gameControllers.get(nickname).notifyHourglassEnded(nickname);
+                break;
+
             // TODO debug
             case "showMessage":
                 String message = inMessage.getParamString();
