@@ -23,6 +23,9 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
+import static it.polimi.ingsw.is25am33.client.view.MessageType.ERROR;
+import static it.polimi.ingsw.is25am33.client.view.MessageType.STANDARD;
+
 public class ClientController extends UnicastRemoteObject implements CallableOnClientController {
 
     private ClientView view;
@@ -93,7 +96,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 if (!registered) {
                     view.showError("Nickname already exists");
                 } else {
-                    view.showMessage("Nickname registered successfully!");
+                    view.showMessage("Nickname registered successfully!", STANDARD);
                     this.nickname = attemptedNickname;
                 }
             } catch (IOException e) {
@@ -142,7 +145,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
             cardPhase();
 
-            view.askForInput("FINE PER ADESSO");
+            view.askForInput("", "FINE PER ADESSO");
 
             return true;
         }
@@ -231,7 +234,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         view.notifyGameCreated(currentGameId);
         view.notifyPlayerJoined(this.nickname, gameInfo);
-        view.showMessage("Waiting for other players to join...");
+        view.showMessage("Waiting for other players to join...", STANDARD);
     }
 
     /**
@@ -248,7 +251,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 List<GameInfo> games = dns.getAvailableGames();
 
                 if (games.isEmpty()) {
-                    view.showMessage("No games available.");
+                    view.showMessage("No games available.", STANDARD);
                     return;
                 }
 
@@ -293,8 +296,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             inGame = true;
             //TODO debug
             serverController.showMessage("Hello from " + nickname);
-            view.showMessage("Successfully joined game!");
-            view.showMessage("Waiting for the game to start...");
+            view.showMessage("Successfully joined game!", STANDARD);
+            view.showMessage("Waiting for the game to start...", STANDARD);
 
         } catch (NumberFormatException e) {
             view.showError("Invalid color choice: " + e.getMessage());
@@ -439,7 +442,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws RemoteException {
-        view.showMessage(ANSI_BLUE + newPlayerNickname + ANSI_RESET + " joined the game!");
+        view.showMessage(ANSI_BLUE + newPlayerNickname + ANSI_RESET + " joined the game!", STANDARD);
     }
 
     @Override
@@ -482,7 +485,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws RemoteException{
         clientModel.setCurrentPlayer(nickname);
-        view.showMessage("Current player is: " + nickname);
+        view.showMessage("Current player is: " + nickname, STANDARD);
     }
 
     @Override
@@ -527,7 +530,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException {
         clientModel.updatePlayerCredits(nickname, credits);
-        view.showMessage(nickname + " has " + credits + " credits.");
+        view.showMessage(nickname + " has " + credits + " credits.", STANDARD);
     }
 
     @Override
@@ -538,7 +541,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws RemoteException{
         clientModel.eliminatePlayer(nickname);
-        view.showMessage(nickname + " was eliminated.");
+        view.showMessage(nickname + " was eliminated.", STANDARD);
     }
 
     @Override

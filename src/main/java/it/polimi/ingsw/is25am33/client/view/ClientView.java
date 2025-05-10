@@ -22,7 +22,7 @@ public interface ClientView {
      */
     void initialize();
 
-    String askForInput(String question);
+    String askForInput(String questionDescription, String interrogationPrompt);
 
     void cancelInputWaiting();
 
@@ -30,7 +30,7 @@ public interface ClientView {
      * Mostra un messaggio all'utente
      * @param message Il messaggio da mostrare
      */
-    void showMessage(String message);
+    void showMessage(String message, MessageType type);
 
     /**
      * Mostra un messaggio di errore all'utente
