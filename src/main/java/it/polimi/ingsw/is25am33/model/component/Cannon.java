@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.component;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
@@ -76,11 +77,13 @@ public class Cannon extends Component implements Rotatable {
     }
 
     @Override
+    @JsonIgnore
     public String getLabel() {
         return "CNN";
     }
 
     @Override
+    @JsonIgnore
     public String getMainAttribute() {
         return switch (fireDirection) {
             case NORTH -> "N";

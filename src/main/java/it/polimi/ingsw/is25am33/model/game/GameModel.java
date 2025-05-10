@@ -234,7 +234,7 @@ public class GameModel {
             this.currAdventureCard = currAdventureCard;
 
             for (String nickname : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nickname).notifyCurrAdventureCard(nickname, currAdventureCard);
+                gameContext.getClientControllers().get(nickname).notifyCurrAdventureCard(nickname, currAdventureCard.toString());
             }
         }
         catch(RemoteException e){

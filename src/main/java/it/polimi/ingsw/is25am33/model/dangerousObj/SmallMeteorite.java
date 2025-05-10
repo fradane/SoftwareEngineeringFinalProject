@@ -12,6 +12,12 @@ public class SmallMeteorite extends Meteorite {
 
     public SmallMeteorite(Direction direction) {
         super(direction);
+        this.dangerousObjType = "smallMeteorite";
+    }
+
+    public SmallMeteorite() {
+        super();
+        this.dangerousObjType = "smallMeteorite";
     }
 
     @Override
@@ -22,7 +28,7 @@ public class SmallMeteorite extends Meteorite {
 
     @Override
     public String getDangerousObjType() {
-        return "SmallMeteorite";
+        return dangerousObjType;
     }
 
     @Override

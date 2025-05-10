@@ -12,6 +12,12 @@ public class SmallShot extends Shot {
 
     public SmallShot(Direction direction) {
         super(direction);
+        this.dangerousObjType = "smallShot";
+    }
+
+    public SmallShot() {
+        super();
+        this.dangerousObjType = "smallShot";
     }
 
     @Override
@@ -21,7 +27,7 @@ public class SmallShot extends Shot {
 
     @Override
     public String getDangerousObjType() {
-        return "SmallShot";
+        return dangerousObjType;
     }
 
     @Override

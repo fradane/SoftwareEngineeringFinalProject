@@ -77,8 +77,6 @@ public class ClientCLIView implements ClientView {
         });
         inputThread.setDaemon(true); // Termina quando il thread principale termina
         inputThread.start();
-
-        System.out.println("=== Galaxy Trucker Client ===");
     }
 
     /**
@@ -932,14 +930,16 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public BiConsumer<CallableOnGameController, String> showChoosePlanetMenu(){
-        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip): "));
-        return(server, nickname) -> {
-            try {
-                server.playerWantsToVisitPlanet(nickname, choice);
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
-        };
+        return null;
+        // TODO
+//        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip): "));
+//        return(server, nickname) -> {
+//            try {
+//                server.playerWantsToVisitPlanet(nickname, choice);
+//            } catch (RemoteException e) {
+//                throw new RuntimeException(e);
+//            }
+//        };
     }
 
     @Override

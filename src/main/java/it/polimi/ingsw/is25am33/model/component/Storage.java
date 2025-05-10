@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.component;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
@@ -145,6 +146,7 @@ public abstract class Storage extends Component {
     }
 
     @Override
+    @JsonIgnore
     public String getMainAttribute() {
         return Integer.toString(maxCapacity - stockedCubes.size());
     }

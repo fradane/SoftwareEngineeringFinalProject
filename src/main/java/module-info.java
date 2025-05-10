@@ -26,6 +26,7 @@ module it.polimi.ingsw.is25am33 {
     opens it.polimi.ingsw.is25am33.serializationLayer to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.is25am33.serializationLayer.client to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.is25am33.serializationLayer.server to com.fasterxml.jackson.databind;
+    opens it.polimi.ingsw.is25am33.model.dangerousObj to com.fasterxml.jackson.databind;
 
     // RMI (Remote Method Invocation) Configuration
     // Open packages needed for RMI functionality

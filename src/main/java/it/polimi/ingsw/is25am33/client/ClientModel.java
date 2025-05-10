@@ -17,7 +17,7 @@ public class ClientModel {
 
     private String myNickname;
     private final Map<String, PlayerClientData> playerClientData = new ConcurrentHashMap<>();
-    private AdventureCard currAdventureCard;
+    private String currAdventureCard;
     private CardState currCardState;
     private GameState gameState;
     private DangerousObj currDangerousObj;
@@ -71,11 +71,11 @@ public class ClientModel {
         this.gameState = gameState;
     }
 
-    public void setCurrAdventureCard(AdventureCard card) {
-        this.currAdventureCard = card;
+    public void setCurrAdventureCard(String currAdventureCard) {
+        this.currAdventureCard = currAdventureCard;
     }
 
-    public AdventureCard getCurrAdventureCard() {
+    public String getCurrAdventureCard() {
         return currAdventureCard;
     }
 

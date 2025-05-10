@@ -12,6 +12,12 @@ public class BigShot extends Shot {
 
     public BigShot(Direction direction) {
         super(direction);
+        this.dangerousObjType = "bigShot";
+    }
+
+    public BigShot() {
+        super();
+        this.dangerousObjType = "bigShot";
     }
 
     @Override
@@ -21,7 +27,7 @@ public class BigShot extends Shot {
 
     @Override
     public String getDangerousObjType() {
-        return "BigShot";
+        return dangerousObjType;
     }
 
     @Override

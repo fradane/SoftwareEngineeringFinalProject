@@ -19,7 +19,8 @@ public class ServerDeserializer {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(jsonStringWithData, type);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            System.err.println(e.getMessage());
+            return null;
         }
 
     }

@@ -297,9 +297,9 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyCurrAdventureCard(String nickname, AdventureCard adventureCard) throws RemoteException{
+    public void notifyCurrAdventureCard(String nickname, String adventureCard) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCard");
-        outMessage.setParamAdventureCard(adventureCard);
+        outMessage.setParamString(adventureCard);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
@@ -386,12 +386,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamString(nickname);
         outMessage.setParamInt(newPosition);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-    }
-
-    public void notifyFlyingBoardUpdate(String nickname, FlyingBoard flyingBoard) throws RemoteException {
-        SocketMessage outMessage = new SocketMessage("server", "notifyFlyingBoardUpdate");
-        outMessage.setParamFlyingBoard(flyingBoard);
-        writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override

@@ -261,7 +261,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
                 case "notifyCurrAdventureCard":
                     if (clientController != null) {
-                        clientController.notifyCurrAdventureCard(nickname, notification.getParamAdventureCard());
+                        clientController.notifyCurrAdventureCard(nickname, notification.getParamString());
                     }
                     break;
 

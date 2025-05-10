@@ -10,6 +10,10 @@ public abstract class Shot extends DangerousObj {
         super(direction);
     }
 
+    public Shot() {
+        super();
+    }
+
     public abstract void startAttack(PlayerChoicesDataStructure playerChoices, Pirates pirates);
 
 }

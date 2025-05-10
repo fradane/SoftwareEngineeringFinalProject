@@ -27,7 +27,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws RemoteException;
 
-    void notifyCurrAdventureCard( String nickname, AdventureCard adventureCard) throws RemoteException;
+    void notifyCurrAdventureCard( String nickname, String adventureCard) throws RemoteException;
 
     void notifyCardState(String nickname, CardState cardState) throws RemoteException;
 

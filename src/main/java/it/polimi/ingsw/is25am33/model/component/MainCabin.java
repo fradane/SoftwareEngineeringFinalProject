@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.component;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -45,6 +46,7 @@ public class MainCabin extends Cabin implements Serializable {
     }
 
     @Override
+    @JsonIgnore
     public String getLabel() {
         return "MCB";
     }

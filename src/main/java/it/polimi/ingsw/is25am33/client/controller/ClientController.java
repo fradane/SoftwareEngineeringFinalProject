@@ -51,7 +51,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         ClientModel clientModel = new ClientModel();
 
         // Selezione dell'interfaccia utente
-        ClientView view = selectUserInterface(scanner, clientModel);
+        ClientView view = selectUserInterface(scanner, clientModel, args[0]);
+        if (view == null) {
+            System.err.println("Invalid parameters. Exiting...");
+            return;
+        }
 
         // Creiamo il controller
         ClientController clientController = new ClientController(clientModel);
@@ -59,7 +63,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.initialize();
 
         // Selezione del protocollo di rete
-        CallableOnDNS dns = clientController.selectNetworkProtocol();
+        CallableOnDNS dns = clientController.selectNetworkProtocol(args[1]);
+        if (dns == null) {
+            System.err.println("Invalid parameters. Exiting...");
+            return;
+        }
         clientController.setDns(dns);
 
         clientController.register();
@@ -316,55 +324,78 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * @param scanner Scanner per leggere l'input dell'utente
      * @return L'implementazione di ClientView scelta
      */
-    private static ClientView selectUserInterface(Scanner scanner, ClientModel clientModel) {
-        System.out.println("Select user interface:");
-        System.out.println("1. Command Line Interface (CLI)");
-        System.out.println("2. Graphical User Interface (GUI)");
+    private static ClientView selectUserInterface(Scanner scanner, ClientModel clientModel, String choice) {
 
-        while (true) {
-            System.out.print("Your choice: ");
-            try {
-                int choice = Integer.parseInt(scanner.nextLine());
-                switch (choice) {
-                    case 1:
-                        return new ClientCLIView(clientModel);
-                    case 2:
-                        //return new ClientGUIView();
-                    default:
-                        System.out.println("Invalid choice. Please enter 1 or 2.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number.");
-            }
-        }
+        return switch (choice) {
+            case "cli" -> new ClientCLIView(clientModel);
+            case "rmi" ->
+                // TODO
+                //return new ClientGUIView();
+                    null;
+            default -> null;
+        };
+
+
+//        System.out.println("Select user interface:");
+//        System.out.println("1. Command Line Interface (CLI)");
+//        System.out.println("2. Graphical User Interface (GUI)");
+//
+//        while (true) {
+//            System.out.print("Your choice: ");
+//            try {
+//                int choice = Integer.parseInt(scanner.nextLine());
+//                switch (args) {
+//                    case 1:
+//                        return new ClientCLIView(clientModel);
+//                    case 2:
+//                        //return new ClientGUIView();
+//                    default:
+//                        System.out.println("Invalid choice. Please enter 1 or 2.");
+//                }
+//            } catch (NumberFormatException e) {
+//                System.out.println("Please enter a valid number.");
+//            }
+//        }
     }
 
     /**
      * Permette all'utente di selezionare il protocollo di rete
      * @return L'implementazione di NetworkManager scelta
      */
-    private CallableOnDNS selectNetworkProtocol() throws RemoteException {
-        System.out.println("Select network protocol:");
-        System.out.println("1. RMI (Remote Method Invocation)");
-        System.out.println("2. Socket TCP/IP");
+    private CallableOnDNS selectNetworkProtocol(String choice) {
 
-        while (true) {
-            try {
-                int choice = Integer.parseInt(view.askForInput("Your choice: "));
-                switch (choice) {
-                    case 1:
-                        return this.setUpRMIConnection();
-                    case 2:
-                        return this.setUpSocketConnection();
-                    default:
-                        System.out.println("Invalid choice. Please enter 1 or 2.");
-                }
-            } catch (IOException e) {
-                view.showError("Connection refused: " + e.getMessage());
-            } catch (NumberFormatException e) {
-                view.showMessage("Invalid choice. Please enter 1 or 2.");
-            }
+        try {
+            return switch (choice) {
+                case "rmi" -> this.setUpRMIConnection();
+                case "socket" -> this.setUpSocketConnection();
+                default -> null;
+            };
+        } catch (IOException e) {
+            view.showError("Connection refused: " + e.getMessage());
+            return null;
         }
+
+//        System.out.println("Select network protocol:");
+//        System.out.println("1. RMI (Remote Method Invocation)");
+//        System.out.println("2. Socket TCP/IP");
+//
+//        while (true) {
+//            try {
+//                int choice = Integer.parseInt(view.askForInput("Your choice: "));
+//                switch (choice) {
+//                    case 1:
+//                        return this.setUpRMIConnection();
+//                    case 2:
+//                        return this.setUpSocketConnection();
+//                    default:
+//                        System.out.println("Invalid choice. Please enter 1 or 2.");
+//                }
+//            } catch (IOException e) {
+//                view.showError("Connection refused: " + e.getMessage());
+//            } catch (NumberFormatException e) {
+//                view.showMessage("Invalid choice. Please enter 1 or 2.");
+//            }
+//        }
     }
 
     private CallableOnDNS setUpRMIConnection() throws RemoteException {
@@ -455,7 +486,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyCurrAdventureCard(String nickname, AdventureCard adventureCard) throws RemoteException{
+    public void notifyCurrAdventureCard(String nickname, String adventureCard) throws RemoteException{
         clientModel.setCurrAdventureCard(adventureCard);
         view.showCurrAdventureCard(true);
     }

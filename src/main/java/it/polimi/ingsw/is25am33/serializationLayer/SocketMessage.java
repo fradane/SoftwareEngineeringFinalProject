@@ -41,8 +41,6 @@ public class SocketMessage {
     private Component paramComponent;
     private Component[][] paramShipBoardAsMatrix;
     private DangerousObj paramDangerousObj;
-    private AdventureCard paramAdventureCard;
-    private FlyingBoard paramFlyingBoard;
     private List<List<String>> paramLittleVisibleDecks;
 
     public SocketMessage(String senderNickname, String actions) {
@@ -58,9 +56,7 @@ public class SocketMessage {
         this.paramGameState = GameState.SETUP;
         this.paramComponent = new BatteryBox(new HashMap<>(), 0);
         this.paramGameId = "";
-        this.paramDangerousObj= new BigShot(Direction.NORTH);
-        this.paramAdventureCard= new Planets();
-        this.paramFlyingBoard=new Level1FlyingBoard();
+        this.paramDangerousObj = new BigShot(Direction.NORTH);
         this.paramActivableCoordinates = new ArrayList<>();
         this.paramBatteryBoxCoordinates = new ArrayList<>();
         this.paramCabinCoordinates = new ArrayList<>();
@@ -196,24 +192,8 @@ public class SocketMessage {
         this.paramDangerousObj = paramDangerousObj;
     }
 
-    public AdventureCard getParamAdventureCard() {
-        return paramAdventureCard;
-    }
-
-    public void setParamAdventureCard(AdventureCard paramAdventureCard) {
-        this.paramAdventureCard = paramAdventureCard;
-    }
-
     public DangerousObj getParamDangerousObj() {
         return paramDangerousObj;
-    }
-
-    public FlyingBoard getParamFlyingBoard() {
-        return paramFlyingBoard;
-    }
-
-    public void setParamFlyingBoard(FlyingBoard flyingBoard) {
-        this.paramFlyingBoard = flyingBoard;
     }
 
     public List<List<String>> getParamLittleVisibleDecks() {

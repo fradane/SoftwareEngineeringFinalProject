@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.component;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
@@ -11,7 +12,7 @@ import java.util.*;
 
 /**
  * Abstract representation of a generic component within the system.
- * A component has a state, orientation, and directional connectors.
+ * A component has state, orientation, and directional connectors.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -133,8 +134,10 @@ public abstract class Component implements Serializable {
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
     }
 
+    @JsonIgnore
     public abstract String getLabel();
 
+    @JsonIgnore
     public abstract String getMainAttribute();
 
 }
