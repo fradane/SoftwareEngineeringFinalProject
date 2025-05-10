@@ -149,36 +149,36 @@ public abstract class ShipBoard implements Serializable {
      * @throws IllegalArgumentException If the position is invalid or violates placement rules.
      */
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
-        try {
-            synchronized (shipMatrix) {
-                if (!isValidPosition(x, y))
-                    throw new IllegalArgumentException("Not a valid position");
-                else if (!isPositionConnectedToShip(x, y))
-                    throw new IllegalArgumentException("Not connected to the ship");
-                else if (!areEmptyConnectorsWellConnected(focusedComponent, x, y))
-                    throw new IllegalArgumentException("Empty connector not well connected");
-                else {
-                    if (
-                            !areConnectorsWellConnected(focusedComponent, x, y)
-                                    || isComponentInFireDirection(focusedComponent, x, y)
-                                    || isComponentInEngineDirection(focusedComponent, x, y)
-                                    || (!(focusedComponent instanceof Engine) || isEngineDirectionWrong((Engine) focusedComponent))
-                    )
-                        incorrectlyPositionedComponents.add(focusedComponent);
+        synchronized (shipMatrix) {
+            if (!isValidPosition(x, y))
+                throw new IllegalArgumentException("Not a valid position");
+            else if (!isPositionConnectedToShip(x, y))
+                throw new IllegalArgumentException("Not connected to the ship");
+            else if (!areEmptyConnectorsWellConnected(focusedComponent, x, y))
+                throw new IllegalArgumentException("Empty connector not well connected");
+            else {
+                if (
+                        !areConnectorsWellConnected(focusedComponent, x, y)
+                                || isComponentInFireDirection(focusedComponent, x, y)
+                                || isComponentInEngineDirection(focusedComponent, x, y)
+                                || (!(focusedComponent instanceof Engine) || isEngineDirectionWrong((Engine) focusedComponent))
+                )
+                    incorrectlyPositionedComponents.add(focusedComponent);
 
-                    shipMatrix[x][y] = focusedComponent;
+                shipMatrix[x][y] = focusedComponent;
 
-                    focusedComponent.insertInComponentsMap(componentsPerType);
+                focusedComponent.insertInComponentsMap(componentsPerType);
 
-                    for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
-                        gameContext.getClientControllers().get(nicknameToNotify).notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                    try {
+                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+                    } catch (RemoteException e) {
+                        System.err.println("Remote Exception");
                     }
+                });
 
-                    focusedComponent = null;
-                }
+                focusedComponent = null;
             }
-        } catch(RemoteException e) {
-            System.err.println("Remote Exception");
         }
 
     }
@@ -835,22 +835,21 @@ public abstract class ShipBoard implements Serializable {
      * @param componentsPositions A set of coordinates of components to remove.
      */
     public void removeShipPart (Set<List<Integer>> componentsPositions) {
-        try{
-            for(List<Integer> componentPosition : componentsPositions) {
-                Component currentComponent = shipMatrix[componentPosition.get(0)][componentPosition.get(1)];
-                notActiveComponents.add(currentComponent);
-                incorrectlyPositionedComponents.remove(currentComponent);
-                shipMatrix[componentPosition.get(0)][componentPosition.get(1)] = null;
-            }
-
-
-            for(String s: gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyShipBoardUpdate(s,player.getNickname(), shipMatrix );
-            }
+        for(List<Integer> componentPosition : componentsPositions) {
+            Component currentComponent = shipMatrix[componentPosition.get(0)][componentPosition.get(1)];
+            notActiveComponents.add(currentComponent);
+            incorrectlyPositionedComponents.remove(currentComponent);
+            shipMatrix[componentPosition.get(0)][componentPosition.get(1)] = null;
         }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
+
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyShipBoardUpdate(nicknameToNotify,player.getNickname(), shipMatrix );
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
+            }
+        });
+
     }
 
     /**
@@ -949,19 +948,18 @@ public abstract class ShipBoard implements Serializable {
 
     public Component releaseFocusedComponent() {
 
-        try {
-            Component component = getFocusedComponent();
-            setFocusedComponent(null);
+        Component component = getFocusedComponent();
+        setFocusedComponent(null);
 
-            for (String s : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyReleaseComponent(s, player.getNickname());
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyReleaseComponent(nicknameToNotify, player.getNickname());
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
             }
-            return component;
-        }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
-            return null;
-        }
+        });
+
+        return component;
 
     }
 

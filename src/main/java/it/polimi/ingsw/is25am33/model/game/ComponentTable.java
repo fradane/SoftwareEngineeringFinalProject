@@ -38,33 +38,35 @@ public class ComponentTable {
     }
 
     public void addVisibleComponent(Component component){
-        try {
-            // although visibleComponents it's already synchronized, this method needs currVisibleIndex to be synchronized too,
-            synchronized (visibleComponents) {
-                component.setCurrState(ComponentState.VISIBLE);
-                visibleComponents.put(currVisibleIndex, component);
+        // although visibleComponents it's already synchronized, this method needs currVisibleIndex to be synchronized too,
+        synchronized (visibleComponents) {
+            component.setCurrState(ComponentState.VISIBLE);
+            visibleComponents.put(currVisibleIndex, component);
 
-                for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
-                    gameContext.getClientControllers().get(nicknameToNotify).notifyAddVisibleComponents(nicknameToNotify, currVisibleIndex, component);
+            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                try {
+                    clientController.notifyAddVisibleComponents(nicknameToNotify, currVisibleIndex, component);
+                } catch (RemoteException e) {
+                    System.err.println("Remote Exception");
                 }
+            });
 
-                currVisibleIndex++;
 
-            }
-        }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
+            currVisibleIndex++;
+
         }
     }
 
     public Component pickVisibleComponent(int index) {
-        try {
-            for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nicknameToNotify).notifyRemoveVisibleComponents(nicknameToNotify, index);
+
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyRemoveVisibleComponents(nicknameToNotify, index);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
             }
-        } catch (RemoteException e) {
-            System.err.println("Remote Exception");
-        }
+        });
+
         return visibleComponents.remove(index);
     }
 

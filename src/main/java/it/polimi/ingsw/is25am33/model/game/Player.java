@@ -39,15 +39,17 @@ public class Player implements Serializable {
     }
 
     public void addCredits(int number) {
-        try {
-            ownedCredits += number;
 
-            for(String s: gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyPlayerCredits(s, nickname, ownedCredits);
+        ownedCredits += number;
+
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyPlayerCredits(nicknameToNotify, nickname, ownedCredits);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
             }
-        } catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
+        });
+
     }
 
     public ShipBoard getPersonalBoard() {
