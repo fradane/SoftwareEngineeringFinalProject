@@ -65,18 +65,16 @@ public abstract class FlyingBoard {
      * @param player The player to be marked as out.
      */
     public void addOutPlayer(Player player) {
-        try{
-            outPlayers.add(player);
-            ranking.remove(player);
+        outPlayers.add(player);
+        ranking.remove(player);
 
-            for(String nicknameToNotify : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nicknameToNotify).notifyEliminatedPlayer(nicknameToNotify, player.getNickname());
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyEliminatedPlayer(nicknameToNotify, player.getNickname());
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
             }
-
-        }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
+        });
     }
 
     @JsonIgnore
@@ -115,26 +113,27 @@ public abstract class FlyingBoard {
      * @param offset The number of positions to move (can be positive or negative).
      */
     public void movePlayer(Player player, int offset){
-        try{
-            int currentPosition = ranking.get(player);
-            int newPosition = currentPosition + offset;
+        int currentPosition = ranking.get(player);
+        int newPosition = currentPosition + offset;
 
-            while (checkPosition(newPosition)) {
-                if (offset > 0) {
-                    newPosition++;
-                } else {
-                    newPosition--;
-                }
-            }
-            ranking.put(player, newPosition);
-
-            for(String nicknameToNotify: gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nicknameToNotify).notifyRankingUpdate(nicknameToNotify,player.getNickname(),newPosition);
+        while (checkPosition(newPosition)) {
+            if (offset > 0) {
+                newPosition++;
+            } else {
+                newPosition--;
             }
         }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
+        ranking.put(player, newPosition);
+
+        int finalNewPosition = newPosition;
+
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyRankingUpdate(nicknameToNotify,player.getNickname(), finalNewPosition);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
+            }
+        });
 
     }
 

@@ -56,17 +56,17 @@ public class Level1FlyingBoard extends FlyingBoard {
 
     @Override
     public void insertPlayer(Player player) {
-        try{
-            int initialPosition = initialPositionIterator.next();
-            ranking.put(player, initialPosition);
 
-            for(String nicknameToNotify: gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nicknameToNotify).notifyRankingUpdate(nicknameToNotify,player.getNickname(),initialPosition);
+        int initialPosition = initialPositionIterator.next();
+        ranking.put(player, initialPosition);
+
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyRankingUpdate(nicknameToNotify,player.getNickname(),initialPosition);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
             }
-        }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
+        });
 
     }
 }

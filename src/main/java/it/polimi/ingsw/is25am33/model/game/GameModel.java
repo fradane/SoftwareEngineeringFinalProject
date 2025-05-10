@@ -9,10 +9,12 @@ import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import javafx.util.Pair;
 
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 
 public class GameModel {
@@ -85,14 +87,14 @@ public class GameModel {
                     }
                 }
 
-                gameContext.getClientControllers()
-                        .forEach((nicknameToNotify, controller) -> {
-                            try {
-                                controller.notifyHourglassRestarted(nicknameToNotify, nickname, flipsLeft);
-                            } catch (RemoteException e) {
-                                System.err.println("Remote Exception");
-                            }
-                        });
+                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                    try {
+                        clientController.notifyHourglassRestarted(nicknameToNotify, nickname, flipsLeft);
+                    } catch (RemoteException e) {
+                        System.err.println("Remote Exception");
+                    }
+                });
+
 
                 flipsLeft--;
                 numClientsFinishedTimer = 0;
@@ -140,16 +142,17 @@ public class GameModel {
     }
 
     public void setCurrGameState(GameState currGameState) {
-        try {
-            this.currGameState = currGameState;
-            currGameState.run(this);
 
-            for (String nickname : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nickname).notifyGameState(nickname, currGameState);
+        this.currGameState = currGameState;
+        currGameState.run(this);
+
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyGameState(nicknameToNotify, currGameState);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
             }
-        } catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
+        });
     }
 
     public GameContext getGameContext() {
@@ -174,14 +177,15 @@ public class GameModel {
 
     public void setCurrDangerousObj(DangerousObj dangerousObj) {
 
-        try{
-            this.currDangerousObj = dangerousObj;
-            for(String nickname : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nickname).notifyDangerousObjAttack(nickname, currDangerousObj);
+        this.currDangerousObj = dangerousObj;
+
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyDangerousObjAttack(nicknameToNotify, currDangerousObj);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
             }
-        } catch(RemoteException e) {
-            System.err.println("Remote Exception");
-        }
+        });
 
     }
 
@@ -199,16 +203,17 @@ public class GameModel {
     }
 
     public void setCurrPlayer(Player player){
-        try{
-            this.currPlayer = player;
 
-            for(String nickname: gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nickname).notifyCurrPlayerChanged(nickname, player.getNickname());
+        this.currPlayer = player;
+
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyCurrPlayerChanged(nicknameToNotify, player.getNickname());
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
             }
-        }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
+        });
+
 
     }
 
@@ -229,17 +234,16 @@ public class GameModel {
     }
 
     public void setCurrAdventureCard(AdventureCard currAdventureCard) {
-
-        try {
             this.currAdventureCard = currAdventureCard;
 
-            for (String nickname : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nickname).notifyCurrAdventureCard(nickname, currAdventureCard);
-            }
-        }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
+            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                try {
+                    clientController.notifyCurrAdventureCard(nicknameToNotify, currAdventureCard);
+                } catch (RemoteException e) {
+                    System.err.println("Remote Exception");
+                }
+            });
+
     }
 
     public AdventureCard getCurrAdventureCard() {

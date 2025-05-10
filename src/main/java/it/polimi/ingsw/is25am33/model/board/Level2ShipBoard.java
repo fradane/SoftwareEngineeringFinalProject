@@ -34,17 +34,17 @@ public class Level2ShipBoard extends ShipBoard{
     }
 
     public void book () {
-        try {
-            notActiveComponents.add(focusedComponent);
-            focusedComponent.setCurrState(ComponentState.BOOKED);
 
-            for (String s : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(s).notifyBookedComponent(s, player.getNickname(), focusedComponent);
+        notActiveComponents.add(focusedComponent);
+        focusedComponent.setCurrState(ComponentState.BOOKED);
+
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyBookedComponent(nicknameToNotify, player.getNickname(), focusedComponent);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
             }
-        }
-        catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
+        });
 
     }
 
