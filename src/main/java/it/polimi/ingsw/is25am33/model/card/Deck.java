@@ -76,31 +76,34 @@ public class Deck {
     }
 
     /**
-     * Sets up the smaller decks by categorizing cards into levels,
-     * shuffling them, and distributing them into the visible and non-visible decks.
+     * Sets up the little decks for the given game model. This involves loading all adventure cards,
+     * organizing them based on their levels, shuffling, populating the visible and non-visible little decks,
+     * and notifying all clients of the current state of the little visible decks.
+     *
+     * @param gameModel The game model instance to which the little decks will be associated.
      */
     public void setUpLittleDecks(GameModel gameModel) {
-        try {
-            loadCards();
-            allCards.forEach(adventureCard -> adventureCard.setGame(gameModel));
-            List<AdventureCard> level1Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 1).collect(Collectors.toList()));
-            List<AdventureCard> level2Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 2).collect(Collectors.toList()));
 
-            Collections.shuffle(level1Cards);
-            Collections.shuffle(level2Cards);
+        loadCards();
+        allCards.forEach(adventureCard -> adventureCard.setGame(gameModel));
+        List<AdventureCard> level1Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 1).collect(Collectors.toList()));
+        List<AdventureCard> level2Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 2).collect(Collectors.toList()));
 
-            littleVisibleDecks.forEach(littleDeck -> composeLittleDecks(level1Cards, level2Cards, littleDeck));
-            composeLittleDecks(level1Cards, level2Cards, littleNotVisibleDeck);
+        Collections.shuffle(level1Cards);
+        Collections.shuffle(level2Cards);
 
-            mapLittleDecksToString();
+        littleVisibleDecks.forEach(littleDeck -> composeLittleDecks(level1Cards, level2Cards, littleDeck));
+        composeLittleDecks(level1Cards, level2Cards, littleNotVisibleDeck);
 
-            for (String nickname : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nickname).notifyVisibleDeck(nickname, littleVisibleDecksString);
+        mapLittleDecksToString();
+
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyVisibleDeck(nicknameToNotify, littleVisibleDecksString);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
             }
-
-        } catch(RemoteException e){
-            System.err.println("Remote Exception");
-        }
+        });
 
     }
 

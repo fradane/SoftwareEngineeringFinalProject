@@ -9,12 +9,10 @@ import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
-import javafx.util.Pair;
 
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 
 
 public class GameModel {

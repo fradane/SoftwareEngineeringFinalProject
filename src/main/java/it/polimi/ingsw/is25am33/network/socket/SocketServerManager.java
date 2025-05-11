@@ -147,14 +147,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).playerWantsToPlaceFocusedComponent(nickname, coordinates);
                 break;
 
-            case "getShipBoardOf":
-                Component[][] shipBoardAsMatrix = gameControllers.get(nickname).getShipBoardOf(inMessage.getParamString(), nickname);
-                outMessage = new SocketMessage("server", "showShipBoard");
-                outMessage.setParamShipBoardAsMatrix(shipBoardAsMatrix);
-
-                out.println(ServerSerializer.serialize(outMessage));
-                break;
-
             case "playerWantsToWatchLittleDeck":
                 boolean response = gameControllers.get(nickname).playerWantsToWatchLittleDeck(nickname, inMessage.getParamInt());
                 outMessage = new SocketMessage("server", "notifyLittleDeckVisibility");
@@ -163,7 +155,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 out.println(ServerSerializer.serialize(outMessage));
                 break;
 
-            case "playerWantsToReleaseVisibleDeck":
+            case "playerWantsToReleaseLittleDeck":
                 gameControllers.get(nickname).playerWantsToReleaseLittleDeck(nickname, inMessage.getParamInt());
                 break;
 
@@ -217,6 +209,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
             case "playerHandleBigShot":
                 gameControllers.get(nickname).playerHandleBigShot(nickname);
+                break;
+
+            case "playerPicksVisibleComponent":
+                Component chosenComponent = gameControllers.get(nickname).playerPicksVisibleComponent(nickname, inMessage.getParamInt());
+                outMessage = new SocketMessage("server", "notifyPickedComponent");
+                outMessage.setParamComponent(chosenComponent);
+                writers.get(nickname).println(ServerSerializer.serialize(outMessage));
                 break;
 
             case "playerChoseStorage":
@@ -334,7 +333,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyAddVisibleComponents(String nickname, int index, Component component) throws RemoteException{
+    public void notifyAddVisibleComponents(String nickname, int index, Component component) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyAddVisibleComponents");
         outMessage.setParamInt(index);
         outMessage.setParamComponent(component);
@@ -390,7 +389,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     @Override
     public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws RemoteException {
-        SocketMessage outMessage = new SocketMessage("server", "notifyFlyingBoardUpdate");
+        SocketMessage outMessage = new SocketMessage("server", "notifyVisibleDeck");
         outMessage.setParamLittleVisibleDecks(littleVisibleDeck);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }

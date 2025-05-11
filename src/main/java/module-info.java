@@ -11,6 +11,7 @@ module it.polimi.ingsw.is25am33 {
     requires java.management.rmi;
     requires java.logging;
     requires java.rmi;
+    requires org.jetbrains.annotations;
 
     // JavaFX Configuration
     // Allows JavaFX to access the main package for FXML loading

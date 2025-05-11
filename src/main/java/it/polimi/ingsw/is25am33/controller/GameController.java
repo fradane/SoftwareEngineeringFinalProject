@@ -137,16 +137,6 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public Component[][] getShipBoardOf(String otherPlayerNickname, String askerNickname) {
-        return gameModel.getPlayers().get(otherPlayerNickname).getPersonalBoardAsMatrix();
-    }
-
-    @Override
-    public Map<Integer, Component> showPlayerVisibleComponent(String nickname) {
-        return gameModel.getComponentTable().getVisibleComponents();
-    }
-
-    @Override
     public Component playerPicksVisibleComponent(String nickname, Integer choice) {
         Component chosenComponent = gameModel.getComponentTable().pickVisibleComponent(choice);
         if (chosenComponent == null) return null;

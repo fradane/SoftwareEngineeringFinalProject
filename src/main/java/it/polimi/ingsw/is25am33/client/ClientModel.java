@@ -4,11 +4,8 @@ import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
-import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
-import it.polimi.ingsw.is25am33.client.Hourglass;
 
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -160,15 +157,5 @@ public class ClientModel {
                 .filter(player -> playerClientData.get(player).isOut())
                 .collect(Collectors.toSet());
     }
-
-
-    /*
-    * TODO:
-    *  - notificare solo il cambiamento della shipboard tramite due notify del tipo removeComponent(coordinate) e una notifyAddComponent(component, coordinate),
-    *       notifyAddComponent deve chiamare il metodo addComponent della shipBoard in modo che venga aggiunto tutto anche nella mappa che serve per altre cose
-    *  - completare la classe hourglass con le tue notify
-    * */
-
-
 
 }

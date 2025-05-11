@@ -5,7 +5,6 @@ import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -15,6 +14,7 @@ import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.client.Hourglass;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -23,7 +23,6 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
-import static it.polimi.ingsw.is25am33.client.view.MessageType.ERROR;
 import static it.polimi.ingsw.is25am33.client.view.MessageType.STANDARD;
 
 public class ClientController extends UnicastRemoteObject implements CallableOnClientController {
@@ -36,7 +35,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     private boolean inGame = false;
     private String nickname;
     boolean gameStarted = false;
-    private ClientModel clientModel;
+    private final ClientModel clientModel;
 
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BLUE = "\u001B[34m";
@@ -46,7 +45,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         this.clientModel = clientModel;
     }
 
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String @NotNull [] args) throws RemoteException {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("=== Galaxy Trucker Client ===");
@@ -71,9 +70,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             System.err.println("Invalid parameters. Exiting...");
             return;
         }
+
         clientController.setDns(dns);
 
         clientController.register();
+
+        clientModel.setMyNickname(clientController.getNickname());
 
         clientController.start();
     }
@@ -87,7 +89,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             String attemptedNickname = view.askNickname();
 
             if (attemptedNickname.length() < 3) {
-                view.showError("Invalid nickname: choose a nickname at least 3 characters long");
+                view.showError("Invalid nickname - choose a nickname at least 3 characters long");
                 continue;
             }
 
@@ -111,12 +113,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         this.dns = dns;
     }
 
-    public ClientModel getClientModel() {
-        return clientModel;
-    }
-
-    public void setClientModel(ClientModel clientModel) {
-        this.clientModel = clientModel;
+    public String getNickname() {
+        return nickname;
     }
 
     private void start() {
@@ -294,8 +292,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 serverController = gameInfo.getGameController();
             }
             inGame = true;
-            //TODO debug
-            serverController.showMessage("Hello from " + nickname);
             view.showMessage("Successfully joined game!", STANDARD);
             view.showMessage("Waiting for the game to start...", STANDARD);
 
@@ -319,7 +315,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void setView(ClientView view) {
         this.view = view;
-        this.clientModel = view.getClientModel();
     }
 
     /**
@@ -331,7 +326,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         return switch (choice) {
             case "cli" -> new ClientCLIView(clientModel);
-            case "rmi" ->
+            case "gui" ->
                 // TODO
                 //return new ClientGUIView();
                     null;
@@ -449,10 +444,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws RemoteException {
         gameStarted = true;
         clientModel.setGameState(GameState.BUILD_SHIPBOARD);
-        gameInfo.getConnectedPlayers()
-                .forEach((nickname, color) ->
-                    clientModel.addPlayer(nickname, color)
-                );
+        gameInfo.getConnectedPlayers().forEach(clientModel::addPlayer);
         view.notifyGameStarted(GameState.BUILD_SHIPBOARD);
         clientModel.setHourglass(new Hourglass(gameInfo.isTestFlight(), this));
         clientModel.getHourglass().start(view, "game");

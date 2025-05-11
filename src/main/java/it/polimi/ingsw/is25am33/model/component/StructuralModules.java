@@ -51,7 +51,6 @@ public class StructuralModules extends Component {
             | %s     %s |
             |    %s    |
             +---------+
-            MaxCapacity: %d
             """, north, west, east, south);
     }
 

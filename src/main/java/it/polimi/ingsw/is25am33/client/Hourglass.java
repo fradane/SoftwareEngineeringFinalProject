@@ -30,11 +30,7 @@ public class Hourglass {
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.isRunning = false;
         this.controller = controller;
-
-        if (isTestFlight)
-            this.flipsLeft = 0;
-        else
-            this.flipsLeft = 2;
+        this.flipsLeft = isTestFlight ? 0 : 3;
     }
 
     public boolean isRunning() {
@@ -66,7 +62,7 @@ public class Hourglass {
 
         isRunning = true;
         flipsLeft--;
-        timeLeft = 60;
+        timeLeft = 10;
         scheduler.scheduleAtFixedRate(() -> {
 
             if (timeLeft > 0) {

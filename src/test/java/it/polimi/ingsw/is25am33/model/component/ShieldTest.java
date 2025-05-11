@@ -54,7 +54,7 @@ class ShieldTest {
         shield.rotate();
         shield.rotate();
 
-        shield.setDirection();
+        //shield.setDirection();
 
         List<Direction> coveredDirectionsExpected = new ArrayList<>();
         coveredDirectionsExpected.add(Direction.WEST);

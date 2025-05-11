@@ -155,7 +155,7 @@ public class ShipBoardTest {
 
         eng.rotate();
         eng.rotate();
-        eng.rotatePowerDirection();
+        //eng.rotatePowerDirection();
         assertFalse(shipBoard.isEngineDirectionWrong(eng));
     }
 
@@ -475,7 +475,7 @@ public class ShipBoardTest {
         Cannon singleSide  = new Cannon(createSimpleConnectors());
         singleSide.rotate();
         singleSide.rotate();
-        singleSide.rotateFireDirection();
+        //singleSide.rotateFireDirection();
         DoubleCannon doubleFront = new DoubleCannon(createSimpleConnectors());
 
         // Pretend we "activate" them all => pass them in a Stream

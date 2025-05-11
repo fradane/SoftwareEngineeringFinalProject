@@ -142,7 +142,7 @@ public interface ClientView {
 
     void notifyNoMoreComponentAvailable();
 
-    BiFunction<CallableOnGameController, String, Boolean> showShipBoardsMenu();
+    void showShipBoardsMenu();
 
     BiFunction<CallableOnGameController, String, Boolean> showPickedComponentAndMenu(Component component);
 
@@ -178,7 +178,7 @@ public interface ClientView {
 
     BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu();
 
-    void showLittleDeck(int littleDeckChoice);
+    Boolean showLittleDeck(int littleDeckChoice);
 
     void updateTimeLeft(int timeLeft);
 

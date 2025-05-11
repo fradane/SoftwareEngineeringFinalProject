@@ -73,20 +73,6 @@ public class ServerDeserializer {
 
     }
 
-//    public static SocketMessage handleSocketMessage(String message) {
-//
-//        SocketMessage socketMessage = ServerDeserializer.deserializeObj(message, SocketMessage.class);
-//
-//        String nickname = socketMessage.getNickname();
-//        String action = socketMessage.getActions();
-//        String params = socketMessage.getParams();
-//
-//
-//        return socketMessage.getMessageAsMap();
-//
-//    }
-
-
     public static void main(String[] args) {
         String deserialize = """
                 {"nickname":"fra","actions":"action","paramString":"giu","paramCoordinates":{"coordinates":[-1,-1],"positive":false},"paramGameInfo":[{"gameId":"ciao","maxPlayers":4,"connectedPlayers":{},"started":true,"connectedPlayersNicknames":[],"testFlight":true,"full":false,"playersAndColors":{}}],"paramInt":2,"paramBoolean":false,"paramPlayerColor":"GREEN"}
@@ -95,8 +81,6 @@ public class ServerDeserializer {
         SocketMessage inMessage = ServerDeserializer.deserializeObj(deserialize, SocketMessage.class);
 
     }
-
-
 
 }
 

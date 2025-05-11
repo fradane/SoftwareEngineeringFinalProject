@@ -5,13 +5,11 @@ import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
-import it.polimi.ingsw.is25am33.model.card.Planets;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.client.Hourglass;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -50,7 +48,7 @@ public class ClientCLIView implements ClientView {
     private static final String ANSI_GREEN = "\u001B[32m";
     private static final String ANSI_YELLOW = "\u001B[33m";
 
-    private String defaultInterrogationPrompt = "Your choice: ";
+    private final String defaultInterrogationPrompt = "Your choice: ";
     private String currentInterrogationPrompt = "";
 
 
@@ -396,22 +394,26 @@ public class ClientCLIView implements ClientView {
     @Override
     public void showCurrAdventureCard(boolean isFirstTime) {
         if (isFirstTime) System.out.println("The card has been drawn from the deck.");
-        System.out.println("Current adventure card: " + clientModel.getCurrAdventureCard().toString());
+        System.out.println("Current adventure card: " + clientModel.getCurrAdventureCard());
     }
 
     @Override
     public void showNewGameState() {
-        System.out.println("===================================");
-        System.out.println("📢  [Game Update]");
-        System.out.println("🎮  New Game State: " + clientModel.getGameState().toString());
-        System.out.println("===================================");
+        showMessage(String.format("""
+                        \n===================================
+                        📢  [Game Update]
+                        🎮  New Game State: %s
+                        ===================================
+                        """, clientModel.getGameState().toString()), STANDARD);
     }
 
     public void showDangerousObj(){
-        System.out.println("===================================");
-        System.out.println(" [Dangerous Object Attack] ");
-        System.out.println(" New Dangerous Object: " + clientModel.getCurrDangerousObj().toString());
-        System.out.println("===================================");
+        showMessage(String.format("""
+                        \n===================================
+                        📢  [Dangerous Object Attack]
+                        ☄️  New Dangerous Object: %s
+                        ===================================
+                        """, clientModel.getCurrDangerousObj().toString()), STANDARD);
     }
 
     @Override
@@ -444,17 +446,17 @@ public class ClientCLIView implements ClientView {
                         \nChoose an option:
                         1. Pick a random covered component from the table
                         2. Pick a visible component from the table
-                        3. End your shipBoard setup phase
-                        4. Show one of the ship boards
-                        5. Restart hourglass
-                        6. Watch a little deck
+                        3. Show one of the ship boards
+                        4. Restart hourglass
+                        5. Watch a little deck
                         """;
-                String input = askForInput(questionDescription, defaultInterrogationPrompt);
+                Optional<Integer> optionalInput = convertInput(askForInput(questionDescription, defaultInterrogationPrompt));
+                int choice;
 
-                // TODO
-                //if (input.equals(INPUT_INTERRUPT)) return;
-
-                int choice = Integer.parseInt(input);
+                if (optionalInput.isEmpty())
+                    return (_, _) -> true;
+                else
+                    choice = optionalInput.get();
 
                 switch (choice) {
                     case 1:
@@ -469,6 +471,7 @@ public class ClientCLIView implements ClientView {
                                 while (hasFocusComponent) {
                                     BiFunction<CallableOnGameController, String, Boolean> consumer = ClientCLIView.this
                                             .showPickedComponentAndMenu(pickedComponent);
+                                    if (consumer == null) return true;
                                     hasFocusComponent = consumer.apply(server, nickname);
                                 }
                             } catch (Exception e) {
@@ -480,13 +483,9 @@ public class ClientCLIView implements ClientView {
                         };
 
                     case 2:
-                        return (server, nickname) ->{
-                            Map<Integer, Component> visibleComponents = null;
-                            try {
-                                visibleComponents = server.showPlayerVisibleComponent(nickname);
-                            } catch (RemoteException e) {
-                                throw new RuntimeException(e);
-                            }
+                        return (server, nickname) -> {
+
+                            Map<Integer, Component> visibleComponents = clientModel.getVisibleComponents();
 
                             if (visibleComponents == null || visibleComponents.isEmpty()) {
                                 ClientCLIView.this.showMessage("No visible components yet!", STANDARD);
@@ -495,6 +494,7 @@ public class ClientCLIView implements ClientView {
 
                             BiFunction<CallableOnGameController, String, Component> function = ClientCLIView.this.showVisibleComponentAndMenu(visibleComponents);
                             if (function == null) return false; // means that the player has changed its idea
+                            if (function == INTERRUPTED) return true; // means that the timer interrupted the player
                             Component pickedComponent = function.apply(server, nickname);
                             if (pickedComponent == null) {
                                 ClientCLIView.this.showError("This component is no longer available, someone has stolen it from you!");
@@ -505,30 +505,32 @@ public class ClientCLIView implements ClientView {
                             while (hasFocusComponent) {
                                 BiFunction<CallableOnGameController, String, Boolean> consumer = ClientCLIView.this
                                         .showPickedComponentAndMenu(pickedComponent);
+                                if (consumer == null) return true;
                                 hasFocusComponent = consumer.apply(server, nickname);
                             }
                             return false;
                         };
 
+//                    case 3:
+//                        String answer = askForInput("", "Are you sure you want to end your shipBoard setup phase? [Y/n] ");
+//                        if (answer.equalsIgnoreCase("Y") || answer.isEmpty()) {
+//                            System.out.println("Ending your shipBoard setup phase...");
+//                            return (server, nickname) -> {
+//                                try {
+//                                    server.playerChoseToEndBuildShipBoardPhase(nickname);
+//                                } catch (IOException e) {
+//                                    throw new RuntimeException(e);
+//                                }
+//                                return true;
+//                            };
+//                        }
+//                        break;
+
                     case 3:
-                        String answer = askForInput("", "Are you sure you want to end your shipBoard setup phase? [Y/n] ");
-                        if (answer.equalsIgnoreCase("Y") || answer.isEmpty()) {
-                            System.out.println("Ending your shipBoard setup phase...");
-                            return (server, nickname) -> {
-                                try {
-                                    server.playerChoseToEndBuildShipBoardPhase(nickname);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                return true;
-                            };
-                        }
+                        showShipBoardsMenu();
                         break;
 
                     case 4:
-                        return showShipBoardsMenu();
-
-                    case 5:
                         if (clientModel.getHourglass().isRunning()) {
                             showMessage("The hourglass is already running, please wait for it to end.", STANDARD);
                             break;
@@ -536,20 +538,20 @@ public class ClientCLIView implements ClientView {
 
                         return (server, nickname) -> {
                             try {
-                                showMessage("Restarting the hourglass...");
+                                showMessage("Restarting the hourglass...", NOTIFICATION_INFO);
                                 server.playerWantsToRestartHourglass(nickname);
-                                showMessage("The hourglass has been restarted.");
+                                showMessage("The hourglass has been restarted.", NOTIFICATION_INFO);
                             } catch (RemoteException e) {
                                 switch (e.getMessage()) {
 
                                     case "No more flips available.",
                                          "Interrupted while waiting for all clients to finish the timer.",
                                          "Another player is already restarting the hourglass. Please wait.":
-                                        showMessage(e.getMessage());
+                                        showError(e.getMessage());
                                         break;
 
                                     default:
-                                        showMessage("An error occurred: " + e.getMessage());
+                                        showError("An error occurred: " + e.getMessage());
                                         break;
 
                                 }
@@ -557,10 +559,16 @@ public class ClientCLIView implements ClientView {
                             return false;
                         };
 
-                    case 6:
+                    case 5:
                         int littleDeckChoice;
                         while (true) {
-                            littleDeckChoice = Integer.parseInt(askForInput("", "Which little deck would you like to watch? (1-3) "));
+                            optionalInput = convertInput(askForInput("", "Which little deck would you like to watch? (1-3): "));
+
+                            if (optionalInput.isEmpty())
+                                return null;
+                            else
+                                littleDeckChoice = optionalInput.get();
+
                             if (littleDeckChoice >= 1 && littleDeckChoice <= 3) break;
                             showMessage("Invalid choice. Please select 1-3.", STANDARD);
                         }
@@ -568,22 +576,22 @@ public class ClientCLIView implements ClientView {
                         int finalLittleDeckChoice = littleDeckChoice;
                         return (server, nickname) -> {
                             boolean response;
+                            Boolean wasInterrupted = null;
                             try {
                                 response = server.playerWantsToWatchLittleDeck(nickname, finalLittleDeckChoice);
+
+                                if (!response) {
+                                    showMessage("The little deck is not available right now!\nTry again later.", STANDARD);
+                                    return false;
+                                }
+
+                                wasInterrupted = ClientCLIView.this.showLittleDeck(finalLittleDeckChoice);
+                                server.playerWantsToReleaseLittleDeck(nickname, finalLittleDeckChoice);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
-                            if (!response) {
-                                showMessage("The little deck is not available right now!\nTry again later.", STANDARD);
-                                return false;
-                            }
-                            ClientCLIView.this.showLittleDeck(finalLittleDeckChoice);
-                            try {
-                                server.playerWantsToReleaseLittleDeck(nickname, finalLittleDeckChoice);
-                            } catch (RemoteException e) {
-                                throw new RuntimeException(e);
-                            }
-                            return false;
+
+                            return wasInterrupted;
                         };
 
                     default:
@@ -607,24 +615,28 @@ public class ClientCLIView implements ClientView {
     public void notifyHourglassStarted(int flipsLeft, String nickname) {
 
         if (nickname.equals("game")) {
-            showMessage(ANSI_BLUE + "Hourglass started!!! There will be " + flipsLeft + " flips left at the end of this timer." + ANSI_RESET);
+            showMessage("Hourglass started!!! There will be " + flipsLeft + " flips left at the end of this timer.", NOTIFICATION_INFO);
             return;
         }
 
         if (flipsLeft == 0)
-            showMessage(ANSI_BLUE + "Hourglass restarted by " + nickname + "!!! There will be no flips left at the end of this timer." + ANSI_RESET);
+            showMessage(nickname + " flipped the hourglass!!! There will be no flips left at the end of this timer.", NOTIFICATION_INFO);
         else if (flipsLeft == 1)
-            showMessage(ANSI_BLUE + "Hourglass restarted by " + nickname + "!!! There will be " + flipsLeft + " flip left at the end of this timer." + ANSI_RESET);
+            showMessage(nickname + " flipped the hourglass!!! There will be " + flipsLeft + " flip left at the end of this timer.", NOTIFICATION_INFO);
         else
-            showMessage(ANSI_BLUE + "Hourglass restarted by " + nickname + "!!! There will be " + flipsLeft + " flips left at the end of this timer." + ANSI_RESET);
+            showMessage(nickname + " flipped the hourglass!!! There will be " + flipsLeft + " flips left at the end of this timer.", NOTIFICATION_INFO);
 
     }
 
     @Override
-    public void showLittleDeck(int littleDeckChoice) {
-        System.out.println("Here is the little deck you chose: ");
-        clientModel.getLittleVisibleDecks().get(littleDeckChoice - 1).forEach(System.out::println);
-        askForInput("", "Press enter to continue...");
+    public Boolean showLittleDeck(int littleDeckChoice) {
+        StringBuilder littleDeck = new StringBuilder();
+        littleDeck.append("\nHere is the little deck you chose:\n");
+        clientModel.getLittleVisibleDecks().get(littleDeckChoice - 1).forEach(
+                card -> littleDeck.append(card).append("\n")
+        );
+        showMessage(littleDeck.toString(), STANDARD);
+        return askForInput("", "Press enter to continue...").equals(INPUT_INTERRUPT);
     }
 
     @Override
@@ -654,8 +666,7 @@ public class ClientCLIView implements ClientView {
     @Override
     public BiFunction<CallableOnGameController, String, Boolean> showPickedComponentAndMenu(Component component) {
 
-        System.out.println("\nPicked component details:");
-        System.out.println(component.toString());
+        showMessage("\nYou have selected the component:\n" + component.toString() + "\n", STANDARD);
 
         while (true) {
 
@@ -668,17 +679,25 @@ public class ClientCLIView implements ClientView {
                         4. Release component
                         5. Show your ship board
                         """;
-                int choice = Integer.parseInt(askForInput(questionDescription, defaultInterrogationPrompt));
+                int choice;
+                Optional<Integer> optionalInput = convertInput(askForInput(questionDescription, defaultInterrogationPrompt));
+
+                if (optionalInput.isEmpty())
+                    return null;
+                else
+                    choice = optionalInput.get();
 
                 switch (choice) {
                     case 1:
                         component.rotate();
-                        System.out.println("\nUpdated component details:");
+                        System.out.println("\nComponent details:");
                         System.out.println(component);
                         break;
 
                     case 2:
                         Coordinates coords = readCoordinatesFromUserInput("Select coordinates (row column): ");
+                        if (coords == null) return null;
+
                         return (server, nickname) -> {
                             try {
                                 server.playerWantsToPlaceFocusedComponent(nickname, coords);
@@ -720,8 +739,7 @@ public class ClientCLIView implements ClientView {
                         };
 
                     case 5:
-                        // TODO Show current state of ship board (not implemented here)
-                        System.out.println("Showing your current ship board...");
+                        showMyShipBoard();
                         break;
 
                     default:
@@ -749,6 +767,7 @@ public class ClientCLIView implements ClientView {
 
         while (true) {
             String input = this.askForInput("", prompt);
+            if (input.equals(INPUT_INTERRUPT)) return null;
             if (input.isEmpty()
                     && (prompt.equals("Select the coordinates (row column) for the double engines you would like to activate or press enter to skip: ")
                     || prompt.equals("Select the coordinates (row column) for the battery box you would like to activate or press enter to skip: ")
@@ -771,35 +790,38 @@ public class ClientCLIView implements ClientView {
     }
 
     /**
-     * Displays a menu listing all players' nicknames and prompts the user to choose
-     * a ship board to view. Returns a BiFunction that triggers the request on the server
-     * to view the selected player's ship board.
-     *
-     * @return a BiFunction to be executed with the RMIServerNetworkManager and player nickname
+     * Displays a menu where players can view the ship boards of other participants.
+     * The method retrieves a list of player nicknames and displays it as a selectable menu.
+     * The user is prompted to input the number corresponding to the player whose ship board they wish to view.
+     * If the input is valid, the method displays the selected player's ship board.
+     * In case of invalid input, the user is prompted again until a valid choice is made.
+     * <p>
+     * Key functionality:
+     * - Presents a numbered menu of player nicknames.
+     * - Validates user input to ensure it corresponds to an available index.
+     * - Displays the selected player's ship board using {@link #showShipBoard(Component[][], String)}.
+     * <p>
+     * The method continues to loop until a valid choice is entered, or the desired ship board is successfully displayed.
      */
     @Override
-    public BiFunction<CallableOnGameController, String, Boolean> showShipBoardsMenu() {
+    public void showShipBoardsMenu() {
         while (true) {
             try {
                 String questionDescription = "\nChoose one of the ship boards:";
                 List<String> playersNickname = clientModel.getPlayersNickname().stream().toList();
                 for (String player : playersNickname) {
-                    questionDescription = questionDescription.concat("\n" + playersNickname.indexOf(player) + 1 + ". " + player);
+                    questionDescription = questionDescription.concat("\n" + (playersNickname.indexOf(player) + 1) + ". " + player);
                 }
+                questionDescription = questionDescription.concat("\n");
                 int choice = Integer.parseInt(this.askForInput(questionDescription, defaultInterrogationPrompt));
                 if (choice <= 0 || choice > playersNickname.size()) {
                     showMessage("Invalid choice. Please enter a valid number.", STANDARD);
                 } else {
-                    return (server, nickname) -> {
-                        try {
-                            Component[][] selectedPlayerShipBoard = server.getShipBoardOf(playersNickname.get(choice - 1), nickname);
-                            this.showShipBoard(selectedPlayerShipBoard, playersNickname.get(choice - 1));
-                            return false;
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    };
+                    String chosenNickname = playersNickname.get(choice - 1);
+                    this.showShipBoard(clientModel.getShipboardOf(chosenNickname).getShipBoardMatrix(), chosenNickname);
                 }
+
+                return;
             } catch (NumberFormatException e) {
                 showMessage("Invalid choice. Please enter a valid number.", STANDARD);
             }
@@ -836,79 +858,89 @@ public class ClientCLIView implements ClientView {
                 "• STR = structural modules"
         };
 
+        StringBuilder output = new StringBuilder();
+
         int legendIndex = 0;
 
-        System.out.println("Here's the ship board of " + shipBoardOwnerNickname + ":");
+        output.append(String.format("\nHere's the ship board of " + shipBoardOwnerNickname + ":\n"));
 
         // Stampa numeri delle colonne
-        System.out.print("       ");
+        output.append("       ");
         for (int col = 4; col <= 10; col++) {
-            System.out.printf("   %2d     ", col);
+            output.append(String.format("   %2d     ", col));
         }
 
-        System.out.println();
+        output.append("\n");
 
         // TODO generalizzare il caso per il livello 1
         for (int i = 4; i <= 8; i++) {
             // Ogni cella viene stampata su 4 righe
             for (int line = 0; line < 4; line++) {
                 if (line == 2) {
-                    System.out.printf(" %2d   ", i + 1);
+                    output.append(String.format(" %2d   ", i + 1));
                 } else {
-                    System.out.print("      ");
+                    output.append("      ");
                 }
                 for (int j = 3; j <= 9; j++) {
                     Component cell = shipBoard[i][j];
                     switch (line) {
                         case 0:
-                            System.out.print("+---------");
+                            output.append("+---------");
                             break;
 
                         case 1:
-                            System.out.printf("|    %1s    ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.NORTH).fromConnectorTypeToValue()));
+                            output.append(String.format("|    %1s    ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())));
                             break;
 
-                        case 2: System.out.printf("| %1s %3s %1s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.WEST).fromConnectorTypeToValue()),
+                        case 2: output.append(String.format("| %1s %3s %1s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.WEST).fromConnectorTypeToValue()),
                                 Level2ShipBoard.isOutsideShipboard(i, j) ? (ANSI_RED + "OUT" + ANSI_RESET) : (cell == null ? "" : cell.getLabel()),
-                                Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.EAST).fromConnectorTypeToValue()));
+                                Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.EAST).fromConnectorTypeToValue())));
                             break;
 
-                        case 3: System.out.printf("|    %1s %2s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()),
-                                Level2ShipBoard.isOutsideShipboard(i, j) ? "" : (cell == null ? "" : (ANSI_BLUE + (cell.getMainAttribute().length() == 2 ? "" : " ") + cell.getMainAttribute() + ANSI_RESET)));
+                        case 3: output.append(String.format("|    %1s %2s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()),
+                                Level2ShipBoard.isOutsideShipboard(i, j) ? "" : (cell == null ? "" : (ANSI_BLUE + (cell.getMainAttribute().length() == 2 ? "" : " ") + cell.getMainAttribute() + ANSI_RESET))));
                             break;
                     }
                 }
 
                 if (line == 0) {
-                    System.out.print("+");
+                    output.append("+");
                 } else {
-                    System.out.print("|");
+                    output.append("|");
                 }
 
-                System.out.println(legendIndex <= legendLines.length - 1 ? ("\t\t" + legendLines[legendIndex++]) : "");
+                output.append(legendIndex <= legendLines.length - 1 ? ("\t\t" + legendLines[legendIndex++] + "\n") : "\n");
 
             }
         }
 
-        System.out.print("      ");
-        for (int i = 0; i <= 6; i++) {
-            System.out.print("+---------");
-        }
-        System.out.println("+");
+        output.append("      ");
+        output.append("+---------".repeat(7));
+        output.append("+\n");
+
+        showMessage(output.toString(), STANDARD);
     }
 
     @Override
     public BiFunction<CallableOnGameController, String, Component> showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents) {
-        showMessage("\nHere's the visible components:", STANDARD);
+
+        StringBuilder visibleComponentsList = new StringBuilder();
+        visibleComponentsList.append("\nHere's the visible components:");
 
         visibleComponents.keySet().forEach(index -> {
-            System.out.printf("%2d ", index);
-            System.out.println(visibleComponents.get(index));
+            visibleComponentsList.append("\n").append(index).append(". ").append(visibleComponents.get(index));
         });
+        showMessage(visibleComponentsList.toString(), STANDARD);
 
         while (true) {
             try {
-                int choice = Integer.parseInt(askForInput("", "Choose one of the visible components (0 to go back): "));
+                Optional<Integer> optionalInput = convertInput(askForInput("", "Choose one of the visible components (0 to go back): "));
+                int choice;
+
+                if (optionalInput.isEmpty())
+                    return INTERRUPTED;
+                else
+                    choice = optionalInput.get();
 
                 if (choice == 0) return null;
 
@@ -920,7 +952,7 @@ public class ClientCLIView implements ClientView {
                 return (server, nickname) -> {
                     try {
                         return server.playerPicksVisibleComponent(nickname, choice);
-                    } catch (RemoteException e) {
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 };
@@ -977,17 +1009,7 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public BiConsumer<CallableOnGameController, String> showChoosePlanetMenu(){
-        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip). ", defaultInterrogationPrompt));
-        return(server, nickname) -> {
-            try {
-                server.playerWantsToVisitPlanet(nickname, choice);
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
-        };
-        return null;
-        // TODO
-//        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip): "));
+//        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip). ", defaultInterrogationPrompt));
 //        return(server, nickname) -> {
 //            try {
 //                server.playerWantsToVisitPlanet(nickname, choice);
@@ -995,13 +1017,15 @@ public class ClientCLIView implements ClientView {
 //                throw new RuntimeException(e);
 //            }
 //        };
+        return null;
+        // TODO
     }
 
     @Override
     public BiConsumer<CallableOnGameController, String> showChooseEnginesMenu() {
 
         this.showMyShipBoard();
-        System.out.println();
+        showMessage("\n", STANDARD);
         List<Coordinates> doubleEnginesCoordinates = new ArrayList<>();
         List<Coordinates> batteryBoxesCoordinates = new ArrayList<>();
         ShipBoardClient shipBoard = getMyShipBoard();
@@ -1047,9 +1071,7 @@ public class ClientCLIView implements ClientView {
     }
 
     private void showMyShipBoard() {
-        // TODO dopo che abbiamo fatto la merge con luca
-        // String nickname = clientModel.getNickname();
-        // this.showShipBoard(clientModel.getShipBoard(), nickname);
+        this.showShipBoard(getMyShipBoard().getShipBoardMatrix(), clientModel.getMyNickname());
     }
 
     @Override
@@ -1270,6 +1292,7 @@ public class ClientCLIView implements ClientView {
             }
         };
     }
+
     @Override
     public BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu() {
 
@@ -1348,19 +1371,25 @@ public class ClientCLIView implements ClientView {
     @Override
     public void notifyTimerEnded(int flipsLeft) {
         if (flipsLeft == 0)
-            showMessage("Timer ended! You cannot build your ship anymore.", STANDARD);
+            showMessage("Timer ended! You cannot build your ship anymore.", NOTIFICATION_CRITICAL);
         else if (flipsLeft == 1)
-            showMessage("Timer ended! There is now " + flipsLeft + " flip left.", STANDARD);
+            showMessage("Timer ended! There is now " + flipsLeft + " flip left.", NOTIFICATION_INFO);
         else
-            showMessage("Timer ended! There are now " + flipsLeft + " flips left.", STANDARD);
+            showMessage("Timer ended! There are now " + flipsLeft + " flips left.", NOTIFICATION_INFO);
     }
 
     @Override
     public void updateTimeLeft(int timeLeft) {
         if (timeLeft % 20 == 0 && timeLeft != 0 && timeLeft != 60) {
-            showMessage("Time left: " + timeLeft, STANDARD);
+            showMessage("Time left: " + timeLeft, NOTIFICATION_INFO);
         }
     }
+
+    private Optional<Integer> convertInput(String input) throws NumberFormatException {
+        return input.equals(INPUT_INTERRUPT) ? Optional.empty() : Optional.of(Integer.parseInt(input));
+    }
+
+    private static final BiFunction<CallableOnGameController, String, Component> INTERRUPTED = (s, n) -> null;
 
     public static void main(String[] args) {
         ClientModel clientModel = new ClientModel();

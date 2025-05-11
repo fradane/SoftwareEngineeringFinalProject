@@ -2,8 +2,6 @@ package it.polimi.ingsw.is25am33.serializationLayer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.board.*;
-import it.polimi.ingsw.is25am33.model.card.AdventureCard;
-import it.polimi.ingsw.is25am33.model.card.Planets;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.BigShot;
@@ -13,14 +11,11 @@ import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.model.game.Player;
 
-import javax.smartcardio.Card;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class SocketMessage {
 
@@ -42,6 +37,7 @@ public class SocketMessage {
     private Component[][] paramShipBoardAsMatrix;
     private DangerousObj paramDangerousObj;
     private List<List<String>> paramLittleVisibleDecks;
+    private Map<Integer, Component> paramVisibleComponents;
 
     public SocketMessage(String senderNickname, String actions) {
         this.senderNickname = senderNickname;
@@ -60,9 +56,19 @@ public class SocketMessage {
         this.paramActivableCoordinates = new ArrayList<>();
         this.paramBatteryBoxCoordinates = new ArrayList<>();
         this.paramCabinCoordinates = new ArrayList<>();
+        this.paramVisibleComponents = new HashMap<>();
+        this.paramLittleVisibleDecks = new ArrayList<>();
     }
 
     public SocketMessage() {
+    }
+
+    public Map<Integer, Component> getParamVisibleComponents() {
+        return paramVisibleComponents;
+    }
+
+    public void setParamVisibleComponents(Map<Integer, Component> paramVisibleComponents) {
+        this.paramVisibleComponents = paramVisibleComponents;
     }
 
     public List<Coordinates> getParamActivableCoordinates() {

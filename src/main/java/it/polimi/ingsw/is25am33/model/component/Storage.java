@@ -141,6 +141,7 @@ public abstract class Storage extends Component {
      *
      * @return true if the storage is full, false otherwise
      */
+    @JsonIgnore
     public boolean isFull() {
         return stockedCubes.size() == maxCapacity;
     }

@@ -23,11 +23,7 @@ public interface CallableOnGameController extends Remote {
 
     void playerChoseToEndBuildShipBoardPhase(String nickname) throws IOException;
 
-    Component[][] getShipBoardOf(String otherPlayerNickname, String askerNickname) throws IOException;
-
-    Component playerPicksVisibleComponent(String nickname, Integer choice) throws RemoteException;
-
-    Map<Integer, Component> showPlayerVisibleComponent(String nickname) throws RemoteException;
+    Component playerPicksVisibleComponent(String nickname, Integer choice) throws IOException;
 
     void playerWantsToVisitLocation(String nickname, Boolean choice) throws RemoteException;
 

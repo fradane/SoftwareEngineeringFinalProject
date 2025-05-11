@@ -258,6 +258,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     if (clientController != null) {
                         clientController.notifyHourglassRestarted(nickname, notification.getParamString(), notification.getParamInt());
                     }
+                    break;
 
                 case "notifyCurrAdventureCard":
                     if (clientController != null) {
@@ -383,23 +384,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public Component[][] getShipBoardOf(String otherPlayerNickname, String askerNickname) throws IOException {
-        SocketMessage outMessage = new SocketMessage(nickname, "getShipBoardOf");
-        outMessage.setParamString(otherPlayerNickname);
-        SocketMessage response = sendAndWaitForSpecificResponse(outMessage, Set.of("showShipBoard"));
-        return response.getParamShipBoardAsMatrix();
-    }
-
-    @Override
-    public Component playerPicksVisibleComponent(String nickname, Integer choice) throws RemoteException {
-        // TODO dopo che luca ha fatto la merge
-        return null;
-    }
-
-    @Override
-    public Map<Integer, Component> showPlayerVisibleComponent(String nickname) throws RemoteException {
-        // TODO dopo che luca ha fatto la merge
-        return null;
+    public Component playerPicksVisibleComponent(String nickname, Integer choice) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerPicksVisibleComponent");
+        outMessage.setParamInt(choice);
+        SocketMessage response = sendAndWaitForSpecificResponse(outMessage, Set.of("notifyPickedComponent"));
+        return response.getParamComponent();
     }
 
     @Override
