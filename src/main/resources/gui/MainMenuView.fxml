@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewController"
+            prefWidth="600" prefHeight="600"
+            style="-fx-background-color: #1c1c1c;">
+
+    <VBox spacing="20" alignment="CENTER"
+          AnchorPane.topAnchor="30" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+
+        <Label text="Main Menu" style="-fx-text-fill: white; -fx-font-size: 28px;"/>
+
+        <Button fx:id="availableGameButton" text="Available Games" onAction="#handleAvailableGames" prefWidth="200"/>
+        <Button fx:id="createGameButton" text="Create Game" onAction="#handleCreateGame" prefWidth="200"/>
+        <Button fx:id="joinGameButton" text="Join Game" onAction="#handleJoinGame" prefWidth="200"/>
+        <Button fx:id="exitButton" text="Exit" onAction="#handleExit" prefWidth="200"/>
+
+        <ListView fx:id="gameListView" prefHeight="200" prefWidth="400" visible="false"/>
+
+        <!-- Form per creare una partita -->
+        <VBox fx:id="createGameForm" spacing="10" alignment="CENTER"
+              visible="false" managed="false" prefWidth="400" padding="10">
+            <Label text="Create Game" style="-fx-text-fill: white; -fx-font-size: 18px;"/>
+            <Label text="Number of Players (2-4)" style="-fx-text-fill: white;"/>
+            <Slider fx:id="PlayerCountSlider" min="2" max="4" blockIncrement="0.1" minorTickCount="4" showTickMarks="true" showTickLabels="true" snapToTicks="true" />
+            <CheckBox fx:id="easyModeCheckBox" text="Easy Mode" style="-fx-text-fill: white;"/>
+            <Label text="Choose Your Color" style="-fx-text-fill: white;"/>
+            <ComboBox fx:id="colorComboBox" prefWidth="200"/>
+            <Button fx:id="submitCreateGameButton" text="Create" onAction="#handleSubmitCreateGame" prefWidth="100"/>
+        </VBox>
+
+        <!-- Form per unirsi a una partita -->
+        <VBox fx:id="joinGameForm" spacing="10" alignment="CENTER"
+              visible="false" managed="false" prefWidth="400" padding="10">
+            <Label text="Join Game" style="-fx-text-fill: white; -fx-font-size: 18px;"/>
+            <Label text="Choose Your Color" style="-fx-text-fill: white;"/>
+            <ComboBox fx:id="joinColorComboBox" prefWidth="200"/>
+            <Button fx:id="submitJoinGameButton" text="Join" onAction="#handleSubmitJoinGame" prefWidth="100"/>
+        </VBox>
+
+    </VBox>
+</AnchorPane>

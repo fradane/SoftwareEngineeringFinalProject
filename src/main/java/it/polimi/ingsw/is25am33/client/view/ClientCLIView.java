@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.client.view;
 
 import it.polimi.ingsw.is25am33.client.ClientModel;
 import it.polimi.ingsw.is25am33.client.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
@@ -14,8 +15,6 @@ import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
-
-import it.polimi.ingsw.is25am33.model.component.ComponentLoader;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -39,6 +38,7 @@ public class ClientCLIView implements ClientView {
     private volatile boolean waitingForInput = false;
     private static final String INPUT_INTERRUPT = "%";
     private final ClientModel clientModel;
+    private final ClientController clientController;
     private final Object consoleLock = new Object();
 
     // Definizione dei colori ANSI (funziona nei terminali che supportano i colori ANSI).
@@ -52,9 +52,10 @@ public class ClientCLIView implements ClientView {
     private String currentInterrogationPrompt = "";
 
 
-    public ClientCLIView(ClientModel clientModel) {
+    public ClientCLIView() throws RemoteException {
         this.scanner = new Scanner(System.in);
-        this.clientModel = clientModel;
+        this.clientModel = new ClientModel();
+        this.clientController = new ClientController(clientModel);
     }
 
     @Override
@@ -86,13 +87,13 @@ public class ClientCLIView implements ClientView {
 
 
     public String askForInput(String questionDescription, String interrogationPrompt) {
+
         synchronized (consoleLock) {
             currentInterrogationPrompt = interrogationPrompt;
             showMessage(questionDescription, INPUT);
             showMessage(interrogationPrompt, INPUT);
             waitingForInput = true;
         }
-
 
         try {
             String input = null;
@@ -110,6 +111,11 @@ public class ClientCLIView implements ClientView {
             waitingForInput = false;
         }
 
+    }
+
+    @Override
+    public ClientController getClientController() {
+        return clientController;
     }
 
     /**
@@ -168,8 +174,16 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
-    public String askNickname() {
-        return askForInput("", "Choose a nickname: ");
+    public void askNickname() {
+        String attemptedNickname;
+        while (true) {
+            attemptedNickname = askForInput("", "Choose a nickname: ");
+            if (attemptedNickname.length() < 3)
+                showError("Nickname cannot be less than 3 characters long. Please try again.");
+            else
+                break;
+        }
+        clientController.register(attemptedNickname);
     }
 
     @Override
@@ -310,28 +324,72 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
-    public int showMainMenu() {
+    public void showMainMenu() {
         while (true) {
             String questionDescription = """
                     \nChoose an option:
-                    1. List available games
-                    2. Create a new game
-                    3. Join a game
-                    4. Exit
+                    1. Create a new game
+                    2. Join a game
+                    3. Exit
                     """;
 
             String input = askForInput(questionDescription, defaultInterrogationPrompt);
             try {
                 int choice = Integer.parseInt(input);
-                if (choice >= 1 && choice <= 4) {
-                    return choice;
-                } else {
-                    System.out.println("Invalid choice. Please select 1-4.");
+
+                switch (choice) {
+
+                    case 1:
+                        showCreateGameMenu();
+                        break;
+
+                    case 2:
+                        showJoinGameMenu();
+                        break;
+
+                    case 3:
+                        showMessage("Exiting...", NOTIFICATION_CRITICAL);
+                        System.exit(0);
+
+                    default:
+                        showMessage("Invalid choice. Please select 1-4.", STANDARD);
+
                 }
+
             } catch (NumberFormatException e) {
                 System.out.println("Please enter a valid number.");
             }
         }
+    }
+
+    private void showJoinGameMenu() {
+        showAvailableGames(games);
+
+        String[] result = new String[2]; // [gameId, colorChoice]
+
+        result[0] = askForInput("", "Enter game ID to join: ");
+
+        List<String> gameIds = games.stream().map(GameInfo::getGameId).toList();
+        while(!gameIds.contains(result[0])){
+            showError("Invalid game ID");
+            result[0] = askForInput("", "Enter game ID to join: ");
+        }
+
+        List<PlayerColor> occupiedColors = games.stream()
+                .filter(gameInfo -> gameInfo.getGameId().equals(result[0]))
+                .flatMap(game -> game.getConnectedPlayers().values().stream())
+                .toList();
+        List<PlayerColor> availableColors = Arrays.stream(PlayerColor.values())
+                .filter(currColor -> !occupiedColors.contains(currColor))
+                .toList();
+
+        result[1] = askPlayerColor(availableColors);
+
+        return result;
+    }
+
+    private void showCreateGameMenu() {
+
     }
 
     @Override
@@ -1390,37 +1448,5 @@ public class ClientCLIView implements ClientView {
     }
 
     private static final BiFunction<CallableOnGameController, String, Component> INTERRUPTED = (s, n) -> null;
-
-    public static void main(String[] args) {
-        ClientModel clientModel = new ClientModel();
-        clientModel.addPlayer("pippo", PlayerColor.BLUE);
-        clientModel.addPlayer("pluto", PlayerColor.BLUE);
-        clientModel.addPlayer("alice", PlayerColor.BLUE);
-        clientModel.updatePlayerPosition("pippo", 30);
-        clientModel.updatePlayerPosition("pluto", 15);
-        clientModel.updatePlayerPosition("alice", 1);
-        ClientCLIView cli = new ClientCLIView(clientModel);
-
-        cli.showCurrentRanking();
-
-        List<Component> components = ComponentLoader.loadComponents();
-        Component[][] griglia = new Component[12][12];
-
-        // Fill random positions with random components
-        for (int i = 0; i < 12; i++) {
-            for (int j = 0; j < 12; j++) {
-                if (Level2ShipBoard.isOutsideShipboard(i, j)) continue;
-                griglia[i][j] = components.get(new Random().nextInt(components.size()));
-            }
-        }
-
-        cli.showShipBoard(griglia, "pippo");
-
-        String RESET = "\u001B[0m";
-        String CYAN = "\u001B[36m";
-        String YELLOW = "\u001B[33m";
-        String MAGENTA = "\u001B[35m";
-
-    }
 
 }

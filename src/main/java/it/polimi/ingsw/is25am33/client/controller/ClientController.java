@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.client.controller;
 import it.polimi.ingsw.is25am33.client.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
+import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -14,7 +15,6 @@ import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.client.Hourglass;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -36,6 +36,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     private String nickname;
     boolean gameStarted = false;
     private final ClientModel clientModel;
+    private List<GameInfo> games = new ArrayList<>();
 
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BLUE = "\u001B[34m";
@@ -45,66 +46,23 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         this.clientModel = clientModel;
     }
 
-    public static void main(String @NotNull [] args) throws RemoteException {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("=== Galaxy Trucker Client ===");
-
-        ClientModel clientModel = new ClientModel();
-
-        // Selezione dell'interfaccia utente
-        ClientView view = selectUserInterface(scanner, clientModel, args[0]);
-        if (view == null) {
-            System.err.println("Invalid parameters. Exiting...");
-            return;
-        }
-
-        // Creiamo il controller
-        ClientController clientController = new ClientController(clientModel);
-        clientController.setView(view);
-        view.initialize();
-
-        // Selezione del protocollo di rete
-        CallableOnDNS dns = clientController.selectNetworkProtocol(args[1]);
-        if (dns == null) {
-            System.err.println("Invalid parameters. Exiting...");
-            return;
-        }
-
-        clientController.setDns(dns);
-
-        clientController.register();
-
-        clientModel.setMyNickname(clientController.getNickname());
-
-        clientController.start();
+    public void run() {
+        view.askNickname();
     }
 
-    private void register() {
+    public void register(String attemptedNickname) {
 
-        boolean registered = false;
-
-        while (!registered) {
-
-            String attemptedNickname = view.askNickname();
-
-            if (attemptedNickname.length() < 3) {
-                view.showError("Invalid nickname - choose a nickname at least 3 characters long");
-                continue;
+        try {
+            boolean registered = dns.registerWithNickname(attemptedNickname, this);
+            if (!registered) {
+                view.showError("Nickname already exists");
+            } else {
+                view.showMessage("Nickname registered successfully!", STANDARD);
+                this.nickname = attemptedNickname;
+                view.showMainMenu();
             }
-
-            try {
-                registered = dns.registerWithNickname(attemptedNickname, this);
-                if (!registered) {
-                    view.showError("Nickname already exists");
-                } else {
-                    view.showMessage("Nickname registered successfully!", STANDARD);
-                    this.nickname = attemptedNickname;
-                }
-            } catch (IOException e) {
-                view.showError("Error registering nickname: " + attemptedNickname);
-            }
-
+        } catch (IOException e) {
+            view.showError("Error registering nickname: " + attemptedNickname);
         }
 
     }
@@ -117,179 +75,62 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         return nickname;
     }
 
-    private void start() {
-        boolean running = true;
-
-        while (running) {
-            if (inGame) {
-                running = handleGameState();
-            } else {
-                running = handleMainMenu();
-            }
-        }
-
-        // Disconnessione
-        //disconnect();
-
-    }
-
-    private boolean handleGameState() {
-
-        if (gameStarted) {
-
-            buildShipBoardPhase();
-
-            // TODO
-
-            cardPhase();
-
-            view.askForInput("", "FINE PER ADESSO");
-
-            return true;
-        }
-
-        int choice = view.showGameMenu();
-
-        try {
-            switch (choice) {
-                case 0:
-                    gameStarted = true;
-                    return true;
-                case 1: // Lascia il gioco
-                    leaveGame();
-                    return true;
-
-                default:
-                    view.showError("Invalid choice");
-                    return true;
-            }
-        } catch (Exception e) {
-            view.showError(e.getMessage());
-            return true;
-        }
-    }
-
-
-    private boolean handleMainMenu() {
-        int choice = view.showMainMenu();
-
-        try {
-            return switch (choice) {
-                case 1 -> {
-                    listAvailableGames();
-                    yield true;
-                }
-                case 2 -> {
-                    createGame();
-                    yield true;
-                }
-                case 3 -> {
-                    joinGame();
-                    yield true;
-                }
-                case 4 -> {
-                    // TODO disconnessione
-                    yield false;
-                }
-                default -> {
-                    view.showError("Invalid choice");
-                    yield true;
-                }
-            };
-        } catch (Exception e) {
-            view.showError(e.getMessage());
-            return true;
-        }
-    }
-
     /**
      * Displays the list of available games.
      */
-    private void listAvailableGames() throws IOException {
-        List<GameInfo> games = dns.getAvailableGames();
-        view.showAvailableGames(games);
-    }
-
-    /**
-     * Creates a new game.
-     */
-    private void createGame() throws IOException {
-        int[] gameSettings = view.askCreateGame();
-        int numPlayers = gameSettings[0];
-        boolean isTestFlight = gameSettings[1] == 1;
-        PlayerColor color = view.intToPlayerColor(gameSettings[2]);
-
-        GameInfo gameInfo = dns.createGame(color, numPlayers, isTestFlight, nickname);
-
-        // if the dns was SocketClientManager (e.g., the client is socket), the serverController is the SocketClientManager used as a dns before
-        if (dns instanceof SocketClientManager) {
-            serverController = (SocketClientManager) dns;
-        } else {
-            serverController = gameInfo.getGameController();
-        }
-        currentGameId = gameInfo.getGameId();
-        inGame = true;
-
-        view.notifyGameCreated(currentGameId);
-        view.notifyPlayerJoined(this.nickname, gameInfo);
-        view.showMessage("Waiting for other players to join...", STANDARD);
-    }
-
-    /**
-     * Joins an existing game.
-     */
-    private void joinGame() throws RemoteException {
-
+    public void listAvailableGames() {
         try {
-            String[] joinSettings = null;
-            String gameId = null;
-            GameInfo gameInfo;
+            this.games = dns.getAvailableGames();
+            view.showAvailableGames(games);
+        } catch (IOException e) {
+            view.showError("Error listing available games: " + e.getMessage());
+        }
+    }
 
-            while (true) {
-                List<GameInfo> games = dns.getAvailableGames();
-
-                if (games.isEmpty()) {
-                    view.showMessage("No games available.", STANDARD);
-                    return;
-                }
-
-                joinSettings = view.askJoinGame(games);
-                gameId = joinSettings[0];
-
-                String finalGameId = gameId;
-                Optional<GameInfo> gameInfoOptional = games.stream().filter(info -> info.getGameId().equals(finalGameId)).findFirst();
-                if(gameInfoOptional.isPresent()){
-                    gameInfo = gameInfoOptional.get();
-                    break;
-                } else {
-                    view.showError("Game not found");
-                }
-            }
-
-            // Break down the conversion to clarify it for the compiler
-            int colorChoice = Integer.parseInt(joinSettings[1]);
-            PlayerColor color = view.intToPlayerColor(colorChoice);
-
-            boolean success = dns.joinGame(gameId, nickname, color);
-
-            while(!success) {
-                view.showError("Color already in use");
-                List<PlayerColor> availableColors = Arrays.stream(PlayerColor.values())
-                        .filter(currColor -> !gameInfo.getConnectedPlayers().containsValue(currColor))
-                        .toList();
-                joinSettings[1] = view.askPlayerColor(availableColors);
-                colorChoice = Integer.parseInt(joinSettings[1]);
-                color = view.intToPlayerColor(colorChoice);
-                success = dns.joinGame(gameId, nickname, color);
-            }
-
-            currentGameId = gameId;
+    public void handleCreateGameMenu(int numPlayers, boolean isTestFlight, PlayerColor chosenColor) {
+        try {
+            GameInfo gameInfo = dns.createGame(chosenColor, numPlayers, isTestFlight, nickname);
 
             // if the dns was SocketClientManager (e.g., the client is socket), the serverController is the SocketClientManager used as a dns before
             if (dns instanceof SocketClientManager) {
                 serverController = (SocketClientManager) dns;
             } else {
                 serverController = gameInfo.getGameController();
+            }
+            currentGameId = gameInfo.getGameId();
+            inGame = true;
+
+            view.notifyGameCreated(currentGameId);
+            view.notifyPlayerJoined(this.nickname, gameInfo);
+            view.showMessage("Waiting for other players to join...", STANDARD);
+        } catch (IOException e) {
+            view.showError("Error creating game: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Joins an existing game.
+     */
+    public void joinGame(String chosenGameId, PlayerColor chosenColor) {
+
+        try {
+
+            List<GameInfo> games = dns.getAvailableGames();
+            boolean success = dns.joinGame(chosenGameId, nickname, chosenColor);
+
+            if (!success) {
+                view.showError("Color already in use");
+                view.showAvailableGames(games);
+                return;
+            }
+
+            currentGameId = chosenGameId;
+
+            // if the dns was SocketClientManager (e.g., the client is socket), the serverController is the SocketClientManager used as a dns before
+            if (dns instanceof SocketClientManager) {
+                serverController = (SocketClientManager) dns;
+            } else {
+                serverController = games.stream().filter(info -> info.getGameId().equals(chosenGameId)).findFirst().orElseThrow().getGameController();
             }
             inGame = true;
             view.showMessage("Successfully joined game!", STANDARD);
@@ -311,6 +152,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         } catch (Exception e) {
             view.showError("Error joining game: " + e.getMessage());
         }
+
     }
 
     public void setView(ClientView view) {
@@ -322,14 +164,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * @param scanner Scanner per leggere l'input dell'utente
      * @return L'implementazione di ClientView scelta
      */
-    private static ClientView selectUserInterface(Scanner scanner, ClientModel clientModel, String choice) {
+    public static ClientView selectUserInterface(Scanner scanner, String choice) throws RemoteException {
 
         return switch (choice) {
-            case "cli" -> new ClientCLIView(clientModel);
-            case "gui" ->
-                // TODO
-                //return new ClientGUIView();
-                    null;
+            case "cli" -> new ClientCLIView();
+            case "gui" -> new ClientGuiController();
             default -> null;
         };
 
@@ -360,7 +199,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * Permette all'utente di selezionare il protocollo di rete
      * @return L'implementazione di NetworkManager scelta
      */
-    private CallableOnDNS selectNetworkProtocol(String choice) {
+    public CallableOnDNS selectNetworkProtocol(String choice) {
 
         try {
             return switch (choice) {

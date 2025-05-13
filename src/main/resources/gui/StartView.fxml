@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12"
+            fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.StartViewController"
+            prefWidth="600" prefHeight="400"
+            style="-fx-background-color: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);">
+
+    <VBox alignment="CENTER" spacing="20.0" prefWidth="600" prefHeight="400" layoutX="0" layoutY="0"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+
+        <!-- Titolo centrato e ben visibile -->
+        <Label text="Galaxy Trucker" textAlignment="CENTER"
+               style="-fx-text-fill: white; -fx-font-weight: bold;">
+            <font>
+                <Font name="Arial" size="36"/>
+            </font>
+        </Label>
+
+        <!-- Campo inserimento nickname -->
+        <TextField fx:id="nicknameField" promptText="Inserisci il tuo nickname"
+                   onAction="#handleSubmit" maxWidth="250" visible="false"/>
+
+        <!-- Pulsante submit -->
+        <Button fx:id="startButton"  onAction="#handleSubmit" text="Submit" maxWidth="100" visible="false"/>
+
+        <!-- Label per eventuali errori -->
+        <Label fx:id="errorLabel" textFill="red" visible="false"/>
+
+    </VBox>
+</AnchorPane>

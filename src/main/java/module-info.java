@@ -63,4 +63,8 @@ module it.polimi.ingsw.is25am33 {
     exports it.polimi.ingsw.is25am33.model.enumFiles;
     opens it.polimi.ingsw.is25am33.model.enumFiles to com.fasterxml.jackson.databind, java.rmi;
     opens it.polimi.ingsw.is25am33.client to com.fasterxml.jackson.databind;
+    exports it.polimi.ingsw.is25am33.client.view.gui;
+    opens it.polimi.ingsw.is25am33.client.view.gui to javafx.fxml;
+    exports it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
+    opens it.polimi.ingsw.is25am33.client.view.gui.viewControllers to javafx.fxml;
 }

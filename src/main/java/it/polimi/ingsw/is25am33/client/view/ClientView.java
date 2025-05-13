@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.client.view;
 
 import it.polimi.ingsw.is25am33.client.ClientModel;
+import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
@@ -17,6 +18,9 @@ import java.util.function.BiFunction;
  * Può essere implementata sia da una CLI che da una GUI.
  */
 public interface ClientView {
+
+    ClientController getClientController();
+
     /**
      * Inizializza la view
      */
@@ -40,9 +44,8 @@ public interface ClientView {
 
     /**
      * Chiede all'utente di inserire un nickname
-     * @return Il nickname inserito
      */
-    String askNickname();
+    void askNickname();
 
     /**
      * Chiede all'utente di inserire l'indirizzo del server
@@ -71,9 +74,8 @@ public interface ClientView {
 
     /**
      * Mostra il menù principale
-     * @return La scelta dell'utente
      */
-    int showMainMenu();
+    void showMainMenu();
 
     /**
      * Mostra il menù di gioco quando l'utente è in una partita in attesa
