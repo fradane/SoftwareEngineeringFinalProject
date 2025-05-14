@@ -8,6 +8,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface CallableOnGameController extends Remote {
 
@@ -60,4 +61,8 @@ public interface CallableOnGameController extends Remote {
     void playerWantsToReleaseLittleDeck(String nickname, int littleDeckChoice) throws RemoteException;
 
     void playerWantsToRestartHourglass(String nickname)  throws RemoteException;
+
+    void playerToRemoveComponent(String nickname, Component component) throws RemoteException;
+
+    void playerChooseShipPart(String nickname, List<Set<List<Integer>>>shipPart) throws RemoteException;
 }

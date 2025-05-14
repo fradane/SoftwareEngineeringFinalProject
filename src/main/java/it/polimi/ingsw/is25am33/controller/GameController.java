@@ -370,4 +370,14 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.restartHourglass(nickname);
     }
 
+    @Override
+    public void playerToRemoveComponent(String nickname, Component component) throws RemoteException {
+
+    }
+
+    @Override
+    public void playerChooseShipPart(String nickname, List<Set<List<Integer>>> shipPart) throws RemoteException {
+
+    }
+
 }

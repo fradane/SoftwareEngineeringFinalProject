@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.ClientModel;
+import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
@@ -134,6 +135,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             buildShipBoardPhase();
 
             // TODO
+            checkShipBoardPhase();
 
             cardPhase();
 
@@ -442,6 +444,21 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
+    public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws RemoteException {
+
+    }
+
+    @Override
+    public void notifyRemovalResult(String nicknameToNotify, boolean success) throws RemoteException {
+
+    }
+
+    @Override
+    public void notifyShipCorrect(String nicknameToNotify) throws RemoteException {
+
+    }
+
+    @Override
     public void notifyGameState(String nickname, GameState gameState) throws RemoteException{
         clientModel.setGameState(gameState);
         view.showNewGameState();
@@ -477,12 +494,17 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
-        clientModel.getShipboardOf(nickname).getShipBoardMatrix()[coordinates.getX()][coordinates.getY()] = component;
+        clientModel.getShipboardOf(nickname).getShipMatrix()[coordinates.getX()][coordinates.getY()] = component;
+    }
+
+
+    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
+        clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponents().add(component);
     }
 
     @Override
     public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException {
-        clientModel.getShipboardOf(nickname).setShipBoardMatrix(shipMatrix);
+        clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
     }
 
     @Override
@@ -496,7 +518,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) throws RemoteException {
-        clientModel.getShipboardOf(nickname).getBookedComponent().add(component);
+        clientModel.getShipboardOf(nickname).getBookedComponents().add(component);
     }
 
     public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException {
@@ -543,6 +565,19 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             view.showShipBoardsMenu();
         }
 
+    }
+
+    public void checkShipBoardPhase() {
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+
+        List<Component> incorrectlyPositionedComponents = shipBoard.getIncorrectlyPositionedComponents();
+        Component currentComponent;
+        while(clientModel.getGameState() == GameState.CHECK_SHIPBOARD) {
+            if(!incorrectlyPositionedComponents.isEmpty()){
+                view.askComponentToRemove(shipBoard, incorrectlyPositionedComponents);
+            }
+            //currentComponent = view.askComponentToRemove(incorrectlyPositionedComponents);
+        }
     }
 
     public void cardPhase() {

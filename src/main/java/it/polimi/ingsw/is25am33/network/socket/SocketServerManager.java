@@ -24,6 +24,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -272,6 +273,21 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
+    public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws RemoteException {
+
+    }
+
+    @Override
+    public void notifyRemovalResult(String nicknameToNotify, boolean success) throws RemoteException {
+
+    }
+
+    @Override
+    public void notifyShipCorrect(String nicknameToNotify) throws RemoteException {
+
+    }
+
+    @Override
     public void notifyGameState(String nickname, GameState gameState) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyGameState");
         outMessage.setParamGameState(gameState);
@@ -351,6 +367,11 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamComponent(component);
         outMessage.setParamCoordinates(coordinates);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException{
+        // TODO
     }
 
     @Override

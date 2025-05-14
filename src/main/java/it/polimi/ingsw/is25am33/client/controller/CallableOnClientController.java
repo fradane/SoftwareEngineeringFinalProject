@@ -14,6 +14,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface CallableOnClientController extends Remote {
 
@@ -43,6 +44,8 @@ public interface CallableOnClientController extends Remote {
 
     void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException;
 
+    void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException;
+
     void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException;
 
     void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException;
@@ -54,5 +57,11 @@ public interface CallableOnClientController extends Remote {
     void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws RemoteException;
 
     void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException;
+
+    void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws RemoteException;
+
+    void notifyRemovalResult(String nicknameToNotify, boolean success) throws RemoteException;
+
+    void notifyShipCorrect(String nicknameToNotify ) throws RemoteException;
 
 }

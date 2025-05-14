@@ -590,6 +590,31 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
+        showShipBoard(shipBoard.getShipMatrix(), clientModel.getMyNickname());
+
+        String questionDescription = "\nChoose a component to remove: \n";
+
+        for (Component component : incorrectlyPositionedComponents) {
+            questionDescription = questionDescription.concat(component.toString() + "\n");
+        }
+
+        while (true) {
+            String input = askForInput(questionDescription, defaultInterrogationPrompt);
+            try {
+                int indexChoosen = Integer.parseInt(input);
+                if (indexChoosen >= 1 && indexChoosen <= incorrectlyPositionedComponents.size()) {
+                    return incorrectlyPositionedComponents.get(indexChoosen);
+                } else {
+                    System.out.println("Invalid choice. Please select 1-" + incorrectlyPositionedComponents.size() + ".");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid number.");
+            }
+        }
+    }
+
+    @Override
     public void showLittleDeck(int littleDeckChoice) {
         System.out.println("Here is the little deck you chose: ");
         clientModel.getLittleVisibleDecks().get(littleDeckChoice - 1).forEach(System.out::println);
@@ -967,7 +992,7 @@ public class ClientCLIView implements ClientView {
 
             Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double engines you would like to activate or press enter to skip: ");
             if (coords == null) break;
-            if (shipBoard.getComponentByType(DoubleEngine.class).contains(shipBoard.getComponentAt(coords)))
+            if (shipBoard.getDoubleEngines().contains(shipBoard.getComponentAt(coords)))
                 doubleEnginesCoordinates.add(coords);
             else {
                 showMessage("The selected coordinates are not related to any double engine, try again", STANDARD);
@@ -981,7 +1006,7 @@ public class ClientCLIView implements ClientView {
                     showMessage("You have to select a battery box after choosing a double engine.", STANDARD);
                     continue;
                 }
-                if (shipBoard.getComponentByType(BatteryBox.class).contains(shipBoard.getComponentAt(batteryCoords))) {
+                if (shipBoard.getBatteryBoxes().contains(shipBoard.getComponentAt(batteryCoords))) {
                     batteryBoxesCoordinates.add(batteryCoords);
                     break;
                 }
@@ -1049,7 +1074,7 @@ public class ClientCLIView implements ClientView {
 
             Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double cannon you would like to activate or press enter to skip: ");
             if (coords == null) break;
-            if (myShipBoard.getComponentByType(DoubleCannon.class).contains(myShipBoard.getComponentAt(coords)))
+            if (myShipBoard.getDoubleCannons().contains(myShipBoard.getComponentAt(coords)))
                 doubleCannonsCoordinates.add(coords);
             else {
                 showMessage("The selected coordinates are not related to any double cannons, try again", STANDARD);
@@ -1063,7 +1088,7 @@ public class ClientCLIView implements ClientView {
                     showMessage("You have to select a battery box after choosing a double engine.", STANDARD);
                     continue;
                 }
-                if (myShipBoard.getComponentByType(BatteryBox.class).contains(myShipBoard.getComponentAt(batteryCoords))) {
+                if (myShipBoard.getBatteryBoxes().contains(myShipBoard.getComponentAt(batteryCoords))) {
                     batteryBoxesCoordinates.add(batteryCoords);
                     break;
                 }
@@ -1094,7 +1119,7 @@ public class ClientCLIView implements ClientView {
                 showMessage("You have to select cabins", STANDARD);
                 continue;
             }
-            if (myShipBoard.getComponentByType(Cabin.class).contains(myShipBoard.getComponentAt(coords))) {
+            if (myShipBoard.getCabin().contains(myShipBoard.getComponentAt(coords))) {
                 cabinCoordinates.add(coords);
                 break;
             } else {
@@ -1130,13 +1155,13 @@ public class ClientCLIView implements ClientView {
                     }
                 };
 
-            if(myShipBoard.getComponentByType(Shield.class).contains(myShipBoard.getComponentAt(activableCoords))) {
+            if(myShipBoard.getShields().contains(myShipBoard.getComponentAt(activableCoords))) {
                 showMessage("The selected coordinates are not related to any shield, try again", STANDARD);
                 continue;
             }
 
             Coordinates batteryBoxCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
-            if(myShipBoard.getComponentByType(BatteryBox.class).contains(myShipBoard.getComponentAt(batteryBoxCoords))) {
+            if(myShipBoard.getBatteryBoxes().contains(myShipBoard.getComponentAt(batteryBoxCoords))) {
                 showMessage("The selected coordinates are not related to any battery box, try again", STANDARD);
                 continue;
             }
@@ -1170,13 +1195,13 @@ public class ClientCLIView implements ClientView {
                     }
                 };
 
-            if(myShipBoard.getComponentByType(DoubleCannon.class).contains(myShipBoard.getComponentAt(doubleCannonCoords))) {
+            if(myShipBoard.getDoubleCannons().contains(myShipBoard.getComponentAt(doubleCannonCoords))) {
                 showMessage("The selected coordinates are not related to any double cannon, try again", STANDARD);
                 continue;
             }
 
             Coordinates batteryBoxCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
-            if(myShipBoard.getComponentByType(BatteryBox.class).contains(myShipBoard.getComponentAt(batteryBoxCoords))) {
+            if(myShipBoard.getBatteryBoxes().contains(myShipBoard.getComponentAt(batteryBoxCoords))) {
                 showMessage("The selected coordinates are not related to any battery box, try again", STANDARD);
                 continue;
             }
@@ -1243,8 +1268,8 @@ public class ClientCLIView implements ClientView {
             ShipBoardClient myShipBoard = getMyShipBoard();
 
             List<Component> storages = new ArrayList<>();
-            storages.addAll(myShipBoard.getComponentByType(SpecialStorage.class));
-            storages.addAll(myShipBoard.getComponentByType(StandardStorage.class));
+            storages.addAll(myShipBoard.getSpecialStorages());
+            storages.addAll(myShipBoard.getStandardStorages());
 
             if (storages.contains(myShipBoard.getComponentAt(coords)))
                 return (server, nickname) -> {
@@ -1268,8 +1293,8 @@ public class ClientCLIView implements ClientView {
             ShipBoardClient myShipBoard = getMyShipBoard();
 
             List<Component> storages = new ArrayList<>();
-            storages.addAll(myShipBoard.getComponentByType(SpecialStorage.class));
-            storages.addAll(myShipBoard.getComponentByType(StandardStorage.class));
+            storages.addAll(myShipBoard.getStandardStorages());
+            storages.addAll(myShipBoard.getSpecialStorages());
 
             if (storages.contains(myShipBoard.getComponentAt(coords)))
                 return (server, nickname) -> {
