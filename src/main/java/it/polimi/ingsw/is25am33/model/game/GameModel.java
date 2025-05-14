@@ -363,4 +363,7 @@ public class GameModel {
         }
     }
 
+    public void setGameContext(GameContext gameContext) {
+        this.gameContext = gameContext;
+    }
 }

@@ -51,7 +51,7 @@ public class Deck {
     }
 
     public void setGameContext(GameContext gameContext){
-        this.gameContext=gameContext;
+        this.gameContext = gameContext;
     }
 
     /**
@@ -154,7 +154,7 @@ public class Deck {
      * - Stardust
      * - War Fields
      */
-    public void loadCards() {
+    private void loadCards() {
         allCards.addAll(Deck.loadAbandonedShipFromJson());
         allCards.addAll(Deck.loadAbandonedStationFromJson());
         allCards.addAll(Deck.loadFreeSpaceFromJson());
@@ -312,5 +312,17 @@ public class Deck {
         synchronized (isLittleDeckFree) {
             isLittleDeckFree.set(littleDeckChoice - 1, true);
         }
+    }
+
+    public List<List<AdventureCard>> getLittleVisibleDecks() {
+        return littleVisibleDecks;
+    }
+
+    public List<AdventureCard> getLittleNotVisibleDeck() {
+        return littleNotVisibleDeck;
+    }
+
+    public List<List<String>> getLittleVisibleDecksString() {
+        return littleVisibleDecksString;
     }
 }
