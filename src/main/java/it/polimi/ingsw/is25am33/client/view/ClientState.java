@@ -1,0 +1,13 @@
+package it.polimi.ingsw.is25am33.client.view;
+
+public enum ClientState {
+    REGISTER,
+    MAIN_MENU,
+    CREATE_GAME_CHOOSE_NUM_PLAYERS,
+    CREATE_GAME_CHOOSE_IS_TEST_FLIGHT,
+    CREATE_GAME_CHOOSE_COLOR,
+    JOIN_GAME_CHOOSE_GAME_ID,
+    JOIN_GAME_CHOOSE_COLOR,
+    WAIT_FOR_PLAYERS;
+    // TODO: add more states
+}

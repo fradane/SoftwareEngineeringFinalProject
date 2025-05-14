@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
+import static it.polimi.ingsw.is25am33.client.view.ClientState.*;
 import static it.polimi.ingsw.is25am33.client.view.MessageType.*;
 
 /**
@@ -37,9 +38,11 @@ public class ClientCLIView implements ClientView {
     private final BlockingQueue<String> inputQueue = new LinkedBlockingQueue<>();
     private volatile boolean waitingForInput = false;
     private static final String INPUT_INTERRUPT = "%";
-    private final ClientModel clientModel;
-    private final ClientController clientController;
+    private ClientModel clientModel;
+    private ClientController clientController;
     private final Object consoleLock = new Object();
+    private ClientState clientState = REGISTER;
+    BlockingQueue<String> stringQueue = new LinkedBlockingQueue<>();
 
     // Definizione dei colori ANSI (funziona nei terminali che supportano i colori ANSI).
     private static final String ANSI_RED = "\u001B[31m";
@@ -47,15 +50,27 @@ public class ClientCLIView implements ClientView {
     private static final String ANSI_BLUE = "\u001B[34m";
     private static final String ANSI_GREEN = "\u001B[32m";
     private static final String ANSI_YELLOW = "\u001B[33m";
-
     private final String defaultInterrogationPrompt = "Your choice: ";
     private String currentInterrogationPrompt = "";
 
-
     public ClientCLIView() throws RemoteException {
         this.scanner = new Scanner(System.in);
-        this.clientModel = new ClientModel();
-        this.clientController = new ClientController(clientModel);
+    }
+
+    public ClientState getClientState() {
+        return clientState;
+    }
+
+    public void setClientModel(ClientModel clientModel) {
+        this.clientModel = clientModel;
+    }
+
+    public void setClientController(ClientController clientController) {
+        this.clientController = clientController;
+    }
+
+    public void setClientState(ClientState clientState) {
+        this.clientState = clientState;
     }
 
     @Override
@@ -81,8 +96,23 @@ public class ClientCLIView implements ClientView {
                 Thread.currentThread().interrupt();
             }
         });
+
+        Thread handlerInputMessage = new Thread(() -> {
+
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    ClientCLIView.this.handleInput(inputQueue.take());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+        });
+
+        handlerInputMessage.setDaemon(true);
         inputThread.setDaemon(true); // Termina quando il thread principale termina
         inputThread.start();
+        handlerInputMessage.start();
     }
 
 
@@ -132,7 +162,7 @@ public class ClientCLIView implements ClientView {
     public void showMessage(String message, MessageType type) {
         synchronized (consoleLock) {
 
-            if(type==INPUT) {
+            if(type == INPUT) {
                 System.out.print(message);
                 return;
             }
@@ -144,7 +174,7 @@ public class ClientCLIView implements ClientView {
 
             switch (type){
                 case STANDARD :
-                    System.out.println(message);
+                    System.out.print(message);
                     break;
                 case ERROR :
                     System.out.println(ANSI_RED + "Error: " + message + ANSI_RESET);
@@ -175,24 +205,9 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void askNickname() {
-        String attemptedNickname;
-        while (true) {
-            attemptedNickname = askForInput("", "Choose a nickname: ");
-            if (attemptedNickname.length() < 3)
-                showError("Nickname cannot be less than 3 characters long. Please try again.");
-            else
-                break;
-        }
-        clientController.register(attemptedNickname);
+        showMessage("Please enter your nickname: ", STANDARD);
     }
 
-    @Override
-    public String askServerAddress() {
-        String address = askForInput("", "Enter server address (default: localhost): ");
-        return address.isEmpty() ? "localhost" : address;
-    }
-
-    @Override
     public void showAvailableGames(Iterable<GameInfo> games) {
         boolean hasGames = false;
 
@@ -206,6 +221,8 @@ public class ClientCLIView implements ClientView {
 
         if (!hasGames) {
             System.out.println("No games available.");
+            clientState = ClientState.MAIN_MENU;
+            showMainMenu();
         }
     }
 
@@ -243,8 +260,7 @@ public class ClientCLIView implements ClientView {
             }
         }
 
-        // Scegli il colore
-        result[2] = Integer.parseInt(askPlayerColor());
+        // Scegli il color
 
         return result;
     }
@@ -276,29 +292,36 @@ public class ClientCLIView implements ClientView {
         return result;
     }
 
-    public String askPlayerColor() {
-        String questionDescription = """
+    public void showColorQuestion() {
+        String colorMenu = """
                 \nChoose your color:
                 1. RED
                 2. BLUE
                 3. GREEN
                 4. YELLOW
+                >\s
                 """;
-
-        while (true) {
-            String input = askForInput(questionDescription, defaultInterrogationPrompt);
-            try {
-                int colorChoice = Integer.parseInt(input);
-                if (colorChoice >= 1 && colorChoice <= 4) {
-                    return Integer.toString(colorChoice);
-                } else {
-                    System.out.println("Invalid choice. Please select 1-4.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number.");
-            }
-        }
+        showMessage(colorMenu, STANDARD);
     }
+
+    public void showAvailableColorsQuestion(String gameID) {
+        List<PlayerColor> occupiedColors = clientController.getGames().stream()
+                .filter(gameInfo -> gameInfo.getGameId().equals(gameID))
+                .flatMap(game -> game.getConnectedPlayers().values().stream())
+                .toList();
+        List<PlayerColor> availableColors = Arrays.stream(PlayerColor.values())
+                .filter(currColor -> !occupiedColors.contains(currColor))
+                .toList();
+
+        StringBuilder colorMenu = new StringBuilder("\nChoose your color:\n");
+        for (PlayerColor color : availableColors) {
+            colorMenu.append(color.getNumber()).append(". ").append(color.name()).append("\n");
+        }
+
+        showMessage(colorMenu.toString(), STANDARD);
+    }
+
+
 
     public String askPlayerColor(List<PlayerColor> availableColors) {
         String questionDescription = "\nChoose your color: \n";
@@ -325,71 +348,14 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showMainMenu() {
-        while (true) {
-            String questionDescription = """
-                    \nChoose an option:
-                    1. Create a new game
-                    2. Join a game
-                    3. Exit
-                    """;
-
-            String input = askForInput(questionDescription, defaultInterrogationPrompt);
-            try {
-                int choice = Integer.parseInt(input);
-
-                switch (choice) {
-
-                    case 1:
-                        showCreateGameMenu();
-                        break;
-
-                    case 2:
-                        showJoinGameMenu();
-                        break;
-
-                    case 3:
-                        showMessage("Exiting...", NOTIFICATION_CRITICAL);
-                        System.exit(0);
-
-                    default:
-                        showMessage("Invalid choice. Please select 1-4.", STANDARD);
-
-                }
-
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number.");
-            }
-        }
-    }
-
-    private void showJoinGameMenu() {
-        showAvailableGames(games);
-
-        String[] result = new String[2]; // [gameId, colorChoice]
-
-        result[0] = askForInput("", "Enter game ID to join: ");
-
-        List<String> gameIds = games.stream().map(GameInfo::getGameId).toList();
-        while(!gameIds.contains(result[0])){
-            showError("Invalid game ID");
-            result[0] = askForInput("", "Enter game ID to join: ");
-        }
-
-        List<PlayerColor> occupiedColors = games.stream()
-                .filter(gameInfo -> gameInfo.getGameId().equals(result[0]))
-                .flatMap(game -> game.getConnectedPlayers().values().stream())
-                .toList();
-        List<PlayerColor> availableColors = Arrays.stream(PlayerColor.values())
-                .filter(currColor -> !occupiedColors.contains(currColor))
-                .toList();
-
-        result[1] = askPlayerColor(availableColors);
-
-        return result;
-    }
-
-    private void showCreateGameMenu() {
-
+        clientState = ClientState.MAIN_MENU;
+        String menu = """
+                \nChoose an option:
+                1. Create a new game
+                2. Join a game
+                >\s
+                """;
+        showMessage(menu, STANDARD);
     }
 
     @Override
@@ -1448,5 +1414,109 @@ public class ClientCLIView implements ClientView {
     }
 
     private static final BiFunction<CallableOnGameController, String, Component> INTERRUPTED = (s, n) -> null;
+
+    public void showNumPlayersQuestion() {
+        showMessage("How many players do you want to play with?", STANDARD);
+    }
+
+    public void showTestFlightQuestion() {
+        showMessage("Do you want to play the test flight? [y/n]", STANDARD);
+    }
+
+    public void handleInput(String input) {
+
+        if (input.equals("exit")) {
+            clientController.leaveGame();
+            System.exit(0);
+        }
+
+        try {
+            switch (clientState) {
+
+                case REGISTER:
+                    clientController.register(input);
+                    break;
+
+                case MAIN_MENU:
+                    switch (Integer.parseInt(input)) {
+                        case 1:
+                            clientState = CREATE_GAME_CHOOSE_NUM_PLAYERS;
+                            showNumPlayersQuestion();
+                            break;
+
+                        case 2:
+                            clientState = JOIN_GAME_CHOOSE_GAME_ID;
+                            showAvailableGames(clientController.getGames());
+                            break;
+
+                        default:
+                            showMessage("Invalid input. Please enter 1 or 2.", ERROR);
+                            break;
+                    }
+                    break;
+
+                case CREATE_GAME_CHOOSE_NUM_PLAYERS:
+                    clientState = CREATE_GAME_CHOOSE_IS_TEST_FLIGHT;
+                    stringQueue.add(input);
+                    showTestFlightQuestion();
+                    break;
+
+                case CREATE_GAME_CHOOSE_IS_TEST_FLIGHT:
+                    clientState = CREATE_GAME_CHOOSE_COLOR;
+                    stringQueue.add(input);
+                    showColorQuestion();
+                    break;
+
+                case CREATE_GAME_CHOOSE_COLOR:
+                    stringQueue.add(input);
+                    try {
+                        clientState = WAIT_FOR_PLAYERS;
+                        int numPlayers = Integer.parseInt(stringQueue.poll());
+                        boolean isTestFlight = Boolean.parseBoolean(stringQueue.poll());
+                        PlayerColor playerColor = PlayerColor.getPlayerColor(Integer.parseInt(stringQueue.poll()));
+                        clientController.handleCreateGameMenu(numPlayers, isTestFlight, playerColor);
+                    } catch(NumberFormatException e) {
+                        showMessage("\nOne or more values were incorrect. Please try again.\n", ERROR);
+                        clientState = CREATE_GAME_CHOOSE_NUM_PLAYERS;
+                        stringQueue.clear();
+                        showNumPlayersQuestion();
+                    }
+                    break;
+
+                case JOIN_GAME_CHOOSE_GAME_ID:
+                    stringQueue.add(input);
+                    clientState = JOIN_GAME_CHOOSE_COLOR;
+                    showAvailableColorsQuestion(input);
+                    break;
+
+                case JOIN_GAME_CHOOSE_COLOR:
+                    stringQueue.add(input);
+                    try {
+                        String gameId = stringQueue.poll();
+                        PlayerColor playerColor = PlayerColor.getPlayerColor(Integer.parseInt(stringQueue.poll()));
+                        clientController.joinGame(gameId, playerColor);
+                        clientState = WAIT_FOR_PLAYERS;
+                    } catch (NumberFormatException e) {
+                        showMessage("\nOne or more values were incorrect. Please try again.\n", ERROR);
+                        clientState = JOIN_GAME_CHOOSE_GAME_ID;
+                        stringQueue.clear();
+                        showAvailableGames(clientController.getGames());
+                    }
+                    break;
+
+                case WAIT_FOR_PLAYERS:
+                    // TODO
+                    break;
+
+                default:
+                    showMessage("", ERROR);
+                    break;
+
+            }
+        } catch (NumberFormatException e) {
+            showMessage("\nPlease enter a valid number.\n", ERROR);
+        }
+
+    }
 
 }

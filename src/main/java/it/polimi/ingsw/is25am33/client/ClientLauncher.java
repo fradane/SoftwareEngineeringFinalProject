@@ -56,7 +56,8 @@ public class ClientLauncher {
                 ClientModel clientModel = new ClientModel();
                 ClientController clientController = new ClientController(clientModel);
                 clientController.setView(cli);
-                cli.initialize();
+                ((ClientCLIView) cli).setClientController(clientController);
+                ((ClientCLIView) cli).setClientModel(clientModel);
 
                 CallableOnDNS dns = clientController.selectNetworkProtocol(args[1]);
                 if (dns == null) {
@@ -64,6 +65,7 @@ public class ClientLauncher {
                     return;
                 }
                 clientController.setDns(dns);
+                cli.initialize();
                 clientController.run();
             } catch (RemoteException e) {
                 System.err.println("Error while connecting to the server. Exiting...");

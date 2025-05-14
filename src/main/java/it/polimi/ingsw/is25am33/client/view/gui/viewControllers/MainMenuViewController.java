@@ -5,6 +5,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
@@ -13,59 +14,61 @@ import java.util.stream.Collectors;
 
 public class MainMenuViewController extends GuiController {
 
-
     private ClientModel clientModel;
     private final Map<String, GameInfo> games = new HashMap<>();
     private final Set<PlayerColor> colors = new HashSet<>(Arrays.asList(PlayerColor.values()));
     private String currGameId;
 
     @FXML
-    public VBox joinGameForm;
+    private VBox mainMenu;
 
     @FXML
-    public CheckBox easyModeCheckBox;
+    private VBox createGameForm;
 
     @FXML
-    public ComboBox colorComboBox;
+    private VBox joinGameForm;
 
     @FXML
-    public Button submitCreateGameButton;
+    private CheckBox easyModeCheckBox;
 
     @FXML
-    public ComboBox joinColorComboBox;
+    private ComboBox<PlayerColor> colorComboBox;
 
     @FXML
-    public Button submitJoinGameButton;
+    private Slider playerCountSlider;
 
     @FXML
-    public VBox createGameForm;
+    private Button submitCreateGameButton;
 
     @FXML
-    public Slider playerCountSlider;
+    private ComboBox<PlayerColor> joinColorComboBox;
 
     @FXML
-    public Button exitButton;
+    private Button submitJoinGameButton;
 
     @FXML
-    public Button createGameButton;
+    private Button availableGameButton;
 
     @FXML
-    public Button joinGameButton;
+    private Button createGameButton;
 
     @FXML
-    public Button availableGameButton;
+    private Button joinGameButton;
+
+    @FXML
+    private Button exitButton;
 
     @FXML
     private ListView<String> gameListView;
 
-    @FXML
-    private void handleAvailableGames() {
-
-    }
 
     @FXML
     private void handleCreateGame() {
+        mainMenu.setVisible(false);
+        mainMenu.setManaged(false);
+        //createGameForm.setAlignment(Pos.CENTER);
         createGameForm.setVisible(true);
+        createGameForm.setManaged(true);
 
     }
 
@@ -73,7 +76,7 @@ public class MainMenuViewController extends GuiController {
     private void handleSubmitCreateGame() {
         double numPlayers = playerCountSlider.getValue();
         boolean isEasyMode = easyModeCheckBox.isSelected();
-        PlayerColor chosenColor = (PlayerColor) colorComboBox.getValue();
+        PlayerColor chosenColor = colorComboBox.getValue();
 
         if (chosenColor == null) {
             showInfo("Please fill all fields.");
@@ -82,8 +85,6 @@ public class MainMenuViewController extends GuiController {
 
         clientController.handleCreateGameMenu((int) numPlayers, isEasyMode, chosenColor);
     }
-
-
 
 
     @FXML
@@ -127,11 +128,7 @@ public class MainMenuViewController extends GuiController {
         gameListView.getItems().setAll(gameInfo);
         gameListView.setVisible(true);
 
-    }
 
-    @FXML
-    public void handleSubmitCreateGame(ActionEvent actionEvent) {
-        // TODO: crea una nuova partita
     }
 
     @FXML

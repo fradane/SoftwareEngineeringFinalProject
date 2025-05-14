@@ -13,9 +13,10 @@ import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
-import java.util.Map;
 
 public interface CallableOnClientController extends Remote {
+
+    void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException;
 
     void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws RemoteException;
 

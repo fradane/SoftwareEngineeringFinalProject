@@ -15,4 +15,14 @@ public enum PlayerColor {
     public int getNumber() {
         return number;
     }
+
+    public static PlayerColor getPlayerColor(int number){
+        for(PlayerColor playerColor : PlayerColor.values()){
+            if(playerColor.getNumber() == number)
+                return playerColor;
+        }
+        return null;
+    }
+
+
 }

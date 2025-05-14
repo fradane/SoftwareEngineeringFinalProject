@@ -48,18 +48,6 @@ public interface ClientView {
     void askNickname();
 
     /**
-     * Chiede all'utente di inserire l'indirizzo del server
-     * @return L'indirizzo del server
-     */
-    String askServerAddress();
-
-    /**
-     * Mostra la lista dei giochi disponibili
-     * @param games La lista dei giochi disponibili
-     */
-    void showAvailableGames(Iterable<GameInfo> games);
-
-    /**
      * Chiede all'utente di creare un nuovo gioco
      * @return Un array contenente [numeroGiocatori, isTestFlight (0/1), coloreGiocatore (int)]
      */
@@ -110,8 +98,6 @@ public interface ClientView {
      * @param reason La ragione della terminazione
      */
     void notifyGameEnded(String reason);
-
-    String askPlayerColor();
 
     /**
      * Converte un intero in un colore del giocatore

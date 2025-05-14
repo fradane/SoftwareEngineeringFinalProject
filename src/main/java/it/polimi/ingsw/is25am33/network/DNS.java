@@ -10,14 +10,16 @@ import it.polimi.ingsw.is25am33.network.socket.SocketServerManager;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
-    public static final Map<String, GameController> gameControllers = new ConcurrentHashMap<>();
+    public static final Map<String, GameController> gameControllers = new ConcurrentHashMap<>();    // GameId - gameController
     public final ConnectionManager connectionManager;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     public static void main(String[] args) throws RemoteException {
 
@@ -35,7 +37,15 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     public DNS() throws RemoteException {
         super();
-        connectionManager = new ConnectionManager();
+        connectionManager = new ConnectionManager(this);
+    }
+
+    public static Map<String, GameController> getGameControllers() {
+        return gameControllers;
+    }
+
+    public ConnectionManager getConnectionManager() {
+        return connectionManager;
     }
 
     @Override
@@ -51,12 +61,20 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
     @Override
     public boolean registerWithNickname(String nickname, CallableOnClientController controller) throws RemoteException {
         boolean result = connectionManager.registerWithNickname(nickname, controller);
-        if (result) System.out.println("New user registered with nickname: " + nickname);
+        if (result) {
+            System.out.println("New user registered with nickname: " + nickname);
+            new Thread(() -> {
+                try {
+                    controller.notifyGameInfos(nickname, getAvailableGames());
+                } catch (RemoteException e) {
+                    System.err.println("Remote Exception");
+                }
+            }).start();
+        }
         return result;
     }
 
-    @Override
-    public List<GameInfo> getAvailableGames() throws RemoteException {
+    public List<GameInfo> getAvailableGames() {
         return gameControllers.values().stream()
                 .map(GameController::getGameInfo)
                 .filter(game -> !game.isStarted() && !game.isFull())
@@ -65,7 +83,38 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     @Override
     public GameInfo createGame(PlayerColor color, int numPlayers, boolean isTestFlight, String nickname) throws RemoteException {
-        return connectionManager.createGame(color, numPlayers, isTestFlight, nickname);
+
+        GameInfo newGameInfo = connectionManager.createGame(color, numPlayers, isTestFlight, nickname);
+
+        Map<Future<?>, String> futureNicknames = new HashMap<>();
+        List<GameInfo> availableGames = getAvailableGames();
+
+        connectionManager.getClients()
+                        .forEach((clientNickname, clientController) -> {
+                            Future<?> future = executor.submit(() -> {
+                                try {
+                                    if (!gameControllers.containsKey(clientNickname))
+                                        clientController.notifyGameInfos(clientNickname, availableGames);
+                                } catch (RemoteException e) {
+                                    System.err.println("Remote Exception");
+                                }
+                            });
+                            futureNicknames.put(future, clientNickname);
+                        });
+
+        futureNicknames.forEach((future, clientNickname) -> {
+            try {
+                future.get(1, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                System.err.println("Timeout nella notifica del client: " + clientNickname);
+                future.cancel(true);
+            } catch (InterruptedException | ExecutionException e) {
+                System.err.println("Errore nella notifica del client: " + clientNickname);
+                e.printStackTrace();
+            }
+        });
+
+        return newGameInfo;
     }
 
     @Override
@@ -73,7 +122,37 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         return connectionManager.joinGame(gameId, nickname, color);
     }
 
+    public void removeGame(String gameId) {
+        gameControllers.remove(gameId);
+
+        Map<Future<?>, String> futureNicknames = new HashMap<>();
+        List<GameInfo> availableGames = getAvailableGames();
+
+        connectionManager.getClients()
+                .forEach((clientNickname, clientController) -> {
+                    Future<?> future = executor.submit(() -> {
+                        try {
+                            if (!gameControllers.containsKey(clientNickname))
+                                clientController.notifyGameInfos(clientNickname, availableGames);
+                        } catch (RemoteException e) {
+                            System.err.println("Remote Exception");
+                        }
+                    });
+                    futureNicknames.put(future, clientNickname);
+                });
+
+        futureNicknames.forEach((future, clientNickname) -> {
+            try {
+                future.get(1, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                System.err.println("Timeout nella notifica del client: " + clientNickname);
+                future.cancel(true);
+            } catch (InterruptedException | ExecutionException e) {
+                System.err.println("Errore nella notifica del client: " + clientNickname);
+                e.printStackTrace();
+            }
+        });
 
 
-
+    }
 }

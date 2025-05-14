@@ -13,8 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
 
     private final Map<String, CallableOnClientController> clients = new ConcurrentHashMap<>();
+    private final DNS dns;
 
-    public ConnectionManager() {}
+    public ConnectionManager(DNS dns) {
+        this.dns = dns;
+    }
 
     public synchronized boolean registerWithNickname(String nickname, CallableOnClientController controller) {
         if (clients.containsKey(nickname)) return false;
@@ -35,7 +38,7 @@ public class ConnectionManager {
         String gameId = generateUniqueGameId();
 
         // creates a new controller for this gameModel
-        GameController controller = new GameController(gameId, numPlayers, isTestFlight);
+        GameController controller = new GameController(gameId, numPlayers, isTestFlight, dns);
         synchronized (controller) {
             DNS.gameControllers.put(gameId, controller);
 
@@ -50,6 +53,10 @@ public class ConnectionManager {
             //succede tanta roba
             return controller.getGameInfo();
         }
+    }
+
+    public Map<String, CallableOnClientController> getClients() {
+        return clients;
     }
 
     public boolean joinGame(String gameId, String nickname, PlayerColor color) throws RemoteException {

@@ -59,4 +59,5 @@ public interface CallableOnGameController extends Remote {
 
     void notifyHourglassEnded(String nickname) throws RemoteException;
 
+    void leaveGame(String nickname) throws RemoteException;
 }

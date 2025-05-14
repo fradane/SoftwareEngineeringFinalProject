@@ -23,6 +23,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
+import static it.polimi.ingsw.is25am33.client.view.MessageType.NOTIFICATION_CRITICAL;
 import static it.polimi.ingsw.is25am33.client.view.MessageType.STANDARD;
 
 public class ClientController extends UnicastRemoteObject implements CallableOnClientController {
@@ -50,6 +51,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.askNickname();
     }
 
+    public List<GameInfo> getGames() {
+        return games;
+    }
+
     public void register(String attemptedNickname) {
 
         try {
@@ -71,24 +76,23 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         this.dns = dns;
     }
 
+    public CallableOnDNS getDns() {
+        return dns;
+    }
+
     public String getNickname() {
         return nickname;
     }
 
-    /**
-     * Displays the list of available games.
-     */
-    public void listAvailableGames() {
-        try {
-            this.games = dns.getAvailableGames();
-            view.showAvailableGames(games);
-        } catch (IOException e) {
-            view.showError("Error listing available games: " + e.getMessage());
-        }
-    }
-
     public void handleCreateGameMenu(int numPlayers, boolean isTestFlight, PlayerColor chosenColor) {
         try {
+
+            if(numPlayers < 2 || numPlayers > 4) {
+                view.showError("Number of players must be between 2 and 4");
+                view.showMainMenu();
+                return;
+            }
+
             GameInfo gameInfo = dns.createGame(chosenColor, numPlayers, isTestFlight, nickname);
 
             // if the dns was SocketClientManager (e.g., the client is socket), the serverController is the SocketClientManager used as a dns before
@@ -105,6 +109,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             view.showMessage("Waiting for other players to join...", STANDARD);
         } catch (IOException e) {
             view.showError("Error creating game: " + e.getMessage());
+            view.showMainMenu();
         }
     }
 
@@ -115,12 +120,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         try {
 
-            List<GameInfo> games = dns.getAvailableGames();
             boolean success = dns.joinGame(chosenGameId, nickname, chosenColor);
 
             if (!success) {
                 view.showError("Color already in use");
-                view.showAvailableGames(games);
                 return;
             }
 
@@ -138,19 +141,22 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         } catch (NumberFormatException e) {
             view.showError("Invalid color choice: " + e.getMessage());
+            view.showMainMenu();
         } catch (RemoteException e) {
             if(e.getMessage().contains("Client not registered"))
                 view.showError("Error joining game: Client not registered");
             else if (e.getMessage().contains("GameModel not found"))
                 view.showError("GameModel already started");
-            else if (e.getMessage().contains("GameModel already started"))
+            else if (e.getMessage().contains("GameModel already  or deleted"))
                 view.showError("Error joining game: GameModel already started");
             else if (e.getMessage().contains("GameModel is full"))
                 view.showError("Error joining game: GameModel is full");
             else if (e.getMessage().contains("You are already in this gameModel"))
                 view.showError("Error joining game: You are already in this gameModel");
+            view.showMainMenu();
         } catch (Exception e) {
             view.showError("Error joining game: " + e.getMessage());
+            view.showMainMenu();
         }
 
     }
@@ -236,7 +242,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     private CallableOnDNS setUpRMIConnection() throws RemoteException {
-        String serverAddress = view.askServerAddress();
+        String serverAddress = "localhost";
 
         try {
             Registry registry = LocateRegistry.getRegistry(serverAddress, NetworkConfiguration.RMI_PORT);
@@ -259,19 +265,24 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     }
 
-    private void leaveGame() {
+    public void leaveGame() {
         System.out.println("VOGLIO USCIRE DAL GIOCO, MA NON POSSO :(");
-        /*try {
+        try {
             if (currentGameId != null) {
-                networkManager.leaveGame(currentGameId);
+                serverController.leaveGame(nickname);
                 inGame = false;
                 gameStarted = false;
                 currentGameId = null;
-                view.showMessage("Left the game.");
+                view.showMessage("Left the game.", NOTIFICATION_CRITICAL);
             }
         } catch (Exception e) {
             view.showError("Error leaving game: " + e.getMessage());
-        }*/
+        }
+    }
+
+    @Override
+    public void notifyGameInfos(String nickname, List<GameInfo> gameInfos) {
+        this.games = gameInfos;
     }
 
     @Override

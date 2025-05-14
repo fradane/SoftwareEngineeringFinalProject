@@ -92,6 +92,11 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         GameInfo gameInfo;
 
         switch (action) {
+
+            case "leaveGame":
+                gameControllers.get(nickname).leaveGame(nickname);
+                break;
+
             case "registerWithNickname":
                 boolean registrationSuccess = dns.registerWithNickname(nickname, this);
                 if (registrationSuccess) {
@@ -245,6 +250,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 throw new RemoteException("Not properly formatted json");
         }
 
+    }
+
+    @Override
+    public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyGameInfos");
+        outMessage.setParamGameInfo(gameInfos);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override

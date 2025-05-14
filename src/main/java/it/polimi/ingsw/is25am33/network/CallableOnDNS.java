@@ -18,8 +18,6 @@ public interface CallableOnDNS extends Remote {
 
     boolean registerWithNickname(String nickname, CallableOnClientController controller) throws IOException;
 
-    List<GameInfo> getAvailableGames() throws IOException;
-
     GameInfo createGame(PlayerColor color, int numPlayers, boolean isTestFlight, String nickname) throws IOException;
 
     boolean joinGame(String gameId, String nickname, PlayerColor color) throws IOException;

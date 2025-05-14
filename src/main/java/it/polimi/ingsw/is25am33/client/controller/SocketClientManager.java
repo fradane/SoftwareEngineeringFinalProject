@@ -89,6 +89,12 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
+    public void leaveGame(String gameId) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "leaveGame");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
     public boolean registerWithNickname(String nickname, CallableOnClientController controller) throws IOException {
 
         SocketMessage outMessage = new SocketMessage(nickname, "registerWithNickname");
@@ -115,21 +121,6 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         in = new Scanner(socket.getInputStream());
 
         startMessageHandlerThread();
-    }
-
-    @Override
-    public List<GameInfo> getAvailableGames() throws IOException {
-
-        SocketMessage outMessage = new SocketMessage(nickname, "getAvailableGames");
-
-        SocketMessage response = sendAndWaitForSpecificResponse(outMessage, Set.of("notifyAvailableGames"));
-
-        if (response.getActions().equals("notifyAvailableGames")) {
-            return response.getParamGameInfo();
-        }
-
-        throw new IOException("Unexpected response: " + response.getActions());
-
     }
 
     @Override

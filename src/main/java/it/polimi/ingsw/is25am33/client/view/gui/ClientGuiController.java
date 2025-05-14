@@ -99,16 +99,6 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public String askServerAddress() {
-        return "";
-    }
-
-    @Override
-    public void showAvailableGames(Iterable<GameInfo> games) {
-        mainMenuViewController.showAvailableGames(games);
-    }
-
-    @Override
     public int[] askCreateGame() {
         return new int[0];
     }
@@ -129,6 +119,7 @@ public class ClientGuiController extends Application implements ClientView {
             primaryStage.show();
         } catch (IOException e) {
             System.out.println("Error while loading the main menu view.");
+            e.printStackTrace();
         }
 
     }
@@ -161,11 +152,6 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public void notifyGameEnded(String reason) {
 
-    }
-
-    @Override
-    public String askPlayerColor() {
-        return "";
     }
 
     @Override

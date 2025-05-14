@@ -14,6 +14,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.model.game.Player;
+import it.polimi.ingsw.is25am33.network.DNS;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -23,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GameController extends UnicastRemoteObject implements CallableOnGameController {
     private final GameModel gameModel;
     private final Map<String, CallableOnClientController> clientControllers;
+    private final DNS dns;
 
     // TODO metodo di debug
     @Override
@@ -30,10 +32,11 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         System.out.println(string);
     }
 
-    public GameController(String gameId, int maxPlayers, boolean isTestFlight) throws RemoteException {
+    public GameController(String gameId, int maxPlayers, boolean isTestFlight, DNS dns) throws RemoteException {
         this.gameModel = new GameModel(gameId, maxPlayers, isTestFlight);
         clientControllers = new ConcurrentHashMap<>();
         gameModel.createGameContext(clientControllers);
+        this.dns = dns;
     }
 
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController) {
@@ -98,10 +101,30 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     public void startGame() {
+        gameModel.setStarted(true);
         GameInfo gameInfo = getGameInfo();
         gameModel.setCurrGameState(GameState.BUILD_SHIPBOARD);
         notifyGameStarted();
         System.out.println("[" + gameInfo.getGameId() + "] Game started");
+    }
+
+    @Override
+    public void leaveGame(String nickname) {
+        if (!gameModel.isStarted()) {
+
+            clientControllers.remove(nickname);
+            System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
+            if (clientControllers.isEmpty()) {
+                dns.removeGame(getGameInfo().getGameId());
+                System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
+            }
+
+            dns.getConnectionManager().getClients().remove(nickname);
+
+        } else {
+            // TODO: termina il gioco per tutti
+        }
+
     }
 
     @Override
