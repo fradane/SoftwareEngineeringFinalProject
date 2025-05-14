@@ -9,6 +9,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.Player;
+import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
@@ -20,7 +21,7 @@ import java.util.stream.Stream;
 import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.*;
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 
-public abstract class ShipBoard implements Serializable {
+public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
     protected GameContext gameContext;
 
@@ -44,7 +45,7 @@ public abstract class ShipBoard implements Serializable {
     /**
      * The main matrix of components. Each cell represents a position on the ship.
      */
-    protected final Component[][] shipMatrix = new Component[BOARD_DIMENSION][BOARD_DIMENSION];
+    protected Component[][] shipMatrix = new Component[BOARD_DIMENSION][BOARD_DIMENSION];
 
     /**
      * A map that groups components based on their class (type).
@@ -67,7 +68,7 @@ public abstract class ShipBoard implements Serializable {
     /**
      * A set of components marked as incorrectly placed.
      */
-    private Set<Component> incorrectlyPositionedComponents = new HashSet<>();
+    private List<Component> incorrectlyPositionedComponents = new ArrayList<>();
 
     /**
      * Constructor that creates a ShipBoard with the main cabin placed at the initial coordinates.
@@ -98,8 +99,16 @@ public abstract class ShipBoard implements Serializable {
         return focusedComponent;
     }
 
+    public List<Component> getIncorrectlyPositionedComponents() {
+        return incorrectlyPositionedComponents;
+    }
+
     public void setGameContext(GameContext gameContext) {
         this.gameContext = gameContext;
+    }
+
+    public void setShipMatrix(Component[][] shipMatrix) {
+        this.shipMatrix = shipMatrix;
     }
 
     public void setFocusedComponent(Component focusedComponent)  {
@@ -112,6 +121,10 @@ public abstract class ShipBoard implements Serializable {
         } catch(RemoteException e){
             System.err.println("Remote Exception");
         }
+    }
+
+    public List<Component> getBookedComponents(){
+        return notActiveComponents;
     }
 
 //    /**
@@ -162,9 +175,17 @@ public abstract class ShipBoard implements Serializable {
                                 || isComponentInFireDirection(focusedComponent, x, y)
                                 || isComponentInEngineDirection(focusedComponent, x, y)
                                 || (!(focusedComponent instanceof Engine) || isEngineDirectionWrong((Engine) focusedComponent))
-                )
+                ) {
                     incorrectlyPositionedComponents.add(focusedComponent);
-
+                    // TODO cambiare notify aggiornata
+                    for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
+                        try {
+                            gameContext.getClientControllers().get(nicknameToNotify).notifyIncorrectlyPositionedComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+                        } catch (RemoteException e) {
+                            System.err.println("Remote Exception");
+                        }
+                    }
+                }
                 shipMatrix[x][y] = focusedComponent;
 
                 focusedComponent.insertInComponentsMap(componentsPerType);

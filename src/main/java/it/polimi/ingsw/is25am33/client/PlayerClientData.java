@@ -1,5 +1,7 @@
 package it.polimi.ingsw.is25am33.client;
 
+import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
+import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 
 /**
@@ -20,7 +22,7 @@ public class PlayerClientData {
         this.nickname = nickname;
         this.credits = 0;
         this.color = color;
-        this.shipBoard = new ShipBoardClient();
+        this.shipBoard = new Level2ShipBoard(color);
     }
 
     public PlayerColor getColor() {

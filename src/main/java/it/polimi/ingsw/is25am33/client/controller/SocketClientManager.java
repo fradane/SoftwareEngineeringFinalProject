@@ -370,6 +370,16 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
+    public void playerToRemoveComponent(String nickname, Component component) throws RemoteException {
+
+    }
+
+    @Override
+    public void playerChooseShipPart(String nickname, List<Set<List<Integer>>> shipPart) throws RemoteException {
+
+    }
+
+    @Override
     public void playerChoseToEndBuildShipBoardPhase(String nickname) {
         // TODO
     }

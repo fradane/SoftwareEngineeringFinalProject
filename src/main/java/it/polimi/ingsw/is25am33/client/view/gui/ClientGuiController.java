@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.client.view.gui;
 
 import it.polimi.ingsw.is25am33.client.ClientModel;
+import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.MessageType;
@@ -59,6 +60,21 @@ public class ClientGuiController extends Application implements ClientView {
         primaryStage.setScene(scene);
         primaryStage.show();
         initializationDone.complete(null);
+    }
+
+    @Override
+    public void notifyHourglassRestarted(int flipsLeft) {
+
+    }
+
+    @Override
+    public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
+        return null;
+    }
+
+    @Override
+    public PlayerColor intToPlayerColor(int colorChoice) {
+        return ClientView.super.intToPlayerColor(colorChoice);
     }
 
     public CompletableFuture<Void> getInitializationDoneFuture() {
