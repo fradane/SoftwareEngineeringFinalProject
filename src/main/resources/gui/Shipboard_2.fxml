@@ -1,24 +1,24 @@
-<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<?xml version="1.0" encoding="UTF-8"?>
 
-<!--<?import java.lang.*?>-->
-<!--<?import java.util.*?>-->
-<!--<?import javafx.scene.*?>-->
-<!--<?import javafx.scene.control.*?>-->
-<!--<?import javafx.scene.layout.*?>-->
-<!--<?import javafx.scene.image.ImageView?>-->
-<!--<?import javafx.scene.image.Image?>-->
-<!--<?import javafx.scene.layout.Pane?>-->
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.Pane?>
 
-<!--<Pane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml"-->
-<!--      fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipboardController"-->
-<!--      prefHeight="512.0" prefWidth="679.0">-->
+<Pane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController"
+      prefHeight="512.0" prefWidth="679.0">
 
-<!--    &lt;!&ndash; Immagine di sfondo &ndash;&gt;-->
-<!--    <ImageView fx:id="backgroundImage"-->
-<!--               fitHeight="512.0" fitWidth="679.0"-->
-<!--               pickOnBounds="true" preserveRatio="false">-->
-<!--        <image>-->
-<!--            <Image url="@shipboard_2.jpg" />-->
-<!--        </image>-->
-<!--    </ImageView>-->
-<!--</Pane>-->
+    <!-- Immagine di sfondo -->
+    <ImageView fx:id="backgroundImage"
+               fitHeight="512.0" fitWidth="679.0"
+               pickOnBounds="true" preserveRatio="false">
+        <image>
+            <Image url="@shipboard_2.jpg" />
+        </image>
+    </ImageView>
+</Pane>

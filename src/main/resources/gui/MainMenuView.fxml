@@ -2,6 +2,8 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import java.lang.Integer?>
+<?import javafx.collections.FXCollections?>
 
 <AnchorPane prefHeight="600" prefWidth="600" style="-fx-background-color: #1c1c1c;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewController">
 
@@ -23,7 +25,15 @@
             </padding>
             <Label style="-fx-text-fill: white; -fx-font-size: 18px;" text="Create Game" />
             <Label style="-fx-text-fill: white;" text="Number of Players (2-4)" />
-            <Slider fx:id="PlayerCountSlider" blockIncrement="0.1" max="4" min="2" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" />
+            <ComboBox fx:id="playerCountComboBox" prefWidth="200">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <Integer fx:value="2"/>
+                        <Integer fx:value="3"/>
+                        <Integer fx:value="4"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
             <CheckBox fx:id="easyModeCheckBox" style="-fx-text-fill: white;" text="Easy Mode" />
             <Label style="-fx-text-fill: white;" text="Choose Your Color" />
             <ComboBox fx:id="colorComboBox" prefWidth="200" />

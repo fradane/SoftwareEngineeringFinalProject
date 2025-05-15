@@ -1,4 +1,5 @@
 package it.polimi.ingsw.is25am33.model.board;
+import it.polimi.ingsw.is25am33.model.GameContext;
 import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
@@ -24,8 +25,8 @@ public class Level2ShipBoard extends ShipBoard{
             {false, false, false, false, false, false, false, false, false, false, false, false}
     };
 
-    public Level2ShipBoard(PlayerColor playerColor) {
-        super(playerColor);
+    public Level2ShipBoard(PlayerColor playerColor, GameContext gameContext) {
+        super(playerColor, gameContext);
         this.validPositions = level2ValidPositions;
     }
 

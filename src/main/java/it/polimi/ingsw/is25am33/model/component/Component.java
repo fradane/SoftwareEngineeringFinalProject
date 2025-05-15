@@ -57,7 +57,7 @@ public abstract class Component implements Serializable {
     /**
      * Constructs a Component with specified directional connectors.
      *
-     * <p>The initial initial rotation is zero.</p>
+     * <p>The initial rotation is zero.</p>
      *
      * @param connectors a map associating directions to their connector types
      */

@@ -31,7 +31,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyCardState(String nickname, CardState cardState) throws RemoteException;
 
-    void notifyChooseComponent(String nicknameToNotify, String nickname, Component component) throws RemoteException;
+    void notifyFocusedComponent(String nicknameToNotify, String nickname, Component component) throws RemoteException;
 
     void notifyReleaseComponent(String nicknameToNotify, String nickname) throws RemoteException;
 

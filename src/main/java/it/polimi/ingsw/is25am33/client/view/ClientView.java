@@ -128,17 +128,17 @@ public interface ClientView {
 
     ClientModel getClientModel();
 
-    BiFunction<CallableOnGameController, String, Boolean> showBuildShipBoardMenu();
+    void showBuildShipBoardMenu();
 
     void notifyNoMoreComponentAvailable();
 
     void showShipBoardsMenu();
 
-    BiFunction<CallableOnGameController, String, Boolean> showPickedComponentAndMenu(Component component);
+    void showPickedComponentAndMenu();
 
     void showShipBoard(Component[][] shipBoard, String shipBoardOwnerNickname);
 
-    BiFunction<CallableOnGameController, String, Component> showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
+    void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
 
     BiConsumer<CallableOnGameController, String> showVisitLocationMenu();
 
@@ -179,6 +179,8 @@ public interface ClientView {
     void notifyHourglassRestarted(int flipsLeft);
 
     Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents);
+
+    void showWaitingForPlayers();
 
     void showInvalidShipBoardMenu();
 }

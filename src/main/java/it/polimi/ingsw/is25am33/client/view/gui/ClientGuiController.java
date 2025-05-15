@@ -68,6 +68,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showPickedComponentAndMenu() {
+
+    }
+
+    @Override
     public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
         return null;
     }
@@ -90,6 +95,9 @@ public class ClientGuiController extends Application implements ClientView {
     public ClientController getClientController() {
         return clientController;
     }
+
+    @Override
+    public void showWaitingForPlayers() {}
 
     @Override
     public void initialize() {}
@@ -206,8 +214,8 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public BiFunction<CallableOnGameController, String, Boolean> showBuildShipBoardMenu() {
-        return null;
+    public void showBuildShipBoardMenu() {
+
     }
 
     @Override
@@ -221,18 +229,13 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public BiFunction<CallableOnGameController, String, Boolean> showPickedComponentAndMenu(Component component) {
-        return null;
-    }
-
-    @Override
     public void showShipBoard(Component[][] shipBoard, String shipBoardOwnerNickname) {
 
     }
 
     @Override
-    public BiFunction<CallableOnGameController, String, Component> showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents) {
-        return null;
+    public void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents) {
+
     }
 
     @Override

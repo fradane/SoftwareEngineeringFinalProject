@@ -75,12 +75,13 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      *
      * @param color The color associated with the player.
      */
-    public ShipBoard(PlayerColor color) {
+    public ShipBoard(PlayerColor color, GameContext gameContext) {
         Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
         connectors.put(Direction.NORTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.WEST,  ConnectorType.UNIVERSAL);
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
+        this.gameContext = gameContext;
 
         shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
     }
@@ -116,9 +117,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             this.focusedComponent = focusedComponent;
 
             for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nicknameToNotify).notifyChooseComponent(nicknameToNotify, player.getNickname(), focusedComponent);
+                gameContext.getClientControllers().get(nicknameToNotify).notifyFocusedComponent(nicknameToNotify, player.getNickname(), focusedComponent);
             }
-        } catch(RemoteException e){
+        } catch(RemoteException e) {
             System.err.println("Remote Exception");
         }
     }
