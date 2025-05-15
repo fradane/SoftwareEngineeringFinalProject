@@ -1,6 +1,8 @@
 package it.polimi.ingsw.is25am33.model.game;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
+import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -13,6 +15,7 @@ import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 
 public class GameModel {
@@ -363,4 +366,28 @@ public class GameModel {
         }
     }
 
+    @JsonIgnore
+    public Set<ShipBoard> getInvalidShipBoards(){
+        Set<ShipBoard> invalidShipBoards = players.values().stream()
+                .map(player -> player.getPersonalBoard())
+                .filter(shipBoard -> shipBoard.isShipCorrect() == false)
+                .collect(Collectors.toSet());
+        return invalidShipBoards;
+    }
+
+    public void notifyInvalidShipBoards() {
+        Set<ShipBoard> invalidShipBoards = getInvalidShipBoards();
+        Set<String> playersNicknameToBeNotified = players.values().stream()
+                .filter(player -> invalidShipBoards.contains(player.getPersonalBoard()))
+                .map(player->player.getNickname())
+                .collect(Collectors.toSet());
+
+        gameContext.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
+            try {
+                clientController.notifyInvalidShip(nicknameToNotify);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
+            }
+        });
+    }
 }

@@ -298,6 +298,11 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
+    public void notifyInvalidShip(String nicknameToNotify) throws RemoteException {
+
+    }
+
+    @Override
     public void notifyShipCorrect(String nicknameToNotify) throws RemoteException {
 
     }

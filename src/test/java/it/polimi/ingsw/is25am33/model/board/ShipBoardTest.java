@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import it.polimi.ingsw.is25am33.model.GameContext;
 import it.polimi.ingsw.is25am33.model.component.*;
 
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
@@ -29,6 +30,7 @@ public class ShipBoardTest {
     void setup() {
         // Use whichever concrete subclass is appropriate (e.g., Level2ShipBoard)
         shipBoard = new Level2ShipBoard(PlayerColor.RED);
+        shipBoard.setGameContext(new GameContext(new HashMap<>()));
     }
 
     /**
@@ -198,7 +200,7 @@ public class ShipBoardTest {
         // Now remove the piece at (4,5). This should split the ship into two groups:
         //   Part A: the single cell at (4,4)
         //   Part B: the two cells at (4,6) and (4,7)
-        List<Set<List<Integer>>> parts = shipBoard.removeAndRecalculateShipParts(4, 5);
+        List<Set<Coordinates>> parts = shipBoard.removeAndRecalculateShipParts(4, 5);
 
         // Let's check that c2 is now in notActiveComponents
         assertTrue(shipBoard.notActiveComponents.contains(c2),
@@ -212,20 +214,20 @@ public class ShipBoardTest {
 
         // For clarity, let's find which set is (4,4) and which is (4,6)&(4,7).
         // E.g. we can sort by size or check coordinates explicitly.
-        Set<List<Integer>> partA = parts.get(0).size() == 1 ? parts.get(0) : parts.get(1);
-        Set<List<Integer>> partB = parts.get(0).size() == 1 ? parts.get(1) : parts.get(0);
+        Set<Coordinates> partA = parts.get(0).size() == 1 ? parts.get(0) : parts.get(1);
+        Set<Coordinates> partB = parts.get(0).size() == 1 ? parts.get(1) : parts.get(0);
 
         // partA should contain exactly (4,4)
         assertEquals(1, partA.size(),
                 "One of the parts must be a singleton, presumably (4,4)");
-        assertTrue(partA.contains(Arrays.asList(4, 4)), "Expected the single cell (4,4) in partA");
+        assertTrue(partA.contains(new Coordinates(4, 4)), "Expected the single cell (4,4) in partA");
 
         // partB should contain (4,6) and (4,7)
         assertEquals(2, partB.size(),
                 "Other part should contain 2 cells: (4,6) and (4,7)");
-        assertTrue(partB.contains(Arrays.asList(4, 6)),
+        assertTrue(partB.contains(new Coordinates(4, 6)),
                 "Should contain (4,6)");
-        assertTrue(partB.contains(Arrays.asList(4, 7)),
+        assertTrue(partB.contains(new Coordinates(4, 7)),
                 "Should contain (4,7)");
 
         // Now we simulate removing the entire partB from the board
@@ -536,22 +538,22 @@ public class ShipBoardTest {
 
 
         assertDoesNotThrow(() -> {
-            List<Set<List<Integer>>> parts = shipBoard.identifyShipParts(4, 4);
+            List<Set<Coordinates>> parts = shipBoard.identifyShipParts(4, 4);
         });
         assertEquals(
                 List.of(
                         Set.of(
-                                List.of(6, 7),
-                                List.of(6, 6),
-                                List.of(7, 6)
+                                new Coordinates(6, 7),
+                                new Coordinates(6, 6),
+                                new Coordinates(7, 6)
                         ), Set.of(
-                                List.of(8, 7),
-                                List.of(8, 8),
-                                List.of(8, 9),
-                                List.of(9, 8)
+                                new Coordinates(8, 7),
+                                new Coordinates(8, 8),
+                                new Coordinates(8, 9),
+                                new Coordinates(9, 8)
                         )
                 ),
-                        shipBoard.identifyShipParts(7, 7));
+                shipBoard.identifyShipParts(7, 7));
     }
 
     @Test
@@ -579,11 +581,11 @@ public class ShipBoardTest {
         shipBoard.focusedComponent = c7;
         shipBoard.placeComponentWithFocus(9, 8);
 
-        Set<List<Integer>> toRemove = new HashSet<>();
-        toRemove.add(Arrays.asList(8, 7));
-        toRemove.add(Arrays.asList(8, 8));
-        toRemove.add(Arrays.asList(8, 9));
-        toRemove.add(Arrays.asList(9, 8));
+        Set<Coordinates> toRemove = new HashSet<>();
+        toRemove.add(new Coordinates(8, 7));
+        toRemove.add(new Coordinates(8, 8));
+        toRemove.add(new Coordinates(8, 9));
+        toRemove.add(new Coordinates(9, 8));
 
         shipBoard.removeShipPart(toRemove);
 

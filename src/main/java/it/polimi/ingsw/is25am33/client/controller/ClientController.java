@@ -1,7 +1,6 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.ClientModel;
-import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
@@ -324,6 +323,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
+    public void notifyInvalidShip(String nicknameToNotify) throws RemoteException {
+        view.showInvalidShipBoardMenu();
+    }
+
+    @Override
     public void notifyShipCorrect(String nicknameToNotify) throws RemoteException {
 
     }
@@ -369,7 +373,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
 
     public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
-        clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponents().add(component);
+        //clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponentsCoordinates().add(component);
     }
 
     @Override
@@ -435,19 +439,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             view.showShipBoardsMenu();
         }
 
-    }
-
-    public void checkShipBoardPhase() {
-        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
-
-        List<Component> incorrectlyPositionedComponents = shipBoard.getIncorrectlyPositionedComponents();
-        Component currentComponent;
-        while(clientModel.getGameState() == GameState.CHECK_SHIPBOARD) {
-            if(!incorrectlyPositionedComponents.isEmpty()){
-                view.askComponentToRemove(shipBoard, incorrectlyPositionedComponents);
-            }
-            //currentComponent = view.askComponentToRemove(incorrectlyPositionedComponents);
-        }
     }
 
     public void cardPhase() {

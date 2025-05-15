@@ -68,7 +68,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     /**
      * A set of components marked as incorrectly placed.
      */
-    private List<Component> incorrectlyPositionedComponents = new ArrayList<>();
+    private List<Coordinates> incorrectlyPositionedComponentsCoordinates = new ArrayList<>();
 
     /**
      * Constructor that creates a ShipBoard with the main cabin placed at the initial coordinates.
@@ -99,8 +99,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return focusedComponent;
     }
 
-    public List<Component> getIncorrectlyPositionedComponents() {
-        return incorrectlyPositionedComponents;
+    public List<Coordinates> getIncorrectlyPositionedComponentsCoordinates() {
+        return incorrectlyPositionedComponentsCoordinates;
     }
 
     public void setGameContext(GameContext gameContext) {
@@ -170,21 +170,20 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             else if (!areEmptyConnectorsWellConnected(focusedComponent, x, y))
                 throw new IllegalArgumentException("Empty connector not well connected");
             else {
-                if (
+                if (//TODO aggiungere controllo che se sto aggiungendo un cannone che punta verso un component già piazzato
                         !areConnectorsWellConnected(focusedComponent, x, y)
                                 || isComponentInFireDirection(focusedComponent, x, y)
                                 || isComponentInEngineDirection(focusedComponent, x, y)
                                 || (!(focusedComponent instanceof Engine) || isEngineDirectionWrong((Engine) focusedComponent))
                 ) {
-                    incorrectlyPositionedComponents.add(focusedComponent);
-                    // TODO cambiare notify aggiornata
-                    for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
+                    incorrectlyPositionedComponentsCoordinates.add(new Coordinates(x, y));
+                    gameContext.notifyClients(Set.of(player.getNickname()), (nicknameToNotify, clientController) -> {
                         try {
-                            gameContext.getClientControllers().get(nicknameToNotify).notifyIncorrectlyPositionedComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+                            clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
                         } catch (RemoteException e) {
                             System.err.println("Remote Exception");
                         }
-                    }
+                    });
                 }
                 shipMatrix[x][y] = focusedComponent;
 
@@ -379,12 +378,12 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @return A list of sets, where each set contains the coordinates of components in a disconnected part.
      * @throws IllegalArgumentException If there is no component at the specified position.
      */
-    public List<Set<List<Integer>>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException {
+    public List<Set<Coordinates>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException {
         if(shipMatrix[x][y] == null)
             throw new IllegalArgumentException("No component in this position");
 
         notActiveComponents.add(shipMatrix[x][y]);
-        incorrectlyPositionedComponents.remove(shipMatrix[x][y]);
+        incorrectlyPositionedComponentsCoordinates.remove(new Coordinates(x, y));
         shipMatrix[x][y] = null;
 
         return identifyShipParts(x, y);
@@ -606,7 +605,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @return true if the ship has no placement errors, otherwise false.
      */
     public boolean isShipCorrect() {
-        return incorrectlyPositionedComponents.isEmpty();
+        return incorrectlyPositionedComponentsCoordinates.isEmpty();
     }
 
     /**
@@ -793,9 +792,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @param y The y-coordinate.
      * @return A list of sets, where each set contains the coordinates of components in a connected part.
      */
-    public List<Set<List<Integer>>> identifyShipParts(int x, int y) {
+    public List<Set<Coordinates>> identifyShipParts(int x, int y) {
         boolean[][] visited = new boolean[BOARD_DIMENSION][BOARD_DIMENSION];
-        List<Set<List<Integer>>> shipParts = new ArrayList<>();
+        List<Set<Coordinates>> shipParts = new ArrayList<>();
 
         visited[x][y] = true;
 
@@ -808,7 +807,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
             if(!isValidPosition(newX, newY) || shipMatrix[newX][newY] == null || visited[newX][newY]) continue;
 
-            Set<List<Integer>> currentPart = bfsCollectPart(newX, newY, visited);
+            Set<Coordinates> currentPart = bfsCollectPart(newX, newY, visited);
             shipParts.add(currentPart);
         }
         return shipParts;
@@ -823,27 +822,27 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @param visited A matrix of visited nodes.
      * @return A set of coordinates forming a connected part of the ship.
      */
-    public Set<List<Integer>> bfsCollectPart(int startX, int startY, boolean[][] visited) {
-        Queue<List<Integer>> queue = new LinkedList<>();
-        Set<List<Integer>> part = new HashSet<>();
+    public Set<Coordinates> bfsCollectPart(int startX, int startY, boolean[][] visited) {
+        Queue<Coordinates> queue = new LinkedList<>();
+        Set<Coordinates> part = new HashSet<>();
 
-        queue.add(Arrays.asList(startX, startY));
+        queue.add(new Coordinates(startX, startY));
         visited[startX][startY] = true;
 
         int[] dx = {-1, 1, 0, 0};
         int[] dy = {0, 0, -1, 1};
 
         while (!queue.isEmpty()) {
-            List<Integer> pos = queue.poll();
+            Coordinates pos = queue.poll();
             part.add(pos);
 
             for (int dir=0; dir<4; dir++) {
-                int newX = pos.get(0) + dx[dir];
-                int newY = pos.get(1) + dy[dir];
+                int newX = pos.getX() + dx[dir];
+                int newY = pos.getY() + dy[dir];
 
                 if (isValidPosition(newX, newY) && shipMatrix[newX][newY] != null && !visited[newX][newY]) {
                     visited[newX][newY] = true;
-                    queue.add(Arrays.asList(newX, newY));
+                    queue.add(new Coordinates(newX, newY));
                 }
             }
         }
@@ -855,12 +854,12 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      *
      * @param componentsPositions A set of coordinates of components to remove.
      */
-    public void removeShipPart (Set<List<Integer>> componentsPositions) {
-        for(List<Integer> componentPosition : componentsPositions) {
-            Component currentComponent = shipMatrix[componentPosition.get(0)][componentPosition.get(1)];
+    public void removeShipPart (Set<Coordinates> componentsPositions) {
+        for(Coordinates componentPosition : componentsPositions) {
+            Component currentComponent = shipMatrix[componentPosition.getX()][componentPosition.getY()];
             notActiveComponents.add(currentComponent);
-            incorrectlyPositionedComponents.remove(currentComponent);
-            shipMatrix[componentPosition.get(0)][componentPosition.get(1)] = null;
+            incorrectlyPositionedComponentsCoordinates.remove(currentComponent);
+            shipMatrix[componentPosition.getX()][componentPosition.getY()] = null;
         }
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {

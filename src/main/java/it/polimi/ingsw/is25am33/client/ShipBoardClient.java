@@ -51,7 +51,7 @@ public interface ShipBoardClient {
      */
     List<Component> getBookedComponents();
 
-    List<Component> getIncorrectlyPositionedComponents();
+    List<Coordinates> getIncorrectlyPositionedComponentsCoordinates();
 
     /**
      * Sets the game context
@@ -154,7 +154,7 @@ public interface ShipBoardClient {
      * @return A list of sets, where each set contains the coordinates of components in a disconnected part
      * @throws IllegalArgumentException If there is no component at the specified position
      */
-    List<Set<List<Integer>>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException;
+    List<Set<Coordinates>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException;
 
     /**
      * Determines whether there is a cannon in the specified row or column that is pointed
@@ -351,7 +351,7 @@ public interface ShipBoardClient {
      * @param y The y-coordinate
      * @return A list of sets, where each set contains the coordinates of components in a connected part
      */
-    List<Set<List<Integer>>> identifyShipParts(int x, int y);
+    List<Set<Coordinates>> identifyShipParts(int x, int y);
 
     /**
      * Performs a breadth-first search (BFS) to gather all connected cells
@@ -362,14 +362,14 @@ public interface ShipBoardClient {
      * @param visited A matrix of visited nodes
      * @return A set of coordinates forming a connected part of the ship
      */
-    Set<List<Integer>> bfsCollectPart(int startX, int startY, boolean[][] visited);
+    Set<Coordinates> bfsCollectPart(int startX, int startY, boolean[][] visited);
 
     /**
      * Removes the specified set of components from the board and marks them as inactive
      *
      * @param componentsPositions A set of coordinates of components to remove
      */
-    void removeShipPart(Set<List<Integer>> componentsPositions);
+    void removeShipPart(Set<Coordinates> componentsPositions);
 
     /**
      * Finds the coordinates of the first non-null component in a given direction,

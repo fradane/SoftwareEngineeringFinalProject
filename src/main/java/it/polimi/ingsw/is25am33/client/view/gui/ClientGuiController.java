@@ -73,6 +73,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showInvalidShipBoardMenu() {
+        //TODO
+    }
+
+    @Override
     public PlayerColor intToPlayerColor(int colorChoice) {
         return ClientView.super.intToPlayerColor(colorChoice);
     }

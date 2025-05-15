@@ -388,12 +388,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerToRemoveComponent(String nickname, Component component) throws RemoteException {
+    public void playerWantsToRemoveComponent(String nickname, Component component) throws RemoteException {
 
     }
 
     @Override
-    public void playerChooseShipPart(String nickname, List<Set<List<Integer>>> shipPart) throws RemoteException {
+    public void playerChooseShipPart(String nickname, List<Set<Coordinates>> shipPart) throws RemoteException {
 
     }
 

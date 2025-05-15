@@ -179,4 +179,6 @@ public interface ClientView {
     void notifyHourglassRestarted(int flipsLeft);
 
     Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents);
+
+    void showInvalidShipBoardMenu();
 }

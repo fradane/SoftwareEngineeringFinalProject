@@ -61,6 +61,8 @@ public interface CallableOnClientController extends Remote {
 
     void notifyRemovalResult(String nicknameToNotify, boolean success) throws RemoteException;
 
+    void notifyInvalidShip(String nicknameToNotify ) throws RemoteException;
+
     void notifyShipCorrect(String nicknameToNotify ) throws RemoteException;
 
 }

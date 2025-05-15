@@ -690,6 +690,13 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void showInvalidShipBoardMenu() {
+        String nickname = clientModel.getMyNickname();
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+        showShipBoard(shipBoard.getShipMatrix(), nickname);
+    }
+
+    @Override
     public Boolean showLittleDeck(int littleDeckChoice) {
         StringBuilder littleDeck = new StringBuilder();
         littleDeck.append("\nHere is the little deck you chose:\n");
