@@ -24,8 +24,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
-import static it.polimi.ingsw.is25am33.client.view.MessageType.NOTIFICATION_CRITICAL;
-import static it.polimi.ingsw.is25am33.client.view.MessageType.STANDARD;
+import static it.polimi.ingsw.is25am33.client.view.MessageType.*;
 
 public class ClientController extends UnicastRemoteObject implements CallableOnClientController {
 
@@ -85,6 +84,16 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         return nickname;
     }
 
+    /**
+     * Handles the creation of a new game based on the specified parameters.
+     * It verifies the validity of the number of players, creates the game using
+     * the provided parameters, and updates the game state accordingly. Errors
+     * encountered during game creation are communicated to the user.
+     *
+     * @param numPlayers the number of players for the new game; must be between 2 and 4
+     * @param isTestFlight a flag indicating whether the game is in test flight mode
+     * @param chosenColor the color chosen by the player for the game
+     */
     public void handleCreateGameMenu(int numPlayers, boolean isTestFlight, PlayerColor chosenColor) {
         try {
 
@@ -115,7 +124,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     /**
-     * Joins an existing game.
+     * Attempts to join a selected game with the given game ID and chosen player color.
+     * It handles the connection process, updates the game state, and manages error cases.
+     *
+     * @param chosenGameId the identifier of the game to join
+     * @param chosenColor the color chosen by the player for the game
      */
     public void joinGame(String chosenGameId, PlayerColor chosenColor) {
 
@@ -137,8 +150,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 serverController = games.stream().filter(info -> info.getGameId().equals(chosenGameId)).findFirst().orElseThrow().getGameController();
             }
             inGame = true;
-            view.showMessage("Successfully joined game!", STANDARD);
-            view.showMessage("Waiting for the game to start...", STANDARD);
+            view.showWaitingForPlayers();
 
         } catch (NumberFormatException e) {
             view.showError("Invalid color choice: " + e.getMessage());
@@ -288,7 +300,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws RemoteException {
-        view.showMessage(ANSI_BLUE + newPlayerNickname + ANSI_RESET + " joined the game!", STANDARD);
+        view.showMessage(newPlayerNickname + " joined the game!", NOTIFICATION_INFO);
     }
 
     @Override
@@ -299,10 +311,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.notifyGameStarted(GameState.BUILD_SHIPBOARD);
         clientModel.setHourglass(new Hourglass(gameInfo.isTestFlight(), this));
         clientModel.getHourglass().start(view, "game");
-
-        // Se la view è di tipo ClientCLIView, possiamo interrompere l'attesa
-        if (view instanceof ClientCLIView)
-            view.cancelInputWaiting();
     }
 
     @Override
@@ -377,6 +385,15 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
     }
 
+    
+    /**
+     * Notifies the client that the player called nickname has the focus on a specific component.
+     *
+     * @param nicknameToNotify the nickname of the player to be notified
+     * @param nickname the nickname of the player who selected the component
+     * @param focusedComponent the component that is being focused on
+     * @throws RemoteException if a communication-related error occurs during the remote method call
+     */
     @Override
     public void notifyChooseComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws RemoteException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(focusedComponent);
@@ -387,10 +404,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
     }
 
+    @Override
     public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) throws RemoteException {
         clientModel.getShipboardOf(nickname).getBookedComponents().add(component);
     }
 
+    @Override
     public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException {
         clientModel.updatePlayerCredits(nickname, credits);
         view.showMessage(nickname + " has " + credits + " credits.", STANDARD);
@@ -467,5 +486,38 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             view.showNewGameState();
         }
     }
+
+    public void pickRandomComponent() {
+        try {
+            serverController.playerPicksHiddenComponent(nickname);
+            view.showPickedComponentAndMenu();
+        } catch (IOException e) {
+            System.err.println("Remote exception: " + e.getMessage());
+        }
+
+
+        clientModel.getShipboardOf(nickname).setFocusedComponent(pickedComponent);
+        
+        boolean hasFocusComponent = true;
+        while (hasFocusComponent) {
+            BiFunction<CallableOnGameController, String, Boolean> consumer = ClientCLIView.this
+                    .showPickedComponentAndMenu(pickedComponent);
+            if (consumer == null) return true;
+            hasFocusComponent = consumer.apply(server, nickname);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    public void reserveFocusedComponent() {
+
+
+        clientModel.getShipboardOf(nickname).;
+
+        serverController.playerWantsToReserveFocusedComponent(nickname);
+
+
+    }
+}
 
 }

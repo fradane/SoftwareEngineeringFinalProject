@@ -35,22 +35,13 @@ public class MainMenuViewController extends GuiController {
     private ComboBox<PlayerColor> colorComboBox;
 
     @FXML
-    private Slider playerCountSlider;
-
-    @FXML
-    private Button submitCreateGameButton;
+    private ComboBox<Integer> playerCountComboBox;
 
     @FXML
     private ComboBox<PlayerColor> joinColorComboBox;
 
     @FXML
     private Button submitJoinGameButton;
-
-    @FXML
-    private Button availableGameButton;
-
-    @FXML
-    private Button createGameButton;
 
     @FXML
     private Button joinGameButton;
@@ -74,16 +65,16 @@ public class MainMenuViewController extends GuiController {
 
     @FXML
     private void handleSubmitCreateGame() {
-        double numPlayers = playerCountSlider.getValue();
+        Integer numPlayers = playerCountComboBox.getValue();
         boolean isEasyMode = easyModeCheckBox.isSelected();
         PlayerColor chosenColor = colorComboBox.getValue();
 
-        if (chosenColor == null) {
+        if (chosenColor == null || numPlayers == null) {
             showInfo("Please fill all fields.");
             return;
         }
 
-        clientController.handleCreateGameMenu((int) numPlayers, isEasyMode, chosenColor);
+        clientController.handleCreateGameMenu(numPlayers, isEasyMode, chosenColor);
     }
 
 

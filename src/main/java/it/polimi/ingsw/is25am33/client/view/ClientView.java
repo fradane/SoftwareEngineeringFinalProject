@@ -134,7 +134,7 @@ public interface ClientView {
 
     void showShipBoardsMenu();
 
-    BiFunction<CallableOnGameController, String, Boolean> showPickedComponentAndMenu(Component component);
+    void showPickedComponentAndMenu();
 
     void showShipBoard(Component[][] shipBoard, String shipBoardOwnerNickname);
 
@@ -179,4 +179,6 @@ public interface ClientView {
     void notifyHourglassRestarted(int flipsLeft);
 
     Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents);
+
+    void showWaitingForPlayers();
 }

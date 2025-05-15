@@ -87,6 +87,9 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showWaitingForPlayers() {}
+
+    @Override
     public void initialize() {}
 
     @Override
