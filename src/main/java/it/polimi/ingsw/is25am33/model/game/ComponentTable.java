@@ -50,10 +50,7 @@ public class ComponentTable {
                     System.err.println("Remote Exception");
                 }
             });
-
-
             currVisibleIndex++;
-
         }
     }
 
