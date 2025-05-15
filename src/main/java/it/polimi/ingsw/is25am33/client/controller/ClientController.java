@@ -7,6 +7,7 @@ import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -53,6 +54,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public List<GameInfo> getGames() {
         return games;
+    }
+
+    public ClientModel getClientModel() {
+        return clientModel;
     }
 
     public void register(String attemptedNickname) {
@@ -307,7 +312,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws RemoteException {
         gameStarted = true;
         clientModel.setGameState(GameState.BUILD_SHIPBOARD);
-        gameInfo.getConnectedPlayers().forEach(clientModel::addPlayer);
+        gameInfo.getConnectedPlayers().forEach((nickname, color) -> clientModel.addPlayer(nickname, color, gameInfo.isTestFlight()));
         view.notifyGameStarted(GameState.BUILD_SHIPBOARD);
         clientModel.setHourglass(new Hourglass(gameInfo.isTestFlight(), this));
         clientModel.getHourglass().start(view, "game");
@@ -385,7 +390,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
     }
 
-    
     /**
      * Notifies the client that the player called nickname has the focus on a specific component.
      *
@@ -395,7 +399,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * @throws RemoteException if a communication-related error occurs during the remote method call
      */
     @Override
-    public void notifyChooseComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws RemoteException {
+    public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws RemoteException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(focusedComponent);
     }
 
@@ -437,25 +441,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.setLittleVisibleDeck(littleVisibleDecks);
     }
 
-    /**
-     * Initiates the ship board building phase by showing the build menu
-     * and executing the selected action on the server using the current nickname.
-     */
-    public void buildShipBoardPhase() {
-
-        boolean hasPlayerEndedThisPhase = false;
-
-        while(clientModel.getGameState() == GameState.BUILD_SHIPBOARD && !hasPlayerEndedThisPhase) {
-            hasPlayerEndedThisPhase = view.showBuildShipBoardMenu()
-                    .apply(serverController, nickname);
-        }
-
-        while(clientModel.getGameState() == GameState.BUILD_SHIPBOARD) {
-            view.showShipBoardsMenu();
-        }
-
-    }
-
     public void checkShipBoardPhase() {
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
 
@@ -492,32 +477,101 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             serverController.playerPicksHiddenComponent(nickname);
             view.showPickedComponentAndMenu();
         } catch (IOException e) {
-            System.err.println("Remote exception: " + e.getMessage());
+            handleRemoteException(e);
         }
+    }
 
-
-        clientModel.getShipboardOf(nickname).setFocusedComponent(pickedComponent);
-        
-        boolean hasFocusComponent = true;
-        while (hasFocusComponent) {
-            BiFunction<CallableOnGameController, String, Boolean> consumer = ClientCLIView.this
-                    .showPickedComponentAndMenu(pickedComponent);
-            if (consumer == null) return true;
-            hasFocusComponent = consumer.apply(server, nickname);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
     public void reserveFocusedComponent() {
+        try {
+            // TODO aggiungere il caso in cui non si possa piu riservare
+            ((Level2ShipBoard) clientModel.getShipboardOf(nickname)).book();
+            serverController.playerWantsToReserveFocusedComponent(nickname);
+            view.showBuildShipBoardMenu();
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
 
+    public void releaseFocusedComponent() {
+        try {
+            clientModel.getShipboardOf(nickname).releaseFocusedComponent();
+            serverController.playerWantsToReleaseFocusedComponent(nickname);
+            view.showBuildShipBoardMenu();
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
 
-        clientModel.getShipboardOf(nickname).;
+    private void handleRemoteException(IOException e) {
+        System.err.println("Remote exception: " + e);
+        System.exit(1);
+    }
 
-        serverController.playerWantsToReserveFocusedComponent(nickname);
+    public void showShipBoard(String nickname) {
+        clientModel.getPlayerClientData()
+                .keySet()
+                .stream()
+                .filter(player -> player.equals(nickname))
+                .findFirst()
+                .ifPresentOrElse(player -> view.showShipBoard(clientModel.getShipboardOf(player).getShipMatrix(), nickname),
+                        () -> view.showMessage("Player not found\n", STANDARD));
+    }
+
+    public void placeFocusedComponent(int row, int column) {
+        try {
+            clientModel.getShipboardOf(nickname).placeComponentWithFocus(row, column);
+            serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column));
+            view.showBuildShipBoardMenu();
+        } catch (IOException e) {
+            handleRemoteException(e);
+        } catch (IllegalArgumentException e) {
+            view.showMessage("Invalid coordinates\n", STANDARD);
+        }
+    }
+
+    public void pickVisibleComponent(int chosenIndex) {
+
+        try {
+            if (clientModel.getVisibleComponents().containsKey(chosenIndex)) {
+                serverController.playerPicksVisibleComponent(nickname, chosenIndex);
+                view.showPickedComponentAndMenu();
+            } else {
+                view.showMessage("This component is no longer available, someone stole it.", STANDARD);
+                view.showBuildShipBoardMenu();
+            }
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
 
 
     }
-}
+
+    public void restartHourglass() {
+
+        if (clientModel.getHourglass().isRunning()) {
+            view.showMessage("The hourglass is already running, please wait for it to end.", STANDARD);
+            view.showBuildShipBoardMenu();
+            return;
+        }
+
+        try {
+            serverController.playerWantsToRestartHourglass(nickname);
+        } catch (RemoteException e) {
+            switch (e.getMessage()) {
+                case "No more flips available.",
+                     "Interrupted while waiting for all clients to finish the timer.",
+                     "Another player is already restarting the hourglass. Please wait.":
+                    view.showMessage(e.getMessage(), STANDARD);
+                    break;
+
+                default:
+                    handleRemoteException(e);
+            }
+        } finally {
+            view.showBuildShipBoardMenu();
+        }
+
+    }
 
 }

@@ -1,6 +1,5 @@
 package it.polimi.ingsw.is25am33.client;
 
-import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -140,8 +139,8 @@ public class ClientModel {
         playerClientData.get(nickname).setFlyingBoardPosition(newPosition);
     }
 
-    public void addPlayer(String nickname, PlayerColor color) {
-        playerClientData.put(nickname, new PlayerClientData(nickname, color));
+    public void addPlayer(String nickname, PlayerColor color, boolean isTestFlight) {
+        playerClientData.put(nickname, new PlayerClientData(nickname, color, isTestFlight));
     }
 
     public ShipBoardClient getShipboardOf(String nickname) {

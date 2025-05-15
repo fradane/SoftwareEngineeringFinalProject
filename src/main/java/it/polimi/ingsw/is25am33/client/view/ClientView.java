@@ -128,7 +128,7 @@ public interface ClientView {
 
     ClientModel getClientModel();
 
-    BiFunction<CallableOnGameController, String, Boolean> showBuildShipBoardMenu();
+    void showBuildShipBoardMenu();
 
     void notifyNoMoreComponentAvailable();
 
@@ -138,7 +138,7 @@ public interface ClientView {
 
     void showShipBoard(Component[][] shipBoard, String shipBoardOwnerNickname);
 
-    BiFunction<CallableOnGameController, String, Component> showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
+    void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
 
     BiConsumer<CallableOnGameController, String> showVisitLocationMenu();
 
