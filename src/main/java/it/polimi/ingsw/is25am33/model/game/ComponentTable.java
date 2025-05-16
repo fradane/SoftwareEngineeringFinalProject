@@ -44,16 +44,9 @@ public class ComponentTable {
             visibleComponents.put(currVisibleIndex, component);
 
             gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-                try {
-                    clientController.notifyAddVisibleComponents(nicknameToNotify, currVisibleIndex, component);
-                } catch (RemoteException e) {
-                    System.err.println("Remote Exception");
-                }
+                clientController.notifyAddVisibleComponents(nicknameToNotify, currVisibleIndex, component);
             });
-
-
             currVisibleIndex++;
-
         }
     }
 
@@ -67,11 +60,7 @@ public class ComponentTable {
         }
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
-                clientController.notifyRemoveVisibleComponents(nicknameToNotify, index);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
+            clientController.notifyRemoveVisibleComponents(nicknameToNotify, index);
         });
 
         return pickedComponent;

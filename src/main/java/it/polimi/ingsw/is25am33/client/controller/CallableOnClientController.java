@@ -63,4 +63,6 @@ public interface CallableOnClientController extends Remote {
 
     void notifyShipCorrect(String nicknameToNotify ) throws RemoteException;
 
+    void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayer) throws RemoteException;
+
 }

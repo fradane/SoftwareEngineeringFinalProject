@@ -46,6 +46,7 @@ public class ConnectionManager {
                     " for " + numPlayers + " players" + (isTestFlight ? " (Test Flight)" : ""));
 
 
+
             // Aggiungi il player alla partita
             controller.addPlayer(nickname, color, clients.get(nickname));
             System.out.println("[" + gameId + "] " + nickname + " joined game with color " + color);

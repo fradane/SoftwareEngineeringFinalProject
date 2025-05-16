@@ -442,6 +442,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.setLittleVisibleDeck(littleVisibleDecks);
     }
 
+    @Override
+    public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayerNickname) throws RemoteException {
+        view.showMessage(disconnectedPlayerNickname + " disconnected.", STANDARD);
+    }
+
     public void checkShipBoardPhase() {
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
 

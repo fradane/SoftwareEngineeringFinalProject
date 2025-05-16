@@ -98,11 +98,7 @@ public class Deck {
         mapLittleDecksToString();
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
                 clientController.notifyVisibleDeck(nicknameToNotify, littleVisibleDecksString);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
         });
 
     }

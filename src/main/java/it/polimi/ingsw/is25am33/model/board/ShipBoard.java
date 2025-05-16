@@ -81,8 +81,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         connectors.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.WEST,  ConnectorType.UNIVERSAL);
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
-        this.gameContext = gameContext;
-
+        connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
         shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
     }
 
@@ -113,15 +112,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     }
 
     public void setFocusedComponent(Component focusedComponent)  {
-        try {
-            this.focusedComponent = focusedComponent;
-
-            for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
-                gameContext.getClientControllers().get(nicknameToNotify).notifyFocusedComponent(nicknameToNotify, player.getNickname(), focusedComponent);
-            }
-        } catch(RemoteException e) {
-            System.err.println("Remote Exception");
-        }
+        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyFocusedComponent(nicknameToNotify, player.getNickname(), focusedComponent);;
+        });
     }
 
     public List<Component> getBookedComponents(){
@@ -178,25 +171,17 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                                 || (!(focusedComponent instanceof Engine) || isEngineDirectionWrong((Engine) focusedComponent))
                 ) {
                     incorrectlyPositionedComponents.add(focusedComponent);
-                    // TODO cambiare notify aggiornata
-                    for (String nicknameToNotify : gameContext.getClientControllers().keySet()) {
-                        try {
-                            gameContext.getClientControllers().get(nicknameToNotify).notifyIncorrectlyPositionedComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-                        } catch (RemoteException e) {
-                            System.err.println("Remote Exception");
-                        }
-                    }
+
+                    gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                        clientController.notifyIncorrectlyPositionedComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+                    });
                 }
                 shipMatrix[x][y] = focusedComponent;
 
                 focusedComponent.insertInComponentsMap(componentsPerType);
 
                 gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-                    try {
                         clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-                    } catch (RemoteException e) {
-                        System.err.println("Remote Exception");
-                    }
                 });
 
                 focusedComponent = null;
@@ -974,11 +959,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         setFocusedComponent(null);
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
                 clientController.notifyReleaseComponent(nicknameToNotify, player.getNickname());
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
         });
 
         return component;

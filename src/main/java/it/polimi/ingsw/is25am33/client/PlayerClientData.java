@@ -26,7 +26,7 @@ public class PlayerClientData {
         this.nickname = nickname;
         this.credits = 0;
         this.color = color;
-        this.shipBoard = isTestFlight ? new Level1ShipBoard(color, new GameContext(new HashMap<>())) : new Level2ShipBoard(color, new GameContext(new HashMap<>()));
+        this.shipBoard = isTestFlight ? new Level1ShipBoard(color, new GameContext(null,null)) : new Level2ShipBoard(color, new GameContext(null,null));
     }
 
     public PlayerColor getColor() {

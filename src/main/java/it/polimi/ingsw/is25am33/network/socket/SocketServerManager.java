@@ -424,6 +424,15 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
+    public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayer) throws RemoteException{
+        writers.remove(disconnectedPlayer);
+        SocketMessage outMessage = new SocketMessage("server", "notifyPlayerDisconnected");
+        outMessage.setParamString(disconnectedPlayer);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+
 
 }
 

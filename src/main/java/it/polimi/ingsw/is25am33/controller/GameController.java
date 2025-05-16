@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GameController extends UnicastRemoteObject implements CallableOnGameController {
     private final GameModel gameModel;
-    private final Map<String, CallableOnClientController> clientControllers;
+    private final ConcurrentHashMap<String, CallableOnClientController> clientControllers = new ConcurrentHashMap<>();
     private final DNS dns;
 
     // TODO metodo di debug
@@ -34,14 +34,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     public GameController(String gameId, int maxPlayers, boolean isTestFlight, DNS dns) throws RemoteException {
         this.gameModel = new GameModel(gameId, maxPlayers, isTestFlight);
-        clientControllers = new ConcurrentHashMap<>();
-        gameModel.createGameContext(clientControllers);
+        this.gameModel.createGameContext(clientControllers);
         this.dns = dns;
     }
 
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController) {
-        gameModel.addPlayer(nickname, color, clientController);
         clientControllers.put(nickname, clientController);
+        gameModel.addPlayer(nickname, color, clientController);
     }
 
     public void removePlayer(String nickname) {

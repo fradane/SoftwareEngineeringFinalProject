@@ -1,3 +1,4 @@
+
 package it.polimi.ingsw.is25am33.network;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
@@ -90,17 +91,17 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         List<GameInfo> availableGames = getAvailableGames();
 
         connectionManager.getClients()
-                        .forEach((clientNickname, clientController) -> {
-                            Future<?> future = executor.submit(() -> {
-                                try {
-                                    if (!gameControllers.containsKey(clientNickname))
-                                        clientController.notifyGameInfos(clientNickname, availableGames);
-                                } catch (RemoteException e) {
-                                    System.err.println("Remote Exception");
-                                }
-                            });
-                            futureNicknames.put(future, clientNickname);
-                        });
+                .forEach((clientNickname, clientController) -> {
+                    Future<?> future = executor.submit(() -> {
+                        try {
+                            if (!gameControllers.containsKey(clientNickname))
+                                clientController.notifyGameInfos(clientNickname, availableGames);
+                        } catch (RemoteException e) {
+                            System.err.println("Remote Exception");
+                        }
+                    });
+                    futureNicknames.put(future, clientNickname);
+                });
 
         futureNicknames.forEach((future, clientNickname) -> {
             try {

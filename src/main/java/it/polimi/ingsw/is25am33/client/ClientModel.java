@@ -158,6 +158,17 @@ public class ClientModel {
                 .collect(Collectors.toSet());
     }
 
+    public LinkedHashMap<String, PlayerClientData> finalRanking(){
+        return playerClientData.entrySet().stream()
+                .sorted(Map.Entry.<String, PlayerClientData>comparingByValue(Comparator.comparingInt(PlayerClientData::getCredits).reversed()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1,e2)->e1,
+                        LinkedHashMap::new
+                ));
+    }
+
     public void setNickname(String nickname) {
         this.myNickname = nickname;
     }
