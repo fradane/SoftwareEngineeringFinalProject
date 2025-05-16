@@ -504,9 +504,15 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void notifyHourglassEnded(String nickname) {
+    public void notifyHourglassEnded(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "notifyHourglassEnded");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    @Override
+    public void playerWantsToFocusReservedComponent(String nickname, int choice) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToFocusReservedComponent");
+        outMessage.setParamInt(choice);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
 }

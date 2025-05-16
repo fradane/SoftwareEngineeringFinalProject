@@ -68,6 +68,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showPickReservedComponentQuestion() {
+
+    }
+
+    @Override
     public void showPickedComponentAndMenu() {
 
     }
@@ -219,12 +224,7 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public void showShipBoardsMenu() {
-
-    }
-
-    @Override
-    public void showShipBoard(Component[][] shipBoard, String shipBoardOwnerNickname) {
+    public void showShipBoard(ShipBoardClient shipBoard, String shipBoardOwnerNickname) {
 
     }
 
@@ -304,8 +304,8 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public Boolean showLittleDeck(int littleDeckChoice) {
-        return null;
+    public void showLittleDeck(int littleDeckChoice) {
+
     }
 
     @Override

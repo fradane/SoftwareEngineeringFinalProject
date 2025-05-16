@@ -65,4 +65,6 @@ public interface CallableOnGameController extends Remote {
     void playerToRemoveComponent(String nickname, Component component) throws RemoteException;
 
     void playerChooseShipPart(String nickname, List<Set<List<Integer>>>shipPart) throws RemoteException;
+
+    void playerWantsToFocusReservedComponent(String nickname, int choice) throws RemoteException;
 }
