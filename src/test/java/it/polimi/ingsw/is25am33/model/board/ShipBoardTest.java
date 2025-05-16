@@ -29,8 +29,7 @@ public class ShipBoardTest {
     @BeforeEach
     void setup() {
         // Use whichever concrete subclass is appropriate (e.g., Level2ShipBoard)
-        shipBoard = new Level2ShipBoard(PlayerColor.RED);
-        shipBoard.setGameContext(new GameContext(new HashMap<>()));
+        shipBoard = new Level2ShipBoard(PlayerColor.RED, new GameContext(new HashMap<>()));
     }
 
     /**
@@ -200,7 +199,7 @@ public class ShipBoardTest {
         // Now remove the piece at (4,5). This should split the ship into two groups:
         //   Part A: the single cell at (4,4)
         //   Part B: the two cells at (4,6) and (4,7)
-        List<Set<Coordinates>> parts = shipBoard.removeAndRecalculateShipParts(4, 5);
+        List<Set<List<Integer>>> parts = shipBoard.removeAndRecalculateShipParts(4, 5);
 
         // Let's check that c2 is now in notActiveComponents
         assertTrue(shipBoard.notActiveComponents.contains(c2),

@@ -69,6 +69,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             } else {
                 view.showMessage("Nickname registered successfully!", STANDARD);
                 this.nickname = attemptedNickname;
+                clientModel.setNickname(nickname);
                 view.showMainMenu();
             }
         } catch (IOException e) {
@@ -477,7 +478,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void reserveFocusedComponent() {
         try {
             // TODO aggiungere il caso in cui non si possa piu riservare
-            ((Level2ShipBoard) clientModel.getShipboardOf(nickname)).book();
+            // PS gli aggiornamenti sul modello di chi fa l'azione li gestiscono le notify o chi fa l'azione?
+            // perche se io qua faccio book anche sul mio client model e poi mi arriva la notifica ne aggiungo due
+            //((Level2ShipBoard) clientModel.getShipboardOf(nickname)).book();
             serverController.playerWantsToReserveFocusedComponent(nickname);
             view.showBuildShipBoardMenu();
         } catch (IOException e) {
@@ -506,12 +509,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .stream()
                 .filter(player -> player.equals(nickname))
                 .findFirst()
-                .ifPresentOrElse(player -> view.showShipBoard(clientModel.getShipboardOf(player).getShipMatrix(), nickname),
+                .ifPresentOrElse(player -> view.showShipBoard(clientModel.getShipboardOf(player), nickname),
                         () -> view.showMessage("Player not found\n", STANDARD));
     }
 
     public void placeFocusedComponent(int row, int column) {
         try {
+            row--;
+            column--;
             clientModel.getShipboardOf(nickname).placeComponentWithFocus(row, column);
             serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column));
             view.showBuildShipBoardMenu();
@@ -535,7 +540,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         } catch (IOException e) {
             handleRemoteException(e);
         }
-
 
     }
 
@@ -566,4 +570,47 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     }
 
+    /**
+     * Allows the player to select a reserved component based on their choice input.
+     * It validates the input, manages reserved components, and informs the server
+     * about the selected component to focus on. Displays appropriate views and messages
+     * based on the player's actions or errors encountered.
+     *
+     * @param choice the index of the reserved component to pick; must be a valid
+     *               non-negative integer within the range of available reserved
+     *               components. Value is decremented internally to match list indexing.
+     */
+    public void pickReservedComponent(int choice) {
+        List<Component> bookedComponent = clientModel.getShipboardOf(nickname).getBookedComponents();
+        choice--;   // decrement choice to match list indexing
+
+        if (bookedComponent.isEmpty()) {
+            view.showMessage("You have no reserved components.", STANDARD);
+            view.showBuildShipBoardMenu();
+            return;
+        }
+
+        if (choice == -1) {
+            view.showBuildShipBoardMenu();
+            return;
+        }
+
+        if (choice < 0 || choice >= bookedComponent.size()) {
+            view.showMessage("Invalid choice. You only have " + bookedComponent.size() + " reserved components", STANDARD);
+            view.showBuildShipBoardMenu();
+            return;
+        }
+
+        try {
+            Component component = clientModel.getShipboardOf(nickname).getBookedComponents().remove(choice);
+            clientModel.getShipboardOf(nickname).setFocusedComponent(component);
+            // TODO da sostituire con:
+            // ((Level2ShipBoard) clientModel.getShipboardOf(nickname)).focusReservedComponent(choice);
+
+            serverController.playerWantsToFocusReservedComponent(nickname, choice);
+            view.showPickedComponentAndMenu();
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
+    }
 }

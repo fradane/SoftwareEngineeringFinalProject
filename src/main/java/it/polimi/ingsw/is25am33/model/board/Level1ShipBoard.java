@@ -19,4 +19,6 @@ public class Level1ShipBoard extends ShipBoard {
     public boolean canDifendItselfWithSingleCannons(DangerousObj obj) {
         return false;
     }
+
+
 }

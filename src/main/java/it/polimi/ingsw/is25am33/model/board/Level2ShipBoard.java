@@ -52,11 +52,8 @@ public class Level2ShipBoard extends ShipBoard{
     }
 
     public void handleDangerousObject(DangerousObj obj){
-
         int[] hitCoordinate = findFirstComponentInDirection(obj.getCoordinate(), obj.getDirection());
-
         removeAndRecalculateShipParts(hitCoordinate[0], hitCoordinate[1]);
-
     }
 
     public boolean canDifendItselfWithSingleCannons(DangerousObj obj){
@@ -74,5 +71,8 @@ public class Level2ShipBoard extends ShipBoard{
         return true;
     }
 
+    // TODO indice del reserved component da mettere in focus e accertarsi della notify
+    public void focusReservedComponent(int choice) {
 
+    }
 }

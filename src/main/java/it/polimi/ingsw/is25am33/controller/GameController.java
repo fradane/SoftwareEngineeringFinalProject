@@ -395,4 +395,8 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    @Override
+    public void playerWantsToFocusReservedComponent(String nickname, int choice) throws RemoteException {
+        ((Level2ShipBoard) gameModel.getPlayers().get(nickname).getPersonalBoard()).focusReservedComponent(choice);
+    }
 }

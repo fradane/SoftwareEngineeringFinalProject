@@ -158,4 +158,7 @@ public class ClientModel {
                 .collect(Collectors.toSet());
     }
 
+    public void setNickname(String nickname) {
+        this.myNickname = nickname;
+    }
 }
