@@ -44,6 +44,7 @@ module it.polimi.ingsw.is25am33 {
     exports it.polimi.ingsw.is25am33.model.component;
     exports it.polimi.ingsw.is25am33.model.dangerousObj;
     exports it.polimi.ingsw.is25am33.model.board to com.fasterxml.jackson.databind;
+    opens it.polimi.ingsw.is25am33.model.dangerousObj to com.fasterxml.jackson.databind;
     
     // Controller and network exports
     exports it.polimi.ingsw.is25am33.controller;
