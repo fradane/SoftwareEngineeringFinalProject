@@ -374,9 +374,10 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerChooseShipPart(String nickname, List<Set<Coordinates>> shipPart) throws RemoteException {
-
+    public void playerChooseShipPart(String nickname, List<Set<List<Integer>>> shipPart) throws RemoteException {
+        //TODO
     }
+
 
     @Override
     public void playerChoseToEndBuildShipBoardPhase(String nickname) {

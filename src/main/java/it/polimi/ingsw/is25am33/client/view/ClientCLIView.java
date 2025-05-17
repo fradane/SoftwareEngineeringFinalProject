@@ -548,7 +548,7 @@ public class ClientCLIView implements ClientView {
     public void showInvalidShipBoardMenu() {
         String nickname = clientModel.getMyNickname();
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
-        showShipBoard(shipBoard.getShipMatrix(), nickname);
+        showShipBoard(shipBoard, nickname);
     }
 
     @Override
