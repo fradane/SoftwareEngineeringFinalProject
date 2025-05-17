@@ -329,6 +329,12 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyGameInfos":
+                    if (clientController != null) {
+                        clientController.notifyGameInfos(notification.getParamString(), notification.getParamGameInfo());
+                    }
+                    break;
+
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
