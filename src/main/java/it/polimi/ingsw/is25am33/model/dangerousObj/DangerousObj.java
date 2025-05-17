@@ -10,9 +10,9 @@ import java.util.function.BiConsumer;
 import java.io.Serializable;
 
 @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,       // Usa il nome per distinguere i tipi
-        include = JsonTypeInfo.As.PROPERTY, // Inserisci un campo per indicare il tipo
-        property = "dangerousObjType"                  // Questo sarà il nome del campo nel JSON
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "dangerousObjType"
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = BigMeteorite.class, name = "bigMeteorite"),

@@ -11,9 +11,7 @@ import it.polimi.ingsw.is25am33.model.game.GameInfo;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
 /**
  * Interfaccia che definisce le operazioni di visualizzazione del client.
@@ -128,17 +126,15 @@ public interface ClientView {
 
     ClientModel getClientModel();
 
-    BiFunction<CallableOnGameController, String, Boolean> showBuildShipBoardMenu();
+    void showBuildShipBoardMenu();
 
     void notifyNoMoreComponentAvailable();
 
-    void showShipBoardsMenu();
-
     void showPickedComponentAndMenu();
 
-    void showShipBoard(Component[][] shipBoard, String shipBoardOwnerNickname);
+    void showShipBoard(ShipBoardClient shipBoard, String shipBoardOwnerNickname);
 
-    BiFunction<CallableOnGameController, String, Component> showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
+    void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
 
     BiConsumer<CallableOnGameController, String> showVisitLocationMenu();
 
@@ -168,7 +164,7 @@ public interface ClientView {
 
     BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu();
 
-    Boolean showLittleDeck(int littleDeckChoice);
+    void showLittleDeck(int littleDeckChoice);
 
     void updateTimeLeft(int timeLeft);
 
@@ -181,4 +177,6 @@ public interface ClientView {
     Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents);
 
     void showWaitingForPlayers();
+
+    void showPickReservedComponentQuestion();
 }

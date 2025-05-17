@@ -1,13 +1,13 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import it.polimi.ingsw.is25am33.model.GameContext;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
-public class Level1ShipBoard extends ShipBoard{
+public class Level1ShipBoard extends ShipBoard {
 
-
-    public Level1ShipBoard(PlayerColor color) {
-        super(color);
+    public Level1ShipBoard(PlayerColor color, GameContext gameContext) {
+        super(color, gameContext);
     }
 
     @Override
@@ -19,4 +19,6 @@ public class Level1ShipBoard extends ShipBoard{
     public boolean canDifendItselfWithSingleCannons(DangerousObj obj) {
         return false;
     }
+
+
 }

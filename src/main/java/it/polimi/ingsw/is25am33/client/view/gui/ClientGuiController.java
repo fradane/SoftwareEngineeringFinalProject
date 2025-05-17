@@ -68,6 +68,16 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showPickReservedComponentQuestion() {
+
+    }
+
+    @Override
+    public void showPickedComponentAndMenu() {
+
+    }
+
+    @Override
     public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
         return null;
     }
@@ -207,8 +217,8 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public BiFunction<CallableOnGameController, String, Boolean> showBuildShipBoardMenu() {
-        return null;
+    public void showBuildShipBoardMenu() {
+
     }
 
     @Override
@@ -217,23 +227,13 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public void showShipBoardsMenu() {
-    }
-
-
-    @Override
-    public void showPickedComponentAndMenu() {
-        return;
-    }
-
-    @Override
-    public void showShipBoard(Component[][] shipBoard, String shipBoardOwnerNickname) {
+    public void showShipBoard(ShipBoardClient shipBoard, String shipBoardOwnerNickname) {
 
     }
 
     @Override
-    public BiFunction<CallableOnGameController, String, Component> showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents) {
-        return null;
+    public void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents) {
+
     }
 
     @Override
@@ -307,8 +307,8 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public Boolean showLittleDeck(int littleDeckChoice) {
-        return null;
+    public void showLittleDeck(int littleDeckChoice) {
+
     }
 
     @Override

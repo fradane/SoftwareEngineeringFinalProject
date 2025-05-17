@@ -265,7 +265,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
                 case "notifyChooseComponent":
                     if (clientController != null) {
-                        clientController.notifyChooseComponent(null, notification.getParamString(), notification.getParamComponent());
+                        clientController.notifyFocusedComponent(null, notification.getParamString(), notification.getParamComponent());
                     }
                     break;
 
@@ -329,6 +329,12 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyGameInfos":
+                    if (clientController != null) {
+                        clientController.notifyGameInfos(notification.getParamString(), notification.getParamGameInfo());
+                    }
+                    break;
+
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
@@ -340,7 +346,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     @Override
     public void playerPicksHiddenComponent(String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPicksHiddenComponent");
-        SocketMessage response = sendAndWaitForSpecificResponse(outMessage, Set.of("notifyPickedComponent"));
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
@@ -384,11 +390,10 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public Component playerPicksVisibleComponent(String nickname, Integer choice) throws IOException {
+    public void playerPicksVisibleComponent(String nickname, Integer choice) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPicksVisibleComponent");
         outMessage.setParamInt(choice);
-        SocketMessage response = sendAndWaitForSpecificResponse(outMessage, Set.of("notifyPickedComponent"));
-        return response.getParamComponent();
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
@@ -505,9 +510,15 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void notifyHourglassEnded(String nickname) {
+    public void notifyHourglassEnded(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "notifyHourglassEnded");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    @Override
+    public void playerWantsToFocusReservedComponent(String nickname, int choice) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToFocusReservedComponent");
+        outMessage.setParamInt(choice);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
 }

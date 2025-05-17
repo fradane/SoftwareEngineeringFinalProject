@@ -1,8 +1,12 @@
 package it.polimi.ingsw.is25am33.client;
 
+import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
+
+import java.util.HashMap;
 
 /**
  * Represents the client-side data of a player in the game.
@@ -18,11 +22,11 @@ public class PlayerClientData {
     private ShipBoardClient shipBoard;
     private PlayerColor color;
 
-    public PlayerClientData(String nickname, PlayerColor color) {
+    public PlayerClientData(String nickname, PlayerColor color, boolean isTestFlight) {
         this.nickname = nickname;
         this.credits = 0;
         this.color = color;
-        this.shipBoard = new Level2ShipBoard(color);
+        this.shipBoard = isTestFlight ? new Level1ShipBoard(color, new GameContext(new HashMap<>())) : new Level2ShipBoard(color, new GameContext(new HashMap<>()));
     }
 
     public PlayerColor getColor() {

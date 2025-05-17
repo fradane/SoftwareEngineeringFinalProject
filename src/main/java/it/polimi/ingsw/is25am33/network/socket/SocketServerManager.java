@@ -141,11 +141,11 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 break;
 
             case "playerPicksHiddenComponent":
-                //Component component = gameControllers.get(nickname).playerPicksHiddenComponent(nickname);
-                outMessage = new SocketMessage("server", "notifyPickedComponent");
-                //outMessage.setParamComponent(component);
+                gameControllers.get(nickname).playerPicksHiddenComponent(nickname);
+                break;
 
-                out.println(ServerSerializer.serialize(outMessage));
+            case "playerWantsToFocusReservedComponent":
+                gameControllers.get(nickname).playerWantsToFocusReservedComponent(nickname, inMessage.getParamInt());
                 break;
 
             case "playerWantsToPlaceFocusedComponent":
@@ -218,10 +218,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 break;
 
             case "playerPicksVisibleComponent":
-                Component chosenComponent = gameControllers.get(nickname).playerPicksVisibleComponent(nickname, inMessage.getParamInt());
-                outMessage = new SocketMessage("server", "notifyPickedComponent");
-                outMessage.setParamComponent(chosenComponent);
-                writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+                gameControllers.get(nickname).playerPicksVisibleComponent(nickname, inMessage.getParamInt());
                 break;
 
             case "playerChoseStorage":
@@ -338,7 +335,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyChooseComponent(String nicknameToNotify, String nickname, Component component) throws RemoteException{
+    public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component component) throws RemoteException{
         SocketMessage outMessage = new SocketMessage("server", "notifyChooseComponent");
         outMessage.setParamString(nickname);
         outMessage.setParamComponent(component);

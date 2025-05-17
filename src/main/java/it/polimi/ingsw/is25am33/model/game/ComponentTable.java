@@ -59,6 +59,13 @@ public class ComponentTable {
 
     public Component pickVisibleComponent(int index) {
 
+        Component pickedComponent = visibleComponents.remove(index);
+
+        if (pickedComponent == null) {
+            // TODO notifica al singolo giocatore che non è piu disponibile
+            return null;
+        }
+
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
             try {
                 clientController.notifyRemoveVisibleComponents(nicknameToNotify, index);
@@ -67,7 +74,7 @@ public class ComponentTable {
             }
         });
 
-        return visibleComponents.remove(index);
+        return pickedComponent;
     }
 
     public Stream<Pair<Integer, Component>> getVisibleComponentsAsStream(){
