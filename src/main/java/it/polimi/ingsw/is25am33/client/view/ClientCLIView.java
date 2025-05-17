@@ -495,171 +495,172 @@ public class ClientCLIView implements ClientView {
      */
     @Override
     public BiFunction<CallableOnGameController, String, Boolean> showBuildShipBoardMenu() {
-
-        while (true) {
-
-            try {
-                String questionDescription = """
-                        \nChoose an option:
-                        1. Pick a random covered component from the table
-                        2. Pick a visible component from the table
-                        3. Show one of the ship boards
-                        4. Restart hourglass
-                        5. Watch a little deck
-                        """;
-                Optional<Integer> optionalInput = convertInput(askForInput(questionDescription, defaultInterrogationPrompt));
-                int choice;
-
-                if (optionalInput.isEmpty())
-                    return (_, _) -> true;
-                else
-                    choice = optionalInput.get();
-
-                switch (choice) {
-                    case 1:
-                        return (server, nickname) -> {
-                            try {
-                                Component pickedComponent = server.playerPicksHiddenComponent(nickname);
-                                if (pickedComponent == null) {
-                                    ClientCLIView.this.notifyNoMoreComponentAvailable();
-                                    return false;
-                                }
-                                boolean hasFocusComponent = true;
-                                while (hasFocusComponent) {
-                                    BiFunction<CallableOnGameController, String, Boolean> consumer = ClientCLIView.this
-                                            .showPickedComponentAndMenu(pickedComponent);
-                                    if (consumer == null) return true;
-                                    hasFocusComponent = consumer.apply(server, nickname);
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-//                                System.out.println("Error connecting to server: " + e.getMessage());
-//                                System.out.println("Please try again.");
-                            }
-                            return false;
-                        };
-
-                    case 2:
-                        return (server, nickname) -> {
-
-                            Map<Integer, Component> visibleComponents = clientModel.getVisibleComponents();
-
-                            if (visibleComponents == null || visibleComponents.isEmpty()) {
-                                ClientCLIView.this.showMessage("No visible components yet!", STANDARD);
-                                return false;
-                            }
-
-                            BiFunction<CallableOnGameController, String, Component> function = ClientCLIView.this.showVisibleComponentAndMenu(visibleComponents);
-                            if (function == null) return false; // means that the player has changed its idea
-                            if (function == INTERRUPTED) return true; // means that the timer interrupted the player
-                            Component pickedComponent = function.apply(server, nickname);
-                            if (pickedComponent == null) {
-                                ClientCLIView.this.showError("This component is no longer available, someone has stolen it from you!");
-                                return false;
-                            }
-
-                            boolean hasFocusComponent = true;
-                            while (hasFocusComponent) {
-                                BiFunction<CallableOnGameController, String, Boolean> consumer = ClientCLIView.this
-                                        .showPickedComponentAndMenu(pickedComponent);
-                                if (consumer == null) return true;
-                                hasFocusComponent = consumer.apply(server, nickname);
-                            }
-                            return false;
-                        };
-
-//                    case 3:
-//                        String answer = askForInput("", "Are you sure you want to end your shipBoard setup phase? [Y/n] ");
-//                        if (answer.equalsIgnoreCase("Y") || answer.isEmpty()) {
-//                            System.out.println("Ending your shipBoard setup phase...");
-//                            return (server, nickname) -> {
-//                                try {
-//                                    server.playerChoseToEndBuildShipBoardPhase(nickname);
-//                                } catch (IOException e) {
-//                                    throw new RuntimeException(e);
+//
+//        while (true) {
+//
+//            try {
+//                String questionDescription = """
+//                        \nChoose an option:
+//                        1. Pick a random covered component from the table
+//                        2. Pick a visible component from the table
+//                        3. Show one of the ship boards
+//                        4. Restart hourglass
+//                        5. Watch a little deck
+//                        """;
+//                Optional<Integer> optionalInput = convertInput(askForInput(questionDescription, defaultInterrogationPrompt));
+//                int choice;
+//
+//                if (optionalInput.isEmpty())
+//                    return (_, _) -> true;
+//                else
+//                    choice = optionalInput.get();
+//
+//                switch (choice) {
+//                    case 1:
+//                        return (server, nickname) -> {
+//                            try {
+//                                Component pickedComponent = server.playerPicksHiddenComponent(nickname);
+//                                if (pickedComponent == null) {
+//                                    ClientCLIView.this.notifyNoMoreComponentAvailable();
+//                                    return false;
 //                                }
-//                                return true;
-//                            };
-//                        }
+//                                boolean hasFocusComponent = true;
+//                                while (hasFocusComponent) {
+//                                    BiFunction<CallableOnGameController, String, Boolean> consumer = ClientCLIView.this
+//                                            .showPickedComponentAndMenu();
+//                                    if (consumer == null) return true;
+//                                    hasFocusComponent = consumer.apply(server, nickname);
+//                                }
+//                            } catch (Exception e) {
+//                                e.printStackTrace();
+////                                System.out.println("Error connecting to server: " + e.getMessage());
+////                                System.out.println("Please try again.");
+//                            }
+//                            return false;
+//                        };
+//
+//                    case 2:
+//                        return (server, nickname) -> {
+//
+//                            Map<Integer, Component> visibleComponents = clientModel.getVisibleComponents();
+//
+//                            if (visibleComponents == null || visibleComponents.isEmpty()) {
+//                                ClientCLIView.this.showMessage("No visible components yet!", STANDARD);
+//                                return false;
+//                            }
+//
+//                            BiFunction<CallableOnGameController, String, Component> function = ClientCLIView.this.showVisibleComponentAndMenu(visibleComponents);
+//                            if (function == null) return false; // means that the player has changed its idea
+//                            if (function == INTERRUPTED) return true; // means that the timer interrupted the player
+//                            Component pickedComponent = function.apply(server, nickname);
+//                            if (pickedComponent == null) {
+//                                ClientCLIView.this.showError("This component is no longer available, someone has stolen it from you!");
+//                                return false;
+//                            }
+//
+//                            boolean hasFocusComponent = true;
+//                            while (hasFocusComponent) {
+//                                BiFunction<CallableOnGameController, String, Boolean> consumer = ClientCLIView.this
+//                                        .showPickedComponentAndMenu(pickedComponent);
+//                                if (consumer == null) return true;
+//                                hasFocusComponent = consumer.apply(server, nickname);
+//                            }
+//                            return false;
+//                        };
+//
+////                    case 3:
+////                        String answer = askForInput("", "Are you sure you want to end your shipBoard setup phase? [Y/n] ");
+////                        if (answer.equalsIgnoreCase("Y") || answer.isEmpty()) {
+////                            System.out.println("Ending your shipBoard setup phase...");
+////                            return (server, nickname) -> {
+////                                try {
+////                                    server.playerChoseToEndBuildShipBoardPhase(nickname);
+////                                } catch (IOException e) {
+////                                    throw new RuntimeException(e);
+////                                }
+////                                return true;
+////                            };
+////                        }
+////                        break;
+//
+//                    case 3:
+//                        showShipBoardsMenu();
 //                        break;
-
-                    case 3:
-                        showShipBoardsMenu();
-                        break;
-
-                    case 4:
-                        if (clientModel.getHourglass().isRunning()) {
-                            showMessage("The hourglass is already running, please wait for it to end.", STANDARD);
-                            break;
-                        }
-
-                        return (server, nickname) -> {
-                            try {
-                                showMessage("Restarting the hourglass...", NOTIFICATION_INFO);
-                                server.playerWantsToRestartHourglass(nickname);
-                                showMessage("The hourglass has been restarted.", NOTIFICATION_INFO);
-                            } catch (RemoteException e) {
-                                switch (e.getMessage()) {
-
-                                    case "No more flips available.",
-                                         "Interrupted while waiting for all clients to finish the timer.",
-                                         "Another player is already restarting the hourglass. Please wait.":
-                                        showError(e.getMessage());
-                                        break;
-
-                                    default:
-                                        showError("An error occurred: " + e.getMessage());
-                                        break;
-
-                                }
-                            }
-                            return false;
-                        };
-
-                    case 5:
-                        int littleDeckChoice;
-                        while (true) {
-                            optionalInput = convertInput(askForInput("", "Which little deck would you like to watch? (1-3): "));
-
-                            if (optionalInput.isEmpty())
-                                return null;
-                            else
-                                littleDeckChoice = optionalInput.get();
-
-                            if (littleDeckChoice >= 1 && littleDeckChoice <= 3) break;
-                            showMessage("Invalid choice. Please select 1-3.", STANDARD);
-                        }
-
-                        int finalLittleDeckChoice = littleDeckChoice;
-                        return (server, nickname) -> {
-                            boolean response;
-                            Boolean wasInterrupted = null;
-                            try {
-                                response = server.playerWantsToWatchLittleDeck(nickname, finalLittleDeckChoice);
-
-                                if (!response) {
-                                    showMessage("The little deck is not available right now!\nTry again later.", STANDARD);
-                                    return false;
-                                }
-
-                                wasInterrupted = ClientCLIView.this.showLittleDeck(finalLittleDeckChoice);
-                                server.playerWantsToReleaseLittleDeck(nickname, finalLittleDeckChoice);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-
-                            return wasInterrupted;
-                        };
-
-                    default:
-                        System.out.println("Invalid choice. Please select 1-6.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number.");
-            }
-
-        }
-    }
+//
+//                    case 4:
+//                        if (clientModel.getHourglass().isRunning()) {
+//                            showMessage("The hourglass is already running, please wait for it to end.", STANDARD);
+//                            break;
+//                        }
+//
+//                        return (server, nickname) -> {
+//                            try {
+//                                showMessage("Restarting the hourglass...", NOTIFICATION_INFO);
+//                                server.playerWantsToRestartHourglass(nickname);
+//                                showMessage("The hourglass has been restarted.", NOTIFICATION_INFO);
+//                            } catch (RemoteException e) {
+//                                switch (e.getMessage()) {
+//
+//                                    case "No more flips available.",
+//                                         "Interrupted while waiting for all clients to finish the timer.",
+//                                         "Another player is already restarting the hourglass. Please wait.":
+//                                        showError(e.getMessage());
+//                                        break;
+//
+//                                    default:
+//                                        showError("An error occurred: " + e.getMessage());
+//                                        break;
+//
+//                                }
+//                            }
+//                            return false;
+//                        };
+//
+//                    case 5:
+//                        int littleDeckChoice;
+//                        while (true) {
+//                            optionalInput = convertInput(askForInput("", "Which little deck would you like to watch? (1-3): "));
+//
+//                            if (optionalInput.isEmpty())
+//                                return null;
+//                            else
+//                                littleDeckChoice = optionalInput.get();
+//
+//                            if (littleDeckChoice >= 1 && littleDeckChoice <= 3) break;
+//                            showMessage("Invalid choice. Please select 1-3.", STANDARD);
+//                        }
+//
+//                        int finalLittleDeckChoice = littleDeckChoice;
+//                        return (server, nickname) -> {
+//                            boolean response;
+//                            Boolean wasInterrupted = null;
+//                            try {
+//                                response = server.playerWantsToWatchLittleDeck(nickname, finalLittleDeckChoice);
+//
+//                                if (!response) {
+//                                    showMessage("The little deck is not available right now!\nTry again later.", STANDARD);
+//                                    return false;
+//                                }
+//
+//                                wasInterrupted = ClientCLIView.this.showLittleDeck(finalLittleDeckChoice);
+//                                server.playerWantsToReleaseLittleDeck(nickname, finalLittleDeckChoice);
+//                            } catch (IOException e) {
+//                                throw new RuntimeException(e);
+//                            }
+//
+//                            return wasInterrupted;
+//                        };
+//
+//                    default:
+//                        System.out.println("Invalid choice. Please select 1-6.");
+//                }
+//            } catch (NumberFormatException e) {
+//                System.out.println("Please enter a valid number.");
+//            }
+//
+//        }
+        return null;
+      }
 
     /**
      * Notifies that the hourglass timer has started or restarted, providing the number of flips left
@@ -1532,38 +1533,38 @@ public class ClientCLIView implements ClientView {
 
                         case 3:
                             Coordinates coords = readCoordinatesFromUserInput("Select coordinates (row column): ");
-                            if (coords == null) return null;
+                            //if (coords == null) return null;
 
-                            return (server, nickname) -> {
-                                try {
-                                    server.playerWantsToPlaceFocusedComponent(nickname, coords);
-                                    coords.setCoordinates(List.of(coords.getX() + 1, coords.getY() + 1));
-                                    ClientCLIView.this.showMessage("You placed the component at: " + coords + ".", STANDARD);
-                                    return false;
-                                } catch (IOException e) {
-                                    e.printStackTrace();
+//                            return (server, nickname) -> {
+//                                try {
+//                                    //server.playerWantsToPlaceFocusedComponent(nickname, coords);
+//                                    coords.setCoordinates(List.of(coords.getX() + 1, coords.getY() + 1));
+//                                    ClientCLIView.this.showMessage("You placed the component at: " + coords + ".", STANDARD);
+//                                    return false;
+//                                } catch (IOException e) {
+//                                    e.printStackTrace();
 //                                ClientCLIView.this.showError(e.getMessage());
 //                                ClientCLIView.this.showError("Try again.");
-                                    return true;
-                                }
-                            };
+//                                    return true;
+//                                }
+//                            };
 
                         case 4:
-                            clientController.reserveFocusedComponent();
+                            //clientController.reserveFocusedComponent();
                             break;
 
-                        case 4:
-                            return (server, nickname) -> {
-                                try {
-                                    server.playerWantsToReleaseFocusedComponent(nickname);
-                                    ClientCLIView.this.showMessage("Component released.", STANDARD);
-                                    return false;
-                                } catch (IOException e) {
-                                    ClientCLIView.this.showError(e.getMessage());
-                                    ClientCLIView.this.showError("Try again.");
-                                    return true;
-                                }
-                            };
+                        case 111:
+//                            return (server, nickname) -> {
+//                                try {
+//                                    //server.playerWantsToReleaseFocusedComponent(nickname);
+//                                    ClientCLIView.this.showMessage("Component released.", STANDARD);
+//                                    return false;
+//                                } catch (IOException e) {
+//                                    ClientCLIView.this.showError(e.getMessage());
+//                                    ClientCLIView.this.showError("Try again.");
+//                                    return true;
+//                                }
+//                            };
 
                         case 5:
                             showMyShipBoard();

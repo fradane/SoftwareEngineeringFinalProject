@@ -7,6 +7,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import javafx.collections.ObservableList;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Set;
 
 public interface CallableOnClientController extends Remote {
+
+    //void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException;
 
     void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException;
 

@@ -141,9 +141,9 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 break;
 
             case "playerPicksHiddenComponent":
-                Component component = gameControllers.get(nickname).playerPicksHiddenComponent(nickname);
+                //Component component = gameControllers.get(nickname).playerPicksHiddenComponent(nickname);
                 outMessage = new SocketMessage("server", "notifyPickedComponent");
-                outMessage.setParamComponent(component);
+                //outMessage.setParamComponent(component);
 
                 out.println(ServerSerializer.serialize(outMessage));
                 break;

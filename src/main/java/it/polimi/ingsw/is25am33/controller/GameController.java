@@ -128,11 +128,11 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public Component playerPicksHiddenComponent(String nickname) {
+    public void playerPicksHiddenComponent(String nickname) {
         Component pickedComponent = gameModel.getComponentTable().pickHiddenComponent();
-        if (pickedComponent == null) return null;
+        if (pickedComponent == null)
+            return;
         gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(pickedComponent);
-        return pickedComponent;
     }
 
     @Override

@@ -16,6 +16,8 @@ import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.client.Hourglass;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -37,7 +39,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     private String nickname;
     boolean gameStarted = false;
     private final ClientModel clientModel;
-    private List<GameInfo> games = new ArrayList<>();
+    private ObservableList<GameInfo> games = FXCollections.observableArrayList();
 
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BLUE = "\u001B[34m";
@@ -51,7 +53,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.askNickname();
     }
 
-    public List<GameInfo> getGames() {
+    public ObservableList<GameInfo> getGames() {
         return games;
     }
 
@@ -293,9 +295,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+
     @Override
-    public void notifyGameInfos(String nickname, List<GameInfo> gameInfos) {
-        this.games = gameInfos;
+    public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException {
+        this.games = (ObservableList<GameInfo>) gameInfos;
     }
 
     @Override
@@ -487,37 +490,38 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void pickRandomComponent() {
-        try {
-            serverController.playerPicksHiddenComponent(nickname);
-            view.showPickedComponentAndMenu();
-        } catch (IOException e) {
-            System.err.println("Remote exception: " + e.getMessage());
+        public void pickRandomComponent() {
+//        try {
+//            serverController.playerPicksHiddenComponent(nickname);
+//            view.showPickedComponentAndMenu();
+//        } catch (IOException e) {
+//            System.err.println("Remote exception: " + e.getMessage());
         }
-
-
-        clientModel.getShipboardOf(nickname).setFocusedComponent(pickedComponent);
-        
-        boolean hasFocusComponent = true;
-        while (hasFocusComponent) {
-            BiFunction<CallableOnGameController, String, Boolean> consumer = ClientCLIView.this
-                    .showPickedComponentAndMenu(pickedComponent);
-            if (consumer == null) return true;
-            hasFocusComponent = consumer.apply(server, nickname);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    public void reserveFocusedComponent() {
-
-
-        clientModel.getShipboardOf(nickname).;
-
-        serverController.playerWantsToReserveFocusedComponent(nickname);
-
-
-    }
-}
+//        }
+//
+//
+//        clientModel.getShipboardOf(nickname).setFocusedComponent(pickedComponent);
+//
+//        boolean hasFocusComponent = true;
+//        while (hasFocusComponent) {
+//            BiFunction<CallableOnGameController, String, Boolean> consumer = ClientCLIView.this
+//                    .showPickedComponentAndMenu(pickedComponent);
+//            if (consumer == null) return true;
+//            hasFocusComponent = consumer.apply(server, nickname);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//    public void reserveFocusedComponent() {
+//
+//
+//        clientModel.getShipboardOf(nickname).;
+//
+//        serverController.playerWantsToReserveFocusedComponent(nickname);
+//
+//
+//    }
+//}
 
 }

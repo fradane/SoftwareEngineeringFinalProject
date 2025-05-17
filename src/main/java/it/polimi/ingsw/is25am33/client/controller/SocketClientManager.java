@@ -338,10 +338,9 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public Component playerPicksHiddenComponent(String nickname) throws IOException {
+    public void playerPicksHiddenComponent(String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPicksHiddenComponent");
         SocketMessage response = sendAndWaitForSpecificResponse(outMessage, Set.of("notifyPickedComponent"));
-        return response.getParamComponent();
     }
 
     @Override

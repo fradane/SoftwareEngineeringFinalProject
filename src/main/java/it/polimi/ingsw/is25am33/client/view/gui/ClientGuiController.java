@@ -133,9 +133,12 @@ public class ClientGuiController extends Application implements ClientView {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/MainMenuView.fxml"));
             Parent root = loader.load();
-            mainMenuViewController = loader.getController();
+            MainMenuViewController controller = loader.getController();
+            GuiController.setClientController(clientController);
+            controller.updateGameInfo();
             primaryStage.setScene(new Scene(root));
             primaryStage.show();
+
         } catch (IOException e) {
             System.out.println("Error while loading the main menu view.");
             e.printStackTrace();
@@ -215,12 +218,12 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showShipBoardsMenu() {
-
     }
 
+
     @Override
-    public BiFunction<CallableOnGameController, String, Boolean> showPickedComponentAndMenu(Component component) {
-        return null;
+    public void showPickedComponentAndMenu() {
+        return;
     }
 
     @Override
