@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.game.Player;
-import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -70,15 +69,6 @@ public class ServerDeserializer {
                 .map(coordinates -> player.getPersonalBoard().getComponentAt(coordinates))
                 .map(Cabin.class::cast)
                 .toList();
-
-    }
-
-    public static void main(String[] args) {
-        String deserialize = """
-                {"nickname":"fra","actions":"action","paramString":"giu","paramCoordinates":{"coordinates":[-1,-1],"positive":false},"paramGameInfo":[{"gameId":"ciao","maxPlayers":4,"connectedPlayers":{},"started":true,"connectedPlayersNicknames":[],"testFlight":true,"full":false,"playersAndColors":{}}],"paramInt":2,"paramBoolean":false,"paramPlayerColor":"GREEN"}
-                """;
-
-        SocketMessage inMessage = ServerDeserializer.deserializeObj(deserialize, SocketMessage.class);
 
     }
 
