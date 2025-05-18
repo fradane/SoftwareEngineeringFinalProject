@@ -201,6 +201,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
     public String toString() {
         // Box sinistro
         String firstString = String.format("""
+        %s
         ┌────────────────────────────┐
         │          Pirates           │
         ├────────────────────────────┤
@@ -209,7 +210,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         │ StepsBack:         %-2d      │
         │ Shots:             x%-2d     │
         └────────────────────────────┘
-        """, requiredFirePower, reward, stepsBack, shots != null ? shots.size() : 0);
+        """,imageName, requiredFirePower, reward, stepsBack, shots != null ? shots.size() : 0);
 
 
         StringBuilder secondString = new StringBuilder();

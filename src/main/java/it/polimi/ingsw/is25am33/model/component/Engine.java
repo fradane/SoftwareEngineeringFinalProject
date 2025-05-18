@@ -51,6 +51,7 @@ public class Engine extends Component implements Rotatable {
                 : " ";
 
         return String.format("""
+            %s
             Engine
             +---------+
             |    %s    |
@@ -58,7 +59,7 @@ public class Engine extends Component implements Rotatable {
             |    %s    |
             +---------+
             powerDirection: %s
-            """, north, west, east, south, powerDirection);
+            """,imageName, north, west, east, south, powerDirection);
     }
 
     /**

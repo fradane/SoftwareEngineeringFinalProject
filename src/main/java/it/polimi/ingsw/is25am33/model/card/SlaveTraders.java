@@ -107,6 +107,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
     @Override
     public String toString() {
         return String.format("""
+           %s
            ┌────────────────────────────┐
            │        SlaveTraders        │
            ├────────────────────────────┤
@@ -115,7 +116,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
            │ reward                x%-2d  │
            │ stepsBack             %-2d   │
            └────────────────────────────┘
-           """, requiredFirePower, crewMalus, reward, stepsBack);
+           """,imageName, requiredFirePower, crewMalus, reward, stepsBack);
     }
 
 }

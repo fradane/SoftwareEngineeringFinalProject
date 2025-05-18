@@ -1,5 +1,6 @@
 [
   {
+    "imageName": "GT-cards_I_IT_013.jpg",
     "level": 1,
     "shotIDs": ["small_north", "big_north", "small_north"],
     "reward": 4,
@@ -8,6 +9,7 @@
   },
 
   {
+    "imageName": "GT-cards_II_IT_013.jpg",
     "level": 2,
     "shotIDs": ["big_north", "small_north", "big_north"],
     "reward": 7,

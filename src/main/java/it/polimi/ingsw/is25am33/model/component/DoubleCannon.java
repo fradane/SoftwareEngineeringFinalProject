@@ -47,6 +47,7 @@ public class DoubleCannon extends Cannon implements Activable {
                 : " ";
 
         return String.format("""
+                %s
                 DoubleCannon
                 +---------+
                 |    %s    |
@@ -54,7 +55,7 @@ public class DoubleCannon extends Cannon implements Activable {
                 |    %s    |
                 +---------+
                 fireDirection: %s
-                """, north, west, east, south, getFireDirection());
+                """,imageName, north, west, east, south, getFireDirection());
     }
 
     @Override

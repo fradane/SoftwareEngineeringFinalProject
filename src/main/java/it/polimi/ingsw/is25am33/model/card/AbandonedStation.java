@@ -121,6 +121,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
     public String toString() {
         // Parte sinistra: box dati statici
         String firstString = String.format("""
+        %s
         ┌────────────────────────────┐
         │     AbandonedStation       │
         ├────────────────────────────┤
@@ -128,7 +129,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         │ Steps Back:        x%-2d     │
         │ Rewards:           x%-2d     │
         └────────────────────────────┘
-        """, requiredCrewMembers, stepsBack, reward != null ? reward.size() : 0);
+        """, imageName, stepsBack, reward != null ? reward.size() : 0);
 
         StringBuilder secondString = new StringBuilder("   ");
         if (reward != null && !reward.isEmpty()) {

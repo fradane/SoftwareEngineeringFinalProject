@@ -46,6 +46,7 @@ public class StandardStorage extends Storage {
                 : " ";
 
         return String.format("""
+            %s
             StandardStorage
             +---------+
             |    %s    |
@@ -53,7 +54,7 @@ public class StandardStorage extends Storage {
             |    %s    |
             +---------+
             MaxCapacity: %d
-            """, north, west, east, south, getMaxCapacity());
+            """,imageName, north, west, east, south, getMaxCapacity());
     }
 
     /**

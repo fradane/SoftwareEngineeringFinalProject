@@ -22,10 +22,6 @@ public class StartViewController extends GuiController{
     @FXML
     private Button startButton;
 
-    public void setClientModel(ClientModel clientModel) {
-        this.clientModel = clientModel;
-    }
-
     /**
      * Triggerato quando l'utente clicca sul pulsante "Avvia".
      */

@@ -62,11 +62,12 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
 
     @Override
     public String toString() {
-        return """
+        return String.format( """
+           %s
            ┌────────────────────────────┐
            │         FreeSpace          │
            └────────────────────────────┘
-           """;
+           """, imageName);
     }
 
 }

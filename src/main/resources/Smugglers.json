@@ -1,5 +1,6 @@
 [
   {
+    "imageName": "GT-cards_I_IT_012.jpg",
     "level": 1,
     "cubeMalus": 2,
     "reward": ["YELLOW", "GREEN", "BLUE"],
@@ -8,6 +9,7 @@
   },
 
   {
+    "imageName": "GT-cards_II_IT_012.jpg",
     "level": 2,
     "cubeMalus": 3,
     "reward": ["RED", "YELLOW", "YELLOW"],

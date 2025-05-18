@@ -16,20 +16,8 @@
         <VBox fx:id="mainMenu" alignment="CENTER" spacing="20" visible="true" managed="true">
             <Label style="-fx-text-fill: white; -fx-font-size: 28px;" text="Main Menu" />
             <Button fx:id="createGameButton" onAction="#handleCreateGame" prefWidth="200" text="Create Game" />
-            <VBox alignment="CENTER" spacing="5">
-                <Button fx:id="joinGameButton"
-                        text="Join Game"
-                        onMouseEntered="#handleHoverJoinGameComboBox"
-                        prefWidth="200" />
-                <ComboBox fx:id="joinGameComboBox"
-                          onAction="#handleJoinGameComboBoxSelect"
-                          onMouseExited="#handleExitHoverJoinGameComboBox"
-                          visible="false"
-                          managed="false"
-                          prefWidth="200" />
-            </VBox>
+            <Button fx:id="joinGameButton" onAction="#handleChooseGameForm" prefWidth="200" text="Join Game" />
             <Button fx:id="exitButton" onAction="#handleExit" prefWidth="200" text="Exit" />
-            <ListView fx:id="gameListView" prefHeight="200" prefWidth="400" visible="false" />
         </VBox>
 
         <!-- Create Game Form -->
@@ -54,16 +42,24 @@
             <Button fx:id="submitCreateGameButton" onAction="#handleSubmitCreateGame" prefWidth="100" text="Create" />
         </VBox>
 
+        <!-- Choose Game Form -->
+        <VBox fx:id="chooseGameForm" alignment="CENTER" spacing="10" visible="false" managed="false">
+            <padding>
+                <Insets bottom="10" left="10" right="10" top="10" />
+            </padding>
+            <ListView fx:id="gameListView" prefWidth="300" prefHeight="400"/>
+            <Button fx:id="chooseGameButton" onAction="#handleChooseGame" prefWidth="100" text="Next" />
+        </VBox>
+
+
         <!-- Join Game Form -->
         <VBox fx:id="joinGameForm" alignment="CENTER" spacing="10" visible="false" managed="false">
             <padding>
                 <Insets bottom="10" left="10" right="10" top="10" />
             </padding>
             <Label style="-fx-text-fill: white; -fx-font-size: 18px;" text="Join Game" />
-            <Label style="-fx-text-fill: white;" text="Choose a Game" />
-            <ComboBox fx:id="availableGamesComboBox" prefWidth="200" />
-            <Label style="-fx-text-fill: white;" text="Choose Your Color" />
-            <ComboBox fx:id="joinColorComboBox" prefWidth="200" />
+            <Label style="-fx-text-fill: white;" text="Choose a Color to join" />
+            <ListView fx:id="colorListView" prefWidth="300" prefHeight="400"/>
             <Button fx:id="submitJoinGameButton" onAction="#handleSubmitJoinGame" prefWidth="100" text="Join" />
         </VBox>
 

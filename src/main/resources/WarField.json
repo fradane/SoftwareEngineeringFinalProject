@@ -1,5 +1,6 @@
 [
   {
+    "imageName": "GT-cards_I_IT_0116.jpg",
     "level": 1,
     "minimumCategories": ["CREW", "ENGINE", "CANNON"],
     "stepsBack": -3,
@@ -8,6 +9,7 @@
   },
 
   {
+    "imageName": "GT-cards_II_IT_0116.jpg",
     "level": 2,
     "minimumCategories": ["CANNON", "ENGINE", "CREW"],
     "stepsBack": -4,

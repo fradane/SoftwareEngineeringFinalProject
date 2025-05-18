@@ -54,6 +54,7 @@ public class BatteryBox extends Component {
                 : " ";
 
         return String.format("""
+            %s
             BatteryBox
             +---------+
             |    %s    |
@@ -61,7 +62,7 @@ public class BatteryBox extends Component {
             |    %s    |
             +---------+
             maxBatteryCapacity: %d
-            """, north, west, east, south, maxBatteryCapacity);
+            """, imageName, north, west, east, south, maxBatteryCapacity);
     }
 
     /**

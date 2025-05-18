@@ -13,6 +13,7 @@ module it.polimi.ingsw.is25am33 {
     requires java.logging;
     requires java.rmi;
     requires org.jetbrains.annotations;
+    requires net.bytebuddy;
 
     // JavaFX Configuration
     // Allows JavaFX to access the main package for FXML loading
@@ -49,6 +50,7 @@ module it.polimi.ingsw.is25am33 {
     // Controller and network exports
     exports it.polimi.ingsw.is25am33.controller;
     exports it.polimi.ingsw.is25am33.network.common to java.rmi;
+    exports it.polimi.ingsw.is25am33.network;
     
     // Client-side exports
     exports it.polimi.ingsw.is25am33.client;

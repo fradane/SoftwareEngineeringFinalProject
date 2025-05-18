@@ -20,6 +20,7 @@ public abstract class AdventureCard implements Serializable {
     protected int level;
     protected CardState currState;
     protected GameModel gameModel;
+    protected String imageName;
 
     /**
      * A static map that associates string identifiers with factory functions
@@ -56,6 +57,14 @@ public abstract class AdventureCard implements Serializable {
             "small_west", () -> new SmallShot(Direction.WEST),
             "small_east", () -> new SmallShot(Direction.EAST)
     );
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
 
     public void setLevel(int level) {
         this.level = level;

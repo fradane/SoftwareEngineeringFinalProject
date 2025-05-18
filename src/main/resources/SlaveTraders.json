@@ -1,5 +1,6 @@
 [
   {
+    "imageName": "GT-cards_I_IT_01.jpg",
     "level": 1,
     "crewMalus": 3,
     "reward": 5,
@@ -8,6 +9,7 @@
   },
 
   {
+    "imageName": "GT-cards_II_IT_01.jpg",
     "level": 2,
     "crewMalus": 4,
     "reward": 8,

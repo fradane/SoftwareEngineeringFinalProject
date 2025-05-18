@@ -53,13 +53,14 @@ public class Cabin extends Component {
                 : " ";
 
         return String.format("""
+            %s
             Cabin
             +---------+
             |    %s    |
             | %s     %s |
             |    %s    |
             +---------+
-            """, north, west, east, south);
+            """,imageName, north, west, east, south);
     }
 
     /**

@@ -7,6 +7,7 @@ import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.MessageType;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.GuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewController;
+import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.StartViewController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -37,6 +38,7 @@ public class ClientGuiController extends Application implements ClientView {
 
     StartViewController startViewController;
     MainMenuViewController mainMenuViewController;
+    ShipBoardViewController shipBoardViewController;
 
     public static ClientGuiController getInstance() {
         return instance;
@@ -74,7 +76,7 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showPickedComponentAndMenu() {
-
+        shipBoardViewController.showFocusComponent();
     }
 
     @Override
@@ -119,7 +121,13 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showError(String errorMessage) {
-        startViewController.showServerError(errorMessage);
+        switch (errorMessage) {
+            case "Color already in use", "GameModel already started":
+                mainMenuViewController.showError(errorMessage);
+                break;
+            default:
+                startViewController.showServerError(errorMessage);
+        }
     }
 
     @Override
@@ -140,19 +148,19 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public void showMainMenu() {
 
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/MainMenuView.fxml"));
-            Parent root = loader.load();
-            MainMenuViewController controller = loader.getController();
-            GuiController.setClientController(clientController);
-            controller.updateGameInfo();
-            primaryStage.setScene(new Scene(root));
-            primaryStage.show();
-
-        } catch (IOException e) {
-            System.out.println("Error while loading the main menu view.");
-            e.printStackTrace();
-        }
+        javafx.application.Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/MainMenuView.fxml"));
+                Parent root = loader.load();
+                mainMenuViewController = loader.getController();
+                mainMenuViewController.setAvailableGames();
+                primaryStage.setScene(new Scene(root));
+                primaryStage.show();
+            } catch (IOException e) {
+                System.out.println("Error while loading the main menu view.");
+                e.printStackTrace();
+            }
+        });
 
     }
 
@@ -218,7 +226,19 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showBuildShipBoardMenu() {
-
+        javafx.application.Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Shipboard_2.fxml"));
+                Parent root = loader.load();
+                shipBoardViewController = loader.getController();
+                GuiController.setClientModel(clientModel);
+                primaryStage.setScene(new Scene(root));
+                primaryStage.show();
+            } catch (IOException e) {
+                System.out.println("Error while loading the shipboard view.");
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override

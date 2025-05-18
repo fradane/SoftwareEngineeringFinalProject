@@ -54,6 +54,7 @@ public class Shield extends Component implements Activable, Rotatable {
                 : " ";
 
         return String.format("""
+            %s
             Shield
             +---------+
             |    %s    |
@@ -61,7 +62,7 @@ public class Shield extends Component implements Activable, Rotatable {
             |    %s    |
             +---------+
             powerDirection: %s
-            """, north, west, east, south, direction);
+            """,imageName, north, west, east, south, direction);
     }
 
     /**

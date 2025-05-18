@@ -1,5 +1,6 @@
 [
   {
+    "imageName": "GT-cards_I_IT_0112.jpg",
     "level":  1,
     "stepsBack": -3,
     "availablePlanets": [
@@ -19,6 +20,7 @@
   },
 
   {
+    "imageName": "GT-cards_I_IT_0113.jpg",
     "level":  1,
     "stepsBack": -2,
     "availablePlanets": [
@@ -35,6 +37,7 @@
   },
 
   {
+    "imageName": "GT-cards_I_IT_0114.jpg",
     "level":  1,
     "stepsBack": -3,
     "availablePlanets": [
@@ -48,6 +51,7 @@
   },
 
   {
+    "imageName": "GT-cards_I_IT_0115.jpg",
     "level":  1,
     "stepsBack": -1,
     "availablePlanets": [
@@ -64,6 +68,7 @@
   },
 
   {
+    "imageName": "GT-cards_II_IT_0112.jpg",
     "level":  2,
     "stepsBack": -4,
     "availablePlanets": [
@@ -80,6 +85,7 @@
   },
 
   {
+    "imageName": "GT-cards_II_IT_0113.jpg",
     "level":  2,
     "stepsBack": -3,
     "availablePlanets": [
@@ -93,6 +99,7 @@
   },
 
   {
+    "imageName": "GT-cards_II_IT_0114.jpg",
     "level":  2,
     "stepsBack": -2,
     "availablePlanets": [
@@ -112,6 +119,7 @@
   },
 
   {
+    "imageName": "GT-cards_II_IT_0115.jpg",
     "level":  2,
     "stepsBack": -3,
     "availablePlanets": [

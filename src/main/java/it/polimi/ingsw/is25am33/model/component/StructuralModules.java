@@ -45,13 +45,14 @@ public class StructuralModules extends Component {
                 : " ";
 
         return String.format("""
+            %s
             StructuralModules
             +---------+
             |    %s    |
             | %s     %s |
             |    %s    |
             +---------+
-            """, north, west, east, south);
+            """,imageName, north, west, east, south);
     }
 
     @Override

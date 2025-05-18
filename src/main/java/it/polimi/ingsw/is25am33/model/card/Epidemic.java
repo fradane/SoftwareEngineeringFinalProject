@@ -43,11 +43,12 @@ public class Epidemic extends AdventureCard{
 
     @Override
     public String toString() {
-        return """
+        return String.format("""
+           %s
            ┌────────────────────────────┐
            │          Epidemic          │
            └────────────────────────────┘
-           """;
+           """, imageName);
     }
 
 }

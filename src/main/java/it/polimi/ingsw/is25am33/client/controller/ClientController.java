@@ -7,7 +7,6 @@ import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -40,10 +39,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     private String nickname;
     boolean gameStarted = false;
     private final ClientModel clientModel;
-    private ObservableList<GameInfo> games = FXCollections.observableArrayList();
-
-    private static final String ANSI_RESET = "\u001B[0m";
-    private static final String ANSI_BLUE = "\u001B[34m";
+    private final ObservableList<GameInfo> observableGames = FXCollections.observableArrayList();
 
     public ClientController(ClientModel clientModel) throws RemoteException {
         super();
@@ -54,8 +50,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.askNickname();
     }
 
-    public ObservableList<GameInfo> getGames() {
-        return games;
+    public List<GameInfo> getGames() {
+        return new ArrayList<>(observableGames);
+    }
+
+    public ObservableList<GameInfo> getObservableGames() {
+        return observableGames;
     }
 
     public ClientModel getClientModel() {
@@ -155,6 +155,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             if (dns instanceof SocketClientManager) {
                 serverController = (SocketClientManager) dns;
             } else {
+                List<GameInfo> games = new ArrayList<>(observableGames);
                 serverController = games.stream().filter(info -> info.getGameId().equals(chosenGameId)).findFirst().orElseThrow().getGameController();
             }
             inGame = true;
@@ -168,8 +169,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 view.showError("Error joining game: Client not registered");
             else if (e.getMessage().contains("GameModel not found"))
                 view.showError("GameModel already started");
-            else if (e.getMessage().contains("GameModel already  or deleted"))
-                view.showError("Error joining game: GameModel already started");
+            else if (e.getMessage().contains("GameModel already started"))
+                view.showError("Error joining game: GameModel already started or deleted");
             else if (e.getMessage().contains("GameModel is full"))
                 view.showError("Error joining game: GameModel is full");
             else if (e.getMessage().contains("You are already in this gameModel"))
@@ -304,7 +305,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException {
-        this.games = (ObservableList<GameInfo>) gameInfos;
+        observableGames.clear();
+        observableGames.addAll(gameInfos);
     }
 
     @Override
@@ -318,6 +320,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.setGameState(GameState.BUILD_SHIPBOARD);
         gameInfo.getConnectedPlayers().forEach((nickname, color) -> clientModel.addPlayer(nickname, color, gameInfo.isTestFlight()));
         view.notifyGameStarted(GameState.BUILD_SHIPBOARD);
+        view.showBuildShipBoardMenu();
         clientModel.setHourglass(new Hourglass(gameInfo.isTestFlight(), this));
         clientModel.getHourglass().start(view, "game");
     }

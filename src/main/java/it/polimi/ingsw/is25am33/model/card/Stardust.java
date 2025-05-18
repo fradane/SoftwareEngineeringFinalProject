@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
+import net.bytebuddy.matcher.StringSetMatcher;
 
 import java.util.List;
 
@@ -34,11 +35,12 @@ public class Stardust extends AdventureCard implements PlayerMover {
 
     @Override
     public String toString() {
-        return """
+        return String.format( """
+           %s
            ┌────────────────────────┐
            │       Stardust         │
            └────────────────────────┘
-           """;
+           """, imageName);
     }
 
     private void moveNotCorrectlyAssembledShips() {

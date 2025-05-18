@@ -13,7 +13,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -21,6 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import static it.polimi.ingsw.is25am33.client.view.ClientState.*;
 import static it.polimi.ingsw.is25am33.client.view.MessageType.*;
@@ -48,7 +48,6 @@ public class ClientCLIView implements ClientView {
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BLUE = "\u001B[34m";
-    private static final String ANSI_GREEN = "\u001B[32m";
     private static final String ANSI_YELLOW = "\u001B[33m";
     private final String defaultInterrogationPrompt = "Your choice: ";
     private String currentInterrogationPrompt = "";
@@ -342,7 +341,7 @@ public class ClientCLIView implements ClientView {
 
 
 
-    public String askPlayerColor(List<PlayerColor> availableColors) {
+    public String askPlayerColor(@NotNull List<PlayerColor> availableColors) {
         String questionDescription = "\nChoose your color: \n";
 
         for (PlayerColor color : availableColors) {
@@ -438,7 +437,6 @@ public class ClientCLIView implements ClientView {
                 The game is now in progress...
                 
                 """, STANDARD);
-        showBuildShipBoardMenu();
     }
 
     @Override
@@ -549,7 +547,11 @@ public class ClientCLIView implements ClientView {
         StringBuilder littleDeck = new StringBuilder();
         littleDeck.append("\nHere is the little deck you chose:\n");
         clientModel.getLittleVisibleDecks().get(littleDeckChoice - 1).forEach(
-                card -> littleDeck.append(card).append("\n")
+                card -> {
+                    List<String> cardLines = Arrays.asList(card.split("\\n"));
+                    cardLines.removeFirst();
+                    littleDeck.append(cardLines).append("\n");
+                }
         );
         showMessage(littleDeck.toString(), STANDARD);
     }
@@ -624,17 +626,21 @@ public class ClientCLIView implements ClientView {
      * @param shipBoardOwnerNickname the nickname of the owner of the ship board being displayed
      */
     @Override
-    public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
+    public void showShipBoard(@NotNull ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
 
         Component[][] shipBoard = shipBoardClient.getShipMatrix();
         List<Component> bookedComponents = shipBoardClient.getBookedComponents();
-        String[] reservedComponent1 = new String[7];
-        String[] reservedComponent2 = new String[7];
+        List<String> reservedComponent1 = new ArrayList<>();
+        List<String> reservedComponent2 = new ArrayList<>();
 
-        if (!bookedComponents.isEmpty())
-            reservedComponent1 = shipBoardClient.getBookedComponents().getFirst().toString().split("\\n");
-        if (bookedComponents.size() == 2)
-            reservedComponent2 = shipBoardClient.getBookedComponents().get(1).toString().split("\\n");
+        if (!bookedComponents.isEmpty()) {
+            reservedComponent1.addAll(Arrays.stream(shipBoardClient.getBookedComponents().getFirst().toString().split("\\n")).collect(Collectors.toList()));
+            reservedComponent1.removeFirst();
+        }
+        if (bookedComponents.size() == 2) {
+            reservedComponent2.addAll(Arrays.stream(shipBoardClient.getBookedComponents().get(1).toString().split("\\n")).collect(Collectors.toList()));
+            reservedComponent2.removeFirst();
+        }
 
 
         String[] legendLines = {
@@ -710,8 +716,8 @@ public class ClientCLIView implements ClientView {
                 if (legendIndex <= legendLines.length - 1)
                     output.append(String.format("\t\t" + legendLines[legendIndex++] + "\n"));
                 else if (componentIndex <= 6) {
-                    if (reservedComponent1[componentIndex] != null) output.append(String.format("\t\t\t" + reservedComponent1[componentIndex]));
-                    if (reservedComponent2[componentIndex] != null) output.append(String.format("\t\t\t" + reservedComponent2[componentIndex]));
+                    if (reservedComponent1.get(componentIndex) != null) output.append(String.format("\t\t\t" + reservedComponent1.get(componentIndex)));
+                    if (reservedComponent2.get(componentIndex) != null) output.append(String.format("\t\t\t" + reservedComponent2.get(componentIndex)));
                     output.append("\n");
                     componentIndex++;
                 }
@@ -740,7 +746,9 @@ public class ClientCLIView implements ClientView {
         visibleComponentsList.append("\nHere's the visible components:");
 
         visibleComponents.keySet().forEach(index -> {
-            visibleComponentsList.append("\n").append(index).append(". ").append(visibleComponents.get(index));
+            List<String> visibleComponent = Arrays.stream(visibleComponents.get(index).toString().split("\\n")).collect(Collectors.toList());
+            visibleComponent.removeFirst();
+            visibleComponentsList.append("\n").append(index).append(". ").append(visibleComponent);
         });
         showMessage(visibleComponentsList.toString(), STANDARD);
         showMessage("Choose one of the visible components (0 to go back): ", ASK);

@@ -115,6 +115,7 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
     @Override
     public String toString() {
         return String.format("""
+           %s
            ┌────────────────────────────┐
            │       AbandonedShip        │
            ├────────────────────────────┤
@@ -122,7 +123,7 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
            │ Reward:            x%-2d     │
            │ Steps Back:        %-2d      │
            └────────────────────────────┘
-           """, crewMalus, reward, stepsBack);
+           """, imageName, crewMalus, reward, stepsBack);
     }
 
 }

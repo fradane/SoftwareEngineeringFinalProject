@@ -52,6 +52,7 @@ public class LifeSupport extends Component {
                 : " ";
 
         return String.format("""
+            %s
             LifeSupport
             +---------+
             |    %s    |
@@ -59,7 +60,7 @@ public class LifeSupport extends Component {
             |    %s    |
             +---------+
             lifeSupportColor: %s
-            """, north, west, east, south, lifeSupportColor);
+            """,imageName, north, west, east, south, lifeSupportColor);
     }
 
     /**

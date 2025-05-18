@@ -121,13 +121,14 @@ public class Planets extends AdventureCard implements PlayerMover {
     @Override
     public String toString() {
         String firstString = String.format("""
+           %s
            ┌────────────────────────────┐
            │          Planets           │
            ├────────────────────────────┤
            │ Planets:           x%-2d     │
            │ Steps Back:        %-2d      │
            └────────────────────────────┘
-           """,
+           """,imageName,
                 availablePlanets != null ? availablePlanets.size() : 0,
                 stepsBack);
 

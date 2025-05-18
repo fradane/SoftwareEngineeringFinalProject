@@ -31,6 +31,8 @@ import java.util.*;
 })
 public abstract class Component implements Serializable {
 
+    protected String imageName;
+
     /**
      * Current operational state of the component.
      */
@@ -63,6 +65,14 @@ public abstract class Component implements Serializable {
      */
     public Component(Map<Direction, ConnectorType> connectors) {
         this.connectors = connectors;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 
     /**

@@ -45,6 +45,7 @@ public class SpecialStorage extends Storage {
                 : " ";
 
         return String.format("""
+            %s
             SpecialStorage
             +---------+
             |    %s    |
@@ -52,7 +53,7 @@ public class SpecialStorage extends Storage {
             |    %s    |
             +---------+
             MaxCapacity: %d
-            """, north, west, east, south, getMaxCapacity());
+            """,imageName, north, west, east, south, getMaxCapacity());
     }
 
     @Override
