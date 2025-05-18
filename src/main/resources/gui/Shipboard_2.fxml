@@ -83,16 +83,23 @@
               </StackPane.margin>
             </GridPane>
 
-
-            <FlowPane fx:id="littleDeckFlowPane" hgap="10" managed="false" vgap="10" visible="false" StackPane.alignment="CENTER">
-                <ImageView fx:id="visibleCard1" />
-                <ImageView fx:id="visibleCard2" />
-                <ImageView fx:id="visibleCard3" />
+            <FlowPane fx:id="littleDeckFlowPane" hgap="20.0" vgap="20.0" managed="false" visible="false" StackPane.alignment="CENTER">
+                <ImageView fx:id="visibleCard1" fitWidth="250" preserveRatio="true" />
+               <FlowPane.margin>
+                  <Insets left="25.0" right="25.0" />
+               </FlowPane.margin>
+                <ImageView fx:id="visibleCard2" fitWidth="250" preserveRatio="true" />
+               <FlowPane.margin>
+                  <Insets left="25.0" right="25.0" />
+               </FlowPane.margin>
+                <ImageView fx:id="visibleCard3" fitWidth="250" preserveRatio="true" />
+               <FlowPane.margin>
+                  <Insets left="25.0" right="25.0" />
+               </FlowPane.margin>
+            <padding>
+               <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
             </FlowPane>
-            
-         <padding>
-            <Insets top="200.0" />
-         </padding>
         </StackPane>
     </center>
 
@@ -105,7 +112,7 @@
                 <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
              </padding>
         </HBox>
-        <Button fx:id="goBackButton" onAction="#handleGoBackButton" alignment="TOP_LEFT" text="GO BACK"/>
+        <Button fx:id="goBackButton" alignment="TOP_LEFT" onAction="#handleGoBackButton" text="GO BACK" />
     </top>
 
     <bottom>

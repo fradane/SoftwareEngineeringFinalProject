@@ -1,7 +1,10 @@
 package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
+import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,7 +33,7 @@ public class ShipBoardViewController extends GuiController {
     @FXML
     private ImageView visibleCard3 = new ImageView();
     @FXML
-    private ImageView component1 = new ImageView();
+    private ImageView focusComponent = new ImageView();
 
 
     @FXML
@@ -130,10 +133,62 @@ public class ShipBoardViewController extends GuiController {
     @FXML
     private ComboBox<String> viewOtherShipboardButton;
 
+    private Button getButtonAt(int row, int col) {
+        String id = String.format("button%02d_%02d", row, col);
+        try {
+            var field = getClass().getDeclaredField(id);
+            field.setAccessible(true);
+            return (Button) field.get(this);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            return null;
+        }
+    }
+
     public void initialize() {
         borderPane.setVisible(true);
         stackPane.setVisible(true);
         grid.setVisible(true);
+
+//        clientModel.getPlayerClientData().get(clientModel.getMyNickname())
+//                .getShipBoard()
+//                .focusedComponentProperty()
+//                .addListener((obs, oldVal, newVal) -> {
+//                    if (newVal != null) {
+//                        String imagePath = newVal.toString().split("\\n")[0];
+//                        Platform.runLater(() -> focusComponent.setImage(new Image(Objects.requireNonNull(
+//                                getClass().getResourceAsStream("/gui/graphics/components/" + imagePath)
+//                        ))));
+//                    }
+//                });
+//
+
+        // TODO modificare con adapter o shipboard
+        ShipBoardClient myShipBoard = clientModel.getPlayerClientData().get(clientModel.getMyNickname()).getShipBoard();
+        ObjectProperty<Component>[][] observableMatrix = myShipBoard.getObservableMatrix();
+
+        for (int i = 0; i < 12; i++) {
+            for (int j = 0; j < 12; j++) {
+
+                ObjectProperty<Component> cellProperty = observableMatrix[i][j];
+                Button button = getButtonAt(i, j);
+
+                if (button != null) {
+                    cellProperty.addListener((obs, oldVal, newVal) -> {
+                        if (newVal != null) {
+                            Image img = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/components/" + newVal.toString().split("\\n")[0] + ".jpg")));
+                            ImageView imgView = new ImageView(img);
+                            imgView.setFitWidth(50);
+                            imgView.setFitHeight(50);
+                            imgView.setPreserveRatio(true);
+                            button.setGraphic(imgView);
+                        } else {
+                            button.setGraphic(null);
+                        }
+                    });
+                }
+
+            }
+        }
 
         viewOtherShipboardButton.setItems(
                 FXCollections.observableArrayList(
@@ -155,7 +210,6 @@ public class ShipBoardViewController extends GuiController {
         if (waitingForCoords)
             selectedCoordinates.add(new Coordinates(row, column));
     }
-
 
     public void handleLittleDeck() {
 
@@ -181,15 +235,14 @@ public class ShipBoardViewController extends GuiController {
     }
 
     public void showFocusComponent(){
-        componentBox.setVisible(true);
-        componentBox.setManaged(true);
+        Platform.runLater(() -> {
+            componentBox.setVisible(true);
+            componentBox.setManaged(true);
+        });
     }
 
     public void handleRandomComponentButton() {
         clientController.pickRandomComponent();
-
-
-
     }
 
     public void handleGoBackButton(ActionEvent actionEvent) {
@@ -200,4 +253,3 @@ public class ShipBoardViewController extends GuiController {
         });
     }
 }
-
