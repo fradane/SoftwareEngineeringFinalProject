@@ -6,7 +6,8 @@
       "EAST": "UNIVERSAL",
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web53"
   },
 
   {
@@ -16,7 +17,8 @@
       "EAST": "UNIVERSAL",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web54"
   },
 
   {
@@ -26,7 +28,8 @@
       "EAST": "UNIVERSAL",
       "SOUTH": "SINGLE",
       "WEST": "UNIVERSAL"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web55"
   },
 
   {
@@ -36,7 +39,8 @@
       "EAST": "UNIVERSAL",
       "SOUTH": "DOUBLE",
       "WEST": "UNIVERSAL"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web56"
   },
 
   {
@@ -46,7 +50,8 @@
       "EAST": "UNIVERSAL",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web57"
   },
 
   {
@@ -56,7 +61,8 @@
       "EAST": "SINGLE",
       "SOUTH": "DOUBLE",
       "WEST": "UNIVERSAL"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web58"
   },
 
   {
@@ -66,7 +72,8 @@
       "EAST": "DOUBLE",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web59"
   },
 
   {
@@ -76,7 +83,8 @@
       "EAST": "DOUBLE",
       "SOUTH": "DOUBLE",
       "WEST": "UNIVERSAL"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web60"
   }
 
 ]
