@@ -116,7 +116,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
            │ reward                x%-2d  │
            │ stepsBack             %-2d   │
            └────────────────────────────┘
-           """,imageName, requiredFirePower, crewMalus, reward, stepsBack);
+           """, imageName, requiredFirePower, crewMalus, reward, stepsBack);
     }
 
 }

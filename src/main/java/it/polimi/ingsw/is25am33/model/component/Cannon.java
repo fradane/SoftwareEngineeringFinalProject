@@ -48,6 +48,7 @@ public class Cannon extends Component implements Rotatable {
                 : " ";
 
         return String.format("""
+            %s
             Cannon
             +---------+
             |    %s    |
@@ -55,7 +56,7 @@ public class Cannon extends Component implements Rotatable {
             |    %s    |
             +---------+
             fireDirection: %s
-            """, north, west, east, south, fireDirection);
+            """, imageName, north, west, east, south, fireDirection);
     }
 
     /**

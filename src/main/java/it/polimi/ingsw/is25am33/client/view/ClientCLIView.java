@@ -565,7 +565,6 @@ public class ClientCLIView implements ClientView {
                 """, STANDARD);
     }
 
-
     @Override
     public void showPickedComponentAndMenu() {
         clientState = BUILDING_SHIPBOARD_WITH_FOCUSED_COMPONENT;
@@ -746,10 +745,16 @@ public class ClientCLIView implements ClientView {
         visibleComponentsList.append("\nHere's the visible components:");
 
         visibleComponents.keySet().forEach(index -> {
-            List<String> visibleComponent = Arrays.stream(visibleComponents.get(index).toString().split("\\n")).collect(Collectors.toList());
-            visibleComponent.removeFirst();
-            visibleComponentsList.append("\n").append(index).append(". ").append(visibleComponent);
+            String[] visibleComponent = visibleComponents.get(index).toString().split("\\n");
+            StringBuilder output = new StringBuilder();
+            output.append("\n").append(index).append(". ").append(visibleComponent[1]);
+            for (int i = 2; i < visibleComponent.length; i++) {
+                output.append("\n").append(visibleComponent[i]);
+            }
+            output.append("\n");
+            visibleComponentsList.append(output);
         });
+
         showMessage(visibleComponentsList.toString(), STANDARD);
         showMessage("Choose one of the visible components (0 to go back): ", ASK);
     }
@@ -1329,10 +1334,15 @@ public class ClientCLIView implements ClientView {
                                 showMessage("Still picking the component. Please wait...\n", STANDARD);
                                 break;
                             }
+                            String[] visibleComponent = focusedComponent.toString().split("\\n");
+                            StringBuilder output = new StringBuilder();
+                            for (int i = 1; i < visibleComponent.length; i++) {
+                                output.append(visibleComponent[i]).append("\n");
+                            }
                             showMessage(String.format("""
                                     \nComponent details:
                                     %s
-                                    """, focusedComponent), STANDARD);
+                                    """, output), STANDARD);
                             showPickedComponentAndMenu();
                             break;
 

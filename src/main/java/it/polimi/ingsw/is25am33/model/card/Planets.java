@@ -128,7 +128,7 @@ public class Planets extends AdventureCard implements PlayerMover {
            │ Planets:           x%-2d     │
            │ Steps Back:        %-2d      │
            └────────────────────────────┘
-           """,imageName,
+           """, imageName,
                 availablePlanets != null ? availablePlanets.size() : 0,
                 stepsBack);
 
