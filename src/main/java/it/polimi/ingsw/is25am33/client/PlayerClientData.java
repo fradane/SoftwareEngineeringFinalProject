@@ -4,7 +4,9 @@ import it.polimi.ingsw.is25am33.model.GameContext;
 import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.client.ShipBoardClient;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
+import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.HashMap;
 
@@ -27,6 +29,7 @@ public class PlayerClientData {
         this.credits = 0;
         this.color = color;
         this.shipBoard = isTestFlight ? new Level1ShipBoard(color, new GameContext(new HashMap<>())) : new Level2ShipBoard(color, new GameContext(new HashMap<>()));
+        this.shipBoard.setPlayer(new Player(nickname, (ShipBoard) this.shipBoard, color));
     }
 
     public PlayerColor getColor() {

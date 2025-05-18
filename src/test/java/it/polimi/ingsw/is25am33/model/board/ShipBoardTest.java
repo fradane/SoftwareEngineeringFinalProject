@@ -8,6 +8,8 @@ import org.junit.jupiter.api.*;
 
 import java.util.*;
 
+import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.*;
+import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -19,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ShipBoardTest {
 
     private ShipBoard shipBoard;
+    // MainCabin position for more readable tests
+    private int cabinX;
+    private int cabinY;
 
     @BeforeAll
     static void setupAll() {
@@ -30,20 +35,10 @@ public class ShipBoardTest {
     void setup() {
         // Use whichever concrete subclass is appropriate (e.g., Level2ShipBoard)
         shipBoard = new Level2ShipBoard(PlayerColor.RED, new GameContext(new HashMap<>()));
-    }
 
-    /**
-     * Helper that returns a simple 12x12 matrix of "true", except for [0][0] which is "false"
-     */
-    private static boolean[][] createDefaultValidPositions() {
-        boolean[][] positions = new boolean[ShipBoard.BOARD_DIMENSION][ShipBoard.BOARD_DIMENSION];
-        for (int i = 0; i < ShipBoard.BOARD_DIMENSION; i++) {
-            for (int j = 0; j < ShipBoard.BOARD_DIMENSION; j++) {
-                positions[i][j] = true;
-            }
-        }
-        positions[0][0] = false;
-        return positions;
+        // Store MainCabin coordinates for cleaner test code
+        cabinX = ShipBoard.STARTING_CABIN_POSITION[0];
+        cabinY = ShipBoard.STARTING_CABIN_POSITION[1];
     }
 
     /**
@@ -54,21 +49,24 @@ public class ShipBoardTest {
      */
     private Map<Direction, ConnectorType> createSimpleConnectors() {
         Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
-        connectors.put(Direction.NORTH, ConnectorType.SINGLE);
-        connectors.put(Direction.SOUTH, ConnectorType.SINGLE);
-        connectors.put(Direction.EAST,  ConnectorType.SINGLE);
-        connectors.put(Direction.WEST,  ConnectorType.SINGLE);
+        connectors.put(NORTH, SINGLE);
+        connectors.put(SOUTH, SINGLE);
+        connectors.put(Direction.EAST,  SINGLE);
+        connectors.put(Direction.WEST,  SINGLE);
         return connectors;
     }
 
-    //@Test
-    @DisplayName("Test: initializeValidPositions throws if called twice")
-    void testInitializeValidPositionsError() {
-        boolean[][] dummy = new boolean[ShipBoard.BOARD_DIMENSION][ShipBoard.BOARD_DIMENSION];
-        // Already called in setup(). Another call => must throw
-//        assertThrows(IllegalStateException.class, () ->
-//                ShipBoard.initializeValidPositions(dummy)
-//        );
+    /**
+     * Helper per creare una mappa di connettori personalizzati
+     */
+    private Map<Direction, ConnectorType> createCustomConnectors(ConnectorType north, ConnectorType south,
+                                                                 ConnectorType east, ConnectorType west) {
+        Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
+        connectors.put(NORTH, north);
+        connectors.put(SOUTH, south);
+        connectors.put(EAST, east);
+        connectors.put(WEST, west);
+        return connectors;
     }
 
     @Test
@@ -82,7 +80,8 @@ public class ShipBoardTest {
 
         assertFalse(shipBoard.isValidPosition(0, 0));
 
-        assertTrue(shipBoard.isValidPosition(11, 11));
+        // Test using a position relative to MainCabin (cabinX + 1, cabinY + 2)
+        assertTrue(shipBoard.isValidPosition(cabinX + 1, cabinY + 2));
     }
 
     @Test
@@ -92,27 +91,127 @@ public class ShipBoardTest {
         Cannon cannon = new Cannon(createSimpleConnectors());
         shipBoard.focusedComponent = cannon;
 
+        // Use position far away from MainCabin
+        int farX = cabinX - 2;
+        int farY = cabinY - 2;
+
         // Board is empty => no adjacency => must throw
         assertThrows(IllegalArgumentException.class,
-                () -> shipBoard.placeComponentWithFocus(4, 4)
+                () -> shipBoard.placeComponentWithFocus(farX, farY)
         );
     }
 
+    @Test
+    @DisplayName("Test: motore che punta verso la cabina principale (SOUTH)")
+    void testEnginePointingTowardMainCabin() {
+        // Creo un motore (che punta verso SOUTH di default)
+        Map<Direction, ConnectorType> connectors = createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE);
+        Engine engine = new Engine(connectors);
 
+        // Verifico che la direzione di default sia SOUTH
+        assertEquals(SOUTH, engine.getFireDirection());
+
+        // Posiziono il motore sopra la cabina principale
+        shipBoard.focusedComponent = engine;
+
+        // La posizione sarebbe cabinX-1, cabinY (sopra la cabina)
+        shipBoard.placeComponentWithFocus(cabinX-1, cabinY);
+
+        // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
+        List<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+        assertTrue(incorrectCoords.contains(new Coordinates(cabinX-1, cabinY)));
+
+        // Inoltre, verifico che sia marcato come errato per la direzione sbagliata
+        assertTrue(shipBoard.isEngineDirectionWrong(engine));
+    }
+
+    @Test
+    @DisplayName("Test: componente con connettore EMPTY che punta verso la cabina principale")
+    void testComponentWithEmptyConnectorTowardMainCabin() {
+        // Creo un componente con connettore EMPTY verso SUD (che punterà sulla cabina)
+        Map<Direction, ConnectorType> connectors = createCustomConnectors(SINGLE, EMPTY, SINGLE, SINGLE);
+        Cabin cabin = new Cabin(connectors);
+
+        // Posiziono il componente sopra la cabina principale
+        shipBoard.focusedComponent = cabin;
+
+        // La posizione sarebbe cabinX-1, cabinY
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> shipBoard.placeComponentWithFocus(cabinX-1, cabinY));
+
+        // Verifico che l'eccezione sia quella prevista per connettori incompatibili
+        assertEquals("Empty connector not well connected", exception.getMessage());
+    }
 
     @Test
     @DisplayName("Test: isPositionConnectedToShip is true for adjacent cells near central cabin")
     void testIsPositionConnectedToShip() {
-        int x = ShipBoard.STARTING_CABIN_POSITION[0];
-        int y = ShipBoard.STARTING_CABIN_POSITION[1];
-
-        assertTrue(shipBoard.isPositionConnectedToShip(x+1, y));
-        assertTrue(shipBoard.isPositionConnectedToShip(x-1, y));
-        assertTrue(shipBoard.isPositionConnectedToShip(x,   y+1));
-        assertTrue(shipBoard.isPositionConnectedToShip(x,   y-1));
+        assertTrue(shipBoard.isPositionConnectedToShip(cabinX+1, cabinY));
+        assertTrue(shipBoard.isPositionConnectedToShip(cabinX-1, cabinY));
+        assertTrue(shipBoard.isPositionConnectedToShip(cabinX, cabinY+1));
+        assertTrue(shipBoard.isPositionConnectedToShip(cabinX, cabinY-1));
 
         // Not directly adjacent => false
-        assertFalse(shipBoard.isPositionConnectedToShip(x+2, y));
+        assertFalse(shipBoard.isPositionConnectedToShip(cabinX+2, cabinY));
+    }
+
+    @Test
+    @DisplayName("Test: cannone che punta verso la cabina principale")
+    void testCannonPointingTowardMainCabin() {
+        // Creo un cannone che punta verso SUD (che punterà sulla cabina)
+        Map<Direction, ConnectorType> connectors = createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE);
+        Cannon cannon = new Cannon(connectors);
+
+        // Il cannone punta di default verso NORTH, devo rotarlo due volte per puntare a SUD
+        cannon.rotate();  // NORTH -> EAST
+        cannon.rotate();  // EAST -> SOUTH
+
+        // Posiziono il cannone sopra la cabina principale
+        shipBoard.focusedComponent = cannon;
+
+        // La posizione sarebbe cabinX-1, cabinY
+        shipBoard.placeComponentWithFocus(cabinX-1, cabinY);
+
+        // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
+        List<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+        assertTrue(incorrectCoords.contains(new Coordinates(cabinX-1, cabinY)));
+    }
+
+    @Test
+    @DisplayName("Test: isAimingAComponent verifica se un cannone punta a un altro componente")
+    void testIsAimingAComponent() {
+        Map<Direction, ConnectorType> connectors = createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE);
+
+        // Posiziono un componente a nord della cabina principale
+        Cabin targetCabin = new Cabin(connectors);
+        shipBoard.focusedComponent = targetCabin;
+        int x1 = cabinX - 1;
+        int y1 = cabinY;
+        shipBoard.placeComponentWithFocus(x1, y1);
+
+        // Posiziono un cannone a ovest del targetCabin, che punta verso est (quindi verso mainCabin)
+        Cannon eastCannon = new Cannon(connectors);
+        eastCannon.rotate(); // NORTH -> EAST
+
+        shipBoard.focusedComponent = eastCannon;
+        int x2 = cabinX;
+        int y2 = cabinY - 1;
+        shipBoard.placeComponentWithFocus(x2, y2);
+
+        // Il cannone dovrebbe puntare verso targetCabin
+        assertTrue(shipBoard.isAimingAComponent(eastCannon, x2, y2));
+
+        // Ora posiziono un cannone che non punta verso alcun componente
+        Cannon eastCannon2 = new Cannon(connectors);
+        eastCannon2.rotate(); // NORTH -> EAST
+
+        shipBoard.focusedComponent = eastCannon2;
+        int x3 = cabinX;
+        int y3 = cabinY + 1;
+        shipBoard.placeComponentWithFocus(x3, y3);
+
+        // Questo cannone non dovrebbe puntare verso alcun componente
+        assertFalse(shipBoard.isAimingAComponent(eastCannon2, x3, y3));
     }
 
     @Test
@@ -122,8 +221,8 @@ public class ShipBoardTest {
         Cannon cannon = new Cannon(createSimpleConnectors());
         shipBoard.focusedComponent = cannon;
 
-        int x = ShipBoard.STARTING_CABIN_POSITION[0] + 1;
-        int y = ShipBoard.STARTING_CABIN_POSITION[1];
+        int x = cabinX + 1;
+        int y = cabinY;
 
         assertDoesNotThrow(() ->
                 shipBoard.placeComponentWithFocus(x, y)
@@ -133,7 +232,6 @@ public class ShipBoardTest {
         assertNull(shipBoard.focusedComponent);
     }
 
-
     @Test
     @DisplayName("Test: releaseComponentWithFocus sets state to FREE & clears focus")
     void testReleaseComponentWithFocus() {
@@ -142,7 +240,7 @@ public class ShipBoardTest {
         engine.setCurrState(ComponentState.BOOKED);
         shipBoard.focusedComponent = engine;
 
-        //shipBoard.releaseComponentWithFocus();
+        shipBoard.releaseFocusedComponent();
         assertEquals(ComponentState.VISIBLE, engine.getCurrState());
         assertNull(shipBoard.focusedComponent);
     }
@@ -150,159 +248,298 @@ public class ShipBoardTest {
     @Test
     @DisplayName("Test: isEngineDirectionWrong returns true if engine is facing SOUTH")
     void testIsEngineDirectionWrong() {
-        // Notice: Engine constructor sets powerDirection= SOUTH by default
+        // Notice: Engine constructor sets fireDirection= SOUTH by default
         Engine eng = new Engine(createSimpleConnectors());
         assertTrue(shipBoard.isEngineDirectionWrong(eng)); // because it's SOUTH
 
         eng.rotate();
         eng.rotate();
-        //eng.rotatePowerDirection();
+        //eng.rotateFireDirection();
         assertFalse(shipBoard.isEngineDirectionWrong(eng));
     }
 
     @Test
     @DisplayName("Test: removeAndRecalculateShipParts throws if cell is empty")
     void testRemoveAndRecalculateShipParts() {
+        // Use position relative to MainCabin but not adjacent
+        int farX = cabinX - 2;
+        int farY = cabinY - 2;
+
         assertThrows(IllegalArgumentException.class,
-                () -> shipBoard.removeAndRecalculateShipParts(4, 4)
+                () -> shipBoard.removeAndRecalculateShipParts(farX, farY)
         );
     }
 
     @Test
     @DisplayName("Test: removeAndRecalculateShipParts splits the ship into two isolated parts, which can then be removed")
     void testRemoveAndRecalculateShipPartsIsolatedParts() {
-    /*
-       We'll build a small chain of components in row=4:
-         (4,4) - bridging - (4,5) - bridging - (4,6) - (4,7)
-       Then removing (4,5) should yield two parts:
-         Part A: (4,4)
-         Part B: (4,6) and (4,7)
-       We'll check that the method returns these two sets, and then
-       remove one of them to confirm the board updates.
-    */
+        /*
+         * Costruiremo una struttura a L partendo dalla MainCabin, rispettando le posizioni valide:
+         *
+         *         MainCabin(6,6) --- c1(6,7) --- c2(6,8)
+         *              |
+         *   c4(7,5) - c3(7,6)
+         *
+         * Poi rimuoveremo c1, isolando c2, e verificheremo che vengano identificate due parti separate
+         */
 
-        // Create simple connectors for each component
+        // Verifichiamo innanzitutto le posizioni valide vicino alla MainCabin
+        // La MainCabin è in (6,6)
+        assertTrue(shipBoard.isValidPosition(cabinX, cabinY + 1)); // (6,7)
+        assertTrue(shipBoard.isValidPosition(cabinX, cabinY + 2)); // (6,8)
+        assertTrue(shipBoard.isValidPosition(cabinX + 1, cabinY)); // (7,6)
+        assertTrue(shipBoard.isValidPosition(cabinX + 1, cabinY - 1)); // (7,5)
+
+        // Creiamo i componenti con connettori semplici
         Map<Direction, ConnectorType> connectors = createSimpleConnectors();
 
-        // Place four components in a row
-        // For brevity, let's use Cabin for all. You could use different types if you prefer.
-        Cabin c1 = new Cabin(connectors); // at (4,4)
-        Cabin c2 = new Cabin(connectors); // bridging piece at (4,5)
-        Cabin c3 = new Cabin(connectors); // at (4,6)
-        Cabin c4 = new Cabin(connectors); // at (4,7)
+        // Posiziono c1 a EST della MainCabin (6,7)
+        Cabin c1 = new Cabin(connectors);
+        shipBoard.focusedComponent = c1;
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
 
-        shipBoard.shipMatrix[4][4] = c1;
-        shipBoard.shipMatrix[4][5] = c2;
-        shipBoard.shipMatrix[4][6] = c3;
-        shipBoard.shipMatrix[4][7] = c4;
+        // Posiziono c2 a EST di c1 (6,8)
+        Cabin c2 = new Cabin(connectors);
+        shipBoard.focusedComponent = c2;
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
 
-        // Now remove the piece at (4,5). This should split the ship into two groups:
-        //   Part A: the single cell at (4,4)
-        //   Part B: the two cells at (4,6) and (4,7)
-        List<Set<List<Integer>>> parts = shipBoard.removeAndRecalculateShipParts(4, 5);
+        // Posiziono c3 a SUD della MainCabin (7,6)
+        Cabin c3 = new Cabin(connectors);
+        shipBoard.focusedComponent = c3;
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY);
 
-        // Let's check that c2 is now in notActiveComponents
-        assertTrue(shipBoard.notActiveComponents.contains(c2),
-                "Removed component at (4,5) should be in notActiveComponents");
-        assertNull(shipBoard.shipMatrix[4][5],
-                "Cell (4,5) should now be empty");
+        // Posiziono c4 a OVEST di c3 (7,5)
+        Cabin c4 = new Cabin(connectors);
+        shipBoard.focusedComponent = c4;
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY - 1);
 
-        // We expect exactly 2 isolated parts
-        assertEquals(2, parts.size(),
-                "Should have 2 separate parts after removing the bridging component");
+        // Verifichiamo che tutti i componenti siano stati posizionati correttamente
+        assertEquals(c1, shipBoard.shipMatrix[cabinX][cabinY + 1]);
+        assertEquals(c2, shipBoard.shipMatrix[cabinX][cabinY + 2]);
+        assertEquals(c3, shipBoard.shipMatrix[cabinX + 1][cabinY]);
+        assertEquals(c4, shipBoard.shipMatrix[cabinX + 1][cabinY - 1]);
 
-        // For clarity, let's find which set is (4,4) and which is (4,6)&(4,7).
-        // E.g. we can sort by size or check coordinates explicitly.
-        Set<Coordinates> partA = parts.get(0).size() == 1 ? parts.get(0) : parts.get(1);
-        Set<Coordinates> partB = parts.get(0).size() == 1 ? parts.get(1) : parts.get(0);
+        // Ora rimuoviamo c1, che dovrebbe separare c2 dal resto della nave
+        Set<Set<Coordinates>> parts = shipBoard.removeAndRecalculateShipParts(cabinX, cabinY + 1);
 
-        // partA should contain exactly (4,4)
-        assertEquals(1, partA.size(),
-                "One of the parts must be a singleton, presumably (4,4)");
-        assertTrue(partA.contains(new Coordinates(4, 4)), "Expected the single cell (4,4) in partA");
+        // Verifichiamo che c1 sia stato rimosso e aggiunto ai componenti non attivi
+        assertNull(shipBoard.shipMatrix[cabinX][cabinY + 1]);
+        assertTrue(shipBoard.notActiveComponents.contains(c1));
 
-        // partB should contain (4,6) and (4,7)
-        assertEquals(2, partB.size(),
-                "Other part should contain 2 cells: (4,6) and (4,7)");
-        assertTrue(partB.contains(new Coordinates(4, 6)),
-                "Should contain (4,6)");
-        assertTrue(partB.contains(new Coordinates(4, 7)),
-                "Should contain (4,7)");
+        // Dovremmo avere esattamente 2 parti: il componente c2 isolato e il resto della nave
+        assertEquals(2, parts.size());
 
-        // Now we simulate removing the entire partB from the board
-        shipBoard.removeShipPart(partB);
-        // That should remove c3 and c4 from the board
-        assertNull(shipBoard.shipMatrix[4][6],
-                "PartB cell (4,6) should be removed");
-        assertNull(shipBoard.shipMatrix[4][7],
-                "PartB cell (4,7) should be removed");
+        // Troviamo quale parte è il componente isolato (c2) e quale è il corpo principale
+        Set<Coordinates> isolatedPart = null;
+        Set<Coordinates> mainPart = null;
 
-        // They should also appear in notActiveComponents
-        assertTrue(shipBoard.notActiveComponents.contains(c3),
-                "c3 must be in notActiveComponents after removal");
-        assertTrue(shipBoard.notActiveComponents.contains(c4),
-                "c4 must be in notActiveComponents after removal");
+        for (Set<Coordinates> part : parts) {
+            if (part.size() == 1) {
+                isolatedPart = part;
+            } else {
+                mainPart = part;
+            }
+        }
+
+        assertNotNull(isolatedPart, "Dovrebbe esserci una parte isolata con un solo componente");
+        assertNotNull(mainPart, "Dovrebbe esserci una parte principale con più componenti");
+
+        // La parte isolata dovrebbe contenere solo c2
+        assertTrue(isolatedPart.contains(new Coordinates(cabinX, cabinY + 2)));
+        assertEquals(1, isolatedPart.size());
+
+        // La parte principale dovrebbe contenere la MainCabin, c3 e c4
+        assertTrue(mainPart.contains(new Coordinates(cabinX, cabinY))); // MainCabin
+        assertTrue(mainPart.contains(new Coordinates(cabinX + 1, cabinY))); // c3
+        assertTrue(mainPart.contains(new Coordinates(cabinX + 1, cabinY - 1))); // c4
+        assertEquals(3, mainPart.size());
+
+        // Ora rimuoviamo la parte isolata (c2)
+        shipBoard.removeShipPart(isolatedPart);
+
+        // Verifichiamo che c2 sia stato rimosso dalla matrice e aggiunto ai componenti non attivi
+        assertNull(shipBoard.shipMatrix[cabinX][cabinY + 2]);
+        assertTrue(shipBoard.notActiveComponents.contains(c2));
+
+        // Gli altri componenti dovrebbero essere ancora nella matrice
+        assertNotNull(shipBoard.shipMatrix[cabinX][cabinY]); // MainCabin
+        assertNotNull(shipBoard.shipMatrix[cabinX + 1][cabinY]); // c3
+        assertNotNull(shipBoard.shipMatrix[cabinX + 1][cabinY - 1]); // c4
     }
-
 
     @Test
     @DisplayName("Test: isThereACannon returns true if Cannon with that direction found in row/col")
     void testIsThereACannon() {
+        // Place cannon at position relative to MainCabin
+        int x = cabinX - 3;
+        int y = cabinY - 2;
+
         Cannon cannon = new Cannon(createSimpleConnectors());
-        shipBoard.shipMatrix[3][4] = cannon;
-        // For direction NORTH, we interpret 'pos=4' as column=4
-        // => check row i in [0..11], i=3 => found cannon => true
-        assertTrue(shipBoard.isThereACannon(4, Direction.NORTH));
+        shipBoard.shipMatrix[x][y] = cannon;
+
+        // For direction NORTH, we interpret 'pos=y' as column=y
+        assertTrue(shipBoard.isThereACannon(y, NORTH));
         // Wrong direction => false
-        assertFalse(shipBoard.isThereACannon(4, Direction.SOUTH));
+        assertFalse(shipBoard.isThereACannon(y, SOUTH));
     }
 
     @Test
     @DisplayName("Test: isThereADoubleCannon returns true if DoubleCannon is in row/col with given direction")
     void testIsThereADoubleCannon() {
-        // e.g. new DoubleCannon(...) => same constructor signature in your code
-        DoubleCannon dbl = new DoubleCannon(createSimpleConnectors());
-        shipBoard.shipMatrix[5][5] = dbl;
+        // Place DoubleCannon at position relative to MainCabin
+        int x = cabinX - 1;
+        int y = cabinY - 1;
 
-        assertTrue(shipBoard.isThereADoubleCannon(5, Direction.NORTH));
-        assertFalse(shipBoard.isThereADoubleCannon(5, Direction.SOUTH));
+        DoubleCannon dbl = new DoubleCannon(createSimpleConnectors());
+        shipBoard.shipMatrix[x][y] = dbl;
+
+        assertTrue(shipBoard.isThereADoubleCannon(y, NORTH));
+        assertFalse(shipBoard.isThereADoubleCannon(y, SOUTH));
     }
 
     @Test
     @DisplayName("Test: getOrderedComponentsInDirection returns correct order for a row/column")
     void testGetOrderedComponentsInDirection() {
-        // Fill row=2 with random cannons
+        // Use a row relative to the MainCabin
+        int row = cabinX - 4;
+
+        // Fill row with random cannons
         for (int col = 0; col < ShipBoard.BOARD_DIMENSION; col++) {
-            shipBoard.shipMatrix[2][col] = new Cannon(createSimpleConnectors());
+            shipBoard.shipMatrix[row][col] = new Cannon(createSimpleConnectors());
         }
-        Component[] fromWest = shipBoard.getOrderedComponentsInDirection(2, Direction.WEST);
+        Component[] fromWest = shipBoard.getOrderedComponentsInDirection(row, Direction.WEST);
         assertEquals(12, fromWest.length);
-        // The first from West is (2,0), then (2,1)...
-        assertEquals(shipBoard.shipMatrix[2][0], fromWest[0]);
-        assertEquals(shipBoard.shipMatrix[2][1], fromWest[1]);
+        // The first from West is (row,0), then (row,1)...
+        assertEquals(shipBoard.shipMatrix[row][0], fromWest[0]);
+        assertEquals(shipBoard.shipMatrix[row][1], fromWest[1]);
 
+        // Use a column relative to the MainCabin
+        int col = cabinY + 1;
 
-        // Fill col=7 with random cannons
-        for (int row = 0; row < ShipBoard.BOARD_DIMENSION; row++) {
-            shipBoard.shipMatrix[row][7] = new Cannon(createSimpleConnectors());
+        // Fill col with random cannons
+        for (int r = 0; r < ShipBoard.BOARD_DIMENSION; r++) {
+            shipBoard.shipMatrix[r][col] = new Cannon(createSimpleConnectors());
         }
-        Component[] fromSouth = shipBoard.getOrderedComponentsInDirection(7, Direction.SOUTH);
+        Component[] fromSouth = shipBoard.getOrderedComponentsInDirection(col, SOUTH);
         assertEquals(12, fromWest.length);
-        // The first from West is (2,0), then (2,1)...
-        assertEquals(shipBoard.shipMatrix[11][7], fromSouth[0]);
-        assertEquals(shipBoard.shipMatrix[10][7], fromSouth[1]);
+        // The first from South is (11,col), then (10,col)...
+        assertEquals(shipBoard.shipMatrix[11][col], fromSouth[0]);
+        assertEquals(shipBoard.shipMatrix[10][col], fromSouth[1]);
     }
 
     @Test
     @DisplayName("Test: isExposed returns false if row/col is empty")
     void testIsExposed() {
-        assertFalse(shipBoard.isExposed(4, Direction.NORTH));
+        // Use position relative to MainCabin
+        int col = cabinY - 2;
+        assertFalse(shipBoard.isExposed(col, NORTH));
     }
 
     @Test
-    @DisplayName("Test: countExposed is 0 on empty board")
+    @DisplayName("Test: countExposed is 4 on empty board due to the MainCabin")
     void testCountExposed() {
-        assertEquals(0, shipBoard.countExposed());
+        assertEquals(4, shipBoard.countExposed());
+    }
+
+    @Test
+    @DisplayName("Test: countExposed calculates the correct number of exposed connectors including MainCabin")
+    void testCountExposedWithComponents() {
+        // Prima di aggiungere qualsiasi componente, controlliamo quanti connettori esposti ha la MainCabin
+        // La MainCabin ha connettori UNIVERSAL in tutte le direzioni
+        // All'inizio ogni lato della MainCabin è esposto (ha celle vuote adiacenti)
+
+        // Calcolo manuale: la MainCabin ha 4 lati con connettori UNIVERSAL tutti esposti
+        int expectedInitialExposed = 4;
+        assertEquals(expectedInitialExposed, shipBoard.countExposed(),
+                "La MainCabin dovrebbe avere 4 connettori esposti all'inizio");
+
+        // Ora aggiungiamo alcuni componenti intorno alla MainCabin
+
+        // Creiamo un componente C1 con connettore SINGLE a SUD
+        // e lo posizionamo a NORD della MainCabin
+        Map<Direction, ConnectorType> c1Connectors = createCustomConnectors(EMPTY, SINGLE, EMPTY, EMPTY);
+        Cabin c1 = new Cabin(c1Connectors);
+        shipBoard.shipMatrix[cabinX-1][cabinY] = c1;
+
+        // Situazione attuale:
+        //    C1 (EMPTY a NORD, SINGLE a SUD)
+        //    |
+        // MainCabin (UNIVERSAL in tutte le direzioni)
+
+        // Dopo aver posizionato C1 a NORD della MainCabin:
+        // - Il connettore NORD della MainCabin non è più esposto (collegato a C1)
+        // - I connettori EST, SUD e OVEST della MainCabin sono ancora esposti
+        // - C1 ha un connettore SINGLE a SUD collegato alla MainCabin (non esposto)
+        // - C1 ha connettori EMPTY nelle altre direzioni (non contano come esposti)
+
+        // Quindi ora abbiamo 3 connettori esposti (EST, SUD, OVEST della MainCabin)
+        int expectedExposedAfterC1 = 3;
+        assertEquals(expectedExposedAfterC1, shipBoard.countExposed(),
+                "Dopo aver posizionato C1 a NORD, dovrebbero esserci 3 connettori esposti");
+
+        // Aggiungiamo C2 a EST della MainCabin con connettori SINGLE a OVEST e NORD
+        Map<Direction, ConnectorType> c2Connectors = createCustomConnectors(SINGLE, EMPTY, EMPTY, SINGLE);
+        Cabin c2 = new Cabin(c2Connectors);
+        shipBoard.shipMatrix[cabinX][cabinY+1] = c2;
+
+        // Situazione attuale:
+        //    C1 (EMPTY a NORD, SINGLE a SUD)
+        //    |
+        // MainCabin (UNIVERSAL in tutte le direzioni) -- C2 (SINGLE a OVEST, SINGLE a NORD)
+
+        // Dopo aver posizionato C2 a EST della MainCabin:
+        // - Il connettore EST della MainCabin non è più esposto (collegato a C2)
+        // - I connettori SUD e OVEST della MainCabin sono ancora esposti
+        // - C2 ha un connettore SINGLE a OVEST collegato alla MainCabin (non esposto)
+        // - C2 ha un connettore SINGLE a NORD che è esposto (non c'è nulla in quella posizione)
+
+        // Quindi ora abbiamo 3 connettori esposti (SUD e OVEST della MainCabin + NORD di C2)
+        int expectedExposedAfterC2 = 3;
+        assertEquals(expectedExposedAfterC2, shipBoard.countExposed(),
+                "Dopo aver posizionato C2 a EST, dovrebbero esserci 3 connettori esposti");
+
+        // Aggiungiamo C3 a SUD della MainCabin con connettori DOUBLE in tutte le direzioni
+        Map<Direction, ConnectorType> c3Connectors = createCustomConnectors(DOUBLE, DOUBLE, DOUBLE, DOUBLE);
+        Cabin c3 = new Cabin(c3Connectors);
+        shipBoard.shipMatrix[cabinX+1][cabinY] = c3;
+
+        // Situazione attuale:
+        //    C1 (EMPTY a NORD, SINGLE a SUD)
+        //    |
+        // MainCabin (UNIVERSAL in tutte le direzioni) -- C2 (SINGLE a OVEST, SINGLE a NORD)
+        //    |
+        //    C3 (DOUBLE in tutte le direzioni)
+
+        // Dopo aver posizionato C3 a SUD della MainCabin:
+        // - Il connettore SUD della MainCabin non è più esposto (collegato a C3)
+        // - Il connettore OVEST della MainCabin è ancora esposto
+        // - C3 ha connettori DOUBLE a EST, SUD e OVEST che sono tutti esposti
+
+        // Quindi ora abbiamo 4 connettori esposti (OVEST della MainCabin + NORD di C2 + EST, SUD, OVEST di C3)
+        int expectedExposedAfterC3 = 5;
+        assertEquals(expectedExposedAfterC3, shipBoard.countExposed(),
+                "Dopo aver posizionato C3 a SUD, dovrebbero esserci 5 connettori esposti");
+
+        // Aggiungiamo C4 a OVEST della MainCabin con connettori SINGLE in tutte le direzioni
+        Map<Direction, ConnectorType> c4Connectors = createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE);
+        Cabin c4 = new Cabin(c4Connectors);
+        shipBoard.shipMatrix[cabinX][cabinY-1] = c4;
+
+        // Situazione finale:
+        //              C1 (EMPTY a NORD, SINGLE a SUD)
+        //              |
+        // C4 (SINGLE ovunque) -- MainCabin (UNIVERSAL in tutte le direzioni) -- C2 (SINGLE a OVEST, SINGLE a NORD)
+        //              |
+        //              C3 (DOUBLE in tutte le direzioni)
+
+        // Dopo aver posizionato C4 a OVEST della MainCabin:
+        // - Tutti i connettori della MainCabin sono collegati (nessuno esposto)
+        // - C4 ha connettori SINGLE a NORD, SUD e OVEST che sono tutti esposti
+
+        // Quindi ora abbiamo 7 connettori esposti (NORD di C2 + EST, SUD, OVEST di C3 + NORD, SUD, OVEST di C4)
+        int expectedExposedFinal = 7;
+        assertEquals(expectedExposedFinal, shipBoard.countExposed(),
+                "Nella configurazione finale, dovrebbero esserci 7 connettori esposti");
     }
 
     @Test
@@ -317,13 +554,13 @@ public class ShipBoardTest {
         Cabin cabin3 = new Cabin(createSimpleConnectors());
         cabin3.getInhabitants().add(CrewMember.HUMAN);
 
+        // Place cabins at positions relative to MainCabin
         shipBoard.focusedComponent = cabin1;
-        shipBoard.placeComponentWithFocus(7, 8);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
         shipBoard.focusedComponent = cabin2;
-        shipBoard.placeComponentWithFocus(6, 7);
+        shipBoard.placeComponentWithFocus(cabinX - 1, cabinY);
         shipBoard.focusedComponent = cabin3;
-        shipBoard.placeComponentWithFocus(7, 9);
-
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
 
         List<CrewMember> members = shipBoard.getCrewMembers();
         assertEquals(3, members.size());
@@ -340,13 +577,13 @@ public class ShipBoardTest {
 
         Cabin c3 = new Cabin(createSimpleConnectors());
 
-
+        // Place cabins at positions relative to MainCabin
         shipBoard.focusedComponent = c1;
-        shipBoard.placeComponentWithFocus(7, 8);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
         shipBoard.focusedComponent = c2;
-        shipBoard.placeComponentWithFocus(7, 9);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
         shipBoard.focusedComponent = c3;
-        shipBoard.placeComponentWithFocus(7, 10);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 3);
 
         Set<Cabin> neighbors = shipBoard.cabinWithNeighbors();
         assertEquals(2, neighbors.size());
@@ -372,15 +609,15 @@ public class ShipBoardTest {
     @Test
     @DisplayName("Test: getDoubleCannons returns the DoubleCannon objects")
     void testGetDoubleCannons() {
-        // Normal cannon
+        // Normal cannon at position relative to MainCabin
         Cannon c = new Cannon(createSimpleConnectors());
         shipBoard.focusedComponent = c;
-        shipBoard.placeComponentWithFocus(7, 8);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
 
-        // Double cannon
+        // Double cannon at position relative to MainCabin
         DoubleCannon dc = new DoubleCannon(createSimpleConnectors());
         shipBoard.focusedComponent = dc;
-        shipBoard.placeComponentWithFocus(7, 9);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
 
         List<DoubleCannon> doubles = shipBoard.getDoubleCannons();
         assertEquals(1, doubles.size());
@@ -390,13 +627,14 @@ public class ShipBoardTest {
     @Test
     @DisplayName("Test: getAllCannons returns both single and double cannons")
     void testGetAllCannons() {
+        // Place cannons at positions relative to MainCabin
         Cannon c = new Cannon(createSimpleConnectors());
         DoubleCannon dc = new DoubleCannon(createSimpleConnectors());
 
         shipBoard.focusedComponent = c;
-        shipBoard.placeComponentWithFocus(7, 8);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
         shipBoard.focusedComponent = dc;
-        shipBoard.placeComponentWithFocus(7, 9);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
 
         List<Cannon> cannons = shipBoard.getAllCannons();
         assertEquals(2, cannons.size());
@@ -407,13 +645,14 @@ public class ShipBoardTest {
     @Test
     @DisplayName("Test: getAllEngines returns Engine and DoubleEngine")
     void testGetAllEngines() {
+        // Place engines at positions relative to MainCabin
         Engine e = new Engine(createSimpleConnectors());
         DoubleEngine de = new DoubleEngine(createSimpleConnectors());
 
         shipBoard.focusedComponent = e;
-        shipBoard.placeComponentWithFocus(7, 8);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
         shipBoard.focusedComponent = de;
-        shipBoard.placeComponentWithFocus(7, 9);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
 
         List<Engine> engines = shipBoard.getAllEngines();
         assertEquals(2, engines.size());
@@ -424,13 +663,14 @@ public class ShipBoardTest {
     @Test
     @DisplayName("Test: getStorages returns all Storage components")
     void testGetStorages() {
+        // Place storages at positions relative to MainCabin
         Storage s1 = new StandardStorage(createSimpleConnectors(), 3);
         Storage s2 = new SpecialStorage(createSimpleConnectors(), 2);
 
         shipBoard.focusedComponent = s1;
-        shipBoard.placeComponentWithFocus(7, 8);
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY);
         shipBoard.focusedComponent = s2;
-        shipBoard.placeComponentWithFocus(7, 9);
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY + 1);
 
         List<Storage> storages = shipBoard.getStorages();
         assertEquals(2, storages.size());
@@ -441,13 +681,14 @@ public class ShipBoardTest {
     @Test
     @DisplayName("Test: getBatteryBoxes returns BatteryBox components")
     void testGetBatteryBoxes() {
+        // Place battery boxes at positions relative to MainCabin
         BatteryBox b1 = new BatteryBox(createSimpleConnectors(), 3);
         BatteryBox b2 = new BatteryBox(createSimpleConnectors(), 2);
 
         shipBoard.focusedComponent = b1;
-        shipBoard.placeComponentWithFocus(7, 8);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
         shipBoard.focusedComponent = b2;
-        shipBoard.placeComponentWithFocus(7, 9);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
 
         List<BatteryBox> boxes = shipBoard.getBatteryBoxes();
         assertEquals(2, boxes.size());
@@ -458,12 +699,13 @@ public class ShipBoardTest {
     @Test
     @DisplayName("Test: isDirectionCoveredByShield returns true if any Shield covers that direction")
     void testIsDirectionCoveredByShield() {
+        // Place shield at position relative to MainCabin
         Shield shield = new Shield(createSimpleConnectors());
         shipBoard.focusedComponent = shield;
-        shipBoard.placeComponentWithFocus(7, 8);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
 
-        assertTrue(shipBoard.isDirectionCoveredByShield(Direction.NORTH));
-        assertFalse(shipBoard.isDirectionCoveredByShield(Direction.SOUTH));
+        assertTrue(shipBoard.isDirectionCoveredByShield(NORTH));
+        assertFalse(shipBoard.isDirectionCoveredByShield(SOUTH));
     }
 
     @Test
@@ -513,89 +755,241 @@ public class ShipBoardTest {
     @Test
     @DisplayName("Test: identifyShipParts does not crash and returns BFS partitions")
     void testIdentifyShipParts() {
+        // Place cabins at positions relative to MainCabin
         Cabin c1 = new Cabin(createSimpleConnectors());
         shipBoard.focusedComponent = c1;
-        shipBoard.placeComponentWithFocus(6, 7);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
+
         Cabin c2 = new Cabin(createSimpleConnectors());
         shipBoard.focusedComponent = c2;
-        shipBoard.placeComponentWithFocus(6, 6);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY - 1);
+
         Cabin c3 = new Cabin(createSimpleConnectors());
         shipBoard.focusedComponent = c3;
-        shipBoard.placeComponentWithFocus(7, 6);
+        shipBoard.placeComponentWithFocus(cabinX - 1, cabinY - 1);
+
         Cabin c4 = new Cabin(createSimpleConnectors());
         shipBoard.focusedComponent = c4;
-        shipBoard.placeComponentWithFocus(8, 7);
+        shipBoard.placeComponentWithFocus(cabinX - 1, cabinY - 2);
+
         Cabin c5 = new Cabin(createSimpleConnectors());
         shipBoard.focusedComponent = c5;
-        shipBoard.placeComponentWithFocus(8, 8);
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY - 1);
+
         Cabin c6 = new Cabin(createSimpleConnectors());
         shipBoard.focusedComponent = c6;
-        shipBoard.placeComponentWithFocus(8, 9);
+        shipBoard.placeComponentWithFocus(cabinX + 2, cabinY - 1);
+
         Cabin c7 = new Cabin(createSimpleConnectors());
         shipBoard.focusedComponent = c7;
-        shipBoard.placeComponentWithFocus(9, 8);
+        shipBoard.placeComponentWithFocus(cabinX + 2, cabinY - 2);
 
+        // Test with position not adjacent to any component
+        int testX = cabinX + 1;
+        int testY = cabinY + 2;
 
         assertDoesNotThrow(() -> {
-            List<Set<Coordinates>> parts = shipBoard.identifyShipParts(4, 4);
+            Set<Set<Coordinates>> parts = shipBoard.identifyShipParts(testX, testY);
         });
+
+        // Test with position between the two groups
+        int betweenX = cabinX;
+        int betweenY = cabinY - 1;
+
         assertEquals(
-                List.of(
+                Set.of(
                         Set.of(
-                                new Coordinates(6, 7),
-                                new Coordinates(6, 6),
-                                new Coordinates(7, 6)
+                                new Coordinates(cabinX, cabinY),
+                                new Coordinates(cabinX, cabinY + 1)
                         ), Set.of(
-                                new Coordinates(8, 7),
-                                new Coordinates(8, 8),
-                                new Coordinates(8, 9),
-                                new Coordinates(9, 8)
+                                new Coordinates(cabinX - 1, cabinY - 1),
+                                new Coordinates(cabinX - 1, cabinY - 2)
+                        ), Set.of(
+                                new Coordinates(cabinX + 1, cabinY - 1),
+                                new Coordinates(cabinX + 2, cabinY - 1),
+                                new Coordinates(cabinX + 2, cabinY - 2)
                         )
                 ),
-                shipBoard.identifyShipParts(7, 7));
+                shipBoard.identifyShipParts(betweenX, betweenY));
     }
 
     @Test
     @DisplayName("Test: removeShipPart removes all components in the set")
     void testRemoveShipPart() {
-        Cabin c1 = new Cabin(createSimpleConnectors());
+        /*
+         * Costruiremo una struttura che rispetta le posizioni valide:
+         *
+         *          c1(6,7) --- c2(6,8)
+         *          |
+         * MainCabin(6,6)
+         *          |
+         *          c3(7,6) --- c4(7,7)
+         *                       |
+         *                      c5(8,7)
+         *
+         * E poi rimuoveremo c3, c4 e c5 verificando che siano stati rimossi correttamente
+         */
+
+        // Verifichiamo innanzitutto che le posizioni scelte siano valide
+        assertTrue(shipBoard.isValidPosition(cabinX, cabinY + 1));  // (6,7)
+        assertTrue(shipBoard.isValidPosition(cabinX, cabinY + 2));  // (6,8)
+        assertTrue(shipBoard.isValidPosition(cabinX + 1, cabinY));  // (7,6)
+        assertTrue(shipBoard.isValidPosition(cabinX + 1, cabinY + 1)); // (7,7)
+        assertTrue(shipBoard.isValidPosition(cabinX + 2, cabinY + 1)); // (8,7)
+
+        // Creiamo i componenti con connettori semplici
+        Map<Direction, ConnectorType> connectors = createSimpleConnectors();
+
+        // Posiziono c1 a EST della MainCabin (6,7)
+        Cabin c1 = new Cabin(connectors);
         shipBoard.focusedComponent = c1;
-        shipBoard.placeComponentWithFocus(6, 7);
-        Cabin c2 = new Cabin(createSimpleConnectors());
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
+
+        // Posiziono c2 a EST di c1 (6,8)
+        Cabin c2 = new Cabin(connectors);
         shipBoard.focusedComponent = c2;
-        shipBoard.placeComponentWithFocus(6, 6);
-        Cabin c3 = new Cabin(createSimpleConnectors());
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
+
+        // Posiziono c3 a SUD della MainCabin (7,6)
+        Cabin c3 = new Cabin(connectors);
         shipBoard.focusedComponent = c3;
-        shipBoard.placeComponentWithFocus(7, 6);
-        Cabin c4 = new Cabin(createSimpleConnectors());
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY);
+
+        // Posiziono c4 a EST di c3 (7,7)
+        Cabin c4 = new Cabin(connectors);
         shipBoard.focusedComponent = c4;
-        shipBoard.placeComponentWithFocus(8, 7);
-        Cabin c5 = new Cabin(createSimpleConnectors());
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY + 1);
+
+        // Posiziono c5 a SUD di c4 (8,7)
+        Cabin c5 = new Cabin(connectors);
         shipBoard.focusedComponent = c5;
-        shipBoard.placeComponentWithFocus(8, 8);
-        Cabin c6 = new Cabin(createSimpleConnectors());
-        shipBoard.focusedComponent = c6;
-        shipBoard.placeComponentWithFocus(8, 9);
-        Cabin c7 = new Cabin(createSimpleConnectors());
-        shipBoard.focusedComponent = c7;
-        shipBoard.placeComponentWithFocus(9, 8);
+        shipBoard.placeComponentWithFocus(cabinX + 2, cabinY + 1);
 
+        // Verifichiamo che tutti i componenti siano stati posizionati correttamente
+        assertEquals(c1, shipBoard.shipMatrix[cabinX][cabinY + 1]);
+        assertEquals(c2, shipBoard.shipMatrix[cabinX][cabinY + 2]);
+        assertEquals(c3, shipBoard.shipMatrix[cabinX + 1][cabinY]);
+        assertEquals(c4, shipBoard.shipMatrix[cabinX + 1][cabinY + 1]);
+        assertEquals(c5, shipBoard.shipMatrix[cabinX + 2][cabinY + 1]);
+
+        // Creiamo il set di coordinate che vogliamo rimuovere (c3, c4, c5)
         Set<Coordinates> toRemove = new HashSet<>();
-        toRemove.add(new Coordinates(8, 7));
-        toRemove.add(new Coordinates(8, 8));
-        toRemove.add(new Coordinates(8, 9));
-        toRemove.add(new Coordinates(9, 8));
+        toRemove.add(new Coordinates(cabinX + 1, cabinY));      // c3
+        toRemove.add(new Coordinates(cabinX + 1, cabinY + 1));  // c4
+        toRemove.add(new Coordinates(cabinX + 2, cabinY + 1));  // c5
 
+        // Rimuoviamo la parte specifica della nave
         shipBoard.removeShipPart(toRemove);
 
-        assertNull(shipBoard.shipMatrix[8][7]);
-        assertNull(shipBoard.shipMatrix[8][8]);
-        assertNull(shipBoard.shipMatrix[8][9]);
-        assertNull(shipBoard.shipMatrix[9][8]);
-        // Must appear in notActiveComponents
+        // Verifichiamo che le celle siano ora vuote
+        assertNull(shipBoard.shipMatrix[cabinX + 1][cabinY]);      // c3
+        assertNull(shipBoard.shipMatrix[cabinX + 1][cabinY + 1]);  // c4
+        assertNull(shipBoard.shipMatrix[cabinX + 2][cabinY + 1]);  // c5
+
+        // Verifichiamo che i componenti rimossi siano stati aggiunti a notActiveComponents
+        assertTrue(shipBoard.notActiveComponents.contains(c3));
         assertTrue(shipBoard.notActiveComponents.contains(c4));
         assertTrue(shipBoard.notActiveComponents.contains(c5));
-        assertTrue(shipBoard.notActiveComponents.contains(c6));
-        assertTrue(shipBoard.notActiveComponents.contains(c7));
+
+        // Le altre celle non dovrebbero essere state modificate
+        assertNotNull(shipBoard.shipMatrix[cabinX][cabinY]);     // MainCabin
+        assertNotNull(shipBoard.shipMatrix[cabinX][cabinY + 1]); // c1
+        assertNotNull(shipBoard.shipMatrix[cabinX][cabinY + 2]); // c2
+        assertEquals(c1, shipBoard.shipMatrix[cabinX][cabinY + 1]);
+        assertEquals(c2, shipBoard.shipMatrix[cabinX][cabinY + 2]);
+    }
+
+    @Test
+    @DisplayName("Test: mismatch tra connettori SINGLE e DOUBLE")
+    void testSingleDoubleConnectorMismatch() {
+        // Posiziono un componente con connettori DOUBLE accanto alla cabina principale
+        Map<Direction, ConnectorType> doubleConnectors = createCustomConnectors(DOUBLE, DOUBLE, DOUBLE, DOUBLE);
+        Cabin cabin = new Cabin(doubleConnectors);
+
+        int adjacentX = cabinX;
+        int adjacentY = cabinY + 1;
+
+        shipBoard.focusedComponent = cabin;
+        shipBoard.placeComponentWithFocus(adjacentX, adjacentY);
+
+        // Ora provo a collegare un altro componente con connettori SINGLE
+        Map<Direction, ConnectorType> singleConnectors = createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE);
+        Cabin cabin2 = new Cabin(singleConnectors);
+
+        shipBoard.focusedComponent = cabin2;
+
+        // Il posizionamento dovrebbe essere possibile ma il componente sarà marcato come errato
+        shipBoard.placeComponentWithFocus(adjacentX, adjacentY + 1);
+
+        // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
+        List<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+        assertTrue(incorrectCoords.contains(new Coordinates(adjacentX, adjacentY + 1)));
+    }
+
+    @Test
+    @DisplayName("Test: posizionamento in una cella valida ma non adiacente alla nave")
+    void testPlacementInNonAdjacentValidCell() {
+        Map<Direction, ConnectorType> connectors = createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE);
+        Cabin cabin = new Cabin(connectors);
+
+        shipBoard.focusedComponent = cabin;
+
+        // Scelgo un punto della griglia lontano dalla cabina principale
+        int farX = cabinX + 1;
+        int farY = cabinY - 2;
+
+        // Verifico che la posizione sia valida ma non adiacente alla nave
+        assertTrue(shipBoard.isValidPosition(farX, farY));
+        assertFalse(shipBoard.isPositionConnectedToShip(farX, farY));
+
+        // Il posizionamento dovrebbe lanciare un'eccezione
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> shipBoard.placeComponentWithFocus(farX, farY));
+
+        assertEquals("Not connected to the ship", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test: posizionamento in una posizione già occupata")
+    void testPlacementInOccupiedPosition() {
+        // Uso direttamente la posizione della cabina principale
+        Map<Direction, ConnectorType> connectors = createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE);
+        Cabin cabin = new Cabin(connectors);
+
+        shipBoard.focusedComponent = cabin;
+
+        // Il posizionamento dovrebbe lanciare un'eccezione
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> shipBoard.placeComponentWithFocus(cabinX, cabinY));
+
+        assertEquals("Position already occupied", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test: verifica della compatibilità tra connettori")
+    void testAreConnectorsCompatible() {
+        // Per testare indirettamente, possiamo verificare che i connettori UNIVERSAL siano compatibili con tutto
+        Map<Direction, ConnectorType> universalConnectors = createCustomConnectors(UNIVERSAL, UNIVERSAL, UNIVERSAL, UNIVERSAL);
+        Map<Direction, ConnectorType> singleConnectors = createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE);
+
+        Cabin universalCabin = new Cabin(universalConnectors);
+        Cabin singleCabin = new Cabin(singleConnectors);
+
+        // Posiziono la cabina universal vicino alla main cabin
+        int adjacentX = cabinX;
+        int adjacentY = cabinY + 1;
+
+        shipBoard.focusedComponent = universalCabin;
+        shipBoard.placeComponentWithFocus(adjacentX, adjacentY);
+
+        // Posiziono la cabina single vicino alla universal
+        shipBoard.focusedComponent = singleCabin;
+
+        // Il posizionamento dovrebbe avvenire senza errori
+        assertDoesNotThrow(() -> shipBoard.placeComponentWithFocus(adjacentX, adjacentY + 1));
+
+        // E il componente non dovrebbe essere marcato come errato
+        List<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+        assertFalse(incorrectCoords.contains(new Coordinates(adjacentX, adjacentY + 1)));
     }
 }

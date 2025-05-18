@@ -1376,8 +1376,18 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case PLACE_FOCUSED_COMPONENT:
-                    int row = Integer.parseInt(input.trim().split("\\s+")[0]);
-                    int column = Integer.parseInt(input.trim().split("\\s+")[1]);
+                    String[] coordinates = input.trim().split("\\s+");
+
+                    // Verifica che ci siano esattamente due numeri
+                    if (coordinates.length != 2) {
+                        showMessage("Invalid input. Please enter both row and column separated by space (e.g. '8 6').", ERROR);
+                        break;
+                    }
+
+                    // Prova a convertire le stringhe in numeri
+                    int row = Integer.parseInt(coordinates[0]);
+                    int column = Integer.parseInt(coordinates[1]);
+
                     clientController.placeFocusedComponent(row, column);
                     break;
 

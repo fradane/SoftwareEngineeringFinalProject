@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
-import java.util.EnumMap;
 import java.util.Map;
 
 /**
@@ -17,7 +16,7 @@ public class Engine extends Component implements Rotatable {
      * The direction in which the engine provides power.
      * Defaults to {@code Direction.SOUTH}.
      */
-    private Direction powerDirection = Direction.SOUTH;
+    private Direction fireDirection = Direction.SOUTH;
 
     /**
      * Default constructor for {@code Engine}.
@@ -57,8 +56,8 @@ public class Engine extends Component implements Rotatable {
             | %s     %s |
             |    %s    |
             +---------+
-            powerDirection: %s
-            """, north, west, east, south, powerDirection);
+            fireDirection: %s
+            """, north, west, east, south, fireDirection);
     }
 
     /**
@@ -66,16 +65,16 @@ public class Engine extends Component implements Rotatable {
      *
      * @return the current {@code Direction} of power output
      */
-    public Direction getPowerDirection() {
-        return powerDirection;
+    public Direction getFireDirection() {
+        return fireDirection;
     }
 
     /**
      * Rotates the power direction based on the engine's rotation.
      */
-   /*public void rotatePowerDirection() {
+   /*public void rotateFireDirection() {
         for (int i = 0; i < getRotation() % 4; i++) {
-            this.powerDirection = shiftDirection(this.powerDirection);
+            this.fireDirection = shiftDirection(this.fireDirection);
         }
     }*/
 
@@ -85,7 +84,7 @@ public class Engine extends Component implements Rotatable {
     @Override
     public void rotate() {
         super.rotate();
-        powerDirection = shiftDirection(powerDirection);
+        fireDirection = shiftDirection(fireDirection);
     }
 
     @Override
@@ -97,7 +96,7 @@ public class Engine extends Component implements Rotatable {
     @Override
     @JsonIgnore
     public String getMainAttribute() {
-        return switch (powerDirection) {
+        return switch (fireDirection) {
             case NORTH -> "N";
             case SOUTH -> "S";
             case WEST -> "W";

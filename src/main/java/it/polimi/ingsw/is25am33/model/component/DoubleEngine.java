@@ -53,7 +53,7 @@ public class DoubleEngine extends Engine implements Activable {
             |    %s    |
             +---------+
             fireDirection: %s
-            """, north, west, east, south, getPowerDirection());
+            """, north, west, east, south, getFireDirection());
     }
 
     public static void main(String[] args) {

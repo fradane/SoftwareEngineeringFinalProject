@@ -91,7 +91,7 @@ public interface ShipBoardClient {
      * @param componentToPlace The engine to check
      * @return true if the direction is invalid, otherwise false
      */
-    boolean isEngineDirectionWrong(Engine componentToPlace);
+    boolean isEngineDirectionWrong(Component componentToPlace);
 
     /**
      * Verifies whether placing a component at the specified coordinates would be adjacent
@@ -124,6 +124,8 @@ public interface ShipBoardClient {
      */
     boolean areConnectorsWellConnected(Component componentToPlace, int x, int y);
 
+    boolean isAimingAComponent(Component componentToPlace, int x, int y);
+
     /**
      * Checks whether a cannon in an adjacent cell is pointed at the cell
      * where the new component is being placed
@@ -154,7 +156,7 @@ public interface ShipBoardClient {
      * @return A list of sets, where each set contains the coordinates of components in a disconnected part
      * @throws IllegalArgumentException If there is no component at the specified position
      */
-    List<Set<Coordinates>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException;
+    Set<Set<Coordinates>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException;
 
     /**
      * Determines whether there is a cannon in the specified row or column that is pointed
@@ -351,7 +353,7 @@ public interface ShipBoardClient {
      * @param y The y-coordinate
      * @return A list of sets, where each set contains the coordinates of components in a connected part
      */
-    List<Set<Coordinates>> identifyShipParts(int x, int y);
+    Set<Set<Coordinates>> identifyShipParts(int x, int y);
 
     /**
      * Performs a breadth-first search (BFS) to gather all connected cells

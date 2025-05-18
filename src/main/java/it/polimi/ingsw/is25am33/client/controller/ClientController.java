@@ -460,8 +460,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         serverController.notifyHourglassEnded(nickname);
         if (clientModel.getHourglass().getFlipsLeft() == 0) {
             //TODO
-            clientModel.setGameState(GameState.CHECK_SHIPBOARD);
-            view.showNewGameState();
+            //clientModel.setGameState(GameState.CHECK_SHIPBOARD);
+            //view.showNewGameState();
         }
     }
 
@@ -523,7 +523,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         } catch (IOException e) {
             handleRemoteException(e);
         } catch (IllegalArgumentException e) {
-            view.showMessage("Invalid coordinates\n", STANDARD);
+            view.showMessage("Invalid coordinates: " + e.getMessage() + "\n", ERROR);
         }
     }
 

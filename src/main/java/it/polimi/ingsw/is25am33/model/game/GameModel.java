@@ -56,7 +56,7 @@ public class GameModel {
         deck = new Deck();
         isStarted = false;
         componentTable = new ComponentTable();
-        flipsLeft = isTestFlight ? 1 : 3;
+        flipsLeft = isTestFlight ? 1 : 2;
     }
 
     /**

@@ -56,13 +56,14 @@ public class Hourglass {
             scheduler.shutdown();
         }
 
+        flipsLeft--;
+
         view.notifyHourglassStarted(flipsLeft, nickname);
 
         scheduler = Executors.newScheduledThreadPool(1);
 
         isRunning = true;
-        flipsLeft--;
-        timeLeft = 10;
+        timeLeft = 1; //TODO ricambiare a 10 secondi
         scheduler.scheduleAtFixedRate(() -> {
 
             if (timeLeft > 0) {
