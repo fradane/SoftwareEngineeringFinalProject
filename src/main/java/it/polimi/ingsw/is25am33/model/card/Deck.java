@@ -293,7 +293,9 @@ public class Deck {
      * @return A list of WarField objects.
      */
     private static List<WarField> loadWarFieldFromJson() {
-        return loadFromJson("WarField.json", WarField.class);
+        List<WarField> warFields = new ArrayList<>(loadFromJson("WarField.json", WarField.class));
+        warFields.forEach(WarField::convertIdsToShots);
+        return warFields;
     }
 
     public List<AdventureCard> getAllCards() {

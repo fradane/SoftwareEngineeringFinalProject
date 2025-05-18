@@ -167,7 +167,7 @@ public class MeteoriteStorm extends AdventureCard {
     public String toString() {
         // Box sinistro con nome e numero meteoriti
         String firstString = String.format(""" 
-       %s 
+       %s
        ┌────────────────────────────┐
        │       MeteoriteStorm       │
        ├────────────────────────────┤

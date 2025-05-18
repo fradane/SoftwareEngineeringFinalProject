@@ -129,7 +129,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         │ Steps Back:        x%-2d     │
         │ Rewards:           x%-2d     │
         └────────────────────────────┘
-        """, imageName, stepsBack, reward != null ? reward.size() : 0);
+        """, imageName, requiredCrewMembers, stepsBack, reward != null ? reward.size() : 0);
 
         StringBuilder secondString = new StringBuilder("   ");
         if (reward != null && !reward.isEmpty()) {

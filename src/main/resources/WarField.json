@@ -2,18 +2,18 @@
   {
     "imageName": "GT-cards_I_IT_0116.jpg",
     "level": 1,
-    "minimumCategories": ["CREW", "ENGINE", "CANNON"],
+    "minimumCategories": ["EVALUATE_CREW_MEMBERS", "EVALUATE_ENGINE_POWER", "EVALUATE_CANNON_POWER"],
     "stepsBack": -3,
     "crewMalus": 2,
-    "shots": ["SOUTH", "SOUTH"]
+    "shots": ["small_south", "big_south"]
   },
 
   {
     "imageName": "GT-cards_II_IT_0116.jpg",
     "level": 2,
-    "minimumCategories": ["CANNON", "ENGINE", "CREW"],
+    "minimumCategories": ["EVALUATE_CANNON_POWER", "EVALUATE_ENGINE_POWER", "EVALUATE_CREW_MEMBERS"],
     "stepsBack": -4,
     "crewMalus": 3,
-    "shots": ["NORTH", "EAST", "WEST", "SOUTH"]
+    "shots": ["small_north", "small_west", "small_east", "big_south"]
   }
 ]

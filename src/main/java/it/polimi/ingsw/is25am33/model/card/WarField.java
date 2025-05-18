@@ -1,23 +1,21 @@
 package it.polimi.ingsw.is25am33.model.card;
 
-import it.polimi.ingsw.is25am33.model.enumFiles.Category;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
+import it.polimi.ingsw.is25am33.model.enumFiles.WarFieldCategories;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WarField extends AdventureCard implements PlayerMover {
 
-    private List<Category> minimunCategories;
     private int stepsBack;
     private int crewMalus;
     private List<Shot> shots;
-
-    public WarField(List<Category> minimunCategories, List<Shot> shots) {
-        this.minimunCategories = minimunCategories;
-        this.shots = shots;
-    }
+    private List<String> shotIDs;
+    private static final List<CardState> cardStates = List.of(CardState.DANGEROUS_ATTACK, CardState.REMOVE_CREW_MEMBERS, CardState.HANDLE_CUBES_MALUS);
+    private List<WarFieldCategories> categories = new ArrayList<>();
 
     public WarField() {
         this.cardName = this.getClass().getSimpleName();
@@ -33,8 +31,49 @@ public class WarField extends AdventureCard implements PlayerMover {
         return;
     }
 
-    public void setMinimunCategories(List<Category> minimunCategories) {
-        this.minimunCategories = minimunCategories;
+    public void convertIdsToShots() {
+
+        shots = shotIDs.stream()
+                .map(id -> {
+                    try {
+                        return shotCreator.get(id).call();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).toList();
+
+    }
+
+    public void setMinimunCategories(List<WarFieldCategories> minimunCategories) {
+        this.categories = minimunCategories;
+    }
+
+    public List<String> getShotIDs() {
+        return shotIDs;
+    }
+
+    public void setShotIDs(List<String> shotIDs) {
+        this.shotIDs = shotIDs;
+    }
+
+    public int getStepsBack() {
+        return stepsBack;
+    }
+
+    public int getCrewMalus() {
+        return crewMalus;
+    }
+
+    public List<Shot> getShots() {
+        return shots;
+    }
+
+    public List<WarFieldCategories> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<WarFieldCategories> categories) {
+        this.categories = categories;
     }
 
     public void setStepsBack(int stepsBack) {
@@ -50,36 +89,9 @@ public class WarField extends AdventureCard implements PlayerMover {
     }
 
     // TODO
-//    public void effect(GameModel gameModel) {
-//
-//        FlyingBoard flyingBoard = gameModel.getFlyingBoard();
-//
-//        minimunCategories.forEach(cat -> {
-//            Player minPlayer = cat.getMinimumPlayer(flyingBoard.getCurrentRanking());
-//
-//            switch (minimunCategories.indexOf(cat)) {
-//                case 0:
-//                    movePlayer(gameModel.getFlyingBoard, minPlayer, stepsBack);
-//                    break;
-//
-//                case 1:
-//                    minPlayer.getPersonalBoard().removeCrewMembers(crewMalus);
-//                    break;
-//
-//                case 2:
-//
-//                    for(Shot s : shots) {
-//
-//                        s.setCoordinates(GameModel.throwDices());
-//                        minPlayer.getPersonalBoard().handleDangerousObj(s);
-//
-//                    }
-//
-//                    break;
-//            }
-//
-//        });
-//
-//
-//    }
+
+
+
+
+
 }
