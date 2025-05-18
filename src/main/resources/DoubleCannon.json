@@ -6,7 +6,8 @@
       "EAST": "EMPTY",
       "SOUTH": "SINGLE",
       "WEST": "EMPTY"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web126"
   },
   {
     "type": "DoubleCannon",
@@ -15,7 +16,8 @@
       "EAST": "EMPTY",
       "SOUTH": "DOUBLE",
       "WEST": "EMPTY"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web127"
   },
   {
     "type": "DoubleCannon",
@@ -24,7 +26,8 @@
       "EAST": "SINGLE",
       "SOUTH": "UNIVERSAL",
       "WEST": "EMPTY"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web128"
   },
   {
     "type": "DoubleCannon",
@@ -33,7 +36,8 @@
       "EAST": "UNIVERSAL",
       "SOUTH": "EMPTY",
       "WEST": "EMPTY"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web129"
   },
   {
     "type": "DoubleCannon",
@@ -42,7 +46,8 @@
       "EAST": "UNIVERSAL",
       "SOUTH": "DOUBLE",
       "WEST": "EMPTY"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web130"
   },
   {
     "type": "DoubleCannon",
@@ -51,7 +56,8 @@
       "EAST": "SINGLE",
       "SOUTH": "DOUBLE",
       "WEST": "SINGLE"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web131"
   },
   {
     "type": "DoubleCannon",
@@ -60,7 +66,8 @@
       "EAST": "DOUBLE",
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web132"
   },
   {
     "type": "DoubleCannon",
@@ -69,7 +76,8 @@
       "EAST": "EMPTY",
       "SOUTH": "UNIVERSAL",
       "WEST": "DOUBLE"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web133"
   },
   {
     "type": "DoubleCannon",
@@ -78,7 +86,8 @@
       "EAST": "DOUBLE",
       "SOUTH": "SINGLE",
       "WEST": "DOUBLE"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web134"
   },
   {
     "type": "DoubleCannon",
@@ -87,7 +96,8 @@
       "EAST": "EMPTY",
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web135"
   },
   {
     "type": "DoubleCannon",
@@ -96,6 +106,7 @@
       "EAST": "EMPTY",
       "SOUTH": "SINGLE",
       "WEST": "UNIVERSAL"
-    }
+    },
+    "imageName": "GT-new_tiles_16_for web136"
   }
 ]
