@@ -83,6 +83,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
         shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
+        this.gameContext = gameContext;
     }
 
     public void setPlayer(Player player) {
@@ -112,6 +113,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     }
 
     public void setFocusedComponent(Component focusedComponent)  {
+        this.focusedComponent = focusedComponent;
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyFocusedComponent(nicknameToNotify, player.getNickname(), focusedComponent);;
         });

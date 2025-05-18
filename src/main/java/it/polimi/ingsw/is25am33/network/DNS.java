@@ -9,6 +9,7 @@ import it.polimi.ingsw.is25am33.network.common.ConnectionManager;
 import it.polimi.ingsw.is25am33.network.rmi.RMIServerRunnable;
 import it.polimi.ingsw.is25am33.network.socket.SocketServerManager;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
             new Thread(() -> {
                 try {
                     controller.notifyGameInfos(nickname, getAvailableGames());
-                } catch (RemoteException e) {
+                } catch (IOException e) {
                     System.err.println("Remote Exception");
                 }
             }).start();
@@ -96,7 +97,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
                         try {
                             if (!gameControllers.containsKey(clientNickname))
                                 clientController.notifyGameInfos(clientNickname, availableGames);
-                        } catch (RemoteException e) {
+                        } catch (IOException e) {
                             System.err.println("Remote Exception");
                         }
                     });
@@ -135,7 +136,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
                         try {
                             if (!gameControllers.containsKey(clientNickname))
                                 clientController.notifyGameInfos(clientNickname, availableGames);
-                        } catch (RemoteException e) {
+                        } catch (IOException e) {
                             System.err.println("Remote Exception");
                         }
                     });

@@ -78,8 +78,8 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                     .forEach(nickname -> {
                         try {
                             clientControllers.get(nickname).notifyNewPlayerJoined(nickname, gameId, newPlayerNickname, color);
-                        } catch (RemoteException e) {
-                            throw new RuntimeException(e);
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     });
         });
@@ -92,7 +92,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 .forEach(nickname -> {
                     try {
                         clientControllers.get(nickname).notifyGameStarted(nickname, getGameInfo());
-                    } catch (RemoteException e) {
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 });
@@ -117,11 +117,10 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 dns.removeGame(getGameInfo().getGameId());
                 System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
             }
-
             dns.getConnectionManager().getClients().remove(nickname);
 
         } else {
-            // TODO: termina il gioco per tutti
+
         }
 
     }

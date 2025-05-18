@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.network.socket;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
+import it.polimi.ingsw.is25am33.client.controller.SocketClientManager;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
@@ -15,6 +16,7 @@ import it.polimi.ingsw.is25am33.network.DNS;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerSerializer;
 import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
+import javafx.print.Printer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -75,7 +77,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                         out.close();
                         socket.close();
                     } catch (final IOException e) {
-                        System.err.println(e.getMessage());
+                        e.printStackTrace();
                     }
                 });
             } catch (final IOException e) {
@@ -83,6 +85,10 @@ public class SocketServerManager implements Runnable, CallableOnClientController
             }
         }
         executor.shutdown();
+    }
+
+    public Map<String, PrintWriter> getWriters() {
+        return writers;
     }
 
     private void performAction(SocketMessage inMessage, PrintWriter out) throws IOException {
@@ -250,189 +256,217 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     }
 
-    @Override
-    public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException {
-        SocketMessage outMessage = new SocketMessage("server", "notifyGameInfos");
-        outMessage.setParamGameInfo(gameInfos);
-        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    public void checkWriterStatus(PrintWriter writer,String nickname) throws IOException{
+        if(writer.checkError()){
+            writers.remove(nickname);
+            throw new IOException("Writer is null");
+        }
+
     }
 
     @Override
-    public void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws RemoteException {
+    public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws IOException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyGameInfos");
+        outMessage.setParamGameInfo(gameInfos);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
+    }
+
+    @Override
+    public void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyNewPlayerJoined");
         outMessage.setParamGameId(gameId);
         outMessage.setParamString(newPlayerNickname);
         outMessage.setParamPlayerColor(color);
-
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws RemoteException{
+    public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyGameStarted");
         outMessage.setParamGameInfo(List.of(gameInfo));
-
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException {
+    public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyHourglassRestarted");
         outMessage.setParamInt(flipsLeft);
         outMessage.setParamString(nickname);
-
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyRemovalResult(String nicknameToNotify, boolean success) throws RemoteException {
+    public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws IOException {
 
     }
 
     @Override
-    public void notifyShipCorrect(String nicknameToNotify) throws RemoteException {
+    public void notifyRemovalResult(String nicknameToNotify, boolean success) throws IOException {
 
     }
 
     @Override
-    public void notifyGameState(String nickname, GameState gameState) throws RemoteException{
+    public void notifyShipCorrect(String nicknameToNotify) throws IOException {
+
+    }
+
+    @Override
+    public void notifyGameState(String nickname, GameState gameState) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyGameState");
         outMessage.setParamGameState(gameState);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
-    public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws RemoteException{
+    public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyDangerousObjAttack");
         outMessage.setParamDangerousObj(dangerousObj);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
-    public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname){
+    public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrPlayerChanged");
         outMessage.setParamString(nickname);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void notifyCurrAdventureCard(String nickname, String adventureCard) throws RemoteException{
+    public void notifyCurrAdventureCard(String nickname, String adventureCard) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCard");
         outMessage.setParamString(adventureCard);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
-    public void notifyCardState(String nickname, CardState cardState) throws RemoteException{
+    public void notifyCardState(String nickname, CardState cardState) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyCardState");
         outMessage.setParamCardState(cardState);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
-    public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component component) throws RemoteException{
+    public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component component) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyChooseComponent");
         outMessage.setParamString(nickname);
         outMessage.setParamComponent(component);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+
     @Override
-    public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws RemoteException{
+    public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyReleaseComponent");
         outMessage.setParamString(nickname);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws RemoteException{
+    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyBookedComponent");
         outMessage.setParamString(nickname);
         outMessage.setParamComponent(component);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void notifyAddVisibleComponents(String nickname, int index, Component component) throws RemoteException {
+    public void notifyAddVisibleComponents(String nickname, int index, Component component) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyAddVisibleComponents");
         outMessage.setParamInt(index);
         outMessage.setParamComponent(component);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
-    public void notifyRemoveVisibleComponents(String nickname, int index) throws RemoteException{
+    public void notifyRemoveVisibleComponents(String nickname, int index) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyRemoveVisibleComponents");
         outMessage.setParamInt(index);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
-    public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException{
+    public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyComponentPlaced");
         outMessage.setParamString(nickname);
         outMessage.setParamComponent(component);
         outMessage.setParamCoordinates(coordinates);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException{
+    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException{
         // TODO
     }
 
     @Override
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException {
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyShipBoardUpdate");
         outMessage.setParamString(nickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void  notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException {
+    public void  notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerCredits");
         outMessage.setParamString(nickname);
         outMessage.setParamInt(credits);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void  notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws RemoteException {
+    public void  notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyEliminatedPlayer");
         outMessage.setParamString(nickname);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void  notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) throws RemoteException{
+    public void  notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyRankingUpdate");
         outMessage.setParamString(nickname);
         outMessage.setParamInt(newPosition);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
-    public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws RemoteException {
+    public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyVisibleDeck");
         outMessage.setParamLittleVisibleDecks(littleVisibleDeck);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
-    public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayer) throws RemoteException{
-        writers.remove(disconnectedPlayer);
+    public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayer) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerDisconnected");
         outMessage.setParamString(disconnectedPlayer);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+        for(PrintWriter writer : writers.values()){
+            writer.println("CONNECTION CLOSED");
+            writer.close();
+        }
+        writers.clear();
     }
-
-
 
 }
 
