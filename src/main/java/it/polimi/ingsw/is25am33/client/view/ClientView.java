@@ -179,4 +179,6 @@ public interface ClientView {
     void showWaitingForPlayers();
 
     void showPickReservedComponentQuestion();
+
+    void showExitMenu();
 }

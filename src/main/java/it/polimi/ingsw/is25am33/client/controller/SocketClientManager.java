@@ -161,7 +161,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     private void startMessageHandlerThread() {
         Thread messageHandler = new Thread(() -> {
-            while (running) {
+            while (true) {
                 try {
                     if (in.hasNextLine()) {
                         String line = in.nextLine();
@@ -333,10 +333,6 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                 case "notifyPlayerDisconnected":
                     if (clientController != null) {
                         clientController.notifyPlayerDisconnected(null, notification.getParamString());
-                        running=false;
-                        out.close();
-                        in.close();
-                        break;
                     }
                     break;
 

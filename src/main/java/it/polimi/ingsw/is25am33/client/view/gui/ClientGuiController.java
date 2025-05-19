@@ -323,4 +323,8 @@ public class ClientGuiController extends Application implements ClientView {
 
     }
 
+    public void showExitMenu(){
+
+    }
+
 }

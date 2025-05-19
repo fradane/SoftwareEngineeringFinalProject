@@ -7,7 +7,7 @@
       "SOUTH": "SINGLE",
       "WEST": "EMPTY"
     },
-    "imageName": "GT-new_tiles_16_for web126"
+    "imageName": "GT-new_tiles_16_for web126.jpg"
   },
   {
     "type": "DoubleCannon",
@@ -17,7 +17,7 @@
       "SOUTH": "DOUBLE",
       "WEST": "EMPTY"
     },
-    "imageName": "GT-new_tiles_16_for web127"
+    "imageName": "GT-new_tiles_16_for web127.jpg"
   },
   {
     "type": "DoubleCannon",
@@ -27,7 +27,7 @@
       "SOUTH": "UNIVERSAL",
       "WEST": "EMPTY"
     },
-    "imageName": "GT-new_tiles_16_for web128"
+    "imageName": "GT-new_tiles_16_for web128.jpg"
   },
   {
     "type": "DoubleCannon",
@@ -37,7 +37,7 @@
       "SOUTH": "EMPTY",
       "WEST": "EMPTY"
     },
-    "imageName": "GT-new_tiles_16_for web129"
+    "imageName": "GT-new_tiles_16_for web129.jpg"
   },
   {
     "type": "DoubleCannon",
@@ -47,7 +47,7 @@
       "SOUTH": "DOUBLE",
       "WEST": "EMPTY"
     },
-    "imageName": "GT-new_tiles_16_for web130"
+    "imageName": "GT-new_tiles_16_for web130.jpg"
   },
   {
     "type": "DoubleCannon",
@@ -57,7 +57,7 @@
       "SOUTH": "DOUBLE",
       "WEST": "SINGLE"
     },
-    "imageName": "GT-new_tiles_16_for web131"
+    "imageName": "GT-new_tiles_16_for web131.jpg"
   },
   {
     "type": "DoubleCannon",
@@ -67,7 +67,7 @@
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
     },
-    "imageName": "GT-new_tiles_16_for web132"
+    "imageName": "GT-new_tiles_16_for web132.jpg"
   },
   {
     "type": "DoubleCannon",
@@ -77,7 +77,7 @@
       "SOUTH": "UNIVERSAL",
       "WEST": "DOUBLE"
     },
-    "imageName": "GT-new_tiles_16_for web133"
+    "imageName": "GT-new_tiles_16_for web133.jpg"
   },
   {
     "type": "DoubleCannon",
@@ -87,7 +87,7 @@
       "SOUTH": "SINGLE",
       "WEST": "DOUBLE"
     },
-    "imageName": "GT-new_tiles_16_for web134"
+    "imageName": "GT-new_tiles_16_for web134.jpg"
   },
   {
     "type": "DoubleCannon",
@@ -97,7 +97,7 @@
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-    "imageName": "GT-new_tiles_16_for web135"
+    "imageName": "GT-new_tiles_16_for web135.jpg"
   },
   {
     "type": "DoubleCannon",
@@ -107,6 +107,6 @@
       "SOUTH": "SINGLE",
       "WEST": "UNIVERSAL"
     },
-    "imageName": "GT-new_tiles_16_for web136"
+    "imageName": "GT-new_tiles_16_for web136.jpg"
   }
 ]

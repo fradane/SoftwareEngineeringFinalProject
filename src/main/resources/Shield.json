@@ -7,7 +7,7 @@
       "SOUTH": "UNIVERSAL",
       "WEST": "SINGLE"
     },
-    "imageName": "GT-new_tiles_16_for web149"
+    "imageName": "GT-new_tiles_16_for web149.jpg"
   },
   {
     "type": "Shield",
@@ -17,7 +17,7 @@
       "SOUTH": "SINGLE",
       "WEST": "SINGLE"
     },
-    "imageName": "GT-new_tiles_16_for web150"
+    "imageName": "GT-new_tiles_16_for web150.jpg"
   },
   {
     "type": "Shield",
@@ -27,7 +27,7 @@
       "SOUTH": "DOUBLE",
       "WEST": "SINGLE"
     },
-    "imageName": "GT-new_tiles_16_for web151"
+    "imageName": "GT-new_tiles_16_for web151.jpg"
   },
   {
     "type": "Shield",
@@ -37,7 +37,7 @@
       "SOUTH": "UNIVERSAL",
       "WEST": "DOUBLE"
     },
-    "imageName": "GT-new_tiles_16_for web152"
+    "imageName": "GT-new_tiles_16_for web152.jpg"
   },
   {
     "type": "Shield",
@@ -47,7 +47,7 @@
       "SOUTH": "DOUBLE",
       "WEST": "DOUBLE"
     },
-    "imageName": "GT-new_tiles_16_for web153"
+    "imageName": "GT-new_tiles_16_for web153.jpg"
   },
   {
     "type": "Shield",
@@ -57,7 +57,7 @@
       "SOUTH": "SINGLE",
       "WEST": "DOUBLE"
     },
-    "imageName": "GT-new_tiles_16_for web154"
+    "imageName": "GT-new_tiles_16_for web154.jpg"
   },
   {
     "type": "Shield",
@@ -67,7 +67,7 @@
       "SOUTH": "SINGLE",
       "WEST": "UNIVERSAL"
     },
-    "imageName": "GT-new_tiles_16_for web155"
+    "imageName": "GT-new_tiles_16_for web155.jpg"
   },
   {
     "type": "Shield",
@@ -77,6 +77,6 @@
       "SOUTH": "DOUBLE",
       "WEST": "UNIVERSAL"
     },
-    "imageName": "GT-new_tiles_16_for web156"
+    "imageName": "GT-new_tiles_16_for web156.jpg"
   }
 ]

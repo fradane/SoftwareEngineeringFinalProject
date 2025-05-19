@@ -287,11 +287,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void leaveGame() {
         try {
             if (currentGameId != null) {
-                serverController.leavefGame(nickname);
+                serverController.leaveGame(nickname);
                 inGame = false;
                 gameStarted = false;
                 currentGameId = null;
-                view.showMessage("Left the game.", NOTIFICATION_CRITICAL);
             }
         } catch (Exception e) {
             view.showError("Error leaving game: " + e.getMessage());
@@ -445,7 +444,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayerNickname) throws IOException {
         view.showMessage(disconnectedPlayerNickname + " disconnected.", ERROR);
         view.showMessage("GAME ENDED", STANDARD);
-        leaveGame();
+        view.showExitMenu();
     }
 
     public void checkShipBoardPhase() {

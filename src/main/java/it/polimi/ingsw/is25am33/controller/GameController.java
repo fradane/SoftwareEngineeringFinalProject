@@ -120,7 +120,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             dns.getConnectionManager().getClients().remove(nickname);
 
         } else {
-
+            clientControllers.forEach((playerNickname, clientController) -> {
+                clientControllers.remove(playerNickname);
+                dns.getConnectionManager().getClients().remove(playerNickname);
+            });
+            dns.removeGame(getGameInfo().getGameId());
+            System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
         }
 
     }

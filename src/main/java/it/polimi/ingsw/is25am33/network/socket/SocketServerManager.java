@@ -38,6 +38,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     private final Map<String, CallableOnGameController> gameControllers = new ConcurrentHashMap<>();
     private final Map<String, PrintWriter> writers = new ConcurrentHashMap<>();
+    private boolean readInput = true;
 
     public SocketServerManager(DNS dns) {
         this.dns = dns;
@@ -62,15 +63,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                     try {
                         final Scanner in = new Scanner(socket.getInputStream());
                         final PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                        while (true) {
+                            while (true) {
                             final String line = in.nextLine();
-                            if (line.equals("quit")) {
+                            if (line.equals("exit")) {
                                 break;
                             } else {
-
                                 SocketMessage inMessage = ServerDeserializer.deserializeObj(line, SocketMessage.class);
                                 performAction(inMessage, out);
-
                             }
                         }
                         in.close();
@@ -102,6 +101,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
             case "leaveGame":
                 gameControllers.get(nickname).leaveGame(nickname);
+                writers.remove(nickname);
                 break;
 
             case "registerWithNickname":
@@ -461,11 +461,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerDisconnected");
         outMessage.setParamString(disconnectedPlayer);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        for(PrintWriter writer : writers.values()){
-            writer.println("CONNECTION CLOSED");
-            writer.close();
-        }
-        writers.clear();
     }
 
 }

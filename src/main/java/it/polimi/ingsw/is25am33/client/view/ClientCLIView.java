@@ -1385,4 +1385,8 @@ public class ClientCLIView implements ClientView {
 
     }
 
+    public void showExitMenu(){
+        scanner.next("exit");
+    }
+
 }
