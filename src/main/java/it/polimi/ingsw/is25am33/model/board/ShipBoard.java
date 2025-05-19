@@ -65,7 +65,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     /**
      * A set of components marked as incorrectly placed.
      */
-    private List<Coordinates> incorrectlyPositionedComponentsCoordinates = new ArrayList<>();
+    private Set<Coordinates> incorrectlyPositionedComponentsCoordinates = new HashSet<>();
 
     /**
      * Constructor that creates a ShipBoard with the main cabin placed at the initial coordinates.
@@ -97,7 +97,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return focusedComponent;
     }
 
-    public List<Coordinates> getIncorrectlyPositionedComponentsCoordinates() {
+    public Set<Coordinates> getIncorrectlyPositionedComponentsCoordinates() {
         return incorrectlyPositionedComponentsCoordinates;
     }
 
@@ -151,6 +151,55 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     }
 
     /**
+     * Verifies that the component is properly connected to the ship through at least one non-EMPTY connector.
+     * A component connected only through EMPTY connectors is not considered properly connected.
+     *
+     * @param componentToPlace The component to validate.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return true if the component is properly connected through at least one non-EMPTY connector, otherwise false.
+     */
+    public boolean isPositionConnectedToShip(Component componentToPlace, int x, int y) {
+        for (Direction direction : Direction.values()) {
+            int[] neighbor = getNeighborCoordinates(x, y, direction);
+            int neighborX = neighbor[0];
+            int neighborY = neighbor[1];
+
+            // Skip if position is invalid or empty
+            if (!isValidPosition(neighborX, neighborY) || !isPositionOccupiedByComponent(neighborX, neighborY)) {
+                continue;
+            }
+
+            Component neighborComponent = shipMatrix[neighborX][neighborY];
+            Direction oppositeDirection = getOppositeDirection(direction);
+
+            // Check if both connectors are non-EMPTY
+            ConnectorType myConnector = componentToPlace.getConnectors().get(direction);
+            ConnectorType neighborConnector = neighborComponent.getConnectors().get(oppositeDirection);
+
+            if (myConnector != EMPTY && neighborConnector != EMPTY) {
+                // Found at least one proper connection
+                return true;
+            }
+        }
+
+        // No proper (non-EMPTY) connections found
+        return false;
+    }
+
+    // throws an exception if is not allowed to place the component in that position
+    public void checkPosition(int x, int y) {
+        if (!isValidPosition(x, y))
+            throw new IllegalArgumentException("Not a valid position");
+        else if (isPositionOccupiedByComponent(x, y))
+            throw new IllegalArgumentException("Position already occupied");
+        else if (!isPositionConnectedToShip(focusedComponent, x, y))
+            throw new IllegalArgumentException("Not connected to the ship or connected only via empty connector");
+        //else if (!areEmptyConnectorsWellConnected(focusedComponent, x, y))
+            //throw new IllegalArgumentException("Empty connector not well connected");
+    }
+
+    /**
      * Attempts to place the focused component at the specified coordinates,
      * performing various validity and connectivity checks.
      * If the placed component does not violate an essential rule it is simply added to list of incorrectyle Positioned Components.
@@ -161,46 +210,40 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
         synchronized (shipMatrix) {
-            if (!isValidPosition(x, y))
-                throw new IllegalArgumentException("Not a valid position");
-            else if (isPositionOccupiedByComponent(x, y))
-                throw new IllegalArgumentException("Position already occupied");
-            else if (!isPositionConnectedToShip(x, y))
-                throw new IllegalArgumentException("Not connected to the ship");
-            else if (!areEmptyConnectorsWellConnected(focusedComponent, x, y))
-                throw new IllegalArgumentException("Empty connector not well connected");
-            else {
-                if (//TODO aggiungere controllo che se sto aggiungendo un cannone che punta verso un component già piazzato
-                        !areConnectorsWellConnected(focusedComponent, x, y)
-                                || isComponentInFireDirection(focusedComponent, x, y)
-                                || isComponentInEngineDirection(focusedComponent, x, y)
-                                || isEngineDirectionWrong(focusedComponent)
-                                || isAimingAComponent(focusedComponent, x, y)
-                ) {
-                    incorrectlyPositionedComponentsCoordinates.add(new Coordinates(x, y));
-                    String playerNicknameToNotify = player != null ? player.getNickname() : "";
-                    gameContext.notifyClients(Set.of(playerNicknameToNotify), (nicknameToNotify, clientController) -> {
-                        try {
-                            clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-                        } catch (RemoteException e) {
-                            System.err.println("Remote Exception");
-                        }
-                    });
-                }
-                shipMatrix[x][y] = focusedComponent;
-
-                focusedComponent.insertInComponentsMap(componentsPerType);
-
-                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            //TODO uncommentare la checkPosition
+            //checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
+            if (//TODO aggiungere controllo che se sto aggiungendo un cannone che punta verso un component già piazzato
+                    !areConnectorsWellConnected(focusedComponent, x, y)
+                            || !areEmptyConnectorsWellConnected(focusedComponent, x, y) //TODO da controllare se effettivamente va messo qui questo controllo oppure all'interno di checkPosition
+                            || isComponentInFireDirection(focusedComponent, x, y)
+                            || isComponentInEngineDirection(focusedComponent, x, y)
+                            || isEngineDirectionWrong(focusedComponent)
+                            || isAimingAComponent(focusedComponent, x, y)
+            ) {
+                incorrectlyPositionedComponentsCoordinates.add(new Coordinates(x, y));
+                String playerNicknameToNotify = player != null ? player.getNickname() : "";
+                gameContext.notifyClients(Set.of(playerNicknameToNotify), (nicknameToNotify, clientController) -> {
                     try {
                         clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
                     } catch (RemoteException e) {
                         System.err.println("Remote Exception");
                     }
                 });
-
-                focusedComponent = null;
             }
+            shipMatrix[x][y] = focusedComponent;
+
+            focusedComponent.insertInComponentsMap(componentsPerType);
+
+            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                try {
+                    clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+                } catch (RemoteException e) {
+                    System.err.println("Remote Exception");
+                }
+            });
+
+            focusedComponent = null;
+
         }
 
     }
@@ -269,29 +312,6 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             case WEST:  return EAST;
             default: throw new IllegalArgumentException("Direzione non valida: " + direction);
         }
-    }
-
-    /**
-     * Verifies whether placing a component at the specified coordinates would be adjacent
-     * to at least one existing component, ensuring continuity of the ship.
-     *
-     * @param x The x-coordinate.
-     * @param y The y-coordinate.
-     * @return true if the placement is adjacent to an existing component, otherwise false.
-     */
-    public boolean isPositionConnectedToShip(int x, int y) {
-
-        for (Direction direction : Direction.values()) {
-            int[] neighbor = getNeighborCoordinates(x, y, direction);
-            int neighborX = neighbor[0];
-            int neighborY = neighbor[1];
-
-            if (isValidPosition(neighborX, neighborY) && isPositionOccupiedByComponent(neighborX, neighborY)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public boolean isPositionOccupiedByComponent(int x, int y) {
@@ -438,7 +458,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         if(shipMatrix[x][y] == null)
             throw new IllegalArgumentException("No component in this position");
 
-        notActiveComponents.add(shipMatrix[x][y]);
+        Component componentToRemove = shipMatrix[x][y];
+        notActiveComponents.add(componentToRemove);
+        removeFromComponentsMap(componentToRemove);
         incorrectlyPositionedComponentsCoordinates.remove(new Coordinates(x, y));
         shipMatrix[x][y] = null;
 
@@ -906,18 +928,26 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         for(Coordinates componentPosition : componentsPositions) {
             Component currentComponent = shipMatrix[componentPosition.getX()][componentPosition.getY()];
             notActiveComponents.add(currentComponent);
-            incorrectlyPositionedComponentsCoordinates.remove(currentComponent);
+            removeFromComponentsMap(currentComponent);
+            incorrectlyPositionedComponentsCoordinates.remove(componentPosition);
             shipMatrix[componentPosition.getX()][componentPosition.getY()] = null;
         }
+//        String playerNicknameToNotify = player != null ? player.getNickname() : "";
+//        gameContext.notifyClients(Set.of(playerNicknameToNotify), (nicknameToNotify, clientController) -> {
+//            try {
+//                if(isShipCorrect())
+//                    clientController.notifyValidShipBoard(nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+//                else
+//                    clientController.notifyInvalidShipBoard(nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+//            } catch (RemoteException e) {
+//                System.err.println("Remote Exception");
+//            }
+//        });
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
-                clientController.notifyShipBoardUpdate(nicknameToNotify,player.getNickname(), shipMatrix );
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
-        });
+    }
 
+    public void setIncorrectlyPositionedComponentsCoordinates(Set<Coordinates> incorrectlyPositionedComponentsCoordinates) {
+        this.incorrectlyPositionedComponentsCoordinates = incorrectlyPositionedComponentsCoordinates;
     }
 
     /**
@@ -1030,6 +1060,22 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
         return component;
 
+    }
+
+    /**
+     * Removes a component from the componentsPerType map
+     * @param component The component to remove
+     */
+    private void removeFromComponentsMap(Component component) {
+        Class<?> componentClass = component.getClass();
+        List<Object> componentsList = componentsPerType.get(componentClass);
+        if (componentsList != null) {
+            componentsList.remove(component);
+            // Se la lista diventa vuota, potresti volerla rimuovere dalla mappa
+            if (componentsList.isEmpty()) {
+                componentsPerType.remove(componentClass);
+            }
+        }
     }
 
 }

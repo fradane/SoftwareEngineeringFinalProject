@@ -1,11 +1,8 @@
 package it.polimi.ingsw.is25am33.model.enumFiles;
 
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.io.Serializable;
-import java.rmi.RemoteException;
-import java.util.Set;
 
 public enum GameState implements Serializable {
 
@@ -26,7 +23,7 @@ public enum GameState implements Serializable {
         @Override
         public void run(GameModel gameModel) {
             gameModel.notifyInvalidShipBoards();
-
+            gameModel.notifyValidShipBoards();
         }
 
     },

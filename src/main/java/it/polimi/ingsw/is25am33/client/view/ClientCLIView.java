@@ -13,7 +13,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -43,6 +42,7 @@ public class ClientCLIView implements ClientView {
     private final Object consoleLock = new Object();
     private ClientState clientState = REGISTER;
     BlockingQueue<String> stringQueue = new LinkedBlockingQueue<>();
+    Map<String, Set<Coordinates>> coloredCoordinates = new HashMap<>();
 
     // Definizione dei colori ANSI (funziona nei terminali che supportano i colori ANSI).
     private static final String ANSI_RED = "\u001B[31m";
@@ -546,9 +546,77 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showInvalidShipBoardMenu() {
+        setClientState(CHECK_SHIPBOARD_INVALID);
+        String nickname = clientModel.getMyNickname();
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+        Set<Coordinates> invalidCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+        Map<String, Set<Coordinates>> coloredCoordinates = new HashMap<>();
+        coloredCoordinates.put(ANSI_RED, invalidCoordinates);
+        showShipBoard(shipBoard, nickname, coloredCoordinates);
+
+        setClientState(CHECK_SHIPBOARD_CHOOSE_COMPONENT_TO_REMOVE);
+        showChooseComponentToRemoveMenu();
+    }
+
+    @Override
+    public void showValidShipBoardMenu() {
+        setClientState(CHECK_SHIPBOARD_CORRECT);
         String nickname = clientModel.getMyNickname();
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         showShipBoard(shipBoard, nickname);
+        showMessage("TEXT TO BE CHANGED: non fare nulla che stai apposto così", STANDARD);
+    }
+
+    @Override
+    public void showChooseComponentToRemoveMenu() {
+        //showMessage("Insert the coordinates of the component you wanna remove: ", STANDARD);
+
+        // Ottiene le coordinate dei componenti incorrettamente posizionati
+        Set<Coordinates> incorrectCoords = clientModel.getShipboardOf(clientController.getNickname())
+                .getIncorrectlyPositionedComponentsCoordinates();
+
+        StringBuilder message = new StringBuilder();
+        message.append("Insert the coordinates of the component you want to remove.\n");
+
+        if (!incorrectCoords.isEmpty()) {
+            message.append("Valid coordinates (shown in red on the ship board):\n");
+
+            // Converti le coordinate da 0-based a 1-based per la visualizzazione
+            incorrectCoords.forEach(coord ->
+                    message.append("  (").append(coord.getX() + 1).append(",").append(coord.getY() + 1).append(")\n")
+            );
+
+            message.append("Enter coordinates as 'row column' (e.g., '5 7'): ");
+        } else {
+            message.append("No incorrectly positioned components found.\n");
+        }
+
+        showMessage(message.toString(), STANDARD);
+    }
+
+    @Override
+    public void showChooseShipPartsMenu(List<Set<Coordinates>> shipPartsList) {
+        setClientState(CHECK_SHIPBOARD_CHOOSE_SHIP_PART_TO_KEEP);
+
+        // Crea mappa per visualizzazione
+        List<String> colors = Arrays.asList(ANSI_BLUE, ANSI_GREEN, ANSI_YELLOW, ANSI_RED);
+        Map<String, Set<Coordinates>> displayColorMap = new HashMap<>();
+
+        for (int i = 0; i < shipPartsList.size() && i < colors.size(); i++) {
+            displayColorMap.put(colors.get(i), shipPartsList.get(i));
+        }
+
+        String nickname = clientModel.getMyNickname();
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+        showShipBoard(shipBoard, nickname, displayColorMap);
+
+        StringBuilder menu = new StringBuilder("\nChoose the ship part to KEEP by entering its number:\n");
+        for (int i = 0; i < shipPartsList.size(); i++) {
+            String color = i < colors.size() ? colors.get(i) : "";
+            menu.append((i + 1)).append(". Ship part ").append(color).append("(colored part)\n").append(ANSI_RESET);
+        }
+
+        showMessage(menu.toString(), ASK);
     }
 
     @Override
@@ -630,8 +698,117 @@ public class ClientCLIView implements ClientView {
      * @param shipBoardClient the client that provides the ship matrix and booked components
      * @param shipBoardOwnerNickname the nickname of the owner of the ship board being displayed
      */
+//    @Override
+//    public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
+//
+//        Component[][] shipBoard = shipBoardClient.getShipMatrix();
+//        List<Component> bookedComponents = shipBoardClient.getBookedComponents();
+//        String[] reservedComponent1 = new String[7];
+//        String[] reservedComponent2 = new String[7];
+//
+//        if (!bookedComponents.isEmpty())
+//            reservedComponent1 = shipBoardClient.getBookedComponents().getFirst().toString().split("\\n");
+//        if (bookedComponents.size() == 2)
+//            reservedComponent2 = shipBoardClient.getBookedComponents().get(1).toString().split("\\n");
+//
+//
+//        String[] legendLines = {
+//                "LEGEND - component label and explanation on attributes:",
+//                "",
+//                "• BBX = battery box - number of remaining batteries",
+//                "• CAB = cabin - number and type of members",
+//                "• CAN = cannon - fire direction",
+//                "• 2CN = double cannons - fire direction",
+//                "• 2EN = double engines - power direction",
+//                "• ENG = engine - power direction",
+//                "• LSP = life support - type of life support",
+//                "• MCB = main cabin - number and type of members",
+//                "• SLD = shield - covered directions",
+//                "• SPS = special storage - left storages",
+//                "• STS = standard storage - left storages",
+//                "• STR = structural modules",
+//                ""
+//        };
+//
+//        StringBuilder output = new StringBuilder();
+//
+//        int legendIndex = 0;
+//        int componentIndex = 0;
+//
+//        output.append(String.format("\nHere's the ship board of " + shipBoardOwnerNickname + ":\n"));
+//
+//        // Stampa numeri delle colonne
+//        output.append("       ");
+//        for (int col = 4; col <= 10; col++) {
+//            output.append(String.format("   %2d     ", col));
+//        }
+//
+//          output.append(String.format("\t\t" + legendLines[legendIndex++] + "\n"));
+//
+//        // TODO generalizzare il caso per il livello 1
+//        for (int i = 4; i <= 8; i++) {
+//            // Ogni cella viene stampata su 4 righe
+//            for (int line = 0; line < 4; line++) {
+//                if (line == 2) {
+//                    output.append(String.format(" %2d   ", i + 1));
+//                } else {
+//                    output.append("      ");
+//                }
+//                for (int j = 3; j <= 9; j++) {
+//                    Component cell = shipBoard[i][j];
+//                    switch (line) {
+//                        case 0:
+//                            output.append("+---------");
+//                            break;
+//
+//                        case 1:
+//                            output.append(String.format("|    %1s    ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())));
+//                            break;
+//
+//                        case 2: output.append(String.format("| %1s %3s %1s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.WEST).fromConnectorTypeToValue()),
+//                                Level2ShipBoard.isOutsideShipboard(i, j) ? (ANSI_RED + "OUT" + ANSI_RESET) : (cell == null ? "" : cell.getLabel()),
+//                                Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.EAST).fromConnectorTypeToValue())));
+//                            break;
+//
+//                        case 3: output.append(String.format("|    %1s %2s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()),
+//                                Level2ShipBoard.isOutsideShipboard(i, j) ? "" : (cell == null ? "" : (ANSI_BLUE + (cell.getMainAttribute().length() == 2 ? "" : " ") + cell.getMainAttribute() + ANSI_RESET))));
+//                            break;
+//                    }
+//                }
+//
+//                if (line == 0) {
+//                    output.append("+");
+//                } else {
+//                    output.append("|");
+//                }
+//
+//                if (legendIndex <= legendLines.length - 1)
+//                    output.append(String.format("\t\t" + legendLines[legendIndex++] + "\n"));
+//                else if (componentIndex <= 6) {
+//                    if (reservedComponent1[componentIndex] != null) output.append(String.format("\t\t\t" + reservedComponent1[componentIndex]));
+//                    if (reservedComponent2[componentIndex] != null) output.append(String.format("\t\t\t" + reservedComponent2[componentIndex]));
+//                    output.append("\n");
+//                    componentIndex++;
+//                }
+//
+//            }
+//        }
+//
+//        output.append("      ");
+//        output.append("+---------".repeat(7));
+//        output.append("+\n");
+//        output.append("> ");
+//
+//        showMessage(output.toString(), ASK);
+//    }
+
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
+        showShipBoard(shipBoardClient, shipBoardOwnerNickname, Collections.emptyMap());
+    }
+
+    @Override
+    public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {
 
         Component[][] shipBoard = shipBoardClient.getShipMatrix();
         List<Component> bookedComponents = shipBoardClient.getBookedComponents();
@@ -642,7 +819,6 @@ public class ClientCLIView implements ClientView {
             reservedComponent1 = shipBoardClient.getBookedComponents().getFirst().toString().split("\\n");
         if (bookedComponents.size() == 2)
             reservedComponent2 = shipBoardClient.getBookedComponents().get(1).toString().split("\\n");
-
 
         String[] legendLines = {
                 "LEGEND - component label and explanation on attributes:",
@@ -688,22 +864,46 @@ public class ClientCLIView implements ClientView {
                 }
                 for (int j = 3; j <= 9; j++) {
                     Component cell = shipBoard[i][j];
+
+                    // Determina il colore per questa coordinata
+                    String componentColor = getColorForCoordinate(i, j, colorMap);
+                    String resetColor = componentColor.isEmpty() ? "" : ANSI_RESET;
+
                     switch (line) {
                         case 0:
                             output.append("+---------");
                             break;
 
                         case 1:
-                            output.append(String.format("|    %1s    ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())));
+                            String northConnector = Level2ShipBoard.isOutsideShipboard(i, j) ? "X" :
+                                    (cell == null ? "" : Integer.toString(cell.getConnectors().get(Direction.NORTH).fromConnectorTypeToValue()));
+                            output.append(String.format("|    %s%1s%s    ",
+                                    componentColor, northConnector, resetColor));
                             break;
 
-                        case 2: output.append(String.format("| %1s %3s %1s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.WEST).fromConnectorTypeToValue()),
-                                Level2ShipBoard.isOutsideShipboard(i, j) ? (ANSI_RED + "OUT" + ANSI_RESET) : (cell == null ? "" : cell.getLabel()),
-                                Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.EAST).fromConnectorTypeToValue())));
+                        case 2:
+                            String westConnector = Level2ShipBoard.isOutsideShipboard(i, j) ? "X" :
+                                    (cell == null ? "" : Integer.toString(cell.getConnectors().get(Direction.WEST).fromConnectorTypeToValue()));
+                            String eastConnector = Level2ShipBoard.isOutsideShipboard(i, j) ? "X" :
+                                    (cell == null ? "" : Integer.toString(cell.getConnectors().get(Direction.EAST).fromConnectorTypeToValue()));
+                            String label = Level2ShipBoard.isOutsideShipboard(i, j) ? (ANSI_RED + "OUT" + ANSI_RESET) :
+                                    (cell == null ? "" : (componentColor + cell.getLabel() + resetColor));
+
+                            output.append(String.format("| %s%1s%s %3s %s%1s%s ",
+                                    componentColor, westConnector, resetColor,
+                                    label,
+                                    componentColor, eastConnector, resetColor));
                             break;
 
-                        case 3: output.append(String.format("|    %1s %2s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()),
-                                Level2ShipBoard.isOutsideShipboard(i, j) ? "" : (cell == null ? "" : (ANSI_BLUE + (cell.getMainAttribute().length() == 2 ? "" : " ") + cell.getMainAttribute() + ANSI_RESET))));
+                        case 3:
+                            String southConnector = Level2ShipBoard.isOutsideShipboard(i, j) ? "X" :
+                                    (cell == null ? "" : Integer.toString(cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()));
+                            String attribute = Level2ShipBoard.isOutsideShipboard(i, j) ? "" :
+                                    (cell == null ? "" : (componentColor + (cell.getMainAttribute().length() == 2 ? "" : " ") + cell.getMainAttribute() + resetColor));
+
+                            output.append(String.format("|    %s%1s%s %2s ",
+                                    componentColor, southConnector, resetColor,
+                                    attribute));
                             break;
                     }
                 }
@@ -717,12 +917,13 @@ public class ClientCLIView implements ClientView {
                 if (legendIndex <= legendLines.length - 1)
                     output.append(String.format("\t\t" + legendLines[legendIndex++] + "\n"));
                 else if (componentIndex <= 6) {
-                    if (reservedComponent1[componentIndex] != null) output.append(String.format("\t\t\t" + reservedComponent1[componentIndex]));
-                    if (reservedComponent2[componentIndex] != null) output.append(String.format("\t\t\t" + reservedComponent2[componentIndex]));
+                    if (reservedComponent1[componentIndex] != null)
+                        output.append(String.format("\t\t\t" + reservedComponent1[componentIndex]));
+                    if (reservedComponent2[componentIndex] != null)
+                        output.append(String.format("\t\t\t" + reservedComponent2[componentIndex]));
                     output.append("\n");
                     componentIndex++;
                 }
-
             }
         }
 
@@ -732,6 +933,27 @@ public class ClientCLIView implements ClientView {
         output.append("> ");
 
         showMessage(output.toString(), ASK);
+    }
+
+    /**
+     * Determina il colore ANSI da applicare alla coordinata specificata
+     * basandosi sulla mappa dei colori fornita.
+     *
+     * @param x La coordinata x
+     * @param y La coordinata y
+     * @param colorMap La mappa che associa stringhe colore a set di coordinate
+     * @return La stringa del colore ANSI da applicare, o stringa vuota se nessun colore è specificato
+     */
+    private String getColorForCoordinate(int x, int y, Map<String, Set<Coordinates>> colorMap) {
+        Coordinates coord = new Coordinates(x, y);
+
+        for (Map.Entry<String, Set<Coordinates>> entry : colorMap.entrySet()) {
+            if (entry.getValue().contains(coord)) {
+                return entry.getKey();
+            }
+        }
+
+        return ""; // Nessun colore specificato, usa il default
     }
 
     @Override
@@ -1193,6 +1415,9 @@ public class ClientCLIView implements ClientView {
     }
 
     public void handleInput(@NotNull String input) {
+        String[] coordinates;
+        int row;
+        int column;
 
         if (input.equals("exit")) {
             clientController.leaveGame();
@@ -1376,7 +1601,7 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case PLACE_FOCUSED_COMPONENT:
-                    String[] coordinates = input.trim().split("\\s+");
+                    coordinates = input.trim().split("\\s+");
 
                     // Verifica che ci siano esattamente due numeri
                     if (coordinates.length != 2) {
@@ -1385,10 +1610,58 @@ public class ClientCLIView implements ClientView {
                     }
 
                     // Prova a convertire le stringhe in numeri
-                    int row = Integer.parseInt(coordinates[0]);
-                    int column = Integer.parseInt(coordinates[1]);
+                    row = Integer.parseInt(coordinates[0]);
+                    column = Integer.parseInt(coordinates[1]);
 
                     clientController.placeFocusedComponent(row, column);
+                    break;
+
+                case CHECK_SHIPBOARD_INVALID:
+                    break;
+
+                case CHECK_SHIPBOARD_CHOOSE_COMPONENT_TO_REMOVE:
+                    coordinates = input.trim().split("\\s+");
+
+                    // Verifica che ci siano esattamente due numeri
+                    if (coordinates.length != 2) {
+                        showMessage("Invalid input. Please enter both row and column separated by space (e.g. '8 6').", ERROR);
+                        break;
+                    }
+
+                    try {
+                        // Prova a convertire le stringhe in numeri
+                        row = Integer.parseInt(coordinates[0]);
+                        column = Integer.parseInt(coordinates[1]);
+
+                        // Converte le coordinate da 1-based (input utente) a 0-based (sistema interno)
+                        Coordinates targetCoords = new Coordinates(row - 1, column - 1);
+
+                        // Ottiene le coordinate dei componenti incorrettamente posizionati
+                        Set<Coordinates> incorrectCoords = clientModel.getShipboardOf(clientController.getNickname())
+                                .getIncorrectlyPositionedComponentsCoordinates();
+
+                        // Controlla se le coordinate inserite sono tra quelle incorrette
+                        if (incorrectCoords.contains(targetCoords)) {
+                            clientController.removeComponent(row, column);
+                        } else {
+                            showMessage("The coordinates (" + row + ", " + column + ") do not correspond to an incorrectly positioned component.", ERROR);
+                            showMessage("Please choose coordinates from the red-highlighted components.", ERROR);
+                        }
+                    } catch (NumberFormatException e) {
+                        showMessage("Invalid input. Please enter valid numbers for row and column.", ERROR);
+                    }
+                    break;
+
+                case CHECK_SHIPBOARD_CHOOSE_SHIP_PART_TO_KEEP:
+                    try {
+                        int choice = Integer.parseInt(input.trim());
+                        clientController.handleShipPartSelection(choice);
+                    } catch (NumberFormatException e) {
+                        showMessage("Please enter a valid number.", ERROR);
+                    }
+                    break;
+
+                case CHECK_SHIPBOARD_CORRECT:
                     break;
 
                 default:

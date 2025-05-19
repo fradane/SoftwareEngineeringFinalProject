@@ -23,6 +23,8 @@ public interface ShipBoardClient {
      */
     void setPlayer(Player player);
 
+    void setIncorrectlyPositionedComponentsCoordinates(Set<Coordinates> incorrectlyPositionedComponentsCoordinates);
+
     /**
      * Gets the ship matrix representing the board state
      *
@@ -51,7 +53,7 @@ public interface ShipBoardClient {
      */
     List<Component> getBookedComponents();
 
-    List<Coordinates> getIncorrectlyPositionedComponentsCoordinates();
+    Set<Coordinates> getIncorrectlyPositionedComponentsCoordinates();
 
     /**
      * Sets the game context
@@ -94,14 +96,15 @@ public interface ShipBoardClient {
     boolean isEngineDirectionWrong(Component componentToPlace);
 
     /**
-     * Verifies whether placing a component at the specified coordinates would be adjacent
-     * to at least one existing component
+     * Verifies that the component is properly connected to the ship through at least one non-EMPTY connector.
+     * A component connected only through EMPTY connectors is not considered properly connected.
      *
-     * @param x The x-coordinate
-     * @param y The y-coordinate
-     * @return true if the placement is adjacent to an existing component, otherwise false
+     * @param componentToPlace The component to validate.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return true if the component is properly connected through at least one non-EMPTY connector, otherwise false.
      */
-    boolean isPositionConnectedToShip(int x, int y);
+    boolean isPositionConnectedToShip(Component componentToPlace, int x, int y);
 
     /**
      * Ensures that if an adjacent component has an EMPTY connector,

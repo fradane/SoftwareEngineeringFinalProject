@@ -61,8 +61,10 @@ public interface CallableOnClientController extends Remote {
 
     void notifyRemovalResult(String nicknameToNotify, boolean success) throws RemoteException;
 
-    void notifyInvalidShip(String nicknameToNotify ) throws RemoteException;
+    void notifyInvalidShipBoard(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException;
 
-    void notifyShipCorrect(String nicknameToNotify ) throws RemoteException;
+    void notifyValidShipBoard(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException;
+
+    void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts) throws RemoteException;
 
 }

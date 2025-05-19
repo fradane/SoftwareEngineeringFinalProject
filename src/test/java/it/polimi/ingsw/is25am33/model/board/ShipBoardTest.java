@@ -118,7 +118,7 @@ public class ShipBoardTest {
         shipBoard.placeComponentWithFocus(cabinX-1, cabinY);
 
         // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
-        List<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+        Set<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
         assertTrue(incorrectCoords.contains(new Coordinates(cabinX-1, cabinY)));
 
         // Inoltre, verifico che sia marcato come errato per la direzione sbagliata
@@ -140,19 +140,21 @@ public class ShipBoardTest {
                 () -> shipBoard.placeComponentWithFocus(cabinX-1, cabinY));
 
         // Verifico che l'eccezione sia quella prevista per connettori incompatibili
-        assertEquals("Empty connector not well connected", exception.getMessage());
+        assertEquals("Not connected to the ship", exception.getMessage());
     }
 
     @Test
     @DisplayName("Test: isPositionConnectedToShip is true for adjacent cells near central cabin")
     void testIsPositionConnectedToShip() {
-        assertTrue(shipBoard.isPositionConnectedToShip(cabinX+1, cabinY));
-        assertTrue(shipBoard.isPositionConnectedToShip(cabinX-1, cabinY));
-        assertTrue(shipBoard.isPositionConnectedToShip(cabinX, cabinY+1));
-        assertTrue(shipBoard.isPositionConnectedToShip(cabinX, cabinY-1));
+        Map<Direction, ConnectorType> connectors = createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE);
+        Cannon cannon = new Cannon(connectors);
+        assertTrue(shipBoard.isPositionConnectedToShip(cannon, cabinX+1, cabinY));
+        assertTrue(shipBoard.isPositionConnectedToShip(cannon, cabinX-1, cabinY));
+        assertTrue(shipBoard.isPositionConnectedToShip(cannon, cabinX, cabinY+1));
+        assertTrue(shipBoard.isPositionConnectedToShip(cannon, cabinX, cabinY-1));
 
         // Not directly adjacent => false
-        assertFalse(shipBoard.isPositionConnectedToShip(cabinX+2, cabinY));
+        assertFalse(shipBoard.isPositionConnectedToShip(cannon, cabinX+2, cabinY));
     }
 
     @Test
@@ -173,7 +175,7 @@ public class ShipBoardTest {
         shipBoard.placeComponentWithFocus(cabinX-1, cabinY);
 
         // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
-        List<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+        Set<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
         assertTrue(incorrectCoords.contains(new Coordinates(cabinX-1, cabinY)));
     }
 
@@ -922,8 +924,35 @@ public class ShipBoardTest {
         shipBoard.placeComponentWithFocus(adjacentX, adjacentY + 1);
 
         // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
-        List<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+        Set<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
         assertTrue(incorrectCoords.contains(new Coordinates(adjacentX, adjacentY + 1)));
+    }
+
+    @Test
+    @DisplayName("Test: mismatch tra connettori")
+    void testConnectorMismatch() {
+        Map<Direction, ConnectorType> customConnectors1 = createCustomConnectors(SINGLE, SINGLE, EMPTY, SINGLE);
+        Cabin cabin = new Cabin(customConnectors1);
+
+        int adjacentX = cabinX;
+        int adjacentY = cabinY + 1;
+
+        shipBoard.focusedComponent = cabin;
+        shipBoard.placeComponentWithFocus(adjacentX, adjacentY);
+
+        // Ora provo a collegare un altro componente con connettori SINGLE
+        Map<Direction, ConnectorType> customConnectors2 = createCustomConnectors(SINGLE, EMPTY, DOUBLE, DOUBLE);
+        Cabin cabin2 = new Cabin(customConnectors2);
+        cabin2.rotate();
+
+        shipBoard.focusedComponent = cabin2;
+
+        // Il posizionamento dovrebbe essere possibile ma il componente sarà marcato come errato
+        shipBoard.placeComponentWithFocus(adjacentX - 1, adjacentY);
+
+        // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
+        Set<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+        assertTrue(incorrectCoords.contains(new Coordinates(adjacentX - 1, adjacentY)));
     }
 
     @Test
@@ -940,7 +969,7 @@ public class ShipBoardTest {
 
         // Verifico che la posizione sia valida ma non adiacente alla nave
         assertTrue(shipBoard.isValidPosition(farX, farY));
-        assertFalse(shipBoard.isPositionConnectedToShip(farX, farY));
+        assertFalse(shipBoard.isPositionConnectedToShip(cabin, farX, farY));
 
         // Il posizionamento dovrebbe lanciare un'eccezione
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -989,7 +1018,89 @@ public class ShipBoardTest {
         assertDoesNotThrow(() -> shipBoard.placeComponentWithFocus(adjacentX, adjacentY + 1));
 
         // E il componente non dovrebbe essere marcato come errato
-        List<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+        Set<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
         assertFalse(incorrectCoords.contains(new Coordinates(adjacentX, adjacentY + 1)));
+    }
+
+    @Test
+    @DisplayName("Test: componentsPerType map is correctly updated on component addition and removal")
+    void testComponentsPerTypeMapUpdates() {
+
+        // ========================
+        // TEST AGGIUNTA COMPONENTI
+        // ========================
+
+        Map<Direction, ConnectorType> connectors = createSimpleConnectors();
+
+        // Aggiungo una cabina
+        Cabin cabin = new Cabin(connectors);
+        shipBoard.focusedComponent = cabin;
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
+
+        // Verifica aggiunta alla mappa
+        assertNotNull(shipBoard.componentsPerType.get(Cabin.class));
+        assertEquals(1, shipBoard.componentsPerType.get(Cabin.class).size());
+        assertTrue(shipBoard.componentsPerType.get(Cabin.class).contains(cabin));
+
+        // Aggiungo un cannone
+        Cannon cannon = new Cannon(connectors);
+        shipBoard.focusedComponent = cannon;
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY);
+
+        // Verifica aggiunta alla mappa
+        assertNotNull(shipBoard.componentsPerType.get(Cannon.class));
+        assertEquals(1, shipBoard.componentsPerType.get(Cannon.class).size());
+        assertTrue(shipBoard.componentsPerType.get(Cannon.class).contains(cannon));
+
+        // Aggiungo un motore
+        Engine engine = new Engine(connectors);
+        shipBoard.focusedComponent = engine;
+        shipBoard.placeComponentWithFocus(cabinX - 1, cabinY);
+
+        // Verifica aggiunta alla mappa
+        assertNotNull(shipBoard.componentsPerType.get(Engine.class));
+        assertEquals(1, shipBoard.componentsPerType.get(Engine.class).size());
+        assertTrue(shipBoard.componentsPerType.get(Engine.class).contains(engine));
+
+        // ==============================
+        // TEST RIMOZIONE CON removeAndRecalculateShipParts
+        // ==============================
+
+        // Rimuovo la cabina
+        shipBoard.removeAndRecalculateShipParts(cabinX, cabinY + 1);
+
+        // Verifica rimozione dalla mappa (la lista può essere vuota o null)
+        List<Object> cabinList = shipBoard.componentsPerType.get(Cabin.class);
+        assertTrue(cabinList == null || cabinList.isEmpty());
+        assertTrue(cabinList == null || !cabinList.contains(cabin));
+
+        // Verifica che sia in notActiveComponents
+        assertTrue(shipBoard.notActiveComponents.contains(cabin));
+
+        // ==============================
+        // TEST RIMOZIONE CON removeShipPart
+        // ==============================
+
+        // Creo set con coordinate da rimuovere
+        Set<Coordinates> toRemove = new HashSet<>();
+        toRemove.add(new Coordinates(cabinX + 1, cabinY));  // cannon
+        toRemove.add(new Coordinates(cabinX - 1, cabinY));  // engine
+
+        // Rimuovo i componenti
+        shipBoard.removeShipPart(toRemove);
+
+        // Verifica rimozione dalla mappa (le liste possono essere vuote o null)
+        List<Object> cannonList = shipBoard.componentsPerType.get(Cannon.class);
+        List<Object> engineList = shipBoard.componentsPerType.get(Engine.class);
+
+        assertTrue(cannonList == null || cannonList.isEmpty());
+        assertTrue(engineList == null || engineList.isEmpty());
+        assertTrue(cannonList == null || !cannonList.contains(cannon));
+        assertTrue(engineList == null || !engineList.contains(engine));
+
+        // Verifica che siano in notActiveComponents
+        assertTrue(shipBoard.notActiveComponents.contains(cannon));
+        assertTrue(shipBoard.notActiveComponents.contains(engine));
+        assertEquals(3, shipBoard.notActiveComponents.size()); // cabin + cannon + engine
     }
 }
