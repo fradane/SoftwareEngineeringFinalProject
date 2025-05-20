@@ -58,6 +58,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         return observableGames;
     }
 
+    public String getCurrentGameId() {
+        return currentGameId;
+    }
+
     public ClientModel getClientModel() {
         return clientModel;
     }
@@ -192,7 +196,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * @param scanner Scanner per leggere l'input dell'utente
      * @return L'implementazione di ClientView scelta
      */
-    public static ClientView selectUserInterface(Scanner scanner, String choice) throws RemoteException {
+    public static ClientView selectUserInterface(Scanner scanner, String choice) throws IOException {
 
         return switch (choice) {
             case "cli" -> new ClientCLIView();
@@ -263,7 +267,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 //        }
     }
 
-    private CallableOnDNS setUpRMIConnection() throws RemoteException {
+    private CallableOnDNS setUpRMIConnection() throws IOException {
         String serverAddress = "localhost";
 
         try {
@@ -288,14 +292,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void leaveGame() {
-        System.out.println("VOGLIO USCIRE DAL GIOCO, MA NON POSSO :(");
         try {
             if (currentGameId != null) {
                 serverController.leaveGame(nickname);
                 inGame = false;
                 gameStarted = false;
                 currentGameId = null;
-                view.showMessage("Left the game.", NOTIFICATION_CRITICAL);
             }
         } catch (Exception e) {
             view.showError("Error leaving game: " + e.getMessage());
@@ -310,12 +312,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws RemoteException {
+    public void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws IOException {
         view.showMessage(newPlayerNickname + " joined the game!", NOTIFICATION_INFO);
     }
 
     @Override
-    public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws RemoteException {
+    public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws IOException {
         gameStarted = true;
         clientModel.setGameState(GameState.BUILD_SHIPBOARD);
         gameInfo.getConnectedPlayers().forEach((nickname, color) -> clientModel.addPlayer(nickname, color, gameInfo.isTestFlight()));
@@ -326,7 +328,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException {
+    public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws IOException {
         if (nickname.equals(this.nickname))
             nickname = "you";
 
@@ -334,66 +336,66 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws RemoteException {
+    public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws IOException {
 
     }
 
     @Override
-    public void notifyRemovalResult(String nicknameToNotify, boolean success) throws RemoteException {
+    public void notifyRemovalResult(String nicknameToNotify, boolean success) throws IOException {
 
     }
 
     @Override
-    public void notifyShipCorrect(String nicknameToNotify) throws RemoteException {
+    public void notifyShipCorrect(String nicknameToNotify) throws IOException {
 
     }
 
     @Override
-    public void notifyGameState(String nickname, GameState gameState) throws RemoteException{
+    public void notifyGameState(String nickname, GameState gameState) throws IOException{
         clientModel.setGameState(gameState);
         view.showNewGameState();
     }
 
     @Override
-    public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws RemoteException{
+    public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws IOException{
         clientModel.setCurrDangerousObj(dangerousObj);
         view.showDangerousObj();
     }
 
     @Override
-    public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws RemoteException{
+    public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws IOException{
         clientModel.setCurrentPlayer(nickname);
         view.showMessage("Current player is: " + nickname, STANDARD);
     }
 
     @Override
-    public void notifyCurrAdventureCard(String nickname, String adventureCard) throws RemoteException{
+    public void notifyCurrAdventureCard(String nickname, String adventureCard) throws IOException{
         clientModel.setCurrAdventureCard(adventureCard);
         view.showCurrAdventureCard(true);
     }
 
     @Override
-    public void notifyAddVisibleComponents(String nickname, int index, Component component) throws RemoteException{
+    public void notifyAddVisibleComponents(String nickname, int index, Component component) throws IOException{
         clientModel.getVisibleComponents().put(index, component);
     }
 
     @Override
-    public void notifyRemoveVisibleComponents(String nickname, int index) throws RemoteException{
+    public void notifyRemoveVisibleComponents(String nickname, int index) throws IOException{
         clientModel.getVisibleComponents().remove(index);
     }
 
     @Override
-    public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
+    public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException {
         clientModel.getShipboardOf(nickname).getShipMatrix()[coordinates.getX()][coordinates.getY()] = component;
     }
 
 
-    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
+    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException {
         clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponents().add(component);
     }
 
     @Override
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws RemoteException {
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws IOException {
         clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
     }
 
@@ -406,46 +408,53 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * @throws RemoteException if a communication-related error occurs during the remote method call
      */
     @Override
-    public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws RemoteException {
+    public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(focusedComponent);
     }
 
     @Override
-    public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws RemoteException {
+    public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws IOException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
     }
 
     @Override
-    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) throws RemoteException {
+    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) throws IOException {
         clientModel.getShipboardOf(nickname).getBookedComponents().add(component);
     }
 
     @Override
-    public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws RemoteException {
+    public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws IOException {
         clientModel.updatePlayerCredits(nickname, credits);
         view.showMessage(nickname + " has " + credits + " credits.", STANDARD);
     }
 
     @Override
-    public void notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) throws RemoteException{
+    public void notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) throws IOException{
         clientModel.updatePlayerPosition(nickname,newPosition);
     }
 
     @Override
-    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws RemoteException{
+    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws IOException{
         clientModel.eliminatePlayer(nickname);
         view.showMessage(nickname + " was eliminated.", STANDARD);
     }
 
     @Override
-    public void notifyCardState(String nickname, CardState cardState) throws RemoteException {
+    public void notifyCardState(String nickname, CardState cardState) throws IOException {
         clientModel.setCardState(cardState);
         view.showNewCardState();
     }
 
     @Override
-    public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDecks) throws RemoteException {
+    public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDecks) throws IOException {
         clientModel.setLittleVisibleDeck(littleVisibleDecks);
+    }
+
+    @Override
+    public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayerNickname) throws IOException {
+        view.showMessage(disconnectedPlayerNickname + " disconnected.", ERROR);
+        view.showMessage("GAME ENDED", STANDARD);
+        view.showExitMenu();
     }
 
     public void checkShipBoardPhase() {
@@ -470,7 +479,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     }
 
-    public void notifyHourglassEnded() throws RemoteException {
+    public void notifyHourglassEnded() throws IOException {
         serverController.notifyHourglassEnded(nickname);
         if (clientModel.getHourglass().getFlipsLeft() == 0) {
             //TODO
@@ -567,7 +576,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         try {
             serverController.playerWantsToRestartHourglass(nickname);
-        } catch (RemoteException e) {
+        } catch (IOException e) {
             switch (e.getMessage()) {
                 case "No more flips available.",
                      "Interrupted while waiting for all clients to finish the timer.",
@@ -623,7 +632,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
             serverController.playerWantsToFocusReservedComponent(nickname, choice);
             view.showPickedComponentAndMenu();
-        } catch (RemoteException e) {
+        } catch (IOException e) {
             handleRemoteException(e);
         }
     }

@@ -69,11 +69,7 @@ public abstract class FlyingBoard {
         ranking.remove(player);
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
-                clientController.notifyEliminatedPlayer(nicknameToNotify, player.getNickname());
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
+            clientController.notifyEliminatedPlayer(nicknameToNotify, player.getNickname());
         });
     }
 
@@ -128,11 +124,7 @@ public abstract class FlyingBoard {
         int finalNewPosition = newPosition;
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
-                clientController.notifyRankingUpdate(nicknameToNotify,player.getNickname(), finalNewPosition);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
+            clientController.notifyRankingUpdate(nicknameToNotify,player.getNickname(), finalNewPosition);
         });
 
     }

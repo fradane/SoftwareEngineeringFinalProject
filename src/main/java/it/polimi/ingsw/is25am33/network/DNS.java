@@ -1,3 +1,4 @@
+
 package it.polimi.ingsw.is25am33.network;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
@@ -8,6 +9,7 @@ import it.polimi.ingsw.is25am33.network.common.ConnectionManager;
 import it.polimi.ingsw.is25am33.network.rmi.RMIServerRunnable;
 import it.polimi.ingsw.is25am33.network.socket.SocketServerManager;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -66,7 +68,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
             new Thread(() -> {
                 try {
                     controller.notifyGameInfos(nickname, getAvailableGames());
-                } catch (RemoteException e) {
+                } catch (IOException e) {
                     System.err.println("Remote Exception");
                 }
             }).start();
@@ -90,17 +92,17 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         List<GameInfo> availableGames = getAvailableGames();
 
         connectionManager.getClients()
-                        .forEach((clientNickname, clientController) -> {
-                            Future<?> future = executor.submit(() -> {
-                                try {
-                                    if (!gameControllers.containsKey(clientNickname))
-                                        clientController.notifyGameInfos(clientNickname, availableGames);
-                                } catch (RemoteException e) {
-                                    System.err.println("Remote Exception");
-                                }
-                            });
-                            futureNicknames.put(future, clientNickname);
-                        });
+                .forEach((clientNickname, clientController) -> {
+                    Future<?> future = executor.submit(() -> {
+                        try {
+                            if (!gameControllers.containsKey(clientNickname))
+                                clientController.notifyGameInfos(clientNickname, availableGames);
+                        } catch (IOException e) {
+                            System.err.println("Remote Exception");
+                        }
+                    });
+                    futureNicknames.put(future, clientNickname);
+                });
 
         futureNicknames.forEach((future, clientNickname) -> {
             try {
@@ -134,7 +136,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
                         try {
                             if (!gameControllers.containsKey(clientNickname))
                                 clientController.notifyGameInfos(clientNickname, availableGames);
-                        } catch (RemoteException e) {
+                        } catch (IOException e) {
                             System.err.println("Remote Exception");
                         }
                     });

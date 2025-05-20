@@ -7,7 +7,8 @@
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
     },
-    "lifeSupportColor": "BROWN"
+    "lifeSupportColor": "BROWN",
+    "imageName": "GT-new_tiles_16_for web137.jpg"
   },
   {
     "type": "LifeSupport",
@@ -17,7 +18,8 @@
       "SOUTH": "EMPTY",
       "WEST": "SINGLE"
     },
-    "lifeSupportColor": "BROWN"
+    "lifeSupportColor": "BROWN",
+    "imageName": "GT-new_tiles_16_for web138.jpg"
   },
   {
     "type": "LifeSupport",
@@ -27,7 +29,8 @@
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-    "lifeSupportColor": "BROWN"
+    "lifeSupportColor": "BROWN",
+    "imageName": "GT-new_tiles_16_for web139.jpg"
   },
   {
     "type": "LifeSupport",
@@ -37,7 +40,8 @@
       "SOUTH": "SINGLE",
       "WEST": "UNIVERSAL"
     },
-    "lifeSupportColor": "BROWN"
+    "lifeSupportColor": "BROWN",
+    "imageName": "GT-new_tiles_16_for web140.jpg"
   },
   {
     "type": "LifeSupport",
@@ -47,7 +51,8 @@
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-    "lifeSupportColor": "BROWN"
+    "lifeSupportColor": "BROWN",
+    "imageName": "GT-new_tiles_16_for web141.jpg"
   },
   {
     "type": "LifeSupport",
@@ -57,7 +62,8 @@
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-    "lifeSupportColor": "BROWN"
+    "lifeSupportColor": "BROWN",
+    "imageName": "GT-new_tiles_16_for web142.jpg"
   },
   {
     "type": "LifeSupport",
@@ -67,7 +73,8 @@
       "SOUTH": "EMPTY",
       "WEST": "DOUBLE"
     },
-    "lifeSupportColor": "PURPLE"
+    "lifeSupportColor": "PURPLE",
+    "imageName": "GT-new_tiles_16_for web143.jpg"
   },
   {
     "type": "LifeSupport",
@@ -77,7 +84,8 @@
       "SOUTH": "EMPTY",
       "WEST": "DOUBLE"
     },
-    "lifeSupportColor": "PURPLE"
+    "lifeSupportColor": "PURPLE",
+    "imageName": "GT-new_tiles_16_for web144.jpg"
   },
   {
     "type": "LifeSupport",
@@ -87,7 +95,8 @@
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-    "lifeSupportColor": "PURPLE"
+    "lifeSupportColor": "PURPLE",
+    "imageName": "GT-new_tiles_16_for web145.jpg"
   },
   {
     "type": "LifeSupport",
@@ -97,7 +106,8 @@
       "SOUTH": "DOUBLE",
       "WEST": "UNIVERSAL"
     },
-    "lifeSupportColor": "PURPLE"
+    "lifeSupportColor": "PURPLE",
+    "imageName": "GT-new_tiles_16_for web146.jpg"
   },
   {
     "type": "LifeSupport",
@@ -107,7 +117,8 @@
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-    "lifeSupportColor": "PURPLE"
+    "lifeSupportColor": "PURPLE",
+    "imageName": "GT-new_tiles_16_for web147.jpg"
   },
   {
     "type": "LifeSupport",
@@ -117,6 +128,7 @@
       "SOUTH": "EMPTY",
       "WEST": "UNIVERSAL"
     },
-    "lifeSupportColor": "PURPLE"
+    "lifeSupportColor": "PURPLE",
+    "imageName": "GT-new_tiles_16_for web148.jpg"
   }
 ]

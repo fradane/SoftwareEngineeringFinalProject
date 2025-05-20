@@ -61,11 +61,7 @@ public class Level1FlyingBoard extends FlyingBoard {
         ranking.put(player, initialPosition);
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
-                clientController.notifyRankingUpdate(nicknameToNotify,player.getNickname(),initialPosition);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
+            clientController.notifyRankingUpdate(nicknameToNotify,player.getNickname(),initialPosition);
         });
 
     }

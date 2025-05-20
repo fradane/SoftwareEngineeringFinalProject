@@ -86,11 +86,7 @@ public class GameModel {
                 }
 
                 gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-                    try {
                         clientController.notifyHourglassRestarted(nicknameToNotify, nickname, flipsLeft);
-                    } catch (RemoteException e) {
-                        System.err.println("Remote Exception");
-                    }
                 });
 
                 flipsLeft--;
@@ -111,8 +107,8 @@ public class GameModel {
         return componentTable;
     }
 
-    public void createGameContext(Map<String, CallableOnClientController> clientControllers) {
-        this.gameContext = new GameContext(clientControllers);
+    public void createGameContext(ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
+        this.gameContext = new GameContext(this,clientControllers);
         deck.setGameContext(gameContext);
         flyingBoard.setGameContext(gameContext);
         componentTable.setGameContext(gameContext);
@@ -144,11 +140,7 @@ public class GameModel {
         currGameState.run(this);
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
                 clientController.notifyGameState(nicknameToNotify, currGameState);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
         });
     }
 
@@ -177,11 +169,7 @@ public class GameModel {
         this.currDangerousObj = dangerousObj;
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
                 clientController.notifyDangerousObjAttack(nicknameToNotify, currDangerousObj);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
         });
 
     }
@@ -210,11 +198,7 @@ public class GameModel {
         this.currPlayer = player;
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
                 clientController.notifyCurrPlayerChanged(nicknameToNotify, player.getNickname());
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
         });
 
 
@@ -240,11 +224,7 @@ public class GameModel {
             this.currAdventureCard = currAdventureCard;
 
             gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-                try {
                     clientController.notifyCurrAdventureCard(nicknameToNotify, currAdventureCard.toString());
-                } catch (RemoteException e) {
-                    System.err.println("Remote Exception");
-                }
             });
 
     }
@@ -330,7 +310,7 @@ public class GameModel {
 
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController){
         gameContext.getClientControllers().put(nickname, clientController);
-        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color, gameContext) : new Level2ShipBoard(color, gameContext);
+        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color,gameContext) : new Level2ShipBoard(color, gameContext);
         Player player = new Player(nickname, shipBoard, color);
         player.setGameContext(gameContext);
         players.put(nickname, player);

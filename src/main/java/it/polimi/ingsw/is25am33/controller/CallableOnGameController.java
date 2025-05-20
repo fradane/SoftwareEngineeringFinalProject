@@ -12,7 +12,7 @@ import java.util.Set;
 
 public interface CallableOnGameController extends Remote {
 
-    void showMessage(String s) throws RemoteException;
+    void showMessage(String s) throws IOException;
 
     void playerPicksHiddenComponent(String nickname) throws IOException;
 
@@ -26,45 +26,45 @@ public interface CallableOnGameController extends Remote {
 
     void playerPicksVisibleComponent(String nickname, Integer choice) throws IOException;
 
-    void playerWantsToVisitLocation(String nickname, Boolean choice) throws RemoteException;
+    void playerWantsToVisitLocation(String nickname, Boolean choice) throws IOException;
 
-    void playerWantsToThrowDices(String nickname) throws RemoteException;
+    void playerWantsToThrowDices(String nickname) throws IOException;
 
-    void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException;
+    void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws IOException;
 
-    void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException;
+    void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws IOException;
 
-    void playerChoseCabin(String nickname, List<Coordinates> cabin) throws RemoteException;
+    void playerChoseCabin(String nickname, List<Coordinates> cabin) throws IOException;
 
-    void playerWantsToVisitPlanet(String nickname, int choice) throws RemoteException;
+    void playerWantsToVisitPlanet(String nickname, int choice) throws IOException;
 
-    void playerWantsToAcceptTheReward(String nickname, Boolean choice) throws RemoteException;
+    void playerWantsToAcceptTheReward(String nickname, Boolean choice) throws IOException;
 
-    void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords) throws RemoteException;
+    void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords) throws IOException;
 
-    void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords) throws RemoteException;
+    void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords) throws IOException;
 
-    void playerHandleBigShot(String nickname) throws RemoteException;
+    void playerHandleBigShot(String nickname) throws IOException;
 
-    void playerChoseStorage(String nickname, Coordinates storageCoords) throws RemoteException;
+    void playerChoseStorage(String nickname, Coordinates storageCoords) throws IOException;
 
-    void spreadEpidemic(String nickname) throws RemoteException;
+    void spreadEpidemic(String nickname) throws IOException;
 
-    void stardustEvent(String nickname) throws RemoteException;
+    void stardustEvent(String nickname) throws IOException;
 
     boolean playerWantsToWatchLittleDeck(String nickname, int littleDeckChoice) throws IOException;
 
-    void playerWantsToReleaseLittleDeck(String nickname, int littleDeckChoice) throws RemoteException;
+    void playerWantsToReleaseLittleDeck(String nickname, int littleDeckChoice) throws IOException;
 
-    void playerWantsToRestartHourglass(String nickname) throws RemoteException;
+    void playerWantsToRestartHourglass(String nickname) throws IOException;
 
-    void notifyHourglassEnded(String nickname) throws RemoteException;
+    void notifyHourglassEnded(String nickname) throws IOException;
 
-    void leaveGame(String nickname) throws RemoteException;
+    void leaveGame(String nickname) throws IOException;
 
-    void playerToRemoveComponent(String nickname, Component component) throws RemoteException;
+    void playerToRemoveComponent(String nickname, Component component) throws IOException;
 
-    void playerChooseShipPart(String nickname, List<Set<List<Integer>>>shipPart) throws RemoteException;
+    void playerChooseShipPart(String nickname, List<Set<List<Integer>>>shipPart) throws IOException;
 
-    void playerWantsToFocusReservedComponent(String nickname, int choice) throws RemoteException;
+    void playerWantsToFocusReservedComponent(String nickname, int choice) throws IOException;
 }

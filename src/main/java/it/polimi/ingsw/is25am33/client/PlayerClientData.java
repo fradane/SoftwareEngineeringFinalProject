@@ -7,6 +7,7 @@ import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents the client-side data of a player in the game.
@@ -26,7 +27,7 @@ public class PlayerClientData {
         this.nickname = nickname;
         this.credits = 0;
         this.color = color;
-        this.shipBoard = isTestFlight ? new Level1ShipBoard(color, new GameContext(new HashMap<>())) : new Level2ShipBoard(color, new GameContext(new HashMap<>()));
+        this.shipBoard = isTestFlight ? new Level1ShipBoard(color, new GameContext(null, new ConcurrentHashMap<>())) : new Level2ShipBoard(color, new GameContext(null,new ConcurrentHashMap<>()));
     }
 
     public PlayerColor getColor() {

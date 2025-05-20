@@ -86,11 +86,7 @@ public abstract class AdventureCard implements Serializable {
         this.currState = currState;
 
         gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
-                clientController.notifyCardState(nicknameToNotify, currState);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
+            clientController.notifyCardState(nicknameToNotify, currState);
         });
     }
 

@@ -7,6 +7,7 @@ import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.game.Player;
+import javafx.beans.property.ObjectProperty;
 
 import java.util.List;
 import java.util.Set;
@@ -426,4 +427,10 @@ public interface ShipBoardClient {
      * @return The component that was released
      */
     Component releaseFocusedComponent();
+
+    // TODO da togliere
+    default ObjectProperty<Component>[][] getObservableMatrix() {
+        return null;
+    }
+
 }

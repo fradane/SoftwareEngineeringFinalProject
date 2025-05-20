@@ -7,7 +7,7 @@ import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 public class Level1ShipBoard extends ShipBoard {
 
     public Level1ShipBoard(PlayerColor color, GameContext gameContext) {
-        super(color, gameContext);
+        super(color,gameContext);
     }
 
     @Override
