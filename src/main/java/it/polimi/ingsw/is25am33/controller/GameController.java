@@ -46,15 +46,6 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.addPlayer(nickname, color, clientController);
     }
 
-    public void removePlayer(String nickname) {
-        gameModel.removePlayer(nickname);
-    }
-
-    public void playCard(String jsonString) throws IOException {
-        AdventureCard currCard = gameModel.getCurrAdventureCard();
-        currCard.play(currCard.getCurrState().handleJsonDeserialization(gameModel, jsonString));
-    }
-
     public GameInfo getGameInfo() {
         Collection<Player> players = gameModel.getPlayers().values();
         Map<String, PlayerColor> playerAndColors = new HashMap<>();
@@ -171,8 +162,16 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerChoseToEndBuildShipBoardPhase(String nickname) {
-        // TODO
+    public void playerEndsBuildShipBoardPhase(String nickname) {
+        gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname));
+        if (gameModel.getFlyingBoard().getCurrentRanking().size() == gameModel.getMaxPlayers())
+            gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
+    }
+
+    @Override
+    public void playerPlacePlaceholder(String nickname) {
+        if (gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname)) == gameModel.getMaxPlayers())
+            gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
     }
 
     @Override
@@ -349,10 +348,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerChoseStorage(String nickname, Coordinates storageCoords) throws RemoteException {
+    public void playerChoseStorage(String nickname, List<Coordinates> storageCoords) throws RemoteException {
 
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-        Storage storage = storageCoords.isCoordinateInvalid() ? null : ((Storage) shipBoard.getComponentAt(storageCoords));
+        List<Storage> storage = new ArrayList<>();
+        if (!storageCoords.isEmpty())
+            storageCoords.forEach(coords -> storage.add(coords.isCoordinateInvalid() ? null : ((Storage) shipBoard.getComponentAt(coords))));
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
@@ -415,12 +416,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 Component[][] shipMatrix = shipBoard.getShipMatrix();
                 Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
                 if(shipParts.size() == 1){
-                    if(incorrectlyPositionedComponentsCoordinates.size()==0) {
+                    if(incorrectlyPositionedComponentsCoordinates.isEmpty()) {
                         clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
 
                     }else
                         clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
-                }else if(shipParts.size() == 0)
+                }else if(shipParts.isEmpty())
                     clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
                 else
                     clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts);

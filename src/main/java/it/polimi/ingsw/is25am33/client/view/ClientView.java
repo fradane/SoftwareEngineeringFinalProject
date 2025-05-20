@@ -195,4 +195,5 @@ public interface ClientView {
 
     void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts);
 
+    void showFirstToEnter();
 }

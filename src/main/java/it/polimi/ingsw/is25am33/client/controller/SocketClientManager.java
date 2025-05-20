@@ -288,6 +288,18 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyStopHourglass":
+                    if (clientController != null) {
+                        clientController.notifyStopHourglass(notification.getParamString());
+                    }
+                    break;
+
+                case "notifyFirstToEnter":
+                    if (clientController != null) {
+                        clientController.notifyFirstToEnter(notification.getParamString());
+                    }
+                    break;
+
                 case "notifyRemoveVisibleComponents":
                     if (clientController != null) {
                         clientController.notifyRemoveVisibleComponents(notification.getParamString(), notification.getParamInt());
@@ -438,8 +450,15 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
 
     @Override
-    public void playerChoseToEndBuildShipBoardPhase(String nickname) {
-        // TODO
+    public void playerEndsBuildShipBoardPhase(String nickname) {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerEndsBuildShipBoardPhase");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerPlacePlaceholder(String nickname) {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerPlacePlaceholder");
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
@@ -528,9 +547,9 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerChoseStorage(String nickname, Coordinates storageCoords) throws RemoteException {
+    public void playerChoseStorage(String nickname, List<Coordinates> storageCoords) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerChoseStorage");
-        outMessage.setParamCoordinates(storageCoords);
+        outMessage.setParamActivableCoordinates(storageCoords);
         out.println(ClientSerializer.serialize(outMessage));
     }
 

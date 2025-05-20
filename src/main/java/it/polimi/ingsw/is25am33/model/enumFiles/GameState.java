@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.enumFiles;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.io.Serializable;
+import java.util.EmptyStackException;
 
 public enum GameState implements Serializable {
 
@@ -22,6 +23,7 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
+            gameModel.notifyStopHourglass();
             gameModel.notifyInvalidShipBoards();
             gameModel.notifyValidShipBoards();
         }
@@ -41,7 +43,12 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
-            gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard());
+            try {
+                gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard());
+            } catch (EmptyStackException e) {
+                //TODO
+                gameModel.setCurrAdventureCard(null);
+            }
         }
 
     },
@@ -59,7 +66,20 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
+            // check doubled players
             gameModel.getFlyingBoard().getDoubledPlayers();
+
+            // check if there are any human members alive
+            gameModel.getPlayers().forEach((_, player) -> {
+                if (gameModel.getCurrPlayer().getPersonalBoard()
+                        .getCrewMembers()
+                        .stream()
+                        .noneMatch(crewMember -> crewMember.equals(CrewMember.HUMAN))
+                ) {
+                    gameModel.getFlyingBoard().addOutPlayer(player);
+                }
+            });
+
         }
 
     },

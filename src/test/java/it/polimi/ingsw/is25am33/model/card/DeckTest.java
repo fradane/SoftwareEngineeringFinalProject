@@ -2,11 +2,13 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.ThrowingBiConsumer;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -23,9 +25,9 @@ class DeckTest {
     void setUp() {
         deck = new Deck();
         dummyGameModel = new GameModel(null, 2, false);
-        dummyGameContext = new GameContext(null) {
+        dummyGameContext = new GameContext(null, null) {
             @Override
-            public void notifyAllClients(BiConsumer<String, CallableOnClientController> action) {}
+            public void notifyAllClients(ThrowingBiConsumer<String, CallableOnClientController, IOException> consumer) {}
         };
         deck.setGameContext(dummyGameContext);
         dummyGameModel.setGameContext(dummyGameContext);

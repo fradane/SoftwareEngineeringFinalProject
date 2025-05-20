@@ -4,18 +4,17 @@ import it.polimi.ingsw.is25am33.model.GameContext;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
-import java.rmi.RemoteException;
 import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
  * Abstract class representing a FlyingBoard that keeps track of players and their positions.
  */
 public abstract class FlyingBoard {
-    private Set<Player> outPlayers;
-    protected int runLenght;
-    protected Map<Player, Integer> ranking;
+    private final Set<Player> outPlayers;
+    protected int runLength;
+    protected final Map<Player, Integer> ranking;
     protected GameContext gameContext;
 
     /**
@@ -24,9 +23,9 @@ public abstract class FlyingBoard {
      * @param runLength The length difference after which a player is considered doubled.
      */
     public FlyingBoard(int runLength) {
-        this.runLenght = runLength;
+        this.runLength = runLength;
         this.outPlayers = new HashSet<>();
-        this.ranking = new HashMap<>();
+        this.ranking = new ConcurrentHashMap<>();
     }
 
     public void setGameContext(GameContext gameContext) {
@@ -38,7 +37,7 @@ public abstract class FlyingBoard {
      *
      * @param player The player to be inserted.
      */
-    public abstract void insertPlayer(Player player);
+    public abstract int insertPlayer(Player player);
 
     /**
      * Retrieves the current position of the specified player in the ranking.
@@ -73,9 +72,8 @@ public abstract class FlyingBoard {
         });
     }
 
-    @JsonIgnore
-    public int getRunLenght() {
-        return runLenght;
+    public int getRunLength() {
+        return runLength;
     }
 
     public Map<Player, Integer> getRanking() {
@@ -83,23 +81,27 @@ public abstract class FlyingBoard {
     }
 
     /**
-     * Identifies and returns the players who have been doubled, based on their position.
-     * Doubled players are added to the outPlayers set and removed from the ranking.
-     *
-     * @return A list of players who are out of the gameModel.
+     * Identifies and removes players from the ranking whose position difference
+     * from the top-ranked player exceeds the predefined run length.
+     * These players are added to the `outPlayers` set.
+     * <p>
+     * The method performs the following:
+     * 1. Determines the maximum position in the ranking.
+     * 2. Filters players whose position difference from the maximum position
+     *    is greater than the `runLenght`.
+     * 3. Adds the filtered players to the `outPlayers` set.
+     * 4. Removes the filtered players from the ranking map.
      */
-    public List<Player> getDoubledPlayers() {
+    public void getDoubledPlayers() {
         int maxPosition = Collections.max(ranking.values());
 
         List<Player> playersToRemove = ranking.keySet()
                 .stream()
-                .filter(player -> maxPosition - ranking.get(player) > runLenght)
+                .filter(player -> maxPosition - ranking.get(player) > runLength)
                 .collect(Collectors.toList());
 
-        outPlayers.addAll(playersToRemove);
+        playersToRemove.forEach(this::addOutPlayer);
         ranking.keySet().removeAll(playersToRemove);
-
-        return playersToRemove;
     }
 
     /**
