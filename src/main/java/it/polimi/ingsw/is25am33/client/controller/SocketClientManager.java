@@ -350,9 +350,10 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates) throws IOException {
+    public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates, int rotation) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToPlaceFocusedComponent");
         outMessage.setParamCoordinates(coordinates);
+        outMessage.setParamInt(rotation);
         out.println(ClientSerializer.serialize(outMessage));
     }
 

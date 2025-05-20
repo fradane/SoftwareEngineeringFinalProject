@@ -129,6 +129,7 @@ public abstract class Component implements Serializable {
         for (int i = 0; i < keys.size(); i++) {
             connectors.put(keys.get(i), values.get(i));
         }
+        rotation = (rotation + 1) % 4;
 
     }
 

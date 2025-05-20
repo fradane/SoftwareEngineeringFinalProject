@@ -227,7 +227,56 @@ public enum CardState {
             return view.showAcceptTheRewardMenu();
         }
     },
-    
+
+    EVALUATE_CREW_MEMBERS{
+        @Override
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
+            return null;
+        }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            // TODO
+            return null;
+        }
+    },
+    EVALUATE_CANNON_POWER{
+        @Override
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
+            return null;
+        }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            // TODO
+            return null;
+        }
+    },
+    EVALUATE_ENGINE_POWER{
+        @Override
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
+            return null;
+        }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            // TODO
+            return null;
+        }
+    },
+    STEPS_BACK{
+        @Override
+        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
+            return null;
+        }
+
+        @Override
+        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+            // TODO
+            return null;
+        }
+    },
+
     END_OF_CARD {
         @Override
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {

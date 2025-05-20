@@ -531,8 +531,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         try {
             row--;
             column--;
-            clientModel.getShipboardOf(nickname).placeComponentWithFocus(row, column);
-            serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column));
+            // TODO aggiungere il check sul componente
+            serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column), clientModel.getShipboardOf(nickname).getFocusedComponent().getRotation());
             view.showBuildShipBoardMenu();
         } catch (IOException e) {
             handleRemoteException(e);

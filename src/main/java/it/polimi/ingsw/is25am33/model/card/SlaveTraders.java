@@ -97,9 +97,9 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         if (gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
-            setCurrState( CardState.CHOOSE_CANNONS);
+            setCurrState(CardState.CHOOSE_CANNONS);
         } else {
-            setCurrState( CardState.END_OF_CARD);
+            setCurrState(CardState.END_OF_CARD);
         }
 
     }

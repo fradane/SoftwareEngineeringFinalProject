@@ -81,6 +81,7 @@ public abstract class AdventureCard implements Serializable {
     @JsonIgnore
     public abstract CardState getFirstState();
 
+    @JsonIgnore
     public void setCurrState(CardState currState)  {
         this.currState = currState;
 

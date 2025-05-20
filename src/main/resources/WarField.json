@@ -2,7 +2,11 @@
   {
     "imageName": "GT-cards_I_IT_0116.jpg",
     "level": 1,
-    "minimumCategories": ["EVALUATE_CREW_MEMBERS", "EVALUATE_ENGINE_POWER", "EVALUATE_CANNON_POWER"],
+    "categories": {
+      "EVALUATE_CREW_MEMBERS": "STEPS_BACK",
+      "EVALUATE_ENGINE_POWER": "REMOVE_CREW_MEMBERS",
+      "EVALUATE_CANNON_POWER": "DANGEROUS_ATTACK"
+    },
     "stepsBack": -3,
     "crewMalus": 2,
     "shots": ["small_south", "big_south"]
@@ -11,7 +15,11 @@
   {
     "imageName": "GT-cards_II_IT_0116.jpg",
     "level": 2,
-    "minimumCategories": ["EVALUATE_CANNON_POWER", "EVALUATE_ENGINE_POWER", "EVALUATE_CREW_MEMBERS"],
+    "categories": {
+      "EVALUATE_CANNON_POWER": "STEPS_BACK",
+      "EVALUATE_ENGINE_POWER": "HANDLE_CUBES_MALUS",
+      "EVALUATE_CREW_MEMBERS": "DANGEROUS_ATTACK"
+    },
     "stepsBack": -4,
     "crewMalus": 3,
     "shots": ["small_north", "small_west", "small_east", "big_south"]

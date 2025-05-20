@@ -16,7 +16,7 @@ public interface CallableOnGameController extends Remote {
 
     void playerPicksHiddenComponent(String nickname) throws IOException;
 
-    void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates) throws IOException;
+    void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates, int rotation) throws IOException;
 
     void playerWantsToReserveFocusedComponent(String nickname) throws IOException;
 

@@ -20,6 +20,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
 
 public class GameController extends UnicastRemoteObject implements CallableOnGameController {
     private final GameModel gameModel;
@@ -134,9 +135,19 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(pickedComponent);
     }
 
+    /**
+     * Handles the player's action to place a focused component on their ship board at the specified coordinates
+     * with the specified rotation.
+     *
+     * @param nickname the nickname of the player placing the component
+     * @param coordinates the coordinates on the ship board where the component will be placed
+     * @param rotation the number of clockwise rotations to apply to the component before placement
+     */
     @Override
-    public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates) {
+    public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates, int rotation) {
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+        for (int i = 0; i < rotation; i++)
+            shipBoard.getFocusedComponent().rotate();
         shipBoard.placeComponentWithFocus(coordinates.getX(), coordinates.getY());
     }
 

@@ -150,7 +150,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
             case "playerWantsToPlaceFocusedComponent":
                 Coordinates coordinates = inMessage.getParamCoordinates();
-                gameControllers.get(nickname).playerWantsToPlaceFocusedComponent(nickname, coordinates);
+                gameControllers.get(nickname).playerWantsToPlaceFocusedComponent(nickname, coordinates, inMessage.getParamInt());
                 break;
 
             case "playerWantsToWatchLittleDeck":

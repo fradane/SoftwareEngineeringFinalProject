@@ -190,6 +190,12 @@ public class GameModel {
         return playerIterator.hasNext();
     }
 
+    /**
+     * Resets the iterator for the player ranking and sets the current player
+     * to the first player in the ranking.
+     * This method initializes the player iterator using the current player ranking
+     * and subsequently sets the current player to the first player determined by the iterator.
+     */
     public void resetPlayerIterator() {
         playerIterator = currRanking.iterator();
         currPlayer = playerIterator.next();

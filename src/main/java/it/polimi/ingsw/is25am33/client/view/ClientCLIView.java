@@ -488,7 +488,7 @@ public class ClientCLIView implements ClientView {
                         3. Place a reserved component
                         4. Restart hourglass
                         5. Watch a little deck
-                        ("show" + [nickname]" to watch other's player ship board)
+                        ("show [nickname]" to watch other's player ship board)
                         >\s""";
         showMessage(menu, ASK);
     }
@@ -548,9 +548,10 @@ public class ClientCLIView implements ClientView {
         littleDeck.append("\nHere is the little deck you chose:\n");
         clientModel.getLittleVisibleDecks().get(littleDeckChoice - 1).forEach(
                 card -> {
-                    List<String> cardLines = Arrays.asList(card.split("\\n"));
-                    cardLines.removeFirst();
-                    littleDeck.append(cardLines).append("\n");
+                    String[] cardLines = card.split("\\n");
+                    for (int i = 1; i < cardLines.length; i++) {
+                        littleDeck.append(cardLines[i]).append("\n");
+                    }
                 }
         );
         showMessage(littleDeck.toString(), STANDARD);
@@ -575,7 +576,7 @@ public class ClientCLIView implements ClientView {
                     3. Place component on ship board
                     4. Reserve component
                     5. Release component
-                    ("show" + [nickname]" to watch other's player ship board)
+                    ("show [nickname]" to watch other's player ship board)
                     >\s""";
         showMessage(menu, ASK);
     }
@@ -644,10 +645,9 @@ public class ClientCLIView implements ClientView {
 
         String[] legendLines = {
                 "LEGEND - component label and explanation on attributes:",
-                "",
                 "• BBX = battery box - number of remaining batteries",
                 "• CAB = cabin - number and type of members",
-                "• CAN = cannon - fire direction",
+                "• CNN = cannon - fire direction",
                 "• 2CN = double cannons - fire direction",
                 "• 2EN = double engines - power direction",
                 "• ENG = engine - power direction",
@@ -714,9 +714,11 @@ public class ClientCLIView implements ClientView {
 
                 if (legendIndex <= legendLines.length - 1)
                     output.append(String.format("\t\t" + legendLines[legendIndex++] + "\n"));
-                else if (componentIndex <= 6) {
-                    if (reservedComponent1.get(componentIndex) != null) output.append(String.format("\t\t\t" + reservedComponent1.get(componentIndex)));
-                    if (reservedComponent2.get(componentIndex) != null) output.append(String.format("\t\t\t" + reservedComponent2.get(componentIndex)));
+                else if (componentIndex <= 7) {
+                    if (reservedComponent1.size() > componentIndex)
+                        if (reservedComponent1.get(componentIndex) != null) output.append(String.format("\t\t\t" + reservedComponent1.get(componentIndex)));
+                    if (reservedComponent2.size() > componentIndex)
+                        if (reservedComponent2.get(componentIndex) != null) output.append(String.format("\t\t\t" + reservedComponent2.get(componentIndex)));
                     output.append("\n");
                     componentIndex++;
                 }
@@ -1328,21 +1330,22 @@ public class ClientCLIView implements ClientView {
 
                 case BUILDING_SHIPBOARD_WITH_FOCUSED_COMPONENT:
                     Component focusedComponent = clientModel.getPlayerClientData().get(clientController.getNickname()).getShipBoard().getFocusedComponent();
+                    String[] focusedComponentString;
+                    StringBuilder focusedComponentStringBuilder = new StringBuilder();
                     switch (Integer.parseInt(input)) {
                         case 1:
                             if (focusedComponent == null) {
                                 showMessage("Still picking the component. Please wait...\n", STANDARD);
                                 break;
                             }
-                            String[] visibleComponent = focusedComponent.toString().split("\\n");
-                            StringBuilder output = new StringBuilder();
-                            for (int i = 1; i < visibleComponent.length; i++) {
-                                output.append(visibleComponent[i]).append("\n");
+                            focusedComponentString = focusedComponent.toString().split("\\n");
+                            for (int i = 1; i < focusedComponentString.length; i++) {
+                                focusedComponentStringBuilder.append(focusedComponentString[i]).append("\n");
                             }
                             showMessage(String.format("""
                                     \nComponent details:
                                     %s
-                                    """, output), STANDARD);
+                                    """, focusedComponentStringBuilder), STANDARD);
                             showPickedComponentAndMenu();
                             break;
 
@@ -1352,10 +1355,14 @@ public class ClientCLIView implements ClientView {
                                 break;
                             }
                             focusedComponent.rotate();
+                            focusedComponentString = focusedComponent.toString().split("\\n");
+                            for (int i = 1; i < focusedComponentString.length; i++) {
+                                focusedComponentStringBuilder.append(focusedComponentString[i]).append("\n");
+                            }
                             showMessage(String.format("""
                                     \nComponent details:
                                     %s
-                                    """, focusedComponent), STANDARD);
+                                    """, focusedComponentStringBuilder), STANDARD);
                             showPickedComponentAndMenu();
                             break;
 
