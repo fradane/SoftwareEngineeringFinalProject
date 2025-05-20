@@ -180,5 +180,4 @@ public interface ClientView {
 
     void showPickReservedComponentQuestion();
 
-    void showExitMenu();
 }

@@ -106,7 +106,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
         futureNicknames.forEach((future, clientNickname) -> {
             try {
-                future.get(1, TimeUnit.SECONDS);
+                future.get(5, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 System.err.println("Timeout nella notifica del client: " + clientNickname);
                 future.cancel(true);
@@ -126,35 +126,5 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     public void removeGame(String gameId) {
         gameControllers.remove(gameId);
-
-        Map<Future<?>, String> futureNicknames = new HashMap<>();
-        List<GameInfo> availableGames = getAvailableGames();
-
-        connectionManager.getClients()
-                .forEach((clientNickname, clientController) -> {
-                    Future<?> future = executor.submit(() -> {
-                        try {
-                            if (!gameControllers.containsKey(clientNickname))
-                                clientController.notifyGameInfos(clientNickname, availableGames);
-                        } catch (IOException e) {
-                            System.err.println("Remote Exception");
-                        }
-                    });
-                    futureNicknames.put(future, clientNickname);
-                });
-
-        futureNicknames.forEach((future, clientNickname) -> {
-            try {
-                future.get(1, TimeUnit.SECONDS);
-            } catch (TimeoutException e) {
-                System.err.println("Timeout nella notifica del client: " + clientNickname);
-                future.cancel(true);
-            } catch (InterruptedException | ExecutionException e) {
-                System.err.println("Errore nella notifica del client: " + clientNickname);
-                e.printStackTrace();
-            }
-        });
-
-
     }
 }

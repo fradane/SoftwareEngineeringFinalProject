@@ -64,14 +64,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                         final Scanner in = new Scanner(socket.getInputStream());
                         final PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                             while (true) {
-                            final String line = in.nextLine();
-                            if (line.equals("exit")) {
-                                break;
-                            } else {
-                                SocketMessage inMessage = ServerDeserializer.deserializeObj(line, SocketMessage.class);
-                                performAction(inMessage, out);
+                                final String line = in.nextLine();
+                                if (line.equals("exit")) {
+                                    break;
+                                } else {
+                                    SocketMessage inMessage = ServerDeserializer.deserializeObj(line, SocketMessage.class);
+                                    performAction(inMessage, out);
+                                }
                             }
-                        }
                         in.close();
                         out.close();
                         socket.close();
