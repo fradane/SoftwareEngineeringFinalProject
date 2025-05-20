@@ -1,20 +1,20 @@
 package it.polimi.ingsw.is25am33.client;
 
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
-import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
+import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 
 import java.rmi.RemoteException;
-import java.util.Scanner;
 
 public class ClientLauncher {
     public static void main(String[] args) {
         String titleScreen ="╔═══════════════════════════════════════════════════════════════════════════╗\n" +
                             "║                                                                           ║\n" +
                             "║     ███████╗ █████╗ ██╗      █████╗ ██╗  ██╗██╗   ██╗                     ║\n" +
-                            "║    ██╔════╝██╔══██╗██║     ██╔══██╗╚██╗██╔╝╚██╗ ██╔╝                      ║\n" +
+                            "║    ██╔════╝ ██╔══██╗██║     ██╔══██╗╚██╗██╔╝╚██╗ ██╔╝                     ║\n" +
                             "║    ██║  ███╗███████║██║     ███████║ ╚███╔╝  ╚████╔╝                      ║\n" +
                             "║    ██║   ██║██╔══██║██║     ██╔══██║ ██╔██╗   ╚██╔╝                       ║\n" +
                             "║    ╚██████╔╝██║  ██║███████╗██║  ██║██╔╝ ██╗   ██║                        ║\n" +

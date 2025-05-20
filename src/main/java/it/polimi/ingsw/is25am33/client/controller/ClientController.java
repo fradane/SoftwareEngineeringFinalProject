@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
-import it.polimi.ingsw.is25am33.client.ClientModel;
-import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
+import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
@@ -12,7 +12,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.client.Hourglass;
+import it.polimi.ingsw.is25am33.client.model.Hourglass;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 import javafx.collections.FXCollections;
@@ -25,7 +25,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
-import static it.polimi.ingsw.is25am33.client.view.MessageType.*;
+import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
 
 public class ClientController extends UnicastRemoteObject implements CallableOnClientController {
 
@@ -568,7 +568,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         try {
             row--;
             column--;
-            // TODO aggiungere il check sul componente
+            clientModel.getShipboardOf(nickname).checkPosition(row, column);
             serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column), clientModel.getShipboardOf(nickname).getFocusedComponent().getRotation());
             view.showBuildShipBoardMenu();
         } catch (IOException e) {

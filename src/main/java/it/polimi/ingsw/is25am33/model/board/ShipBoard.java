@@ -6,11 +6,9 @@ import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.Player;
-import it.polimi.ingsw.is25am33.client.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;

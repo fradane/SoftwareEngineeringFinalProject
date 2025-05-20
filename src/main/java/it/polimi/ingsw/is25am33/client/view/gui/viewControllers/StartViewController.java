@@ -1,8 +1,6 @@
 package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
-import it.polimi.ingsw.is25am33.client.ClientModel;
-import it.polimi.ingsw.is25am33.client.controller.ClientController;
-import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
+import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;

@@ -1,4 +1,4 @@
-package it.polimi.ingsw.is25am33.client;
+package it.polimi.ingsw.is25am33.client.model;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.GameContext;
@@ -437,5 +437,7 @@ public interface ShipBoardClient {
     default ObjectProperty<Component>[][] getObservableMatrix() {
         return null;
     }
+
+    void checkPosition(int x, int y);
 
 }

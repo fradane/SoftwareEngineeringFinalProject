@@ -71,4 +71,7 @@ module it.polimi.ingsw.is25am33 {
     opens it.polimi.ingsw.is25am33.client.view.gui to javafx.fxml;
     exports it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
     opens it.polimi.ingsw.is25am33.client.view.gui.viewControllers to javafx.fxml;
+    exports it.polimi.ingsw.is25am33.client.view.tui;
+    exports it.polimi.ingsw.is25am33.client.model;
+    opens it.polimi.ingsw.is25am33.client.model to com.fasterxml.jackson.databind;
 }

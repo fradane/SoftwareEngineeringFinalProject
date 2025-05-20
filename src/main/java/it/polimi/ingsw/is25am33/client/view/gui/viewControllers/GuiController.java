@@ -1,6 +1,6 @@
 package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
-import it.polimi.ingsw.is25am33.client.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 
 public abstract class GuiController {

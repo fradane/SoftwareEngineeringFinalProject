@@ -1,4 +1,4 @@
-package it.polimi.ingsw.is25am33.client;
+package it.polimi.ingsw.is25am33.client.model;
 
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;

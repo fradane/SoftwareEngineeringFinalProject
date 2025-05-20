@@ -1,8 +1,9 @@
-package it.polimi.ingsw.is25am33.client.view;
+package it.polimi.ingsw.is25am33.client.view.tui;
 
-import it.polimi.ingsw.is25am33.client.ClientModel;
-import it.polimi.ingsw.is25am33.client.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
+import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
@@ -23,8 +24,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static it.polimi.ingsw.is25am33.client.view.ClientState.*;
-import static it.polimi.ingsw.is25am33.client.view.MessageType.*;
+import static it.polimi.ingsw.is25am33.client.view.tui.ClientState.*;
+import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
 
 /**
  * The ClientCLIView class provides a command-line interface for interactions with the client-side

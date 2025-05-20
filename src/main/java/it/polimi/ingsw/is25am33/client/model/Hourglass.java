@@ -1,10 +1,9 @@
-package it.polimi.ingsw.is25am33.client;
+package it.polimi.ingsw.is25am33.client.model;
 
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;

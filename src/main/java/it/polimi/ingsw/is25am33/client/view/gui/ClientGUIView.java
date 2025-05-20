@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.client.view.gui;
 
 
-import it.polimi.ingsw.is25am33.client.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 
