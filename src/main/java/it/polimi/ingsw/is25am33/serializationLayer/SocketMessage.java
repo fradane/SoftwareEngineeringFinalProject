@@ -12,10 +12,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SocketMessage {
 
@@ -38,6 +35,9 @@ public class SocketMessage {
     private DangerousObj paramDangerousObj;
     private List<List<String>> paramLittleVisibleDecks;
     private Map<Integer, Component> paramVisibleComponents;
+    private Set<Coordinates> paramIncorrectlyPositionedCoordinates;
+    private Set<Set<Coordinates>> paramShipParts;
+    private Set<Coordinates> paramShipPart;
 
     public SocketMessage(String senderNickname, String actions) {
         this.senderNickname = senderNickname;
@@ -208,6 +208,30 @@ public class SocketMessage {
 
     public void setParamLittleVisibleDecks(List<List<String>> paramLittleVisibleDecks) {
         this.paramLittleVisibleDecks = paramLittleVisibleDecks;
+    }
+
+    public Set<Coordinates> getParamIncorrectlyPositionedCoordinates() {
+        return paramIncorrectlyPositionedCoordinates;
+    }
+
+    public void setParamIncorrectlyPositionedCoordinates(Set<Coordinates> paramIncorrectlyPositionedCoordinates) {
+        this.paramIncorrectlyPositionedCoordinates = paramIncorrectlyPositionedCoordinates;
+    }
+
+    public Set<Set<Coordinates>> getParamShipParts() {
+        return paramShipParts;
+    }
+
+    public void setParamShipParts(Set<Set<Coordinates>> paramShipParts) {
+        this.paramShipParts = paramShipParts;
+    }
+
+    public Set<Coordinates> getParamShipPart() {
+        return paramShipPart;
+    }
+
+    public void setParamShipPart(Set<Coordinates> paramShipPart) {
+        this.paramShipPart = paramShipPart;
     }
 
     @JsonIgnore

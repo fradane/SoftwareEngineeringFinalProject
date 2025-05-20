@@ -334,6 +334,40 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyInvalidShipBoard":
+                    if (clientController != null) {
+                        clientController.notifyInvalidShipBoard(
+                                nickname,
+                                notification.getParamString(),
+                                notification.getParamShipBoardAsMatrix(),
+                                notification.getParamIncorrectlyPositionedCoordinates()
+                        );
+                    }
+                    break;
+
+                case "notifyValidShipBoard":
+                    if (clientController != null) {
+                        clientController.notifyValidShipBoard(
+                                nickname,
+                                notification.getParamString(),
+                                notification.getParamShipBoardAsMatrix(),
+                                notification.getParamIncorrectlyPositionedCoordinates()
+                        );
+                    }
+                    break;
+
+                case "notifyShipPartsGeneratedDueToRemoval":
+                    if (clientController != null) {
+                        clientController.notifyShipPartsGeneratedDueToRemoval(
+                                nickname,
+                                notification.getParamString(),
+                                notification.getParamShipBoardAsMatrix(),
+                                notification.getParamIncorrectlyPositionedCoordinates(),
+                                notification.getParamShipParts()
+                        );
+                    }
+                    break;
+
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
@@ -375,12 +409,16 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     @Override
     public void playerWantsToRemoveComponent(String nickname, Coordinates coordinate) throws RemoteException {
-
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToRemoveComponent");
+        outMessage.setParamCoordinates(coordinate);
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
     public void playerChoseShipPart(String nickname, Set<Coordinates> shipPart) throws RemoteException {
-        //TODO
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseShipPart");
+        outMessage.setParamShipPart(shipPart);
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
 

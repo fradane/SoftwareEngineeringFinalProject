@@ -42,6 +42,9 @@ public class GameModel {
     private Integer numClientsFinishedTimer = 0;
     private Boolean isRestartInProgress = false;
 
+    // Lock per la transizione di stato
+    private final Object stateTransitionLock = new Object();
+
     public GameModel(String gameId, int maxPlayers, boolean isTestFlight) {
         this.gameId = gameId;
         this.maxPlayers = maxPlayers;
@@ -142,17 +145,19 @@ public class GameModel {
     }
 
     public void setCurrGameState(GameState currGameState) {
+        synchronized (stateTransitionLock) {
+            this.currGameState = currGameState;
 
-        this.currGameState = currGameState;
-        currGameState.run(this);
+            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                try {
+                    clientController.notifyGameState(nicknameToNotify, currGameState);
+                } catch (RemoteException e) {
+                    System.err.println("Remote Exception");
+                }
+            });
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
-                clientController.notifyGameState(nicknameToNotify, currGameState);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
-        });
+            currGameState.run(this);
+        }
     }
 
     public GameContext getGameContext() {
@@ -431,9 +436,12 @@ public class GameModel {
     }
 
     public void checkAndTransitionToNextPhase() {
-        if (areAllShipsCorrect()) {
-            // Cambia allo stato successivo
-            setCurrGameState(GameState.CREATE_DECK);
+
+        synchronized (stateTransitionLock){
+            if (areAllShipsCorrect()) {
+                // Cambia allo stato successivo
+                setCurrGameState(GameState.CREATE_DECK);
+            }
         }
     }
 }

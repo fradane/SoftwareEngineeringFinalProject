@@ -403,17 +403,20 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                     if(incorrectlyPositionedComponentsCoordinates.size()==0) {
                         clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
 
-                        // Se c'è solo una ship part e nessun componente mal posizionato,
-                        // la nave è corretta, quindi controlliamo se possiamo cambiare fase
-                        gameModel.checkAndTransitionToNextPhase();
                     }else
                         clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
-                }else
+                }else if(shipParts.size() == 0)
+                    clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                else
                     clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts);
             } catch (RemoteException e) {
                 System.err.println("Remote Exception");
             }
         });
+
+        if(shipParts.size() == 1) //ovvero ho direttamente rimosso un componente
+            // Controllo se tutte le navi sono corrette e in caso cambio la fase
+            gameModel.checkAndTransitionToNextPhase();
 
 
     }
