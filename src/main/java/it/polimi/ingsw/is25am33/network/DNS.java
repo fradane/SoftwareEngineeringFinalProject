@@ -106,7 +106,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
         futureNicknames.forEach((future, clientNickname) -> {
             try {
-                future.get(1, TimeUnit.SECONDS);
+                future.get(5, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 System.err.println("Timeout nella notifica del client: " + clientNickname);
                 future.cancel(true);

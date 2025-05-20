@@ -50,6 +50,8 @@ public abstract class Component implements Serializable {
 
     protected String type;
 
+    protected String imageName;
+
     /**
      * Default constructor for {@code Component}.
      */
@@ -150,5 +152,13 @@ public abstract class Component implements Serializable {
 
     @JsonIgnore
     public abstract String getMainAttribute();
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
 
 }

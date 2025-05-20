@@ -123,6 +123,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         } else {
             clientControllers.forEach((playerNickname, clientController) -> {
                 clientControllers.remove(playerNickname);
+                DNS.gameControllers.remove(playerNickname);
                 dns.getConnectionManager().getClients().remove(playerNickname);
             });
             dns.removeGame(getGameInfo().getGameId());

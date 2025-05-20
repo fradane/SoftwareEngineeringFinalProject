@@ -17,8 +17,6 @@ import java.util.Set;
 
 public interface CallableOnClientController extends Remote {
 
-    //void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException;
-
     void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws IOException;
 
     void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws IOException;

@@ -44,7 +44,7 @@ public class GameContext {
 
         futureNicknames.forEach((future, nickname) -> {
             try {
-                future.get(2, TimeUnit.SECONDS);
+                future.get(5, TimeUnit.SECONDS);
             } catch (TimeoutException | InterruptedException | ExecutionException e) {
                 clientsDisconnected.add(nickname);
             }

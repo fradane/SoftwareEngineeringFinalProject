@@ -28,6 +28,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     private volatile GameState gameState;
     private final CallableOnClientController clientController;
     private boolean running = true;
+    private Socket socket;
 
     // Coda per memorizzare le notifiche mentre aspettiamo risposte specifiche
     private final Queue<SocketMessage> notificationBuffer = new ConcurrentLinkedQueue<>();
@@ -115,7 +116,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     public void connect() throws IOException {
-        Socket socket = new Socket("127.0.0.1", 1234);
+        socket = new Socket("127.0.0.1", 1234);
         System.out.println("Connected to server at " + socket.getRemoteSocketAddress());
 
         out = new PrintWriter(socket.getOutputStream(), true);
@@ -333,6 +334,12 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                 case "notifyPlayerDisconnected":
                     if (clientController != null) {
                         clientController.notifyPlayerDisconnected(null, notification.getParamString());
+                        SocketMessage outMessage = new SocketMessage(nickname, "leaveGame");
+                        out.println(ClientSerializer.serialize(outMessage));
+                        in.close();
+                        out.close();
+                        socket.close();
+                        System.exit(0);
                     }
                     break;
 
