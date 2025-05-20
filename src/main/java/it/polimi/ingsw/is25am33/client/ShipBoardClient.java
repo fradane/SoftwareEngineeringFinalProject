@@ -24,6 +24,8 @@ public interface ShipBoardClient {
      */
     void setPlayer(Player player);
 
+    void setIncorrectlyPositionedComponentsCoordinates(Set<Coordinates> incorrectlyPositionedComponentsCoordinates);
+
     /**
      * Gets the ship matrix representing the board state
      *
@@ -52,7 +54,7 @@ public interface ShipBoardClient {
      */
     List<Component> getBookedComponents();
 
-    List<Component> getIncorrectlyPositionedComponents();
+    Set<Coordinates> getIncorrectlyPositionedComponentsCoordinates();
 
     /**
      * Sets the game context
@@ -92,17 +94,18 @@ public interface ShipBoardClient {
      * @param componentToPlace The engine to check
      * @return true if the direction is invalid, otherwise false
      */
-    boolean isEngineDirectionWrong(Engine componentToPlace);
+    boolean isEngineDirectionWrong(Component componentToPlace);
 
     /**
-     * Verifies whether placing a component at the specified coordinates would be adjacent
-     * to at least one existing component
+     * Verifies that the component is properly connected to the ship through at least one non-EMPTY connector.
+     * A component connected only through EMPTY connectors is not considered properly connected.
      *
-     * @param x The x-coordinate
-     * @param y The y-coordinate
-     * @return true if the placement is adjacent to an existing component, otherwise false
+     * @param componentToPlace The component to validate.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return true if the component is properly connected through at least one non-EMPTY connector, otherwise false.
      */
-    boolean isPositionConnectedToShip(int x, int y);
+    boolean isPositionConnectedToShip(Component componentToPlace, int x, int y);
 
     /**
      * Ensures that if an adjacent component has an EMPTY connector,
@@ -124,6 +127,8 @@ public interface ShipBoardClient {
      * @return true if the connectors are compatible, otherwise false
      */
     boolean areConnectorsWellConnected(Component componentToPlace, int x, int y);
+
+    boolean isAimingAComponent(Component componentToPlace, int x, int y);
 
     /**
      * Checks whether a cannon in an adjacent cell is pointed at the cell
@@ -155,7 +160,7 @@ public interface ShipBoardClient {
      * @return A list of sets, where each set contains the coordinates of components in a disconnected part
      * @throws IllegalArgumentException If there is no component at the specified position
      */
-    List<Set<List<Integer>>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException;
+    Set<Set<Coordinates>> removeAndRecalculateShipParts(int x, int y) throws IllegalArgumentException;
 
     /**
      * Determines whether there is a cannon in the specified row or column that is pointed
@@ -352,7 +357,7 @@ public interface ShipBoardClient {
      * @param y The y-coordinate
      * @return A list of sets, where each set contains the coordinates of components in a connected part
      */
-    List<Set<List<Integer>>> identifyShipParts(int x, int y);
+    Set<Set<Coordinates>> identifyShipParts(int x, int y);
 
     /**
      * Performs a breadth-first search (BFS) to gather all connected cells
@@ -363,14 +368,14 @@ public interface ShipBoardClient {
      * @param visited A matrix of visited nodes
      * @return A set of coordinates forming a connected part of the ship
      */
-    Set<List<Integer>> bfsCollectPart(int startX, int startY, boolean[][] visited);
+    Set<Coordinates> bfsCollectPart(int startX, int startY, boolean[][] visited);
 
     /**
      * Removes the specified set of components from the board and marks them as inactive
      *
      * @param componentsPositions A set of coordinates of components to remove
      */
-    void removeShipPart(Set<List<Integer>> componentsPositions);
+    void removeShipPart(Set<Coordinates> componentsPositions);
 
     /**
      * Finds the coordinates of the first non-null component in a given direction,

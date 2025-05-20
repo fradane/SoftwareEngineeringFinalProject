@@ -4,6 +4,7 @@ import it.polimi.ingsw.is25am33.client.ClientModel;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -11,6 +12,7 @@ import it.polimi.ingsw.is25am33.model.game.GameInfo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
@@ -134,6 +136,8 @@ public interface ClientView {
 
     void showShipBoard(ShipBoardClient shipBoard, String shipBoardOwnerNickname);
 
+    void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap);
+
     void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
 
     BiConsumer<CallableOnGameController, String> showVisitLocationMenu();
@@ -181,5 +185,13 @@ public interface ClientView {
     void showPickReservedComponentQuestion();
 
     void showExitMenu();
+
+    void showInvalidShipBoardMenu();
+
+    void showValidShipBoardMenu();
+
+    void showChooseComponentToRemoveMenu();
+
+    void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts);
 
 }

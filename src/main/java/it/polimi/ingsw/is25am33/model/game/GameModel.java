@@ -1,8 +1,10 @@
 package it.polimi.ingsw.is25am33.model.game;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.board.*;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -13,6 +15,7 @@ import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 
 public class GameModel {
@@ -39,6 +42,9 @@ public class GameModel {
     private Integer numClientsFinishedTimer = 0;
     private Boolean isRestartInProgress = false;
 
+    // Lock per la transizione di stato
+    private final Object stateTransitionLock = new Object();
+
     public GameModel(String gameId, int maxPlayers, boolean isTestFlight) {
         this.gameId = gameId;
         this.maxPlayers = maxPlayers;
@@ -53,7 +59,7 @@ public class GameModel {
         deck = new Deck();
         isStarted = false;
         componentTable = new ComponentTable();
-        flipsLeft = isTestFlight ? 1 : 3;
+        flipsLeft = isTestFlight ? 1 : 2;
     }
 
     /**
@@ -135,13 +141,15 @@ public class GameModel {
     }
 
     public void setCurrGameState(GameState currGameState) {
+        synchronized (stateTransitionLock) {
+            this.currGameState = currGameState;
 
-        this.currGameState = currGameState;
-        currGameState.run(this);
+            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyGameState(nicknameToNotify, currGameState);
+            });
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyGameState(nicknameToNotify, currGameState);
-        });
+            currGameState.run(this);
+        }
     }
 
     public GameContext getGameContext() {
@@ -348,6 +356,80 @@ public class GameModel {
         }
     }
 
+    @JsonIgnore
+    public Set<ShipBoard> getInvalidShipBoards(){
+        Set<ShipBoard> invalidShipBoards = players.values().stream()
+                .map(player -> player.getPersonalBoard())
+                .filter(shipBoard -> shipBoard.isShipCorrect() == false)
+                .collect(Collectors.toSet());
+        return invalidShipBoards;
+    }
+
+    @JsonIgnore
+    public Set<ShipBoard> getValidShipBoards(){
+        Set<ShipBoard> invalidShipBoards = players.values().stream()
+                .map(player -> player.getPersonalBoard())
+                .filter(shipBoard -> shipBoard.isShipCorrect() == true)
+                .collect(Collectors.toSet());
+        return invalidShipBoards;
+    }
+
+    public void notifyInvalidShipBoards() {
+        Set<ShipBoard> invalidShipBoards = getInvalidShipBoards();
+        Set<String> playersNicknameToBeNotified = players.values().stream()
+                .filter(player -> invalidShipBoards.contains(player.getPersonalBoard()))
+                .map(player->player.getNickname())
+                .collect(Collectors.toSet());
+
+        gameContext.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
+            try {
+                Player player = players.get(nicknameToNotify);
+                ShipBoard shipBoard = player.getPersonalBoard();
+                Component[][] shipMatrix = shipBoard.getShipMatrix();
+                Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+
+                clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
+            }
+        });
+    }
+
+    public void notifyValidShipBoards() {
+        Set<ShipBoard> validShipBoards = getValidShipBoards();
+        Set<String> playersNicknameToBeNotified = players.values().stream()
+                .filter(player -> validShipBoards.contains(player.getPersonalBoard()))
+                .map(player->player.getNickname())
+                .collect(Collectors.toSet());
+
+        gameContext.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
+            try {
+                Player player = players.get(nicknameToNotify);
+                ShipBoard shipBoard = player.getPersonalBoard();
+                Component[][] shipMatrix = shipBoard.getShipMatrix();
+                Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+
+                clientController.notifyValidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
+            }
+        });
+    }
+
+    public boolean areAllShipsCorrect() {
+        return players.values().stream()
+                .allMatch(player -> player.getPersonalBoard().isShipCorrect());
+    }
+
+    public void checkAndTransitionToNextPhase() {
+
+        synchronized (stateTransitionLock){
+            if (areAllShipsCorrect()) {
+                // Cambia allo stato successivo
+                setCurrGameState(GameState.CREATE_DECK);
+            }
+        }
+    }
     public void setGameContext(GameContext gameContext) {
         this.gameContext = gameContext;
     }

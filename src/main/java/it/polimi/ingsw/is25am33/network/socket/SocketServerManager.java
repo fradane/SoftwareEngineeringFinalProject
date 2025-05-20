@@ -4,8 +4,6 @@ import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.client.controller.SocketClientManager;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
-import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -183,6 +181,16 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).playerWantsToReleaseFocusedComponent(nickname);
                 break;
 
+            case "playerWantsToRemoveComponent":
+                Coordinates coordinatesToRemove = inMessage.getParamCoordinates();
+                gameControllers.get(nickname).playerWantsToRemoveComponent(nickname, coordinatesToRemove);
+                break;
+
+            case "playerChoseShipPart":
+                Set<Coordinates> chosenShipPart = inMessage.getParamShipPart();
+                gameControllers.get(nickname).playerChoseShipPart(nickname, chosenShipPart);
+                break;
+
             case "playerWantsToVisitLocation":
                 gameControllers.get(nickname).playerWantsToVisitLocation(nickname, inMessage.getParamBoolean());
                 break;
@@ -310,8 +318,31 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyShipCorrect(String nicknameToNotify) throws IOException {
+    public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyInvalidShipBoard");
+        outMessage.setParamString(shipOwnerNickname);
+        outMessage.setParamShipBoardAsMatrix(shipMatrix);
+        outMessage.setParamIncorrectlyPositionedCoordinates(incorrectlyPositionedComponentsCoordinates);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
 
+    @Override
+    public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyValidShipBoard");
+        outMessage.setParamString(shipOwnerNickname);
+        outMessage.setParamShipBoardAsMatrix(shipMatrix);
+        outMessage.setParamIncorrectlyPositionedCoordinates(incorrectlyPositionedComponentsCoordinates);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyShipPartsGeneratedDueToRemoval");
+        outMessage.setParamString(shipOwnerNickname);
+        outMessage.setParamShipBoardAsMatrix(shipMatrix);
+        outMessage.setParamIncorrectlyPositionedCoordinates(incorrectlyPositionedComponentsCoordinates);
+        outMessage.setParamShipParts(shipParts);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override

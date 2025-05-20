@@ -61,8 +61,8 @@ public class Shield extends Component implements Activable, Rotatable {
             | %s     %s |
             |    %s    |
             +---------+
-            powerDirection: %s
-            """,imageName, north, west, east, south, direction);
+            fireDirection: %s
+            """, imageName, north, west, east, south, direction);
     }
 
     /**

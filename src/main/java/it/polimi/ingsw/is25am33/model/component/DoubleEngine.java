@@ -54,7 +54,7 @@ public class DoubleEngine extends Engine implements Activable {
             |    %s    |
             +---------+
             fireDirection: %s
-            """,imageName, north, west, east, south, getPowerDirection());
+            """,imageName, north, west, east, south, getFireDirection());
     }
 
     @Override

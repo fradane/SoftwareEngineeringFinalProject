@@ -48,15 +48,15 @@ class EngineTest {
     }
 
     @Test
-    void testRotatePowerDirection(){
+    void testRotateFireDirection(){
         engine.rotate();
         engine.rotate();
         engine.rotate();
 
-        //engine.rotatePowerDirection();
+        //engine.rotateFireDirection();
 
-        Direction powerDirectionExpected = Direction.EAST;
-        assertEquals(powerDirectionExpected,engine.getPowerDirection(), "Wrong PowerDirection");
+        Direction fireDirectionExpected = Direction.EAST;
+        assertEquals(fireDirectionExpected,engine.getFireDirection(), "Wrong FireDirection");
 
     }
 }

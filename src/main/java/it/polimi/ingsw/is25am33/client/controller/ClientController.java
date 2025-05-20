@@ -1,7 +1,6 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.ClientModel;
-import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
@@ -40,6 +39,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     boolean gameStarted = false;
     private final ClientModel clientModel;
     private final ObservableList<GameInfo> observableGames = FXCollections.observableArrayList();
+
+    private List<Set<Coordinates>> currentShipPartsList = new ArrayList<>();
 
     public ClientController(ClientModel clientModel) throws RemoteException {
         super();
@@ -347,9 +348,44 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyShipCorrect(String nicknameToNotify) throws IOException {
+    public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException {
+        clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
+        clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
 
+        // Mostra il menu solo se è la propria shipBoard
+        if (shipOwnerNickname.equals(nickname)) {
+            view.showInvalidShipBoardMenu();
+        }
     }
+
+    @Override
+    public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException {
+        clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
+        clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
+
+        // Mostra il menu solo se è la propria shipBoard
+        if (shipOwnerNickname.equals(nickname)) {
+            view.showValidShipBoardMenu();
+        }
+    }
+
+    @Override
+    public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts) throws RemoteException {
+        clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
+        clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
+
+
+        // Gestisce la selezione solo se è la propria shipBoard
+        if (shipOwnerNickname.equals(nickname)) {
+            setCurrentShipPartsList(shipParts);
+            view.showChooseShipPartsMenu(currentShipPartsList);
+        }
+    }
+
+    public void setCurrentShipPartsList(Set<Set<Coordinates>> shipParts) {
+        this.currentShipPartsList = new ArrayList<>(shipParts);
+    }
+
 
     @Override
     public void notifyGameState(String nickname, GameState gameState) throws IOException{
@@ -390,9 +426,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(nickname).getShipMatrix()[coordinates.getX()][coordinates.getY()] = component;
     }
 
-
-    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException {
-        clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponents().add(component);
+    // TODO marco, controllare
+    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
+        //clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponentsCoordinates().add(component);
     }
 
     @Override
@@ -458,19 +494,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         leaveGame();
     }
 
-    public void checkShipBoardPhase() {
-        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
-
-        List<Component> incorrectlyPositionedComponents = shipBoard.getIncorrectlyPositionedComponents();
-        Component currentComponent;
-        while(clientModel.getGameState() == GameState.CHECK_SHIPBOARD) {
-            if(!incorrectlyPositionedComponents.isEmpty()){
-                view.askComponentToRemove(shipBoard, incorrectlyPositionedComponents);
-            }
-            //currentComponent = view.askComponentToRemove(incorrectlyPositionedComponents);
-        }
-    }
-
     public void cardPhase() {
 
         while(clientModel.getGameState() == GameState.PLAY_CARD) {
@@ -484,8 +507,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         serverController.notifyHourglassEnded(nickname);
         if (clientModel.getHourglass().getFlipsLeft() == 0) {
             //TODO
-            clientModel.setGameState(GameState.CHECK_SHIPBOARD);
-            view.showNewGameState();
+            //clientModel.setGameState(GameState.CHECK_SHIPBOARD);
+            //view.showNewGameState();
         }
     }
 
@@ -547,7 +570,27 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         } catch (IOException e) {
             handleRemoteException(e);
         } catch (IllegalArgumentException e) {
-            view.showMessage("Invalid coordinates\n", STANDARD);
+            view.showMessage("Invalid coordinates: " + e.getMessage() + "\n", ERROR);
+        }
+    }
+
+    public void removeComponent(int row, int column) {
+        try{
+            row --;
+            column--;
+            serverController.playerWantsToRemoveComponent(nickname, new Coordinates(row, column));
+        }catch (IllegalArgumentException e) {
+            view.showMessage("Invalid coordinates: " + e.getMessage() + "\n", ERROR);
+        }catch (RemoteException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    public void removeShipPart(Set<Coordinates> shipPart) {
+        try{
+            serverController.playerChoseShipPart(nickname, shipPart);
+        }catch (RemoteException e) {
+            handleRemoteException(e);
         }
     }
 
@@ -634,6 +677,20 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             serverController.playerWantsToFocusReservedComponent(nickname, choice);
             view.showPickedComponentAndMenu();
         } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    public void handleShipPartSelection(int choice) {
+        try {
+            if (choice >= 1 && choice <= currentShipPartsList.size()) {
+                Set<Coordinates> selectedShipPartToKeep = currentShipPartsList.get(choice - 1);
+                serverController.playerChoseShipPart(nickname, selectedShipPartToKeep);
+                currentShipPartsList.clear();
+            } else {
+                view.showError("Invalid choice. Please enter a number between 1 and " + currentShipPartsList.size());
+            }
+        } catch (RemoteException e) {
             handleRemoteException(e);
         }
     }

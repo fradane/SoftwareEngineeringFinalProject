@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents the coordinates of a component on the shipBoard.
@@ -88,8 +89,24 @@ public class Coordinates implements Serializable {
         return "{x = " + getX() + ", y = " + getY() + "}";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Coordinates) {
+            Coordinates other = (Coordinates) obj;
+            return other.getX() == getX() && other.getY() == getY();
+        }
+        return false;
+    }
+
     @JsonIgnore
     public boolean isCoordinateInvalid() {
         return coordinates.getFirst() == -1 && coordinates.getLast() == -1;
     }
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getX(), getY());
+    }
+
 }

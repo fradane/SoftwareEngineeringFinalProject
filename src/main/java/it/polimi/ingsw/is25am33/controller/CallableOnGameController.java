@@ -1,13 +1,11 @@
 package it.polimi.ingsw.is25am33.controller;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.component.Component;
 
 import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface CallableOnGameController extends Remote {
@@ -62,9 +60,9 @@ public interface CallableOnGameController extends Remote {
 
     void leaveGame(String nickname) throws IOException;
 
-    void playerToRemoveComponent(String nickname, Component component) throws IOException;
+    void playerWantsToRemoveComponent(String nickname, Coordinates coordinate) throws IOException;
 
-    void playerChooseShipPart(String nickname, List<Set<List<Integer>>>shipPart) throws IOException;
+    void playerChoseShipPart(String nickname, Set<Coordinates> shipPart) throws IOException;
 
     void playerWantsToFocusReservedComponent(String nickname, int choice) throws IOException;
 }

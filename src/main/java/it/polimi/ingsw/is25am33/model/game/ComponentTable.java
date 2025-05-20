@@ -40,7 +40,6 @@ public class ComponentTable {
     public void addVisibleComponent(Component component){
         // although visibleComponents it's already synchronized, this method needs currVisibleIndex to be synchronized too,
         synchronized (visibleComponents) {
-            component.setCurrState(ComponentState.VISIBLE);
             visibleComponents.put(currVisibleIndex, component);
 
             gameContext.notifyAllClients((nicknameToNotify, clientController) -> {

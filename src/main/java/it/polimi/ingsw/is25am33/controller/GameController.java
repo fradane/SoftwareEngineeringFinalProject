@@ -27,6 +27,8 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     private final ConcurrentHashMap<String, CallableOnClientController> clientControllers = new ConcurrentHashMap<>();
     private final DNS dns;
 
+    private final Map<String, Set<Set<Coordinates>>> temporaryShipParts = new ConcurrentHashMap<>();
+
     // TODO metodo di debug
     @Override
     public void showMessage(String string) throws RemoteException {
@@ -401,13 +403,73 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerToRemoveComponent(String nickname, Component component) throws RemoteException {
+    public void playerWantsToRemoveComponent(String nickname, Coordinates coordinates) throws RemoteException {
+        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+        Set<Set<Coordinates>> shipParts = shipBoard.removeAndRecalculateShipParts(coordinates.getX(), coordinates.getY());
+
+        // Memorizza le ship parts per questo giocatore
+        temporaryShipParts.put(nickname, shipParts);
+
+        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            try {
+                Component[][] shipMatrix = shipBoard.getShipMatrix();
+                Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+                if(shipParts.size() == 1){
+                    if(incorrectlyPositionedComponentsCoordinates.size()==0) {
+                        clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+
+                    }else
+                        clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                }else if(shipParts.size() == 0)
+                    clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                else
+                    clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts);
+            } catch (RemoteException e) {
+                System.err.println("Remote Exception");
+            }
+        });
+
+        if(shipParts.size() == 1) //ovvero ho direttamente rimosso un componente
+            // Controllo se tutte le navi sono corrette e in caso cambio la fase
+            gameModel.checkAndTransitionToNextPhase();
+
 
     }
 
     @Override
-    public void playerChooseShipPart(String nickname, List<Set<List<Integer>>> shipPart) throws RemoteException {
+    public void playerChoseShipPart(String nickname, Set<Coordinates> chosenShipPart) throws RemoteException {
+        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
 
+        // Ottieni tutte le ship parts memorizzate per questo giocatore
+        Set<Set<Coordinates>> allShipParts = temporaryShipParts.get(nickname);
+
+        if (allShipParts != null) {
+            // Rimuovi tutte le ship parts TRANNE quella scelta
+            for (Set<Coordinates> shipPart : allShipParts) {
+                if (!shipPart.equals(chosenShipPart)) {
+                    shipBoard.removeShipPart(shipPart);
+                }
+            }
+
+            gameModel.getGameContext().notifyAllClients( (nicknameToNotify, clientController) -> {
+                try {
+                    Component[][] shipMatrix = shipBoard.getShipMatrix();
+                    Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+                    if(shipBoard.isShipCorrect())
+                        clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                    else
+                        clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                } catch (RemoteException e) {
+                    System.err.println("Remote Exception");
+                }
+            });
+
+            // Pulisci la mappa temporanea
+            temporaryShipParts.remove(nickname);
+        }
+
+        //Controlla se tutte le navi sono corrette e cambia fase se necessario
+        gameModel.checkAndTransitionToNextPhase();
     }
 
     @Override

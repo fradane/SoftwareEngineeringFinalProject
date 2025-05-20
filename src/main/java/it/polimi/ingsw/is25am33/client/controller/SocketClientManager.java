@@ -3,7 +3,6 @@ package it.polimi.ingsw.is25am33.client.controller;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.controller.GameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -303,7 +302,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
                 case "notifyShipBoardUpdate":
                     if (clientController != null) {
-                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix());
+                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix() );
                     }
                     break;
 
@@ -349,6 +348,40 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyInvalidShipBoard":
+                    if (clientController != null) {
+                        clientController.notifyInvalidShipBoard(
+                                nickname,
+                                notification.getParamString(),
+                                notification.getParamShipBoardAsMatrix(),
+                                notification.getParamIncorrectlyPositionedCoordinates()
+                        );
+                    }
+                    break;
+
+                case "notifyValidShipBoard":
+                    if (clientController != null) {
+                        clientController.notifyValidShipBoard(
+                                nickname,
+                                notification.getParamString(),
+                                notification.getParamShipBoardAsMatrix(),
+                                notification.getParamIncorrectlyPositionedCoordinates()
+                        );
+                    }
+                    break;
+
+                case "notifyShipPartsGeneratedDueToRemoval":
+                    if (clientController != null) {
+                        clientController.notifyShipPartsGeneratedDueToRemoval(
+                                nickname,
+                                notification.getParamString(),
+                                notification.getParamShipBoardAsMatrix(),
+                                notification.getParamIncorrectlyPositionedCoordinates(),
+                                notification.getParamShipParts()
+                        );
+                    }
+                    break;
+
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
@@ -390,14 +423,19 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerToRemoveComponent(String nickname, Component component) throws RemoteException {
-
+    public void playerWantsToRemoveComponent(String nickname, Coordinates coordinate) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToRemoveComponent");
+        outMessage.setParamCoordinates(coordinate);
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
-    public void playerChooseShipPart(String nickname, List<Set<List<Integer>>> shipPart) throws RemoteException {
-
+    public void playerChoseShipPart(String nickname, Set<Coordinates> shipPart) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseShipPart");
+        outMessage.setParamShipPart(shipPart);
+        out.println(ClientSerializer.serialize(outMessage));
     }
+
 
     @Override
     public void playerChoseToEndBuildShipBoardPhase(String nickname) {

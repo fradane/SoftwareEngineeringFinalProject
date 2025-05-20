@@ -10,6 +10,7 @@ import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewCont
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.StartViewController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -24,10 +25,10 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
 public class ClientGuiController extends Application implements ClientView {
 
@@ -83,6 +84,26 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
         return null;
+    }
+
+    @Override
+    public void showInvalidShipBoardMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showValidShipBoardMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showChooseComponentToRemoveMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {
+        //TODO
     }
 
     @Override
@@ -258,6 +279,11 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public void showShipBoard(ShipBoardClient shipBoard, String shipBoardOwnerNickname) {
 
+    }
+
+    @Override
+    public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {
+        //TODO
     }
 
     @Override

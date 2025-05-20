@@ -36,6 +36,8 @@ public class Level2ShipBoard extends ShipBoard{
 
     public void book () {
 
+        //TODO aggiungere il fatto che non si possono prenotare più di due componenti
+
         notActiveComponents.add(focusedComponent);
         focusedComponent.setCurrState(ComponentState.BOOKED);
 
