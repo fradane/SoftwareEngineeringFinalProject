@@ -13,6 +13,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -50,6 +51,7 @@ public class ClientCLIView implements ClientView {
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BLUE = "\u001B[34m";
     private static final String ANSI_YELLOW = "\u001B[33m";
+    private static final String ANSI_GREEN = "\u001B[32m";
     private final String defaultInterrogationPrompt = "Your choice: ";
     private String currentInterrogationPrompt = "";
 

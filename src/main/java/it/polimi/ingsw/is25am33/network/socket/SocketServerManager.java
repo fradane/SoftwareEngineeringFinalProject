@@ -273,6 +273,11 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
+    public void notifyShipCorrect(String nicknameToNotify) throws IOException {
+        // TODO rimuovere
+    }
+
+    @Override
     public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyGameInfos");
         outMessage.setParamGameInfo(gameInfos);

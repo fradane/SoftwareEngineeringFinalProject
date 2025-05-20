@@ -10,6 +10,7 @@ import java.net.SocketException;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.BiConsumer;
 
 public class GameContext {
     private final GameModel gameModel;

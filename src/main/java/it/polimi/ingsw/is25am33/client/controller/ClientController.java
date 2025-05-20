@@ -306,6 +306,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    @Override
+    public void notifyShipCorrect(String nicknameToNotify) throws IOException {
+        // TODO rimuovere
+    }
 
     @Override
     public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException {
@@ -581,7 +585,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             serverController.playerWantsToRemoveComponent(nickname, new Coordinates(row, column));
         }catch (IllegalArgumentException e) {
             view.showMessage("Invalid coordinates: " + e.getMessage() + "\n", ERROR);
-        }catch (RemoteException e) {
+        }catch (IOException e) {
             handleRemoteException(e);
         }
     }
@@ -589,7 +593,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void removeShipPart(Set<Coordinates> shipPart) {
         try{
             serverController.playerChoseShipPart(nickname, shipPart);
-        }catch (RemoteException e) {
+        }catch (IOException e) {
             handleRemoteException(e);
         }
     }
@@ -690,7 +694,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             } else {
                 view.showError("Invalid choice. Please enter a number between 1 and " + currentShipPartsList.size());
             }
-        } catch (RemoteException e) {
+        } catch (IOException e) {
             handleRemoteException(e);
         }
     }

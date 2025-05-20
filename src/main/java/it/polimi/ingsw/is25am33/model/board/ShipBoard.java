@@ -8,6 +8,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.*;
@@ -216,13 +217,14 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             ) {
                 incorrectlyPositionedComponentsCoordinates.add(new Coordinates(x, y));
                 String playerNicknameToNotify = player != null ? player.getNickname() : "";
-                gameContext.notifyClients(Set.of(playerNicknameToNotify), (nicknameToNotify, clientController) -> {
-                    try {
-                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-                    } catch (RemoteException e) {
-                        System.err.println("Remote Exception");
-                    }
-                });
+//                gameContext.notifyClients(Set.of(playerNicknameToNotify), (nicknameToNotify, clientController) -> {
+//                    try {
+//                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+//                    } catch (IOException e) {
+//                        System.err.println("Remote Exception");
+//                    }
+//                });
+                //TODO controllare se uncommentare
             }
             shipMatrix[x][y] = focusedComponent;
 
@@ -243,10 +245,10 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         if (componentToPlace instanceof Cannon) {
             Cannon cannon = (Cannon) componentToPlace;
             fireDirection = cannon.getFireDirection();
-        }else if (componentToPlace instanceof Engine) {
+        } else if (componentToPlace instanceof Engine) {
             Engine engine = (Engine) componentToPlace;
             fireDirection = engine.getFireDirection();
-        }else{
+        } else {
             return false;
         }
 
@@ -255,6 +257,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         int neighborY = neighbor[1];
 
         return isValidPosition(neighborX, neighborY) && isPositionOccupiedByComponent(neighborX, neighborY);
+    }
 
     /**
      * Checks whether the direction of an engine is incorrect (e.g., if it's not SOUTH).
