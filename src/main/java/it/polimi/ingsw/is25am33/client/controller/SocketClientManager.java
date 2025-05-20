@@ -15,6 +15,7 @@ import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -26,7 +27,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     private String nickname;
     private volatile GameState gameState;
     private final CallableOnClientController clientController;
-    private final boolean running = true;
+    private boolean running = true;
 
     // Coda per memorizzare le notifiche mentre aspettiamo risposte specifiche
     private final Queue<SocketMessage> notificationBuffer = new ConcurrentLinkedQueue<>();
@@ -46,7 +47,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     /**
      * Invia un messaggio e aspetta una risposta specifica
      */
-    private SocketMessage sendAndWaitForSpecificResponse(SocketMessage message, Set<String> expectedActions) throws IOException {
+    private SocketMessage sendAndWaitForSpecificResponse(SocketMessage message, Set<String> expectedActions) throws RemoteException {
         synchronized (lock) {
             // Impostiamo lo stato di attesa
             waitingForResponse = true;
@@ -67,7 +68,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
             return response;
         } catch (InterruptedException | ExecutionException e) {
             //TODO capire dove gestirle queste eccezioni
-            throw new IOException("Failed to get response: " + e.getMessage(), e);
+            throw new RemoteException("Failed to get response: " + e.getMessage(), e);
         } finally {
             synchronized (lock) {
                 waitingForResponse = false;
@@ -95,7 +96,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public boolean registerWithNickname(String nickname, CallableOnClientController controller) throws IOException {
+    public boolean registerWithNickname(String nickname, CallableOnClientController controller) throws RemoteException {
 
         SocketMessage outMessage = new SocketMessage(nickname, "registerWithNickname");
         outMessage.setParamString(nickname);
@@ -109,7 +110,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
             return false;
         }
 
-        throw new IOException("Unexpected response: " + response.getActions());
+        throw new RemoteException("Unexpected response: " + response.getActions());
 
     }
 
@@ -160,7 +161,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     private void startMessageHandlerThread() {
         Thread messageHandler = new Thread(() -> {
-            while (running) {
+            while (true) {
                 try {
                     if (in.hasNextLine()) {
                         String line = in.nextLine();
@@ -329,6 +330,12 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyPlayerDisconnected":
+                    if (clientController != null) {
+                        clientController.notifyPlayerDisconnected(null, notification.getParamString());
+                    }
+                    break;
+
                 case "notifyGameInfos":
                     if (clientController != null) {
                         clientController.notifyGameInfos(notification.getParamString(), notification.getParamGameInfo());
@@ -344,26 +351,26 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerPicksHiddenComponent(String nickname) throws IOException {
+    public void playerPicksHiddenComponent(String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "playerPicksHiddenComponent");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
-    public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates) throws IOException {
+    public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToPlaceFocusedComponent");
         outMessage.setParamCoordinates(coordinates);
         out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
-    public void playerWantsToReserveFocusedComponent(String nickname) throws IOException {
+    public void playerWantsToReserveFocusedComponent(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToReserveFocusedComponent");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
-    public void playerWantsToReleaseFocusedComponent(String nickname) throws IOException {
+    public void playerWantsToReleaseFocusedComponent(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToReleaseFocusedComponent");
         out.println(ClientSerializer.serialize(outMessage));
     }
@@ -390,7 +397,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerPicksVisibleComponent(String nickname, Integer choice) throws IOException {
+    public void playerPicksVisibleComponent(String nickname, Integer choice) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPicksVisibleComponent");
         outMessage.setParamInt(choice);
         out.println(ClientSerializer.serialize(outMessage));
@@ -494,7 +501,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public boolean playerWantsToWatchLittleDeck(String nickname, int littleDeckChoice) throws IOException {
+    public boolean playerWantsToWatchLittleDeck(String nickname, int littleDeckChoice) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToWatchLittleDeck");
         outMessage.setParamInt(littleDeckChoice);
 
@@ -521,4 +528,5 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         outMessage.setParamInt(choice);
         out.println(ClientSerializer.serialize(outMessage));
     }
+
 }

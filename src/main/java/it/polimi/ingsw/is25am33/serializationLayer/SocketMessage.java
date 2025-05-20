@@ -58,6 +58,7 @@ public class SocketMessage {
         this.paramCabinCoordinates = new ArrayList<>();
         this.paramVisibleComponents = new HashMap<>();
         this.paramLittleVisibleDecks = new ArrayList<>();
+        this.paramCardState=CardState.START_CARD;
     }
 
     public SocketMessage() {

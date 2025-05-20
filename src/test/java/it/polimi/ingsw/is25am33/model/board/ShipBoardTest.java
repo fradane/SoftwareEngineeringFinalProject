@@ -29,7 +29,7 @@ public class ShipBoardTest {
     @BeforeEach
     void setup() {
         // Use whichever concrete subclass is appropriate (e.g., Level2ShipBoard)
-        shipBoard = new Level2ShipBoard(PlayerColor.RED, new GameContext(new HashMap<>()));
+        shipBoard = new Level2ShipBoard(PlayerColor.RED, new GameContext(null,null));
     }
 
     /**

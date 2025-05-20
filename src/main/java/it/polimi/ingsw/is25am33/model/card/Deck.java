@@ -98,11 +98,7 @@ public class Deck {
         mapLittleDecksToString();
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
                 clientController.notifyVisibleDeck(nicknameToNotify, littleVisibleDecksString);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
         });
 
     }
@@ -162,7 +158,7 @@ public class Deck {
         allCards.addAll(Deck.loadPiratesFromJson());
         allCards.addAll(Deck.loadPlanetsFromJson());
         allCards.addAll(Deck.loadSlaveTradersFromJson());
-        allCards.addAll(Deck.loadSmugglersFromJson());
+        //TODO allCards.addAll(Deck.loadSmugglersFromJson());
         allCards.addAll(Deck.loadStardustFromJson());
         //TODO allCards.addAll(Deck.loadWarFieldFromJson());
     }

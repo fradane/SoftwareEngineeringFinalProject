@@ -768,7 +768,7 @@ public class ClientCLIView implements ClientView {
                 return (server, nickname) -> {
                     try {
                         server.playerWantsToVisitLocation(nickname, true);
-                    } catch (RemoteException e) {
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 };
@@ -777,7 +777,7 @@ public class ClientCLIView implements ClientView {
                 return (server, nickname) -> {
                     try {
                         server.playerWantsToVisitLocation(nickname, false);
-                    } catch (RemoteException e) {
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 };
@@ -796,7 +796,7 @@ public class ClientCLIView implements ClientView {
         return (server, nickname) -> {
             try {
                 server.playerWantsToThrowDices(nickname);
-            } catch (RemoteException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -855,7 +855,7 @@ public class ClientCLIView implements ClientView {
         return (server, nickname) -> {
             try {
                 server.playerChoseDoubleEngines(nickname, doubleEnginesCoordinates, batteryBoxesCoordinates);
-            } catch (RemoteException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -878,7 +878,7 @@ public class ClientCLIView implements ClientView {
                 return (server, nickname) -> {
                     try {
                         server.playerWantsToAcceptTheReward(nickname, true);
-                    } catch (RemoteException e) {
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 };
@@ -887,7 +887,7 @@ public class ClientCLIView implements ClientView {
                 return (server, nickname) -> {
                     try {
                         server.playerWantsToAcceptTheReward(nickname, false);
-                    } catch (RemoteException e) {
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 };
@@ -935,7 +935,7 @@ public class ClientCLIView implements ClientView {
         return (server, nickname) -> {
             try {
                 server.playerChoseDoubleCannons(nickname, doubleCannonsCoordinates, batteryBoxesCoordinates);
-            } catch (RemoteException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -965,7 +965,7 @@ public class ClientCLIView implements ClientView {
         return (server, nickname) -> {
             try {
                 server.playerChoseCabin(nickname, cabinCoordinates);
-            } catch (RemoteException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -985,7 +985,7 @@ public class ClientCLIView implements ClientView {
                 return (server, nickname) -> {
                     try {
                         server.playerHandleSmallDanObj(nickname, new Coordinates(), new Coordinates());
-                    } catch (RemoteException e) {
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 };
@@ -1004,7 +1004,7 @@ public class ClientCLIView implements ClientView {
             return (server, nickname) -> {
                 try {
                     server.playerHandleSmallDanObj(nickname, activableCoords, batteryBoxCoords);
-                } catch (RemoteException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             };
@@ -1025,7 +1025,7 @@ public class ClientCLIView implements ClientView {
                 return (server, nickname) -> {
                     try {
                         server.playerHandleBigMeteorite(nickname, new Coordinates(), new Coordinates());
-                    } catch (RemoteException e) {
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 };
@@ -1044,7 +1044,7 @@ public class ClientCLIView implements ClientView {
             return (server, nickname) -> {
                 try {
                     server.playerHandleBigMeteorite(nickname, doubleCannonCoords, batteryBoxCoords);
-                } catch (RemoteException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             };
@@ -1058,7 +1058,7 @@ public class ClientCLIView implements ClientView {
         return (server, nickname) -> {
             try {
                 server.playerHandleBigShot(nickname);
-            } catch (RemoteException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -1070,7 +1070,7 @@ public class ClientCLIView implements ClientView {
         return(server, nickname) -> {
             try {
                 server.spreadEpidemic(nickname);
-            } catch (RemoteException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -1082,7 +1082,7 @@ public class ClientCLIView implements ClientView {
         return(server, nickname) -> {
             try {
                 server.stardustEvent(nickname);
-            } catch (RemoteException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -1096,7 +1096,7 @@ public class ClientCLIView implements ClientView {
             if (coords == null) return (server, nickname) -> {
                 try {
                     server.playerChoseStorage(nickname, new Coordinates());
-                } catch (RemoteException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             };
@@ -1111,7 +1111,7 @@ public class ClientCLIView implements ClientView {
                 return (server, nickname) -> {
                     try {
                         server.playerChoseStorage(nickname, coords);
-                    } catch (RemoteException e) {
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 };
@@ -1136,8 +1136,8 @@ public class ClientCLIView implements ClientView {
                 return (server, nickname) -> {
                     try {
                         server.playerChoseStorage(nickname, coords);
-                    } catch (RemoteException e) {
-                        throw new RuntimeException(e);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 };
             else
@@ -1401,6 +1401,10 @@ public class ClientCLIView implements ClientView {
             showMessage("\nPlease enter a valid number.\n", ERROR);
         }
 
+    }
+
+    public void showExitMenu(){
+        scanner.next("exit");
     }
 
 }

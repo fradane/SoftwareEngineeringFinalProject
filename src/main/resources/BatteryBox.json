@@ -9,7 +9,8 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web.jpg"
   },
 
   {
@@ -21,7 +22,8 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web2.jpg"
   },
 
   {
@@ -33,7 +35,8 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web3.jpg"
   },
 
   {
@@ -45,7 +48,8 @@
       "WEST": "SINGLE"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web4.jpg"
   },
 
   {
@@ -57,7 +61,8 @@
       "WEST": "SINGLE"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web5.jpg"
   },
 
   {
@@ -69,7 +74,8 @@
       "WEST": "SINGLE"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web6.jpg"
   },
 
   {
@@ -81,7 +87,8 @@
       "WEST": "DOUBLE"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web7.jpg"
   },
 
   {
@@ -93,7 +100,8 @@
       "WEST": "UNIVERSAL"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web8.jpg"
   },
 
   {
@@ -105,7 +113,8 @@
       "WEST": "UNIVERSAL"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web9.jpg"
   },
 
   {
@@ -117,7 +126,8 @@
       "WEST": "UNIVERSAL"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web10.jpg"
   },
 
   {
@@ -129,7 +139,8 @@
       "WEST": "UNIVERSAL"
     },
     "maxBatteryCapacity": 2,
-    "remainingBatteries": 2
+    "remainingBatteries": 2,
+    "imageName": "GT-new_tiles_16_for web11.jpg"
   },
 
   {
@@ -141,7 +152,8 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 3,
-    "remainingBatteries": 3
+    "remainingBatteries": 3,
+    "imageName": "GT-new_tiles_16_for web12.jpg"
   },
 
   {
@@ -153,7 +165,8 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 3,
-    "remainingBatteries": 3
+    "remainingBatteries": 3,
+    "imageName": "GT-new_tiles_16_for web13.jpg"
   },
 
   {
@@ -165,7 +178,8 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 3,
-    "remainingBatteries": 3
+    "remainingBatteries": 3,
+    "imageName": "GT-new_tiles_16_for web14.jpg"
   },
 
   {
@@ -177,7 +191,8 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 3,
-    "remainingBatteries": 3
+    "remainingBatteries": 3,
+    "imageName": "GT-new_tiles_16_for web15.jpg"
   },
 
   {
@@ -189,7 +204,8 @@
       "WEST": "EMPTY"
     },
     "maxBatteryCapacity": 3,
-    "remainingBatteries": 3
+    "remainingBatteries": 3,
+    "imageName": "GT-new_tiles_16_for web16.jpg"
   },
 
   {
@@ -201,7 +217,8 @@
       "WEST": "SINGLE"
     },
     "maxBatteryCapacity": 3,
-    "remainingBatteries": 3
+    "remainingBatteries": 3,
+    "imageName": "GT-new_tiles_16_for web.jpg"
   }
 
 ]

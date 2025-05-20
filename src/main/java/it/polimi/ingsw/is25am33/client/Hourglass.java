@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.client;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -74,7 +75,7 @@ public class Hourglass {
 
                 try {
                     controller.notifyHourglassEnded();
-                } catch (RemoteException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
 

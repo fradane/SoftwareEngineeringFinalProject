@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -226,9 +227,17 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showBuildShipBoardMenu() {
+        Optional<Boolean> isTestFlight = clientController.getGames()
+                .stream()
+                .filter(gameInfo -> gameInfo.getGameId().equals(clientController.getCurrentGameId()))
+                .map(GameInfo::isTestFlight).findFirst();
+
+        String fxmlPath = isTestFlight.isPresent() && isTestFlight.get() ?
+                "/gui/Shipboard_1.fxml" : "/gui/Shipboard_2.fxml";
+
         javafx.application.Platform.runLater(() -> {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Shipboard_2.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
                 Parent root = loader.load();
                 shipBoardViewController = loader.getController();
                 GuiController.setClientModel(clientModel);
@@ -343,6 +352,10 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void notifyHourglassStarted(int flipsLeft, String nickname) {
+
+    }
+
+    public void showExitMenu(){
 
     }
 

@@ -43,11 +43,7 @@ public class Player implements Serializable {
         ownedCredits += number;
 
         gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
                 clientController.notifyPlayerCredits(nicknameToNotify, nickname, ownedCredits);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
         });
 
     }
