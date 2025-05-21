@@ -341,7 +341,7 @@ public class ClientCLIView implements ClientView {
         for (PlayerColor color : availableColors) {
             colorMenu.append(color.getNumber()).append(". ").append(color.name()).append("\n");
         }
-        colorMenu.append(">\s");
+        colorMenu.append("> ");
         showMessage(colorMenu.toString(), ASK);
     }
 
@@ -537,6 +537,7 @@ public class ClientCLIView implements ClientView {
                         3. Place a reserved component
                         4. Restart hourglass
                         5. Watch a little deck
+                        6. End ship board construction
                         ("show [nickname]" to watch other's player ship board)
                         >\s""";
         showMessage(menu, ASK);
@@ -564,6 +565,14 @@ public class ClientCLIView implements ClientView {
         else
             showMessage(nickname + " flipped the hourglass!!! There will be " + flipsLeft + " flips left at the end of this timer.", NOTIFICATION_INFO);
 
+    }
+
+    @Override
+    public void showFirstToEnter() {
+        clientState = PLACE_PLACEHOLDER;
+        showMessage("""
+                Your placeholder has not been placed yet!!!
+                Press any key to place it faster than the others...""", STANDARD);
     }
 
     @Override
@@ -616,7 +625,7 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showChooseComponentToRemoveMenu() {
-        //showMessage("Insert the coordinates of the component you wanna remove: ", STANDARD);
+        //showMessage("Insert the coordinates of the component you want to remove: ", STANDARD);
 
         // Ottiene le coordinate dei componenti incorrettamente posizionati
         Set<Coordinates> incorrectCoords = clientModel.getShipboardOf(clientController.getNickname())
@@ -742,13 +751,6 @@ public class ClientCLIView implements ClientView {
 
     }
 
-    /**
-     * Displays the ship board of a specified player's ship in a formatted textual representation.
-     * It includes components, their labels, attributes, and a legend explaining the component types.
-     *
-     * @param shipBoardClient the client that provides the ship matrix and booked components
-     * @param shipBoardOwnerNickname the nickname of the owner of the ship board being displayed
-     */
 //    @Override
 //    public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
 //
@@ -853,7 +855,13 @@ public class ClientCLIView implements ClientView {
 //        showMessage(output.toString(), ASK);
 //    }
 
-
+    /**
+     * Displays the ship board of a specified player's ship in a formatted textual representation.
+     * It includes components, their labels, attributes, and a legend explaining the component types.
+     *
+     * @param shipBoardClient the client that provides the ship matrix and booked components
+     * @param shipBoardOwnerNickname the nickname of the owner of the ship board being displayed
+     */
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
         showShipBoard(shipBoardClient, shipBoardOwnerNickname, Collections.emptyMap());
@@ -1499,20 +1507,28 @@ public class ClientCLIView implements ClientView {
 
 
     public void showCurrentRanking() {
-        System.out.println("==========  Ranking  ==========");
+        StringBuilder output = new StringBuilder();
+        output.append("==========  Ranking  ==========\n");
 
         List<String> sortedRanking = clientModel.getSortedRanking();
 
         int topScore = clientModel.getPlayerClientData().get(sortedRanking.getFirst()).getFlyingBoardPosition();
 
-        for (String player : sortedRanking) {
-            int playerScore = clientModel.getPlayerClientData().get(player).getFlyingBoardPosition();
-            int diff = topScore - playerScore;
-            System.out.printf("%-20s | %-10d%n", player, -diff);
+        if (topScore == 0) {
+            showMessage("Think about building your ship board, being the leader without a ship board is roughly impossible.\n> ", ASK);
+            return;
         }
 
-        System.out.println("===============================");
-        System.out.println("Legend: the score shows how many steps behind the leader each player is.\n");
+        for (int i = 0; i < sortedRanking.size(); i++) {
+            String player = sortedRanking.get(i);
+            int playerScore = clientModel.getPlayerClientData().get(player).getFlyingBoardPosition();
+            int diff = topScore - playerScore;
+            output.append(String.format("%d. %-20s | %-2d %s\n", i + 1, player, playerScore, (diff == 0 ? "" : "(" + (-diff) + ")")));
+        }
+
+        output.append("===============================\n");
+        output.append("Legend: the score shows the position of each player and how many steps behind the leader they are.\n> ");
+        showMessage(output.toString(), ASK);
     }
 
     @Override
@@ -1560,6 +1576,9 @@ public class ClientCLIView implements ClientView {
             System.exit(0);
         } else if (input.trim().split("\\s+")[0].equals("show")) {
             clientController.showShipBoard(input.trim().split("\\s+")[1]);
+            return;
+        } else if (input.equals("rank")) {
+            showCurrentRanking();
             return;
         }
 
@@ -1672,9 +1691,27 @@ public class ClientCLIView implements ClientView {
                                     >\s""", ASK);
                             break;
 
+                        case 6:
+                            clientState = BUILDING_SHIPBOARD_WAITING;
+                            clientController.endBuildShipBoardPhase();
+                            break;
+
                         default:
-                            showMessage("Invalid choice. Please select 1-5.", STANDARD);
+                            showMessage("Invalid choice. Please select 1-6.\n> ", ASK);
                     }
+                    break;
+
+                case BUILDING_SHIPBOARD_WAITING:
+                    showMessage("Invalid command", STANDARD);
+                    showMessage("""
+                    Your ship is ready, now wait for other player to finish theirs, they are so sloooooow.
+                    Anyway use show command as before to see any shipboard or "rank" to see the current ranking.
+                    You could also exit but it's not recommended.
+                    >\s""", ASK);
+                    break;
+
+                case PLACE_PLACEHOLDER:
+                    clientController.placePlaceholder();
                     break;
 
                 case BUILDING_SHIPBOARD_PICK_VISIBLE_COMPONENT:
@@ -1688,7 +1725,7 @@ public class ClientCLIView implements ClientView {
                     switch (Integer.parseInt(input)) {
                         case 1:
                             if (focusedComponent == null) {
-                                showMessage("Still picking the component. Please wait...\n", STANDARD);
+                                showMessage("Still picking the component. Please wait...\n> ", ASK);
                                 break;
                             }
                             focusedComponentString = focusedComponent.toString().split("\\n");
@@ -1704,7 +1741,7 @@ public class ClientCLIView implements ClientView {
 
                         case 2:
                             if (focusedComponent == null) {
-                                showMessage("Still picking a component. Please wait...", STANDARD);
+                                showMessage("Still picking a component. Please wait...\n> ", ASK);
                                 break;
                             }
                             focusedComponent.rotate();

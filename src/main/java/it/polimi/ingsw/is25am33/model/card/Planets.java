@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalIndexException;
@@ -9,6 +10,7 @@ import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Storage;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class Planets extends AdventureCard implements PlayerMover {
 
@@ -93,28 +95,36 @@ public class Planets extends AdventureCard implements PlayerMover {
 
     }
 
-    private void currPlayerChoseCargoCubeStorage (Storage chosenStorage) {
+    private void currPlayerChoseCargoCubeStorage(List<Storage> chosenStorage) {
 
-        if(chosenStorage.isFull()) {
-            List<CargoCube> sortedStorage = chosenStorage.getStockedCubes();
-            sortedStorage.sort(CargoCube.byValue);
-            CargoCube lessValuableCargoCube = sortedStorage.getFirst();
-            chosenStorage.removeCube(lessValuableCargoCube);
-        }
+        if (chosenStorage.size() != currentPlanet.getReward().size())
+            throw new IllegalArgumentException("Incorrect number of storages");
 
-        if (currentPlanet.hasNext()) {
-            chosenStorage.addCube(currentPlanet.getCurrent());
-        } else {
-            chosenStorage.addCube(currentPlanet.getReward().getLast());
+        IntStream.range(0, chosenStorage.size()).forEach(i -> {
+            if (!(chosenStorage.get(i) instanceof SpecialStorage) && currentPlanet.getReward().get(i) == CargoCube.RED)
+                throw new IllegalArgumentException("Trying to store a RED cube in a non-special storage");
+        });
 
-            if (gameModel.hasNextPlayer()) {
-                gameModel.nextPlayer();
-                setCurrState(CardState.CHOOSE_PLANET);
-            } else {
-                setCurrState(CardState.END_OF_CARD);
+        chosenStorage.forEach(storage -> {
+            if(storage.isFull()) {
+                List<CargoCube> sortedStorage = storage.getStockedCubes();
+                sortedStorage.sort(CargoCube.byValue);
+                CargoCube lessValuableCargoCube = sortedStorage.getFirst();
+                storage.removeCube(lessValuableCargoCube);
             }
+            storage.addCube(currentPlanet.getReward().removeFirst());
+        });
 
+        movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
+
+
+        if (gameModel.hasNextPlayer()) {
+            gameModel.nextPlayer();
+            setCurrState(CardState.CHOOSE_PLANET);
+        } else {
+            setCurrState(CardState.END_OF_CARD);
         }
+
     }
 
 

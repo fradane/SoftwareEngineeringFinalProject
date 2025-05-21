@@ -87,7 +87,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
         }
 
-        setCurrState( CardState.END_OF_CARD);
+        setCurrState(CardState.END_OF_CARD);
 
     }
 

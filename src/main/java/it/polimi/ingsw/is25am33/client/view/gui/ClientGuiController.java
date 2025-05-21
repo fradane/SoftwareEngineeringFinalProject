@@ -87,6 +87,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showFirstToEnter() {
+
+    }
+
+    @Override
     public void showInvalidShipBoardMenu() {
         //TODO
     }

@@ -212,4 +212,5 @@ public interface ClientView {
 
 
 
+    void showFirstToEnter();
 }

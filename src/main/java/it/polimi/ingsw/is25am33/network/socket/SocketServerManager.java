@@ -165,6 +165,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 out.println(ServerSerializer.serialize(outMessage));
                 break;
 
+            case "playerEndsBuildShipBoardPhase":
+                gameControllers.get(nickname).playerEndsBuildShipBoardPhase(nickname);
+                break;
+
+            case "playerPlacePlaceholder":
+                gameControllers.get(nickname).playerPlacePlaceholder(nickname);
+                break;
+
             case "playerWantsToReleaseLittleDeck":
                 gameControllers.get(nickname).playerWantsToReleaseLittleDeck(nickname, inMessage.getParamInt());
                 break;
@@ -236,7 +244,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 break;
 
             case "playerChoseStorage":
-                gameControllers.get(nickname).playerChoseStorage(nickname, inMessage.getParamCoordinates());
+                gameControllers.get(nickname).playerChoseStorage(nickname, inMessage.getParamActivableCoordinates());
                 break;
 
             case "spreadEpidemic":
@@ -310,6 +318,18 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamString(nickname);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
+    }
+
+    @Override
+    public void notifyStopHourglass(String nicknameToNotify) {
+        SocketMessage outMessage = new SocketMessage("server", "notifyStopHourglass");
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyFirstToEnter(String nicknameToNotify) {
+        SocketMessage outMessage = new SocketMessage("server", "notifyFirstToEnter");
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override
