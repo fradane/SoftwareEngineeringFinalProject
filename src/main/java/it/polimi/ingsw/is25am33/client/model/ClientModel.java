@@ -139,8 +139,8 @@ public class ClientModel {
         playerClientData.get(nickname).setFlyingBoardPosition(newPosition);
     }
 
-    public void addPlayer(String nickname, PlayerColor color, boolean isTestFlight) {
-        playerClientData.put(nickname, new PlayerClientData(nickname, color, isTestFlight));
+    public void addPlayer(String nickname, PlayerColor color, boolean isTestFlight, boolean isGui) {
+        playerClientData.put(nickname, new PlayerClientData(nickname, color, isTestFlight, isGui));
     }
 
     public ShipBoardClient getShipboardOf(String nickname) {

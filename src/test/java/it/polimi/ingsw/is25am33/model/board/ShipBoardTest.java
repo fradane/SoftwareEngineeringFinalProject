@@ -35,7 +35,7 @@ public class ShipBoardTest {
     @BeforeEach
     void setup() {
         // Use whichever concrete subclass is appropriate (e.g., Level2ShipBoard)
-        shipBoard = new Level2ShipBoard(PlayerColor.RED, new GameContext(null, new ConcurrentHashMap<>()));
+        shipBoard = new Level2ShipBoard(PlayerColor.RED, new GameContext(null, new ConcurrentHashMap<>()), false);
 
         // Store MainCabin coordinates for cleaner test code
         cabinX = ShipBoard.STARTING_CABIN_POSITION[0];

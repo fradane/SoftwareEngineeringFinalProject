@@ -63,5 +63,10 @@
             <Button fx:id="submitJoinGameButton" onAction="#handleSubmitJoinGame" prefWidth="100" text="Join" />
         </VBox>
 
+        <!-- Game Created Screen -->
+        <VBox fx:id="gameCreatedScreen" alignment="CENTER" spacing="20" visible="false" managed="false">
+            <Label style="-fx-text-fill: white; -fx-font-size: 20px;" text="You’re in! Waiting for others to start the adventure!" />
+        </VBox>
+
     </StackPane>
 </AnchorPane>

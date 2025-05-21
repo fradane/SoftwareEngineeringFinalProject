@@ -6,18 +6,19 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <!-- View Little Deck -->
 
 <BorderPane fx:id="borderPane" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: #1c1c1c" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController">
 
     <center>
-        <StackPane fx:id="stackPane" prefHeight="716.0" prefWidth="1000.0">
+        <StackPane fx:id="stackPane" prefHeight="592.0" prefWidth="1000.0">
             <ImageView fx:id="shipboard" fitHeight="600.0" fitWidth="600.0" preserveRatio="true" StackPane.alignment="CENTER">
                 <Image url="@graphics/shipboard_2.jpg" />
-            <StackPane.margin>
-               <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-            </StackPane.margin>
+                <StackPane.margin>
+                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                </StackPane.margin>
             </ImageView>
 
             <GridPane fx:id="grid" alignment="BOTTOM_LEFT" hgap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="393.0" prefWidth="555.0" vgap="1.0">
@@ -78,68 +79,73 @@
                 <Button fx:id="button08_07" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" style="-fx-background-color: transparent;" styleClass="cell-button" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button08_08" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" style="-fx-background-color: transparent;" styleClass="cell-button" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button08_09" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" style="-fx-background-color: transparent;" styleClass="cell-button" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
-              <StackPane.margin>
-                 <Insets bottom="103.0" left="1.0" right="1.0" top="103.0" />
-              </StackPane.margin>
+                <StackPane.margin>
+                    <Insets bottom="103.0" left="1.0" right="1.0" top="103.0" />
+                </StackPane.margin>
             </GridPane>
 
-            <FlowPane fx:id="littleDeckFlowPane" hgap="20.0" managed="false" vgap="20.0" visible="false" StackPane.alignment="CENTER">
+            <FlowPane fx:id="littleDeckFlowPane" alignment="CENTER" hgap="20.0" managed="false" vgap="20.0" visible="false" StackPane.alignment="CENTER">
                 <ImageView fx:id="visibleCard1" fitWidth="250" preserveRatio="true">
-               <FlowPane.margin>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </FlowPane.margin>
+                    <FlowPane.margin>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                    </FlowPane.margin>
                 </ImageView>
                 <ImageView fx:id="visibleCard2" fitWidth="250" preserveRatio="true">
-               <FlowPane.margin>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </FlowPane.margin>
+                    <FlowPane.margin>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                    </FlowPane.margin>
                 </ImageView>
                 <ImageView fx:id="visibleCard3" fitWidth="250" preserveRatio="true">
-               <FlowPane.margin>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </FlowPane.margin>
+                    <FlowPane.margin>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                    </FlowPane.margin>
                 </ImageView>
-               <FlowPane.margin>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </FlowPane.margin>
-               <FlowPane.margin>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </FlowPane.margin>
-               <FlowPane.margin>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </FlowPane.margin>
-               <FlowPane.margin>
-                  <Insets left="25.0" right="25.0" />
-               </FlowPane.margin>
-               <FlowPane.margin>
-                  <Insets left="25.0" right="25.0" />
-               </FlowPane.margin>
-               <FlowPane.margin>
-                  <Insets left="25.0" right="25.0" />
-               </FlowPane.margin>
-            <padding>
-               <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-            </padding>
+                <FlowPane.margin>
+                    <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                </FlowPane.margin>
+                <FlowPane.margin>
+                    <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                </FlowPane.margin>
+                <FlowPane.margin>
+                    <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                </FlowPane.margin>
+                <FlowPane.margin>
+                    <Insets left="25.0" right="25.0" />
+                </FlowPane.margin>
+                <FlowPane.margin>
+                    <Insets left="25.0" right="25.0" />
+                </FlowPane.margin>
+                <FlowPane.margin>
+                    <Insets left="25.0" right="25.0" />
+                </FlowPane.margin>
+                <padding>
+                    <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                </padding>
             </FlowPane>
         </StackPane>
     </center>
 
     <top>
-        <HBox fx:id="componentBox" alignment="CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" spacing="30.0">
-             <BorderPane.margin>
-                <Insets />
-             </BorderPane.margin>
-             <padding>
-                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-             </padding>
-        </HBox>
-        <Button fx:id="goBackButton" alignment="TOP_LEFT" onAction="#handleGoBackButton" text="GO BACK" />
+        <VBox prefHeight="193.0" prefWidth="1000.0">
+            <HBox fx:id="componentBox" alignment="CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="225.0" prefWidth="1000.0" spacing="30.0">
+                <children>
+                    <ImageView fx:id="focusComponent" />
+                </children>
+                <padding>
+                    <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                </padding>
+                </HBox>
+            <Button fx:id="GoBackButton" alignment="TOP_RIGHT" graphicTextGap="5.0" onAction="#handleGoBackButton" prefHeight="27.0" prefWidth="61.0" text="Go Back" textAlignment="JUSTIFY" textOverrun="CLIP">
+            <font>
+               <Font name="System Bold" size="12.0" />
+            </font></Button>
+        </VBox>
     </top>
 
     <bottom>
-        <VBox alignment="TOP_CENTER" spacing="10.0">
+        <VBox alignment="TOP_CENTER" prefHeight="118.0" prefWidth="1000.0" spacing="10.0">
             <padding>
-                <Insets bottom="10" left="10" right="10" top="10" />
+                <Insets bottom="30" left="10" right="10" top="10" />
             </padding>
             <HBox alignment="TOP_CENTER" spacing="20.0">
                 <Button fx:id="randomComponentButton" onAction="#handleRandomComponentButton" text="Choose a random component" />
@@ -154,9 +160,9 @@
                     </items>
                 </ComboBox>
                 <ComboBox fx:id="viewOtherShipboardButton" onAction="#handleViewOthersShipboard" promptText="View other shipboard" />
-            <VBox.margin>
-               <Insets bottom="100.0" left="20.0" right="20.0" top="20.0" />
-            </VBox.margin>
+                <VBox.margin>
+                    <Insets bottom="100.0" left="20.0" right="20.0" top="20.0" />
+                </VBox.margin>
             </HBox>
         </VBox>
     </bottom>

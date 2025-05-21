@@ -91,7 +91,9 @@
                     <include>**/*.json</include>
                     <include>**/*.fxml</include>
                     <include>**/**/*.css</include>
+                    <include>**/*.jpg</include>
                     <include>**/**/*.jpg</include>
+                    <include>**/**/**/*.jpg</include>
                 </includes>
             </resource>
         </resources>

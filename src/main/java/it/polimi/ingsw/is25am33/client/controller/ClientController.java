@@ -326,7 +326,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws IOException {
         gameStarted = true;
         clientModel.setGameState(GameState.BUILD_SHIPBOARD);
-        gameInfo.getConnectedPlayers().forEach((nickname, color) -> clientModel.addPlayer(nickname, color, gameInfo.isTestFlight()));
+        gameInfo.getConnectedPlayers().forEach((nickname, color) -> clientModel.addPlayer(nickname, color, gameInfo.isTestFlight(), view instanceof ClientGuiController));
         view.notifyGameStarted(GameState.BUILD_SHIPBOARD);
         view.showBuildShipBoardMenu();
         clientModel.setHourglass(new Hourglass(gameInfo.isTestFlight(), this));
@@ -428,6 +428,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException {
         clientModel.getShipboardOf(nickname).getShipMatrix()[coordinates.getX()][coordinates.getY()] = component;
+        clientModel.getShipboardOf(nickname).getShipBoardAdapter().refreshMatrix();
     }
 
     // TODO marco, controllare
@@ -438,6 +439,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws IOException {
         clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
+        clientModel.getShipboardOf(nickname).getShipBoardAdapter().refreshMatrix();
     }
 
     /**
@@ -451,6 +453,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(focusedComponent);
+        clientModel.getShipboardOf(nickname).getShipBoardAdapter().refreshMatrix();
     }
 
     @Override

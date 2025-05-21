@@ -25,8 +25,8 @@ public class Level2ShipBoard extends ShipBoard{
             {false, false, false, false, false, false, false, false, false, false, false, false}
     };
 
-    public Level2ShipBoard(PlayerColor playerColor, GameContext gameContext) {
-        super(playerColor, gameContext);
+    public Level2ShipBoard(PlayerColor playerColor, GameContext gameContext, Boolean isGui) {
+        super(playerColor, gameContext, isGui);
         this.validPositions = level2ValidPositions;
     }
 

@@ -52,14 +52,32 @@ public class MainMenuViewController extends GuiController {
     @FXML
     private ListView<GameInfo> gameListView;
 
+    @FXML
+    private VBox gameCreatedScreen;
+
     public void setAvailableGames() {
         Platform.runLater(() -> gameListView.setItems(clientController.getObservableGames()));
     }
+
 
     @FXML
     public void initialize() {
         colorComboBox.getItems().setAll(PlayerColor.values());
         playerCountComboBox.getItems().setAll(2, 3, 4);
+
+        gameListView.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(GameInfo gameInfo, boolean empty) {
+                super.updateItem(gameInfo, empty);
+                if (empty || gameInfo == null) {
+                    setText(null);
+                } else {
+                    setText("Game ID: " + gameInfo.getGameId() +
+                            " | Players: " + gameInfo.getConnectedPlayersNicknames().size() + "/" + gameInfo.getMaxPlayers() +
+                            " | Test Flight: " + (gameInfo.isTestFlight() ? "Yes" : "No"));
+                }
+            }
+        });
     }
 
     @FXML
@@ -82,6 +100,10 @@ public class MainMenuViewController extends GuiController {
         }
 
         clientController.handleCreateGameMenu(numPlayers, isEasyMode, chosenColor);
+        createGameForm.setVisible(false);
+        createGameForm.setManaged(false);
+        gameCreatedScreen.setVisible(true);
+        gameCreatedScreen.setManaged(true);
     }
 
     @FXML

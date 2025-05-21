@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.polimi.ingsw.is25am33.client.view.gui.ShipBoardFxAdapter;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -20,6 +21,7 @@ import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
     protected GameContext gameContext;
+    protected final ShipBoardFxAdapter shipBoardAdapter;
 
     /**
      * The size of the board where components can be placed. Just one length as the board is squared.
@@ -71,7 +73,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      *
      * @param color The color associated with the player.
      */
-    public ShipBoard(PlayerColor color, GameContext gameContext) {
+    public ShipBoard(PlayerColor color, GameContext gameContext, Boolean isGUI) {
         Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
         connectors.put(Direction.NORTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
@@ -79,6 +81,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
         shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
         this.gameContext = gameContext;
+        this.shipBoardAdapter = isGUI ? new ShipBoardFxAdapter(this) : null;
     }
 
     public void setPlayer(Player player) {
@@ -89,6 +92,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         synchronized (shipMatrix) {
             return shipMatrix;
         }
+    }
+
+    @Override
+    public ShipBoardFxAdapter getShipBoardAdapter() {
+        return shipBoardAdapter;
     }
 
     public Component getFocusedComponent() {
