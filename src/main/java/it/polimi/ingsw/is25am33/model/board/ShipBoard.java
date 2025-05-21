@@ -193,6 +193,55 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     }
 
     /**
+     * Checks the entire ship board for placement rule violations and updates the
+     * incorrectlyPositionedComponentsCoordinates set with coordinates of any components
+     * that violate the placement rules.
+     *
+     * This method iterates through all components on the ship board, applying the same
+     * checks used during component placement to identify incorrectly positioned components.
+     */
+    public void checkShipBoard() {
+        // Clear the current set of incorrectly positioned components
+        incorrectlyPositionedComponentsCoordinates.clear();
+
+        // Iterate through the entire ship matrix
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                Component component = shipMatrix[i][j];
+
+                // Skip empty cells or cells outside valid positions
+                if (component == null || !isValidPosition(i, j)) {
+                    continue;
+                }
+
+                // Check if this position is properly connected to the ship
+                if (!(component instanceof MainCabin) && !isPositionConnectedToShip(component, i, j)) {
+                    incorrectlyPositionedComponentsCoordinates.add(new Coordinates(i, j));
+                    //TODO da togliere usato solo in debug della checkShipBoardPhase
+                    System.out.println("x: " + (i+1) + " y: " + (j+1) + ". isPositionConnectedTOShip");
+                    continue;
+                }
+
+                // Check if this component violates any placement rules
+                if (!areConnectorsWellConnected(component, i, j)
+                        || !areEmptyConnectorsWellConnected(component, i, j)
+                        || isComponentInFireDirection(component, i, j)
+                        || isComponentInEngineDirection(component, i, j)
+                        || isEngineDirectionWrong(component)
+                        || isAimingAComponent(component, i, j)) {
+                    //TODO da togliere usato solo in debug della checkShipBoardPhase
+                    if(isAimingAComponent(component, i, j)) {
+                        System.out.println("x: " + (i+1) + " y: " + (j+1) + ". isAimingAComponent");
+                    }
+
+                    incorrectlyPositionedComponentsCoordinates.add(new Coordinates(i, j));
+                }
+            }
+        }
+    }
+
+
+    /**
      * Attempts to place the focused component at the specified coordinates,
      * performing various validity and connectivity checks.
      * If the placed component does not violate an essential rule it is simply added to list of incorrectyle Positioned Components.
@@ -201,41 +250,47 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @param y The y-coordinate.
      * @throws IllegalArgumentException If the position is invalid or violates placement rules.
      */
+//    public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
+//        synchronized (shipMatrix) {
+//            //TODO uncommentare la checkPosition, serve solo per debugging checkShipboardPhase
+//            //checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
+//            if (//TODO aggiungere controllo che se sto aggiungendo un cannone che punta verso un component già piazzato
+//                    !areConnectorsWellConnected(focusedComponent, x, y)
+//                            || !areEmptyConnectorsWellConnected(focusedComponent, x, y) //TODO da controllare se effettivamente va messo qui questo controllo oppure all'interno di checkPosition
+//                            || isComponentInFireDirection(focusedComponent, x, y)
+//                            || isComponentInEngineDirection(focusedComponent, x, y)
+//                            || isEngineDirectionWrong(focusedComponent)
+//                            || isAimingAComponent(focusedComponent, x, y)
+//            ) {
+//                incorrectlyPositionedComponentsCoordinates.add(new Coordinates(x, y));
+//            }
+//            shipMatrix[x][y] = focusedComponent;
+//
+//            focusedComponent.insertInComponentsMap(componentsPerType);
+//
+//                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+//                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+//                });
+//
+//            focusedComponent = null;
+//
+//        }
+//
+//    }
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
         synchronized (shipMatrix) {
-            //TODO uncommentare la checkPosition
-            //checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
-            if (//TODO aggiungere controllo che se sto aggiungendo un cannone che punta verso un component già piazzato
-                    !areConnectorsWellConnected(focusedComponent, x, y)
-                            || !areEmptyConnectorsWellConnected(focusedComponent, x, y) //TODO da controllare se effettivamente va messo qui questo controllo oppure all'interno di checkPosition
-                            || isComponentInFireDirection(focusedComponent, x, y)
-                            || isComponentInEngineDirection(focusedComponent, x, y)
-                            || isEngineDirectionWrong(focusedComponent)
-                            || isAimingAComponent(focusedComponent, x, y)
-            ) {
-                incorrectlyPositionedComponentsCoordinates.add(new Coordinates(x, y));
-                String playerNicknameToNotify = player != null ? player.getNickname() : "";
-//                gameContext.notifyClients(Set.of(playerNicknameToNotify), (nicknameToNotify, clientController) -> {
-//                    try {
-//                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-//                    } catch (IOException e) {
-//                        System.err.println("Remote Exception");
-//                    }
-//                });
-                //TODO controllare se uncommentare
-            }
+          checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
+
             shipMatrix[x][y] = focusedComponent;
 
             focusedComponent.insertInComponentsMap(componentsPerType);
 
-                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-                });
+            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+            });
 
             focusedComponent = null;
-
         }
-
     }
 
     public boolean isAimingAComponent(Component componentToPlace, int x, int y) {
@@ -265,7 +320,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     public boolean isEngineDirectionWrong(Component componentToPlace) {
         if(componentToPlace instanceof Engine)
-            return ((Engine)componentToPlace).getFireDirection() == SOUTH;
+            return ((Engine)componentToPlace).getFireDirection() != SOUTH;
 
         return false;
     }
@@ -335,6 +390,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             // il nostro componente deve avere un connettore EMPTY nella direzione corrispondente
             if (neighborComponent.getConnectors().get(oppositeDirection) == EMPTY &&
                     componentToPlace.getConnectors().get(direction) != EMPTY) {
+                //TODO da togliere usato solo in debug della checkShipBoardPhase
+                System.out.println("x: " +( x+1) + " y: " + (y+1) + ". areEmptyConnectorsWellConnected");
                 return false;
             }
 
@@ -342,6 +399,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             // il vicino deve avere un connettore EMPTY nella direzione opposta
             if (componentToPlace.getConnectors().get(direction) == EMPTY &&
                     neighborComponent.getConnectors().get(oppositeDirection) != EMPTY) {
+                //TODO da togliere usato solo in debug della checkShipBoardPhase
+                System.out.println("x: " + (x+1) + " y: " + (y+1) + ". areEmptyConnectorsWellConnected");
                 return false;
             }
         }
@@ -371,8 +430,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
             if (!areConnectorsCompatible(
                     componentToPlace.getConnectors().get(direction),
-                    neighborComponent.getConnectors().get(oppositeDirection)))
+                    neighborComponent.getConnectors().get(oppositeDirection))) {
+                //TODO da togliere usato solo in debug della checkShipBoardPhase
+                System.out.println("x: " + (x+1) + " y: " + (y+1) + ". areConnectorsWellConnected");
                 return false;
+            }
         }
 
         return true;
@@ -399,9 +461,13 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             Direction oppositeDirection = getOppositeDirection(direction);
 
             if (neighborComponent instanceof Cannon &&
-                    ((Cannon) neighborComponent).getFireDirection() == oppositeDirection)
+                    ((Cannon) neighborComponent).getFireDirection() == oppositeDirection) {
+                //TODO da togliere usato solo in debug della checkShipBoardPhase
+                System.out.println("x: " + (x+1) + " y: " + (y+1) + ". isComponentInFireDirection");
                 return true;
+            }
         }
+
 
         return false;
     }
@@ -428,8 +494,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
             if (neighborComponent instanceof Engine &&
                     ((Engine) neighborComponent).getFireDirection() == SOUTH &&
-                    ((Engine) neighborComponent).getFireDirection() == oppositeDirection)
+                    ((Engine) neighborComponent).getFireDirection() == oppositeDirection) {
+                //TODO da togliere usato solo in debug della checkShipBoardPhase
+                System.out.println("x: " + (x+1) + " y: " + (y+1) + ". isComponentInEngineDirection");
                 return true;
+            }
         }
 
         return false;

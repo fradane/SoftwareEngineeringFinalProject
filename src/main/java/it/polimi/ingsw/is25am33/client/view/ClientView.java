@@ -141,33 +141,33 @@ public interface ClientView {
 
     void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
 
-    BiConsumer<CallableOnGameController, String> showVisitLocationMenu();
-
-    BiConsumer<CallableOnGameController, String> showThrowDicesMenu();
-
-    BiConsumer<CallableOnGameController, String> showChoosePlanetMenu();
-
-    BiConsumer<CallableOnGameController, String> showChooseEnginesMenu();
-
-    BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu();
-
-    BiConsumer<CallableOnGameController, String> showChooseCannonsMenu();
-
-    BiConsumer<CallableOnGameController, String> showSmallDanObjMenu();
-
-    BiConsumer<CallableOnGameController, String> showBigMeteoriteMenu();
-
-    BiConsumer<CallableOnGameController, String> showBigShotMenu();
-
-    BiConsumer<CallableOnGameController, String> showHandleRemoveCrewMembersMenu();
-
-    BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu();
-
-    BiConsumer<CallableOnGameController, String> showEpidemicMenu();
-
-    BiConsumer<CallableOnGameController, String> showStardustMenu();
-
-    BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu();
+//    BiConsumer<CallableOnGameController, String> showVisitLocationMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showThrowDicesMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showChoosePlanetMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showChooseEnginesMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showChooseCannonsMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showSmallDanObjMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showBigMeteoriteMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showBigShotMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showHandleRemoveCrewMembersMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showEpidemicMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showStardustMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu();
 
     void showLittleDeck(int littleDeckChoice);
 
@@ -194,5 +194,22 @@ public interface ClientView {
     void showChooseComponentToRemoveMenu();
 
     void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts);
+
+    void showVisitLocationMenu();
+    void showThrowDicesMenu();
+    void showChoosePlanetMenu();
+    void showChooseEnginesMenu();
+    void showAcceptTheRewardMenu();
+    void showChooseCannonsMenu();
+    void showSmallDanObjMenu();
+    void showBigMeteoriteMenu();
+    void showBigShotMenu();
+    void showHandleRemoveCrewMembersMenu();
+    void showHandleCubesRewardMenu();
+    void showEpidemicMenu();
+    void showStardustMenu();
+    void showHandleCubesMalusMenu();
+
+
 
 }

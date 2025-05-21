@@ -1,7 +1,6 @@
 package it.polimi.ingsw.is25am33.model.enumFiles;
 
 import it.polimi.ingsw.is25am33.client.view.ClientView;
-import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
@@ -12,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public enum CardState {
 
@@ -24,9 +22,9 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Probabilmente nessun menu specifico per lo stato iniziale
+            //return null;
         }
 
     },
@@ -48,8 +46,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showChooseCannonsMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showChooseCannonsMenu();
         }
     },
 
@@ -70,8 +68,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showChooseEnginesMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showChooseEnginesMenu();
         }
     },
 
@@ -86,8 +84,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view){
-            return view.showHandleRemoveCrewMembersMenu();
+        public void showRelatedMenu(ClientView view){
+            view.showHandleRemoveCrewMembersMenu();
         }
     },
 
@@ -102,8 +100,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showHandleCubesRewardMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showHandleCubesRewardMenu();
         }
     },
 
@@ -118,9 +116,9 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+        public void showRelatedMenu(ClientView view) {
             // TODO
-            return null;
+            view.showHandleCubesMalusMenu();
         }
     },
 
@@ -135,8 +133,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showChoosePlanetMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showChoosePlanetMenu();
         }
     },
 
@@ -151,8 +149,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showVisitLocationMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showVisitLocationMenu();
         }
     },
 
@@ -173,9 +171,17 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+        public void showRelatedMenu(ClientView view) {
             DangerousObj currDangerousObject = view.getClientModel().getCurrDangerousObj();
-            return currDangerousObject.showRelatedMenu(view);
+            String type = currDangerousObject.getDangerousObjType();
+
+            if (type.contains("SmallMeteorite") || type.contains("SmallShot")) {
+                view.showSmallDanObjMenu();
+            } else if (type.contains("BigMeteorite")) {
+                view.showBigMeteoriteMenu();
+            } else if (type.contains("BigShot")) {
+                view.showBigShotMenu();
+            }
         }
     },
 
@@ -186,8 +192,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showThrowDicesMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showThrowDicesMenu();
         }
     },
 
@@ -196,8 +202,8 @@ public enum CardState {
         public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
             return null;
         }
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view){
-            return view.showEpidemicMenu();
+        public void showRelatedMenu(ClientView view){
+            view.showEpidemicMenu();
         }
     },
     STARDUST {
@@ -207,8 +213,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showStardustMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showStardustMenu();
         }
     },
 
@@ -223,8 +229,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showAcceptTheRewardMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showAcceptTheRewardMenu();
         }
     },
 
@@ -235,9 +241,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
     },
     EVALUATE_CANNON_POWER{
@@ -247,9 +252,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
     },
     EVALUATE_ENGINE_POWER{
@@ -259,9 +263,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
     },
     STEPS_BACK{
@@ -271,9 +274,8 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
     },
 
@@ -284,14 +286,13 @@ public enum CardState {
         }
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
     };
 
     public abstract PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) throws IOException;
 
-    public abstract BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view);
-
+    //public abstract BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view);
+    public abstract void showRelatedMenu(ClientView view);
 }

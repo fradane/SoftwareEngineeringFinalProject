@@ -22,8 +22,17 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
+            // First, check all shipboards to identify incorrect components
+            gameModel.getPlayers().values().forEach(player -> {
+                player.getPersonalBoard().checkShipBoard();
+            });
+
+            // After checking all shipboards, send notifications
             gameModel.notifyInvalidShipBoards();
             gameModel.notifyValidShipBoards();
+
+            //Controlla se tutte le navi sono corrette e cambia fase se necessario
+            gameModel.checkAndTransitionToNextPhase();
         }
 
     },
@@ -33,6 +42,7 @@ public enum GameState implements Serializable {
         @Override
         public void run(GameModel gameModel) {
             gameModel.getDeck().mergeIntoGameDeck();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 
     },
@@ -42,6 +52,7 @@ public enum GameState implements Serializable {
         @Override
         public void run(GameModel gameModel) {
             gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard());
+            gameModel.setCurrGameState(GameState.PLAY_CARD);
         }
 
     },
@@ -51,6 +62,7 @@ public enum GameState implements Serializable {
         @Override
         public void run(GameModel gameModel) {
             gameModel.startCard();
+
         }
 
     },

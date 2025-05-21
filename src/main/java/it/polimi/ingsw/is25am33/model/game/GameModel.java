@@ -253,12 +253,18 @@ public class GameModel {
         if (currAdventureCard == null || currAdventureCard.getCurrState() != CardState.START_CARD)
             throw new IllegalStateException("Not the right state");
 
-        setCurrRanking(flyingBoard.getCurrentRanking());
+        //TODO uncommentare quando sarà pronta la creazione della classifica fatta da Fra
+        //setCurrRanking(flyingBoard.getCurrentRanking());
+        setCurrRanking(new ArrayList<>(players.values()));
         currAdventureCard.setGame(this);
         playerIterator = currRanking.iterator();
-        currPlayer = playerIterator.next();
+        setCurrPlayer(playerIterator.next());
+        //currPlayer = playerIterator.next();
         currAdventureCard.setCurrState(currAdventureCard.getFirstState());
 
+        getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyCardStarted(nicknameToNotify);
+        });
     }
 
     public List<Player> getPlayerWithPrettiestShip() {

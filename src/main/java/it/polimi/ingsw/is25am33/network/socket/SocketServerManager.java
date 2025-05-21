@@ -351,6 +351,11 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
+    public void notifyCardStarted(String nicknameToNotify) throws IOException {
+        //TODO
+    }
+
+    @Override
     public void notifyGameState(String nickname, GameState gameState) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyGameState");
         outMessage.setParamGameState(gameState);

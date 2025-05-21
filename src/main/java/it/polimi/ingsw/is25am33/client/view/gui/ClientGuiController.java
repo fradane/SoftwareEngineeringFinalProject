@@ -107,6 +107,76 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showVisitLocationMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showThrowDicesMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showChoosePlanetMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showChooseEnginesMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showAcceptTheRewardMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showChooseCannonsMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showSmallDanObjMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showBigMeteoriteMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showBigShotMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showHandleRemoveCrewMembersMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showHandleCubesRewardMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showEpidemicMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showStardustMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showHandleCubesMalusMenu() {
+        //TODO
+    }
+
+    @Override
     public PlayerColor intToPlayerColor(int colorChoice) {
         return ClientView.super.intToPlayerColor(colorChoice);
     }
@@ -291,75 +361,75 @@ public class ClientGuiController extends Application implements ClientView {
 
     }
 
-    @Override
-    public BiConsumer<CallableOnGameController, String> showVisitLocationMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showThrowDicesMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showChoosePlanetMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showChooseEnginesMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showChooseCannonsMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showSmallDanObjMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showBigMeteoriteMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showBigShotMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showHandleRemoveCrewMembersMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showEpidemicMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showStardustMenu() {
-        return null;
-    }
-
-    @Override
-    public BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu() {
-        return null;
-    }
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showVisitLocationMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showThrowDicesMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showChoosePlanetMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showChooseEnginesMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showChooseCannonsMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showSmallDanObjMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showBigMeteoriteMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showBigShotMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showHandleRemoveCrewMembersMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showEpidemicMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showStardustMenu() {
+//        return null;
+//    }
+//
+//    @Override
+//    public BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu() {
+//        return null;
+//    }
 
     @Override
     public void showLittleDeck(int littleDeckChoice) {

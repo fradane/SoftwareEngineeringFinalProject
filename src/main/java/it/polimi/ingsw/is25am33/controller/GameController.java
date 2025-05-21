@@ -415,6 +415,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 Component[][] shipMatrix = shipBoard.getShipMatrix();
                 Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
                 if(shipParts.size() == 1){
+                    shipBoard.checkShipBoard();
                     if(incorrectlyPositionedComponentsCoordinates.size()==0) {
                         clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
 
@@ -436,6 +437,32 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+//    @Override
+//    public void playerChoseShipPart(String nickname, Set<Coordinates> chosenShipPart) throws RemoteException {
+//        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+//
+//        // Obtain all ship parts memorized for this player
+//        Set<Set<Coordinates>> allShipParts = temporaryShipParts.get(nickname);
+//
+//        if (allShipParts != null) {
+//            // Remove all ship parts EXCEPT the chosen one
+//            for (Set<Coordinates> shipPart : allShipParts) {
+//                if (!shipPart.equals(chosenShipPart)) {
+//                    shipBoard.removeShipPart(shipPart);
+//                }
+//            }
+//
+//            // After removing parts, check the entire ship board for incorrect components
+//            shipBoard.checkShipBoard();
+//
+//            // Clean up the temporary map
+//            temporaryShipParts.remove(nickname);
+//        }
+//
+//        // Check if all ships are correct and change phase if necessary
+//        gameModel.checkAndTransitionToNextPhase();
+//    }
+
     @Override
     public void playerChoseShipPart(String nickname, Set<Coordinates> chosenShipPart) throws RemoteException {
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
@@ -450,6 +477,10 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                     shipBoard.removeShipPart(shipPart);
                 }
             }
+
+            // After removing parts, check the entire ship board for incorrect components
+            shipBoard.checkShipBoard();
+
 
             gameModel.getGameContext().notifyAllClients( (nicknameToNotify, clientController) -> {
                 try {

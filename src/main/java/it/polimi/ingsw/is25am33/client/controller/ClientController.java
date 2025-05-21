@@ -386,6 +386,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    @Override
+    public void notifyCardStarted(String nicknameToNotify) throws IOException {
+
+    }
+
     public void setCurrentShipPartsList(Set<Set<Coordinates>> shipParts) {
         this.currentShipPartsList = new ArrayList<>(shipParts);
     }
@@ -484,6 +489,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyCardState(String nickname, CardState cardState) throws IOException {
         clientModel.setCardState(cardState);
         view.showNewCardState();
+
+        if (clientModel.isMyTurn() && cardState != CardState.END_OF_CARD) {
+            // Chiama direttamente il metodo showRelatedMenu sul CardState
+            cardState.showRelatedMenu(view);
+        }
     }
 
     @Override
@@ -498,14 +508,15 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         leaveGame();
     }
 
-    public void cardPhase() {
-
-        while(clientModel.getGameState() == GameState.PLAY_CARD) {
-            if (clientModel.isMyTurn())
-                clientModel.getCurrCardState().showRelatedMenu(view).accept(serverController, nickname);
-        }
-
-    }
+    //TODO probabilmente sarà da cancellare quando la fase di gioco funzionerà
+//    public void cardPhase() {
+//
+//        while(clientModel.getGameState() == GameState.PLAY_CARD) {
+//            if (clientModel.isMyTurn())
+//                clientModel.getCurrCardState().showRelatedMenu(view).accept(serverController, nickname);
+//        }
+//
+//    }
 
     public void notifyHourglassEnded() throws IOException {
         serverController.notifyHourglassEnded(nickname);
@@ -568,7 +579,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         try {
             row--;
             column--;
-            clientModel.getShipboardOf(nickname).checkPosition(row, column);
+            //TODO uncommentare checkPosition, serve commentarlo solo per testing checkShipBoardPhase
+            //clientModel.getShipboardOf(nickname).checkPosition(row, column);
             serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column), clientModel.getShipboardOf(nickname).getFocusedComponent().getRotation());
             view.showBuildShipBoardMenu();
         } catch (IOException e) {
