@@ -30,15 +30,15 @@ import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
 public class ClientController extends UnicastRemoteObject implements CallableOnClientController {
 
     private ClientView view;
-    private boolean connected = false;
     private CallableOnDNS dns;
     private CallableOnGameController serverController;
-    private String currentGameId;
+    private GameInfo currentGameInfo;
     private boolean inGame = false;
     private String nickname;
     boolean gameStarted = false;
     private final ClientModel clientModel;
     private final ObservableList<GameInfo> observableGames = FXCollections.observableArrayList();
+    private boolean isTestFlight;
 
     private List<Set<Coordinates>> currentShipPartsList = new ArrayList<>();
 
@@ -60,7 +60,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public String getCurrentGameId() {
-        return currentGameId;
+        return currentGameInfo.getGameId();
     }
 
     public ClientModel getClientModel() {
@@ -124,10 +124,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             } else {
                 serverController = gameInfo.getGameController();
             }
-            currentGameId = gameInfo.getGameId();
+            currentGameInfo = gameInfo;
+            this.isTestFlight = gameInfo.isTestFlight();
+            view.setIsTestFlight(this.isTestFlight);
             inGame = true;
 
-            view.notifyGameCreated(currentGameId);
+            view.notifyGameCreated(gameInfo.getGameId());
             view.notifyPlayerJoined(this.nickname, gameInfo);
             view.showMessage("Waiting for other players to join...", STANDARD);
         } catch (IOException e) {
@@ -154,8 +156,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 return;
             }
 
-            currentGameId = chosenGameId;
-
             // if the dns was SocketClientManager (e.g., the client is socket), the serverController is the SocketClientManager used as a dns before
             if (dns instanceof SocketClientManager) {
                 serverController = (SocketClientManager) dns;
@@ -165,6 +165,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             }
             inGame = true;
             view.showWaitingForPlayers();
+            currentGameInfo = observableGames.stream().filter(info -> info.getGameId().equals(chosenGameId)).findFirst().orElseThrow();
+            isTestFlight = currentGameInfo.isTestFlight();
+            view.setIsTestFlight(isTestFlight);
 
         } catch (NumberFormatException e) {
             view.showError("Invalid color choice: " + e.getMessage());
@@ -274,7 +277,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         try {
             Registry registry = LocateRegistry.getRegistry(serverAddress, NetworkConfiguration.RMI_PORT);
             CallableOnDNS dns = (CallableOnDNS) registry.lookup(NetworkConfiguration.DNS_NAME);
-            connected = true;
             System.out.println("[RMI] Connected to RMI Server");
             return dns;
         } catch (Exception e) {
@@ -294,11 +296,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void leaveGame() {
         try {
-            if (currentGameId != null) {
+            if (currentGameInfo != null) {
                 serverController.leaveGame(nickname);
                 inGame = false;
                 gameStarted = false;
-                currentGameId = null;
+                currentGameInfo = null;
                 System.exit(0);
             }
         } catch (Exception e) {
@@ -329,8 +331,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         gameInfo.getConnectedPlayers().forEach((nickname, color) -> clientModel.addPlayer(nickname, color, gameInfo.isTestFlight()));
         view.notifyGameStarted(GameState.BUILD_SHIPBOARD);
         view.showBuildShipBoardMenu();
-        clientModel.setHourglass(new Hourglass(gameInfo.isTestFlight(), this));
-        clientModel.getHourglass().start(view, "game");
+
+        if (!gameInfo.isTestFlight()) {
+            clientModel.setHourglass(new Hourglass(this));
+            clientModel.getHourglass().start(view, "game");
+        }
+
     }
 
     @Override

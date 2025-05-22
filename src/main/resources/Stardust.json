@@ -1,11 +1,13 @@
 [
   {
     "imageName": "GT-cards_I_IT_014.jpg",
-    "level": 1
+    "level": 1,
+    "isTestFlightCard": true
   },
 
   {
     "imageName": "GT-cards_II_IT_014.jpg",
-    "level": 2
+    "level": 2,
+    "isTestFlightCard": false
   }
 ]

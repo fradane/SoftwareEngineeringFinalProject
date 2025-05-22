@@ -1,36 +1,43 @@
 [
   {
     "imageName": "GT-cards_I_IT_015.jpg",
-    "level": 1
+    "level": 1,
+    "isTestFlightCard": true
   },
 
   {
     "imageName": "GT-cards_I_IT_016.jpg",
-    "level": 1
+    "level": 1,
+    "isTestFlightCard": false
   },
 
   {
     "imageName": "GT-cards_I_IT_017.jpg",
-    "level": 1
+    "level": 1,
+    "isTestFlightCard": false
   },
 
   {
     "imageName": "GT-cards_I_IT_018.jpg",
-    "level": 1
+    "level": 1,
+    "isTestFlightCard": false
   },
 
   {
     "imageName": "GT-cards_II_IT_016.jpg",
-    "level": 2
+    "level": 2,
+    "isTestFlightCard": false
   },
 
   {
     "imageName": "GT-cards_II_IT_017.jpg",
-    "level": 2
+    "level": 2,
+    "isTestFlightCard": false
   },
 
   {
     "imageName": "GT-cards_II_IT_018.jpg",
-    "level": 2
+    "level": 2,
+    "isTestFlightCard": false
   }
 ]

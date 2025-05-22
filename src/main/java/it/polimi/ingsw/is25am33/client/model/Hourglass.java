@@ -21,16 +21,18 @@ public class Hourglass {
     private final ClientController controller;
 
     /**
-     * Constructs an Hourglass instance with a specified mode indicating if it is for a test flight.
+     * Constructs an Hourglass instance with a specified client controller.
+     * Initializes the scheduler, sets the initial state to not running,
+     * and limits the number of flips to three.
      *
-     * @param isTestFlight if true, the Hourglass is initialized for a test flight with zero flips left;
-     *                     if false, it is initialized with two flips left.
+     * @param controller the client controller responsible for handling
+     *                   notifications and managing the hourglass state
      */
-    public Hourglass(boolean isTestFlight, ClientController controller) {
+    public Hourglass(ClientController controller) {
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.isRunning = false;
         this.controller = controller;
-        this.flipsLeft = isTestFlight ? 1 : 3;
+        this.flipsLeft = 3;
     }
 
     public boolean isRunning() {
@@ -63,7 +65,7 @@ public class Hourglass {
         scheduler = Executors.newScheduledThreadPool(1);
 
         isRunning = true;
-        timeLeft = 1; //TODO ricambiare a 10 secondi
+        timeLeft = 60; //TODO ricambiare a 10 secondi
         scheduler.scheduleAtFixedRate(() -> {
 
             if (timeLeft > 0) {

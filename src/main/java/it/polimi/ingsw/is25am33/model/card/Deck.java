@@ -1,7 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 
-import java.rmi.RemoteException;
 import java.util.*;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
@@ -26,40 +25,36 @@ import java.util.stream.IntStream;
  */
 public class Deck {
 
-    private final List<AdventureCard> allCards;
-    private final List<List<AdventureCard>> littleVisibleDecks;
-    private final List<AdventureCard> littleNotVisibleDeck;
-    private final List<List<String>> littleVisibleDecksString;
-    private final Stack<AdventureCard> gameDeck;
+    private final List<AdventureCard> allCards = new Stack<>();
+    private final List<List<AdventureCard>> littleVisibleDecks = new ArrayList<>(List.of(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+    private final List<AdventureCard> littleNotVisibleDeck = new ArrayList<>();
+    private final List<List<String>> littleVisibleDecksString = new ArrayList<>();
+    private final Stack<AdventureCard> gameDeck = new Stack<>();
     private GameContext gameContext;
     private final List<Boolean> isLittleDeckFree = new ArrayList<>(List.of(true, true, true));
-
-    /**
-     * Constructs a new Deck instance, initializing all internal card lists.
-     */
-    public Deck() {
-        allCards = new Stack<>();
-        littleVisibleDecks = new ArrayList<>();
-
-        for (int i = 0; i < 3; i++) {
-            littleVisibleDecks.add(new ArrayList<>());
-        }
-
-        littleNotVisibleDeck = new ArrayList<>();
-        littleVisibleDecksString = new ArrayList<>();
-        gameDeck = new Stack<>();
-    }
 
     public void setGameContext(GameContext gameContext){
         this.gameContext = gameContext;
     }
 
     /**
-     * Merges the smaller decks into the main gameModel deck and shuffles it.
+     * Creates a game deck by combining specific card sets and shuffling them.
+     * Depending on the provided parameter, this method determines whether to
+     * include all cards or a subset of decks in the main game deck.
+     *
+     * @param isTestFlight A boolean value indicating whether all cards should
+     *                     be added to the game deck (true) or only specific
+     *                     "little" decks (false).
      */
-    public void mergeIntoGameDeck() {
-        gameDeck.addAll(littleNotVisibleDeck);
-        littleVisibleDecks.forEach(gameDeck::addAll);
+    public void createGameDeck(boolean isTestFlight) {
+
+        if (isTestFlight)
+            gameDeck.addAll(allCards);
+        else {
+            gameDeck.addAll(littleNotVisibleDeck);
+            littleVisibleDecks.forEach(gameDeck::addAll);
+        }
+
         Collections.shuffle(gameDeck);
     }
 
@@ -84,7 +79,12 @@ public class Deck {
      */
     public void setUpLittleDecks(GameModel gameModel) {
 
-        loadCards();
+        if (gameModel.isTestFlight()) {
+            loadCards(false);
+            return;
+        }
+
+        loadCards(false);
         allCards.forEach(adventureCard -> adventureCard.setGame(gameModel));
         List<AdventureCard> level1Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 1).collect(Collectors.toList()));
         List<AdventureCard> level2Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 2).collect(Collectors.toList()));
@@ -137,30 +137,30 @@ public class Deck {
     }
 
     /**
-     * Loads all adventure cards into the deck from their respective JSON files.
-     * The deck is populated with the following types of adventure cards:
-     * - Abandoned Ships
-     * - Abandoned Stations
-     * - Free Space
-     * - Meteorite Storms
-     * - Pirates
-     * - Planets
-     * - Slave Traders
-     * - Smugglers
-     * - Stardust
-     * - War Fields
+     * Loads a set of adventure cards into the game, optionally filtering them based on the test flight flag.
+     *
+     * @param isTestFlight A boolean value indicating whether to load only test flight cards (if true)
+     *                     or all available cards (if false).
      */
-    private void loadCards() {
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedStationFromJson());
-        allCards.addAll(Deck.loadFreeSpaceFromJson());
-        allCards.addAll(Deck.loadMeteoriteStormFromJson());
-        allCards.addAll(Deck.loadPiratesFromJson());
-        allCards.addAll(Deck.loadPlanetsFromJson());
-        allCards.addAll(Deck.loadSlaveTradersFromJson());
-        allCards.addAll(Deck.loadSmugglersFromJson());
-        allCards.addAll(Deck.loadStardustFromJson());
-        allCards.addAll(Deck.loadWarFieldFromJson());
+    private void loadCards(boolean isTestFlight) {
+
+        List<AdventureCard> cards = new ArrayList<>();
+
+        cards.addAll(Deck.loadAbandonedShipFromJson());
+        cards.addAll(Deck.loadAbandonedStationFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadPiratesFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadSlaveTradersFromJson());
+        cards.addAll(Deck.loadSmugglersFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadWarFieldFromJson());
+
+        if (isTestFlight)
+            allCards.addAll(cards.stream().filter(AdventureCard::isTestFlightCard).toList());
+        else
+            allCards.addAll(cards);
     }
 
     /**

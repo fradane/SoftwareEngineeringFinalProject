@@ -331,6 +331,25 @@ public class GameModel {
         players.remove(nickname);
     }
 
+    /**
+     * Handles the event when the hourglass timer has ended for a game session.
+     * It synchronizes actions across players to ensure appropriate game state transitions.
+     * <p>
+     * This method increments the count of clients that have finished their timers
+     * and performs the following actions:
+     * 1. If flips are still available or a restart is in progress, it notifies all threads waiting on the hourglass.
+     * 2. If no flips are left and no restart is in progress:
+     *      - Sets the restart process flag to true.
+     *      - Waits until all players have finished their timers.
+     *      - Depending on the game state:
+     *          a. Transitions to the CHECK_SHIPBOARD state if all players are ranked.
+     *          b. Notifies players about the first player to enter if not all players are ranked.
+     * <p>
+     * Exceptions are handled for interruptions during waiting, ensuring the thread's interrupted status
+     * is maintained and errors are logged appropriately.
+     * <p>
+     * Thread-safety is ensured using synchronization on the hourglassLock object.
+     */
     public void hourglassEnded() {
 
         synchronized (hourglassLock) {
@@ -424,13 +443,14 @@ public class GameModel {
 
     public void checkAndTransitionToNextPhase() {
 
-        synchronized (stateTransitionLock){
+        synchronized (stateTransitionLock) {
             if (areAllShipsCorrect()) {
                 // Cambia allo stato successivo
                 setCurrGameState(GameState.CREATE_DECK);
             }
         }
     }
+
     public void setGameContext(GameContext gameContext) {
         this.gameContext = gameContext;
     }

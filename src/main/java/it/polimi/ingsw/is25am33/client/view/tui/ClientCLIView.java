@@ -6,6 +6,7 @@ import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
@@ -22,6 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static it.polimi.ingsw.is25am33.client.view.tui.ClientState.*;
@@ -46,6 +48,7 @@ public class ClientCLIView implements ClientView {
     private ClientState clientState = REGISTER;
     BlockingQueue<String> stringQueue = new LinkedBlockingQueue<>();
     Map<String, Set<Coordinates>> coloredCoordinates = new HashMap<>();
+    private boolean isTestFlight;
 
     // Definizione dei colori ANSI (funziona nei terminali che supportano i colori ANSI).
     private static final String ANSI_RED = "\u001B[31m";
@@ -74,6 +77,11 @@ public class ClientCLIView implements ClientView {
 
     public void setClientState(ClientState clientState) {
         this.clientState = clientState;
+    }
+
+    @Override
+    public void setIsTestFlight(boolean isTestFlight) {
+        this.isTestFlight = isTestFlight;
     }
 
     @Override
@@ -202,6 +210,7 @@ public class ClientCLIView implements ClientView {
                 break;
             case ERROR :
                 System.out.println(ANSI_RED + "Error: " + message + ANSI_RESET);
+                System.out.println("> ");
                 break;
             case NOTIFICATION_INFO:
                 System.out.print(ANSI_BLUE + "Info: " + message + ANSI_RESET + "\n> ");
@@ -485,17 +494,28 @@ public class ClientCLIView implements ClientView {
     @Override
     public void showBuildShipBoardMenu() {
         clientState = BUILDING_SHIPBOARD_MENU;
-        String menu = """
-                        \nChoose an option:
-                        1. Pick a random covered component from the table
-                        2. Pick a visible component from the table
-                        3. Place a reserved component
-                        4. Restart hourglass
-                        5. Watch a little deck
-                        6. End ship board construction
-                        ("show [nickname]" to watch other's player ship board)
-                        >\s""";
-        showMessage(menu, ASK);
+
+        StringBuilder output = new StringBuilder();
+
+        output.append("""
+                \nChoose an option:
+                1. Pick a random covered component from the table
+                2. Pick a visible component from the table
+                3. End ship board construction
+                """);
+
+        if (!isTestFlight)
+            output.append("""
+                    4. Restart hourglass
+                    5. Watch a little deck
+                    6. Place a reserved component
+                    """);
+
+        output.append("""
+                ("show [nickname]" to watch other's player ship board)
+                >\s""");
+
+        showMessage(output.toString(), ASK);
     }
 
     /**
@@ -657,16 +677,25 @@ public class ClientCLIView implements ClientView {
     @Override
     public void showPickedComponentAndMenu() {
         clientState = BUILDING_SHIPBOARD_WITH_FOCUSED_COMPONENT;
-        String menu = """
+        StringBuilder output = new StringBuilder();
+        output.append("""
                     \nChoose an action:
                     1. Show focus component
                     2. Rotate the component
                     3. Place component on ship board
-                    4. Reserve component
-                    5. Release component
-                    ("show [nickname]" to watch other's player ship board)
-                    >\s""";
-        showMessage(menu, ASK);
+                    4. Release component
+                    """);
+
+        if (!isTestFlight)
+            output.append("""
+                    5. Reserve component
+                    """);
+
+        output.append("""
+                ("show [nickname]" to watch other's player ship board)
+                >\s""");
+
+        showMessage(output.toString(), ASK);
     }
 
     /**
@@ -770,16 +799,16 @@ public class ClientCLIView implements ClientView {
 //                            break;
 //
 //                        case 1:
-//                            output.append(String.format("|    %1s    ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())));
+//                            output.append(String.format("|    %1s    ", isOut.apply(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())));
 //                            break;
 //
-//                        case 2: output.append(String.format("| %1s %3s %1s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.WEST).fromConnectorTypeToValue()),
-//                                Level2ShipBoard.isOutsideShipboard(i, j) ? (ANSI_RED + "OUT" + ANSI_RESET) : (cell == null ? "" : cell.getLabel()),
-//                                Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.EAST).fromConnectorTypeToValue())));
+//                        case 2: output.append(String.format("| %1s %3s %1s ", isOut.apply(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.WEST).fromConnectorTypeToValue()),
+//                                isOut.apply(i, j) ? (ANSI_RED + "OUT" + ANSI_RESET) : (cell == null ? "" : cell.getLabel()),
+//                                isOut.apply(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.EAST).fromConnectorTypeToValue())));
 //                            break;
 //
-//                        case 3: output.append(String.format("|    %1s %2s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()),
-//                                Level2ShipBoard.isOutsideShipboard(i, j) ? "" : (cell == null ? "" : (ANSI_BLUE + (cell.getMainAttribute().length() == 2 ? "" : " ") + cell.getMainAttribute() + ANSI_RESET))));
+//                        case 3: output.append(String.format("|    %1s %2s ", isOut.apply(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()),
+//                                isOut.apply(i, j) ? "" : (cell == null ? "" : (ANSI_BLUE + (cell.getMainAttribute().length() == 2 ? "" : " ") + cell.getMainAttribute() + ANSI_RESET))));
 //                            break;
 //                    }
 //                }
@@ -824,6 +853,8 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {
+
+        BiFunction<Integer, Integer, Boolean> isOut = isTestFlight ? Level1ShipBoard::isOutsideShipboard : Level2ShipBoard::isOutsideShipboard;
 
         Component[][] shipBoard = shipBoardClient.getShipMatrix();
         List<Component> bookedComponents = shipBoardClient.getBookedComponents();
@@ -893,18 +924,18 @@ public class ClientCLIView implements ClientView {
                             break;
 
                         case 1:
-                            String northConnector = Level2ShipBoard.isOutsideShipboard(i, j) ? "X" :
+                            String northConnector = isOut.apply(i, j) ? "X" :
                                     (cell == null ? "" : Integer.toString(cell.getConnectors().get(Direction.NORTH).fromConnectorTypeToValue()));
                             output.append(String.format("|    %s%1s%s    ",
                                     componentColor, northConnector, resetColor));
                             break;
 
                         case 2:
-                            String westConnector = Level2ShipBoard.isOutsideShipboard(i, j) ? "X" :
+                            String westConnector = isOut.apply(i, j) ? "X" :
                                     (cell == null ? "" : Integer.toString(cell.getConnectors().get(Direction.WEST).fromConnectorTypeToValue()));
-                            String eastConnector = Level2ShipBoard.isOutsideShipboard(i, j) ? "X" :
+                            String eastConnector = isOut.apply(i, j) ? "X" :
                                     (cell == null ? "" : Integer.toString(cell.getConnectors().get(Direction.EAST).fromConnectorTypeToValue()));
-                            String label = Level2ShipBoard.isOutsideShipboard(i, j) ? (ANSI_RED + "OUT" + ANSI_RESET) :
+                            String label = isOut.apply(i, j) ? (ANSI_RED + "OUT" + ANSI_RESET) :
                                     (cell == null ? "" : (componentColor + cell.getLabel() + resetColor));
 
                             output.append(String.format("| %s%1s%s %3s %s%1s%s ",
@@ -914,9 +945,9 @@ public class ClientCLIView implements ClientView {
                             break;
 
                         case 3:
-                            String southConnector = Level2ShipBoard.isOutsideShipboard(i, j) ? "X" :
+                            String southConnector = isOut.apply(i, j) ? "X" :
                                     (cell == null ? "" : Integer.toString(cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()));
-                            String attribute = Level2ShipBoard.isOutsideShipboard(i, j) ? "" :
+                            String attribute = isOut.apply(i, j) ? "" :
                                     (cell == null ? "" : (componentColor + (cell.getMainAttribute().length() == 2 ? "" : " ") + cell.getMainAttribute() + resetColor));
 
                             output.append(String.format("|    %s%1s%s %2s ",
@@ -1509,7 +1540,7 @@ public class ClientCLIView implements ClientView {
                     try {
                         clientState = WAIT_FOR_PLAYERS;
                         int numPlayers = Integer.parseInt(Objects.requireNonNull(stringQueue.poll()));
-                        boolean isTestFlight = Boolean.parseBoolean(stringQueue.poll());
+                        boolean isTestFlight = Objects.requireNonNull(stringQueue.poll()).equalsIgnoreCase("y");
                         PlayerColor playerColor = PlayerColor.getPlayerColor(Integer.parseInt(Objects.requireNonNull(stringQueue.poll())));
                         clientController.handleCreateGameMenu(numPlayers, isTestFlight, playerColor);
                     } catch(NumberFormatException | NullPointerException e) {
@@ -1559,24 +1590,37 @@ public class ClientCLIView implements ClientView {
                             showVisibleComponentAndMenu(clientController.getClientModel().getVisibleComponents());
                             break;
 
-                        case 3:
+                        case 6:
+                            if (isTestFlight) {
+                                showMessage("Invalid choice. Please select 1-3.\n> ", ASK);
+                                showBuildShipBoardMenu();
+                            }
                             clientState = BUILDING_SHIPBOARD_PICK_RESERVED_COMPONENT;
                             showMyShipBoard();
                             showPickReservedComponentQuestion();
                             break;
 
                         case 4:
+                            if (isTestFlight) {
+                                showMessage("Invalid choice. Please select 1-3.\n> ", ASK);
+                                showBuildShipBoardMenu();
+                            }
                             clientController.restartHourglass();
                             break;
 
                         case 5:
+                            if (isTestFlight) {
+                                showMessage("Invalid choice. Please select 1-3.\n> ", ASK);
+                                showBuildShipBoardMenu();
+                                break;
+                            }
                             clientState = WATCH_LITTLE_DECK;
                             showMessage("""
                                     Which little deck would you like to watch?
                                     >\s""", ASK);
                             break;
 
-                        case 6:
+                        case 3:
                             clientState = BUILDING_SHIPBOARD_WAITING;
                             clientController.endBuildShipBoardPhase();
                             break;
@@ -1600,6 +1644,11 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case BUILDING_SHIPBOARD_PICK_VISIBLE_COMPONENT:
+                    if (Integer.parseInt(input) == 0) {
+                        clientState = BUILDING_SHIPBOARD_MENU;
+                        showBuildShipBoardMenu();
+                        break;
+                    }
                     clientController.pickVisibleComponent(Integer.parseInt(input));
                     break;
 
@@ -1646,16 +1695,21 @@ public class ClientCLIView implements ClientView {
                             showMessage("Select coordinates where to place the focused component (row column): ", ASK);
                             break;
 
-                        case 4:
+                        case 5:
+                            if (isTestFlight) {
+                                showMessage("Invalid choice. Please select 1-4.\n> ", STANDARD);
+                                showPickedComponentAndMenu();
+                                break;
+                            }
                             clientController.reserveFocusedComponent();
                             break;
 
-                        case 5:
+                        case 4:
                             clientController.releaseFocusedComponent();
                             break;
 
                         default:
-                            showMessage("Invalid choice. Please select 1-5.\n", STANDARD);
+                            showMessage("Invalid choice. Please select 1-5.\n> ", STANDARD);
                     }
                     break;
 

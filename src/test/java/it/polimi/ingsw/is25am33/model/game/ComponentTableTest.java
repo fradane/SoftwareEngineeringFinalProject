@@ -48,7 +48,7 @@ class ComponentTableTest {
         ComponentTable table = new ComponentTable();
 
         // Create a mock GameContext with a no-op notifyAllClients implementation
-        GameContext mockContext = new GameContext(null, nullCCCC) {
+        GameContext mockContext = new GameContext(null, null) {
             @Override
             public void notifyAllClients(ThrowingBiConsumer<String, CallableOnClientController, IOException> consumer) {}
         };

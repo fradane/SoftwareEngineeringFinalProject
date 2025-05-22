@@ -23,7 +23,9 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
-            gameModel.notifyStopHourglass();
+            if (!gameModel.isTestFlight())
+                gameModel.notifyStopHourglass();
+
             gameModel.notifyInvalidShipBoards();
             gameModel.notifyValidShipBoards();
         }
@@ -34,7 +36,7 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
-            gameModel.getDeck().mergeIntoGameDeck();
+            gameModel.getDeck().createGameDeck(gameModel.isTestFlight());
         }
 
     },

@@ -5,7 +5,8 @@
     "shotIDs": ["small_north", "big_north", "small_north"],
     "reward": 4,
     "stepsBack": -1,
-    "requiredFirePower": 5
+    "requiredFirePower": 5,
+    "isTestFlightCard": false
   },
 
   {
@@ -14,6 +15,7 @@
     "shotIDs": ["big_north", "small_north", "big_north"],
     "reward": 7,
     "stepsBack": -2,
-    "requiredFirePower": 6
+    "requiredFirePower": 6,
+    "isTestFlightCard": false
   }
 ]

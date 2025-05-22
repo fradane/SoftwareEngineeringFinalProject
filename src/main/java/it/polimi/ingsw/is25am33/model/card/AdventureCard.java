@@ -7,20 +7,17 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
-import java.io.Serializable;
-import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.function.BiConsumer;
 
-public abstract class AdventureCard implements Serializable {
+public abstract class AdventureCard {
 
     protected String cardName;
     protected int level;
     protected CardState currState;
     protected GameModel gameModel;
     protected String imageName;
+    protected boolean isTestFlightCard;
 
     /**
      * A static map that associates string identifiers with factory functions
@@ -78,6 +75,14 @@ public abstract class AdventureCard implements Serializable {
         return level;
     }
 
+    public boolean isTestFlightCard() {
+        return isTestFlightCard;
+    }
+
+    public void setIsTestFlightCard(boolean testFlightCard) {
+        isTestFlightCard = testFlightCard;
+    }
+
     @JsonIgnore
     public abstract CardState getFirstState();
 
@@ -85,9 +90,9 @@ public abstract class AdventureCard implements Serializable {
     public void setCurrState(CardState currState)  {
         this.currState = currState;
 
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyCardState(nicknameToNotify, currState);
-        });
+        gameModel.getGameContext().notifyAllClients(
+                (nicknameToNotify, clientController) -> clientController.notifyCardState(nicknameToNotify, currState)
+        );
     }
 
     @JsonIgnore
