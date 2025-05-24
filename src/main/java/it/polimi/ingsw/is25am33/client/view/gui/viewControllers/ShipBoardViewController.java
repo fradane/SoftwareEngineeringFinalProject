@@ -7,7 +7,6 @@ import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
-import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -49,6 +48,8 @@ public class ShipBoardViewController extends GuiController {
     @FXML
     public VBox visibleComponentsPanel;
     @FXML
+    public VBox componentsContainer;
+    @FXML
     private ImageView visibleCard1 = new ImageView();
     @FXML
     private ImageView visibleCard2 = new ImageView();
@@ -79,7 +80,7 @@ public class ShipBoardViewController extends GuiController {
     @FXML private Button visibleComponentButton;
     @FXML public ComboBox<Integer> littleDeckComboBox;
 
-    private final int fixedComponentLength = 70;
+    private final int FIXED_COMPONENT_LENGTH = 70;
     private int focusComponentRotation = 0;
     private ModelFxAdapter modelFxAdapter;
 
@@ -129,18 +130,55 @@ public class ShipBoardViewController extends GuiController {
         modelFxAdapter.refreshShipBoard();
     }
 
+    /**
+     * Configures a binding to dynamically display and update visible components in the user interface.
+     * This method listens for changes in the list of visible components and updates the graphical
+     * representation accordingly. It associates each component with a button that allows interaction.
+     *<p>
+     * - When changes occur in the observable list of visible components, the method executes a UI update
+     *   inside a JavaFX application thread.
+     * - It clears the current component display, creates graphical elements (such as images and buttons)
+     *   for the updated components, and appends them to the container.
+     * - Each button is set up to trigger an action that interacts with the current focused component
+     *   or assigns the selected component to the client controller for further processing.
+     *<p>
+     * Note:
+     * - The method relies on `modelFxAdapter.getObservableVisibleComponents()` for the observable list of
+     *   visible components.
+     * - It leverages JavaFX's `Platform.runLater()` to ensure UI updates are performed on the JavaFX
+     *   application thread.
+     * - Graphics representing components are loaded as images with a fixed size from a specific resource path.
+     */
     private void setUpVisibleComponentsBinding() {
-        modelFxAdapter.getObservableVisibleComponets()
-            .addListener((InvalidationListener) change -> Platform.runLater(() -> {
-                VBox container = new VBox(10); // contenitore verticale con spacing
-                for (String string : modelFxAdapter.getObservableVisibleComponets()) {
+        modelFxAdapter.getObservableVisibleComponents()
+            .addListener((InvalidationListener) _ -> Platform.runLater(() -> {
+                componentsContainer.getChildren().clear();
+
+                for (String string : modelFxAdapter.getObservableVisibleComponents()) {
+                    // image set up
                     ImageView imageView = new ImageView(new Image(
                             Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/component/" + string))));
-                    imageView.setFitWidth(70);
-                    imageView.setFitHeight(70);
-                    container.getChildren().add(imageView);
+                    imageView.setFitWidth(FIXED_COMPONENT_LENGTH);
+                    imageView.setFitHeight(FIXED_COMPONENT_LENGTH);
+
+                    // button set up
+                    Button button = new Button();
+                    button.setGraphic(imageView);
+                    button.getStyleClass().add("cell-button");
+                    componentsContainer.getChildren().add(button);
+
+                    // set up the button action
+                    button.setOnAction(_ -> {
+                        if (clientModel.getMyShipboard().getFocusedComponent() == null) {
+                            clientModel.getVisibleComponents().forEach((index, component) -> {
+                                if (component.toString().split("\\n")[0].equals(string))
+                                    clientController.pickVisibleComponent(index);
+                            });
+                        }
+                    });
                 }
-                componentsScrollPane.setContent(container);
+
+                componentsScrollPane.setContent(componentsContainer);
             }));
     }
 
@@ -178,8 +216,8 @@ public class ShipBoardViewController extends GuiController {
                                 Image image = new Image(Objects.requireNonNull(getClass()
                                         .getResourceAsStream("/gui/graphics/component/" + bookedComponentFile)));
                                 ImageView imageview = new ImageView(image);
-                                imageview.setFitWidth(fixedComponentLength);
-                                imageview.setFitHeight(fixedComponentLength);
+                                imageview.setFitWidth(FIXED_COMPONENT_LENGTH);
+                                imageview.setFitHeight(FIXED_COMPONENT_LENGTH);
                                 button04_08.setGraphic(imageview);
                             } else {
                                 button04_08.setGraphic(null);
@@ -196,8 +234,8 @@ public class ShipBoardViewController extends GuiController {
                                 Image image = new Image(Objects.requireNonNull(getClass()
                                         .getResourceAsStream("/gui/graphics/component/" + bookedComponentFile)));
                                 ImageView imageview = new ImageView(image);
-                                imageview.setFitWidth(fixedComponentLength);
-                                imageview.setFitHeight(fixedComponentLength);
+                                imageview.setFitWidth(FIXED_COMPONENT_LENGTH);
+                                imageview.setFitHeight(FIXED_COMPONENT_LENGTH);
                                 button04_09.setGraphic(imageview);
                             } else {
                                 button04_09.setGraphic(null);
@@ -249,8 +287,8 @@ public class ShipBoardViewController extends GuiController {
                 Image img = new Image(Objects.requireNonNull(getClass()
                         .getResourceAsStream("/gui/graphics/component/" + componentName)));
                 ImageView imgView = new ImageView(img);
-                imgView.setFitWidth(fixedComponentLength);
-                imgView.setFitHeight(fixedComponentLength);
+                imgView.setFitWidth(FIXED_COMPONENT_LENGTH);
+                imgView.setFitHeight(FIXED_COMPONENT_LENGTH);
                 imgView.setPreserveRatio(true);
                 imgView.setRotate(component.getRotation() * 90);
                 button.setGraphic(imgView);

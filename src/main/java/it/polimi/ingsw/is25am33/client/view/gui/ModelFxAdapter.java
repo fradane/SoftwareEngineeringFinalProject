@@ -66,7 +66,7 @@ public class ModelFxAdapter {
         return observableFlipsLeft;
     }
 
-    public ObservableList<String> getObservableVisibleComponets() {
+    public ObservableList<String> getObservableVisibleComponents() {
         return observableVisibleComponets;
     }
 

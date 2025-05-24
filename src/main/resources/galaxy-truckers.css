@@ -294,3 +294,116 @@
 .game-combo-box .list-cell:hover {
     -fx-background-color: -fx-space-blue-light;
 }
+
+/* Aggiungi questi stili al tuo file galaxy-truckers.css */
+
+/* Pannello sinistro - Componenti visibili */
+.visible-components-panel {
+    -fx-background-color: -fx-space-darker;
+    -fx-border-color: derive(-fx-space-blue, 20%);
+    -fx-border-width: 0 1px 0 0;
+    -fx-padding: 15px;
+}
+
+/* Header del pannello componenti */
+.panel-header {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+.panel-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 5, 0, 0, 1);
+}
+
+/* ScrollPane per i componenti - stesso stile del timer container */
+.components-scroll-pane {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+.components-scroll-pane .viewport {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+}
+
+.components-scroll-pane .scroll-bar:vertical {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 4px;
+    -fx-pref-width: 8px;
+}
+
+.components-scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 4px;
+}
+
+.components-scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: -fx-space-blue;
+    -fx-background-radius: 4px;
+    -fx-background-insets: 1px;
+}
+
+.components-scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+.components-scroll-pane .scroll-bar .increment-button,
+.components-scroll-pane .scroll-bar .decrement-button {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-pref-height: 0;
+    -fx-pref-width: 0;
+}
+
+.components-scroll-pane .corner {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+/* Container dei componenti */
+.components-container {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-spacing: 10px;
+}
+
+/* Stili per i componenti individuali - stesso stile degli action-button */
+.component-item {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-font-size: 11px;
+}
+
+.component-item:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 5, 0, 0, 0);
+}
+
+.component-item:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 3, 0, 0, 0);
+}
+
+.component-item.selected {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+}
+
+/* Immagini dei componenti */
+.component-image {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}
