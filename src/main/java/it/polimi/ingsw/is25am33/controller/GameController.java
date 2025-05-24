@@ -175,6 +175,11 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
+    public void handleClientChoice(String nickname, PlayerChoicesDataStructure choice) throws IOException {
+        gameModel.getCurrAdventureCard().play(choice);
+    }
+
+    @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) {
         Component chosenComponent = gameModel.getComponentTable().pickVisibleComponent(choice);
         if (chosenComponent == null) return;
@@ -321,17 +326,23 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         BatteryBox batteryBox = null;
         DoubleCannon doubleCannon = null;
 
+        PlayerChoicesDataStructure choice;
+
         // check whether the coordinates are valid
         if (!doubleCannonCoords.isCoordinateInvalid() && !batteryBoxCoords.isCoordinateInvalid()) {
             doubleCannon = ((DoubleCannon) shipBoard.getComponentAt(doubleCannonCoords));
             batteryBox = ((BatteryBox) shipBoard.getComponentAt(batteryBoxCoords));
-        }
 
-        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
-                .Builder()
-                .setChosenBatteryBox(batteryBox)
-                .setChosenDoubleCannon(doubleCannon)
-                .build();
+            choice = new PlayerChoicesDataStructure
+                    .Builder()
+                    .setChosenBatteryBox(batteryBox)
+                    .setChosenDoubleCannon(doubleCannon)
+                    .build();
+        }else {
+            choice = new PlayerChoicesDataStructure
+                    .Builder()
+                    .build();
+        }
 
         gameModel.getCurrAdventureCard().play(choice);
     }

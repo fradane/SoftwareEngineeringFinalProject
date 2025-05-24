@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.client.model;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -14,7 +15,7 @@ public class ClientModel {
 
     private String myNickname;
     private final Map<String, PlayerClientData> playerClientData = new ConcurrentHashMap<>();
-    private String currAdventureCard;
+    private ClientCard currAdventureCard;
     private CardState currCardState;
     private GameState gameState;
     private DangerousObj currDangerousObj;
@@ -41,7 +42,7 @@ public class ClientModel {
     }
 
     public boolean isMyTurn() {
-        return isMyTurn;
+        return myNickname.equals(currentPlayer);
     }
 
     public void setMyTurn(boolean myTurn) {
@@ -68,11 +69,11 @@ public class ClientModel {
         this.gameState = gameState;
     }
 
-    public void setCurrAdventureCard(String currAdventureCard) {
+    public void setCurrAdventureCard(ClientCard currAdventureCard) {
         this.currAdventureCard = currAdventureCard;
     }
 
-    public String getCurrAdventureCard() {
+    public ClientCard getCurrAdventureCard() {
         return currAdventureCard;
     }
 

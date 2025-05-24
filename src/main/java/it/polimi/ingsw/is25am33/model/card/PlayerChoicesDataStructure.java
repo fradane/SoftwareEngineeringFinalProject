@@ -2,6 +2,8 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.component.*;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +14,7 @@ import java.util.Optional;
  *
  * <p>The contained choices are utilized by the model to process and execute player actions accordingly.</p>
  */
-public class PlayerChoicesDataStructure {
+public class PlayerChoicesDataStructure implements Serializable {
 
     private final List<Engine> chosenDoubleEngines;
     private final List<BatteryBox> chosenBatteryBoxes;
@@ -155,7 +157,6 @@ public class PlayerChoicesDataStructure {
         private BatteryBox chosenBatteryBox;
         private DoubleCannon chosenDoubleCannon;
         private List<Cannon> chosenDoubleCannons;
-
         /**
          * Sets the list of double engines selected by the player.
          *
@@ -284,6 +285,13 @@ public class PlayerChoicesDataStructure {
          * @return a new {@link PlayerChoicesDataStructure} instance.
          */
         public PlayerChoicesDataStructure build() {
+            // Inizializza tutte le liste
+            if (chosenDoubleEngines == null) chosenDoubleEngines = new ArrayList<>();
+            if (chosenBatteryBoxes == null) chosenBatteryBoxes = new ArrayList<>();
+            if (chosenCabins == null) chosenCabins = new ArrayList<>();
+            if (chosenStorage == null) chosenStorage = new ArrayList<>();
+            if (chosenDoubleCannons == null) chosenDoubleCannons = new ArrayList<>();
+
             return new PlayerChoicesDataStructure(this);
         }
     }

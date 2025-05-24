@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * Represents a cabin component capable of housing crew members.
  */
-public class Cabin extends Component {
+public class Cabin extends Component{
 
     /** List containing crew members currently inhabiting this cabin. */
     private List<CrewMember> inhabitants = new ArrayList<>();

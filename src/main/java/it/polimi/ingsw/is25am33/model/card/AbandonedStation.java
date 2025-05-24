@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
@@ -45,6 +46,12 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
 
         }
 
+    }
+
+    @Override
+    public ClientCard toClientCard() {
+        //TODO
+        return null;
     }
 
     public void setRequiredCrewMembers(int requiredCrewMembers) {

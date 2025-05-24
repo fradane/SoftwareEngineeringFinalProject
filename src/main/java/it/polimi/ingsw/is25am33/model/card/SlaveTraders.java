@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
@@ -50,6 +51,12 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
                 throw new UnknownStateException("Unknown current state");
         }
 
+    }
+
+    @Override
+    public ClientCard toClientCard() {
+        //TODO
+        return null;
     }
 
     public void setCrewMalus(int crewMalus) {

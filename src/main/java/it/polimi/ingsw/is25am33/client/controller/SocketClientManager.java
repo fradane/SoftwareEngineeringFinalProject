@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.client.controller;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.controller.GameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -254,7 +255,8 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
                 case "notifyCurrAdventureCard":
                     if (clientController != null) {
-                        clientController.notifyCurrAdventureCard(nickname, notification.getParamString());
+                        //TODO da aggiustare con le ClientCard
+                        //clientController.notifyCurrAdventureCard(nickname, notification.getParamString());
                     }
                     break;
 
@@ -459,6 +461,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     public void playerPlacePlaceholder(String nickname) {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPlacePlaceholder");
         out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void handleClientChoice(String nickname, PlayerChoicesDataStructure choice) throws IOException {
+        //TODO
     }
 
     @Override

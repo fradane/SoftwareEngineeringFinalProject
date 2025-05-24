@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.controller;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 
 import java.io.IOException;
 import java.rmi.Remote;
@@ -66,4 +67,6 @@ public interface CallableOnGameController extends Remote {
     void playerWantsToFocusReservedComponent(String nickname, int choice) throws IOException;
 
     void playerPlacePlaceholder(String nickname) throws IOException;
+
+    void handleClientChoice(String nickname, PlayerChoicesDataStructure choice) throws IOException;
 }

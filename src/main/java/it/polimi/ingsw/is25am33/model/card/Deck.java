@@ -151,16 +151,19 @@ public class Deck {
      * - War Fields
      */
     private void loadCards() {
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedStationFromJson());
-        allCards.addAll(Deck.loadFreeSpaceFromJson());
-        allCards.addAll(Deck.loadMeteoriteStormFromJson());
-        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedStationFromJson());
+//        allCards.addAll(Deck.loadFreeSpaceFromJson());
+//        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadSlaveTradersFromJson());
+//        allCards.addAll(Deck.loadSmugglersFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadWarFieldFromJson());
         allCards.addAll(Deck.loadPlanetsFromJson());
-        allCards.addAll(Deck.loadSlaveTradersFromJson());
-        allCards.addAll(Deck.loadSmugglersFromJson());
-        allCards.addAll(Deck.loadStardustFromJson());
-        allCards.addAll(Deck.loadWarFieldFromJson());
+        allCards.addAll(Deck.loadPlanetsFromJson());
+        allCards.addAll(Deck.loadPlanetsFromJson());
     }
 
     /**

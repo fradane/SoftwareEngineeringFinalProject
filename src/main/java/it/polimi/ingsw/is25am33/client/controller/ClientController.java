@@ -1,12 +1,15 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
+import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
@@ -415,9 +418,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyCurrAdventureCard(String nickname, String adventureCard) {
+    public void notifyCurrAdventureCard(String nickname, ClientCard adventureCard, boolean isFirstTime) {
         clientModel.setCurrAdventureCard(adventureCard);
-        view.showCurrAdventureCard(true);
+        view.showCurrAdventureCard(isFirstTime);
     }
 
     @Override
@@ -432,7 +435,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) {
-        clientModel.getShipboardOf(nickname).getShipMatrix()[coordinates.getX()][coordinates.getY()] = component;
+        ShipBoardClient shipboard = clientModel.getShipboardOf(nickname);
+        shipboard.setFocusedComponent(component);
+        shipboard.placeComponentWithFocus(coordinates.getX(), coordinates.getY());
     }
 
     // TODO marco, controllare
@@ -489,6 +494,17 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
+    public void notifyCurrAdventureCardUpdate(String nicknameToNotify, ClientCard adventureCard) throws IOException {
+        clientModel.setCurrAdventureCard(adventureCard);
+    }
+
+    @Override
+    public void notifyPlayerVisitedPlanet(String nicknameToNotify, String nickname, ClientCard adventureCard) throws IOException {
+        if(!clientModel.isMyTurn())
+            view.showMessage(clientModel.getCurrentPlayer() + " just visited a planet", NOTIFICATION_INFO);
+    }
+
+    @Override
     public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) {
         clientModel.eliminatePlayer(nickname);
         view.showMessage(nickname + " was eliminated.", STANDARD);
@@ -496,13 +512,32 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyCardState(String nickname, CardState cardState) {
+        if(isStateRegardingCurrentPlayerOnly(cardState)){
+            if(!clientModel.isMyTurn()) {
+                view.showMessage("This is not your turn. Wait for " + clientModel.getCurrentPlayer() + " to make his choice", NOTIFICATION_INFO);
+                return;
+            }
+        }
+
         clientModel.setCardState(cardState);
         view.showNewCardState();
 
-        if (clientModel.isMyTurn() && cardState != CardState.END_OF_CARD) {
-            // Chiama direttamente il metodo showRelatedMenu sul CardState
-            cardState.showRelatedMenu(view);
+        if (!clientModel.isMyTurn() && cardState != CardState.START_CARD && cardState != CardState.END_OF_CARD) {
+            view.showMessage("Wait for " + clientModel.getCurrentPlayer() + " to make his choice", NOTIFICATION_INFO);
         }
+
+
+//        if (clientModel.isMyTurn() && cardState != CardState.END_OF_CARD) {
+//            // Chiama direttamente il metodo showRelatedMenu sul CardState
+//            cardState.showRelatedMenu(view);
+//        }
+    }
+
+    //Insieme di stati che non vanno notificati a meno che tu non sia il player di turno
+    private boolean isStateRegardingCurrentPlayerOnly(CardState cardState){
+        //TODO capire quali altri stati entrano in questa categoria e aggiungerli sotto
+        return cardState == CardState.HANDLE_CUBES_REWARD
+        || cardState == CardState.CHOOSE_PLANET;
     }
 
     @Override
@@ -722,11 +757,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void endBuildShipBoardPhase() {
         try {
-            serverController.playerEndsBuildShipBoardPhase(nickname);
             view.showMessage("""
                     Your ship is ready, now wait for other player to finish theirs, they are sooooooo slow.
                     Anyway use the <show> command as before to see any shipboard or <rank> to see the current ranking.
                     >\s""", ASK);
+            serverController.playerEndsBuildShipBoardPhase(nickname);
         } catch (IOException e) {
             handleRemoteException(e);
         }
@@ -736,6 +771,273 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         try {
             serverController.playerPlacePlaceholder(nickname);
         } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerWantsToVisitLocation(String nickname, Boolean choice){
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setWantsToVisit(choice)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerWantsToThrowDices(String nickname){
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords){
+        //TODO fare controlli di validità dei valori inseriti
+
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+
+        List<Cannon> cannons = doubleEnginesCoords
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Cannon.class::cast)
+                .toList();
+
+        List<BatteryBox> batteryBoxes = batteryBoxesCoords
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(BatteryBox.class::cast)
+                .toList();
+
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenDoubleCannons(cannons)
+                .setChosenBatteryBoxes(batteryBoxes)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords){
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+
+        List<Cannon> cannons = doubleCannonsCoords
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Cannon.class::cast)
+                .toList();
+
+        List<BatteryBox> batteryBoxes = batteryBoxesCoords
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(BatteryBox.class::cast)
+                .toList();
+
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenDoubleCannons(cannons)
+                .setChosenBatteryBoxes(batteryBoxes)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords){
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+
+        List<Cabin> cabins = cabinCoords
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Cabin.class::cast)
+                .toList();
+
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenCabins(cabins)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerWantsToVisitPlanet(String nickname, int choice){
+        if(!clientModel.isMyTurn()) {
+            view.showMessage("This is not your turn, please wait for others to chose ...", ERROR);
+            return;
+        }
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenPlanetIndex(choice)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerWantsToAcceptTheReward(String nickname, Boolean choice){
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setHasAcceptedTheReward(choice)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords){
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+
+        BatteryBox batteryBox = null;
+        Shield shield = null;
+
+        PlayerChoicesDataStructure playerChoiceDataStructure;
+
+        // check whether the coordinates are valid
+        if (!shieldCoords.isCoordinateInvalid() && !batteryBoxCoords.isCoordinateInvalid()) {
+            shield = ((Shield) shipBoard.getComponentAt(shieldCoords));
+            batteryBox = ((BatteryBox) shipBoard.getComponentAt(batteryBoxCoords));
+
+            playerChoiceDataStructure = new PlayerChoicesDataStructure
+                    .Builder()
+                    .setChosenBatteryBox(batteryBox)
+                    .setChosenShield(shield)
+                    .build();
+        }else{
+            playerChoiceDataStructure = new PlayerChoicesDataStructure
+                    .Builder()
+                    .build();
+        }
+
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords){
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+
+        BatteryBox batteryBox = null;
+        DoubleCannon doubleCannon = null;
+
+        PlayerChoicesDataStructure playerChoiceDataStructure;
+
+        // check whether the coordinates are valid
+        if (!doubleCannonCoords.isCoordinateInvalid() && !batteryBoxCoords.isCoordinateInvalid()) {
+            doubleCannon = ((DoubleCannon) shipBoard.getComponentAt(doubleCannonCoords));
+            batteryBox = ((BatteryBox) shipBoard.getComponentAt(batteryBoxCoords));
+
+            playerChoiceDataStructure = new PlayerChoicesDataStructure
+                    .Builder()
+                    .setChosenBatteryBox(batteryBox)
+                    .setChosenDoubleCannon(doubleCannon)
+                    .build();
+        }else {
+            playerChoiceDataStructure = new PlayerChoicesDataStructure
+                    .Builder()
+                    .build();
+        }
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerHandleBigShot(String nickname){
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerChoseStorage(String nickname, List<Coordinates> storageCoords){
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+        List<Storage> storage = new ArrayList<>();
+
+        if (!storageCoords.isEmpty()) {
+            for (Coordinates coords : storageCoords) {
+                if (coords.isCoordinateInvalid()) {
+                    // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
+                    storage.add(null);
+                } else {
+                    Component component = shipBoard.getComponentAt(coords);
+                    if (component instanceof Storage) {
+                        storage.add((Storage) component);
+                    } else {
+                        // Se le coordinate non puntano a uno storage, aggiungi null
+                        storage.add(null);
+                    }
+                }
+            }
+        }
+        // Se la lista è vuota, significa che il giocatore non può/non vuole salvare nessun cubo
+
+        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenStorage(storage)
+                .build();
+
+        try {
+            serverController.handleClientChoice(nickname, choice);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    public void spreadEpidemic(String nickname){
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void stardustEvent(String nickname){
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
             handleRemoteException(e);
         }
     }

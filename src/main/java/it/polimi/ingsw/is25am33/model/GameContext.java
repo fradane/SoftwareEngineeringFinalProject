@@ -35,6 +35,7 @@ public class GameContext {
                     consumer.accept(nickname, clientController);
                 } catch (IOException  e) {
                     clientsDisconnected.add(nickname);
+                    System.out.println(e.getMessage());
                 }
             });
             futureNicknames.put(future, nickname);

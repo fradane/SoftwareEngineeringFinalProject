@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
 import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
@@ -71,6 +72,12 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
                 throw new IllegalStateException("Unknown current state");
         }
 
+    }
+
+    @Override
+    public ClientCard toClientCard() {
+        //TODO
+        return null;
     }
 
     public void convertIdsToShots() {

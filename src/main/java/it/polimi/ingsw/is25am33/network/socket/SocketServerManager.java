@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.network.socket;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
-import it.polimi.ingsw.is25am33.client.controller.SocketClientManager;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -14,7 +14,6 @@ import it.polimi.ingsw.is25am33.network.DNS;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerSerializer;
 import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
-import javafx.print.Printer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -333,6 +332,16 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
+    public void notifyCurrAdventureCardUpdate(String nicknameToNotify, ClientCard adventureCard) throws IOException {
+        //TODO
+    }
+
+    @Override
+    public void notifyPlayerVisitedPlanet(String nicknameToNotify, String nickname, ClientCard adventureCard) throws IOException {
+        //TODO
+    }
+
+    @Override
     public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws IOException {
 
     }
@@ -400,11 +409,12 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyCurrAdventureCard(String nickname, String adventureCard) throws IOException{
-        SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCard");
-        outMessage.setParamString(adventureCard);
-        writers.get(nickname).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nickname),nickname);
+    public void notifyCurrAdventureCard(String nickname, ClientCard adventureCard, boolean isFirstTime) throws IOException{
+        //TODO da aggisutare con clientCard
+//        SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCard");
+//        outMessage.setParamString(adventureCard);
+//        writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+//        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override

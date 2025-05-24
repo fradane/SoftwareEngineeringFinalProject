@@ -1,5 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+
 public abstract class Enemies extends AdventureCard {
 
     Enemies() {}
@@ -21,5 +23,11 @@ public abstract class Enemies extends AdventureCard {
 
     public int getRequiredFirePower() {
         return requiredFirePower;
+    }
+
+    @Override
+    public ClientCard toClientCard() {
+        //TODO
+        return null;
     }
 }

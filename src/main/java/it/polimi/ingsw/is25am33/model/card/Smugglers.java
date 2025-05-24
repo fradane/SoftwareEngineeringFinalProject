@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
@@ -59,6 +60,13 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             default:
                 throw new UnknownStateException("Unknown current state");
         }
+    }
+
+    @Override
+    public ClientCard toClientCard() {
+        //TODO
+
+        return null;
     }
 
     private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {

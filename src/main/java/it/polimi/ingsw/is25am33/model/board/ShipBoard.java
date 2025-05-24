@@ -674,8 +674,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<CrewMember> getCrewMembers() {
-        return componentsPerType.get(Cabin.class)
-                .stream()
+        List<Object> cabins = componentsPerType.getOrDefault(Cabin.class, Collections.emptyList());
+
+        return cabins.stream()
                 .map(Cabin.class::cast)
                 .map(Cabin::getInhabitants)
                 .flatMap(Collection::stream)
@@ -689,8 +690,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Cabin> getCabin() {
-        return componentsPerType.get(Cabin.class)
-                .stream()
+        List<Object> cabins = componentsPerType.getOrDefault(Cabin.class, Collections.emptyList());
+
+        return cabins.stream()
                 .map(Cabin.class::cast)
                 .collect(Collectors.toList());
     }
@@ -746,8 +748,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<DoubleCannon> getDoubleCannons () {
-        return componentsPerType.get(DoubleCannon.class)
-                .stream()
+        List<Object> cannons = componentsPerType.getOrDefault(DoubleCannon.class, Collections.emptyList());
+
+        return cannons.stream()
                 .map(DoubleCannon.class::cast)
                 .collect(Collectors.toList());
     }
@@ -759,8 +762,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Cannon> getSingleCannons () {
-        return componentsPerType.get(Cannon.class)
-                .stream()
+        List<Object> cannons = componentsPerType.getOrDefault(Cannon.class, Collections.emptyList());
+
+        return cannons.stream()
                 .map(Cannon.class::cast)
                 .collect(Collectors.toList());
     }
@@ -799,8 +803,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<DoubleEngine> getDoubleEngines () {
-        return componentsPerType.get(DoubleEngine.class)
-                .stream()
+        List<Object> engines = componentsPerType.getOrDefault(DoubleEngine.class, Collections.emptyList());
+
+        return engines.stream()
                 .map(DoubleEngine.class::cast)
                 .collect(Collectors.toList());
     }
@@ -812,8 +817,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Engine> getSingleEngines () {
-        return componentsPerType.get(Engine.class)
-                .stream()
+        List<Object> engines = componentsPerType.getOrDefault(Engine.class, Collections.emptyList());
+
+        return engines.stream()
                 .map(Engine.class::cast)
                 .collect(Collectors.toList());
     }
@@ -861,8 +867,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<StandardStorage> getStandardStorages() {
-        return componentsPerType.get(StandardStorage.class)
-                .stream()
+        List<Object> storages = componentsPerType.getOrDefault(StandardStorage.class, Collections.emptyList());
+
+        return storages.stream()
                 .map(StandardStorage.class::cast)
                 .collect(Collectors.toList());
     }
@@ -874,8 +881,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<SpecialStorage> getSpecialStorages() {
-        return componentsPerType.get(SpecialStorage.class)
-                .stream()
+        List<Object> storages = componentsPerType.getOrDefault(SpecialStorage.class, Collections.emptyList());
+
+        return storages.stream()
                 .map(SpecialStorage.class::cast)
                 .collect(Collectors.toList());
     }
@@ -897,8 +905,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<BatteryBox> getBatteryBoxes() {
-        return componentsPerType.get(BatteryBox.class)
-                .stream()
+        List<Object> batteries = componentsPerType.getOrDefault(BatteryBox.class, Collections.emptyList());
+
+        return batteries.stream()
                 .map(BatteryBox.class::cast)
                 .collect(Collectors.toList());
     }
@@ -910,8 +919,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Shield> getShields() {
-        return componentsPerType.get(Shield.class)
-                .stream()
+        List<Object> shields = componentsPerType.getOrDefault(Shield.class, Collections.emptyList());
+
+        return shields.stream()
                 .map(Shield.class::cast)
                 .collect(Collectors.toList());
     }

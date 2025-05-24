@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
@@ -66,6 +67,12 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
                 throw new UnknownStateException("Unknown current state");
         }
 
+    }
+
+    @Override
+    public ClientCard toClientCard() {
+        //TODO
+        return null;
     }
 
     @Override

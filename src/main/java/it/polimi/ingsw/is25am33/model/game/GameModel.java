@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -10,6 +11,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.client.model.card.AdventureCardMapper;
 
 import java.rmi.RemoteException;
 import java.util.*;
@@ -233,8 +235,11 @@ public class GameModel {
     public void setCurrAdventureCard(AdventureCard currAdventureCard) {
             this.currAdventureCard = currAdventureCard;
 
+            // Map server card to client card
+            ClientCard clientCard = currAdventureCard.toClientCard();
+
             gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyCurrAdventureCard(nicknameToNotify, currAdventureCard.toString());
+                    clientController.notifyCurrAdventureCard(nicknameToNotify, clientCard, true);
             });
 
     }

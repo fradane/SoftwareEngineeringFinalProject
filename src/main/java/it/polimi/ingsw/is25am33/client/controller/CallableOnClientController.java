@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -7,7 +8,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.rmi.Remote;
@@ -29,7 +29,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws IOException;
 
-    void notifyCurrAdventureCard( String nickname, String adventureCard) throws IOException;
+    void notifyCurrAdventureCard(String nickname, ClientCard adventureCard, boolean isFirstTime) throws IOException;
 
     void notifyCardState(String nickname, CardState cardState) throws IOException;
 
@@ -77,4 +77,8 @@ public interface CallableOnClientController extends Remote {
     void notifyStopHourglass(String nicknameToNotify) throws IOException;
 
     void notifyFirstToEnter(String nicknameToNotify) throws IOException;
+
+    void notifyCurrAdventureCardUpdate(String nicknameToNotify, ClientCard adventureCard) throws IOException;
+
+    void notifyPlayerVisitedPlanet(String nicknameToNotify, String nickname, ClientCard adventureCard) throws IOException;
 }
