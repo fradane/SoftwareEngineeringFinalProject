@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.client.model;
 
+import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -23,6 +24,16 @@ public class ClientModel {
     private List<List<String>> littleVisibleDecks = new ArrayList<>();
     private boolean isMyTurn;
     private Hourglass hourglass;
+    private ModelFxAdapter modelFxAdapter;
+
+    public void setModelFxAdapter(ModelFxAdapter modelFxAdapter) {
+        this.modelFxAdapter = modelFxAdapter;
+    }
+
+    public void refreshShipBoard() {
+        if (modelFxAdapter != null)
+            modelFxAdapter.refreshShipBoard();
+    }
 
     public Hourglass getHourglass() {
         return hourglass;
@@ -90,6 +101,10 @@ public class ClientModel {
 
     public Map<String, PlayerClientData> getPlayerClientData() {
         return playerClientData;
+    }
+
+    public ShipBoardClient getMyShipboard() {
+        return playerClientData.get(myNickname).getShipBoard();
     }
 
     /**
@@ -172,4 +187,10 @@ public class ClientModel {
     public void setNickname(String nickname) {
         this.myNickname = nickname;
     }
+
+    public void refreshVisibleComponents() {
+        if (modelFxAdapter != null)
+            modelFxAdapter.refreshVisibleComponents();
+    }
+
 }

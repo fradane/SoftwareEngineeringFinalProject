@@ -171,7 +171,7 @@ public interface ClientView {
 
     void showLittleDeck(int littleDeckChoice);
 
-    void updateTimeLeft(int timeLeft);
+    void updateTimeLeft(int timeLeft, int flipsLeft);
 
     void notifyTimerEnded(int flipsLeft);
 

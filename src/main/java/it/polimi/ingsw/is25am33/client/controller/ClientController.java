@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
@@ -390,7 +391,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         this.currentShipPartsList = new ArrayList<>(shipParts);
     }
 
-
     @Override
     public void notifyGameState(String nickname, GameState gameState) throws IOException{
         clientModel.setGameState(gameState);
@@ -418,17 +418,21 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyAddVisibleComponents(String nickname, int index, Component component) throws IOException{
         clientModel.getVisibleComponents().put(index, component);
+        clientModel.refreshVisibleComponents();
     }
 
     @Override
     public void notifyRemoveVisibleComponents(String nickname, int index) throws IOException{
         clientModel.getVisibleComponents().remove(index);
+        clientModel.refreshVisibleComponents();
     }
 
     @Override
     public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException {
-        clientModel.getShipboardOf(nickname).getShipMatrix()[coordinates.getX()][coordinates.getY()] = component;
-        clientModel.getShipboardOf(nickname).getShipBoardAdapter().refreshMatrix();
+        ShipBoardClient shipBoardClient = clientModel.getShipboardOf(nickname);
+        shipBoardClient.getShipMatrix()[coordinates.getX()][coordinates.getY()] = component;
+        shipBoardClient.setFocusedComponent(null);
+        clientModel.refreshShipBoard();
     }
 
     // TODO marco, controllare
@@ -439,7 +443,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws IOException {
         clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
-        clientModel.getShipboardOf(nickname).getShipBoardAdapter().refreshMatrix();
+        clientModel.refreshShipBoard();
     }
 
     /**
@@ -453,17 +457,20 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(focusedComponent);
-        clientModel.getShipboardOf(nickname).getShipBoardAdapter().refreshMatrix();
+        clientModel.refreshShipBoard();
     }
 
     @Override
     public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws IOException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
+        clientModel.refreshShipBoard();
     }
 
     @Override
-    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) throws IOException {
+    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws IOException {
         clientModel.getShipboardOf(nickname).getBookedComponents().add(component);
+        clientModel.getShipboardOf(nickname).setFocusedComponent(null);
+        clientModel.refreshShipBoard();
     }
 
     @Override
@@ -569,8 +576,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void placeFocusedComponent(int row, int column) {
         try {
-            row--;
-            column--;
             clientModel.getShipboardOf(nickname).checkPosition(row, column);
             serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column), clientModel.getShipboardOf(nickname).getFocusedComponent().getRotation());
             view.showBuildShipBoardMenu();
@@ -578,6 +583,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             handleRemoteException(e);
         } catch (IllegalArgumentException e) {
             view.showMessage("Invalid coordinates: " + e.getMessage() + "\n", ERROR);
+            System.err.println("Invalid coordinates: " + e.getMessage());
         }
     }
 

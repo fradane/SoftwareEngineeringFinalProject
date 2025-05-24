@@ -1,6 +1,6 @@
 package it.polimi.ingsw.is25am33.client.model;
 
-import it.polimi.ingsw.is25am33.client.view.gui.ShipBoardFxAdapter;
+import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.GameContext;
 import it.polimi.ingsw.is25am33.model.component.*;
@@ -8,7 +8,6 @@ import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.game.Player;
-import javafx.beans.property.ObjectProperty;
 
 import java.util.List;
 import java.util.Set;
@@ -435,7 +434,5 @@ public interface ShipBoardClient {
     Component releaseFocusedComponent();
 
     void checkPosition(int x, int y);
-
-    ShipBoardFxAdapter getShipBoardAdapter();
 
 }

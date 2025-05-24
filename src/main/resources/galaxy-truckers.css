@@ -1,0 +1,296 @@
+/* galaxy-truckers.css */
+
+/* Colori principali */
+* {
+    -fx-space-dark: #1c1c1c;
+    -fx-space-darker: #0e0e0e;
+    -fx-space-blue: #1e3253;
+    -fx-space-blue-light: #2a4e8b;
+    -fx-space-accent: #ffb300;
+    -fx-space-accent-hover: #ffc233;
+    -fx-space-green: #28a745;
+    -fx-space-red: #dc3545;
+    -fx-space-gray: #6c757d;
+}
+
+/* Stile di base per l'intero gioco */
+.game-background {
+    -fx-background-color: -fx-space-dark;
+    /* -fx-background-image: url("stars-bg.png");  Aggiungi un'immagine stelle se disponibile */
+    -fx-text-fill: white;
+}
+
+/* Header e titolo */
+.top-container {
+    -fx-background-color: -fx-space-darker;
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+    -fx-border-color: derive(-fx-space-blue, 20%);
+    -fx-border-width: 0 0 1px 0;
+}
+
+.screen-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 5, 0, 0, 1);
+}
+
+/* Container del timer */
+.timer-container {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-spacing: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+/* Stili Timer */
+.timer-label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0, 0, 1);
+    -fx-min-width: 50px;
+}
+
+.timer-warning {
+    -fx-text-fill: -fx-space-red;
+    -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.8), 5, 0, 0, 0);
+}
+
+/* Stili Hourglass Button */
+.hourglass-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 6px 10px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-font-size: 11px;
+    -fx-min-width: 110px;
+}
+
+.hourglass-button.hourglass-enabled {
+    -fx-background-color: -fx-space-green;
+}
+
+.hourglass-button.hourglass-enabled:hover {
+    -fx-background-color: derive(-fx-space-green, 15%);
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.5), 5, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.hourglass-button.hourglass-enabled:pressed {
+    -fx-background-color: derive(-fx-space-green, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.7), 3, 0, 0, 0);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.hourglass-button.hourglass-disabled {
+    -fx-background-color: -fx-space-gray;
+    -fx-cursor: default;
+    -fx-opacity: 0.6;
+}
+
+.hourglass-button.hourglass-disabled:hover {
+    -fx-background-color: -fx-space-gray;
+    -fx-effect: none;
+}
+
+/* Bottone navigazione "Go Back" */
+.nav-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-font-size: 12px;
+}
+
+.nav-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 5, 0, 0, 0);
+}
+
+.nav-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 3, 0, 0, 0);
+}
+
+/* Container componenti */
+.component-display {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+
+/* Container della plancia */
+.board-container {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-padding: 10px;
+}
+
+/* Controlli componente */
+.component-controls {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-min-width: 150px;
+    -fx-max-width: 180px;
+}
+
+.controls-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+}
+
+.component-control-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-min-width: 120px;
+    -fx-font-size: 11px;
+}
+
+.component-control-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 5, 0, 0, 0);
+}
+
+.component-control-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 3, 0, 0, 0);
+}
+
+/* Navigazione tra navi */
+.ship-navigation {
+    -fx-padding: 5px;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-radius: 15px;
+}
+
+.ship-nav-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 15px;
+    -fx-padding: 8px 15px;
+    -fx-border-radius: 15px;
+    -fx-cursor: hand;
+}
+
+.ship-nav-button:hover {
+    -fx-background-color: derive(-fx-space-blue, 20%);
+}
+
+.ship-nav-button.active {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+}
+
+/* Bottoni celle griglia */
+.cell-button {
+    -fx-background-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-cursor: hand;
+}
+
+.cell-button:hover {
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 5, 0, 0, 0);
+}
+
+.cell-button:pressed {
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.7), 10, 0, 0, 0);
+}
+
+/* Little Deck */
+.little-deck-container {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-accent;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+}
+
+/* Barra delle azioni in basso */
+.action-bar {
+    -fx-background-color: -fx-space-darker;
+    -fx-padding: 15px;
+    -fx-spacing: 15px;
+    -fx-border-color: derive(-fx-space-blue, 20%);
+    -fx-border-width: 1px 0 0 0;
+}
+
+/* Stile bottoni azione */
+.action-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}
+
+.action-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+.action-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+}
+
+/* ComboBox styling */
+.game-combo-box {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}
+
+.game-combo-box:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+.game-combo-box .arrow {
+    -fx-background-color: white;
+}
+
+.game-combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.game-combo-box .list-cell {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+}
+
+.game-combo-box .list-cell:hover {
+    -fx-background-color: -fx-space-blue-light;
+}

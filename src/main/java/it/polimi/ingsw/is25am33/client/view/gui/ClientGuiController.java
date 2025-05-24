@@ -248,6 +248,9 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showBuildShipBoardMenu() {
+
+        if (shipBoardViewController != null) return;
+
         Optional<Boolean> isTestFlight = clientController.getGames()
                 .stream()
                 .filter(gameInfo -> gameInfo.getGameId().equals(clientController.getCurrentGameId()))
@@ -367,8 +370,9 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public void updateTimeLeft(int timeLeft) {
-
+    public void updateTimeLeft(int timeLeft, int flipsLeft) {
+        if (shipBoardViewController != null && shipBoardViewController.getModelFxAdapter() != null)
+            shipBoardViewController.getModelFxAdapter().refreshTimer(timeLeft, flipsLeft);
     }
 
     @Override

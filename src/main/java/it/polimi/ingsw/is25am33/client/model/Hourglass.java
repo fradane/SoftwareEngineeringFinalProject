@@ -63,12 +63,12 @@ public class Hourglass {
         scheduler = Executors.newScheduledThreadPool(1);
 
         isRunning = true;
-        timeLeft = 1; //TODO ricambiare a 10 secondi
+        timeLeft = 20; //TODO ricambiare a 60 secondi
         scheduler.scheduleAtFixedRate(() -> {
 
             if (timeLeft > 0) {
-                view.updateTimeLeft(timeLeft);
                 timeLeft--;
+                view.updateTimeLeft(timeLeft, flipsLeft);
             } else {
                 scheduler.shutdown();
                 view.notifyTimerEnded(flipsLeft);

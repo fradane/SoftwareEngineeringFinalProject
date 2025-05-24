@@ -1407,7 +1407,7 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
-    public void updateTimeLeft(int timeLeft) {
+    public void updateTimeLeft(int timeLeft, int flipsLeft) {
         if (timeLeft % 20 == 0 && timeLeft != 0 && timeLeft != 60) {
             showMessage("Time left: " + timeLeft, NOTIFICATION_INFO);
         }
@@ -1639,7 +1639,8 @@ public class ClientCLIView implements ClientView {
                     // Prova a convertire le stringhe in numeri
                     row = Integer.parseInt(coordinates[0]);
                     column = Integer.parseInt(coordinates[1]);
-
+                    row--;
+                    column--;
                     clientController.placeFocusedComponent(row, column);
                     break;
 
