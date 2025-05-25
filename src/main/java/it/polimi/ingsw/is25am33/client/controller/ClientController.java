@@ -1,5 +1,8 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
+import it.polimi.ingsw.is25am33.client.ClientModel;
+import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
+import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
@@ -39,12 +42,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     boolean gameStarted = false;
     private final ClientModel clientModel;
     private final ObservableList<GameInfo> observableGames = FXCollections.observableArrayList();
+    private final ClientPingPongManager clientPingPongManager;
 
     private List<Set<Coordinates>> currentShipPartsList = new ArrayList<>();
 
-    public ClientController(ClientModel clientModel) throws RemoteException {
+    public ClientController(ClientModel clientModel, ClientPingPongManager clientPingPongManager) throws RemoteException {
         super();
         this.clientModel = clientModel;
+        this.clientPingPongManager=clientPingPongManager;
     }
 
     public void run() {
@@ -75,6 +80,18 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 view.showError("Nickname already exists");
             } else {
                 view.showMessage("Nickname registered successfully!", STANDARD);
+                new Thread(()->{
+                    clientPingPongManager.start(
+                            ()-> {
+                                try {
+                                    pingToServerFromClient(nickname);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                    );
+                }).start();
+
                 this.nickname = attemptedNickname;
                 clientModel.setNickname(nickname);
                 view.showMainMenu();
@@ -150,7 +167,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             boolean success = dns.joinGame(chosenGameId, nickname, chosenColor);
 
             if (!success) {
-                view.showError("Color already in use");
+                view.showError("Error joining game");
+                view.showMainMenu();
                 return;
             }
 
@@ -299,6 +317,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 inGame = false;
                 gameStarted = false;
                 currentGameId = null;
+                serverController.leaveGameAfterCreation(nickname,true);
+                System.exit(0);
+            }
+            else {
+                dns.leaveGameBeforeCreation(nickname);
                 System.exit(0);
             }
         } catch (Exception e) {
@@ -495,7 +518,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayerNickname) throws IOException {
         view.showMessage(disconnectedPlayerNickname + " disconnected.", ERROR);
         view.showMessage("GAME ENDED", STANDARD);
-        leaveGame();
+    }
+
+    public void forcedDisconnection(String nicknameToNotify, String gameId) throws IOException {
+        leaveGame(false);
     }
 
     public void cardPhase() {
@@ -568,7 +594,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         try {
             row--;
             column--;
-            clientModel.getShipboardOf(nickname).checkPosition(row, column);
+            // TODO aggiungere il check sul componente
             serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column), clientModel.getShipboardOf(nickname).getFocusedComponent().getRotation());
             view.showBuildShipBoardMenu();
         } catch (IOException e) {
@@ -698,4 +724,26 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             handleRemoteException(e);
         }
     }
+
+    //manda il ping dal client al server
+    public void pingToServerFromClient(String nickname) throws IOException{
+        dns.pingToServerFromClient(nickname);
+    }
+
+    //quando ricevo il pong di risposta dal server resetto il timeout
+    public void pongToClientFromServer(String nickname) throws IOException{
+        //System.out.println("Pong dal server");
+        clientPingPongManager.onPongReceived(this::handleDisconnection);
+    }
+
+    //quando il server manda il ping al client
+    public void pingToClientFromServer(String nickname) throws IOException{
+       //System.out.println("Ping dal server");
+        dns.pongToServerFromClient(nickname);
+    }
+
+    public void handleDisconnection() {
+            System.exit(0);
+    }
+
 }

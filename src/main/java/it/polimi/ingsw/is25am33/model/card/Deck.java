@@ -1,14 +1,13 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 
-import java.rmi.RemoteException;
 import java.util.*;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
@@ -31,7 +30,7 @@ public class Deck {
     private final List<AdventureCard> littleNotVisibleDeck;
     private final List<List<String>> littleVisibleDecksString;
     private final Stack<AdventureCard> gameDeck;
-    private GameContext gameContext;
+    private GameClientNotifier gameClientNotifier;
     private final List<Boolean> isLittleDeckFree = new ArrayList<>(List.of(true, true, true));
 
     /**
@@ -50,8 +49,8 @@ public class Deck {
         gameDeck = new Stack<>();
     }
 
-    public void setGameContext(GameContext gameContext){
-        this.gameContext = gameContext;
+    public void setGameContext(GameClientNotifier gameClientNotifier){
+        this.gameClientNotifier = gameClientNotifier;
     }
 
     /**
@@ -97,7 +96,7 @@ public class Deck {
 
         mapLittleDecksToString();
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyVisibleDeck(nicknameToNotify, littleVisibleDecksString);
         });
 

@@ -1,10 +1,11 @@
 package it.polimi.ingsw.is25am33.client.view.gui;
 
-import it.polimi.ingsw.is25am33.client.model.ClientModel;
-import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.ClientModel;
+import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
+import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
-import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
+import it.polimi.ingsw.is25am33.client.view.MessageType;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.GuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController;
@@ -48,7 +49,7 @@ public class ClientGuiController extends Application implements ClientView {
 
     public ClientGuiController() throws RemoteException {
         clientModel = new ClientModel();
-        clientController = new ClientController(clientModel);
+        clientController = new ClientController(clientModel, new ClientPingPongManager());
     }
 
     @Override

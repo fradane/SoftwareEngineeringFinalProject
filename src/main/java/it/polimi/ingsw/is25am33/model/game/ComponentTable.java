@@ -1,12 +1,10 @@
 package it.polimi.ingsw.is25am33.model.game;
 
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.ComponentLoader;
-import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import javafx.util.Pair;
 
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -16,15 +14,15 @@ public class ComponentTable {
     private final Stack<Component> hiddenComponents = new Stack<>();
     private final Map<Integer, Component> visibleComponents = new ConcurrentHashMap<>();
     private Integer currVisibleIndex = 1;
-    private GameContext gameContext;
+    private GameClientNotifier gameClientNotifier;
 
     public ComponentTable() {
         hiddenComponents.addAll(ComponentLoader.loadComponents());
         Collections.shuffle(hiddenComponents);
     }
 
-    public void setGameContext(GameContext gameContext) {
-        this.gameContext = gameContext;
+    public void setGameContext(GameClientNotifier gameClientNotifier) {
+        this.gameClientNotifier = gameClientNotifier;
     }
 
     public Component pickHiddenComponent(){
@@ -42,7 +40,7 @@ public class ComponentTable {
         synchronized (visibleComponents) {
             visibleComponents.put(currVisibleIndex, component);
 
-            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyAddVisibleComponents(nicknameToNotify, currVisibleIndex, component);
             });
             currVisibleIndex++;
@@ -58,7 +56,7 @@ public class ComponentTable {
             return null;
         }
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyRemoveVisibleComponents(nicknameToNotify, index);
         });
 
