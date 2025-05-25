@@ -485,7 +485,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws IOException {
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Object>> componentsPerType) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyShipBoardUpdate");
         outMessage.setParamString(nickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);

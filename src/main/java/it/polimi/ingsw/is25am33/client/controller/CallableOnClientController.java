@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface CallableOnClientController extends Remote {
@@ -47,7 +48,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException;
 
-    void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws IOException;
+    void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Object>> componentsPerType) throws IOException;
 
     void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws IOException;
 

@@ -92,6 +92,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showCurrentRanking() {
+        //TODO
+    }
+
+    @Override
     public void showInvalidShipBoardMenu() {
         //TODO
     }

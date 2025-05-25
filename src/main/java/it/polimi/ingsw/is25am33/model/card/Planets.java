@@ -10,6 +10,7 @@ import it.polimi.ingsw.is25am33.model.IllegalIndexException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Storage;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,6 +116,7 @@ public class Planets extends AdventureCard implements PlayerMover {
             gameModel.nextPlayer();
         } else {
             setCurrState(CardState.END_OF_CARD);
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 
     }
@@ -196,6 +198,10 @@ public class Planets extends AdventureCard implements PlayerMover {
         // Muovi il giocatore indietro
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
+        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
+        });
+
         // Procedi con il prossimo giocatore o termina la carta
         proceedToNextPlayerOrEndCard();
 
@@ -239,6 +245,7 @@ public class Planets extends AdventureCard implements PlayerMover {
             setCurrState(CardState.CHOOSE_PLANET);
         } else {
             setCurrState(CardState.END_OF_CARD);
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
     }
 

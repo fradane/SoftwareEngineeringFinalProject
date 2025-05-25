@@ -10,6 +10,7 @@ import it.polimi.ingsw.is25am33.model.game.Player;
 import javafx.beans.property.ObjectProperty;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -439,5 +440,9 @@ public interface ShipBoardClient {
     }
 
     void checkPosition(int x, int y);
+
+    void setComponentsPerType(Map<Class<?>, List<Object>> componentsPerType);
+
+    Map<Coordinates, Storage> getCoordinatesAndStorages();
 
 }

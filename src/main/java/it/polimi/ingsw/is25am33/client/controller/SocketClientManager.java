@@ -15,7 +15,6 @@ import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -315,10 +314,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     break;
 
                 case "notifyShipBoardUpdate":
-                    if (clientController != null) {
-                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix() );
-                    }
-                    break;
+                    //TODO da aggiustare mettondo i componentsPerType
+//                    if (clientController != null) {
+//                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix(), );
+//                    }
+//                    break;
 
                 case "notifyPlayerCredits":
                     if (clientController != null) {

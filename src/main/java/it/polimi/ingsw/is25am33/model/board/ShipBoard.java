@@ -1143,4 +1143,28 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
     }
 
+    public void setComponentsPerType(Map<Class<?>, List<Object>> componentsPerType) {
+        this.componentsPerType = componentsPerType;
+    }
+
+    /**
+     * Returns a map where keys are coordinates and values are Storage components at those coordinates.
+     * Only includes coordinates that have Storage components.
+     *
+     * @return A map of coordinates to Storage objects
+     */
+    @JsonIgnore
+    public Map<Coordinates, Storage> getCoordinatesAndStorages() {
+        Map<Coordinates, Storage> result = new HashMap<>();
+
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                if (isValidPosition(i, j) && shipMatrix[i][j]!= null && shipMatrix[i][j] instanceof Storage) {
+                    result.put(new Coordinates(i, j), (Storage) shipMatrix[i][j]);
+                }
+            }
+        }
+
+        return result;
+    }
 }

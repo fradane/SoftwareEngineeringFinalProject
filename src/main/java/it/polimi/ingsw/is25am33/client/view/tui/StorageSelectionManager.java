@@ -90,32 +90,6 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Verifica se il giocatore può accettare tutti i cubi reward.
-     *
-     * @return true se il giocatore ha storage sufficienti per tutti i cubi, false altrimenti
-     */
-    public boolean canAcceptAllCubes() {
-        // Conta quanti cubi di ogni tipo ci sono nei reward
-        Map<CargoCube, Integer> cubeCount = new HashMap<>();
-        for (CargoCube cube : cubeRewards) {
-            cubeCount.put(cube, cubeCount.getOrDefault(cube, 0) + 1);
-        }
-
-        // Verifica se ci sono storage compatibili sufficienti per ogni tipo di cubo
-        for (Map.Entry<CargoCube, Integer> entry : cubeCount.entrySet()) {
-            CargoCube cubeType = entry.getKey();
-            int requiredCount = entry.getValue();
-
-            // Se non ci sono abbastanza storage compatibili per questo tipo di cubo
-            if (compatibleStoragesMap.getOrDefault(cubeType, new ArrayList<>()).size() < requiredCount) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Ottiene una mappa che indica quanti cubi di ogni tipo il giocatore non può accettare.
      *
      * @return Una mappa con il tipo di cubo e il numero di cubi che non possono essere accettati
@@ -155,6 +129,12 @@ public class StorageSelectionManager {
             return false;
         }
 
+        // Il giocatore non vuole salvare questo cubo
+        if(storageCoords.isCoordinateInvalid()){
+            selectedStorages.add(storageCoords);
+            return true;
+        }
+
         // Ottengo il componente alle coordinate specificate
         Storage storage = getStorageAtCoordinates(storageCoords);
         if (storage == null) {
@@ -179,6 +159,7 @@ public class StorageSelectionManager {
 
                 // Se il cubo meno prezioso ha un valore maggiore del cubo corrente, avvisa l'utente
                 if (leastValuableCube.getValue() > currentCube.getValue()) {
+                    //TODO farlo con showMessage
                     System.out.println("ATTENZIONE: Il cubo meno prezioso nello storage (" +
                             leastValuableCube + ", valore: " + leastValuableCube.getValue() +
                             ") è più prezioso del cubo corrente (" +
@@ -187,9 +168,57 @@ public class StorageSelectionManager {
             }
         }
 
+        storage.addCube(currentCube);
+
         // Aggiungo le coordinate alla lista delle selezioni
         selectedStorages.add(storageCoords);
+
         return true;
+    }
+
+    /**
+     * Skips the current cube and moves to the next one.
+     *
+     * @return true if the cube was skipped, false if there are no more cubes to skip
+     */
+    public boolean skipCurrentCube() {
+        if (selectedStorages.size() >= cubeRewards.size()) {
+            return false;  // No more cubes to skip
+        }
+
+        selectedStorages.add(new Coordinates(-1, -1));
+        return true;
+    }
+
+    /**
+     * Checks if the current cube can be accepted and explains why if it can't.
+     *
+     * @return A string explaining why the cube can't be accepted, or null if it can be accepted
+     */
+    public String getCurrentCubeImpossibilityReason() {
+        CargoCube currentCube = getCurrentCube();
+        if (currentCube == null) {
+            return "No more cubes to accept";
+        }
+
+        if (currentCube == CargoCube.RED && compatibleStoragesMap.getOrDefault(CargoCube.RED, new ArrayList<>()).isEmpty()) {
+            return "Questo cubo ROSSO non può essere accettato perché non hai storage speciali disponibili";
+        }
+
+        // Count how many cubes of this type have already been assigned
+        int alreadyAssigned = 0;
+        for (int i = 0; i < selectedStorages.size(); i++) {
+            if (cubeRewards.get(i) == currentCube) {
+                alreadyAssigned++;
+            }
+        }
+
+        int availableCount = compatibleStoragesMap.getOrDefault(currentCube, new ArrayList<>()).size();
+        if (availableCount <= alreadyAssigned) {
+            return "Non hai abbastanza storage compatibili per questo cubo " + currentCube;
+        }
+
+        return null; // Cube can be accepted
     }
 
     /**
@@ -203,16 +232,8 @@ public class StorageSelectionManager {
             return false;
         }
 
-        // Conta quanti cubi di questo tipo sono già stati assegnati
-        int alreadyAssigned = 0;
-        for (int i = 0; i < selectedStorages.size(); i++) {
-            if (cubeRewards.get(i) == currentCube) {
-                alreadyAssigned++;
-            }
-        }
-
-        // Verifica se ci sono storage compatibili rimanenti
-        return compatibleStoragesMap.getOrDefault(currentCube, new ArrayList<>()).size() > alreadyAssigned;
+        // Verifica se ci sono storage compatibili
+        return compatibleStoragesMap.getOrDefault(currentCube, new ArrayList<>()).size() > 0;
     }
 
     /**

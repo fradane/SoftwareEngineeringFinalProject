@@ -446,8 +446,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) {
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Object>> componentsPerType) {
         clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
+        clientModel.getShipboardOf(nickname).setComponentsPerType(componentsPerType);
     }
 
     /**
@@ -481,6 +482,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) {
         clientModel.updatePlayerPosition(nickname,newPosition);
+        view.showMessage("\n" + nickname + " has changed its position", NOTIFICATION_INFO);
+        view.showCurrentRanking();
     }
 
     @Override

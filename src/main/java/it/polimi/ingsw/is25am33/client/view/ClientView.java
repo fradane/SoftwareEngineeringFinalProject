@@ -213,4 +213,6 @@ public interface ClientView {
 
 
     void showFirstToEnter();
+
+    void showCurrentRanking();
 }
