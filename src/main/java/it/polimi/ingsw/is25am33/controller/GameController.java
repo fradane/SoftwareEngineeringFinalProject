@@ -20,7 +20,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.IntStream;
 
 public class GameController extends UnicastRemoteObject implements CallableOnGameController {
     private final GameModel gameModel;
@@ -41,6 +40,10 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         this.dns = dns;
     }
 
+    public GameModel getGameModel() {
+        return gameModel;
+    }
+
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController) {
         clientControllers.put(nickname, clientController);
         gameModel.addPlayer(nickname, color, clientController);
@@ -48,6 +51,10 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     public void removePlayer(String nickname) {
         gameModel.removePlayer(nickname);
+    }
+
+    public ConcurrentHashMap<String, CallableOnClientController> getClientControllers() {
+        return clientControllers;
     }
 
     public void playCard(String jsonString) throws IOException {
@@ -111,27 +118,20 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void leaveGame(String nickname) {
-        if (!gameModel.isStarted()) {
-
-            clientControllers.remove(nickname);
-            System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
-            if (clientControllers.isEmpty()) {
-                dns.removeGame(getGameInfo().getGameId());
-                System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
-            }
-            dns.getConnectionManager().getClients().remove(nickname);
-
-        } else {
-            clientControllers.forEach((playerNickname, clientController) -> {
-                clientControllers.remove(playerNickname);
-                DNS.gameControllers.remove(playerNickname);
-                dns.getConnectionManager().getClients().remove(playerNickname);
-            });
+    public void leaveGameAfterCreation(String nickname, Boolean isFirst) {
+        //se voglio uscire notifico a tutti gli altri giocatori nel game che mi sto disconnettendo ed esco.
+        // a quel punto loro si disconnetteranno tramite il game context
+        dns.getClientGame().remove(nickname);
+        clientControllers.remove(nickname);
+        System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
+        //se sono il primo a chiamare e ci sono altri client notifico e chiudo altrimenti se ho rimosso gia tutti i client chiudo il gioco
+        if(isFirst && !gameModel.getGameContext().getClientControllers().isEmpty())
+            gameModel.getGameContext().notifyDisconnection(nickname);
+        else if(clientControllers.isEmpty()) {
             dns.removeGame(getGameInfo().getGameId());
             System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
         }
-
+        //se un client è crashato lo stato del gioco viene settato a false in automatico alla ricezione della disconnessione
     }
 
     @Override

@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface CallableOnDNS extends Remote {
 
-    GameController getController(String gameId) throws RemoteException;
+    GameController getController(String gameId) throws RemoteException ;
 
     GameInfo getGameInfo(String gameId) throws RemoteException;
 
@@ -21,4 +21,10 @@ public interface CallableOnDNS extends Remote {
     GameInfo createGame(PlayerColor color, int numPlayers, boolean isTestFlight, String nickname) throws IOException;
 
     boolean joinGame(String gameId, String nickname, PlayerColor color) throws IOException;
+
+    void leaveGameBeforeCreation(String nickname) throws IOException;
+
+    void pingToServerFromClient(String nickname) throws IOException;
+
+    void pongToServerFromClient(String nickname) throws IOException;
 }

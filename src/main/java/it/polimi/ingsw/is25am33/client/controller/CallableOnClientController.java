@@ -73,4 +73,9 @@ public interface CallableOnClientController extends Remote {
 
     void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts) throws RemoteException;
 
+    void forcedDisconnection(String nickname, String gameId) throws IOException;
+
+    void pingToClientFromServer(String nickname) throws IOException;
+
+    void pongToClientFromServer(String nickname) throws IOException;
 }

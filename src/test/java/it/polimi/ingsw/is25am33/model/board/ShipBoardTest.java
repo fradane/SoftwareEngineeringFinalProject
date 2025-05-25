@@ -1,6 +1,6 @@
 package it.polimi.ingsw.is25am33.model.board;
 
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.component.*;
 
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
@@ -35,7 +35,7 @@ public class ShipBoardTest {
     @BeforeEach
     void setup() {
         // Use whichever concrete subclass is appropriate (e.g., Level2ShipBoard)
-        shipBoard = new Level2ShipBoard(PlayerColor.RED, new GameContext(null, new ConcurrentHashMap<>()));
+        shipBoard = new Level2ShipBoard(PlayerColor.RED, new GameClientNotifier(null, new ConcurrentHashMap<>()));
 
         // Store MainCabin coordinates for cleaner test code
         cabinX = ShipBoard.STARTING_CABIN_POSITION[0];

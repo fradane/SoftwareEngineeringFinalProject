@@ -8,9 +8,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.client.ShipBoardClient;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -21,7 +19,7 @@ import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 
 public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
-    protected GameContext gameContext;
+    protected GameClientNotifier gameClientNotifier;
 
     /**
      * The size of the board where components can be placed. Just one length as the board is squared.
@@ -73,14 +71,14 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      *
      * @param color The color associated with the player.
      */
-    public ShipBoard(PlayerColor color, GameContext gameContext) {
+    public ShipBoard(PlayerColor color, GameClientNotifier gameClientNotifier) {
         Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
         connectors.put(Direction.NORTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.WEST,  ConnectorType.UNIVERSAL);
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
         shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
-        this.gameContext = gameContext;
+        this.gameClientNotifier = gameClientNotifier;
     }
 
     public void setPlayer(Player player) {
@@ -101,8 +99,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return incorrectlyPositionedComponentsCoordinates;
     }
 
-    public void setGameContext(GameContext gameContext) {
-        this.gameContext = gameContext;
+    public void setGameContext(GameClientNotifier gameClientNotifier) {
+        this.gameClientNotifier = gameClientNotifier;
     }
 
     public void setShipMatrix(Component[][] shipMatrix) {
@@ -111,7 +109,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
     public void setFocusedComponent(Component focusedComponent)  {
         this.focusedComponent = focusedComponent;
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyFocusedComponent(nicknameToNotify, player.getNickname(), focusedComponent);;
         });
     }
@@ -230,7 +228,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
             focusedComponent.insertInComponentsMap(componentsPerType);
 
-                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                         clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
                 });
 
@@ -1042,7 +1040,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         component.setCurrState(ComponentState.VISIBLE);
         setFocusedComponent(null);
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyReleaseComponent(nicknameToNotify, player.getNickname());
         });
 
