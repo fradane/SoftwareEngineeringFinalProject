@@ -115,7 +115,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     public void connect() throws IOException {
-        socket = new Socket("127.0.0.1", 1234);
+        socket = new Socket("192.168.1.9", 1234);
         System.out.println("Connected to server at " + socket.getRemoteSocketAddress());
 
         out = new PrintWriter(socket.getOutputStream(), true);

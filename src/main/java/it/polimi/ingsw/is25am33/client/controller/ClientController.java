@@ -270,7 +270,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     private CallableOnDNS setUpRMIConnection() throws IOException {
-        String serverAddress = "localhost";
+        String serverAddress = "192.168.1.9";
 
         try {
             Registry registry = LocateRegistry.getRegistry(serverAddress, NetworkConfiguration.RMI_PORT);
