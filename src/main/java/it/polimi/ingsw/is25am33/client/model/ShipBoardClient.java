@@ -445,4 +445,12 @@ public interface ShipBoardClient {
 
     Map<Coordinates, Storage> getCoordinatesAndStorages();
 
+    /**
+     * Returns a map where keys are coordinates and values are Cabin components that have crew members.
+     * Only includes coordinates that have Cabin components with at least one inhabitant.
+     *
+     * @return A map of coordinates to Cabin objects with crew
+     */
+    Map<Coordinates, Cabin> getCoordinatesAndCabinsWithCrew();
+
 }

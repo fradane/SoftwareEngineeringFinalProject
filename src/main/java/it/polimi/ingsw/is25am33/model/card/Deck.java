@@ -161,9 +161,21 @@ public class Deck {
 //        allCards.addAll(Deck.loadSmugglersFromJson());
 //        allCards.addAll(Deck.loadStardustFromJson());
 //        allCards.addAll(Deck.loadWarFieldFromJson());
-        allCards.addAll(Deck.loadPlanetsFromJson());
-        allCards.addAll(Deck.loadPlanetsFromJson());
-        allCards.addAll(Deck.loadPlanetsFromJson());
+
+
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+
+
+
+        allCards.addAll(Deck.loadAbandonedShipFromJson());
+        allCards.addAll(Deck.loadAbandonedShipFromJson());
+        allCards.addAll(Deck.loadAbandonedShipFromJson());
+        allCards.addAll(Deck.loadAbandonedShipFromJson());
+        allCards.addAll(Deck.loadAbandonedShipFromJson());
     }
 
     /**

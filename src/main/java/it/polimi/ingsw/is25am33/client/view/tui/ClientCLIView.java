@@ -9,6 +9,7 @@ import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.Planet;
+import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
 import it.polimi.ingsw.is25am33.model.component.Storage;
@@ -52,6 +53,7 @@ public class ClientCLIView implements ClientView {
     // Class-level variables to track selection state
     Map<String, Set<Coordinates>> coloredCoordinates = new HashMap<>();
     private List<Coordinates> selectedEngines = new ArrayList<>();
+    private List<Coordinates> selectedCabins = new ArrayList<>();
     private List<Coordinates> selectedCannons = new ArrayList<>();
     private List<Coordinates> selectedBatteries = new ArrayList<>();
     private Coordinates selectedShield = null;
@@ -501,43 +503,55 @@ public class ClientCLIView implements ClientView {
      */
     private void displayCardSpecificInfo(ClientCard card, StringBuilder output) {
         switch (card.getCardType()) {
-            case "PLANETS":
+            case "Planets":
                 displayPlanetsInfo((ClientPlanets) card, output);
                 break;
             //TODO uncommentare quando si inizia ad implementare questa carta
-//            case "ABANDONED_SHIP":
-//                displayAbandonedShipInfo((ClientAbandonedShip) card, output);
-//                break;
-//            case "ABANDONED_STATION":
+            case "AbandonedShip":
+                displayAbandonedShipInfo((ClientAbandonedShip) card, output);
+                break;
+//            case "AbandonedStation":
 //                displayAbandonedStationInfo((ClientAbandonedStation) card, output);
 //                break;
-//            case "PIRATES":
+//            case "Pirates":
 //                displayPiratesInfo((ClientPirates) card, output);
 //                break;
-//            case "SLAVE_TRADERS":
+//            case "SlaveTraders":
 //                displaySlaveTradersInfo((ClientSlaveTraders) card, output);
 //                break;
 //            case "SMUGGLERS":
 //                displaySmugglersInfo((ClientSmugglers) card, output);
 //                break;
-//            case "METEORITE_STORM":
+//            case "MeteoriteStorm":
 //                displayMeteoriteStormInfo((ClientMeteoriteStorm) card, output);
 //                break;
-//            case "FREE_SPACE":
+//            case "FreeSpace":
 //                displayFreeSpaceInfo((ClientFreeSpace) card, output);
 //                break;
-//            case "EPIDEMIC":
+//            case "Epidemic":
 //                displayEpidemicInfo((ClientEpidemic) card, output);
 //                break;
-//            case "STARDUST":
+//            case "Stardust":
 //                displayStardustInfo((ClientStardust) card, output);
 //                break;
-//            case "WAR_FIELD":
+//            case "WarField":
 //                displayWarFieldInfo((ClientWarField) card, output);
 //                break;
             default:
                 output.append("Unknown card type\n");
         }
+    }
+
+    private void displayAbandonedShipInfo(ClientAbandonedShip ship, StringBuilder output) {
+        output.append("Crew Required: ").append(ship.getCrewMalus()).append("\n");
+        output.append("Reward: ").append(ship.getReward()).append(" credits\n");
+        output.append("Steps Back: ").append(ship.getStepsBack()).append("\n");
+
+        output.append("\nYou can accept the reward if you have enough crew members to sacrifice.");
+        output.append("\nIf you accept, you'll lose ").append(ship.getCrewMalus())
+                .append(" crew members, gain ").append(ship.getReward())
+                .append(" credits, and move back ").append(ship.getStepsBack())
+                .append(" spaces.");
     }
 
     private void displayPlanetsInfo(ClientPlanets planets, StringBuilder output) {
@@ -1287,17 +1301,32 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showVisitLocationMenu() {
-        setClientState(ClientState.VISIT_LOCATION_MENU);
+        //setClientState(ClientState.VISIT_LOCATION_MENU);
 
         ClientCard card = clientModel.getCurrAdventureCard();
+        StringBuilder message = new StringBuilder("\n");
+
         if (card.getCardType().equals("AbandonedShip")) {
-            showMessage("\nYou've found an abandoned ship! Visiting will require " +
-                    "losing crew members but you'll get credits.", STANDARD);
+            ClientAbandonedShip shipCard = (ClientAbandonedShip) card;
+            message.append("You've found an abandoned ship!\n\n");
+            message.append("If you choose to visit this ship, you'll need to sacrifice ")
+                    .append(shipCard.getCrewMalus()).append(" crew members.\n");
+            message.append("In return, you'll receive ").append(shipCard.getReward())
+                    .append(" credits, but you'll move back ").append(shipCard.getStepsBack())
+                    .append(" spaces on the route.\n\n");
+
+            // Check if player has enough crew
+            int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
+            if (totalCrew < shipCard.getCrewMalus()) {
+                message.append(ANSI_RED + "WARNING: You only have ").append(totalCrew)
+                        .append(" crew members. You cannot accept this reward!\n\n"+ANSI_RESET);
+            }
         } else if (card.getCardType().equals("AbandonedStation")) {
-            showMessage("\nYou've found an abandoned station! If you have enough crew, you can visit to get cargo.", STANDARD);
+            message.append("You've found an abandoned station! If you have enough crew, you can visit to get cargo.\n");
         }
 
-        showMessage("Do you want to visit this location? [Y/n]", ASK);
+        message.append("Do you want to visit this location? [Y/n]");
+        showMessage(message.toString(), ASK);
     }
 
     @Override
@@ -1455,6 +1484,42 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showHandleRemoveCrewMembersMenu() {
+        setClientState(ClientState.CHOOSE_CABIN_MENU);
+
+        // Show the ship to visualize cabins
+        this.showMyShipBoard();
+
+        ClientCard card = clientModel.getCurrAdventureCard();
+        int crewToRemove = 0;
+
+        if (card instanceof ClientAbandonedShip) {
+            crewToRemove = ((ClientAbandonedShip) card).getCrewMalus();
+        }
+
+        // Get cabins with crew
+        Map<Coordinates, Cabin> cabinsWithCrew = clientModel.getShipboardOf(clientModel.getMyNickname())
+                .getCoordinatesAndCabinsWithCrew();
+
+        // Show cabins with crew
+        StringBuilder cabinInfo = new StringBuilder("\nYour ship has the following occupied cabins:\n");
+
+        if (cabinsWithCrew.isEmpty()) {
+            cabinInfo.append("You have no occupied cabins. You cannot sacrifice crew members.\n");
+            //TODO trovare un modo per mostrare al server questo errore
+        } else {
+            for (Map.Entry<Coordinates, Cabin> entry : cabinsWithCrew.entrySet()) {
+                Coordinates coords = entry.getKey();
+                Cabin cabin = entry.getValue();
+                cabinInfo.append(String.format("%s(%d, %d)%s: %s - Contains %d crew member(s)\n",
+                        ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET,
+                        cabin.getLabel(), cabin.getInhabitants().size()));
+            }
+        }
+
+        showMessage(cabinInfo.toString(), STANDARD);
+        showMessage("\nYou need to remove " + crewToRemove + " crew member(s).", STANDARD);
+        showMessage("Enter coordinates of a cabin to remove crew from (row column) or 'done' when finished: ", ASK);
+
 //        setClientState(ClientState.CHOOSE_CABIN_MENU);
 //
 //        // Mostra la nave per visualizzare le cabine
@@ -1905,7 +1970,7 @@ public class ClientCLIView implements ClientView {
 //
 //        return (server, nickname) -> {
 //            try {
-//                server.playerChoseCabin(nickname, cabinCoordinates);
+//                server.playerChoseCabins(nickname, cabinCoordinates);
 //            } catch (IOException e) {
 //                throw new RuntimeException(e);
 //            }
@@ -2437,6 +2502,47 @@ public class ClientCLIView implements ClientView {
         }
     }
 
+    private void handleCabinSelection(@NotNull String input) {
+        try {
+            // Check if the user wants to select multiple cabins
+            if (input.equalsIgnoreCase("done")) {
+                // Process all selected cabins
+                if (selectedCabins.isEmpty()) {
+                    showMessage("You must select at least one cabin.", ERROR);
+                } else {
+                    clientController.playerChoseCabins(clientController.getNickname(), selectedCabins);
+                    selectedCabins.clear();
+                }
+            } else {
+                // Parse coordinates
+                String[] parts = input.trim().split("\\s+");
+                if (parts.length != 2) {
+                    showMessage("Invalid format. Please enter 'row column'.", ERROR);
+                    return;
+                }
+
+                int row = Integer.parseInt(parts[0]) - 1; // Convert to 0-based
+                int col = Integer.parseInt(parts[1]) - 1;
+                Coordinates coords = new Coordinates(row, col);
+
+                // Verify it's a cabin with crew
+                ShipBoardClient shipBoard = clientModel.getShipboardOf(clientModel.getMyNickname());
+                Component component = shipBoard.getComponentAt(coords);
+
+                if (component instanceof Cabin && ((Cabin)component).hasInhabitants()) {
+                    selectedCabins.add(coords);
+                    showMessage("Cabin selected. Enter another cabin or 'done' to confirm.", STANDARD);
+                } else {
+                    showMessage("No occupied cabin at these coordinates.", ERROR);
+                }
+            }
+        } catch (NumberFormatException e) {
+            showMessage("Invalid coordinates. Please enter numbers.", ERROR);
+        } catch (Exception e) {
+            showMessage("Error: " + e.getMessage(), ERROR);
+        }
+    }
+
     public void handleInput(@NotNull String input) {
         String[] coordinates;
         int row;
@@ -2742,6 +2848,11 @@ public class ClientCLIView implements ClientView {
                     }
                     break;
 
+                case CHOOSE_CABIN_MENU:
+                    handleCabinSelection(input);
+                    break;
+
+
                 case CHOOSE_ENGINES_MENU:
                     if (input.equalsIgnoreCase("done")) {
                         if (selectedEngines.isEmpty()) {
@@ -2821,6 +2932,8 @@ public class ClientCLIView implements ClientView {
         }
 
     }
+
+
 
     public void showExitMenu(){
         scanner.next("exit");

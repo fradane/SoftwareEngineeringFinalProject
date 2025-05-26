@@ -2,12 +2,14 @@ package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.AbandonedShip;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -415,6 +417,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) {
         clientModel.setCurrentPlayer(nickname);
         view.showMessage("Current player is: " + nickname, STANDARD);
+
+//        if(clientModel.isMyTurn())
+//            view.showNewCardState();
     }
 
     @Override
@@ -475,8 +480,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) {
+        int oldCredits = clientModel.getPlayerClientData().get(nickname).getCredits();
         clientModel.updatePlayerCredits(nickname, credits);
-        view.showMessage(nickname + " has " + credits + " credits.", STANDARD);
+        if(clientModel.getMyNickname().equals(nickname)) {
+            view.showMessage("You have just earned " + (credits - oldCredits) + " credits\n", STANDARD);
+            view.showMessage("You now own " + credits + " credits\n", STANDARD);
+        }else
+            view.showMessage(nickname + " has " + credits + " credits.", STANDARD);
     }
 
     @Override
@@ -517,7 +527,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyCardState(String nickname, CardState cardState) {
         if(isStateRegardingCurrentPlayerOnly(cardState)){
             if(!clientModel.isMyTurn()) {
-                view.showMessage("This is not your turn. Wait for " + clientModel.getCurrentPlayer() + " to make his choice", NOTIFICATION_INFO);
+                view.showMessage(clientModel.getCurrentPlayer() + " is currently playing. Soon will to be your turn\n", NOTIFICATION_INFO);
                 return;
             }
         }
@@ -538,9 +548,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     //Insieme di stati che non vanno notificati a meno che tu non sia il player di turno
     private boolean isStateRegardingCurrentPlayerOnly(CardState cardState){
-        //TODO capire quali altri stati entrano in questa categoria e aggiungerli sotto
+        //TODO capire quali altri stati entrano in questa categoria e aggiungerli sotto. Probabilmente da togliere perchè tutti gli stati sono RegardingCurrentPlayerOnly
         return cardState == CardState.HANDLE_CUBES_REWARD
-        || cardState == CardState.CHOOSE_PLANET;
+        || cardState == CardState.CHOOSE_PLANET
+        || cardState == CardState.VISIT_LOCATION
+        || cardState == CardState.REMOVE_CREW_MEMBERS;
     }
 
     @Override
@@ -779,6 +791,19 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void playerWantsToVisitLocation(String nickname, Boolean choice){
+        if (!clientModel.isMyTurn()) {
+            view.showMessage("This is not your turn, please wait for others to choose...", ERROR);
+            return;
+        }
+
+        ClientAbandonedShip shipCard = (ClientAbandonedShip) clientModel.getCurrAdventureCard();
+        int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
+        if (choice==true && totalCrew < shipCard.getCrewMalus()) {
+            view.showMessage("You only have " + totalCrew + " crew members. you cannot visit the location", ERROR);
+            view.showVisitLocationMenu();
+            return;
+        }
+
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
                 .setWantsToVisit(choice)
@@ -861,7 +886,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords){
+    public void playerChoseCabins(String nickname, List<Coordinates> cabinCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
 
         List<Cabin> cabins = cabinCoords

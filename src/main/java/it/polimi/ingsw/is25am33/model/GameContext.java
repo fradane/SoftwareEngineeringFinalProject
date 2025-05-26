@@ -43,7 +43,8 @@ public class GameContext {
 
         futureNicknames.forEach((future, nickname) -> {
             try {
-                future.get(5, TimeUnit.SECONDS);
+                //TODO reimplstare a 5 secondi
+                future.get(10000, TimeUnit.SECONDS);
             } catch (TimeoutException | InterruptedException | ExecutionException e) {
                 clientsDisconnected.add(nickname);
             }
@@ -87,7 +88,8 @@ public class GameContext {
 
         futureNicknames.forEach((future, nickname) -> {
             try {
-                future.get(1, TimeUnit.SECONDS);
+                //TODO riabbassare ad un 1 secondo
+                future.get(1000, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 System.err.println("Timeout nella notifica del client: " + nickname);
                 future.cancel(true);

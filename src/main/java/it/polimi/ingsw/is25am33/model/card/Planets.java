@@ -114,8 +114,10 @@ public class Planets extends AdventureCard implements PlayerMover {
 
         } else if (gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
+            setCurrState(CardState.CHOOSE_PLANET);
         } else {
             setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
             gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 
@@ -245,6 +247,7 @@ public class Planets extends AdventureCard implements PlayerMover {
             setCurrState(CardState.CHOOSE_PLANET);
         } else {
             setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
             gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
     }

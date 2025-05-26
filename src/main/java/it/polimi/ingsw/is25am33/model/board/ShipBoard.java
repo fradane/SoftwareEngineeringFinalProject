@@ -1167,4 +1167,28 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
         return result;
     }
+
+    /**
+     * Returns a map where keys are coordinates and values are Cabin components that have crew members.
+     * Only includes coordinates that have Cabin components with at least one inhabitant.
+     *
+     * @return A map of coordinates to Cabin objects with crew
+     */
+    @JsonIgnore
+    public Map<Coordinates, Cabin> getCoordinatesAndCabinsWithCrew() {
+        Map<Coordinates, Cabin> result = new HashMap<>();
+
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                if (isValidPosition(i, j) && shipMatrix[i][j] instanceof Cabin) {
+                    Cabin cabin = (Cabin) shipMatrix[i][j];
+                    if (cabin.hasInhabitants()) {
+                        result.put(new Coordinates(i, j), cabin);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
 }

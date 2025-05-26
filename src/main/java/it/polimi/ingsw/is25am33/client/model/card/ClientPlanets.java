@@ -61,7 +61,7 @@ public class ClientPlanets extends ClientCard {
 
     @Override
     public String getCardType() {
-        return "PLANETS";
+        return "Planets";
     }
 
     @Override

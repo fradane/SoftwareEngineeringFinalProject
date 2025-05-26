@@ -222,7 +222,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).playerChoseDoubleCannons(nickname, inMessage.getParamActivableCoordinates(), inMessage.getParamBatteryBoxCoordinates());
                 break;
 
-            case "playerChoseCabin":
+            case "playerChoseCabins":
                 gameControllers.get(nickname).playerChoseCabin(nickname, inMessage.getParamCabinCoordinates());
                 break;
 
