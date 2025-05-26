@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.GameContext;
 import it.polimi.ingsw.is25am33.model.ThrowingBiConsumer;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,18 +20,17 @@ class DeckTest {
 
     private Deck deck;
     private GameModel dummyGameModel;
-    private GameContext dummyGameContext;
+    private GameClientNotifier dummyGameClientNotifier;
 
     @BeforeEach
     void setUp() {
         deck = new Deck();
         dummyGameModel = new GameModel(null, 2, false);
-        dummyGameContext = new GameContext(null, null) {
-            @Override
-            public void notifyAllClients(ThrowingBiConsumer<String, CallableOnClientController, IOException> consumer) {}
+        dummyGameClientNotifier = new GameClientNotifier(null,null) {
+            public void notifyAllClients(BiConsumer<String, CallableOnClientController> action) {}
         };
-        deck.setGameContext(dummyGameContext);
-        dummyGameModel.setGameContext(dummyGameContext);
+        deck.setGameContext(dummyGameClientNotifier);
+        dummyGameModel.setGameContext(dummyGameClientNotifier);
     }
 
     @Test

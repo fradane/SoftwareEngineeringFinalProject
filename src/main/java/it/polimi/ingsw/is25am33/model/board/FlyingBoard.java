@@ -1,12 +1,10 @@
 package it.polimi.ingsw.is25am33.model.board;
 
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
-import java.rmi.RemoteException;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -16,7 +14,7 @@ public abstract class FlyingBoard {
     private Set<Player> outPlayers;
     protected int runLenght;
     protected Map<Player, Integer> ranking;
-    protected GameContext gameContext;
+    protected GameClientNotifier gameClientNotifier;
 
     /**
      * Constructor to initialize runLength, outPlayers, and ranking.
@@ -29,8 +27,8 @@ public abstract class FlyingBoard {
         this.ranking = new HashMap<>();
     }
 
-    public void setGameContext(GameContext gameContext) {
-        this.gameContext = gameContext;
+    public void setGameContext(GameClientNotifier gameClientNotifier) {
+        this.gameClientNotifier = gameClientNotifier;
     }
 
     /**
@@ -68,7 +66,7 @@ public abstract class FlyingBoard {
         outPlayers.add(player);
         ranking.remove(player);
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyEliminatedPlayer(nicknameToNotify, player.getNickname());
         });
     }
@@ -123,7 +121,7 @@ public abstract class FlyingBoard {
 
         int finalNewPosition = newPosition;
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyRankingUpdate(nicknameToNotify,player.getNickname(), finalNewPosition);
         });
 

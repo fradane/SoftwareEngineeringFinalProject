@@ -1438,7 +1438,6 @@ public class ClientCLIView implements ClientView {
 
         if (input.equals("exit")) {
             clientController.leaveGame();
-            System.exit(0);
         } else if (input.trim().split("\\s+")[0].equals("show")) {
             clientController.showShipBoard(input.trim().split("\\s+")[1]);
             return;

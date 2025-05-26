@@ -2,10 +2,8 @@ package it.polimi.ingsw.is25am33.model.board;
 
 import it.polimi.ingsw.is25am33.model.game.Player;
 
-import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 /**
  * The {@code Level1FlyingBoard} class extends {@code FlyingBoard} to represent
@@ -60,7 +58,7 @@ public class Level1FlyingBoard extends FlyingBoard {
         int initialPosition = initialPositionIterator.next();
         ranking.put(player, initialPosition);
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyRankingUpdate(nicknameToNotify,player.getNickname(),initialPosition);
         });
 

@@ -1,13 +1,13 @@
 package it.polimi.ingsw.is25am33.model.board;
 
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
 public class Level1ShipBoard extends ShipBoard {
 
-    public Level1ShipBoard(PlayerColor color, GameContext gameContext, Boolean isGui) {
-        super(color,gameContext, isGui);
+    public Level1ShipBoard(PlayerColor color, GameClientNotifier gameClientNotifier, boolean isGui) {
+        super(color, gameClientNotifier, isGui);
     }
 
     @Override

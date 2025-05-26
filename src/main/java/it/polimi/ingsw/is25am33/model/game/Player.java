@@ -1,17 +1,16 @@
 package it.polimi.ingsw.is25am33.model.game;
 
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 
 import java.io.Serializable;
-import java.rmi.RemoteException;
 
 public class Player implements Serializable {
     private final String nickname;
     private int ownedCredits;
-    private GameContext gameContext;
+    private GameClientNotifier gameClientNotifier;
     private final ShipBoard personalBoard;
     private final PlayerColor playerColor;
 
@@ -26,12 +25,12 @@ public class Player implements Serializable {
         return playerColor;
     }
 
-    public void setGameContext(GameContext gameContext) {
-        this.gameContext = gameContext;
+    public void setGameContext(GameClientNotifier gameClientNotifier) {
+        this.gameClientNotifier = gameClientNotifier;
     }
 
-    public GameContext getGameContext() {
-        return gameContext;
+    public GameClientNotifier getGameContext() {
+        return gameClientNotifier;
     }
 
     public String getNickname() {
@@ -42,7 +41,7 @@ public class Player implements Serializable {
 
         ownedCredits += number;
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyPlayerCredits(nicknameToNotify, nickname, ownedCredits);
         });
 

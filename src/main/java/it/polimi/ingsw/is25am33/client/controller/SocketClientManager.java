@@ -28,6 +28,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     private final CallableOnClientController clientController;
     private boolean running = true;
     private Socket socket;
+    private Thread messageHandler;
 
     // Coda per memorizzare le notifiche mentre aspettiamo risposte specifiche
     private final Queue<SocketMessage> notificationBuffer = new ConcurrentLinkedQueue<>();
@@ -80,7 +81,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public GameController getController(String gameId) throws RemoteException {
+    public GameController getController(String gameId)  throws RemoteException{
         return null;
     }
 
@@ -90,10 +91,19 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void leaveGame(String gameId) throws RemoteException {
-        SocketMessage outMessage = new SocketMessage(nickname, "leaveGame");
+    public void leaveGameAfterCreation(String nickname, Boolean isFirst) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "leaveGameAfterCreation");
+        outMessage.setParamBoolean(isFirst);
         out.println(ClientSerializer.serialize(outMessage));
     }
+
+    @Override
+    public void leaveGameBeforeCreation(String nickname) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "leaveGameBeforeCreation");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+
 
     @Override
     public boolean registerWithNickname(String nickname, CallableOnClientController controller) throws RemoteException {
@@ -158,17 +168,17 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
-
     private void startMessageHandlerThread() {
-        Thread messageHandler = new Thread(() -> {
-            while (true) {
+         messageHandler = new Thread(() -> {
+            while (running) {
                 try {
-                    if (in.hasNextLine()) {
+                    if (in!=null && in.hasNextLine()) {
                         String line = in.nextLine();
                         handleServerMessage(line);
                     }
                 } catch (Exception e) {
-                    System.err.println("Error in message handler: " + e.getMessage());
+                    running=false;
+                    break;
                 }
             }
         });
@@ -333,14 +343,16 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                 case "notifyPlayerDisconnected":
                     if (clientController != null) {
                         clientController.notifyPlayerDisconnected(null, notification.getParamString());
-                        SocketMessage outMessage = new SocketMessage(nickname, "leaveGame");
-                        out.println(ClientSerializer.serialize(outMessage));
+                    }
+                    break;
+
+                case "forcedDisconnection" :
+                    if (clientController != null) {
+                        clientController.forcedDisconnection(nickname, notification.getParamString());
                         in.close();
                         out.close();
                         socket.close();
-                        System.exit(0);
                     }
-                    break;
 
                 case "notifyGameInfos":
                     if (clientController != null) {
@@ -382,12 +394,35 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "PING":
+                    if (clientController != null) {
+                        clientController.pingToClientFromServer(nickname);
+                    }
+                    break;
+
+                case "PONG":
+                    if (clientController != null) {
+                        clientController.pongToClientFromServer(nickname);
+                    }
+                    break;
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
         } catch (Exception e) {
             System.err.println("Error handling notification: " + e.getMessage());
         }
+    }
+
+    public void pingToServerFromClient(String nickname) throws IOException{
+        SocketMessage outMessage = new SocketMessage(nickname, "PING");
+        out.println(ClientSerializer.serialize(outMessage));
+        //System.out.println("Ping inviato al server");
+    }
+
+    public void pongToServerFromClient(String nickname) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "PONG");
+        out.println(ClientSerializer.serialize(outMessage));
+        //System.out.println("Pong inviato al server");
     }
 
     @Override

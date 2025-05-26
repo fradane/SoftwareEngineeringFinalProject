@@ -84,10 +84,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         executor.shutdown();
     }
 
-    public Map<String, PrintWriter> getWriters() {
-        return writers;
-    }
-
     private void performAction(SocketMessage inMessage, PrintWriter out) throws IOException {
 
         String nickname = inMessage.getSenderNickname();
@@ -97,8 +93,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
         switch (action) {
 
-            case "leaveGame":
-                gameControllers.get(nickname).leaveGame(nickname);
+            case "leaveGameAfterCreation":
+                gameControllers.get(nickname).leaveGameAfterCreation(nickname, inMessage.getParamBoolean());
+                writers.remove(nickname);
+                break;
+
+            case "leaveGameBeforeCreation":
+                dns.leaveGameBeforeCreation(nickname);
                 writers.remove(nickname);
                 break;
 
@@ -257,6 +258,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).showMessage(message);
                 break;
 
+            case "PING":
+                dns.pingToServerFromClient(nickname);
+                break;
+
+            case "PONG":
+                dns.pongToServerFromClient(nickname);
+                break;
+
             default:
                 System.err.println("Invalid action: " + action);
                 throw new RemoteException("Not properly formatted json");
@@ -267,9 +276,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     public void checkWriterStatus(PrintWriter writer,String nickname) throws IOException{
         if(writer.checkError()){
             writers.remove(nickname);
-            throw new IOException("Writer is null");
         }
-
     }
 
     @Override
@@ -282,7 +289,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyGameInfos");
         outMessage.setParamGameInfo(gameInfos);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -292,7 +298,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamString(newPlayerNickname);
         outMessage.setParamPlayerColor(color);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -300,7 +305,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyGameStarted");
         outMessage.setParamGameInfo(List.of(gameInfo));
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -309,7 +313,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamInt(flipsLeft);
         outMessage.setParamString(nickname);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -355,7 +358,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyGameState");
         outMessage.setParamGameState(gameState);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
@@ -363,7 +365,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyDangerousObjAttack");
         outMessage.setParamDangerousObj(dangerousObj);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
@@ -371,7 +372,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrPlayerChanged");
         outMessage.setParamString(nickname);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -379,7 +379,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCard");
         outMessage.setParamString(adventureCard);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
@@ -387,7 +386,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyCardState");
         outMessage.setParamCardState(cardState);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
@@ -396,7 +394,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamString(nickname);
         outMessage.setParamComponent(component);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
 
@@ -405,7 +402,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyReleaseComponent");
         outMessage.setParamString(nickname);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -414,7 +410,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamString(nickname);
         outMessage.setParamComponent(component);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -423,7 +418,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamInt(index);
         outMessage.setParamComponent(component);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
@@ -431,7 +425,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyRemoveVisibleComponents");
         outMessage.setParamInt(index);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
@@ -441,7 +434,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamComponent(component);
         outMessage.setParamCoordinates(coordinates);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -455,7 +447,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamString(nickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -464,7 +455,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamString(nickname);
         outMessage.setParamInt(credits);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -472,7 +462,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyEliminatedPlayer");
         outMessage.setParamString(nickname);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -481,7 +470,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamString(nickname);
         outMessage.setParamInt(newPosition);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
     @Override
@@ -489,7 +477,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyVisibleDeck");
         outMessage.setParamLittleVisibleDecks(littleVisibleDeck);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
-        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
@@ -499,5 +486,23 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
+    public void forcedDisconnection(String nicknameToNotify,String gameId) throws IOException{
+        SocketMessage outMessage = new SocketMessage("server", "forcedDisconnection");
+        outMessage.setParamString(gameId);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    public void pingToClientFromServer(String nickname) throws IOException{
+        SocketMessage outMessage = new SocketMessage("server", "PING");
+        writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        //System.out.println("Ping inviato a " + nickname);
+    }
+
+    public void pongToClientFromServer(String nickname) throws IOException{
+        SocketMessage outMessage = new SocketMessage("server", "PONG");
+        writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        //System.out.println("Pong inviato a " + nickname);
+    }
 }
 
