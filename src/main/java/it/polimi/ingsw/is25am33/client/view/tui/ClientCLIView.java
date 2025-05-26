@@ -464,7 +464,7 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showCurrAdventureCard(boolean isFirstTime) {
-        if (isFirstTime) System.out.println("The card has been drawn from the deck.");
+        if (isFirstTime) showMessage("The card has been drawn from the deck.", STANDARD);
 
         ClientCard card = clientModel.getCurrAdventureCard();
         if (card == null) {

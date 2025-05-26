@@ -535,6 +535,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.setCardState(cardState);
         view.showNewCardState();
 
+        //TODO probabilemnte da rimuovere perchè inutile
         if (!clientModel.isMyTurn() && cardState != CardState.START_CARD && cardState != CardState.END_OF_CARD) {
             view.showMessage("Wait for " + clientModel.getCurrentPlayer() + " to make his choice", NOTIFICATION_INFO);
         }
