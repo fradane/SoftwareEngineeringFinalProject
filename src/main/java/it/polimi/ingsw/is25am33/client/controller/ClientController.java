@@ -1,9 +1,8 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
-import it.polimi.ingsw.is25am33.client.ClientModel;
-import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
-import it.polimi.ingsw.is25am33.client.view.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
+import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
@@ -313,7 +312,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void leaveGame() {
         try {
             if (currentGameId != null) {
-                serverController.leaveGame(nickname);
                 inGame = false;
                 gameStarted = false;
                 currentGameId = null;
@@ -521,7 +519,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void forcedDisconnection(String nicknameToNotify, String gameId) throws IOException {
-        leaveGame(false);
+        leaveGame();
     }
 
     public void cardPhase() {
