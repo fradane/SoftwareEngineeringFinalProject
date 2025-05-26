@@ -9,6 +9,9 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -18,10 +21,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ShipBoardViewController extends GuiController {
 
@@ -49,6 +49,8 @@ public class ShipBoardViewController extends GuiController {
     public VBox visibleComponentsPanel;
     @FXML
     public VBox componentsContainer;
+    @FXML
+    public StackPane player2ShipBoard, player3ShipBoard,  player4ShipBoard;
     @FXML
     private ImageView visibleCard1 = new ImageView();
     @FXML
@@ -83,6 +85,8 @@ public class ShipBoardViewController extends GuiController {
     private final int FIXED_COMPONENT_LENGTH = 70;
     private int focusComponentRotation = 0;
     private ModelFxAdapter modelFxAdapter;
+    private final Map<String, StackPane> otherPlayersShipBoards = new HashMap<>();
+    private final Set<Button> navButtons = new HashSet<>();
 
     private final Map<String, Button> buttonMap = new HashMap<>();
 
@@ -96,7 +100,7 @@ public class ShipBoardViewController extends GuiController {
         initializeButtonMap();
 
         ShipBoardClient myShipBoard = clientModel.getPlayerClientData().get(clientModel.getMyNickname()).getShipBoard();
-        ObjectProperty<Component>[][] observableMatrix = modelFxAdapter.getObservableMatrix();
+        ObjectProperty<Component>[][] observableMatrix = modelFxAdapter.getMineObservableMatrix();
 
         // set listener for the grid matrix
         modelFxAdapter.getObservableFocusedComponent()
@@ -117,17 +121,86 @@ public class ShipBoardViewController extends GuiController {
                     }
                 }));
 
-        // Setup bindings SOLO per le coordinate che hanno pulsanti corrispondenti
+        // setting up dynamic elements of the scene
         setupGridBindings(observableMatrix);
+        setupBookedComponentsBindings();
+        setupTimerBinding();
+        setupVisibleComponentsBinding();
+        setupShipBoardNavigationBar();
 
-        setUpBookedComponentsBindings(myShipBoard);
+        modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
+        clientModel.getPlayerClientData().keySet().forEach(nickname -> modelFxAdapter.refreshShipBoardOf(nickname));
+    }
 
-        setUpTimerBinding();
+    private void setupShipBoardNavigationBar() {
 
-        setUpVisibleComponentsBinding();
+        List<StackPane> othersStackPanes = List.of(player2ShipBoard, player3ShipBoard, player4ShipBoard);
+        Iterator<StackPane> stackPaneIterator = othersStackPanes.iterator();
 
-        // Refresh finale
-        modelFxAdapter.refreshShipBoard();
+        navButtons.add(myShipButton);
+
+        clientModel.getPlayerClientData()
+                .forEach((nickname, playerClientData) -> {
+                    // my ship board is loaded by default
+                    if (nickname.equals(clientModel.getMyNickname()))
+                        return;
+
+                    StackPane playerStackPane = stackPaneIterator.next();
+                    otherPlayersShipBoards.put(nickname, playerStackPane);
+
+                    ObjectProperty<Component>[][] observableMatrix = modelFxAdapter.getObservableShipBoardOf(nickname);
+                    for (int row = 4; row < 8; row++) {
+                        for (int column = 3; column < 9; column++) {
+                            int finalRow = row;
+                            int finalColumn = column;
+                            observableMatrix[row][column].addListener((_, _, newVal) -> Platform.runLater(() -> {
+                                try {
+                                    if (newVal != null) {
+                                        String componentFile = newVal.toString().split("\\n")[0];
+                                        Image image = new Image(Objects.requireNonNull(getClass()
+                                                .getResourceAsStream("/gui/graphics/component/" + componentFile)));
+                                        Objects.requireNonNull(getNodeFromGridPane(((GridPane) playerStackPane.getChildren().get(1)), finalRow - 4, finalColumn - 3)).setImage(image);
+                                    } else {
+                                        Objects.requireNonNull(getNodeFromGridPane(((GridPane) playerStackPane.getChildren().get(1)), finalRow - 4, finalColumn - 3)).setImage(null);
+                                    }
+                                } catch (Exception e) {
+                                    System.err.println("Error updating component appearance: " + e.getMessage());
+                                }
+                            }));
+                        }
+                    }
+
+                    // Navigation button setup
+                    Button shipBoardButton = new Button();
+                    navButtons.add(shipBoardButton);
+                    shipBoardButton.getStyleClass().add("ship-nav-button");
+                    shipBoardButton.setText(nickname);
+                    shipNavigationBar.getChildren().add(shipBoardButton);
+
+                    shipBoardButton.setOnAction(_ -> Platform.runLater(() -> {
+                        otherPlayersShipBoards.forEach((_, shipboardStackPane1) -> shipboardStackPane1.setVisible(false));
+                        otherPlayersShipBoards.get(nickname).setVisible(true);
+                        navButtons.forEach(button -> button.getStyleClass().remove("active"));
+                        enableMyShipBoardView(false);
+                        shipBoardButton.getStyleClass().add("active");
+                    }));
+
+                });
+
+
+    }
+
+    private ImageView getNodeFromGridPane(GridPane gridPane, int row, int column) {
+        for (Node node : gridPane.getChildren()) {
+            Integer rowIndex = GridPane.getRowIndex(node);
+            Integer colIndex = GridPane.getColumnIndex(node);
+
+            // Default values are 0 if null
+            if ((rowIndex == null ? 0 : rowIndex) == row && (colIndex == null ? 0 : colIndex) == column) {
+                return (ImageView) node;
+            }
+        }
+        return null; // Nessun nodo trovato in quella posizione
     }
 
     /**
@@ -149,7 +222,7 @@ public class ShipBoardViewController extends GuiController {
      *   application thread.
      * - Graphics representing components are loaded as images with a fixed size from a specific resource path.
      */
-    private void setUpVisibleComponentsBinding() {
+    private void setupVisibleComponentsBinding() {
         modelFxAdapter.getObservableVisibleComponents()
             .addListener((InvalidationListener) _ -> Platform.runLater(() -> {
                 componentsContainer.getChildren().clear();
@@ -206,7 +279,7 @@ public class ShipBoardViewController extends GuiController {
 
     }
 
-    private void setUpBookedComponentsBindings(ShipBoardClient myShipBoard) {
+    private void setupBookedComponentsBindings() {
 
         modelFxAdapter.getObservableReservedComponent1()
                 .addListener((_, _, newVal) ->
@@ -263,7 +336,8 @@ public class ShipBoardViewController extends GuiController {
         }
     }
 
-    private void setUpTimerBinding() {
+    // TODO controllare perché non funziona
+    private void setupTimerBinding() {
         modelFxAdapter.getObservableTimer()
                 .addListener((_, _, newVal) -> Platform.runLater(() -> {
                     if (newVal != null) {
@@ -403,6 +477,24 @@ public class ShipBoardViewController extends GuiController {
         }
     }
 
-    public void handleCloseVisiblePanelButton(ActionEvent actionEvent) {
+    public void handleMyShipBoardButton() {
+        Platform.runLater(() -> {
+            otherPlayersShipBoards.forEach((_, shipboardStackPane) -> shipboardStackPane.setVisible(false));
+            navButtons.forEach(button -> button.getStyleClass().remove("active"));
+            myShipButton.getStyleClass().add("active");
+            enableMyShipBoardView(true);
+        });
+    }
+
+    private void enableMyShipBoardView(boolean enable) {
+        Platform.runLater(() -> {
+            if (enable) {
+                grid.setManaged(true);
+                grid.setOpacity(1);
+            } else {
+                grid.setManaged(false);
+                grid.setOpacity(0.1);
+            }
+        });
     }
 }

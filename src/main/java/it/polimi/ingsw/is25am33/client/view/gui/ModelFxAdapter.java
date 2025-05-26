@@ -7,43 +7,66 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ModelFxAdapter {
     private final ClientModel clientModel;
-    private final ObjectProperty<Component>[][] observableMatrix;
+    private final ObjectProperty<Component>[][] mineObservableMatrix;
     private final ObjectProperty<Component> observableFocusedComponent;
     private final ObjectProperty<Component> observableReservedComponent1;
     private final ObjectProperty<Component> observableReservedComponent2;
     private final ObjectProperty<Integer> observableTimer;
     private final ObjectProperty<Integer> observableFlipsLeft;
-    private final ObservableList<String> observableVisibleComponets;
+    private final ObservableList<String> observableVisibleComponents;
+    private final Map<String, ObjectProperty<Component>[][]> observableShipBoards;
 
     @SuppressWarnings("unchecked")
     public ModelFxAdapter(ClientModel clientModel) {
         this.clientModel = clientModel;
         clientModel.setModelFxAdapter(this);
-        this.observableMatrix = new ObjectProperty[12][12];
+
+        this.mineObservableMatrix = new ObjectProperty[12][12];
         this.observableFocusedComponent = new SimpleObjectProperty<>();
         this.observableReservedComponent1 = new SimpleObjectProperty<>();
         this.observableReservedComponent2 = new SimpleObjectProperty<>();
         this.observableTimer = new SimpleObjectProperty<>();
         this.observableFlipsLeft = new SimpleObjectProperty<>();
-        this.observableVisibleComponets = FXCollections.observableArrayList();
+        this.observableVisibleComponents = FXCollections.observableArrayList();
+        this.observableShipBoards = new HashMap<>();
 
-        // Initialize an observable matrix and bind it to a model matrix
+        // initialize other shipboards
+        clientModel.getPlayerClientData()
+                .forEach((nickname, playerClientData) -> {
+                    observableShipBoards.put(nickname, new ObjectProperty[12][12]);
+                    Component[][] shipMatrix = playerClientData.getShipBoard().getShipMatrix();
+                    for (int i = 0; i < 12; i++) {
+                        for (int j = 0; j < 12; j++) {
+                            if (i == 6 && j == 6) System.out.println(shipMatrix[i][j]);
+                            SimpleObjectProperty<Component> prop = new SimpleObjectProperty<>(shipMatrix[i][j]);
+                            observableShipBoards.get(nickname)[i][j] = prop;
+                        }
+                    }
+                });
+
+        // initialize my shipboard
         Component[][] rawMatrix = clientModel.getMyShipboard().getShipMatrix();
         for (int i = 0; i < 12; i++) {
             for (int j = 0; j < 12; j++) {
                 SimpleObjectProperty<Component> prop = new SimpleObjectProperty<>(rawMatrix[i][j]);
-                observableMatrix[i][j] = prop;
+                mineObservableMatrix[i][j] = prop;
             }
         }
 
     }
 
-    public ObjectProperty<Component>[][] getObservableMatrix() {
-        return observableMatrix;
+    public ObjectProperty<Component>[][] getObservableShipBoardOf(String nickname) {
+        return observableShipBoards.get(nickname);
+    }
+
+    public ObjectProperty<Component>[][] getMineObservableMatrix() {
+        return mineObservableMatrix;
     }
 
     public ObjectProperty<Component> getObservableFocusedComponent() {
@@ -67,18 +90,18 @@ public class ModelFxAdapter {
     }
 
     public ObservableList<String> getObservableVisibleComponents() {
-        return observableVisibleComponets;
+        return observableVisibleComponents;
     }
 
     /**
      * Syncs the observable matrix with the shipBoard matrix.
      * Call this method after model updates.
      */
-    public void refreshShipBoard() {
+    private void refreshMyShipBoard() {
         Component[][] rawMatrix = clientModel.getMyShipboard().getShipMatrix();
         for (int i = 0; i < 12; i++) {
             for (int j = 0; j < 12; j++) {
-                observableMatrix[i][j].set(rawMatrix[i][j]);
+                mineObservableMatrix[i][j].set(rawMatrix[i][j]);
             }
         }
 
@@ -99,8 +122,8 @@ public class ModelFxAdapter {
     }
 
     public void refreshVisibleComponents() {
-        observableVisibleComponets.clear();
-        observableVisibleComponets.addAll(
+        observableVisibleComponents.clear();
+        observableVisibleComponents.addAll(
                 clientModel.getVisibleComponents()
                         .keySet()
                         .stream()
@@ -109,5 +132,34 @@ public class ModelFxAdapter {
                         .toList()
         );
     }
+
+    public void refreshShipBoardOf(String nickname) {
+
+        if (nickname.equals(clientModel.getMyNickname())) {
+            refreshMyShipBoard();
+            return;
+        }
+
+        Component[][] rawMatrix = clientModel.getShipboardOf(nickname).getShipMatrix();
+        for (int i = 0; i < 12; i++) {
+            for (int j = 0; j < 12; j++) {
+                if (i == 6 && j == 6) System.out.println(rawMatrix[i][j]);
+                observableShipBoards.get(nickname)[i][j].set(rawMatrix[i][j]);
+            }
+        }
+
+        // TODO booked component
+
+//        List<Component> bookedComponents = clientModel.getShipboardOf(nickname).getBookedComponents();
+//
+//        observableReservedComponent1.set(
+//                !bookedComponents.isEmpty() ? bookedComponents.getFirst() : null
+//        );
+//        observableReservedComponent2.set(
+//                bookedComponents.size() > 1 ? bookedComponents.get(1) : null
+//        );
+
+    }
+
 
 }

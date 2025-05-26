@@ -432,7 +432,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         ShipBoardClient shipBoardClient = clientModel.getShipboardOf(nickname);
         shipBoardClient.getShipMatrix()[coordinates.getX()][coordinates.getY()] = component;
         shipBoardClient.setFocusedComponent(null);
-        clientModel.refreshShipBoard();
+        clientModel.refreshShipBoardOf(nickname);
     }
 
     // TODO marco, controllare
@@ -443,7 +443,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws IOException {
         clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
-        clientModel.refreshShipBoard();
+        clientModel.refreshShipBoardOf(nickname);
     }
 
     /**
@@ -457,20 +457,20 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(focusedComponent);
-        clientModel.refreshShipBoard();
+        clientModel.refreshShipBoardOf(nickname);
     }
 
     @Override
     public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws IOException {
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
-        clientModel.refreshShipBoard();
+        clientModel.refreshShipBoardOf(nickname);
     }
 
     @Override
     public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws IOException {
         clientModel.getShipboardOf(nickname).getBookedComponents().add(component);
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
-        clientModel.refreshShipBoard();
+        clientModel.refreshShipBoardOf(nickname);
     }
 
     @Override
@@ -588,13 +588,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void removeComponent(int row, int column) {
-        try{
-            row --;
+        try {
+            row--;
             column--;
             serverController.playerWantsToRemoveComponent(nickname, new Coordinates(row, column));
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             view.showMessage("Invalid coordinates: " + e.getMessage() + "\n", ERROR);
-        }catch (IOException e) {
+        } catch (IOException e) {
             handleRemoteException(e);
         }
     }

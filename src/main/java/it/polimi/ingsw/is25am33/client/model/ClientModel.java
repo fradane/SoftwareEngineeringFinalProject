@@ -30,9 +30,9 @@ public class ClientModel {
         this.modelFxAdapter = modelFxAdapter;
     }
 
-    public void refreshShipBoard() {
+    public void refreshShipBoardOf(String nickname) {
         if (modelFxAdapter != null)
-            modelFxAdapter.refreshShipBoard();
+            modelFxAdapter.refreshShipBoardOf(nickname);
     }
 
     public Hourglass getHourglass() {
