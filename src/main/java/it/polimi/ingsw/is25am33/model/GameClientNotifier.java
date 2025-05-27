@@ -60,7 +60,7 @@ public class GameClientNotifier {
     public void notifyDisconnection(String nicknameOfDisconectedPlayer) {
         clientControllers.forEach((nicknameToNotify, clientController) -> {
                 try {
-                    clientController.notifyPlayerDisconnected(nicknameToNotify, "nicknameOfDisconectedPlayer" );
+                    clientController.notifyPlayerDisconnected(nicknameToNotify, nicknameOfDisconectedPlayer );
                 } catch (IOException e) {}
         });
         closeAllClients();
