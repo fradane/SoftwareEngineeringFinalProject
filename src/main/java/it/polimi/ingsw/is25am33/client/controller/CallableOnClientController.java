@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface CallableOnClientController extends Remote {
@@ -29,8 +31,6 @@ public interface CallableOnClientController extends Remote {
 
     void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws IOException;
 
-    void notifyCurrAdventureCard( String nickname, String adventureCard) throws IOException;
-
     void notifyCardState(String nickname, CardState cardState) throws IOException;
 
     void notifyFocusedComponent(String nicknameToNotify, String nickname, Component component) throws IOException;
@@ -38,6 +38,8 @@ public interface CallableOnClientController extends Remote {
     void notifyReleaseComponent(String nicknameToNotify, String nickname) throws IOException;
 
     void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws IOException;
+
+    void notifyCurrAdventureCard(String nickname, ClientCard adventureCard, boolean isFirstTime) throws IOException;
 
     void notifyAddVisibleComponents(String nicknameToNotify, int index, Component component) throws IOException;
 
@@ -47,7 +49,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException;
 
-    void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws IOException;
+    void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Object>> componentsPerType) throws IOException;
 
     void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws IOException;
 
@@ -73,6 +75,14 @@ public interface CallableOnClientController extends Remote {
 
     void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts) throws RemoteException;
 
+    void notifyCardStarted(String nicknameToNotify)throws IOException;
+    void notifyStopHourglass(String nicknameToNotify) throws IOException;
+
+    void notifyFirstToEnter(String nicknameToNotify) throws IOException;
+
+    void notifyCurrAdventureCardUpdate(String nicknameToNotify, ClientCard adventureCard) throws IOException;
+
+    void notifyPlayerVisitedPlanet(String nicknameToNotify, String nickname, ClientCard adventureCard) throws IOException;
     void forcedDisconnection(String nickname, String gameId) throws IOException;
 
     void pingToClientFromServer(String nickname) throws IOException;

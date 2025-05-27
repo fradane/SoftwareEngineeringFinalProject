@@ -19,7 +19,7 @@ public class Level1FlyingBoard extends FlyingBoard {
     private static final List<Integer> credits = List.of(4, 3, 2, 1);
     private static final int prettiestShipReward = 2;
 
-    private Iterator<Integer> initialPositionIterator;
+    private final Iterator<Integer> initialPositionIterator;
     private final static List<Integer> initialPositions = List.of(4, 2, 1, 0);
 
     /**
@@ -53,14 +53,19 @@ public class Level1FlyingBoard extends FlyingBoard {
     }
 
     @Override
-    public void insertPlayer(Player player) {
+    public int insertPlayer(Player player) {
 
-        int initialPosition = initialPositionIterator.next();
-        ranking.put(player, initialPosition);
+        synchronized (ranking) {
+            int initialPosition = initialPositionIterator.next();
+            ranking.put(player, initialPosition);
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyRankingUpdate(nicknameToNotify,player.getNickname(),initialPosition);
         });
+
+            return ranking.size();
+
+        }
 
     }
 }

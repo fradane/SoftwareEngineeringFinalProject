@@ -61,9 +61,8 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
     public Map<String, GameController> getClientGame() {
         return clientGame;
     }
-
     @Override
-    public GameInfo getGameInfo(String gameId) throws RemoteException {
+    public GameInfo getGameInfo(String gameId) throws RemoteException{
         return gameControllers.get(gameId).getGameInfo();
     }
 
@@ -185,6 +184,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     public void removeGame(String gameId) {
         gameControllers.remove(gameId);
+
         Map<Future<?>, String> futureNicknames = new HashMap<>();
         List<GameInfo> availableGames = getAvailableGames();
 

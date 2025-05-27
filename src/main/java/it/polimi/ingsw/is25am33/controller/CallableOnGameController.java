@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.controller;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 
 import java.io.IOException;
 import java.rmi.Remote;
@@ -20,7 +21,7 @@ public interface CallableOnGameController extends Remote {
 
     void playerWantsToReleaseFocusedComponent(String nickname) throws IOException;
 
-    void playerChoseToEndBuildShipBoardPhase(String nickname) throws IOException;
+    void playerEndsBuildShipBoardPhase(String nickname) throws IOException;
 
     void playerPicksVisibleComponent(String nickname, Integer choice) throws IOException;
 
@@ -44,7 +45,7 @@ public interface CallableOnGameController extends Remote {
 
     void playerHandleBigShot(String nickname) throws IOException;
 
-    void playerChoseStorage(String nickname, Coordinates storageCoords) throws IOException;
+    void playerChoseStorage(String nickname, List<Coordinates> storageCoords) throws IOException;
 
     void spreadEpidemic(String nickname) throws IOException;
 
@@ -66,4 +67,7 @@ public interface CallableOnGameController extends Remote {
 
     void playerWantsToFocusReservedComponent(String nickname, int choice) throws IOException;
 
+    void playerPlacePlaceholder(String nickname) throws IOException;
+
+    void handleClientChoice(String nickname, PlayerChoicesDataStructure choice) throws IOException;
 }

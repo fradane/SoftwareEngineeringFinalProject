@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.client.controller;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.controller.GameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -14,7 +15,6 @@ import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -264,7 +264,8 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
                 case "notifyCurrAdventureCard":
                     if (clientController != null) {
-                        clientController.notifyCurrAdventureCard(nickname, notification.getParamString());
+                        //TODO da aggiustare con le ClientCard
+                        //clientController.notifyCurrAdventureCard(nickname, notification.getParamString());
                     }
                     break;
 
@@ -298,6 +299,18 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyStopHourglass":
+                    if (clientController != null) {
+                        clientController.notifyStopHourglass(notification.getParamString());
+                    }
+                    break;
+
+                case "notifyFirstToEnter":
+                    if (clientController != null) {
+                        clientController.notifyFirstToEnter(notification.getParamString());
+                    }
+                    break;
+
                 case "notifyRemoveVisibleComponents":
                     if (clientController != null) {
                         clientController.notifyRemoveVisibleComponents(notification.getParamString(), notification.getParamInt());
@@ -311,10 +324,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     break;
 
                 case "notifyShipBoardUpdate":
-                    if (clientController != null) {
-                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix() );
-                    }
-                    break;
+                    //TODO da aggiustare mettondo i componentsPerType
+//                    if (clientController != null) {
+//                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix(), );
+//                    }
+//                    break;
 
                 case "notifyPlayerCredits":
                     if (clientController != null) {
@@ -473,8 +487,20 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
 
     @Override
-    public void playerChoseToEndBuildShipBoardPhase(String nickname) {
-        // TODO
+    public void playerEndsBuildShipBoardPhase(String nickname) {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerEndsBuildShipBoardPhase");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerPlacePlaceholder(String nickname) {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerPlacePlaceholder");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void handleClientChoice(String nickname, PlayerChoicesDataStructure choice) throws IOException {
+        //TODO
     }
 
     @Override
@@ -532,7 +558,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     @Override
     public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords) throws RemoteException{
-        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseCabin");
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseCabins");
         outMessage.setParamCabinCoordinates(cabinCoords);
 
         out.println(ClientSerializer.serialize(outMessage));
@@ -563,9 +589,9 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerChoseStorage(String nickname, Coordinates storageCoords) throws RemoteException {
+    public void playerChoseStorage(String nickname, List<Coordinates> storageCoords) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerChoseStorage");
-        outMessage.setParamCoordinates(storageCoords);
+        outMessage.setParamActivableCoordinates(storageCoords);
         out.println(ClientSerializer.serialize(outMessage));
     }
 

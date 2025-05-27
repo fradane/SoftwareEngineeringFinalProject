@@ -10,6 +10,7 @@ import it.polimi.ingsw.is25am33.model.game.Player;
 import javafx.beans.property.ObjectProperty;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -439,5 +440,17 @@ public interface ShipBoardClient {
     }
 
     void checkPosition(int x, int y);
+
+    void setComponentsPerType(Map<Class<?>, List<Object>> componentsPerType);
+
+    Map<Coordinates, Storage> getCoordinatesAndStorages();
+
+    /**
+     * Returns a map where keys are coordinates and values are Cabin components that have crew members.
+     * Only includes coordinates that have Cabin components with at least one inhabitant.
+     *
+     * @return A map of coordinates to Cabin objects with crew
+     */
+    Map<Coordinates, Cabin> getCoordinatesAndCabinsWithCrew();
 
 }

@@ -70,12 +70,49 @@ public abstract class Storage extends Component {
     }
 
     /**
-     * Adds a {@code CargoCube} to the storage.
+     * Adds a {@code CargoCube} to the storage. If the storage is full,
+     * it will replace the least valuable cube regardless of value comparison.
      *
      * @param cube the {@code CargoCube} to add
+     * @return the {@code CargoCube} that was removed to make space, or null if storage wasn't full
      */
-    public void addCube(CargoCube cube) {
+
+    public CargoCube addCube(CargoCube cube) {
+        // Se lo storage non è pieno, aggiungi semplicemente il cubo
+        if (!isFull()) {
+            stockedCubes.add(cube);
+            return null;
+        }
+
+        // Se lo storage è pieno, trova e rimuovi il cubo di valore minore
+        CargoCube leastValuableCube = findLeastValuableCube();
+
+        if (leastValuableCube != null) {
+            stockedCubes.remove(leastValuableCube);
+            stockedCubes.add(cube);
+            return leastValuableCube;
+        }
+
+        // Caso teoricamente impossibile se isFull() è true
         stockedCubes.add(cube);
+        return null;
+    }
+
+    /**
+     * Finds the least valuable cube in the storage.
+     *
+     * @return the least valuable {@code CargoCube}, or null if storage is empty
+     */
+    @JsonIgnore
+    protected CargoCube findLeastValuableCube() {
+        if (stockedCubes.isEmpty()) {
+            return null;
+        }
+
+        // Ordina i cubi per valore e prendi il primo (meno prezioso)
+        List<CargoCube> sortedCubes = new ArrayList<>(stockedCubes);
+        sortedCubes.sort(CargoCube.byValue);
+        return sortedCubes.get(0);
     }
 
     /**

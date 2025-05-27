@@ -4,6 +4,8 @@ import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
 
+import java.rmi.RemoteException;
+
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.NORTH;
 
 public class Level2ShipBoard extends ShipBoard{

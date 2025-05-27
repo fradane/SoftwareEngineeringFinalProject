@@ -2,6 +2,8 @@ package it.polimi.ingsw.is25am33.model.card;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.model.card.interfaces.ShotSenderCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
@@ -17,7 +19,7 @@ import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
 
-public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCannonActivator {
+public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCannonActivator, ShotSenderCard {
 
     private List<Shot> shots;
     private List<String> shotIDs;
@@ -59,6 +61,12 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
                 throw new UnknownStateException("Unknown current state");
         }
 
+    }
+
+    @Override
+    public ClientCard toClientCard() {
+        //TODO
+        return null;
     }
 
     public void setShotIDs(List<String> shotIDs) {
@@ -142,6 +150,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         }
     }
 
+    @Override
     public void playerDecidedHowToDefendTheirSelvesFromSmallShot(Shield chosenShield, BatteryBox chosenBatteryBox) {
 
         ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
@@ -168,14 +177,15 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         if(playerIterator.hasNext()) {
             gameModel.nextPlayer();
         } else if (shotIterator.hasNext()) {
-            setCurrState( CardState.THROW_DICES);
+            setCurrState(CardState.THROW_DICES);
             playerIterator = defeatedPlayers.iterator();
         } else {
-            setCurrState( CardState.END_OF_CARD);
+            setCurrState(CardState.END_OF_CARD);
         }
 
     }
 
+    @Override
     public void playerIsAttackedByABigShot() {
 
         ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();

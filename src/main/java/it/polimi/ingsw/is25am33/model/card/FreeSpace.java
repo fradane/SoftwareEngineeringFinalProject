@@ -1,10 +1,12 @@
 package it.polimi.ingsw.is25am33.model.card;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Engine;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,9 +37,14 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
 
     }
 
+    @Override
+    public ClientCard toClientCard() {
+        //TODO
+        return null;
+    }
+
     public void currPlayerChoseEnginesToActivate(List<Engine> chosenDoubleEngines, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
 
-        // TODO controllare se un giocatore non ha engine
         if (chosenDoubleEngines == null || chosenBatteryBoxes == null)
             throw new IllegalArgumentException("Null lists");
 
@@ -49,9 +56,15 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
                 throw new IllegalArgumentException("The number of required batteries is not enough");
         });
 
-        chosenBatteryBoxes.forEach(BatteryBox::useBattery);
         int stepsForward = gameModel.getCurrPlayer().getPersonalBoard().countTotalEnginePower(chosenDoubleEngines);
-        movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsForward);
+
+        // check whether the declared engine power equals 0, in this case the player must be disqualified
+        if (stepsForward == 0) {
+            gameModel.getFlyingBoard().addOutPlayer(gameModel.getCurrPlayer());
+        } else {
+            chosenBatteryBoxes.forEach(BatteryBox::useBattery);
+            movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsForward);
+        }
 
         if (gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();

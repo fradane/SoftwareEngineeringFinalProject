@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.model.game;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -11,6 +12,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.client.model.card.AdventureCardMapper;
 
 import java.rmi.RemoteException;
 import java.util.*;
@@ -142,6 +144,9 @@ public class GameModel {
 
     public void setCurrGameState(GameState currGameState) {
         synchronized (stateTransitionLock) {
+
+            if (this.currGameState == currGameState) return;
+
             this.currGameState = currGameState;
 
             gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
@@ -231,9 +236,12 @@ public class GameModel {
     public void setCurrAdventureCard(AdventureCard currAdventureCard) {
             this.currAdventureCard = currAdventureCard;
 
-            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyCurrAdventureCard(nicknameToNotify, currAdventureCard.toString());
-            });
+            // Map server card to client card
+            ClientCard clientCard = currAdventureCard.toClientCard();
+
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyCurrAdventureCard(nicknameToNotify, clientCard, true);
+        });
 
     }
 
@@ -253,12 +261,17 @@ public class GameModel {
         if (currAdventureCard == null || currAdventureCard.getCurrState() != CardState.START_CARD)
             throw new IllegalStateException("Not the right state");
 
+        //TODO uncommentare quando sarà pronta la creazione della classifica fatta da Fra
         setCurrRanking(flyingBoard.getCurrentRanking());
+        //setCurrRanking(new ArrayList<>(players.values()));
         currAdventureCard.setGame(this);
         playerIterator = currRanking.iterator();
-        currPlayer = playerIterator.next();
+        setCurrPlayer(playerIterator.next());
         currAdventureCard.setCurrState(currAdventureCard.getFirstState());
 
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyCardStarted(nicknameToNotify);
+        });
     }
 
     public List<Player> getPlayerWithPrettiestShip() {
@@ -349,8 +362,12 @@ public class GameModel {
                     }
                 }
 
-                setCurrGameState(GameState.CHECK_SHIPBOARD);
-
+                if (flyingBoard.getCurrentRanking().size() == maxPlayers)
+                    setCurrGameState(GameState.CHECK_SHIPBOARD);
+                else
+                    gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                        clientController.notifyFirstToEnter(nicknameToNotify);
+                    });
             }
 
         }
@@ -358,27 +375,25 @@ public class GameModel {
 
     @JsonIgnore
     public Set<ShipBoard> getInvalidShipBoards(){
-        Set<ShipBoard> invalidShipBoards = players.values().stream()
-                .map(player -> player.getPersonalBoard())
-                .filter(shipBoard -> shipBoard.isShipCorrect() == false)
+        return players.values().stream()
+                .map(Player::getPersonalBoard)
+                .filter(shipBoard -> !shipBoard.isShipCorrect())
                 .collect(Collectors.toSet());
-        return invalidShipBoards;
     }
 
     @JsonIgnore
     public Set<ShipBoard> getValidShipBoards(){
-        Set<ShipBoard> invalidShipBoards = players.values().stream()
-                .map(player -> player.getPersonalBoard())
-                .filter(shipBoard -> shipBoard.isShipCorrect() == true)
+        return players.values().stream()
+                .map(Player::getPersonalBoard)
+                .filter(ShipBoard::isShipCorrect)
                 .collect(Collectors.toSet());
-        return invalidShipBoards;
     }
 
     public void notifyInvalidShipBoards() {
         Set<ShipBoard> invalidShipBoards = getInvalidShipBoards();
         Set<String> playersNicknameToBeNotified = players.values().stream()
                 .filter(player -> invalidShipBoards.contains(player.getPersonalBoard()))
-                .map(player->player.getNickname())
+                .map(Player::getNickname)
                 .collect(Collectors.toSet());
 
         gameClientNotifier.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
@@ -395,7 +410,7 @@ public class GameModel {
         Set<ShipBoard> validShipBoards = getValidShipBoards();
         Set<String> playersNicknameToBeNotified = players.values().stream()
                 .filter(player -> validShipBoards.contains(player.getPersonalBoard()))
-                .map(player->player.getNickname())
+                .map(Player::getNickname)
                 .collect(Collectors.toSet());
 
         gameClientNotifier.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
@@ -425,4 +440,11 @@ public class GameModel {
     public void setGameContext(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
     }
+
+    public void notifyStopHourglass() {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyStopHourglass(nicknameToNotify);
+        });
+    }
+
 }

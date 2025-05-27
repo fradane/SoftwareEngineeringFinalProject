@@ -35,8 +35,9 @@ public abstract class FlyingBoard {
      * Inserts a player into the ranking with a specified position.
      *
      * @param player The player to be inserted.
+     * @return
      */
-    public abstract void insertPlayer(Player player);
+    public abstract int insertPlayer(Player player);
 
     /**
      * Retrieves the current position of the specified player in the ranking.
@@ -81,12 +82,18 @@ public abstract class FlyingBoard {
     }
 
     /**
-     * Identifies and returns the players who have been doubled, based on their position.
-     * Doubled players are added to the outPlayers set and removed from the ranking.
-     *
-     * @return A list of players who are out of the gameModel.
+     * Identifies and removes players from the ranking whose position difference
+     * from the top-ranked player exceeds the predefined run length.
+     * These players are added to the `outPlayers` set.
+     * <p>
+     * The method performs the following:
+     * 1. Determines the maximum position in the ranking.
+     * 2. Filters players whose position difference from the maximum position
+     *    is greater than the `runLenght`.
+     * 3. Adds the filtered players to the `outPlayers` set.
+     * 4. Removes the filtered players from the ranking map.
      */
-    public List<Player> getDoubledPlayers() {
+    public void getDoubledPlayers() {
         int maxPosition = Collections.max(ranking.values());
 
         List<Player> playersToRemove = ranking.keySet()
@@ -94,10 +101,8 @@ public abstract class FlyingBoard {
                 .filter(player -> maxPosition - ranking.get(player) > runLenght)
                 .collect(Collectors.toList());
 
-        outPlayers.addAll(playersToRemove);
+        playersToRemove.forEach(this::addOutPlayer);
         ranking.keySet().removeAll(playersToRemove);
-
-        return playersToRemove;
     }
 
     /**

@@ -1,11 +1,15 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientPlanets;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 
 import java.rmi.RemoteException;
 import java.util.List;
@@ -69,6 +73,11 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
     }
 
     @Override
+    public ClientCard toClientCard() {
+        return new ClientAbandonedShip(cardName, imageName, crewMalus, stepsBack, reward);
+    }
+
+    @Override
     public void setLevel(int level) {
         this.level = level;
     }
@@ -86,16 +95,25 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
     }
 
     private void currPlayerWantsToVisit(boolean wantsToVisit) throws IllegalDecisionException {
-
-        if (wantsToVisit) {
-            if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)
-                throw new IllegalDecisionException("Player has not enough crew members");
-            setCurrState(CardState.REMOVE_CREW_MEMBERS);
-        } else if (gameModel.hasNextPlayer()) {
-            gameModel.nextPlayer();
-        } else {
-            setCurrState(CardState.END_OF_CARD);
+        try{
+            if (wantsToVisit) {
+                if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)
+                    //TODO bisogna gestire questo genere di eccezioni, teoricamente già controllate lato client, però boh
+                    throw new IllegalDecisionException("Player has not enough crew members");
+                setCurrState(CardState.REMOVE_CREW_MEMBERS);
+            } else if (gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
+                setCurrState(CardState.VISIT_LOCATION);
+            } else {
+                setCurrState(CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
+            }
+        }catch (Exception e){
+            System.err.println("Error in currPlayerWantsToVisit: " + e.getMessage());
+            e.printStackTrace();
         }
+
 
     }
 
@@ -109,6 +127,7 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
         setCurrState(CardState.END_OF_CARD);
+        gameModel.setCurrGameState(GameState.DRAW_CARD);
 
     }
 
