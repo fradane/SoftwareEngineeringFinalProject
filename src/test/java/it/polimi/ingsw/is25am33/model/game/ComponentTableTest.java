@@ -1,8 +1,6 @@
 package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
-import it.polimi.ingsw.is25am33.model.GameContext;
-import it.polimi.ingsw.is25am33.model.ThrowingBiConsumer;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import org.junit.jupiter.api.Test;

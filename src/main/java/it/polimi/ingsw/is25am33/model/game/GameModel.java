@@ -318,7 +318,7 @@ public class GameModel {
 
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController){
         gameClientNotifier.getClientControllers().put(nickname, clientController);
-        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color, gameClientNotifier) : new Level2ShipBoard(color, gameClientNotifier);
+        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color, gameClientNotifier, false) : new Level2ShipBoard(color, gameClientNotifier, false);
         Player player = new Player(nickname, shipBoard, color);
         player.setGameContext(gameClientNotifier);
         players.put(nickname, player);

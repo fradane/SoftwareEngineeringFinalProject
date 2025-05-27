@@ -55,6 +55,9 @@ public class MainMenuViewController extends GuiController {
     @FXML
     private VBox gameCreatedScreen;
 
+    @FXML
+    private VBox joinOtherPlayersScreen;
+
     public void setAvailableGames() {
         Platform.runLater(() -> gameListView.setItems(clientController.getObservableGames()));
     }
@@ -154,6 +157,10 @@ public class MainMenuViewController extends GuiController {
             return;
         }
         clientController.joinGame(currGameId, chosenColor);
+        joinGameForm.setVisible(false);
+        joinGameForm.setManaged(false);
+        joinOtherPlayersScreen.setVisible(true);
+        joinOtherPlayersScreen.setManaged(true);
     }
 
     public void showError(String errorMessage) {

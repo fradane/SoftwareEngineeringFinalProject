@@ -42,7 +42,7 @@
 
     <left>
         <!-- Pannello sinistro per componenti visibili -->
-        <VBox fx:id="visibleComponentsPanel" maxWidth="300" minWidth="250" styleClass="component-controls">
+        <VBox fx:id="visibleComponentsPanel" maxWidth="300" minWidth="250" styleClass="visible-components-panel">
             <HBox alignment="CENTER" spacing="10.0" styleClass="component-controls">
                 <Label styleClass="component-controls" text="Visible Components" />
             </HBox>
@@ -89,22 +89,22 @@
                         </rowConstraints>
 
                         <!-- Prima riga -->
-                        <Button fx:id="button04_03" maxHeight="Infinity" maxWidth="Infinity" styleClass="cell-button" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.vgrow="ALWAYS" />
-                        <Button fx:id="button04_04" maxHeight="Infinity" maxWidth="Infinity" styleClass="cell-button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                        <Button fx:id="button04_03" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.vgrow="ALWAYS" />
+                        <Button fx:id="button04_04" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button04_05" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
-                        <Button fx:id="button04_06" maxHeight="Infinity" maxWidth="Infinity" styleClass="cell-button" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                        <Button fx:id="button04_06" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button04_07" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button04_08" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button04_09" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
 
                         <!-- Seconda riga -->
-                        <Button fx:id="button05_03" maxHeight="Infinity" maxWidth="Infinity" styleClass="cell-button" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                        <Button fx:id="button05_03" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button05_04" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button05_05" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button05_06" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button05_07" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button05_08" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
-                        <Button fx:id="button05_09" maxHeight="Infinity" maxWidth="Infinity" styleClass="cell-button" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                        <Button fx:id="button05_09" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
 
                         <!-- Terza riga -->
                         <Button fx:id="button06_03" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
@@ -128,7 +128,7 @@
                         <Button fx:id="button08_03" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button08_04" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button08_05" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
-                        <Button fx:id="button08_06" maxHeight="Infinity" maxWidth="Infinity" styleClass="cell-button" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                        <Button fx:id="button08_06" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button08_07" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button08_08" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button fx:id="button08_09" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
@@ -428,6 +428,7 @@
         <HBox alignment="CENTER" spacing="15.0" styleClass="action-bar">
             <Button fx:id="pickRandomComponentButton" onAction="#handlePickRandomComponentButton" styleClass="action-button" text="Random Component" />
             <Button fx:id="visibleComponentButton" onAction="#handleVisibleComponentButton" styleClass="action-button" text="Visible Component" />
+
 
             <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box">
                 <items>

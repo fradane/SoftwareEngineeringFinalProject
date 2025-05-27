@@ -83,6 +83,8 @@ public class ShipBoardViewController extends GuiController {
     @FXML public ComboBox<Integer> littleDeckComboBox;
 
     private final int FIXED_COMPONENT_LENGTH = 70;
+    private final int FIXED_BOOKED_COMPONENT_HEIGHT = 55;
+
     private int focusComponentRotation = 0;
     private ModelFxAdapter modelFxAdapter;
     private final Map<String, StackPane> otherPlayersShipBoards = new HashMap<>();
@@ -289,8 +291,9 @@ public class ShipBoardViewController extends GuiController {
                                 Image image = new Image(Objects.requireNonNull(getClass()
                                         .getResourceAsStream("/gui/graphics/component/" + bookedComponentFile)));
                                 ImageView imageview = new ImageView(image);
-                                imageview.setFitWidth(FIXED_COMPONENT_LENGTH);
-                                imageview.setFitHeight(FIXED_COMPONENT_LENGTH);
+                                imageview.setFitWidth(FIXED_BOOKED_COMPONENT_HEIGHT);
+                                imageview.setFitHeight(FIXED_BOOKED_COMPONENT_HEIGHT);
+                                button04_08.setAlignment(Pos.CENTER_RIGHT);
                                 button04_08.setGraphic(imageview);
                             } else {
                                 button04_08.setGraphic(null);
@@ -307,8 +310,9 @@ public class ShipBoardViewController extends GuiController {
                                 Image image = new Image(Objects.requireNonNull(getClass()
                                         .getResourceAsStream("/gui/graphics/component/" + bookedComponentFile)));
                                 ImageView imageview = new ImageView(image);
-                                imageview.setFitWidth(FIXED_COMPONENT_LENGTH);
-                                imageview.setFitHeight(FIXED_COMPONENT_LENGTH);
+                                imageview.setFitWidth(FIXED_BOOKED_COMPONENT_HEIGHT);
+                                imageview.setFitHeight(FIXED_BOOKED_COMPONENT_HEIGHT);
+                                button04_09.setAlignment(Pos.CENTER_RIGHT);
                                 button04_09.setGraphic(imageview);
                             } else {
                                 button04_09.setGraphic(null);
