@@ -1,12 +1,15 @@
 package it.polimi.ingsw.is25am33.model.board;
+
+import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
 
+
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.NORTH;
 
-public class Level2ShipBoard extends ShipBoard{
+public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
 
     static boolean[][] level2ValidPositions = {
             {false, false, false, false, false, false, false, false, false, false, false, false},

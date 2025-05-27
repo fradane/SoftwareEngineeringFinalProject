@@ -4,7 +4,8 @@
     "level": 1,
     "crewMalus": 2,
     "reward": 3,
-    "stepsBack": -1
+    "stepsBack": -1,
+    "isTestFlightCard": false
   },
 
   {
@@ -12,7 +13,8 @@
     "level": 1,
     "crewMalus": 3,
     "reward": 4,
-    "stepsBack": -1
+    "stepsBack": -1,
+    "isTestFlightCard": true
   },
 
   {
@@ -20,7 +22,8 @@
     "level": 2,
     "crewMalus": 4,
     "reward": 6,
-    "stepsBack": -1
+    "stepsBack": -1,
+    "isTestFlightCard": false
   },
 
   {
@@ -28,6 +31,7 @@
     "level": 2,
     "crewMalus": 5,
     "reward": 8,
-    "stepsBack": -2
+    "stepsBack": -2,
+    "isTestFlightCard": false
   }
 ]

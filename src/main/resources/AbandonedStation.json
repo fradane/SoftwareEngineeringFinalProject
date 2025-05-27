@@ -4,7 +4,8 @@
     "level": 1,
     "stepsBack": -1,
     "requiredCrewMembers": 5,
-    "reward": ["YELLOW", "GREEN"]
+    "reward": ["YELLOW", "GREEN"],
+    "isTestFlightCard": true
   },
 
   {
@@ -12,7 +13,8 @@
     "level": 1,
     "stepsBack": -1,
     "requiredCrewMembers": 6,
-    "reward": ["RED", "RED"]
+    "reward": ["RED", "RED"],
+    "isTestFlightCard": false
   },
 
   {
@@ -20,7 +22,8 @@
     "level": 2,
     "stepsBack": -1,
     "requiredCrewMembers": 7,
-    "reward": ["RED", "YELLOW"]
+    "reward": ["RED", "YELLOW"],
+    "isTestFlightCard": false
   },
 
   {
@@ -28,6 +31,7 @@
     "level": 2,
     "stepsBack": -2,
     "requiredCrewMembers": 8,
-    "reward": ["YELLOW", "YELLOW", "GREEN"]
+    "reward": ["YELLOW", "YELLOW", "GREEN"],
+    "isTestFlightCard": false
   }
 ]

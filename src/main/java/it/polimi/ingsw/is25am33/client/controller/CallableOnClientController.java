@@ -78,4 +78,8 @@ public interface CallableOnClientController extends Remote {
     void pingToClientFromServer(String nickname) throws IOException;
 
     void pongToClientFromServer(String nickname) throws IOException;
+
+    void notifyStopHourglass(String nicknameToNotify) throws IOException;
+
+    void notifyFirstToEnter(String nicknameToNotify) throws IOException;
 }

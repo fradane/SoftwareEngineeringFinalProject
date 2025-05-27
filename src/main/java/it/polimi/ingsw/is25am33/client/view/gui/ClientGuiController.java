@@ -38,6 +38,7 @@ public class ClientGuiController extends Application implements ClientView {
     private static final CompletableFuture<Void> initializationDone = new CompletableFuture<>();
     private static ClientGuiController instance;
     private Stage primaryStage;
+    private boolean isTestFlight;
 
     StartViewController startViewController;
     MainMenuViewController mainMenuViewController;
@@ -73,6 +74,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void setIsTestFlight(boolean isTestFlight) {
+        this.isTestFlight = isTestFlight;
+    }
+
+    @Override
     public void showPickReservedComponentQuestion() {
 
     }
@@ -85,6 +91,11 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
         return null;
+    }
+
+    @Override
+    public void showFirstToEnter() {
+
     }
 
     @Override
@@ -257,8 +268,7 @@ public class ClientGuiController extends Application implements ClientView {
                 .filter(gameInfo -> gameInfo.getGameId().equals(clientController.getCurrentGameId()))
                 .map(GameInfo::isTestFlight).findFirst();
 
-        String fxmlPath = isTestFlight.isPresent() && isTestFlight.get() ?
-                "/gui/Shipboard_1.fxml" : "/gui/Shipboard_2.fxml";
+        String fxmlPath =  isTestFlight ? "/gui/Shipboard_1.fxml" : "/gui/Shipboard_2.fxml";
 
         javafx.application.Platform.runLater(() -> {
             try {

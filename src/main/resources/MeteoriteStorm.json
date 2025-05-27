@@ -2,37 +2,43 @@
   {
     "imageName": "GT-cards_I_IT_019.jpg",
     "level":  1,
-    "meteoriteID": ["big_north", "small_west", "small_east"]
+    "meteoriteID": ["big_north", "small_west", "small_east"],
+    "isTestFlightCard": true
   },
 
   {
     "imageName": "GT-cards_I_IT_0110.jpg",
     "level":  1,
-    "meteoriteID": ["small_north", "small_north", "small_west", "small_east", "small_south"]
+    "meteoriteID": ["small_north", "small_north", "small_west", "small_east", "small_south"],
+    "isTestFlightCard": false
   },
 
   {
     "imageName": "GT-cards_I_IT_0111.jpg",
     "level":  1,
-    "meteoriteID": ["big_north", "small_north", "big_north"]
+    "meteoriteID": ["big_north", "small_north", "big_north"],
+    "isTestFlightCard": false
   },
 
   {
     "imageName": "GT-cards_II_IT_019.jpg",
     "level":  2,
-    "meteoriteID": ["small_north", "small_north", "big_west", "small_west", "small_west"]
+    "meteoriteID": ["small_north", "small_north", "big_west", "small_west", "small_west"],
+    "isTestFlightCard": false
   },
 
   {
     "imageName": "GT-cards_II_IT_0110.jpg",
     "level":  2,
-    "meteoriteID": ["big_north", "big_north", "small_south", "small_south"]
+    "meteoriteID": ["big_north", "big_north", "small_south", "small_south"],
+    "isTestFlightCard": false
   },
 
   {
     "imageName": "GT-cards_II_IT_0111.jpg",
     "level":  2,
-    "meteoriteID": ["small_north", "small_north", "big_east", "small_east", "small_east"]
+    "meteoriteID": ["small_north", "small_north", "big_east", "small_east", "small_east"],
+    "isTestFlightCard": false
   }
 
 ]

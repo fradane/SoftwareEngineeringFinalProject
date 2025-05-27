@@ -5,5 +5,6 @@ public enum MessageType {
     STANDARD,
     ERROR,
     NOTIFICATION_INFO,
-    ASK, NOTIFICATION_CRITICAL
+    ASK,
+    NOTIFICATION_CRITICAL;
 }

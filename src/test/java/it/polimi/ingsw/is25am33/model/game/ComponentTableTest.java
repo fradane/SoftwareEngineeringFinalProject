@@ -2,6 +2,8 @@ package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
+import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.ThrowingBiConsumer;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import org.junit.jupiter.api.Test;
 
@@ -49,6 +51,9 @@ class ComponentTableTest {
         // Create a mock GameContext with a no-op notifyAllClients implementation
         GameClientNotifier mockContext = new GameClientNotifier(null,null) {
             public void notifyAllClients(BiConsumer<String, CallableOnClientController> consumer) {}
+        GameContext mockContext = new GameContext(null, null) {
+            @Override
+            public void notifyAllClients(ThrowingBiConsumer<String, CallableOnClientController, IOException> consumer) {}
         };
 
         // Assign the mock context to the component table
