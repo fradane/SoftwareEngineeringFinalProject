@@ -107,6 +107,20 @@ public class ClientModel {
         return playerClientData.get(myNickname).getShipBoard();
     }
 
+    public Map<PlayerColor, Integer> getColorRanking() {
+        Map<PlayerColor, Integer> ranking = new HashMap<>();
+
+        playerClientData.keySet()
+                .stream()
+                .filter(player -> !playerClientData.get(player).isOut())
+                .forEach(nickname -> ranking.put(
+                        playerClientData.get(nickname).getColor(),
+                        playerClientData.get(nickname).getFlyingBoardPosition()
+                ));
+
+        return ranking;
+    }
+
     /**
      * Retrieves a sorted list of player nicknames based on their flying board position in ascending order,
      * with the list then being reversed to get a descending order ranking.
@@ -193,4 +207,8 @@ public class ClientModel {
             modelFxAdapter.refreshVisibleComponents();
     }
 
+    public void refreshRanking() {
+        if (modelFxAdapter != null)
+            modelFxAdapter.refreshRanking();
+    }
 }

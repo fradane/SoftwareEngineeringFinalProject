@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.client.view.gui;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -10,6 +11,7 @@ import javafx.collections.ObservableList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ModelFxAdapter {
     private final ClientModel clientModel;
@@ -21,6 +23,7 @@ public class ModelFxAdapter {
     private final ObjectProperty<Integer> observableFlipsLeft;
     private final ObservableList<String> observableVisibleComponents;
     private final Map<String, ObjectProperty<Component>[][]> observableShipBoards;
+    private final Map<PlayerColor, ObjectProperty<Integer>> observableColorRanking;
 
     @SuppressWarnings("unchecked")
     public ModelFxAdapter(ClientModel clientModel) {
@@ -34,7 +37,8 @@ public class ModelFxAdapter {
         this.observableTimer = new SimpleObjectProperty<>();
         this.observableFlipsLeft = new SimpleObjectProperty<>();
         this.observableVisibleComponents = FXCollections.observableArrayList();
-        this.observableShipBoards = new HashMap<>();
+        this.observableShipBoards = new ConcurrentHashMap<>();
+        this.observableColorRanking = new ConcurrentHashMap<>();
 
         // initialize other shipboards
         clientModel.getPlayerClientData()
@@ -93,6 +97,10 @@ public class ModelFxAdapter {
         return observableVisibleComponents;
     }
 
+    public Map<PlayerColor, ObjectProperty<Integer>> getObservableColorRanking() {
+        return observableColorRanking;
+    }
+
     /**
      * Syncs the observable matrix with the shipBoard matrix.
      * Call this method after model updates.
@@ -118,7 +126,7 @@ public class ModelFxAdapter {
 
     public void refreshTimer(int timeLeft, int flipsLeft) {
         observableTimer.set(timeLeft);
-        observableTimer.set(flipsLeft);
+        observableFlipsLeft.set(flipsLeft);
     }
 
     public void refreshVisibleComponents() {
@@ -161,5 +169,12 @@ public class ModelFxAdapter {
 
     }
 
+    public void refreshRanking() {
+        clientModel.getColorRanking()
+                .forEach((playerColor, position) -> {
+                    if (observableColorRanking.containsKey(playerColor))
+                        observableColorRanking.get(playerColor).set(position);
+                });
+    }
 
 }

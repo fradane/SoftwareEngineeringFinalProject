@@ -27,7 +27,6 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
@@ -60,7 +59,7 @@ public class ClientGuiController extends Application implements ClientView {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/StartView.fxml"));
         Scene scene = new Scene(loader.load());
         startViewController = loader.getController();
-        startViewController.setClientModel(clientModel);
+        GuiController.setClientModel(clientModel);
         GuiController.setClientController(clientController);
         primaryStage.setTitle("Galaxy Trucker");
         primaryStage.setScene(scene);
@@ -100,7 +99,8 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showInvalidShipBoardMenu() {
-        //TODO
+        if (shipBoardViewController != null)
+            shipBoardViewController.showInvalidComponents();
     }
 
     @Override
@@ -115,7 +115,8 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {
-        //TODO
+        if (shipBoardViewController != null)
+            shipBoardViewController.showShipParts(shipParts);
     }
 
     @Override
@@ -150,6 +151,18 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showMessage(String message, MessageType type) {
+
+        if (clientModel.getGameState() == null)
+            return;
+
+        switch (clientModel.getGameState()) {
+
+            case BUILD_SHIPBOARD:
+                if (shipBoardViewController != null) {
+                    shipBoardViewController.showMessage(message.split("\n")[0]);
+                }
+
+        }
 
     }
 
@@ -263,10 +276,7 @@ public class ClientGuiController extends Application implements ClientView {
 
         if (shipBoardViewController != null) return;
 
-        Optional<Boolean> isTestFlight = clientController.getGames()
-                .stream()
-                .filter(gameInfo -> gameInfo.getGameId().equals(clientController.getCurrentGameId()))
-                .map(GameInfo::isTestFlight).findFirst();
+        boolean isTestFlight = clientController.getCurrentGameInfo().isTestFlight();
 
         String fxmlPath =  isTestFlight ? "/gui/Shipboard_1.fxml" : "/gui/Shipboard_2.fxml";
 

@@ -23,7 +23,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static it.polimi.ingsw.is25am33.client.view.tui.ClientState.*;
@@ -1639,7 +1638,7 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case PLACE_PLACEHOLDER:
-                    clientController.placePlaceholder();
+                    clientController.placePawn();
                     break;
 
                 case BUILDING_SHIPBOARD_PICK_VISIBLE_COMPONENT:
@@ -1739,6 +1738,7 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case CHECK_SHIPBOARD_INVALID:
+                    // TODO RIMUOVERE
                     break;
 
                 case CHECK_SHIPBOARD_CHOOSE_COMPONENT_TO_REMOVE:
@@ -1764,7 +1764,7 @@ public class ClientCLIView implements ClientView {
 
                         // Controlla se le coordinate inserite sono tra quelle incorrette
                         if (incorrectCoords.contains(targetCoords)) {
-                            clientController.removeComponent(row, column);
+                            clientController.removeComponent(targetCoords.getX(), targetCoords.getY());
                         } else {
                             showMessage("The coordinates (" + row + ", " + column + ") do not correspond to an incorrectly positioned component.", ERROR);
                             showMessage("Please choose coordinates from the red-highlighted components.", ERROR);
@@ -1784,6 +1784,7 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case CHECK_SHIPBOARD_CORRECT:
+                    // TODO RIMUOVERE
                     break;
 
                 default:

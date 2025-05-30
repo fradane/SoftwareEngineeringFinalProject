@@ -373,7 +373,7 @@ public class GameModel {
                 if (flyingBoard.getCurrentRanking().size() == maxPlayers)
                     setCurrGameState(GameState.CHECK_SHIPBOARD);
                 else
-                    gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                    gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                         clientController.notifyFirstToEnter(nicknameToNotify);
                     });
             }
@@ -448,7 +448,7 @@ public class GameModel {
     }
 
     public void notifyStopHourglass() {
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyStopHourglass(nicknameToNotify);
         });
     }

@@ -27,7 +27,7 @@ public class ClientLauncher {
                             "║       ██║   ██║  ██║╚██████╔╝╚██████╗██║  ██╗███████╗██║  ██║             ║\n" +
                             "║       ╚═╝   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝             ║\n" +
                             "║                                                                           ║\n" +
-                            "║  -Evita meteoriti, combatti pirati, consegna tubi... diventa leggenda!-   ║\n" +
+                            "║  -Evita meteoriti, combatti pirati, consegna cubi... diventa leggenda!-   ║\n" +
                             "║                                                                           ║\n" +
                             "╚═══════════════════════════════════════════════════════════════════════════╝";
         System.out.println(titleScreen);

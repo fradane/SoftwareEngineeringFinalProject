@@ -225,6 +225,11 @@
     -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 5, 0, 0, 0);
 }
 
+.cell-button.no-hover:hover {
+    -fx-border-color: inherit;
+    -fx-effect: none;
+}
+
 .cell-button:pressed {
     -fx-border-color: -fx-space-accent;
     -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.7), 10, 0, 0, 0);
@@ -333,7 +338,7 @@
 
 /* ScrollPane per i componenti - stesso stile del timer container */
 .components-scroll-pane {
-    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-color: -fx-space-blue-light;
     -fx-background-radius: 8px;
     -fx-border-color: -fx-space-blue;
     -fx-border-radius: 8px;
@@ -342,18 +347,18 @@
 }
 
 .components-scroll-pane .viewport {
-    -fx-background-color: transparent;
+    -fx-background-color: -fx-space-blue-light;
     -fx-background-radius: 8px;
 }
 
 .components-scroll-pane .scroll-bar:vertical {
-    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-color: -fx-space-blue-light;
     -fx-background-radius: 4px;
     -fx-pref-width: 8px;
 }
 
 .components-scroll-pane .scroll-bar:vertical .track {
-    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-color: -fx-space-blue-light;
     -fx-background-radius: 4px;
 }
 

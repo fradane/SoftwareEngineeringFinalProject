@@ -152,4 +152,5 @@ public enum CardState {
 
     public abstract BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view);
 
+    //TODO setProperty
 }

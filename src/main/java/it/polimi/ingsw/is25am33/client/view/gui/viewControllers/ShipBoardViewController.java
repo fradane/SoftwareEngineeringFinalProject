@@ -2,26 +2,31 @@ package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.stream.IntStream;
 
 public class ShipBoardViewController extends GuiController {
 
@@ -52,6 +57,24 @@ public class ShipBoardViewController extends GuiController {
     @FXML
     public StackPane player2ShipBoard, player3ShipBoard,  player4ShipBoard;
     @FXML
+    public Label messageLabel;
+    @FXML
+    public StackPane mainPlayerShipBoard;
+    @FXML
+    public Pane pawnsPane;
+    @FXML
+    public StackPane flyingBoard;
+    @FXML
+    public Button showFlyingBoardButton;
+    @FXML
+    public Button endPhaseButton;
+    @FXML
+    public VBox hourglassBox;
+    @FXML
+    public VBox componentsBoxV;
+    @FXML
+    public HBox bottomBox;
+    @FXML
     private ImageView visibleCard1 = new ImageView();
     @FXML
     private ImageView visibleCard2 = new ImageView();
@@ -70,7 +93,9 @@ public class ShipBoardViewController extends GuiController {
     @FXML
     private GridPane grid;
     @FXML
-    private HBox componentBox;
+    private HBox componentsBoxH;
+
+    @FXML public ImageView redPawn, greenPawn, bluePawn, yellowPawn;
 
     @FXML private Button button04_03, button04_04, button04_05, button04_06, button04_07, button04_08, button04_09;
     @FXML private Button button05_03, button05_04, button05_05, button05_06, button05_07, button05_08, button05_09;
@@ -89,19 +114,39 @@ public class ShipBoardViewController extends GuiController {
     private ModelFxAdapter modelFxAdapter;
     private final Map<String, StackPane> otherPlayersShipBoards = new HashMap<>();
     private final Set<Button> navButtons = new HashSet<>();
+    private List<Set<Coordinates>> shipParts = new ArrayList<>();
 
     private final Map<String, Button> buttonMap = new HashMap<>();
+    private final Map<Button, DropShadow> shadowedButtons = new ConcurrentHashMap<>();
+
+    private BiConsumer<Integer, Integer> correctShipBoardAction;
+
+    private static final Map<Integer, Point2D> boardPositions = Map.ofEntries(
+            Map.entry(0, new Point2D(149.0, 189.0)),
+            Map.entry(1, new Point2D(192.0, 171.0)),
+            Map.entry(2, new Point2D(238.0, 160.0)),
+            Map.entry(3, new Point2D(282.0, 154.0)),
+            Map.entry(4, new Point2D(327.0, 155.0)),
+            Map.entry(5, new Point2D(371.0, 160.0)),
+            Map.entry(6, new Point2D(415.0, 173.0)),
+            Map.entry(7, new Point2D(458.0, 191.0)),
+            Map.entry(8, new Point2D(497.0, 219.0)),
+            Map.entry(9, new Point2D(524.0, 261.0)),
+            Map.entry(10, new Point2D(517.0, 313.0)),
+            Map.entry(11, new Point2D(493.0, 352.0)),
+            Map.entry(12, new Point2D(452.0, 377.0)),
+            Map.entry(13, new Point2D(409.0, 393.0))
+            // TODO finire le posizioni
+    );
 
     public void initialize() {
         borderPane.setVisible(true);
-        stackPane.setVisible(true);
         grid.setVisible(true);
         modelFxAdapter = new ModelFxAdapter(clientModel);
 
         // initialize buttonMap
         initializeButtonMap();
 
-        ShipBoardClient myShipBoard = clientModel.getPlayerClientData().get(clientModel.getMyNickname()).getShipBoard();
         ObjectProperty<Component>[][] observableMatrix = modelFxAdapter.getMineObservableMatrix();
 
         // set listener for the grid matrix
@@ -118,8 +163,8 @@ public class ShipBoardViewController extends GuiController {
                         showFocusComponent();
                     } else {
                         focusComponentImage.setImage(null);
-                        componentBox.setVisible(false);
-                        componentBox.setManaged(false);
+                        componentsBoxH.setVisible(false);
+                        componentsBoxH.setManaged(false);
                     }
                 }));
 
@@ -129,9 +174,49 @@ public class ShipBoardViewController extends GuiController {
         setupTimerBinding();
         setupVisibleComponentsBinding();
         setupShipBoardNavigationBar();
+        setupFlyingBoardBinding();
 
         modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
         clientModel.getPlayerClientData().keySet().forEach(nickname -> modelFxAdapter.refreshShipBoardOf(nickname));
+    }
+
+    private void setupFlyingBoardBinding() {
+
+        clientModel.getColorRanking()
+                .forEach((playerColor, position) -> {
+                    modelFxAdapter.getObservableColorRanking().put(playerColor, new SimpleObjectProperty<>(position));
+                });
+
+        modelFxAdapter.getObservableColorRanking()
+            .forEach((color, position) -> {
+                position.addListener((_, _, newVal) -> Platform.runLater(() -> {
+                    double x = boardPositions.get(newVal).getX();
+                    double y = boardPositions.get(newVal).getY();
+
+                    switch (color) {
+                        case RED:
+                            redPawn.setLayoutX(x);
+                            redPawn.setLayoutY(y);
+                            redPawn.setVisible(true);
+                            break;
+                        case GREEN:
+                            greenPawn.setLayoutX(x);
+                            greenPawn.setLayoutY(y);
+                            greenPawn.setVisible(true);
+                            break;
+                        case BLUE:
+                            bluePawn.setLayoutX(x);
+                            bluePawn.setLayoutY(y);
+                            bluePawn.setVisible(true);
+                            break;
+                        case YELLOW:
+                            yellowPawn.setLayoutX(x);
+                            yellowPawn.setLayoutY(y);
+                            yellowPawn.setVisible(true);
+                            break;
+                    }
+                }));
+            });
     }
 
     private void setupShipBoardNavigationBar() {
@@ -180,9 +265,12 @@ public class ShipBoardViewController extends GuiController {
                     shipNavigationBar.getChildren().add(shipBoardButton);
 
                     shipBoardButton.setOnAction(_ -> Platform.runLater(() -> {
+                        flyingBoard.setVisible(false);
                         otherPlayersShipBoards.forEach((_, shipboardStackPane1) -> shipboardStackPane1.setVisible(false));
                         otherPlayersShipBoards.get(nickname).setVisible(true);
                         navButtons.forEach(button -> button.getStyleClass().remove("active"));
+                        showFlyingBoardButton.getStyleClass().remove("active");
+                        mainPlayerShipBoard.setVisible(false);
                         enableMyShipBoardView(false);
                         shipBoardButton.getStyleClass().add("active");
                     }));
@@ -340,7 +428,6 @@ public class ShipBoardViewController extends GuiController {
         }
     }
 
-    // TODO controllare perché non funziona
     private void setupTimerBinding() {
         modelFxAdapter.getObservableTimer()
                 .addListener((_, _, newVal) -> Platform.runLater(() -> {
@@ -391,14 +478,70 @@ public class ShipBoardViewController extends GuiController {
         int row = Integer.parseInt(parts[0]);
         int column = Integer.parseInt(parts[1]);
 
-        if ((row == 4 && column == 8) || (row == 4 && column == 9)) {
-            clientController.reserveFocusedComponent();
+        // TODO DEBUG: da togliere
+        //System.out.println("Button clicked: " + id + " -> coordinates [" + row + "][" + column + "]\nRotation: " + clientModel.getMyShipboard().getFocusedComponent().getRotation());
+
+        if (clientModel.getGameState() == GameState.BUILD_SHIPBOARD)
+            handleGridButtonBuilding(row, column);
+        else if (clientModel.getGameState() == GameState.CHECK_SHIPBOARD)
+            correctShipBoardAction.accept(row, column);
+    }
+
+    private void handleGridButtonBuilding(int row, int column) {
+
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+
+        if (row == 4 && (column == 8 || column == 9)) {
+
+            // TODO
+            if (shipboard.getBookedComponents().size() == 2 && shipboard.getFocusedComponent() != null) {
+                showMessage("You already have two components booked");
+                return;
+            }
+
+            //se non ho nessun componente in focus
+            if (shipboard.getFocusedComponent() == null) {
+                //se nella lista dei componenti riservati c'è qualcosa, il componente torna in focus e viene tolto dai componenti riservati
+                if (column == 8 && shipboard.getBookedComponents().get(0) != null) {
+                    clientController.pickReservedComponent(1);
+                } else if (column == 9 && shipboard.getBookedComponents().get(1) != null) {
+                    clientController.pickReservedComponent(2);
+                }
+            } else
+                clientController.reserveFocusedComponent();
+
             return;
         }
 
-        System.out.println("Button clicked: " + id + " -> coordinates [" + row + "][" + column + "]\nRotation: " + clientModel.getMyShipboard().getFocusedComponent().getRotation());
+        if (shipboard.getFocusedComponent() != null)
+            clientController.placeFocusedComponent(row, column);
+    }
 
-        clientController.placeFocusedComponent(row, column);
+    private void handleInvalidComponent(int row, int column) {
+
+        if (row == 4 && (column == 8 || column == 9)) {
+            showMessage("Remove one of the wrongly placed components");
+            return;
+        }
+
+        if (clientModel.getMyShipboard().getIncorrectlyPositionedComponentsCoordinates().contains(new Coordinates(row, column))) {
+            shadowedButtons.keySet().forEach(this::removeHighlightColor);
+            clientController.removeComponent(row, column);
+        } else
+            showMessage("Remove one of the wrongly placed components");
+    }
+
+    private void handleShipParts(int row, int column) {
+        IntStream.range(0, shipParts.size() - 1)
+                        .filter(i -> shipParts.get(i).contains(new Coordinates(row, column)))
+                        .findFirst()
+                        .ifPresentOrElse(
+                                i -> {
+                                    shadowedButtons.keySet().forEach(ShipBoardViewController.this::removeHighlightColor);
+                                    clientController.handleShipPartSelection(i + 1);
+                                    },
+                                () -> showMessage("Invalid selection, try again")
+                        );
     }
 
     public void handleLittleDeck() {
@@ -426,8 +569,8 @@ public class ShipBoardViewController extends GuiController {
 
     public void showFocusComponent(){
         Platform.runLater(() -> {
-            componentBox.setVisible(true);
-            componentBox.setManaged(true);
+            componentsBoxH.setVisible(true);
+            componentsBoxH.setManaged(true);
             componentControlsPanel.setVisible(true);
             componentControlsPanel.setManaged(true);
         });
@@ -483,9 +626,12 @@ public class ShipBoardViewController extends GuiController {
 
     public void handleMyShipBoardButton() {
         Platform.runLater(() -> {
+            flyingBoard.setVisible(false);
             otherPlayersShipBoards.forEach((_, shipboardStackPane) -> shipboardStackPane.setVisible(false));
             navButtons.forEach(button -> button.getStyleClass().remove("active"));
+            showFlyingBoardButton.getStyleClass().remove("active");
             myShipButton.getStyleClass().add("active");
+            mainPlayerShipBoard.setVisible(true);
             enableMyShipBoardView(true);
         });
     }
@@ -500,5 +646,114 @@ public class ShipBoardViewController extends GuiController {
                 grid.setOpacity(0.1);
             }
         });
+    }
+
+    public void handleEndPhaseButton() {
+        clientController.endBuildShipBoardPhase();
+
+        Platform.runLater(() -> {
+            hourglassBox.setVisible(false);
+            visibleComponentsPanel.setVisible(false);
+            componentsBoxV.setVisible(false);
+            componentsBoxH.setVisible(false);
+            bottomBox.setVisible(false);
+        });
+    }
+
+    public void showMessage(String message) {
+        Platform.runLater(() -> {
+            messageLabel.setText(message);
+            messageLabel.setOpacity(0.0);
+
+            // Fade in
+            javafx.animation.FadeTransition fadeIn = new javafx.animation.FadeTransition(javafx.util.Duration.seconds(0.5), messageLabel);
+            fadeIn.setFromValue(0.0);
+            fadeIn.setToValue(1.0);
+
+            // Pause before fading out
+            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(2.0));
+
+            // Fade out
+            javafx.animation.FadeTransition fadeOut = new javafx.animation.FadeTransition(javafx.util.Duration.seconds(0.5), messageLabel);
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.0);
+            fadeOut.setOnFinished(_ -> messageLabel.setText(""));
+
+            // Play sequence
+            javafx.animation.SequentialTransition sequence = new javafx.animation.SequentialTransition(fadeIn, pause, fadeOut);
+            sequence.play();
+        });
+    }
+
+    public void handleShowFlyingBoardButton() {
+        Platform.runLater(() -> {
+            otherPlayersShipBoards.forEach((_, shipboardStackPane) -> shipboardStackPane.setVisible(false));
+            navButtons.forEach(button -> button.getStyleClass().remove("active"));
+            showFlyingBoardButton.getStyleClass().add("active");
+            myShipButton.getStyleClass().remove("active");
+            mainPlayerShipBoard.setVisible(false);
+            flyingBoard.setVisible(true);
+            mainPlayerShipBoard.setVisible(false);
+        });
+    }
+
+    public void showInvalidComponents() {
+
+        ShipBoardClient shipBoard = clientModel.getMyShipboard();
+
+        correctShipBoardAction = this::handleInvalidComponent;
+
+        shipBoard.getIncorrectlyPositionedComponentsCoordinates()
+                .forEach(coordinate -> {
+                    String buttonId = coordinate.getX() + "_" + coordinate.getY();
+                    Button button = buttonMap.get(buttonId);
+                    applyHighlightEffect(button, Color.RED);
+                });
+
+    }
+
+    private void applyHighlightEffect(Button button, Color color) {
+        Platform.runLater(() -> {
+            DropShadow shadow = new DropShadow();
+            shadowedButtons.put(button, shadow);
+            shadow.setColor(color);
+            shadow.setRadius(10);
+            shadow.setSpread(0.5);
+            button.setEffect(shadow);
+
+            if (!button.getStyleClass().contains("no-hover")) {
+                button.getStyleClass().add("no-hover");
+            }
+        });
+    }
+
+    private void removeHighlightColor(Button button) {
+        Platform.runLater(() -> {
+            shadowedButtons.remove(button);
+            button.setEffect(null);
+            button.getStyleClass().remove("no-hover");
+        });
+    }
+
+    public void showShipParts(List<Set<Coordinates>> shipParts) {
+
+        List<Color> colors = List.of(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW);
+        Map<Color, Set<Coordinates>> shipPartsMap = new HashMap<>();
+        this.shipParts = shipParts;
+
+        for (int i = 0; i < shipParts.size(); i++) {
+            shipPartsMap.put(colors.get(i), shipParts.get(i));
+        }
+
+        correctShipBoardAction = this::handleShipParts;
+
+        shipPartsMap.forEach((color, coordinates) -> {
+            coordinates.forEach(coordinate -> {
+                String buttonId = coordinate.getX() + "_" + coordinate.getY();
+                Button button = buttonMap.get(buttonId);
+                applyHighlightEffect(button, color);
+            });
+        });
+
     }
 }
