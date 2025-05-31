@@ -27,7 +27,7 @@ public class ClientLauncher {
                             "║       ██║   ██║  ██║╚██████╔╝╚██████╗██║  ██╗███████╗██║  ██║             ║\n" +
                             "║       ╚═╝   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝             ║\n" +
                             "║                                                                           ║\n" +
-                            "║  -Evita meteoriti, combatti pirati, consegna tubi... diventa leggenda!-   ║\n" +
+                            "║  -Evita meteoriti, combatti pirati, consegna cubi... diventa leggenda!-   ║\n" +
                             "║                                                                           ║\n" +
                             "╚═══════════════════════════════════════════════════════════════════════════╝";
         System.out.println(titleScreen);
@@ -72,7 +72,7 @@ public class ClientLauncher {
             try {
                 ClientView cli = new ClientCLIView();
                 ClientModel clientModel = new ClientModel();
-                ClientController clientController = new ClientController(clientModel);
+                ClientController clientController = new ClientController(clientModel, new ClientPingPongManager());
                 clientController.setView(cli);
                 ((ClientCLIView) cli).setClientController(clientController);
                 ((ClientCLIView) cli).setClientModel(clientModel);

@@ -20,7 +20,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.IntStream;
 
 public class GameController extends UnicastRemoteObject implements CallableOnGameController {
     private final GameModel gameModel;
@@ -41,6 +40,10 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         this.dns = dns;
     }
 
+    public GameModel getGameModel() {
+        return gameModel;
+    }
+
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController) {
         clientControllers.put(nickname, clientController);
         gameModel.addPlayer(nickname, color, clientController);
@@ -50,9 +53,8 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.removePlayer(nickname);
     }
 
-    public void playCard(String jsonString) throws IOException {
-        AdventureCard currCard = gameModel.getCurrAdventureCard();
-        currCard.play(currCard.getCurrState().handleJsonDeserialization(gameModel, jsonString));
+    public ConcurrentHashMap<String, CallableOnClientController> getClientControllers() {
+        return clientControllers;
     }
 
     public GameInfo getGameInfo() {
@@ -111,27 +113,20 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void leaveGame(String nickname) {
-        if (!gameModel.isStarted()) {
-
-            clientControllers.remove(nickname);
-            System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
-            if (clientControllers.isEmpty()) {
-                dns.removeGame(getGameInfo().getGameId());
-                System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
-            }
-            dns.getConnectionManager().getClients().remove(nickname);
-
-        } else {
-            clientControllers.forEach((playerNickname, clientController) -> {
-                clientControllers.remove(playerNickname);
-                DNS.gameControllers.remove(playerNickname);
-                dns.getConnectionManager().getClients().remove(playerNickname);
-            });
+    public void leaveGameAfterCreation(String nickname, Boolean isFirst) {
+        //se voglio uscire notifico a tutti gli altri giocatori nel game che mi sto disconnettendo ed esco.
+        // a quel punto loro si disconnetteranno tramite il game context
+        dns.getClientGame().remove(nickname);
+        clientControllers.remove(nickname);
+        System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
+        //se sono il primo a chiamare e ci sono altri client notifico e chiudo altrimenti se ho rimosso gia tutti i client chiudo il gioco
+        if(isFirst && !gameModel.getGameContext().getClientControllers().isEmpty())
+            gameModel.getGameContext().notifyDisconnection(nickname);
+        else if(clientControllers.isEmpty()) {
             dns.removeGame(getGameInfo().getGameId());
             System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
         }
-
+        //se un client è crashato lo stato del gioco viene settato a false in automatico alla ricezione della disconnessione
     }
 
     @Override
@@ -171,8 +166,16 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerChoseToEndBuildShipBoardPhase(String nickname) {
-        // TODO
+    public void playerEndsBuildShipBoardPhase(String nickname) {
+        gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname));
+        if (gameModel.getFlyingBoard().getCurrentRanking().size() == gameModel.getMaxPlayers())
+            gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
+    }
+
+    @Override
+    public void playerPlacePlaceholder(String nickname) {
+        if (gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname)) == gameModel.getMaxPlayers())
+            gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
     }
 
     @Override
@@ -349,10 +352,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerChoseStorage(String nickname, Coordinates storageCoords) throws RemoteException {
+    public void playerChoseStorage(String nickname, List<Coordinates> storageCoords) throws RemoteException {
 
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-        Storage storage = storageCoords.isCoordinateInvalid() ? null : ((Storage) shipBoard.getComponentAt(storageCoords));
+        List<Storage> storage = new ArrayList<>();
+        if (!storageCoords.isEmpty())
+            storageCoords.forEach(coords -> storage.add(coords.isCoordinateInvalid() ? null : ((Storage) shipBoard.getComponentAt(coords))));
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
@@ -414,13 +419,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             try {
                 Component[][] shipMatrix = shipBoard.getShipMatrix();
                 Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
-                if(shipParts.size() == 1){
-                    if(incorrectlyPositionedComponentsCoordinates.size()==0) {
+                if (shipParts.size() == 1) {
+                    if (incorrectlyPositionedComponentsCoordinates.isEmpty())
                         clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
-
-                    }else
+                    else
                         clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
-                }else if(shipParts.size() == 0)
+                } else if (shipParts.isEmpty())
                     clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
                 else
                     clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts);
@@ -429,7 +433,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             }
         });
 
-        if(shipParts.size() == 1) //ovvero ho direttamente rimosso un componente
+        if (shipParts.size() == 1) //ovvero ho direttamente rimosso un componente
             // Controllo se tutte le navi sono corrette e in caso cambio la fase
             gameModel.checkAndTransitionToNextPhase();
 

@@ -5,7 +5,8 @@
     "cubeMalus": 2,
     "reward": ["YELLOW", "GREEN", "BLUE"],
     "stepsBack": -1,
-    "requiredFirePower": 4
+    "requiredFirePower": 4,
+    "isTestFlightCard": true
   },
 
   {
@@ -14,6 +15,7 @@
     "cubeMalus": 3,
     "reward": ["RED", "YELLOW", "YELLOW"],
     "stepsBack": -1,
-    "requiredFirePower": 8
+    "requiredFirePower": 8,
+    "isTestFlightCard": false
   }
 ]

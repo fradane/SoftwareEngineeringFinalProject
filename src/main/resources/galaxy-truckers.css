@@ -208,6 +208,10 @@
     -fx-text-fill: -fx-space-dark;
 }
 
+.not-available-cell-button {
+    -fx-background-color: transparent;
+}
+
 /* Bottoni celle griglia */
 .cell-button {
     -fx-background-color: transparent;
@@ -219,6 +223,11 @@
 .cell-button:hover {
     -fx-border-color: rgba(255, 255, 255, 0.5);
     -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 5, 0, 0, 0);
+}
+
+.cell-button.no-hover:hover {
+    -fx-border-color: inherit;
+    -fx-effect: none;
 }
 
 .cell-button:pressed {
@@ -299,11 +308,15 @@
 
 /* Pannello sinistro - Componenti visibili */
 .visible-components-panel {
-    -fx-background-color: -fx-space-darker;
-    -fx-border-color: derive(-fx-space-blue, 20%);
-    -fx-border-width: 0 1px 0 0;
-    -fx-padding: 15px;
+    -fx-background-color: rgba(0, 0, 0, 0.4); /* uguale al timer-container */
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
 }
+
 
 /* Header del pannello componenti */
 .panel-header {
@@ -325,7 +338,7 @@
 
 /* ScrollPane per i componenti - stesso stile del timer container */
 .components-scroll-pane {
-    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-color: -fx-space-blue-light;
     -fx-background-radius: 8px;
     -fx-border-color: -fx-space-blue;
     -fx-border-radius: 8px;
@@ -334,18 +347,18 @@
 }
 
 .components-scroll-pane .viewport {
-    -fx-background-color: transparent;
+    -fx-background-color: -fx-space-blue-light;
     -fx-background-radius: 8px;
 }
 
 .components-scroll-pane .scroll-bar:vertical {
-    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-color: -fx-space-blue-light;
     -fx-background-radius: 4px;
     -fx-pref-width: 8px;
 }
 
 .components-scroll-pane .scroll-bar:vertical .track {
-    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-color: -fx-space-blue-light;
     -fx-background-radius: 4px;
 }
 

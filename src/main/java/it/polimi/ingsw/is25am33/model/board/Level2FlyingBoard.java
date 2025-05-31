@@ -3,7 +3,6 @@ package it.polimi.ingsw.is25am33.model.board;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
-import java.rmi.RemoteException;
 import java.util.*;
 
 /**
@@ -29,7 +28,7 @@ public class Level2FlyingBoard extends FlyingBoard {
      */
     private final static List<Integer> credits = List.of(12, 9, 6, 3);
 
-    private Iterator<Integer> initialPositionIterator;
+    private final Iterator<Integer> initialPositionIterator;
     private final static List<Integer> initialPositions = List.of(6, 3, 1, 0);
 
     /**
@@ -67,14 +66,18 @@ public class Level2FlyingBoard extends FlyingBoard {
     }
 
     @Override
-    public void insertPlayer(Player player) {
+    public int insertPlayer(Player player) {
 
-        int initialPosition = initialPositionIterator.next();
-        ranking.put(player, initialPosition);
+        synchronized (ranking) {
+            int initialPosition = initialPositionIterator.next();
+            ranking.put(player, initialPosition);
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyRankingUpdate(nicknameToNotify, player.getNickname(), initialPosition);
-        });
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyRankingUpdate(nicknameToNotify, player.getNickname(), initialPosition);
+            });
+
+            return ranking.size();
+        }
 
     }
 

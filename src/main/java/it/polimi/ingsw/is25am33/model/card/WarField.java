@@ -2,19 +2,26 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
 import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
+import it.polimi.ingsw.is25am33.model.card.interfaces.ShotSenderCard;
 import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import javafx.util.Pair;
 
 import java.util.*;
 
-public class WarField extends AdventureCard implements PlayerMover, DoubleCannonActivator, CrewMemberRemover {
+public class WarField extends AdventureCard implements PlayerMover, DoubleCannonActivator, CrewMemberRemover, ShotSenderCard {
 
+    private int cubeMalus;
     private int stepsBack;
     private int crewMalus;
     private List<Shot> shots;
@@ -23,6 +30,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
     private Map<CardState, CardState> categories;
     private Pair<Player, Double> leastResourcedPlayer;
     private Iterator<CardState> phasesIterator;
+    private Iterator<Shot> shotIterator;
 
     public WarField() {
         this.cardName = this.getClass().getSimpleName();
@@ -37,25 +45,31 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
     @Override
     public void play(PlayerChoicesDataStructure playerChoices) {
 
-//        switch (currState) {
-//            case EVALUATE_CANNON_POWER:
-//                this.currPlayerChoseCannonsToActivate(playerChoices.getChosenDoubleCannons().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
-//                break;
-//            case EVALUATE_ENGINE_POWER:
-//                this.currPlayerChoseEnginesToActivate(playerChoices.getChosenDoubleEngines().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
-//                break;
-//            case EVALUATE_CREW_MEMBERS:
-//                this.countCrewMembers();
-//                break;
-//            case REMOVE_CREW_MEMBERS:
-//                this.currPlayerChoseRemovableCrewMembers(playerChoices.getChosenCabins().orElseThrow());
-//                break;
-//            case HANDLE_CUBES_MALUS:
-//                this.currPlayerChose
-//                break;
-//            default:
-//                throw new IllegalStateException("Uknown current state");
-//        }
+        switch (currState) {
+            case EVALUATE_CANNON_POWER:
+                this.currPlayerChoseCannonsToActivate(playerChoices.getChosenDoubleCannons().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
+                break;
+            case EVALUATE_ENGINE_POWER:
+                this.currPlayerChoseEnginesToActivate(playerChoices.getChosenDoubleEngines().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
+                break;
+            case EVALUATE_CREW_MEMBERS:
+                this.countCrewMembers();
+                break;
+            case REMOVE_CREW_MEMBERS:
+                this.currPlayerChoseRemovableCrewMembers(playerChoices.getChosenCabins().orElseThrow());
+                break;
+            case HANDLE_CUBES_MALUS:
+                this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow());
+                break;
+            case THROW_DICES:
+                this.throwDices();
+                break;
+            case DANGEROUS_ATTACK:
+                ((Shot) gameModel.getCurrDangerousObj()).startAttack(playerChoices, this);
+                break;
+            default:
+                throw new IllegalStateException("Unknown current state");
+        }
 
     }
 
@@ -68,6 +82,14 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
                         throw new RuntimeException(e);
                     }
                 }).toList();
+    }
+
+    public int getCubeMalus() {
+        return cubeMalus;
+    }
+
+    public void setCubeMalus(int cubeMalus) {
+        this.cubeMalus = cubeMalus;
     }
 
     public void setCategories(Map<CardState, CardState> categories) {
@@ -110,11 +132,10 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
         this.shots = shots;
     }
 
-    public void initilizePhasesIterator() {
+    public void initilizeCardIterator() {
         phasesIterator = categories.keySet().iterator();
+        shotIterator = shots.iterator();
     }
-
-    // TODO completare la classe
 
     private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
 
@@ -171,25 +192,133 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
     private void handleMalus() {
 
-        if (categories.get(currState) == CardState.STEPS_BACK)
+        if (categories.get(currState) == CardState.STEPS_BACK) {
             movePlayer(gameModel.getFlyingBoard(), leastResourcedPlayer.getKey(), stepsBack);
-        else
-            setCurrState(categories.get(currState) );
+            if (phasesIterator.hasNext()) {
+                setCurrState(phasesIterator.next());
+                gameModel.resetPlayerIterator();
+            } else {
+                setCurrState(CardState.END_OF_CARD);
+            }
+        } else {
+            if (categories.get(currState) == CardState.DANGEROUS_ATTACK)
+                setCurrState(CardState.THROW_DICES);
+            else
+                setCurrState(categories.get(currState));
+            gameModel.setCurrPlayer(leastResourcedPlayer.getKey());
+        }
 
     }
-
-
-
 
     private void currPlayerChoseRemovableCrewMembers(List<Cabin> chosenCabins) throws IllegalArgumentException {
 
         removeMemberProcess(chosenCabins, crewMalus);
 
-        if (phasesIterator.hasNext())
+        if (phasesIterator.hasNext()) {
             setCurrState(phasesIterator.next());
-        else
+            gameModel.resetPlayerIterator();
+        } else
             setCurrState(CardState.END_OF_CARD);
 
+    }
+
+    private void throwDices() {
+
+        if (shotIterator == null) shotIterator = shots.iterator();
+
+        Shot currShot = shotIterator.next();
+        currShot.setCoordinates(GameModel.throwDices());
+        gameModel.setCurrDangerousObj(currShot);
+        setCurrState(CardState.DANGEROUS_ATTACK);
+
+    }
+
+    private void currPlayerChoseStorageToRemove(List<Storage> chosenStorage) {
+
+        if (chosenStorage.size() != cubeMalus)
+            throw new IllegalArgumentException("Incorrect number of storages");
+
+        chosenStorage.stream().distinct().forEach(storage -> {
+            if (Collections.frequency(chosenStorage, storage) > storage.getMaxCapacity() - storage.getStockedCubes().size())
+                throw new IllegalArgumentException("The number of required storages is not enough");
+        });
+
+        chosenStorage.forEach(storage -> {
+            List<CargoCube> sortedStorage = storage.getStockedCubes();
+            sortedStorage.sort(CargoCube.byValue);
+            CargoCube lessValuableCargoCube = sortedStorage.getFirst();
+            storage.removeCube(lessValuableCargoCube);
+        });
+
+        if (phasesIterator.hasNext()) {
+            gameModel.resetPlayerIterator();
+            setCurrState(phasesIterator.next());
+        } else {
+            setCurrState(CardState.END_OF_CARD);
+        }
+
+    }
+
+    @Override
+    public void playerDecidedHowToDefendTheirSelvesFromSmallShot(Shield chosenShield, BatteryBox chosenBatteryBox) {
+
+        ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
+
+        DangerousObj currShot = gameModel.getCurrDangerousObj();
+
+        if (personalBoard.isItGoingToHitTheShip(currShot)) {
+
+            if (chosenShield != null && chosenBatteryBox != null) {
+
+                if (chosenBatteryBox.getRemainingBatteries() == 0)
+                    throw new IllegalStateException("Not enough batteries");
+                if (chosenShield.getDirections().stream().anyMatch(d -> d == currShot.getDirection()))
+                    throw new IllegalArgumentException("Not correct direction");
+
+                chosenBatteryBox.useBattery();
+
+            } else {
+                personalBoard.handleDangerousObject(currShot);
+            }
+        }
+
+        if (shotIterator.hasNext()) {
+            gameModel.setCurrDangerousObj(shotIterator.next());
+        } else if (phasesIterator.hasNext()) {
+            setCurrState(phasesIterator.next());
+            gameModel.resetPlayerIterator();
+        } else {
+            setCurrState(CardState.END_OF_CARD);
+        }
+
+    }
+
+    @Override
+    public void playerIsAttackedByABigShot() {
+
+        ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
+
+        DangerousObj currShot = gameModel.getCurrDangerousObj();
+
+        if (!personalBoard.isItGoingToHitTheShip(currShot)) {
+            personalBoard.handleDangerousObject(currShot);
+        }
+
+        if (shotIterator.hasNext()) {
+            gameModel.setCurrDangerousObj(shotIterator.next());
+        } else if (phasesIterator.hasNext()) {
+            setCurrState(phasesIterator.next());
+            gameModel.resetPlayerIterator();
+        } else {
+            setCurrState(CardState.END_OF_CARD);
+        }
+
+    }
+
+    // TODO
+    @Override
+    public String toString() {
+        return "WarField";
     }
 
 

@@ -4,7 +4,6 @@ import it.polimi.ingsw.is25am33.model.board.Coordinates;
 
 import java.io.IOException;
 import java.rmi.Remote;
-import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +19,7 @@ public interface CallableOnGameController extends Remote {
 
     void playerWantsToReleaseFocusedComponent(String nickname) throws IOException;
 
-    void playerChoseToEndBuildShipBoardPhase(String nickname) throws IOException;
+    void playerEndsBuildShipBoardPhase(String nickname) throws IOException;
 
     void playerPicksVisibleComponent(String nickname, Integer choice) throws IOException;
 
@@ -44,7 +43,7 @@ public interface CallableOnGameController extends Remote {
 
     void playerHandleBigShot(String nickname) throws IOException;
 
-    void playerChoseStorage(String nickname, Coordinates storageCoords) throws IOException;
+    void playerChoseStorage(String nickname, List<Coordinates> storageCoords) throws IOException;
 
     void spreadEpidemic(String nickname) throws IOException;
 
@@ -58,11 +57,13 @@ public interface CallableOnGameController extends Remote {
 
     void notifyHourglassEnded(String nickname) throws IOException;
 
-    void leaveGame(String nickname) throws IOException;
+    void leaveGameAfterCreation( String nickname, Boolean isFirst) throws IOException;
 
     void playerWantsToRemoveComponent(String nickname, Coordinates coordinate) throws IOException;
 
     void playerChoseShipPart(String nickname, Set<Coordinates> shipPart) throws IOException;
 
     void playerWantsToFocusReservedComponent(String nickname, int choice) throws IOException;
+
+    void playerPlacePlaceholder(String nickname) throws IOException;
 }

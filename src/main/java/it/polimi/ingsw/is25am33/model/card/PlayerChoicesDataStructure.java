@@ -19,7 +19,7 @@ public class PlayerChoicesDataStructure {
     private final int chosenPlanetIndex;
     private final boolean wantsToVisit;
     private final List<Cabin> chosenCabins;
-    private final Storage chosenStorage;
+    private final List<Storage> chosenStorage;
     private final boolean hasAcceptedTheReward;
     private final Shield chosenShield;
     private final BatteryBox chosenBatteryBox;
@@ -90,7 +90,7 @@ public class PlayerChoicesDataStructure {
      *
      * @return an {@link Optional} containing the chosen {@link Storage} component, or empty if not set.
      */
-    public Optional<Storage> getChosenStorage() {
+    public Optional<List<Storage>> getChosenStorage() {
         return Optional.ofNullable(chosenStorage);
     }
 
@@ -149,7 +149,7 @@ public class PlayerChoicesDataStructure {
         private int chosenPlanetIndex;
         private boolean wantsToVisit;
         private List<Cabin> chosenCabins;
-        private Storage chosenStorage;
+        private List<Storage> chosenStorage;
         private boolean hasAcceptedTheReward;
         private Shield chosenShield;
         private BatteryBox chosenBatteryBox;
@@ -217,7 +217,7 @@ public class PlayerChoicesDataStructure {
          * @param chosenStorage the chosen {@link Storage} component.
          * @return this builder instance for method chaining.
          */
-        public Builder setChosenStorage(Storage chosenStorage) {
+        public Builder setChosenStorage(List<Storage> chosenStorage) {
             this.chosenStorage = chosenStorage;
             return this;
         }

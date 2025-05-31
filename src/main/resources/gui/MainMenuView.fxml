@@ -68,5 +68,10 @@
             <Label style="-fx-text-fill: white; -fx-font-size: 20px;" text="You’re in! Waiting for others to start the adventure!" />
         </VBox>
 
+        <!-- Join Other Players Screen -->
+        <VBox fx:id="joinOtherPlayersScreen" alignment="CENTER" spacing="20" visible="false" managed="false">
+            <Label style="-fx-text-fill: white; -fx-font-size: 20px;" text="You’re in! Waiting for others to start the adventure!" />
+        </VBox>
+
     </StackPane>
 </AnchorPane>

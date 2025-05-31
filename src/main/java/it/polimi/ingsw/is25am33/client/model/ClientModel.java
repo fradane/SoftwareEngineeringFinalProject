@@ -30,9 +30,9 @@ public class ClientModel {
         this.modelFxAdapter = modelFxAdapter;
     }
 
-    public void refreshShipBoard() {
+    public void refreshShipBoardOf(String nickname) {
         if (modelFxAdapter != null)
-            modelFxAdapter.refreshShipBoard();
+            modelFxAdapter.refreshShipBoardOf(nickname);
     }
 
     public Hourglass getHourglass() {
@@ -105,6 +105,20 @@ public class ClientModel {
 
     public ShipBoardClient getMyShipboard() {
         return playerClientData.get(myNickname).getShipBoard();
+    }
+
+    public Map<PlayerColor, Integer> getColorRanking() {
+        Map<PlayerColor, Integer> ranking = new HashMap<>();
+
+        playerClientData.keySet()
+                .stream()
+                .filter(player -> !playerClientData.get(player).isOut())
+                .forEach(nickname -> ranking.put(
+                        playerClientData.get(nickname).getColor(),
+                        playerClientData.get(nickname).getFlyingBoardPosition()
+                ));
+
+        return ranking;
     }
 
     /**
@@ -193,4 +207,8 @@ public class ClientModel {
             modelFxAdapter.refreshVisibleComponents();
     }
 
+    public void refreshRanking() {
+        if (modelFxAdapter != null)
+            modelFxAdapter.refreshRanking();
+    }
 }

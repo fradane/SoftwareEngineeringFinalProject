@@ -18,35 +18,13 @@ public enum CardState {
 
     START_CARD {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            // implementazione specifica
-            return null;
-        }
-
-        @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             // TODO
             return null;
         }
-
     },
 
     CHOOSE_CANNONS {
-        @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) throws IOException {
-            BufferedReader reader = new BufferedReader(new StringReader(json));
-            String doubleCannonLine = reader.readLine();
-            List<Cannon> DoubleCannonsChoice = ServerDeserializer.fromComponentToDoubleCannon(doubleCannonLine, game.getCurrPlayer());
-            String batteryBoxLine = reader.readLine();
-            List<BatteryBox> batteryBoxesChoice = ServerDeserializer.fromComponentToBatteryBox(batteryBoxLine, game.getCurrPlayer());
-
-            return new PlayerChoicesDataStructure
-                    .Builder()
-                    .setChosenDoubleCannons(DoubleCannonsChoice)
-                    .setChosenBatteryBoxes(batteryBoxesChoice)
-                    .build();
-        }
-
         @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             return view.showChooseCannonsMenu();
@@ -55,36 +33,12 @@ public enum CardState {
 
     CHOOSE_ENGINES {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) throws IOException {
-            BufferedReader reader = new BufferedReader(new StringReader(json));
-            String doubleEnginesLine = reader.readLine();
-            List<Engine> doubleEnginesChoice = ServerDeserializer.fromComponentToDoubleEngine(doubleEnginesLine, game.getCurrPlayer());
-            String batteryBoxLine = reader.readLine();
-            List<BatteryBox> batteryBoxesChoice = ServerDeserializer.fromComponentToBatteryBox(batteryBoxLine, game.getCurrPlayer());
-
-            return new PlayerChoicesDataStructure
-                    .Builder()
-                    .setChosenDoubleEngines(doubleEnginesChoice)
-                    .setChosenBatteryBoxes(batteryBoxesChoice)
-                    .build();
-        }
-
-        @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             return view.showChooseEnginesMenu();
         }
     },
 
     REMOVE_CREW_MEMBERS {
-        @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            List<Cabin> cabinsChoice = ServerDeserializer.fromComponentToCabin(json, game.getCurrPlayer());
-            return new PlayerChoicesDataStructure
-                    .Builder()
-                    .setChosenCabins(cabinsChoice)
-                    .build();
-        }
-
         @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view){
             return view.showHandleRemoveCrewMembersMenu();
@@ -93,30 +47,12 @@ public enum CardState {
 
     HANDLE_CUBES_REWARD {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json)  {
-            Storage storageChoice = ServerDeserializer.deserializeObj(json, Storage.class);
-            return new PlayerChoicesDataStructure
-                    .Builder()
-                    .setChosenStorage(storageChoice)
-                    .build();
-        }
-
-        @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             return view.showHandleCubesRewardMenu();
         }
     },
 
     HANDLE_CUBES_MALUS {
-        @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            Storage storageChoice = ServerDeserializer.deserializeObj(json, Storage.class);
-            return new PlayerChoicesDataStructure
-                    .Builder()
-                    .setChosenStorage(storageChoice)
-                    .build();
-        }
-
         @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             // TODO
@@ -126,15 +62,6 @@ public enum CardState {
 
     CHOOSE_PLANET {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            int playerChoice = ServerDeserializer.deserializeObj(json, Integer.class);
-            return new PlayerChoicesDataStructure
-                    .Builder()
-                    .setChosenPlanetIndex(playerChoice)
-                    .build();
-        }
-
-        @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             return view.showChoosePlanetMenu();
         }
@@ -142,36 +69,12 @@ public enum CardState {
 
     VISIT_LOCATION {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            boolean playerChoice = ServerDeserializer.deserializeObj(json, Boolean.class);
-            return new PlayerChoicesDataStructure
-                    .Builder()
-                    .setWantsToVisit(playerChoice)
-                    .build();
-        }
-
-        @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             return view.showVisitLocationMenu();
         }
     },
 
     DANGEROUS_ATTACK {
-        @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) throws IOException {
-            BufferedReader reader = new BufferedReader(new StringReader(json));
-            String doubleEnginesLine = reader.readLine();
-            Shield shieldChoice = ServerDeserializer.deserializeObj(doubleEnginesLine, Shield.class);
-            String batteryBoxLine = reader.readLine();
-            List<BatteryBox> batteryBoxesChoice = ServerDeserializer.fromComponentToBatteryBox(batteryBoxLine, game.getCurrPlayer());
-
-            return new PlayerChoicesDataStructure
-                    .Builder()
-                    .setChosenShield(shieldChoice)
-                    .setChosenBatteryBoxes(batteryBoxesChoice)
-                    .build();
-        }
-
         @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             DangerousObj currDangerousObject = view.getClientModel().getCurrDangerousObj();
@@ -181,11 +84,6 @@ public enum CardState {
 
     THROW_DICES {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            return null;
-        }
-
-        @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             return view.showThrowDicesMenu();
         }
@@ -193,19 +91,11 @@ public enum CardState {
 
     EPIDEMIC {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            return null;
-        }
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view){
             return view.showEpidemicMenu();
         }
     },
     STARDUST {
-        @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            return null;
-        }
-
         @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             return view.showStardustMenu();
@@ -214,26 +104,12 @@ public enum CardState {
 
     ACCEPT_THE_REWARD {
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            boolean playerChoice = ServerDeserializer.deserializeObj(json, Boolean.class);
-            return new PlayerChoicesDataStructure
-                    .Builder()
-                    .setHasAcceptedTheReward(playerChoice)
-                    .build();
-        }
-
-        @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             return view.showAcceptTheRewardMenu();
         }
     },
 
     EVALUATE_CREW_MEMBERS{
-        @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            return null;
-        }
-
         @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             // TODO
@@ -242,33 +118,21 @@ public enum CardState {
     },
     EVALUATE_CANNON_POWER{
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            return null;
-        }
-
-        @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             // TODO
             return null;
         }
     },
+
     EVALUATE_ENGINE_POWER{
         @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            return null;
-        }
-
-        @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
             // TODO
             return null;
         }
     },
+
     STEPS_BACK{
-        @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            return null;
-        }
 
         @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
@@ -278,10 +142,6 @@ public enum CardState {
     },
 
     END_OF_CARD {
-        @Override
-        public PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) {
-            return null;
-        }
 
         @Override
         public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
@@ -290,8 +150,7 @@ public enum CardState {
         }
     };
 
-    public abstract PlayerChoicesDataStructure handleJsonDeserialization(GameModel game, String json) throws IOException;
-
     public abstract BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view);
 
+    //TODO setProperty
 }

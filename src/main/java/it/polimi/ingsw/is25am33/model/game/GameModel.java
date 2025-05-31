@@ -1,6 +1,5 @@
 package it.polimi.ingsw.is25am33.model.game;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.board.*;
@@ -34,7 +33,7 @@ public class GameModel {
     private GameState currGameState;
     private final Deck deck;
     private final ComponentTable componentTable;
-    private GameContext gameContext;
+    private GameClientNotifier gameClientNotifier;
 
     // attributes useful for hourglass restarting
     private final Object hourglassLock = new Object();
@@ -91,7 +90,7 @@ public class GameModel {
                     }
                 }
 
-                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                         clientController.notifyHourglassRestarted(nicknameToNotify, nickname, flipsLeft);
                 });
 
@@ -114,10 +113,10 @@ public class GameModel {
     }
 
     public void createGameContext(ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
-        this.gameContext = new GameContext(this,clientControllers);
-        deck.setGameContext(gameContext);
-        flyingBoard.setGameContext(gameContext);
-        componentTable.setGameContext(gameContext);
+        this.gameClientNotifier = new GameClientNotifier(this,clientControllers);
+        deck.setGameContext(gameClientNotifier);
+        flyingBoard.setGameContext(gameClientNotifier);
+        componentTable.setGameContext(gameClientNotifier);
     }
 
     public String getGameId() {
@@ -142,9 +141,12 @@ public class GameModel {
 
     public void setCurrGameState(GameState currGameState) {
         synchronized (stateTransitionLock) {
+
+            if (this.currGameState == currGameState) return;
+
             this.currGameState = currGameState;
 
-            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyGameState(nicknameToNotify, currGameState);
             });
 
@@ -152,8 +154,8 @@ public class GameModel {
         }
     }
 
-    public GameContext getGameContext() {
-        return gameContext;
+    public GameClientNotifier getGameContext() {
+        return gameClientNotifier;
     }
 
     public GameState getCurrGameState() {
@@ -176,7 +178,7 @@ public class GameModel {
 
         this.currDangerousObj = dangerousObj;
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyDangerousObjAttack(nicknameToNotify, currDangerousObj);
         });
 
@@ -205,7 +207,7 @@ public class GameModel {
 
         this.currPlayer = player;
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyCurrPlayerChanged(nicknameToNotify, player.getNickname());
         });
 
@@ -231,7 +233,7 @@ public class GameModel {
     public void setCurrAdventureCard(AdventureCard currAdventureCard) {
             this.currAdventureCard = currAdventureCard;
 
-            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyCurrAdventureCard(nicknameToNotify, currAdventureCard.toString());
             });
 
@@ -256,7 +258,7 @@ public class GameModel {
         setCurrRanking(flyingBoard.getCurrentRanking());
         currAdventureCard.setGame(this);
         playerIterator = currRanking.iterator();
-        currPlayer = playerIterator.next();
+        setCurrPlayer(playerIterator.next());
         currAdventureCard.setCurrState(currAdventureCard.getFirstState());
 
     }
@@ -317,10 +319,10 @@ public class GameModel {
     }
 
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController){
-        gameContext.getClientControllers().put(nickname, clientController);
-        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color,gameContext, false) : new Level2ShipBoard(color, gameContext, false);
+        gameClientNotifier.getClientControllers().put(nickname, clientController);
+        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color, gameClientNotifier, false) : new Level2ShipBoard(color, gameClientNotifier, false);
         Player player = new Player(nickname, shipBoard, color);
-        player.setGameContext(gameContext);
+        player.setGameContext(gameClientNotifier);
         players.put(nickname, player);
         shipBoard.setPlayer(player);
     }
@@ -329,6 +331,25 @@ public class GameModel {
         players.remove(nickname);
     }
 
+    /**
+     * Handles the event when the hourglass timer has ended for a game session.
+     * It synchronizes actions across players to ensure appropriate game state transitions.
+     * <p>
+     * This method increments the count of clients that have finished their timers
+     * and performs the following actions:
+     * 1. If flips are still available or a restart is in progress, it notifies all threads waiting on the hourglass.
+     * 2. If no flips are left and no restart is in progress:
+     *      - Sets the restart process flag to true.
+     *      - Waits until all players have finished their timers.
+     *      - Depending on the game state:
+     *          a. Transitions to the CHECK_SHIPBOARD state if all players are ranked.
+     *          b. Notifies players about the first player to enter if not all players are ranked.
+     * <p>
+     * Exceptions are handled for interruptions during waiting, ensuring the thread's interrupted status
+     * is maintained and errors are logged appropriately.
+     * <p>
+     * Thread-safety is ensured using synchronization on the hourglassLock object.
+     */
     public void hourglassEnded() {
 
         synchronized (hourglassLock) {
@@ -349,49 +370,44 @@ public class GameModel {
                     }
                 }
 
-                setCurrGameState(GameState.CHECK_SHIPBOARD);
-
+                if (flyingBoard.getCurrentRanking().size() == maxPlayers)
+                    setCurrGameState(GameState.CHECK_SHIPBOARD);
+                else
+                    gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                        clientController.notifyFirstToEnter(nicknameToNotify);
+                    });
             }
-
         }
     }
 
-    @JsonIgnore
     public Set<ShipBoard> getInvalidShipBoards(){
-        Set<ShipBoard> invalidShipBoards = players.values().stream()
-                .map(player -> player.getPersonalBoard())
-                .filter(shipBoard -> shipBoard.isShipCorrect() == false)
+        return players.values().stream()
+                .map(Player::getPersonalBoard)
+                .filter(shipBoard -> !shipBoard.isShipCorrect())
                 .collect(Collectors.toSet());
-        return invalidShipBoards;
     }
 
-    @JsonIgnore
     public Set<ShipBoard> getValidShipBoards(){
-        Set<ShipBoard> invalidShipBoards = players.values().stream()
-                .map(player -> player.getPersonalBoard())
-                .filter(shipBoard -> shipBoard.isShipCorrect() == true)
+        return players.values().stream()
+                .map(Player::getPersonalBoard)
+                .filter(ShipBoard::isShipCorrect)
                 .collect(Collectors.toSet());
-        return invalidShipBoards;
     }
 
     public void notifyInvalidShipBoards() {
         Set<ShipBoard> invalidShipBoards = getInvalidShipBoards();
         Set<String> playersNicknameToBeNotified = players.values().stream()
                 .filter(player -> invalidShipBoards.contains(player.getPersonalBoard()))
-                .map(player->player.getNickname())
+                .map(Player::getNickname)
                 .collect(Collectors.toSet());
 
-        gameContext.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
-            try {
+        gameClientNotifier.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
                 Player player = players.get(nicknameToNotify);
                 ShipBoard shipBoard = player.getPersonalBoard();
                 Component[][] shipMatrix = shipBoard.getShipMatrix();
                 Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
 
                 clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
         });
     }
 
@@ -399,20 +415,16 @@ public class GameModel {
         Set<ShipBoard> validShipBoards = getValidShipBoards();
         Set<String> playersNicknameToBeNotified = players.values().stream()
                 .filter(player -> validShipBoards.contains(player.getPersonalBoard()))
-                .map(player->player.getNickname())
+                .map(Player::getNickname)
                 .collect(Collectors.toSet());
 
-        gameContext.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
-            try {
+        gameClientNotifier.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
                 Player player = players.get(nicknameToNotify);
                 ShipBoard shipBoard = player.getPersonalBoard();
                 Component[][] shipMatrix = shipBoard.getShipMatrix();
                 Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
 
                 clientController.notifyValidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
         });
     }
 
@@ -423,14 +435,22 @@ public class GameModel {
 
     public void checkAndTransitionToNextPhase() {
 
-        synchronized (stateTransitionLock){
+        synchronized (stateTransitionLock) {
             if (areAllShipsCorrect()) {
                 // Cambia allo stato successivo
                 setCurrGameState(GameState.CREATE_DECK);
             }
         }
     }
-    public void setGameContext(GameContext gameContext) {
-        this.gameContext = gameContext;
+
+    public void setGameContext(GameClientNotifier gameClientNotifier) {
+        this.gameClientNotifier = gameClientNotifier;
     }
+
+    public void notifyStopHourglass() {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyStopHourglass(nicknameToNotify);
+        });
+    }
+
 }
