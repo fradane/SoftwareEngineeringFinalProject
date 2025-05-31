@@ -9,7 +9,7 @@
 <?import java.net.URL?>
 
 
-<BorderPane fx:id="borderPane" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" styleClass="game-background" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController">
+<BorderPane fx:id="borderPane" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" styleClass="game-background" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.BuildAndCheckShipBoardController">
     <stylesheets>
         <URL value="@/galaxy-truckers.css" />
     </stylesheets>

@@ -8,7 +8,7 @@ import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.GuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewController;
-import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController;
+import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.BuildAndCheckShipBoardController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.StartViewController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
@@ -41,7 +41,7 @@ public class ClientGuiController extends Application implements ClientView {
 
     StartViewController startViewController;
     MainMenuViewController mainMenuViewController;
-    ShipBoardViewController shipBoardViewController;
+    BuildAndCheckShipBoardController buildAndCheckShipBoardController;
 
     public static ClientGuiController getInstance() {
         return instance;
@@ -84,7 +84,7 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showPickedComponentAndMenu() {
-        shipBoardViewController.showFocusComponent();
+        buildAndCheckShipBoardController.showFocusComponent();
     }
 
     @Override
@@ -99,8 +99,8 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showInvalidShipBoardMenu() {
-        if (shipBoardViewController != null)
-            shipBoardViewController.showInvalidComponents();
+        if (buildAndCheckShipBoardController != null)
+            buildAndCheckShipBoardController.showInvalidComponents();
     }
 
     @Override
@@ -115,8 +115,8 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {
-        if (shipBoardViewController != null)
-            shipBoardViewController.showShipParts(shipParts);
+        if (buildAndCheckShipBoardController != null)
+            buildAndCheckShipBoardController.showShipParts(shipParts);
     }
 
     @Override
@@ -158,8 +158,8 @@ public class ClientGuiController extends Application implements ClientView {
         switch (clientModel.getGameState()) {
 
             case BUILD_SHIPBOARD:
-                if (shipBoardViewController != null) {
-                    shipBoardViewController.showMessage(message.split("\n")[0]);
+                if (buildAndCheckShipBoardController != null) {
+                    buildAndCheckShipBoardController.showMessage(message.split("\n")[0]);
                 }
 
         }
@@ -274,17 +274,17 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public void showBuildShipBoardMenu() {
 
-        if (shipBoardViewController != null) return;
+        if (buildAndCheckShipBoardController != null) return;
 
         boolean isTestFlight = clientController.getCurrentGameInfo().isTestFlight();
 
-        String fxmlPath =  isTestFlight ? "/gui/Shipboard_1.fxml" : "/gui/Shipboard_2.fxml";
+        String fxmlPath =  isTestFlight ? "/gui/Shipboard_1.fxml" : "/gui/BuildAndCheckShipBoardView.fxml";
 
         javafx.application.Platform.runLater(() -> {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
                 Parent root = loader.load();
-                shipBoardViewController = loader.getController();
+                buildAndCheckShipBoardController = loader.getController();
                 GuiController.setClientModel(clientModel);
                 primaryStage.setScene(new Scene(root));
                 primaryStage.show();
@@ -392,8 +392,8 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void updateTimeLeft(int timeLeft, int flipsLeft) {
-        if (shipBoardViewController != null && shipBoardViewController.getModelFxAdapter() != null)
-            shipBoardViewController.getModelFxAdapter().refreshTimer(timeLeft, flipsLeft);
+        if (buildAndCheckShipBoardController != null && buildAndCheckShipBoardController.getModelFxAdapter() != null)
+            buildAndCheckShipBoardController.getModelFxAdapter().refreshTimer(timeLeft, flipsLeft);
     }
 
     @Override

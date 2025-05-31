@@ -34,6 +34,7 @@ public class MainCabin extends Cabin implements Serializable {
     public MainCabin(Map<Direction, ConnectorType> connectors, PlayerColor color) {
         super(connectors);
         this.color = color;
+        this.type = "MainCabin";
         switch (color) {
             case GREEN:
                 imageName = "GT-new_tiles_16_for_web34.jpg";
