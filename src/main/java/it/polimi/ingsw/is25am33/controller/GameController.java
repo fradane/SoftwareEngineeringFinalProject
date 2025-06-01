@@ -32,7 +32,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     // TODO metodo di debug
     @Override
     public void showMessage(String string) throws RemoteException {
-        System.out.println(string);
+        System.out.println("Show message: " + string);
     }
 
     public GameController(String gameId, int maxPlayers, boolean isTestFlight, DNS dns) throws RemoteException {
@@ -201,7 +201,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         } catch (IllegalArgumentException e) {
             // Notifica l'errore solo al client che ha inviato scelte non valide
             gameModel.getGameContext().notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
-                System.out.println(e.getMessage());
+                System.out.println("ERRORE submitCrewChoices: " + e.getMessage());
                 e.printStackTrace();
                 //TODO capire se ha senso aggiugnere un metodo notifyError per mostrare gli erorri generici
                 //clientController.notifyError(nicknameToNotify, e.getMessage());

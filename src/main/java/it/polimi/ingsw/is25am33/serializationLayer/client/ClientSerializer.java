@@ -15,7 +15,7 @@ public class ClientSerializer {
 
     public static <T> String serialize(T objToSerialize) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            //ObjectMapper mapper = new ObjectMapper();
 
             return mapper.writeValueAsString(objToSerialize);
         } catch (Exception e) {

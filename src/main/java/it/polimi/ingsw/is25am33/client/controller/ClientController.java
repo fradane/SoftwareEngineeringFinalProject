@@ -849,8 +849,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         ClientAbandonedShip shipCard = (ClientAbandonedShip) clientModel.getCurrAdventureCard();
         int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
-        view.showMessage("DEBUG. Total crew: " + totalCrew, NOTIFICATION_CRITICAL);
-        view.showMessage("DEBUG. Crew malus: " + shipCard.getCrewMalus(), NOTIFICATION_CRITICAL);
 
         if (choice==true && totalCrew < shipCard.getCrewMalus()) {
             view.showMessage("You only have " + totalCrew + " crew members. you cannot visit the location", ERROR);

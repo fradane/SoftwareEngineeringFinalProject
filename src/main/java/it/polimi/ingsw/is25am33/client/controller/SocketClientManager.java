@@ -319,10 +319,10 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
                 case "notifyShipBoardUpdate":
                     //TODO da aggiustare mettondo i componentsPerType
-//                    if (clientController != null) {
-//                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix(), );
-//                    }
-//                    break;
+                    if (clientController != null) {
+                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix(), notification.getParamComponentsPerType());
+                    }
+                    break;
 
                 case "notifyPlayerCredits":
                     if (clientController != null) {

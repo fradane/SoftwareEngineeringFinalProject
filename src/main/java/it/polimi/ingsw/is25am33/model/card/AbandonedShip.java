@@ -97,7 +97,6 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
     private void currPlayerWantsToVisit(boolean wantsToVisit) throws IllegalDecisionException {
         try{
             if (wantsToVisit) {
-                System.out.println("\n\n my crew members: " + gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size());
                 if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)
                     //TODO bisogna gestire questo genere di eccezioni, teoricamente già controllate lato client, però boh
                     throw new IllegalDecisionException("Player has not enough crew members");

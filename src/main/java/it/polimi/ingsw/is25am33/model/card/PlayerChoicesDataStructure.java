@@ -165,6 +165,12 @@ public class PlayerChoicesDataStructure implements Serializable {
         return Optional.ofNullable(chosenDoubleCannons);
     }
 
+    // Getter per la serializzazione JSON
+    public List<Coordinates> getCabins() {
+        return chosenCabins;
+    }
+
+
     /**
      * Builder class for constructing instances of {@link PlayerChoicesDataStructure}.
      * This builder allows selective setting of various player choices during gameplay.

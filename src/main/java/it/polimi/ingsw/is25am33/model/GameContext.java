@@ -35,7 +35,8 @@ public class GameContext {
                     consumer.accept(nickname, clientController);
                 } catch (IOException  e) {
                     clientsDisconnected.add(nickname);
-                    System.out.println(e.getMessage());
+                    System.out.println("ERRORE notifyAllClients: " + e.getMessage());
+                    e.printStackTrace();
                 }
             });
             futureNicknames.put(future, nickname);
@@ -44,7 +45,7 @@ public class GameContext {
         futureNicknames.forEach((future, nickname) -> {
             try {
                 //TODO reimplstare a 5 secondi
-                future.get(10000, TimeUnit.SECONDS);
+                future.get(5, TimeUnit.SECONDS);
             } catch (TimeoutException | InterruptedException | ExecutionException e) {
                 System.err.println("TIMEOUT: Client " + nickname + " non risponde dopo 5 secondi");
                 future.cancel(true); // Importante: cancella il task

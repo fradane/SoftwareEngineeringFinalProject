@@ -49,7 +49,8 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         try {
             serverSocket = new ServerSocket(port);
         } catch (final IOException e) {
-            System.err.println(e.getMessage());
+            System.err.println("ERROR in socket.run(): " + e.getMessage());
+            e.printStackTrace();
             return;
         }
         System.out.println("[Socket] Server Socket pronto");
@@ -264,6 +265,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
             case "submitCrewChoices":
                 gameControllers.get(nickname).submitCrewChoices(nickname, inMessage.getParamCrewChoices());
+                break;
 
             // TODO debug
             case "showMessage":
@@ -434,7 +436,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrPlayerChanged");
         outMessage.setParamString(nickname);
-        writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
@@ -523,6 +525,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyShipBoardUpdate");
         outMessage.setParamString(nickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
+        outMessage.setParamComponentsPerType(componentsPerType);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
