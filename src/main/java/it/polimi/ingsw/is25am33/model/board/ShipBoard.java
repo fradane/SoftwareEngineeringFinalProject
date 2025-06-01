@@ -46,7 +46,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     /**
      * A map that groups components based on their class (type).
      */
-    protected Map<Class<?>, List<Object>> componentsPerType = new HashMap<>();
+    protected Map<Class<?>, List<Component>> componentsPerType = new HashMap<>();
 
     /**
      * A list of components that are not currently active on the board (either removed or awaiting placement).
@@ -77,7 +77,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         connectors.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.WEST,  ConnectorType.UNIVERSAL);
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
-        shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
+        Cabin mainCabin = new MainCabin(connectors, color);
+        shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = mainCabin;
+        mainCabin.insertInComponentsMap(componentsPerType);
         this.gameContext = gameContext;
     }
 
@@ -674,7 +676,10 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<CrewMember> getCrewMembers() {
-        List<Object> cabins = componentsPerType.getOrDefault(Cabin.class, Collections.emptyList());
+        List<Component> cabins = new ArrayList<>(componentsPerType.getOrDefault(Cabin.class, Collections.emptyList())); // necessario fare la new ArrayList perchè emptyList è immutabile
+
+        if(componentsPerType.get(MainCabin.class)!=null)
+            cabins.addAll(componentsPerType.get(MainCabin.class));
 
         return cabins.stream()
                 .map(Cabin.class::cast)
@@ -690,7 +695,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Cabin> getCabin() {
-        List<Object> cabins = componentsPerType.getOrDefault(Cabin.class, Collections.emptyList());
+        List<Component> cabins = componentsPerType.getOrDefault(Cabin.class, Collections.emptyList());
 
         return cabins.stream()
                 .map(Cabin.class::cast)
@@ -748,7 +753,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<DoubleCannon> getDoubleCannons () {
-        List<Object> cannons = componentsPerType.getOrDefault(DoubleCannon.class, Collections.emptyList());
+        List<Component> cannons = componentsPerType.getOrDefault(DoubleCannon.class, Collections.emptyList());
 
         return cannons.stream()
                 .map(DoubleCannon.class::cast)
@@ -762,7 +767,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Cannon> getSingleCannons () {
-        List<Object> cannons = componentsPerType.getOrDefault(Cannon.class, Collections.emptyList());
+        List<Component> cannons = componentsPerType.getOrDefault(Cannon.class, Collections.emptyList());
 
         return cannons.stream()
                 .map(Cannon.class::cast)
@@ -803,7 +808,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<DoubleEngine> getDoubleEngines () {
-        List<Object> engines = componentsPerType.getOrDefault(DoubleEngine.class, Collections.emptyList());
+        List<Component> engines = componentsPerType.getOrDefault(DoubleEngine.class, Collections.emptyList());
 
         return engines.stream()
                 .map(DoubleEngine.class::cast)
@@ -817,7 +822,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Engine> getSingleEngines () {
-        List<Object> engines = componentsPerType.getOrDefault(Engine.class, Collections.emptyList());
+        List<Component> engines = componentsPerType.getOrDefault(Engine.class, Collections.emptyList());
 
         return engines.stream()
                 .map(Engine.class::cast)
@@ -867,7 +872,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<StandardStorage> getStandardStorages() {
-        List<Object> storages = componentsPerType.getOrDefault(StandardStorage.class, Collections.emptyList());
+        List<Component> storages = componentsPerType.getOrDefault(StandardStorage.class, Collections.emptyList());
 
         return storages.stream()
                 .map(StandardStorage.class::cast)
@@ -881,7 +886,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<SpecialStorage> getSpecialStorages() {
-        List<Object> storages = componentsPerType.getOrDefault(SpecialStorage.class, Collections.emptyList());
+        List<Component> storages = componentsPerType.getOrDefault(SpecialStorage.class, Collections.emptyList());
 
         return storages.stream()
                 .map(SpecialStorage.class::cast)
@@ -905,7 +910,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<BatteryBox> getBatteryBoxes() {
-        List<Object> batteries = componentsPerType.getOrDefault(BatteryBox.class, Collections.emptyList());
+        List<Component> batteries = componentsPerType.getOrDefault(BatteryBox.class, Collections.emptyList());
 
         return batteries.stream()
                 .map(BatteryBox.class::cast)
@@ -919,7 +924,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Shield> getShields() {
-        List<Object> shields = componentsPerType.getOrDefault(Shield.class, Collections.emptyList());
+        List<Component> shields = componentsPerType.getOrDefault(Shield.class, Collections.emptyList());
 
         return shields.stream()
                 .map(Shield.class::cast)
@@ -1127,13 +1132,19 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
     }
 
+    public Map<Class<?>, List<Component>> getComponentsPerType() {
+        return componentsPerType;
+    }
+
+
+
     /**
      * Removes a component from the componentsPerType map
      * @param component The component to remove
      */
     private void removeFromComponentsMap(Component component) {
         Class<?> componentClass = component.getClass();
-        List<Object> componentsList = componentsPerType.get(componentClass);
+        List<Component> componentsList = componentsPerType.get(componentClass);
         if (componentsList != null) {
             componentsList.remove(component);
             // Se la lista diventa vuota, potresti volerla rimuovere dalla mappa
@@ -1143,7 +1154,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
     }
 
-    public void setComponentsPerType(Map<Class<?>, List<Object>> componentsPerType) {
+    public void setComponentsPerType(Map<Class<?>, List<Component>> componentsPerType) {
         this.componentsPerType = componentsPerType;
     }
 
@@ -1190,5 +1201,82 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
 
         return result;
+    }
+
+    /**
+     * Restituisce una mappa di cabine connesse a moduli di supporto vitale.
+     * Le chiavi sono le coordinate delle cabine, i valori sono gli insiemi dei colori di supporto vitale collegati.
+     */
+    @JsonIgnore
+    public Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport() {
+        Map<Coordinates, Set<ColorLifeSupport>> result = new HashMap<>();
+
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                Component component = shipMatrix[i][j];
+
+                // Verifica se è una cabina (non MainCabin)
+                if (component instanceof Cabin && !(component instanceof MainCabin)) {
+                    Set<ColorLifeSupport> supports = getConnectedLifeSupports(i, j);
+
+                    if (!supports.isEmpty()) {
+                        result.put(new Coordinates(i, j), supports);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Trova tutti i moduli di supporto vitale connessi alla posizione specificata.
+     */
+    private Set<ColorLifeSupport> getConnectedLifeSupports(int x, int y) {
+        Set<ColorLifeSupport> result = new HashSet<>();
+
+        for (Direction direction : Direction.values()) {
+            int[] neighbor = getNeighborCoordinates(x, y, direction);
+            int neighborX = neighbor[0];
+            int neighborY = neighbor[1];
+
+            if (isValidPosition(neighborX, neighborY) && shipMatrix[neighborX][neighborY] instanceof LifeSupport) {
+                // Verifica che i connettori combacino
+                ConnectorType srcConnector = shipMatrix[x][y].getConnectors().get(direction);
+                ConnectorType destConnector = shipMatrix[neighborX][neighborY].getConnectors().get(getOppositeDirection(direction));
+
+                if (areConnectorsCompatible(srcConnector, destConnector)) {
+                    LifeSupport lifeSupport = (LifeSupport) shipMatrix[neighborX][neighborY];
+                    result.add(lifeSupport.getLifeSupportColor());
+                }
+            }
+        }
+
+        //System.out.println("\n " + x + " " + y + " " + result);
+
+        return result;
+    }
+
+    /**
+     * Verifica se un alieno può essere posizionato in una cabina in base ai colori di supporto vitale.
+     */
+    public boolean canAcceptAlien(Coordinates coords, CrewMember alien) {
+        Set<ColorLifeSupport> supports = getConnectedLifeSupports(coords.getX(), coords.getY());
+
+        if (supports.isEmpty()) {
+            return false; // Nessun supporto vitale
+        }
+
+        if (alien == CrewMember.PURPLE_ALIEN) {
+            return supports.contains(ColorLifeSupport.PURPLE);
+        } else if (alien == CrewMember.BROWN_ALIEN) {
+            return supports.contains(ColorLifeSupport.BROWN);
+        }
+
+        return false; // Non è un alieno
+    }
+
+    public MainCabin getMainCabin() {
+        return (MainCabin)shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]];
     }
 }

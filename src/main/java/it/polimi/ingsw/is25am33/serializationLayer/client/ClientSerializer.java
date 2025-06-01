@@ -1,9 +1,17 @@
 package it.polimi.ingsw.is25am33.serializationLayer.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+
 
 
 public class ClientSerializer {
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+    static {
+        mapper.registerModule(new Jdk8Module());       // <-- aggiungi
+        // eventuali altri moduli (JavaTimeModule, ecc.)
+    }
 
     public static <T> String serialize(T objToSerialize) {
         try {

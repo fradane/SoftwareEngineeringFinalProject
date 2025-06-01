@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ClientAbandonedShip extends ClientCard implements Serializable {
+public class ClientAbandonedShip extends ClientCard implements Serializable, CrewMalusCard {
     private int crewMalus;
     private int stepsBack;
     private int reward;
@@ -25,6 +25,7 @@ public class ClientAbandonedShip extends ClientCard implements Serializable {
     }
 
     // Getters
+    @Override
     public int getCrewMalus() {
         return crewMalus;
     }
@@ -38,6 +39,7 @@ public class ClientAbandonedShip extends ClientCard implements Serializable {
     }
 
     // Setters
+    @Override
     public void setCrewMalus(int crewMalus) {
         this.crewMalus = crewMalus;
     }

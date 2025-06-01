@@ -46,6 +46,8 @@ public class GameContext {
                 //TODO reimplstare a 5 secondi
                 future.get(10000, TimeUnit.SECONDS);
             } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                System.err.println("TIMEOUT: Client " + nickname + " non risponde dopo 5 secondi");
+                future.cancel(true); // Importante: cancella il task
                 clientsDisconnected.add(nickname);
             }
         });

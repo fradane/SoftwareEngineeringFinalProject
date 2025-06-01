@@ -258,6 +258,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).notifyHourglassEnded(nickname);
                 break;
 
+            case "handleClientChoice":
+                gameControllers.get(nickname).handleClientChoice(nickname, inMessage.getParamChoice());
+                break;
+
+            case "submitCrewChoices":
+                gameControllers.get(nickname).submitCrewChoices(nickname, inMessage.getParamCrewChoices());
+
             // TODO debug
             case "showMessage":
                 String message = inMessage.getParamString();
@@ -333,12 +340,32 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     @Override
     public void notifyCurrAdventureCardUpdate(String nicknameToNotify, ClientCard adventureCard) throws IOException {
-        //TODO
+        SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCardUpdate");
+        outMessage.setParamClientCard(adventureCard);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override
     public void notifyPlayerVisitedPlanet(String nicknameToNotify, String nickname, ClientCard adventureCard) throws IOException {
-        //TODO
+        SocketMessage outMessage = new SocketMessage("server", "notifyPlayerVisitedPlanet");
+        outMessage.setParamString(nickname);
+        outMessage.setParamClientCard(adventureCard);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyCrewPlacementPhase(String nicknameToNotify) throws IOException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyCrewPlacementPhase");
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyCrewPlacementComplete(String nicknameToNotify, String playerNickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyCrewPlacementComplete");
+        outMessage.setParamString(playerNickname);
+        outMessage.setParamShipMatrix(shipMatrix);
+        outMessage.setParamComponentsPerType(componentsPerType);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override
@@ -352,30 +379,33 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException {
+    public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyInvalidShipBoard");
         outMessage.setParamString(shipOwnerNickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
         outMessage.setParamIncorrectlyPositionedCoordinates(incorrectlyPositionedComponentsCoordinates);
+        outMessage.setParamComponentsPerType(componentsPerType);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override
-    public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException {
+    public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyValidShipBoard");
         outMessage.setParamString(shipOwnerNickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
         outMessage.setParamIncorrectlyPositionedCoordinates(incorrectlyPositionedComponentsCoordinates);
+        outMessage.setParamComponentsPerType(componentsPerType);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override
-    public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts) throws RemoteException {
+    public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyShipPartsGeneratedDueToRemoval");
         outMessage.setParamString(shipOwnerNickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
         outMessage.setParamIncorrectlyPositionedCoordinates(incorrectlyPositionedComponentsCoordinates);
         outMessage.setParamShipParts(shipParts);
+        outMessage.setParamComponentsPerType(componentsPerType);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
@@ -410,11 +440,15 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     @Override
     public void notifyCurrAdventureCard(String nickname, ClientCard adventureCard, boolean isFirstTime) throws IOException{
-        //TODO da aggisutare con clientCard
 //        SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCard");
 //        outMessage.setParamString(adventureCard);
 //        writers.get(nickname).println(ServerSerializer.serialize(outMessage));
 //        checkWriterStatus(writers.get(nickname),nickname);
+        SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCard");
+        outMessage.setParamClientCard(adventureCard);
+        outMessage.setParamBoolean(isFirstTime);
+        writers.get(nickname).println(ServerSerializer.serialize(outMessage));
+        checkWriterStatus(writers.get(nickname),nickname);
     }
 
     @Override
@@ -485,7 +519,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Object>> componentsPerType) throws IOException {
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyShipBoardUpdate");
         outMessage.setParamString(nickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);

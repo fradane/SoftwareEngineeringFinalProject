@@ -21,6 +21,8 @@ public enum ClientState {
     CHECK_SHIPBOARD_CHOOSE_SHIP_PART_TO_KEEP,
     CHECK_SHIPBOARD_CORRECT,
     PLACE_PLACEHOLDER,
+    CREW_PLACEMENT_MENU,
+    NO_CREW_TO_PLACE,
 
     // Card-related states - general
     PLAY_CARD,
@@ -28,6 +30,7 @@ public enum ClientState {
 
     // Visit/decision states
     VISIT_LOCATION_MENU,
+    CANNOT_VISIT_LOCATION,
     ACCEPT_REWARD_MENU,
 
     // Component selection states
@@ -55,6 +58,7 @@ public enum ClientState {
     EPIDEMIC_MENU,
     STARDUST_MENU,
     HANDLE_CUBES_REWARD_MENU,
+    CANNOT_ACCEPT_CUBES_REWARDS,
     HANDLE_CUBES_MALUS_MENU;
 
 }

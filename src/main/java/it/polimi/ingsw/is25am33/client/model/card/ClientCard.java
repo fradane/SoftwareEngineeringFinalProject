@@ -1,11 +1,25 @@
 package it.polimi.ingsw.is25am33.client.model.card;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 
 import javax.smartcardio.Card;
 import java.io.Serializable;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "cardType"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = ClientPlanets.class, name = "Planets"),
+        @JsonSubTypes.Type(value = ClientAbandonedShip.class, name = "AbandonedShip"),
+        // Aggiungi tutte le altre sottoclassi di ClientCard
+})
 public abstract class ClientCard implements Serializable{
     protected String cardName;
     protected String imageName;

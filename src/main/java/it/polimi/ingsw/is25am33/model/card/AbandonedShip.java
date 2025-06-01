@@ -2,7 +2,8 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
-import it.polimi.ingsw.is25am33.client.model.card.ClientPlanets;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
@@ -11,7 +12,6 @@ import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 
-import java.rmi.RemoteException;
 import java.util.List;
 
 
@@ -97,6 +97,7 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
     private void currPlayerWantsToVisit(boolean wantsToVisit) throws IllegalDecisionException {
         try{
             if (wantsToVisit) {
+                System.out.println("\n\n my crew members: " + gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size());
                 if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)
                     //TODO bisogna gestire questo genere di eccezioni, teoricamente già controllate lato client, però boh
                     throw new IllegalDecisionException("Player has not enough crew members");
@@ -117,11 +118,24 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
 
     }
 
-    private void currPlayerChoseRemovableCrewMembers(List<Cabin> chosenCabins) throws IllegalArgumentException {
+    private void currPlayerChoseRemovableCrewMembers(List<Coordinates> chosenCabinsCoordinate) throws IllegalArgumentException {
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        //non viene fatto il controllo se sono tutte cabine perchè già fatto lato client
+        List<Cabin> chosenCabins = chosenCabinsCoordinate
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Cabin.class::cast)
+                .toList();
+
 
         removeMemberProcess(chosenCabins, crewMalus);
 
-        chosenCabins.forEach(Cabin::removeMember);
+        String currPlayerNickname = gameModel.getCurrPlayer().getNickname();
+        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currPlayerNickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
+        });
+
+        //chosenCabins.forEach(Cabin::removeMember);
 
         gameModel.getCurrPlayer().addCredits(reward);
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);

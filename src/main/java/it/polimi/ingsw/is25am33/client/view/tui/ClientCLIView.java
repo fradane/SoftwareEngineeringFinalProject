@@ -60,6 +60,8 @@ public class ClientCLIView implements ClientView {
     private Coordinates currentSelection = null;
     private boolean waitingForBatterySelection = false;
     private StorageSelectionManager storageManager = null;
+    private Map<Integer, Coordinates> crewPlacementCoordinatesMap = new HashMap<>();
+    private Map<Coordinates, CrewMember> crewChoices = new HashMap<>();
 
     // Definizione dei colori ANSI (funziona nei terminali che supportano i colori ANSI).
     private static final String ANSI_RED = "\u001B[31m";
@@ -218,10 +220,10 @@ public class ClientCLIView implements ClientView {
                 System.out.println(ANSI_RED + "Error: " + message + ANSI_RESET);
                 break;
             case NOTIFICATION_INFO:
-                System.out.print(ANSI_BLUE + "Info: " + message + ANSI_RESET + "\n> ");
+                System.out.print("\n" + ANSI_BLUE + "Info: " + message + ANSI_RESET + "\n> ");
                 break;
             case NOTIFICATION_CRITICAL:
-                System.out.print(ANSI_YELLOW + "Important: " + message + ANSI_RESET + "\n> ");
+                System.out.print("\n" + ANSI_YELLOW + "Important: " + message + ANSI_RESET + "\n> ");
                 if (waitingForInput) {
                     waitingForInput = false;
                 }
@@ -698,6 +700,9 @@ public class ClientCLIView implements ClientView {
         switch (mappedState) {
             case VISIT_LOCATION_MENU:
                 showVisitLocationMenu();
+                break;
+            case CHOOSE_CABIN_MENU:
+                showHandleRemoveCrewMembersMenu();
                 break;
             case CHOOSE_PLANET_MENU:
                 showChoosePlanetMenu();
@@ -1317,9 +1322,14 @@ public class ClientCLIView implements ClientView {
 
             // Check if player has enough crew
             int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
+            System.out.println("\n\n my crew members: " + totalCrew);
             if (totalCrew < shipCard.getCrewMalus()) {
+                setClientState(ClientState.CANNOT_VISIT_LOCATION);
                 message.append(ANSI_RED + "WARNING: You only have ").append(totalCrew)
                         .append(" crew members. You cannot accept this reward!\n\n"+ANSI_RESET);
+                showMessage(message.toString(), STANDARD);
+                showMessage("Press any key to continue.", ASK);
+                return;
             }
         } else if (card.getCardType().equals("AbandonedStation")) {
             message.append("You've found an abandoned station! If you have enough crew, you can visit to get cargo.\n");
@@ -1489,12 +1499,10 @@ public class ClientCLIView implements ClientView {
         // Show the ship to visualize cabins
         this.showMyShipBoard();
 
-        ClientCard card = clientModel.getCurrAdventureCard();
+        CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
         int crewToRemove = 0;
 
-        if (card instanceof ClientAbandonedShip) {
-            crewToRemove = ((ClientAbandonedShip) card).getCrewMalus();
-        }
+        crewToRemove = card.getCrewMalus();
 
         // Get cabins with crew
         Map<Coordinates, Cabin> cabinsWithCrew = clientModel.getShipboardOf(clientModel.getMyNickname())
@@ -1505,7 +1513,10 @@ public class ClientCLIView implements ClientView {
 
         if (cabinsWithCrew.isEmpty()) {
             cabinInfo.append("You have no occupied cabins. You cannot sacrifice crew members.\n");
-            //TODO trovare un modo per mostrare al server questo errore
+            showMessage(cabinInfo.toString(), STANDARD);
+            showMessage("ILLEGAL STATE: non si dovrebbe mai entrare qui dentro", ERROR);
+            return;
+            //TODO trovare un modo per mostrare al server questo errore, anche se non dovrebbe mai accadere perchè controlli già fatti
         } else {
             for (Map.Entry<Coordinates, Cabin> entry : cabinsWithCrew.entrySet()) {
                 Coordinates coords = entry.getKey();
@@ -1562,10 +1573,8 @@ public class ClientCLIView implements ClientView {
         if (!storageManager.hasAnyStorage()) {
             showMessage("\nNon hai storage disponibili sulla tua nave. Non puoi accettare nessun cubo reward.", NOTIFICATION_CRITICAL);
             showMessage("Il gioco proseguirà con il prossimo giocatore.", STANDARD);
-
-            // Send an empty list to the server to proceed
-            List<Coordinates> emptyList = new ArrayList<>();
-            clientController.playerChoseStorage(clientController.getNickname(), emptyList);
+            showMessage("Press any key to continue.", ASK);
+            setClientState(ClientState.CANNOT_ACCEPT_CUBES_REWARDS);
             return;
         }
 
@@ -2210,6 +2219,144 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void showCrewPlacementMenu() {
+        setClientState(ClientState.CREW_PLACEMENT_MENU);
+
+        // Non resettare mai crewChoices qui, solo crewPlacementCoordinatesMap
+        crewPlacementCoordinatesMap.clear();
+
+        // Ottieni cabine con supporto vitale
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(clientModel.getMyNickname());
+        Map<Coordinates, Set<ColorLifeSupport>> cabinsWithLifeSupport = shipBoard.getCabinsWithLifeSupport();
+
+        // Prepara la mappa dei colori per la visualizzazione
+        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
+        Set<Coordinates> availableCabins = new HashSet<>(cabinsWithLifeSupport.keySet());
+        availableCabins.removeAll(crewChoices.keySet()); // Rimuovi cabine già scelte
+
+        colorMap.put(ANSI_GREEN, availableCabins); // Cabine disponibili
+        colorMap.put(ANSI_BLUE, crewChoices.keySet()); // Cabine già scelte
+
+        // Mostra la nave con le cabine evidenziate
+        this.showShipBoard(shipBoard, clientModel.getMyNickname(), colorMap);
+
+        if (cabinsWithLifeSupport.isEmpty()) {
+            showMessage("\nYou don't have any cabins connected to life support. All cabins will receive humans.", STANDARD);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(NO_CREW_TO_PLACE);
+            //clientController.submitCrewChoices(new HashMap<>());
+            return;
+        }
+
+        // Mostra opzioni
+        StringBuilder menu = new StringBuilder("\n=== CREW PLACEMENT PHASE ===\n");
+        menu.append("Choose where to place your aliens. " + ANSI_YELLOW + "All cabins will receive 2 humans by default." + ANSI_RESET + "\n");
+
+        // Mostra un riepilogo delle scelte attuali
+        if (!crewChoices.isEmpty()) {
+            menu.append("\nYOUR CURRENT CHOICES:\n");
+            for (Map.Entry<Coordinates, CrewMember> entry : crewChoices.entrySet()) {
+                Coordinates coords = entry.getKey();
+                CrewMember crew = entry.getValue();
+
+                menu.append("▶ Cabin at (").append(coords.getX() + 1).append(",").append(coords.getY() + 1).append("): ");
+                menu.append(crew == CrewMember.PURPLE_ALIEN ? ANSI_BLUE + "Purple Alien" + ANSI_RESET
+                        : ANSI_YELLOW + "Brown Alien" + ANSI_RESET).append("\n");
+            }
+            menu.append("\n");
+        }
+
+        // Conta alieni già selezionati
+        boolean purpleSelected = crewChoices.values().stream().anyMatch(c -> c == CrewMember.PURPLE_ALIEN);
+        boolean brownSelected = crewChoices.values().stream().anyMatch(c -> c == CrewMember.BROWN_ALIEN);
+
+        // Informa l'utente sullo stato attuale degli alieni
+        menu.append("Alien status: ");
+        menu.append("Purple: ").append(purpleSelected ? ANSI_RED + "Already selected" + ANSI_RESET : ANSI_GREEN + "Available" + ANSI_RESET);
+        menu.append(" | Brown: ").append(brownSelected ? ANSI_RED + "Already selected" + ANSI_RESET : ANSI_GREEN + "Available" + ANSI_RESET);
+        menu.append("\n\nCabins with life support:\n");
+
+        int index = 1;
+
+        // Itera attraverso tutte le cabine con supporto vitale
+        for (Map.Entry<Coordinates, Set<ColorLifeSupport>> entry : cabinsWithLifeSupport.entrySet()) {
+            Coordinates coords = entry.getKey();
+            Set<ColorLifeSupport> supportedColors = entry.getValue();
+
+            // Aggiungi mapping indice->coordinate
+            crewPlacementCoordinatesMap.put(index, coords);
+
+            // Se questa cabina ha già una scelta, mostrala diversamente
+            if (crewChoices.containsKey(coords)) {
+                CrewMember chosen = crewChoices.get(coords);
+                String alienColor = chosen == CrewMember.PURPLE_ALIEN ? ANSI_BLUE + "Purple Alien" + ANSI_RESET : ANSI_YELLOW + "Brown Alien" + ANSI_RESET;
+
+                menu.append(ANSI_BLUE)
+                        .append(index).append(". Cabin at (").append(coords.getX() + 1)
+                        .append(",").append(coords.getY() + 1).append("): ")
+                        .append(alienColor)
+                        .append(" [Press ").append(index).append(" to remove]")
+                        .append(ANSI_RESET).append("\n");
+            } else {
+                // Cabina senza scelte ancora - non mostra opzione umani
+                menu.append(index).append(". Cabin at (").append(coords.getX() + 1)
+                        .append(",").append(coords.getY() + 1).append("): ");
+
+                if (supportedColors.size() == 1) {
+                    ColorLifeSupport color = supportedColors.iterator().next();
+                    menu.append("Connected to ").append(color).append(" life support\n");
+
+                    // Mostra solo opzioni per alieni disponibili
+                    if (color == ColorLifeSupport.PURPLE) {
+                        if (!purpleSelected) {
+                            menu.append("   - Press ").append(index).append("P for 1 purple alien\n");
+                        } else {
+                            menu.append("   - " + ANSI_RED + "Purple alien already selected" + ANSI_RESET + "\n");
+                        }
+                    } else {
+                        if (!brownSelected) {
+                            menu.append("   - Press ").append(index).append("B for 1 brown alien\n");
+                        } else {
+                            menu.append("   - " + ANSI_RED + "Brown alien already selected" + ANSI_RESET + "\n");
+                        }
+                    }
+                } else if (supportedColors.size() == 2) {
+                    menu.append("Connected to both life support types\n");
+
+                    if (!purpleSelected) {
+                        menu.append("   - Press ").append(index).append("P for 1 purple alien\n");
+                    } else {
+                        menu.append("   - " + ANSI_RED + "Purple alien already selected" + ANSI_RESET + "\n");
+                    }
+
+                    if (!brownSelected) {
+                        menu.append("   - Press ").append(index).append("B for 1 brown alien\n");
+                    } else {
+                        menu.append("   - " + ANSI_RED + "Brown alien already selected" + ANSI_RESET + "\n");
+                    }
+                }
+            }
+
+            index++;
+        }
+
+        // Conto cabine totali vs. cabine con scelte
+        int totalCabins = shipBoard.getCabin().size();
+        int cabinsWithChoices = crewChoices.size();
+        int cabinsWithoutChoices = totalCabins - cabinsWithChoices;
+
+        menu.append("\n" + ANSI_YELLOW + "Summary: " + cabinsWithChoices + " cabin(s) with aliens, "
+                + cabinsWithoutChoices + " cabin(s) will receive humans." + ANSI_RESET + "\n");
+
+        menu.append("\nC. Confirm choices " + ANSI_GREEN + "(all remaining cabins will receive 2 humans)" + ANSI_RESET + "\n");
+        menu.append("R. Reset all choices\n");
+        menu.append("\nEnter your choice: ");
+
+        showMessage(menu.toString(), ASK);
+    }
+
+
+    @Override
     public void notifyTimerEnded(int flipsLeft) {
         if (flipsLeft == 0)
             showMessage("Timer ended! You cannot build your ship anymore.", NOTIFICATION_CRITICAL);
@@ -2503,6 +2650,7 @@ public class ClientCLIView implements ClientView {
     }
 
     private void handleCabinSelection(@NotNull String input) {
+        CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
         try {
             // Check if the user wants to select multiple cabins
             if (input.equalsIgnoreCase("done")) {
@@ -2510,10 +2658,21 @@ public class ClientCLIView implements ClientView {
                 if (selectedCabins.isEmpty()) {
                     showMessage("You must select at least one cabin.", ERROR);
                 } else {
-                    clientController.playerChoseCabins(clientController.getNickname(), selectedCabins);
-                    selectedCabins.clear();
+                    boolean success = clientController.playerChoseCabins(clientController.getNickname(), selectedCabins);
+                    if(success) {
+                        selectedCabins.clear();
+                        return;
+                    }else{
+                        selectedCabins.clear();
+                        showMessage("Invalid choices. Start again with your selection.", ERROR);
+                    }
                 }
             } else {
+                if(card.getCrewMalus() - selectedCabins.size() == 0) {
+                    showMessage("You cannot select more cabin. Please press done: ", ASK);
+                    return;
+                }
+
                 // Parse coordinates
                 String[] parts = input.trim().split("\\s+");
                 if (parts.length != 2) {
@@ -2531,16 +2690,170 @@ public class ClientCLIView implements ClientView {
 
                 if (component instanceof Cabin && ((Cabin)component).hasInhabitants()) {
                     selectedCabins.add(coords);
-                    showMessage("Cabin selected. Enter another cabin or 'done' to confirm.", STANDARD);
+                    //showMessage("Cabin selected. Enter another cabin or 'done' to confirm.", STANDARD);
                 } else {
                     showMessage("No occupied cabin at these coordinates.", ERROR);
                 }
             }
+            if((card.getCrewMalus() - selectedCabins.size()) == 0)
+               showMessage("You have completed your choices, please press done: ", ASK);
+            else
+                showMessage("You still need to remove " + (card.getCrewMalus() - selectedCabins.size()) +" crew member(s). Enter another cabin coordinate: ", ASK);
         } catch (NumberFormatException e) {
             showMessage("Invalid coordinates. Please enter numbers.", ERROR);
         } catch (Exception e) {
             showMessage("Error: " + e.getMessage(), ERROR);
         }
+    }
+
+    private void handleCrewPlacementInput(String input) {
+        if (input.equalsIgnoreCase("C")) {
+            // Conferma le scelte
+            ShipBoardClient shipBoard = clientModel.getShipboardOf(clientModel.getMyNickname());
+            int totalCabins = shipBoard.getCabin().size();
+            int cabinsWithChoices = crewChoices.size();
+
+            // Messaggio di conferma con riepilogo delle scelte
+            StringBuilder confirmMessage = new StringBuilder(ANSI_GREEN + "Crew placement confirmed!" + ANSI_RESET + "\n");
+            confirmMessage.append("• ").append(cabinsWithChoices).append(" cabin(s) will receive aliens\n");
+            confirmMessage.append("• ").append(totalCabins - cabinsWithChoices).append(" cabin(s) will receive humans\n");
+
+            showMessage(confirmMessage.toString(), STANDARD);
+
+            clientController.submitCrewChoices(new HashMap<>(crewChoices));
+            return;
+        }
+
+        if (input.equalsIgnoreCase("R")) {
+            // Reset delle scelte
+            crewChoices.clear();
+            showMessage("All choices have been reset.", STANDARD);
+            showCrewPlacementMenu();
+            return;
+        }
+
+        try {
+            // Verifica se è solo un numero (rimuove l'alieno da cabine già scelte)
+            if (input.matches("\\d+")) {
+                int index = Integer.parseInt(input);
+
+                if (!crewPlacementCoordinatesMap.containsKey(index)) {
+                    showMessage("Invalid cabin index. Please select a number between 1 and " +
+                            crewPlacementCoordinatesMap.size(), ERROR);
+                    return;
+                }
+
+                Coordinates coords = crewPlacementCoordinatesMap.get(index);
+
+                // Verifica se questa cabina ha già una scelta
+                if (crewChoices.containsKey(coords)) {
+                    // Rimuovi semplicemente l'alieno
+                    CrewMember removed = crewChoices.remove(coords);
+                    showMessage("Removed " + (removed == CrewMember.PURPLE_ALIEN ? "purple" : "brown") +
+                            " alien from cabin. It will receive humans instead.", STANDARD);
+                    showCrewPlacementMenu();
+                } else {
+                    showMessage("This cabin doesn't have an alien assigned yet. Use " + index + "P or " + index + "B to assign an alien.", STANDARD);
+                }
+
+                return;
+            }
+
+            // Formato per assegnare direttamente un alieno: [index][P|B]
+            if (input.length() >= 2) {
+                int index = Integer.parseInt(input.substring(0, input.length() - 1));
+                char choice = Character.toUpperCase(input.charAt(input.length() - 1));
+
+                if (!crewPlacementCoordinatesMap.containsKey(index)) {
+                    showMessage("Invalid cabin index. Please select a number between 1 and " +
+                            crewPlacementCoordinatesMap.size(), ERROR);
+                    return;
+                }
+
+                Coordinates coords = crewPlacementCoordinatesMap.get(index);
+                ShipBoardClient shipBoard = clientModel.getShipboardOf(clientModel.getMyNickname());
+                Map<Coordinates, Set<ColorLifeSupport>> cabinsWithLifeSupport = shipBoard.getCabinsWithLifeSupport();
+                Set<ColorLifeSupport> supportedColors = cabinsWithLifeSupport.get(coords);
+
+                // Conta alieni già selezionati (escludendo quelli nella cabina corrente)
+                boolean purpleAlreadySelected = crewChoices.entrySet().stream()
+                        .anyMatch(e -> e.getValue() == CrewMember.PURPLE_ALIEN && !e.getKey().equals(coords));
+
+                boolean brownAlreadySelected = crewChoices.entrySet().stream()
+                        .anyMatch(e -> e.getValue() == CrewMember.BROWN_ALIEN && !e.getKey().equals(coords));
+
+                String feedbackMessage = null;
+
+                switch (choice) {
+                    case 'P':
+                        // Verifica se supporta Purple e se non è già stato selezionato
+                        if (!supportedColors.contains(ColorLifeSupport.PURPLE)) {
+                            showMessage("This cabin is not connected to a purple life support module", ERROR);
+                            return;
+                        }
+
+                        if (purpleAlreadySelected) {
+                            showMessage("You can only have 1 purple alien on your ship", ERROR);
+                            return;
+                        }
+
+                        crewChoices.put(coords, CrewMember.PURPLE_ALIEN);
+                        feedbackMessage = "Cabin will receive 1 purple alien";
+                        break;
+
+                    case 'B':
+                        // Verifica se supporta Brown e se non è già stato selezionato
+                        if (!supportedColors.contains(ColorLifeSupport.BROWN)) {
+                            showMessage("This cabin is not connected to a brown life support module", ERROR);
+                            return;
+                        }
+
+                        if (brownAlreadySelected) {
+                            showMessage("You can only have 1 brown alien on your ship", ERROR);
+                            return;
+                        }
+
+                        crewChoices.put(coords, CrewMember.BROWN_ALIEN);
+                        feedbackMessage = "Cabin will receive 1 brown alien";
+                        break;
+
+                    default:
+                        showMessage("Invalid choice. Use P for purple alien or B for brown alien", ERROR);
+                        return;
+                }
+
+                // Mostra messaggio di feedback e aggiorna il menu
+                if (feedbackMessage != null) {
+                    showMessage(feedbackMessage, STANDARD);
+                }
+
+                // Aggiorna il menu per mostrare lo stato corrente
+                showCrewPlacementMenu();
+            } else {
+                showMessage("Invalid input format. Use [number] to remove an alien, [number]P or [number]B to assign aliens, C to confirm, or R to reset", ERROR);
+            }
+        } catch (NumberFormatException e) {
+            showMessage("Invalid input format. Please enter a valid number.", ERROR);
+        }
+    }
+
+    private void showCurrentCrewChoices() {
+        StringBuilder summary = new StringBuilder("\nCurrent choices:\n");
+
+        if (crewChoices.isEmpty()) {
+            summary.append("All cabins will receive humans\n");
+        } else {
+            for (Map.Entry<Coordinates, CrewMember> entry : crewChoices.entrySet()) {
+                Coordinates coords = entry.getKey();
+                CrewMember crew = entry.getValue();
+
+                summary.append("Cabin at (").append(coords.getX() + 1).append(",").append(coords.getY() + 1).append("): ");
+                summary.append(crew == CrewMember.PURPLE_ALIEN ? "Purple Alien" : "Brown Alien").append("\n");
+            }
+        }
+
+        showMessage(summary.toString(), STANDARD);
+        showCrewPlacementMenu();
     }
 
     public void handleInput(@NotNull String input) {
@@ -2824,6 +3137,14 @@ public class ClientCLIView implements ClientView {
                 case CHECK_SHIPBOARD_CORRECT:
                     break;
 
+                case CREW_PLACEMENT_MENU:
+                    handleCrewPlacementInput(input);
+                    break;
+
+                case NO_CREW_TO_PLACE:
+                    clientController.submitCrewChoices(new HashMap<>());
+                    break;
+
                 case VISIT_LOCATION_MENU:
                     if (input.equalsIgnoreCase("Y") || input.isEmpty()) {
                         clientController.playerWantsToVisitLocation(clientController.getNickname(), true);
@@ -2916,9 +3237,21 @@ public class ClientCLIView implements ClientView {
                     handleStorageSelection(input); // false = reward
                     break;
 
+                case CANNOT_ACCEPT_CUBES_REWARDS:
+                    // Send an empty list to the server to proceed
+                    List<Coordinates> emptyList = new ArrayList<>();
+                    clientController.playerChoseStorage(clientController.getNickname(), emptyList);
+                    break;
+
                 case HANDLE_CUBES_MALUS_MENU:
                     handleStorageSelection(input); // true = malus
                     break;
+
+                case CANNOT_VISIT_LOCATION:
+                    clientController.playerWantsToAcceptTheReward(clientController.getNickname(), false);
+                    break;
+
+
 
 
 

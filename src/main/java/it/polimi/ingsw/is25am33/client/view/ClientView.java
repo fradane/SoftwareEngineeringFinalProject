@@ -215,4 +215,6 @@ public interface ClientView {
     void showFirstToEnter();
 
     void showCurrentRanking();
+
+    void showCrewPlacementMenu();
 }

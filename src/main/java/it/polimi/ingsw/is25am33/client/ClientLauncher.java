@@ -5,9 +5,15 @@ import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
+import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
+import it.polimi.ingsw.is25am33.serializationLayer.client.ClientSerializer;
 
 import java.rmi.RemoteException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClientLauncher {
     public static void main(String[] args) {
@@ -31,6 +37,15 @@ public class ClientLauncher {
                             "║                                                                           ║\n" +
                             "╚═══════════════════════════════════════════════════════════════════════════╝";
         System.out.println(titleScreen);
+
+        SocketMessage message = new SocketMessage();
+        Map<Coordinates, CrewMember> crewMembers = new HashMap<>();
+        crewMembers.put(new Coordinates(2, 1), CrewMember.HUMAN);
+        message.setParamCrewChoices(crewMembers);
+
+        String prova = ClientSerializer.serialize(message);
+        System.out.println(prova);
+
 
         if (args.length != 2) {
             System.err.println("Invalid parameters. Exiting...");

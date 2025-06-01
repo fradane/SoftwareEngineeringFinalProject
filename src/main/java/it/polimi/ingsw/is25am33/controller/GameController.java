@@ -4,9 +4,10 @@ import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
-import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.io.IOException;
@@ -20,7 +21,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.IntStream;
 
 public class GameController extends UnicastRemoteObject implements CallableOnGameController {
     private final GameModel gameModel;
@@ -180,6 +180,94 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
+    public void submitCrewChoices(String nickname, Map<Coordinates, CrewMember> choices) throws IOException {
+        Player player = gameModel.getPlayers().get(nickname);
+        ShipBoard shipBoard = player.getPersonalBoard();
+
+        try {
+            // Validazione delle scelte
+            validateCrewChoices(shipBoard, choices);
+
+            // Applica le scelte
+            applyCrewChoices(shipBoard, choices);
+
+            // Notifica tutti i client
+            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyCrewPlacementComplete(nicknameToNotify, nickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
+            });
+
+            // Segna il giocatore come completato
+            gameModel.markCrewPlacementCompleted(nickname);
+        } catch (IllegalArgumentException e) {
+            // Notifica l'errore solo al client che ha inviato scelte non valide
+            gameModel.getGameContext().notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+                //TODO capire se ha senso aggiugnere un metodo notifyError per mostrare gli erorri generici
+                //clientController.notifyError(nicknameToNotify, e.getMessage());
+            });
+        }
+    }
+
+    private void validateCrewChoices(ShipBoard shipBoard, Map<Coordinates, CrewMember> choices) {
+        if(choices.isEmpty())
+            return;
+
+        // Verifica cabine con supporto vitale
+        Map<Coordinates, Set<ColorLifeSupport>> cabinsWithLifeSupport = shipBoard.getCabinsWithLifeSupport();
+
+        // Verifica coordinate e compatibilità alieno/supporto vitale
+        for (Map.Entry<Coordinates, CrewMember> entry : choices.entrySet()) {
+            Coordinates coords = entry.getKey();
+            CrewMember crew = entry.getValue();
+
+            // Verifica che sia una cabina con supporto vitale
+            if (!cabinsWithLifeSupport.containsKey(coords)) {
+                throw new IllegalArgumentException("Invalid cabin at coordinates " + coords);
+            }
+
+            // Verifica compatibilità
+            if (!shipBoard.canAcceptAlien(coords, crew)) {
+                throw new IllegalArgumentException("This cabin cannot accept this type of alien");
+            }
+        }
+
+        // Verifica massimo 1 alieno per colore
+        long purpleCount = choices.values().stream().filter(c -> c == CrewMember.PURPLE_ALIEN).count();
+        long brownCount = choices.values().stream().filter(c -> c == CrewMember.BROWN_ALIEN).count();
+
+        if (purpleCount > 1) {
+            throw new IllegalArgumentException("You can have at most 1 purple alien");
+        }
+        if (brownCount > 1) {
+            throw new IllegalArgumentException("You can have at most 1 brown alien");
+        }
+    }
+
+    private void applyCrewChoices(ShipBoard shipBoard, Map<Coordinates, CrewMember> choices) {
+        // Applica le scelte per gli alieni
+        for (Map.Entry<Coordinates, CrewMember> entry : choices.entrySet()) {
+            Coordinates coords = entry.getKey();
+            CrewMember crew = entry.getValue();
+
+            Component component = shipBoard.getComponentAt(coords);
+            if (component instanceof Cabin) {
+                Cabin cabin = (Cabin) component;
+                cabin.fillCabin(crew);
+            }
+        }
+
+        // Posiziona automaticamente umani nelle cabine rimanenti
+        for (Cabin cabin : shipBoard.getCabin()) {
+            if (!cabin.hasInhabitants()) {
+                cabin.fillCabin(CrewMember.HUMAN);
+            }
+        }
+
+        shipBoard.getMainCabin().fillCabin(CrewMember.HUMAN);
+    }
+
+    @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) {
         Component chosenComponent = gameModel.getComponentTable().pickVisibleComponent(choice);
         if (chosenComponent == null) return;
@@ -281,20 +369,21 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords) throws RemoteException{
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-
-        List<Cabin> cabins = cabinCoords
-                .stream()
-                .map(shipBoard::getComponentAt)
-                .map(Cabin.class::cast)
-                .toList();
-
-        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
-                .Builder()
-                .setChosenCabins(cabins)
-                .build();
-
-        gameModel.getCurrAdventureCard().play(playerChoice);
+        //TODO probabilmente da eliminare
+//        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+//
+//        List<Cabin> cabins = cabinCoords
+//                .stream()
+//                .map(shipBoard::getComponentAt)
+//                .map(Cabin.class::cast)
+//                .toList();
+//
+//        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
+//                .Builder()
+//                .setChosenCabins(cabinsCoords)
+//                .build();
+//
+//        gameModel.getCurrAdventureCard().play(playerChoice);
     }
 
     @Override
@@ -425,18 +514,19 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
             try {
                 Component[][] shipMatrix = shipBoard.getShipMatrix();
+                Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
                 Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
                 if(shipParts.size() == 1){
                     shipBoard.checkShipBoard();
                     if(incorrectlyPositionedComponentsCoordinates.isEmpty()) {
-                        clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                        clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
 
                     }else
-                        clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                        clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
                 }else if(shipParts.isEmpty())
-                    clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                    clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
                 else
-                    clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts);
+                    clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts, componentsPerType);
             } catch (RemoteException e) {
                 System.err.println("Remote Exception");
             }
@@ -497,11 +587,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             gameModel.getGameContext().notifyAllClients( (nicknameToNotify, clientController) -> {
                 try {
                     Component[][] shipMatrix = shipBoard.getShipMatrix();
+                    Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
                     Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
                     if(shipBoard.isShipCorrect())
-                        clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                        clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
                     else
-                        clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                        clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
                 } catch (RemoteException e) {
                     System.err.println("Remote Exception");
                 }
