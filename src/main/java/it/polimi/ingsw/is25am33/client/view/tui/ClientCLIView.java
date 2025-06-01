@@ -2371,8 +2371,9 @@ public class ClientCLIView implements ClientView {
         int cabinsWithChoices = crewChoices.size();
         int cabinsWithoutChoices = totalCabins - cabinsWithChoices;
 
+        // il cabinsWithoutChoices + 1 serve per considerare anche la MainCabin
         menu.append("\n" + ANSI_YELLOW + "Summary: " + cabinsWithChoices + " cabin(s) with aliens, "
-                + cabinsWithoutChoices + " cabin(s) will receive humans." + ANSI_RESET + "\n");
+                + (cabinsWithoutChoices + 1) + " cabin(s) will receive humans." + ANSI_RESET + "\n");
 
         menu.append("\nC. Confirm choices " + ANSI_GREEN + "(all remaining cabins will receive 2 humans)" + ANSI_RESET + "\n");
         menu.append("R. Reset all choices\n");
