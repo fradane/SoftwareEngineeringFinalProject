@@ -441,6 +441,35 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyPrefabShipsAvailable":
+                    if (clientController != null) {
+                        clientController.notifyPrefabShipsAvailable(
+                                nickname,
+                                notification.getParamPrefabShips()
+                        );
+                    }
+                    break;
+
+                case "notifyPlayerSelectedPrefabShip":
+                    if (clientController != null) {
+                        clientController.notifyPlayerSelectedPrefabShip(
+                                nickname,
+                                notification.getParamString(),
+                                notification.getParamPrefabShips().get(0)
+                        );
+                    }
+                    break;
+
+                case "notifyPrefabShipSelectionResult":
+                    if (clientController != null) {
+                        clientController.notifyPrefabShipSelectionResult(
+                                nickname,
+                                notification.getParamBoolean(),
+                                notification.getParamString()
+                        );
+                    }
+                    break;
+
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
@@ -520,6 +549,19 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     public void submitCrewChoices(String nickname, Map<Coordinates, CrewMember> choices) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "submitCrewChoices");
         outMessage.setParamCrewChoices(choices);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void requestPrefabShips(String nickname) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "requestPrefabShips");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void requestSelectPrefabShip(String nickname, String prefabShipId) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "requestSelectPrefabShip");
+        outMessage.setParamString(prefabShipId);
         out.println(ClientSerializer.serialize(outMessage));
     }
 

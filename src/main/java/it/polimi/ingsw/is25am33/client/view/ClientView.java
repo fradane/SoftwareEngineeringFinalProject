@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.client.view;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
@@ -217,4 +218,6 @@ public interface ClientView {
     void showCurrentRanking();
 
     void showCrewPlacementMenu();
+
+    void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips);
 }

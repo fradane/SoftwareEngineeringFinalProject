@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.network.socket;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
@@ -267,6 +268,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).submitCrewChoices(nickname, inMessage.getParamCrewChoices());
                 break;
 
+            case "requestPrefabShips":
+                gameControllers.get(nickname).requestPrefabShips(nickname);
+                break;
+
+            case "requestSelectPrefabShip":
+                gameControllers.get(nickname).requestSelectPrefabShip(nickname, inMessage.getParamString());
+
             // TODO debug
             case "showMessage":
                 String message = inMessage.getParamString();
@@ -367,6 +375,32 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamString(playerNickname);
         outMessage.setParamShipMatrix(shipMatrix);
         outMessage.setParamComponentsPerType(componentsPerType);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException {
+        //TODO
+        SocketMessage outMessage = new SocketMessage("server", "notifyPrefabShipsAvailable");
+        outMessage.setParamPrefabShips(prefabShips);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipInfo) throws IOException {
+        //TODO
+        SocketMessage outMessage = new SocketMessage("server", "notifyPlayerSelectedPrefabShip");
+        outMessage.setParamString(playerNickname);
+        outMessage.setParamPrefabShips(List.of(prefabShipInfo));
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException {
+        //TODO
+        SocketMessage outMessage = new SocketMessage("server", "notifyPrefabShipSelectionResult");
+        outMessage.setParamBoolean(success);
+        outMessage.setParamString(errorMessage);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 

@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.serializationLayer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientPlanets;
 import it.polimi.ingsw.is25am33.model.board.*;
@@ -49,6 +50,7 @@ public class SocketMessage {
     private Map<Coordinates, CrewMember> paramCrewChoices;
     private ClientCard paramClientCard;
     private Component[][] paramShipMatrix;
+    private List<PrefabShipInfo> paramPrefabShips;
 
 //    public SocketMessage(String senderNickname, String actions) {
 //        this.senderNickname = senderNickname;
@@ -103,9 +105,18 @@ public class SocketMessage {
         this.paramCrewChoices = null;
         this.paramClientCard = null;
         this.paramShipMatrix = null;
+        this.paramPrefabShips = null;
     }
 
     public SocketMessage() {
+    }
+
+    public List<PrefabShipInfo> getParamPrefabShips() {
+        return paramPrefabShips;
+    }
+
+    public void setParamPrefabShips(List<PrefabShipInfo> paramPrefabShips) {
+        this.paramPrefabShips = paramPrefabShips;
     }
 
     public Map<Integer, Component> getParamVisibleComponents() {

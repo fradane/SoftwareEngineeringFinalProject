@@ -1,6 +1,8 @@
 package it.polimi.ingsw.is25am33.controller;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipFactory;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
@@ -609,5 +611,89 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerWantsToFocusReservedComponent(String nickname, int choice) throws RemoteException {
         ((Level2ShipBoard) gameModel.getPlayers().get(nickname).getPersonalBoard()).focusReservedComponent(choice);
+    }
+
+    @Override
+    public void requestPrefabShips(String nickname) throws RemoteException {
+        // Recupera la lista delle navi prefabbricate
+        List<PrefabShipInfo> prefabShips = PrefabShipFactory.getAvailablePrefabShips(gameModel.isTestFlight());
+
+        // Notifica il client in modo asincrono
+        gameModel.getGameContext().notifyClients(
+                Set.of(nickname),
+                (nicknameToNotify, clientController) -> {
+                    try {
+                        clientController.notifyPrefabShipsAvailable(nicknameToNotify, prefabShips);
+                    } catch (IOException e) {
+                        System.err.println("Error notifying client about prefab ships: " + e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void requestSelectPrefabShip(String nickname, String prefabShipId) throws RemoteException {
+        try {
+            // Ottieni informazioni sulla nave prefabbricata
+            PrefabShipInfo prefabShipInfo = PrefabShipFactory.getPrefabShipInfo(prefabShipId);
+            if (prefabShipInfo == null) {
+                notifySelectionFailure(nickname, "Invalid prefab ship ID: " + prefabShipId);
+                return;
+            }
+
+            // Verifica se è una nave per test flight
+            if (prefabShipInfo.isForTestFlight() && !gameModel.isTestFlight()) {
+                notifySelectionFailure(nickname, "This prefab ship is only available in test flight mode");
+                return;
+            }
+
+            // Ottieni la shipboard del giocatore
+            ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+
+            // Applica la configurazione prefabbricata
+            boolean success = PrefabShipFactory.applyPrefabShip(shipBoard, prefabShipId);
+            if (!success) {
+                notifySelectionFailure(nickname, "Failed to apply prefab ship configuration");
+                return;
+            }
+
+            // Notifica il client del successo
+            gameModel.getGameContext().notifyClients(
+                    Set.of(nickname),
+                    (nicknameToNotify, clientController) -> {
+                        try {
+                            clientController.notifyPrefabShipSelectionResult(nicknameToNotify, true, null);
+                        } catch (IOException e) {
+                            System.err.println("Error notifying client about selection result: " + e.getMessage());
+                        }
+                    }
+            );
+
+            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyShipBoardUpdate(nicknameToNotify, nickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
+            });
+
+            // Notifica tutti i client della scelta
+            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyPlayerSelectedPrefabShip(nicknameToNotify, nickname, prefabShipInfo);
+            });
+
+            //playerEndsBuildShipBoardPhase(nickname);
+        } catch (Exception e) {
+            notifySelectionFailure(nickname, "Internal error: " + e.getMessage());
+        }
+    }
+
+    private void notifySelectionFailure(String nickname, String errorMessage) {
+        gameModel.getGameContext().notifyClients(
+                Set.of(nickname),
+                (nicknameToNotify, clientController) -> {
+                    try {
+                        clientController.notifyPrefabShipSelectionResult(nicknameToNotify, false, errorMessage);
+                    } catch (IOException e) {
+                        System.err.println("Error notifying client about selection failure: " + e.getMessage());
+                    }
+                }
+        );
     }
 }

@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -86,4 +87,8 @@ public interface CallableOnClientController extends Remote {
     void notifyCrewPlacementPhase(String nicknameToNotify) throws IOException;
 
     void notifyCrewPlacementComplete(String nicknameToNotify, String playerNickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException;
+
+    void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException;
+    void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipName) throws IOException;
+    void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException;
 }

@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
@@ -1133,6 +1134,52 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);
         }catch (IOException e){
             handleRemoteException(e);
+        }
+    }
+
+    public void requestPrefabShipsList() {
+        try {
+            // Richiedi la lista in modo asincrono
+            view.showMessage("Requesting prefabricated ships list...", STANDARD);
+            serverController.requestPrefabShips(nickname);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    @Override
+    public void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException {
+        // Memorizza le navi disponibili nel model
+        clientModel.setAvailablePrefabShips(prefabShips);
+
+        // Mostra il menu con le navi disponibili
+        view.showPrefabShipsMenu(prefabShips);
+    }
+
+    @Override
+    public void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipInfo) throws IOException {
+        if (!playerNickname.equals(nickname)) {
+            view.showMessage(playerNickname + " has selected a prefabricated ship: " + prefabShipInfo.getName(), NOTIFICATION_INFO);
+        }
+    }
+
+    public void selectPrefabShip(String prefabShipId) {
+        try {
+            view.showMessage("Requesting prefab ship selection...", STANDARD);
+            serverController.requestSelectPrefabShip(nickname, prefabShipId);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    @Override
+    public void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException {
+        if (success) {
+            view.showMessage("Prefab ship selected successfully! Waiting for other players...", STANDARD);
+            // Aggiornare lo stato se necessario
+        } else {
+            view.showError("Failed to select prefab ship: " + errorMessage);
+            view.showBuildShipBoardMenu();
         }
     }
 }

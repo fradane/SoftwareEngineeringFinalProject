@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.client.view.tui;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.model.card.*;
@@ -795,6 +796,7 @@ public class ClientCLIView implements ClientView {
                         4. Restart hourglass
                         5. Watch a little deck
                         6. End ship board construction
+                        7. Build a prefabricated ship
                         ("show [nickname]" to watch other's player ship board)
                         >\s""";
         showMessage(menu, ASK);
@@ -1253,6 +1255,30 @@ public class ClientCLIView implements ClientView {
         output.append("> ");
 
         showMessage(output.toString(), ASK);
+    }
+
+    public void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips) {
+        clientState = BUILDING_SHIPBOARD_SELECT_PREFAB;
+
+        StringBuilder menu = new StringBuilder("\nAvailable prefabricated ships:\n");
+
+        for (int i = 0; i < prefabShips.size(); i++) {
+            PrefabShipInfo ship = prefabShips.get(i);
+            menu.append(i + 1).append(". ")
+                    .append(ship.getName())
+                    .append(" - ").append(ship.getDescription());
+
+            if (ship.isForTestFlight()) {
+                menu.append(" (Test Flight only)");
+            }
+
+            menu.append("\n");
+        }
+
+        menu.append("0. Go back to the build menu\n");
+        menu.append("Choose a ship: ");
+
+        showMessage(menu.toString(), ASK);
     }
 
     /**
@@ -2986,8 +3012,44 @@ public class ClientCLIView implements ClientView {
                             clientController.endBuildShipBoardPhase();
                             break;
 
+                        case 7:
+                            clientState = BUILDING_SHIPBOARD_SELECT_PREFAB;
+                            clientController.requestPrefabShipsList();
+                            break;
+
                         default:
                             showMessage("Invalid choice. Please select 1-6.\n> ", ASK);
+                    }
+                    break;
+
+                case BUILDING_SHIPBOARD_SELECT_PREFAB:
+                    try {
+                        int choice = Integer.parseInt(input);
+
+                        if (choice == 0) {
+                            clientState = BUILDING_SHIPBOARD_MENU;
+                            showBuildShipBoardMenu();
+                            break;
+                        }
+
+                        List<PrefabShipInfo> prefabShips = clientModel.getAvailablePrefabShips();
+
+                        if (prefabShips.isEmpty()) {
+                            showMessage("No prefab ships available yet. Please wait or try again.", ERROR);
+                            break;
+                        }
+
+                        if (choice >= 1 && choice <= prefabShips.size()) {
+                            PrefabShipInfo selectedShip = prefabShips.get(choice - 1);
+                            clientController.selectPrefabShip(selectedShip.getId());
+                            //clientState = BUILDING_SHIPBOARD_WAITING;
+                            clientState = BUILDING_SHIPBOARD_MENU;
+                            showBuildShipBoardMenu();
+                        } else {
+                            showMessage("Invalid choice. Please select a number between 0 and " + prefabShips.size(), ERROR);
+                        }
+                    } catch (NumberFormatException e) {
+                        showMessage("Please enter a valid number.", ERROR);
                     }
                     break;
 
