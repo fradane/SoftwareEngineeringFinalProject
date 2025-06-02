@@ -453,4 +453,6 @@ public interface ShipBoardClient {
      */
     Map<Coordinates, Cabin> getCoordinatesAndCabinsWithCrew();
 
+    Map<Class<?>, List<Object>> getComponentsPerType();
+
 }

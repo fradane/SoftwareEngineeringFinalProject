@@ -34,7 +34,7 @@ public class ClientModel {
     }
 
     public void eliminatePlayer(String nickname) {
-        playerClientData.get(nickname).setFlyingBoardPosition(-1);
+        playerClientData.get(nickname).setOut(true);
     }
 
     public void setMyNickname(String myNickname) {
@@ -157,17 +157,6 @@ public class ClientModel {
                 .stream()
                 .filter(player -> playerClientData.get(player).isOut())
                 .collect(Collectors.toSet());
-    }
-
-    public LinkedHashMap<String, PlayerClientData> finalRanking(){
-        return playerClientData.entrySet().stream()
-                .sorted(Map.Entry.<String, PlayerClientData>comparingByValue(Comparator.comparingInt(PlayerClientData::getCredits).reversed()))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1,e2)->e1,
-                        LinkedHashMap::new
-                ));
     }
 
     public void setNickname(String nickname) {

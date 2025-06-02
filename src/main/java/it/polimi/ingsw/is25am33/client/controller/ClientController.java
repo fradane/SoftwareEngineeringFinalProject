@@ -470,12 +470,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         //clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponentsCoordinates().add(component);
     }
 
-    @Override
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Object>> componentsPerType) {
-        clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
-        clientModel.getShipboardOf(nickname).setComponentsPerType(componentsPerType);
-    }
-
     /**
      * Notifies the client that the player called nickname has the focus on a specific component.
      *
@@ -557,7 +551,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.showNewCardState();
 
         //TODO probabilemnte da rimuovere perchè inutile
-        if (!clientModel.isMyTurn() && cardState != CardState.START_CARD && cardState != CardState.END_OF_CARD) {
+        if (!clientModel.isMyTurn() && cardState != CardState.START_CARD && cardState != CardState.END_OF_CARD && cardState != CardState.STARDUST) {
             view.showMessage("Wait for " + clientModel.getCurrentPlayer() + " to make his choice", NOTIFICATION_INFO);
         }
 
@@ -568,18 +562,32 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 //        }
     }
 
+    @Override
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Object>> componentsPerType) throws IOException{
+        clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
+        clientModel.getShipboardOf(nickname).setComponentsPerType(componentsPerType);
+    }
+
     //Insieme di stati che non vanno notificati a meno che tu non sia il player di turno
     private boolean isStateRegardingCurrentPlayerOnly(CardState cardState){
         //TODO capire quali altri stati entrano in questa categoria e aggiungerli sotto. Probabilmente da togliere perchè tutti gli stati sono RegardingCurrentPlayerOnly
         return cardState == CardState.HANDLE_CUBES_REWARD
         || cardState == CardState.CHOOSE_PLANET
         || cardState == CardState.VISIT_LOCATION
-        || cardState == CardState.REMOVE_CREW_MEMBERS;
+        || cardState == CardState.REMOVE_CREW_MEMBERS
+        || cardState == CardState.CHOOSE_ENGINES;
+       // || cardState == CardState.STARDUST;
     }
 
     @Override
     public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDecks) {
         clientModel.setLittleVisibleDeck(littleVisibleDecks);
+    }
+
+    @Override
+    public void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Object>> componentsPerType ){
+        ShipBoardClient shipBoardClient = clientModel.getShipboardOf(playerNickname);
+        shipBoardClient.setComponentsPerType(componentsPerType);
     }
 
     @Override
@@ -852,25 +860,18 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords){
         //TODO fare controlli di validità dei valori inseriti
+        if(doubleEnginesCoords.size()!=batteryBoxesCoords.size())
+            throw new IllegalArgumentException("il numero di motori non corrisponde al numero di batterie");
 
-        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
-
-        List<Cannon> cannons = doubleEnginesCoords
-                .stream()
-                .map(shipBoard::getComponentAt)
-                .map(Cannon.class::cast)
-                .toList();
-
-        List<BatteryBox> batteryBoxes = batteryBoxesCoords
-                .stream()
-                .map(shipBoard::getComponentAt)
-                .map(BatteryBox.class::cast)
-                .toList();
+        if(!clientModel.isMyTurn()) {
+            view.showMessage("This is not your turn, please wait for others to chose ...", ERROR);
+            return;
+        }
 
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenDoubleCannons(cannons)
-                .setChosenBatteryBoxes(batteryBoxes)
+                .setChosenDoubleEngines(doubleEnginesCoords)
+                .setChosenBatteryBoxes(batteryBoxesCoords)
                 .build();
 
         try{
@@ -898,7 +899,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
                 .setChosenDoubleCannons(cannons)
-                .setChosenBatteryBoxes(batteryBoxes)
+                .setChosenBatteryBoxes(batteryBoxesCoords)
                 .build();
 
         try{
@@ -1081,12 +1082,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void stardustEvent(String nickname){
-        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
-                .Builder()
-                .build();
-
         try{
-            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+            serverController.stardustEvent(nickname);
         }catch (IOException e){
             handleRemoteException(e);
         }

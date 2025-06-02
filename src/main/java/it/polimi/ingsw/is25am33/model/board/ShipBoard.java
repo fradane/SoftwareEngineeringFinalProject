@@ -91,6 +91,12 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
     }
 
+    public Map<Class<?>, List<Object>> getComponentsPerType() {
+        synchronized (componentsPerType) {
+            return componentsPerType;
+        }
+    }
+
     public Component getFocusedComponent() {
         return focusedComponent;
     }
@@ -282,14 +288,18 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 //    }
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
         synchronized (shipMatrix) {
-          checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
 
+          checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
             shipMatrix[x][y] = focusedComponent;
 
             focusedComponent.insertInComponentsMap(componentsPerType);
 
                 gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                         clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+                });
+
+                gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyComponentPerType(nicknameToNotify,player.getNickname(),componentsPerType);
                 });
 
             focusedComponent = null;
@@ -846,12 +856,13 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @return The total engine power.
      */
     public int countTotalEnginePower(List<Engine> enginesToCountEnginePower) {
-        Stream<Engine> singleEngines = enginesToCountEnginePower.stream().filter(engine -> !(engine instanceof DoubleEngine));
-        Stream<DoubleEngine> doubleEngines = enginesToCountEnginePower.stream().filter(engine -> engine instanceof DoubleEngine).map(engine -> (DoubleEngine) engine);
-
-        int totalEnginePower = (int) (singleEngines.count() + 2 * doubleEngines.count());
-
-        return totalEnginePower;
+            return enginesToCountEnginePower.size()*2+getSingleEngines().size();
+//        Stream<Engine> singleEngines = getSingleEngines().stream().filter(engine -> !(engine instanceof DoubleEngine));
+//        Stream<DoubleEngine> doubleEngines = enginesToCountEnginePower.stream().filter(engine -> engine instanceof DoubleEngine).map(engine -> (DoubleEngine) engine);
+//
+//        int totalEnginePower = (int) (singleEngines.count() + 2 * doubleEngines.count());
+//
+//        return totalEnginePower;
     }
 
     /**

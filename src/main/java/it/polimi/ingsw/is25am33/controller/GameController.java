@@ -250,8 +250,8 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenDoubleEngines(engines)
-                .setChosenBatteryBoxes(batteryBoxes)
+                .setChosenDoubleEngines(doubleEnginesCoords)
+                .setChosenBatteryBoxes(batteryBoxesCoords)
                 .build();
 
         gameModel.getCurrAdventureCard().play(playerChoice);
@@ -278,7 +278,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
                 .Builder()
                 .setChosenDoubleCannons(cannons)
-                .setChosenBatteryBoxes(batteryBoxes)
+                .setChosenBatteryBoxes(batteryBoxesCoords)
                 .build();
 
         gameModel.getCurrAdventureCard().play(playerChoice);

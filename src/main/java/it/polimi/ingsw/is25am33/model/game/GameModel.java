@@ -214,7 +214,6 @@ public class GameModel {
                 clientController.notifyCurrPlayerChanged(nicknameToNotify, player.getNickname());
         });
 
-
     }
 
     public void nextPlayer() {

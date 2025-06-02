@@ -9,10 +9,7 @@ import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.Planet;
-import it.polimi.ingsw.is25am33.model.component.Cabin;
-import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
-import it.polimi.ingsw.is25am33.model.component.Storage;
+import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -525,15 +522,15 @@ public class ClientCLIView implements ClientView {
 //            case "MeteoriteStorm":
 //                displayMeteoriteStormInfo((ClientMeteoriteStorm) card, output);
 //                break;
-//            case "FreeSpace":
-//                displayFreeSpaceInfo((ClientFreeSpace) card, output);
-//                break;
+            case "FreeSpace":
+                displayFreeSpaceInfo((ClientFreeSpace) card, output);
+               break;
 //            case "Epidemic":
 //                displayEpidemicInfo((ClientEpidemic) card, output);
 //                break;
-//            case "Stardust":
-//                displayStardustInfo((ClientStardust) card, output);
-//                break;
+            case "StarDust":
+                displayStardustInfo((ClientStarDust) card, output);
+                break;
 //            case "WarField":
 //                displayWarFieldInfo((ClientWarField) card, output);
 //                break;
@@ -631,20 +628,19 @@ public class ClientCLIView implements ClientView {
 //        }
 //    }
 
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayFreeSpaceInfo(ClientFreeSpace freeSpace, StringBuilder output) {
-//        output.append("Free movement through space using engines\n");
-//    }
+    private void displayFreeSpaceInfo(ClientFreeSpace freeSpace, StringBuilder output) {
+        output.append("Free movement through space using engines\n");
+    }
 
     //TODO uncommentare quando si inizia ad implementare questa carta
 //    private void displayEpidemicInfo(ClientEpidemic epidemic, StringBuilder output) {
 //        output.append("Epidemic spreading! Crew in adjacent cabins will be affected.\n");
 //    }
 
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayStardustInfo(ClientStardust stardust, StringBuilder output) {
-//        output.append("Stardust field! Ships will move back based on exposed connectors.\n");
-//    }
+
+    private void displayStardustInfo(ClientStarDust stardust, StringBuilder output) {
+        output.append("Stardust field! Ships will move back based on exposed connectors.\n");
+    }
 
     //TODO uncommentare quando si inizia ad implementare questa carta
 //    private void displayWarFieldInfo(ClientWarField warField, StringBuilder output) {
@@ -1376,7 +1372,6 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showChooseEnginesMenu() {
-        setClientState(ClientState.CHOOSE_ENGINES_MENU);
 
         // Reset the selection state
         selectedEngines.clear();
@@ -1384,7 +1379,40 @@ public class ClientCLIView implements ClientView {
 
         // Show ship to visualize engines
         this.showMyShipBoard();
+        if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleEngines().isEmpty() ) {
+            showMessage("No double engines available.", STANDARD);
+            showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i motori singoli", STANDARD);
+            showMessage("ATTENZIONE! se la tua shipBoard non ha potenza motrice sarai elimato!", ERROR);
+            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
+            return;
+        }
 
+        if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
+            showMessage("No battery boxes available so you can't activate double engine.", STANDARD);
+            showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i motori singoli", STANDARD);
+            showMessage("ATTENZIONE! se la tua shipBoard non ha potenza motrice sarai elimato!", ERROR);
+            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
+            return;
+        }
+        //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
+        Boolean thereIsAvilableBattery = false;
+        List<BatteryBox> batteryBoxes = clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes();
+        for (BatteryBox batteryBox : batteryBoxes) {
+            if (batteryBox.getRemainingBatteries() >=1) {
+                thereIsAvilableBattery = true;
+                break;
+            }
+        }
+
+        if(!thereIsAvilableBattery) {
+            showMessage("Hai finito le batterie coglione so you can't activate double engine.", STANDARD);
+            showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i motori singoli", STANDARD);
+            showMessage("ATTENZIONE! se la tua shipBoard non ha potenza motrice sarai elimato!", ERROR);
+            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
+            return;
+        }
+
+        setClientState(ClientState.CHOOSE_ENGINES_MENU);
         showMessage("\nYou can activate double engines to gain extra movement. " +
                 "Each double engine requires one battery.", STANDARD);
         showMessage("Enter coordinates of a double engine (row column) or 'done' when finished: ", ASK);
@@ -1781,7 +1809,17 @@ public class ClientCLIView implements ClientView {
 
         showMessage("\nStardust has been detected in your flight path!", STANDARD);
         showMessage("Each ship will move back one space for every exposed connector.", STANDARD);
-        showMessage("Press Enter to continue...", ASK);
+
+        int exposedConnector = clientModel.getShipboardOf(clientModel.getMyNickname()).countExposed();
+        if(exposedConnector > 0) {
+            showMessage("You will lose " + exposedConnector + " flight days.", STANDARD);
+        }
+        else
+            showMessage("You will lose no flight days, GOOD JOB ;)", STANDARD);
+
+        if(clientModel.isMyTurn())
+            inputQueue.add("\n");
+//            showMessage("Press Enter to continue...", ASK);
     }
 
     @Override
@@ -2192,10 +2230,11 @@ public class ClientCLIView implements ClientView {
 
         int topScore = clientModel.getPlayerClientData().get(sortedRanking.getFirst()).getFlyingBoardPosition();
 
-        if (topScore == 0) {
-            showMessage("Think about building your ship board, being the leader without a ship board is roughly impossible.\n> ", ASK);
-            return;
-        }
+        //TODO commentato perche avere 0 come punteggio puo verificarsi anche durante il gioco non solo prima della costruzione
+//        if (topScore == 0) {
+//            showMessage("Think about building your ship board, being the leader without a ship board is roughly impossible.\n> ", ASK);
+//            return;
+//        }
 
         for (int i = 0; i < sortedRanking.size(); i++) {
             String player = sortedRanking.get(i);
@@ -2257,16 +2296,22 @@ public class ClientCLIView implements ClientView {
                 return;
             }
 
-            // Passa alla selezione della batteria
+            if(selectedEngines.contains(coords)) {
+                showMessage("Motore già selezionato", ERROR);
+                showMessage("Selezionare un altro motore o 'done' per confermare", ASK);
+                return;
+            }
+
             selectedEngines.add(coords);
-            showMessage("Now select a battery box for this engine (row column): ", ASK);
+            // Passa alla selezione della batteria
+            showMessage("Now select a battery box for this engine (row column) or 'cancel' to cancel the choise", ASK);
             setClientState(ClientState.CHOOSE_ENGINES_SELECT_BATTERY);
         } catch (Exception e) {
             showMessage("Error processing coordinates: " + e.getMessage(), ERROR);
         }
     }
 
-    private void handleBatterySelection(String input){
+    private void handleBatterySelectionForEngines(String input){
         try {
             Coordinates coords = parseCoordinates(input);
             if (coords == null) return;
@@ -2276,6 +2321,32 @@ public class ClientCLIView implements ClientView {
 
             if (component == null || !shipBoard.getBatteryBoxes().contains(component)) {
                 showMessage("No battery box at these coordinates.", ERROR);
+                showMessage("Selezionare un'altra batteria o 'done' per confermare", ASK);
+                return;
+            }
+
+
+            BatteryBox batteryBox = (BatteryBox) component;
+
+            //se quel box non contiene batterie non posso selezionarlo
+            if(batteryBox.getRemainingBatteries()==0){
+                setClientState(CHOOSE_ENGINES_SELECT_BATTERY);
+                showMessage("This batteryBox is empty!", ERROR);
+                showMessage("Please select another one or 'cancel' to cancel the choise", ASK);
+                return;
+            }
+
+            //se hai selezionato gia tutte le batterie presenti in un batteryBox non puoi piu selezionarlo
+            int frequency=0;
+            for(Coordinates selectedBatteryBoxCoords : selectedBatteries){
+                if(selectedBatteryBoxCoords.equals(coords)){
+                    frequency++;
+                }
+            }
+
+            if(batteryBox.getRemainingBatteries()==frequency){
+                showMessage("hai già selezionato gtutte le batterie disponibili in questo batteryBox", ERROR);
+                showMessage("Please select another one or 'cancel' to cancel the choise", ASK);
                 return;
             }
 
@@ -2539,6 +2610,7 @@ public class ClientCLIView implements ClientView {
         } catch (NumberFormatException e) {
             showMessage("Invalid coordinates. Please enter numbers.", ERROR);
         } catch (Exception e) {
+            showMessage("Error processing coordinates: " + e.getMessage(), ERROR);
             showMessage("Error: " + e.getMessage(), ERROR);
         }
     }
@@ -2854,14 +2926,17 @@ public class ClientCLIView implements ClientView {
 
                 case CHOOSE_ENGINES_MENU:
                     if (input.equalsIgnoreCase("done")) {
+
                         if (selectedEngines.isEmpty()) {
-                            showMessage("You didn't select any engines.", ERROR);
-                        } else {
-                            clientController.playerChoseDoubleEngines(
-                                    clientController.getNickname(), selectedEngines, selectedBatteries);
-                            selectedEngines.clear();
-                            selectedBatteries.clear();
+                            showMessage("You didn't select any engine.", STANDARD);
+                            showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i motori singoli", STANDARD);
                         }
+
+                        clientController.playerChoseDoubleEngines(
+                                clientController.getNickname(), selectedEngines, selectedBatteries);
+                        selectedEngines.clear();
+                        selectedBatteries.clear();
+
                     } else {
                         handleEngineSelection(input);
                     }
@@ -2919,7 +2994,23 @@ public class ClientCLIView implements ClientView {
                     handleStorageSelection(input); // true = malus
                     break;
 
-
+                case CHOOSE_CANNONS_MENU:
+                    handleCannonSelection(input);
+                    break;
+                case CHOOSE_CANNONS_SELECT_BATTERY:
+                   // handleBatterySelectionForCannon(input);
+                    break;
+                case CHOOSE_ENGINES_SELECT_BATTERY:
+                    if (input.equalsIgnoreCase("cancel")) {
+                        selectedEngines.removeLast();
+                        showMessage("You canceled the last chosen engine.", STANDARD);
+                        setClientState(CHOOSE_ENGINES_MENU);
+                        showMessage("Please choose an engine or 'done' to confirm.", ASK);
+                    }
+                    else {
+                        handleBatterySelectionForEngines(input);
+                    }
+                    break;
 
                 default:
                     showMessage("", ERROR);

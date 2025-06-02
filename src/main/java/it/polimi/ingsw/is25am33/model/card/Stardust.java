@@ -1,9 +1,11 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientStarDust;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import net.bytebuddy.matcher.StringSetMatcher;
 
 import java.util.List;
@@ -36,8 +38,7 @@ public class Stardust extends AdventureCard implements PlayerMover {
 
     @Override
     public ClientCard toClientCard() {
-        //TODO
-        return null;
+        return new ClientStarDust(cardName,imageName);
     }
 
     @Override
@@ -53,7 +54,10 @@ public class Stardust extends AdventureCard implements PlayerMover {
     private void moveNotCorrectlyAssembledShips() {
 
         gameModel.getCurrRanking()
+                .reversed()
                 .forEach(p -> movePlayer(gameModel.getFlyingBoard(), p, p.getPersonalBoard().countExposed() * -1));
         setCurrState( CardState.END_OF_CARD);
+        gameModel.resetPlayerIterator();
+        gameModel.setCurrGameState(GameState.DRAW_CARD);
     }
 }

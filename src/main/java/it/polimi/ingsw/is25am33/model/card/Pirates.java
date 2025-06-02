@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.interfaces.ShotSenderCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
@@ -100,7 +101,12 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
     }
 
-    private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
+    private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
+
+        List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
+        for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
+            chosenBatteryBoxes.add((BatteryBox) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
+        }
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
 

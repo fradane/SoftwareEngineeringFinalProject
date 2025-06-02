@@ -161,6 +161,19 @@ public class Deck {
 //        allCards.addAll(Deck.loadStardustFromJson());
 //        allCards.addAll(Deck.loadWarFieldFromJson());
 
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+
 
 //        allCards.addAll(Deck.loadPlanetsFromJson());
 //        allCards.addAll(Deck.loadPlanetsFromJson());
@@ -168,13 +181,19 @@ public class Deck {
 //        allCards.addAll(Deck.loadPlanetsFromJson());
 //        allCards.addAll(Deck.loadPlanetsFromJson());
 
+//          allCards.addAll(Deck.loadFreeSpaceFromJson());
+//          allCards.addAll(Deck.loadFreeSpaceFromJson());
+//          allCards.addAll(Deck.loadFreeSpaceFromJson());
+//          allCards.addAll(Deck.loadFreeSpaceFromJson());
+//          allCards.addAll(Deck.loadFreeSpaceFromJson());
 
 
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
+
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
     }
 
     /**

@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.*;
 
 import java.io.Serializable;
@@ -16,8 +17,8 @@ import java.util.Optional;
  */
 public class PlayerChoicesDataStructure implements Serializable {
 
-    private final List<Engine> chosenDoubleEngines;
-    private final List<BatteryBox> chosenBatteryBoxes;
+    private final List<Coordinates> chosenDoubleEngines;
+    private final List<Coordinates> chosenBatteryBoxes;
     private final int chosenPlanetIndex;
     private final boolean wantsToVisit;
     private final List<Cabin> chosenCabins;
@@ -47,7 +48,7 @@ public class PlayerChoicesDataStructure implements Serializable {
      *
      * @return an {@link Optional} containing the list of chosen {@link Engine} components, or empty if not set.
      */
-    public Optional<List<Engine>> getChosenDoubleEngines() {
+    public Optional<List<Coordinates>> getChosenDoubleEngines() {
         return Optional.ofNullable(chosenDoubleEngines);
     }
 
@@ -56,7 +57,7 @@ public class PlayerChoicesDataStructure implements Serializable {
      *
      * @return an {@link Optional} containing the list of chosen {@link BatteryBox} components, or empty if not set.
      */
-    public Optional<List<BatteryBox>> getChosenBatteryBoxes() {
+    public Optional<List<Coordinates>> getChosenBatteryBoxes() {
         return Optional.ofNullable(chosenBatteryBoxes);
     }
 
@@ -146,8 +147,8 @@ public class PlayerChoicesDataStructure implements Serializable {
      * This builder allows selective setting of various player choices during gameplay.
      */
     public static class Builder {
-        private List<Engine> chosenDoubleEngines;
-        private List<BatteryBox> chosenBatteryBoxes;
+        private List<Coordinates> chosenDoubleEngines;
+        private List<Coordinates> chosenBatteryBoxes;
         private int chosenPlanetIndex;
         private boolean wantsToVisit;
         private List<Cabin> chosenCabins;
@@ -163,7 +164,7 @@ public class PlayerChoicesDataStructure implements Serializable {
          * @param chosenDoubleEngines the list of chosen {@link Engine} components.
          * @return this builder instance for method chaining.
          */
-        public Builder setChosenDoubleEngines(List<Engine> chosenDoubleEngines) {
+        public Builder setChosenDoubleEngines(List<Coordinates> chosenDoubleEngines) {
             this.chosenDoubleEngines = chosenDoubleEngines;
             return this;
         }
@@ -174,7 +175,7 @@ public class PlayerChoicesDataStructure implements Serializable {
          * @param chosenBatteryBoxes the list of chosen {@link BatteryBox} components.
          * @return this builder instance for method chaining.
          */
-        public Builder setChosenBatteryBoxes(List<BatteryBox> chosenBatteryBoxes) {
+        public Builder setChosenBatteryBoxes(List<Coordinates> chosenBatteryBoxes) {
             this.chosenBatteryBoxes = chosenBatteryBoxes;
             return this;
         }
@@ -286,8 +287,8 @@ public class PlayerChoicesDataStructure implements Serializable {
          */
         public PlayerChoicesDataStructure build() {
             // Inizializza tutte le liste
-            if (chosenDoubleEngines == null) chosenDoubleEngines = new ArrayList<>();
-            if (chosenBatteryBoxes == null) chosenBatteryBoxes = new ArrayList<>();
+            if (chosenDoubleEngines == null) chosenDoubleEngines = new ArrayList<Coordinates>();
+            if (chosenBatteryBoxes == null) chosenBatteryBoxes = new ArrayList<Coordinates>();
             if (chosenCabins == null) chosenCabins = new ArrayList<>();
             if (chosenStorage == null) chosenStorage = new ArrayList<>();
             if (chosenDoubleCannons == null) chosenDoubleCannons = new ArrayList<>();

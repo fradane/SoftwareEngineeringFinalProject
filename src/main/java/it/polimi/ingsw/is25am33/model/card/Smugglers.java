@@ -2,11 +2,9 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
-import it.polimi.ingsw.is25am33.model.component.BatteryBox;
-import it.polimi.ingsw.is25am33.model.component.Cannon;
-import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
-import it.polimi.ingsw.is25am33.model.component.Storage;
+import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
@@ -69,7 +67,13 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         return null;
     }
 
-    private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
+    private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
+
+        List<BatteryBox> chosenBatteryBoxes = new java.util.ArrayList<>();
+
+        for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
+            chosenBatteryBoxes.add((BatteryBox) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
+        }
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
 

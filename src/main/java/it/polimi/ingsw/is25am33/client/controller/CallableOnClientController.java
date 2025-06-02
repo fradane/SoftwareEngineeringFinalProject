@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -88,4 +89,7 @@ public interface CallableOnClientController extends Remote {
     void pingToClientFromServer(String nickname) throws IOException;
 
     void pongToClientFromServer(String nickname) throws IOException;
+
+    void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Object>> componentsPerType ) throws IOException;
+
 }

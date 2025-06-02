@@ -4,6 +4,7 @@ import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -502,6 +503,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyShipBoardUpdate");
         outMessage.setParamString(nickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
+        outMessage.setParamComponentsPerType(componentsPerType);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
@@ -565,5 +567,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
         //System.out.println("Pong inviato a " + nickname);
     }
+
+    public void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Object>> componentsPerType ){
+        SocketMessage outMessage = new SocketMessage("server", "notifyComponentPerType");
+        outMessage.setParamString(playerNickname);
+        outMessage.setParamComponentsPerType(componentsPerType);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
 }
 

@@ -58,6 +58,7 @@ public enum GameState implements Serializable {
                 gameModel.setCurrGameState(GameState.PLAY_CARD);
             } catch (EmptyStackException e) {
                 //TODO
+                e.printStackTrace();
                 gameModel.setCurrAdventureCard(null);
             }
         }

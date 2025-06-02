@@ -93,7 +93,9 @@ public class GameClientNotifier {
             Future<?> future = executor.submit(() -> {
                 try {
                     consumer.accept(nickname, clientController);
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    System.err.println("Errore nella notifica del client: " + nickname);
+                }
             });
             futureNicknames.put(future, nickname);
         });

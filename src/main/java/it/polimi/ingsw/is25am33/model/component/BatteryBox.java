@@ -63,7 +63,7 @@ public class BatteryBox extends Component{
             |    %s    |
             +---------+
             maxBatteryCapacity: %d
-            """, imageName, north, west, east, south, maxBatteryCapacity);
+            """, imageName, north, west, east, south,maxBatteryCapacity);
     }
 
     /**
@@ -109,7 +109,6 @@ public class BatteryBox extends Component{
             throw new IllegalStateException("empty battery box");
         }
         remainingBatteries--;
-//        notifyObservers(new ComponentEvent(this, "availableBattery", availableBattery ));
     }
 
     @Override

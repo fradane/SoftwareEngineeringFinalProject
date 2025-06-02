@@ -145,6 +145,13 @@ public abstract class Component implements Serializable {
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
     }
 
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Component component = (Component) o;
+        return Objects.equals(imageName, component.imageName);
+    }
+
     @JsonIgnore
     public abstract String getLabel();
 

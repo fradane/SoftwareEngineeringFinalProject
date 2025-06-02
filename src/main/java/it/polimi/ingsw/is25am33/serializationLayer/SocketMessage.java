@@ -13,6 +13,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SocketMessage {
 
@@ -38,6 +39,7 @@ public class SocketMessage {
     private Set<Coordinates> paramIncorrectlyPositionedCoordinates;
     private Set<Set<Coordinates>> paramShipParts;
     private Set<Coordinates> paramShipPart;
+    private Map<Class<?>, List<Object>> paramComponentsPerType;
 
     public SocketMessage(String senderNickname, String actions) {
         this.senderNickname = senderNickname;
@@ -59,6 +61,7 @@ public class SocketMessage {
         this.paramVisibleComponents = new HashMap<>();
         this.paramLittleVisibleDecks = new ArrayList<>();
         this.paramCardState=CardState.START_CARD;
+        this.paramComponentsPerType = new ConcurrentHashMap<>();
     }
 
     public SocketMessage() {
@@ -70,6 +73,14 @@ public class SocketMessage {
 
     public void setParamVisibleComponents(Map<Integer, Component> paramVisibleComponents) {
         this.paramVisibleComponents = paramVisibleComponents;
+    }
+
+    public Map<Class<?>, List<Object>> getParamComponentsPerType() {
+        return paramComponentsPerType;
+    }
+
+    public void setParamComponentsPerType(Map<Class<?>, List<Object>> paramComponentsPerType) {
+        this.paramComponentsPerType = paramComponentsPerType;
     }
 
     public List<Coordinates> getParamActivableCoordinates() {

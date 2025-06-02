@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
@@ -142,8 +143,8 @@ class FreeSpaceTest {
 
         PlayerChoicesDataStructure playerChoices = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenBatteryBoxes(batteryBoxes)
-                .setChosenDoubleEngines(doubleEngines)
+                .setChosenBatteryBoxes(new ArrayList<Coordinates>())
+                .setChosenDoubleEngines(new ArrayList<Coordinates>())
                 .build();
 
         IntStream.range(0, 4).forEach(i -> {
@@ -168,8 +169,8 @@ class FreeSpaceTest {
 
         PlayerChoicesDataStructure playerChoices = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenBatteryBoxes(batteryBoxes)
-                .setChosenDoubleEngines(doubleEngines)
+                .setChosenBatteryBoxes(new ArrayList<Coordinates>())
+                .setChosenDoubleEngines(new ArrayList<Coordinates>())
                 .build();
 
         card.setCurrState(CardState.START_CARD);

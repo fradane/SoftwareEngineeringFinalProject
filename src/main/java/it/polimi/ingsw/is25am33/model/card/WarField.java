@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.card;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
 import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
@@ -144,7 +145,12 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
         shotIterator = shots.iterator();
     }
 
-    private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
+    private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
+
+        List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
+        for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
+            chosenBatteryBoxes.add((BatteryBox) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
+        }
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
 
@@ -158,18 +164,27 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
     }
 
-    public void currPlayerChoseEnginesToActivate(List<Engine> chosenDoubleEngines, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
+    public void currPlayerChoseEnginesToActivate(List<Coordinates> chosenDoubleEnginesCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
 
-        if (chosenDoubleEngines == null || chosenBatteryBoxes == null)
+        if (chosenDoubleEnginesCoords == null || chosenBatteryBoxesCoords == null)
             throw new IllegalArgumentException("Null lists");
 
-        if (chosenDoubleEngines.size() != chosenBatteryBoxes.size())
+        if (chosenDoubleEnginesCoords.size() != chosenBatteryBoxesCoords.size())
             throw new IllegalArgumentException("The number of engines does not match the number of battery boxes");
 
-        chosenBatteryBoxes.stream().distinct().forEach(box -> {
-            if (Collections.frequency(chosenBatteryBoxes, box) > box.getRemainingBatteries())
-                throw new IllegalArgumentException("The number of required batteries is not enough");
-        });
+        List<Engine> chosenDoubleEngines = new ArrayList<>();
+        List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
+
+        for (Coordinates chosenDoubleEnginesCoord : chosenDoubleEnginesCoords) {
+            chosenDoubleEngines.add((Engine) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenDoubleEnginesCoord));
+        }
+        for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
+            chosenBatteryBoxes.add((BatteryBox) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
+        }
+//        chosenDoubleEnginesCoords.stream().distinct().forEach(box -> {
+//            if (Collections.frequency(chosenBatteryBoxesCoords, box) > box.getRemainingBatteries())
+//                throw new IllegalArgumentException("The number of required batteries is not enough");
+//        });
 
         chosenBatteryBoxes.forEach(BatteryBox::useBattery);
         int currPlayerEnginePower = gameModel.getCurrPlayer().getPersonalBoard().countTotalEnginePower(chosenDoubleEngines);
