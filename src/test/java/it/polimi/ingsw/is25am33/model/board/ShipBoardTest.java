@@ -1071,7 +1071,7 @@ public class ShipBoardTest {
         shipBoard.removeAndRecalculateShipParts(cabinX, cabinY + 1);
 
         // Verifica rimozione dalla mappa (la lista può essere vuota o null)
-        List<Object> cabinList = shipBoard.componentsPerType.get(Cabin.class);
+        List<Component> cabinList = shipBoard.componentsPerType.get(Cabin.class);
         assertTrue(cabinList == null || cabinList.isEmpty());
         assertTrue(cabinList == null || !cabinList.contains(cabin));
 
@@ -1091,8 +1091,8 @@ public class ShipBoardTest {
         shipBoard.removeShipPart(toRemove);
 
         // Verifica rimozione dalla mappa (le liste possono essere vuote o null)
-        List<Object> cannonList = shipBoard.componentsPerType.get(Cannon.class);
-        List<Object> engineList = shipBoard.componentsPerType.get(Engine.class);
+        List<Component> cannonList = shipBoard.componentsPerType.get(Cannon.class);
+        List<Component> engineList = shipBoard.componentsPerType.get(Engine.class);
 
         assertTrue(cannonList == null || cannonList.isEmpty());
         assertTrue(engineList == null || engineList.isEmpty());
