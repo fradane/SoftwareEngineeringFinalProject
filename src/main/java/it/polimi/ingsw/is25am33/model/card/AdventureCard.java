@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -105,6 +106,8 @@ public abstract class AdventureCard {
     }
 
     public abstract void play(PlayerChoicesDataStructure playerChoices) throws UnknownStateException;
+
+    public abstract ClientCard toClientCard();
 
     public void setCardName(String cardName) {
         this.cardName = cardName;

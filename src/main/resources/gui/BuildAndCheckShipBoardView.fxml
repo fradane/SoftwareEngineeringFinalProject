@@ -24,11 +24,14 @@
             <VBox fx:id="hourglassBox" alignment="CENTER_LEFT" spacing="5" styleClass="timer-container">
                 <HBox>
                     <Label fx:id="timerLabel" styleClass="timer-label" />
-                    <Button fx:id="flipHourglassButton" minHeight="-Infinity" minWidth="-Infinity" onAction="#handleFlipHourglassButton" styleClass="action-button" text="Flip Hourglass" />
-                    <HBox alignment="CENTER" HBox.hgrow="ALWAYS" managed="false">
-                        <Label fx:id="messageLabel" alignment="CENTER" contentDisplay="CENTER" styleClass="timer-label" managed="false" />
+                    <Button fx:id="flipHourglassButton" minHeight="-Infinity" minWidth="-Infinity"
+                            onAction="#handleFlipHourglassButton" styleClass="action-button" text="Flip Hourglass" />
+
+                    <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label fx:id="messageLabel" alignment="CENTER" contentDisplay="CENTER" styleClass="timer-label" />
                     </HBox>
                 </HBox>
+
                 <Label fx:id="flipsLeftLabel" styleClass="timer-label" />
                 <VBox.margin>
                     <Insets left="20.0" />
@@ -81,7 +84,12 @@
                 </padding>
             </FlowPane>
 
-        </StackPane>
+
+            <StackPane fx:id="pawnButtonPane" managed="false" styleClass="little-deck-container" visible="false" />
+                <Button fx:id="placePawnButton" onAction="#handlePlacePawnButton" styleClass="place-pawn-button"
+                        text="Press the button to place your pawn, FAST!!!" StackPane.alignment="CENTER"
+                        prefWidth="600.0" prefHeight="100.0" style="-fx-font-size: 18pt;" visible="false" />
+            </StackPane>
     </center>
 
     <right>

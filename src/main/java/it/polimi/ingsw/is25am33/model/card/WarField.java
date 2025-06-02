@@ -2,6 +2,8 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
 import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
@@ -12,7 +14,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
-import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import javafx.util.Pair;
@@ -71,6 +72,12 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
                 throw new IllegalStateException("Unknown current state");
         }
 
+    }
+
+    @Override
+    public ClientCard toClientCard() {
+        //TODO
+        return null;
     }
 
     public void convertIdsToShots() {
@@ -210,7 +217,14 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
     }
 
-    private void currPlayerChoseRemovableCrewMembers(List<Cabin> chosenCabins) throws IllegalArgumentException {
+    private void currPlayerChoseRemovableCrewMembers(List<Coordinates> chosenCabinsCoordinate) throws IllegalArgumentException {
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        //non viene fatto il controllo se sono tutte cabine perchè già fatto lato client
+        List<Cabin> chosenCabins = chosenCabinsCoordinate
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Cabin.class::cast)
+                .toList();
 
         removeMemberProcess(chosenCabins, crewMalus);
 

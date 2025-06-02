@@ -78,13 +78,15 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         clients.put(nickname, controller);
         System.out.println("New user registered with nickname: " + nickname);
 
-        new Thread(()->{
+        new Thread(()-> {
             serverPingPongManager.start(
                     nickname,
-                    ()-> {
+                    () -> {
                         try {
                             pingToClientFromServer(nickname);
-                        } catch (IOException e) {}
+                        } catch (IOException e) {
+                            System.err.println("Errore ping pong: " + e.getMessage());
+                        }
                     }
             );
         }).start();
@@ -170,7 +172,8 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
         futureNicknames.forEach((future, clientNickname) -> {
             try {
-                future.get(5, TimeUnit.SECONDS);
+                //TODO riabbassare a 5 secondi
+                future.get(1000, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 System.err.println("Timeout nella notifica del client: " + clientNickname);
                 future.cancel(true);
@@ -200,7 +203,8 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
         futureNicknames.forEach((future, clientNickname) -> {
             try {
-                future.get(5, TimeUnit.SECONDS);
+                //TODO riabbassare a 1 secondo
+                future.get(1000, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 System.err.println("Timeout nella notifica del client: " + clientNickname);
                 future.cancel(true);
@@ -218,7 +222,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     public void pongToServerFromClient(String nickname) throws IOException{
         //System.out.println("Pong ricevuto da " + nickname);
-        serverPingPongManager.onPongReceived(nickname, ()->handleDisconnection(nickname));
+        serverPingPongManager.onPongReceived(nickname, () -> handleDisconnection(nickname));
     }
 
     public void pingToServerFromClient(String nickname) throws IOException{

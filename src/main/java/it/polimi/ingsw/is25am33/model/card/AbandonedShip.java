@@ -1,13 +1,17 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 
-import java.rmi.RemoteException;
 import java.util.List;
 
 
@@ -69,6 +73,11 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
     }
 
     @Override
+    public ClientCard toClientCard() {
+        return new ClientAbandonedShip(cardName, imageName, crewMalus, stepsBack, reward);
+    }
+
+    @Override
     public void setLevel(int level) {
         this.level = level;
     }
@@ -86,29 +95,52 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
     }
 
     private void currPlayerWantsToVisit(boolean wantsToVisit) throws IllegalDecisionException {
-
-        if (wantsToVisit) {
-            if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)
-                throw new IllegalDecisionException("Player has not enough crew members");
-            setCurrState(CardState.REMOVE_CREW_MEMBERS);
-        } else if (gameModel.hasNextPlayer()) {
-            gameModel.nextPlayer();
-        } else {
-            setCurrState(CardState.END_OF_CARD);
+        try{
+            if (wantsToVisit) {
+                if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)
+                    //TODO bisogna gestire questo genere di eccezioni, teoricamente già controllate lato client, però boh
+                    throw new IllegalDecisionException("Player has not enough crew members");
+                setCurrState(CardState.REMOVE_CREW_MEMBERS);
+            } else if (gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
+                setCurrState(CardState.VISIT_LOCATION);
+            } else {
+                setCurrState(CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
+            }
+        }catch (Exception e){
+            System.err.println("Error in currPlayerWantsToVisit: " + e.getMessage());
+            e.printStackTrace();
         }
+
 
     }
 
-    private void currPlayerChoseRemovableCrewMembers(List<Cabin> chosenCabins) throws IllegalArgumentException {
+    private void currPlayerChoseRemovableCrewMembers(List<Coordinates> chosenCabinsCoordinate) throws IllegalArgumentException {
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        //non viene fatto il controllo se sono tutte cabine perchè già fatto lato client
+        List<Cabin> chosenCabins = chosenCabinsCoordinate
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Cabin.class::cast)
+                .toList();
+
 
         removeMemberProcess(chosenCabins, crewMalus);
 
-        chosenCabins.forEach(Cabin::removeMember);
+        String currPlayerNickname = gameModel.getCurrPlayer().getNickname();
+        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currPlayerNickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
+        });
+
+        //chosenCabins.forEach(Cabin::removeMember);
 
         gameModel.getCurrPlayer().addCredits(reward);
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
         setCurrState(CardState.END_OF_CARD);
+        gameModel.setCurrGameState(GameState.DRAW_CARD);
 
     }
 

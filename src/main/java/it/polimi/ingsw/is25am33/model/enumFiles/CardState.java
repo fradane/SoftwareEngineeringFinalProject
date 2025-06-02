@@ -1,7 +1,6 @@
 package it.polimi.ingsw.is25am33.model.enumFiles;
 
 import it.polimi.ingsw.is25am33.client.view.ClientView;
-import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
@@ -12,145 +11,148 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public enum CardState {
 
     START_CARD {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Probabilmente nessun menu specifico per lo stato iniziale
+            //return null;
         }
     },
 
     CHOOSE_CANNONS {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showChooseCannonsMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showChooseCannonsMenu();
         }
     },
 
     CHOOSE_ENGINES {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showChooseEnginesMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showChooseEnginesMenu();
         }
     },
 
     REMOVE_CREW_MEMBERS {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view){
-            return view.showHandleRemoveCrewMembersMenu();
+        public void showRelatedMenu(ClientView view){
+            view.showHandleRemoveCrewMembersMenu();
         }
     },
 
     HANDLE_CUBES_REWARD {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showHandleCubesRewardMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showHandleCubesRewardMenu();
         }
     },
 
     HANDLE_CUBES_MALUS {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+        public void showRelatedMenu(ClientView view) {
             // TODO
-            return null;
+            view.showHandleCubesMalusMenu();
         }
     },
 
     CHOOSE_PLANET {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showChoosePlanetMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showChoosePlanetMenu();
         }
     },
 
     VISIT_LOCATION {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showVisitLocationMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showVisitLocationMenu();
         }
     },
 
     DANGEROUS_ATTACK {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
+        public void showRelatedMenu(ClientView view) {
             DangerousObj currDangerousObject = view.getClientModel().getCurrDangerousObj();
-            return currDangerousObject.showRelatedMenu(view);
+            String type = currDangerousObject.getDangerousObjType();
+
+            if (type.contains("SmallMeteorite") || type.contains("SmallShot")) {
+                view.showSmallDanObjMenu();
+            } else if (type.contains("BigMeteorite")) {
+                view.showBigMeteoriteMenu();
+            } else if (type.contains("BigShot")) {
+                view.showBigShotMenu();
+            }
         }
     },
 
     THROW_DICES {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showThrowDicesMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showThrowDicesMenu();
         }
     },
 
     EPIDEMIC {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view){
-            return view.showEpidemicMenu();
+        public void showRelatedMenu(ClientView view){
+            view.showEpidemicMenu();
         }
     },
     STARDUST {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showStardustMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showStardustMenu();
         }
     },
 
     ACCEPT_THE_REWARD {
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            return view.showAcceptTheRewardMenu();
+        public void showRelatedMenu(ClientView view) {
+            view.showAcceptTheRewardMenu();
         }
     },
 
     EVALUATE_CREW_MEMBERS{
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
     },
     EVALUATE_CANNON_POWER{
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
     },
 
     EVALUATE_ENGINE_POWER{
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
     },
 
     STEPS_BACK{
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
     },
 
     END_OF_CARD {
 
         @Override
-        public BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view) {
-            // TODO
-            return null;
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
     };
 
-    public abstract BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view);
-
+    //public abstract BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view);
+    public abstract void showRelatedMenu(ClientView view);
+    // TODO chi ha scritto questo todo
     //TODO setProperty
 }

@@ -1,7 +1,11 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.*;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,19 +16,33 @@ import java.util.Optional;
  *
  * <p>The contained choices are utilized by the model to process and execute player actions accordingly.</p>
  */
-public class PlayerChoicesDataStructure {
+public class PlayerChoicesDataStructure implements Serializable {
 
     private final List<Engine> chosenDoubleEngines;
     private final List<BatteryBox> chosenBatteryBoxes;
     private final int chosenPlanetIndex;
     private final boolean wantsToVisit;
-    private final List<Cabin> chosenCabins;
+    private final List<Coordinates> chosenCabins;
     private final List<Storage> chosenStorage;
     private final boolean hasAcceptedTheReward;
     private final Shield chosenShield;
     private final BatteryBox chosenBatteryBox;
     private final DoubleCannon chosenDoubleCannon;
     private final List<Cannon> chosenDoubleCannons;
+
+    public PlayerChoicesDataStructure() {
+        this.chosenDoubleEngines = new ArrayList<>();
+        this.chosenBatteryBoxes = new ArrayList<>();
+        this.chosenPlanetIndex = 0;
+        this.wantsToVisit = false;
+        this.chosenCabins = new ArrayList<>();
+        this.chosenStorage = new ArrayList<>();
+        this.hasAcceptedTheReward = false;
+        this.chosenShield = null;
+        this.chosenBatteryBox = null;
+        this.chosenDoubleCannon = null;
+        this.chosenDoubleCannons = new ArrayList<>();
+    }
 
     private PlayerChoicesDataStructure(Builder builder) {
         this.chosenDoubleEngines = builder.chosenDoubleEngines;
@@ -45,6 +63,7 @@ public class PlayerChoicesDataStructure {
      *
      * @return an {@link Optional} containing the list of chosen {@link Engine} components, or empty if not set.
      */
+    @JsonIgnore
     public Optional<List<Engine>> getChosenDoubleEngines() {
         return Optional.ofNullable(chosenDoubleEngines);
     }
@@ -54,6 +73,7 @@ public class PlayerChoicesDataStructure {
      *
      * @return an {@link Optional} containing the list of chosen {@link BatteryBox} components, or empty if not set.
      */
+    @JsonIgnore
     public Optional<List<BatteryBox>> getChosenBatteryBoxes() {
         return Optional.ofNullable(chosenBatteryBoxes);
     }
@@ -81,7 +101,8 @@ public class PlayerChoicesDataStructure {
      *
      * @return an {@link Optional} containing the list of chosen {@link Cabin} components, or empty if not set.
      */
-    public Optional<List<Cabin>> getChosenCabins() {
+    @JsonIgnore
+    public Optional<List<Coordinates>> getChosenCabins() {
         return Optional.ofNullable(chosenCabins);
     }
 
@@ -90,6 +111,7 @@ public class PlayerChoicesDataStructure {
      *
      * @return an {@link Optional} containing the chosen {@link Storage} component, or empty if not set.
      */
+    @JsonIgnore
     public Optional<List<Storage>> getChosenStorage() {
         return Optional.ofNullable(chosenStorage);
     }
@@ -108,6 +130,7 @@ public class PlayerChoicesDataStructure {
      *
      * @return an {@link Optional} containing the chosen {@link Shield} component, or empty if not set.
      */
+    @JsonIgnore
     public Optional<Shield> getChosenShield() {
         return Optional.ofNullable(chosenShield);
     }
@@ -117,6 +140,7 @@ public class PlayerChoicesDataStructure {
      *
      * @return an {@link Optional} containing the chosen {@link BatteryBox} component, or empty if not set.
      */
+    @JsonIgnore
     public Optional<BatteryBox> getChosenBatteryBox() {
         return Optional.ofNullable(chosenBatteryBox);
     }
@@ -126,6 +150,7 @@ public class PlayerChoicesDataStructure {
      *
      * @return an {@link Optional} containing the chosen {@link DoubleCannon} component, or empty if not set.
      */
+    @JsonIgnore
     public Optional<DoubleCannon> getChosenDoubleCannon() {
         return Optional.ofNullable(chosenDoubleCannon);
     }
@@ -135,9 +160,16 @@ public class PlayerChoicesDataStructure {
      *
      * @return an {@link Optional} containing the list of chosen {@link Cannon} components, or empty if not set.
      */
+    @JsonIgnore
     public Optional<List<Cannon>> getChosenDoubleCannons() {
         return Optional.ofNullable(chosenDoubleCannons);
     }
+
+    // Getter per la serializzazione JSON
+    public List<Coordinates> getCabins() {
+        return chosenCabins;
+    }
+
 
     /**
      * Builder class for constructing instances of {@link PlayerChoicesDataStructure}.
@@ -148,14 +180,13 @@ public class PlayerChoicesDataStructure {
         private List<BatteryBox> chosenBatteryBoxes;
         private int chosenPlanetIndex;
         private boolean wantsToVisit;
-        private List<Cabin> chosenCabins;
+        private List<Coordinates> chosenCabins;
         private List<Storage> chosenStorage;
         private boolean hasAcceptedTheReward;
         private Shield chosenShield;
         private BatteryBox chosenBatteryBox;
         private DoubleCannon chosenDoubleCannon;
         private List<Cannon> chosenDoubleCannons;
-
         /**
          * Sets the list of double engines selected by the player.
          *
@@ -203,10 +234,10 @@ public class PlayerChoicesDataStructure {
         /**
          * Sets the list of cabins selected by the player.
          *
-         * @param chosenCabins the list of chosen {@link Cabin} components.
+         * @param chosenCabins the list of chosen {@link Coordinates} components.
          * @return this builder instance for method chaining.
          */
-        public Builder setChosenCabins(List<Cabin> chosenCabins) {
+        public Builder setChosenCabins(List<Coordinates> chosenCabins) {
             this.chosenCabins = chosenCabins;
             return this;
         }
@@ -284,6 +315,13 @@ public class PlayerChoicesDataStructure {
          * @return a new {@link PlayerChoicesDataStructure} instance.
          */
         public PlayerChoicesDataStructure build() {
+            // Inizializza tutte le liste
+            if (chosenDoubleEngines == null) chosenDoubleEngines = new ArrayList<>();
+            if (chosenBatteryBoxes == null) chosenBatteryBoxes = new ArrayList<>();
+            if (chosenCabins == null) chosenCabins = new ArrayList<>();
+            if (chosenStorage == null) chosenStorage = new ArrayList<>();
+            if (chosenDoubleCannons == null) chosenDoubleCannons = new ArrayList<>();
+
             return new PlayerChoicesDataStructure(this);
         }
     }

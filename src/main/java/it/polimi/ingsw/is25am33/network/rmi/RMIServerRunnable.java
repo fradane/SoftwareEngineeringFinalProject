@@ -1,10 +1,8 @@
 package it.polimi.ingsw.is25am33.network.rmi;
-import it.polimi.ingsw.is25am33.controller.GameController;
+
 import it.polimi.ingsw.is25am33.network.DNS;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 

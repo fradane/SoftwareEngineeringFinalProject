@@ -420,3 +420,25 @@
 .component-image {
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
 }
+
+.place-pawn-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 14px 24px;
+    -fx-font-size: 14px;
+    -fx-min-width: 180px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+.place-pawn-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 6, 0, 0, 1);
+}
+
+.place-pawn-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 4, 0, 0, 1);
+}

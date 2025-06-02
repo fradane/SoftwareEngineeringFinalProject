@@ -4,16 +4,15 @@ module it.polimi.ingsw.is25am33 {
     requires javafx.controls;
     requires javafx.fxml;
     // JSON serialization library
-    requires com.fasterxml.jackson.databind;
-    requires com.fasterxml.jackson.annotation;
     // Java standard libraries
     requires java.smartcardio;
-    requires java.desktop;
     requires java.management.rmi;
-    requires java.logging;
     requires java.rmi;
     requires org.jetbrains.annotations;
     requires net.bytebuddy;
+    requires com.fasterxml.jackson.datatype.jdk8;
+    requires com.fasterxml.jackson.databind;
+    requires java.logging;
 
     // JavaFX Configuration
     // Allows JavaFX to access the main package for FXML loading
@@ -74,4 +73,5 @@ module it.polimi.ingsw.is25am33 {
     exports it.polimi.ingsw.is25am33.client.view.tui;
     exports it.polimi.ingsw.is25am33.client.model;
     opens it.polimi.ingsw.is25am33.client.model to com.fasterxml.jackson.databind;
+    exports it.polimi.ingsw.is25am33.client.model.card;
 }

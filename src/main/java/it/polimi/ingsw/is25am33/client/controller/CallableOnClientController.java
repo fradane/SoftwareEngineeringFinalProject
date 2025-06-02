@@ -1,5 +1,7 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -7,12 +9,12 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface CallableOnClientController extends Remote {
@@ -29,7 +31,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws IOException;
 
-    void notifyCurrAdventureCard( String nickname, String adventureCard) throws IOException;
+    void notifyCurrAdventureCard(String nickname, ClientCard adventureCard, boolean isFirstTime) throws IOException;
 
     void notifyCardState(String nickname, CardState cardState) throws IOException;
 
@@ -47,7 +49,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException;
 
-    void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws IOException;
+    void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException;
 
     void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws IOException;
 
@@ -67,11 +69,11 @@ public interface CallableOnClientController extends Remote {
 
     void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayer) throws IOException;
 
-    void notifyInvalidShipBoard(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException;
+    void notifyInvalidShipBoard(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException;
 
-    void notifyValidShipBoard(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException;
+    void notifyValidShipBoard(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException;
 
-    void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts) throws RemoteException;
+    void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts , Map<Class<?>, List<Component>> componentsPerType) throws RemoteException;
 
     void forcedDisconnection(String nickname, String gameId) throws IOException;
 
@@ -79,7 +81,21 @@ public interface CallableOnClientController extends Remote {
 
     void pongToClientFromServer(String nickname) throws IOException;
 
+    void notifyCardStarted(String nicknameToNotify)throws IOException;
+
     void notifyStopHourglass(String nicknameToNotify) throws IOException;
 
     void notifyFirstToEnter(String nicknameToNotify) throws IOException;
+
+    void notifyCurrAdventureCardUpdate(String nicknameToNotify, ClientCard adventureCard) throws IOException;
+
+    void notifyPlayerVisitedPlanet(String nicknameToNotify, String nickname, ClientCard adventureCard) throws IOException;
+
+    void notifyCrewPlacementPhase(String nicknameToNotify) throws IOException;
+
+    void notifyCrewPlacementComplete(String nicknameToNotify, String playerNickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException;
+
+    void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException;
+    void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipName) throws IOException;
+    void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException;
 }

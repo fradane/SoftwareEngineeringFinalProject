@@ -7,6 +7,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -15,6 +16,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
+import net.bytebuddy.dynamic.DynamicType;
 
 import java.io.IOException;
 import java.util.*;
@@ -60,6 +62,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     @FXML
     public StackPane centerStackPane;
     @FXML
+    public Button placePawnButton;
+    @FXML
+    public StackPane pawnButtonPane;
+    @FXML
     private ImageView visibleCard1 = new ImageView();
     @FXML
     private ImageView visibleCard2 = new ImageView();
@@ -85,7 +91,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     private List<Set<Coordinates>> shipParts = new ArrayList<>();
     private Level2BoardsController boardsController;
     private final int FIXED_COMPONENT_LENGTH = 70;
-    private BiConsumer<Integer, Integer> correctShipBoardAction;
+    private Optional<BiConsumer<Integer, Integer>> correctShipBoardAction = Optional.empty();
 
     public void initialize() {
 
@@ -93,7 +99,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level2Boards.fxml"));
             VBox mainBoardBox = loader.load();
-            centerStackPane.getChildren().add(mainBoardBox);
+            centerStackPane.getChildren().addFirst(mainBoardBox);
             this.boardsController = loader.getController();
         } catch (IOException e) {
             e.printStackTrace();
@@ -140,7 +146,9 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             .addListener((InvalidationListener) _ -> Platform.runLater(() -> {
                 componentsContainer.getChildren().clear();
 
-                for (String string : modelFxAdapter.getObservableVisibleComponents()) {
+                List<String> visibleComponents = new ArrayList<>(modelFxAdapter.getObservableVisibleComponents());
+
+                for (String string : visibleComponents) {
                     // image set up
                     ImageView imageView = new ImageView(new Image(
                             Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/component/" + string))));
@@ -356,7 +364,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     }
 
     public void showInvalidComponents() {
-        correctShipBoardAction = this::handleInvalidComponent;
+        correctShipBoardAction = Optional.of(this::handleInvalidComponent);
         ShipBoardClient shipBoard = clientModel.getMyShipboard();
         shipBoard.getIncorrectlyPositionedComponentsCoordinates()
                 .forEach(coordinate -> this.boardsController.applyHighlightEffect(coordinate, Color.RED));
@@ -372,7 +380,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             shipPartsMap.put(colors.get(i), shipParts.get(i));
         }
 
-        correctShipBoardAction = this::handleShipParts;
+        correctShipBoardAction = Optional.of(this::handleShipParts);
 
         shipPartsMap.forEach((color, coordinates) ->
                 coordinates.forEach(coordinate ->
@@ -382,11 +390,44 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     }
 
+    @Override
     public void onGridButtonClick(int row, int column) {
         if (clientModel.getGameState() == GameState.BUILD_SHIPBOARD)
             handleGridButtonBuilding(row, column);
         else if (clientModel.getGameState() == GameState.CHECK_SHIPBOARD)
-            correctShipBoardAction.accept(row, column);
+            correctShipBoardAction.ifPresentOrElse(
+                    action -> {
+                        action.accept(row, column);
+                        //correctShipBoardAction = Optional.empty();
+                    },
+                    () -> showMessage("This action is not allowed in this phase"));
     }
 
+    public void handlePlacePawnButton() {
+        Platform.runLater(() -> {
+            littleDeckFlowPane.setVisible(false);
+            littleDeckFlowPane.setManaged(false);
+            pawnButtonPane.setVisible(false);
+            pawnButtonPane.setManaged(false);
+            placePawnButton.setVisible(false);
+            placePawnButton.setManaged(false);
+        });
+        clientController.placePawn();
+    }
+
+    public void showFirstToEnterButton() {
+        Platform.runLater(() -> {
+            littleDeckFlowPane.setVisible(false);
+            littleDeckFlowPane.setManaged(false);
+            pawnButtonPane.setVisible(true);
+            pawnButtonPane.setManaged(true);
+            placePawnButton.setVisible(true);
+            placePawnButton.setManaged(true);
+            hourglassBox.setVisible(false);
+            visibleComponentsPanel.setVisible(false);
+            componentsBoxV.setVisible(false);
+            componentsBoxH.setVisible(false);
+            bottomBox.setVisible(false);
+        });
+    }
 }

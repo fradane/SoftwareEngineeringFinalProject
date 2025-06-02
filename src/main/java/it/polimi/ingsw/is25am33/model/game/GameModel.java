@@ -1,10 +1,13 @@
 package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.board.*;
+import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
@@ -40,6 +43,8 @@ public class GameModel {
     private Integer flipsLeft;
     private Integer numClientsFinishedTimer = 0;
     private Boolean isRestartInProgress = false;
+
+    private Map<String, Boolean> crewPlacementCompleted = new ConcurrentHashMap<>();
 
     // Lock per la transizione di stato
     private final Object stateTransitionLock = new Object();
@@ -141,7 +146,6 @@ public class GameModel {
 
     public void setCurrGameState(GameState currGameState) {
         synchronized (stateTransitionLock) {
-
             if (this.currGameState == currGameState) return;
 
             this.currGameState = currGameState;
@@ -149,9 +153,8 @@ public class GameModel {
             gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyGameState(nicknameToNotify, currGameState);
             });
-
-            currGameState.run(this);
         }
+        currGameState.run(this);
     }
 
     public GameClientNotifier getGameContext() {
@@ -233,8 +236,11 @@ public class GameModel {
     public void setCurrAdventureCard(AdventureCard currAdventureCard) {
             this.currAdventureCard = currAdventureCard;
 
+            // Map server card to client card
+            ClientCard clientCard = currAdventureCard.toClientCard();
+
             gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyCurrAdventureCard(nicknameToNotify, currAdventureCard.toString());
+                    clientController.notifyCurrAdventureCard(nicknameToNotify, clientCard, true);
             });
 
     }
@@ -255,12 +261,17 @@ public class GameModel {
         if (currAdventureCard == null || currAdventureCard.getCurrState() != CardState.START_CARD)
             throw new IllegalStateException("Not the right state");
 
+        //TODO uncommentare quando sarà pronta la creazione della classifica fatta da Fra
         setCurrRanking(flyingBoard.getCurrentRanking());
+        //setCurrRanking(new ArrayList<>(players.values()));
         currAdventureCard.setGame(this);
         playerIterator = currRanking.iterator();
         setCurrPlayer(playerIterator.next());
         currAdventureCard.setCurrState(currAdventureCard.getFirstState());
 
+        getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyCardStarted(nicknameToNotify);
+        });
     }
 
     public List<Player> getPlayerWithPrettiestShip() {
@@ -405,9 +416,11 @@ public class GameModel {
                 Player player = players.get(nicknameToNotify);
                 ShipBoard shipBoard = player.getPersonalBoard();
                 Component[][] shipMatrix = shipBoard.getShipMatrix();
+                Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
                 Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
 
-                clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+
         });
     }
 
@@ -422,9 +435,11 @@ public class GameModel {
                 Player player = players.get(nicknameToNotify);
                 ShipBoard shipBoard = player.getPersonalBoard();
                 Component[][] shipMatrix = shipBoard.getShipMatrix();
+                Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
                 Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
 
-                clientController.notifyValidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates);
+                clientController.notifyValidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+
         });
     }
 
@@ -438,7 +453,7 @@ public class GameModel {
         synchronized (stateTransitionLock) {
             if (areAllShipsCorrect()) {
                 // Cambia allo stato successivo
-                setCurrGameState(GameState.CREATE_DECK);
+                setCurrGameState(GameState.PLACE_CREW);
             }
         }
     }
@@ -451,6 +466,58 @@ public class GameModel {
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyStopHourglass(nicknameToNotify);
         });
+    }
+
+    /**
+     * Gestisce l'inizializzazione della fase di posizionamento equipaggio.
+     */
+    public void handleCrewPlacementPhase() {
+        // Reset dello stato di completamento per tutti i giocatori
+        players.keySet().forEach(nickname -> crewPlacementCompleted.put(nickname, false));
+
+        if (isTestFlight) {
+            // In modalità test flight, posiziona automaticamente umani e passa alla fase successiva
+            placeCrewAutomatically();
+            setCurrGameState(GameState.CREATE_DECK);
+        } else {
+            // In modalità normale, notifica i client di iniziare la fase di scelta
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyCrewPlacementPhase(nicknameToNotify);
+            });
+        }
+    }
+
+    /**
+     * Posiziona automaticamente 2 umani in ogni cabina.
+     */
+    private void placeCrewAutomatically() {
+        for (Player player : players.values()) {
+            ShipBoard shipBoard = player.getPersonalBoard();
+
+            // Posiziona 2 umani in ogni cabina (inclusa MainCabin)
+            for (Cabin cabin : shipBoard.getCabin()) {
+                if (!cabin.hasInhabitants()) {
+                    cabin.fillCabin(CrewMember.HUMAN);
+                }
+            }
+        }
+    }
+
+    private Object crewPlacementCompletedLock = new Object();
+    /**
+     * Segna un giocatore come completato per la fase di posizionamento equipaggio.
+     */
+    public void markCrewPlacementCompleted(String nickname) {
+        crewPlacementCompleted.put(nickname, true);
+
+        synchronized (crewPlacementCompletedLock) {
+            // Verifica se tutti hanno completato
+            boolean allCompleted = crewPlacementCompleted.values().stream().allMatch(Boolean::booleanValue);
+
+            if (allCompleted) {
+                setCurrGameState(GameState.CREATE_DECK);
+            }
+        }
     }
 
 }

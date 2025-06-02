@@ -46,7 +46,21 @@
                 </rowConstraints>
 
                 <!-- Prima riga -->
-                <Button fx:id="button04_03" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.vgrow="ALWAYS" />
+                <Button fx:id="button04_03" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.vgrow="ALWAYS">
+                    <graphic>
+                        <StackPane>
+                            <ImageView fitWidth="70" preserveRatio="true" >
+                                <Image url="@graphics/component/GT-new_tiles_16_for_web39.jpg" />
+                            </ImageView>
+                            <ImageView fitWidth="40" preserveRatio="true" >
+                                <Image url="@graphics/crewMembers/brown_alien.png" />
+                                <effect>
+                                    <DropShadow color="black" offsetX="5" offsetY="5" />
+                                </effect>
+                            </ImageView>
+                        </StackPane>
+                    </graphic>
+                </Button>
                 <Button fx:id="button04_04" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button04_05" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button04_06" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />

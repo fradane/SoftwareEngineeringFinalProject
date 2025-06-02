@@ -73,6 +73,7 @@ public class PlayerClientData {
     }
 
     public boolean isOut() {
+        // TODO togliere
         return flyingBoardPosition == -1;
     }
 

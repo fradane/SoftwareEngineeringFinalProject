@@ -1,10 +1,13 @@
 package it.polimi.ingsw.is25am33.controller;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 
 import java.io.IOException;
 import java.rmi.Remote;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface CallableOnGameController extends Remote {
@@ -65,5 +68,13 @@ public interface CallableOnGameController extends Remote {
 
     void playerWantsToFocusReservedComponent(String nickname, int choice) throws IOException;
 
-    void playerPlacePlaceholder(String nickname) throws IOException;
+    void playerPlacesPawn(String nickname) throws IOException;
+
+    void handleClientChoice(String nickname, PlayerChoicesDataStructure choice) throws IOException;
+
+    void submitCrewChoices(String nickname, Map<Coordinates, CrewMember> choices) throws IOException;
+
+    void requestPrefabShips(String nickname) throws IOException;
+
+    void requestSelectPrefabShip(String nickname, String prefabShipId) throws IOException;
 }

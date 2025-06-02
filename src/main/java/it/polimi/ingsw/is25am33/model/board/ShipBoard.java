@@ -48,7 +48,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     /**
      * A map that groups components based on their class (type).
      */
-    protected Map<Class<?>, List<Object>> componentsPerType = new HashMap<>();
+    protected Map<Class<?>, List<Component>> componentsPerType = new HashMap<>();
 
     /**
      * A list of components that are not currently active on the board (either removed or awaiting placement).
@@ -79,7 +79,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         connectors.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.WEST,  ConnectorType.UNIVERSAL);
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
-        shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
+        Cabin mainCabin = new MainCabin(connectors, color);
+        shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = mainCabin;
+        mainCabin.insertInComponentsMap(componentsPerType);
         this.gameClientNotifier = gameClientNotifier;
     }
 
@@ -195,6 +197,55 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     }
 
     /**
+     * Checks the entire ship board for placement rule violations and updates the
+     * incorrectlyPositionedComponentsCoordinates set with coordinates of any components
+     * that violate the placement rules.
+     *
+     * This method iterates through all components on the ship board, applying the same
+     * checks used during component placement to identify incorrectly positioned components.
+     */
+    public void checkShipBoard() {
+        // Clear the current set of incorrectly positioned components
+        incorrectlyPositionedComponentsCoordinates.clear();
+
+        // Iterate through the entire ship matrix
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                Component component = shipMatrix[i][j];
+
+                // Skip empty cells or cells outside valid positions
+                if (component == null || !isValidPosition(i, j)) {
+                    continue;
+                }
+
+                // Check if this position is properly connected to the ship
+                if (!(component instanceof MainCabin) && !isPositionConnectedToShip(component, i, j)) {
+                    incorrectlyPositionedComponentsCoordinates.add(new Coordinates(i, j));
+                    //TODO da togliere usato solo in debug della checkShipBoardPhase
+                    System.out.println("x: " + (i+1) + " y: " + (j+1) + ". isPositionConnectedTOShip");
+                    continue;
+                }
+
+                // Check if this component violates any placement rules
+                if (!areConnectorsWellConnected(component, i, j)
+                        || !areEmptyConnectorsWellConnected(component, i, j)
+                        || isComponentInFireDirection(component, i, j)
+                        || isComponentInEngineDirection(component, i, j)
+                        || isEngineDirectionWrong(component)
+                        || isAimingAComponent(component, i, j)) {
+                    //TODO da togliere usato solo in debug della checkShipBoardPhase
+                    if(isAimingAComponent(component, i, j)) {
+                        System.out.println("x: " + (i+1) + " y: " + (j+1) + ". isAimingAComponent");
+                    }
+
+                    incorrectlyPositionedComponentsCoordinates.add(new Coordinates(i, j));
+                }
+            }
+        }
+    }
+
+
+    /**
      * Attempts to place the focused component at the specified coordinates,
      * performing various validity and connectivity checks.
      * If the placed component does not violate an essential rule it is simply added to list of incorrectyle Positioned Components.
@@ -203,29 +254,37 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @param y The y-coordinate.
      * @throws IllegalArgumentException If the position is invalid or violates placement rules.
      */
+//    public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
+//        synchronized (shipMatrix) {
+//            //TODO uncommentare la checkPosition, serve solo per debugging checkShipboardPhase
+//            //checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
+//            if (//TODO aggiungere controllo che se sto aggiungendo un cannone che punta verso un component già piazzato
+//                    !areConnectorsWellConnected(focusedComponent, x, y)
+//                            || !areEmptyConnectorsWellConnected(focusedComponent, x, y) //TODO da controllare se effettivamente va messo qui questo controllo oppure all'interno di checkPosition
+//                            || isComponentInFireDirection(focusedComponent, x, y)
+//                            || isComponentInEngineDirection(focusedComponent, x, y)
+//                            || isEngineDirectionWrong(focusedComponent)
+//                            || isAimingAComponent(focusedComponent, x, y)
+//            ) {
+//                incorrectlyPositionedComponentsCoordinates.add(new Coordinates(x, y));
+//            }
+//            shipMatrix[x][y] = focusedComponent;
+//
+//            focusedComponent.insertInComponentsMap(componentsPerType);
+//
+//                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+//                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+//                });
+//
+//            focusedComponent = null;
+//
+//        }
+//
+//    }
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
         synchronized (shipMatrix) {
-            //TODO uncommentare la checkPosition
-            //checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
-            if (//TODO aggiungere controllo che se sto aggiungendo un cannone che punta verso un component già piazzato
-                    !areConnectorsWellConnected(focusedComponent, x, y)
-                            || !areEmptyConnectorsWellConnected(focusedComponent, x, y) //TODO da controllare se effettivamente va messo qui questo controllo oppure all'interno di checkPosition
-                            || isComponentInFireDirection(focusedComponent, x, y)
-                            || isComponentInEngineDirection(focusedComponent, x, y)
-                            || isEngineDirectionWrong(focusedComponent)
-                            || isAimingAComponent(focusedComponent, x, y)
-            ) {
-                incorrectlyPositionedComponentsCoordinates.add(new Coordinates(x, y));
-                String playerNicknameToNotify = player != null ? player.getNickname() : "";
-//                gameContext.notifyClients(Set.of(playerNicknameToNotify), (nicknameToNotify, clientController) -> {
-//                    try {
-//                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-//                    } catch (IOException e) {
-//                        System.err.println("Remote Exception");
-//                    }
-//                });
-                //TODO controllare se uncommentare
-            }
+          checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
+
             shipMatrix[x][y] = focusedComponent;
 
             focusedComponent.insertInComponentsMap(componentsPerType);
@@ -235,9 +294,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             });
 
             focusedComponent = null;
-
         }
-
     }
 
     public boolean isAimingAComponent(Component componentToPlace, int x, int y) {
@@ -267,7 +324,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     public boolean isEngineDirectionWrong(Component componentToPlace) {
         if(componentToPlace instanceof Engine)
-            return ((Engine)componentToPlace).getFireDirection() == SOUTH;
+            return ((Engine)componentToPlace).getFireDirection() != SOUTH;
 
         return false;
     }
@@ -337,6 +394,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             // il nostro componente deve avere un connettore EMPTY nella direzione corrispondente
             if (neighborComponent.getConnectors().get(oppositeDirection) == EMPTY &&
                     componentToPlace.getConnectors().get(direction) != EMPTY) {
+                //TODO da togliere usato solo in debug della checkShipBoardPhase
+                System.out.println("x: " +( x+1) + " y: " + (y+1) + ". areEmptyConnectorsWellConnected");
                 return false;
             }
 
@@ -344,6 +403,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             // il vicino deve avere un connettore EMPTY nella direzione opposta
             if (componentToPlace.getConnectors().get(direction) == EMPTY &&
                     neighborComponent.getConnectors().get(oppositeDirection) != EMPTY) {
+                //TODO da togliere usato solo in debug della checkShipBoardPhase
+                System.out.println("x: " + (x+1) + " y: " + (y+1) + ". areEmptyConnectorsWellConnected");
                 return false;
             }
         }
@@ -373,8 +434,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
             if (!areConnectorsCompatible(
                     componentToPlace.getConnectors().get(direction),
-                    neighborComponent.getConnectors().get(oppositeDirection)))
+                    neighborComponent.getConnectors().get(oppositeDirection))) {
+                //TODO da togliere usato solo in debug della checkShipBoardPhase
+                System.out.println("x: " + (x+1) + " y: " + (y+1) + ". areConnectorsWellConnected");
                 return false;
+            }
         }
 
         return true;
@@ -401,9 +465,13 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             Direction oppositeDirection = getOppositeDirection(direction);
 
             if (neighborComponent instanceof Cannon &&
-                    ((Cannon) neighborComponent).getFireDirection() == oppositeDirection)
+                    ((Cannon) neighborComponent).getFireDirection() == oppositeDirection) {
+                //TODO da togliere usato solo in debug della checkShipBoardPhase
+                System.out.println("x: " + (x+1) + " y: " + (y+1) + ". isComponentInFireDirection");
                 return true;
+            }
         }
+
 
         return false;
     }
@@ -430,8 +498,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
             if (neighborComponent instanceof Engine &&
                     ((Engine) neighborComponent).getFireDirection() == SOUTH &&
-                    ((Engine) neighborComponent).getFireDirection() == oppositeDirection)
+                    ((Engine) neighborComponent).getFireDirection() == oppositeDirection) {
+                //TODO da togliere usato solo in debug della checkShipBoardPhase
+                System.out.println("x: " + (x+1) + " y: " + (y+1) + ". isComponentInEngineDirection");
                 return true;
+            }
         }
 
         return false;
@@ -607,8 +678,12 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<CrewMember> getCrewMembers() {
-        return componentsPerType.get(Cabin.class)
-                .stream()
+        List<Component> cabins = new ArrayList<>(componentsPerType.getOrDefault(Cabin.class, Collections.emptyList())); // necessario fare la new ArrayList perchè emptyList è immutabile
+
+        if(componentsPerType.get(MainCabin.class)!=null)
+            cabins.addAll(componentsPerType.get(MainCabin.class));
+
+        return cabins.stream()
                 .map(Cabin.class::cast)
                 .map(Cabin::getInhabitants)
                 .flatMap(Collection::stream)
@@ -622,8 +697,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Cabin> getCabin() {
-        return componentsPerType.get(Cabin.class)
-                .stream()
+        List<Component> cabins = componentsPerType.getOrDefault(Cabin.class, Collections.emptyList());
+
+        return cabins.stream()
                 .map(Cabin.class::cast)
                 .collect(Collectors.toList());
     }
@@ -679,8 +755,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<DoubleCannon> getDoubleCannons () {
-        return componentsPerType.get(DoubleCannon.class)
-                .stream()
+        List<Component> cannons = componentsPerType.getOrDefault(DoubleCannon.class, Collections.emptyList());
+
+        return cannons.stream()
                 .map(DoubleCannon.class::cast)
                 .collect(Collectors.toList());
     }
@@ -692,8 +769,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Cannon> getSingleCannons () {
-        return componentsPerType.get(Cannon.class)
-                .stream()
+        List<Component> cannons = componentsPerType.getOrDefault(Cannon.class, Collections.emptyList());
+
+        return cannons.stream()
                 .map(Cannon.class::cast)
                 .collect(Collectors.toList());
     }
@@ -732,8 +810,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<DoubleEngine> getDoubleEngines () {
-        return componentsPerType.get(DoubleEngine.class)
-                .stream()
+        List<Component> engines = componentsPerType.getOrDefault(DoubleEngine.class, Collections.emptyList());
+
+        return engines.stream()
                 .map(DoubleEngine.class::cast)
                 .collect(Collectors.toList());
     }
@@ -745,8 +824,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Engine> getSingleEngines () {
-        return componentsPerType.get(Engine.class)
-                .stream()
+        List<Component> engines = componentsPerType.getOrDefault(Engine.class, Collections.emptyList());
+
+        return engines.stream()
                 .map(Engine.class::cast)
                 .collect(Collectors.toList());
     }
@@ -794,8 +874,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<StandardStorage> getStandardStorages() {
-        return componentsPerType.get(StandardStorage.class)
-                .stream()
+        List<Component> storages = componentsPerType.getOrDefault(StandardStorage.class, Collections.emptyList());
+
+        return storages.stream()
                 .map(StandardStorage.class::cast)
                 .collect(Collectors.toList());
     }
@@ -807,8 +888,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<SpecialStorage> getSpecialStorages() {
-        return componentsPerType.get(SpecialStorage.class)
-                .stream()
+        List<Component> storages = componentsPerType.getOrDefault(SpecialStorage.class, Collections.emptyList());
+
+        return storages.stream()
                 .map(SpecialStorage.class::cast)
                 .collect(Collectors.toList());
     }
@@ -830,8 +912,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<BatteryBox> getBatteryBoxes() {
-        return componentsPerType.get(BatteryBox.class)
-                .stream()
+        List<Component> batteries = componentsPerType.getOrDefault(BatteryBox.class, Collections.emptyList());
+
+        return batteries.stream()
                 .map(BatteryBox.class::cast)
                 .collect(Collectors.toList());
     }
@@ -843,8 +926,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Shield> getShields() {
-        return componentsPerType.get(Shield.class)
-                .stream()
+        List<Component> shields = componentsPerType.getOrDefault(Shield.class, Collections.emptyList());
+
+        return shields.stream()
                 .map(Shield.class::cast)
                 .collect(Collectors.toList());
     }
@@ -1050,13 +1134,19 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
     }
 
+    public Map<Class<?>, List<Component>> getComponentsPerType() {
+        return componentsPerType;
+    }
+
+
+
     /**
      * Removes a component from the componentsPerType map
      * @param component The component to remove
      */
     private void removeFromComponentsMap(Component component) {
         Class<?> componentClass = component.getClass();
-        List<Object> componentsList = componentsPerType.get(componentClass);
+        List<Component> componentsList = componentsPerType.get(componentClass);
         if (componentsList != null) {
             componentsList.remove(component);
             // Se la lista diventa vuota, potresti volerla rimuovere dalla mappa
@@ -1066,4 +1156,129 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
     }
 
+    public void setComponentsPerType(Map<Class<?>, List<Component>> componentsPerType) {
+        this.componentsPerType = componentsPerType;
+    }
+
+    /**
+     * Returns a map where keys are coordinates and values are Storage components at those coordinates.
+     * Only includes coordinates that have Storage components.
+     *
+     * @return A map of coordinates to Storage objects
+     */
+    @JsonIgnore
+    public Map<Coordinates, Storage> getCoordinatesAndStorages() {
+        Map<Coordinates, Storage> result = new HashMap<>();
+
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                if (isValidPosition(i, j) && shipMatrix[i][j]!= null && shipMatrix[i][j] instanceof Storage) {
+                    result.put(new Coordinates(i, j), (Storage) shipMatrix[i][j]);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a map where keys are coordinates and values are Cabin components that have crew members.
+     * Only includes coordinates that have Cabin components with at least one inhabitant.
+     *
+     * @return A map of coordinates to Cabin objects with crew
+     */
+    @JsonIgnore
+    public Map<Coordinates, Cabin> getCoordinatesAndCabinsWithCrew() {
+        Map<Coordinates, Cabin> result = new HashMap<>();
+
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                if (isValidPosition(i, j) && shipMatrix[i][j] instanceof Cabin) {
+                    Cabin cabin = (Cabin) shipMatrix[i][j];
+                    if (cabin.hasInhabitants()) {
+                        result.put(new Coordinates(i, j), cabin);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Restituisce una mappa di cabine connesse a moduli di supporto vitale.
+     * Le chiavi sono le coordinate delle cabine, i valori sono gli insiemi dei colori di supporto vitale collegati.
+     */
+    @JsonIgnore
+    public Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport() {
+        Map<Coordinates, Set<ColorLifeSupport>> result = new HashMap<>();
+
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                Component component = shipMatrix[i][j];
+
+                // Verifica se è una cabina (non MainCabin)
+                if (component instanceof Cabin && !(component instanceof MainCabin)) {
+                    Set<ColorLifeSupport> supports = getConnectedLifeSupports(i, j);
+
+                    if (!supports.isEmpty()) {
+                        result.put(new Coordinates(i, j), supports);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Trova tutti i moduli di supporto vitale connessi alla posizione specificata.
+     */
+    private Set<ColorLifeSupport> getConnectedLifeSupports(int x, int y) {
+        Set<ColorLifeSupport> result = new HashSet<>();
+
+        for (Direction direction : Direction.values()) {
+            int[] neighbor = getNeighborCoordinates(x, y, direction);
+            int neighborX = neighbor[0];
+            int neighborY = neighbor[1];
+
+            if (isValidPosition(neighborX, neighborY) && shipMatrix[neighborX][neighborY] instanceof LifeSupport) {
+                // Verifica che i connettori combacino
+                ConnectorType srcConnector = shipMatrix[x][y].getConnectors().get(direction);
+                ConnectorType destConnector = shipMatrix[neighborX][neighborY].getConnectors().get(getOppositeDirection(direction));
+
+                if (areConnectorsCompatible(srcConnector, destConnector)) {
+                    LifeSupport lifeSupport = (LifeSupport) shipMatrix[neighborX][neighborY];
+                    result.add(lifeSupport.getLifeSupportColor());
+                }
+            }
+        }
+
+        //System.out.println("\n " + x + " " + y + " " + result);
+
+        return result;
+    }
+
+    /**
+     * Verifica se un alieno può essere posizionato in una cabina in base ai colori di supporto vitale.
+     */
+    public boolean canAcceptAlien(Coordinates coords, CrewMember alien) {
+        Set<ColorLifeSupport> supports = getConnectedLifeSupports(coords.getX(), coords.getY());
+
+        if (supports.isEmpty()) {
+            return false; // Nessun supporto vitale
+        }
+
+        if (alien == CrewMember.PURPLE_ALIEN) {
+            return supports.contains(ColorLifeSupport.PURPLE);
+        } else if (alien == CrewMember.BROWN_ALIEN) {
+            return supports.contains(ColorLifeSupport.BROWN);
+        }
+
+        return false; // Non è un alieno
+    }
+
+    public MainCabin getMainCabin() {
+        return (MainCabin)shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]];
+    }
 }

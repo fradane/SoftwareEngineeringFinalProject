@@ -4,13 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
+import java.io.Serializable;
 import java.util.Map;
 
 
 /**
  * Represents a battery container component that stores energy units used to power other components.
  */
-public class BatteryBox extends Component {
+public class BatteryBox extends Component{
 
     /** The maximum battery capacity of this battery box. */
     private int maxBatteryCapacity;

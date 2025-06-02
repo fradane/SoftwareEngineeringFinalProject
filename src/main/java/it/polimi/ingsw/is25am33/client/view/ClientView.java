@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.client.view;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
@@ -141,33 +142,33 @@ public interface ClientView {
 
     void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
 
-    BiConsumer<CallableOnGameController, String> showVisitLocationMenu();
-
-    BiConsumer<CallableOnGameController, String> showThrowDicesMenu();
-
-    BiConsumer<CallableOnGameController, String> showChoosePlanetMenu();
-
-    BiConsumer<CallableOnGameController, String> showChooseEnginesMenu();
-
-    BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu();
-
-    BiConsumer<CallableOnGameController, String> showChooseCannonsMenu();
-
-    BiConsumer<CallableOnGameController, String> showSmallDanObjMenu();
-
-    BiConsumer<CallableOnGameController, String> showBigMeteoriteMenu();
-
-    BiConsumer<CallableOnGameController, String> showBigShotMenu();
-
-    BiConsumer<CallableOnGameController, String> showHandleRemoveCrewMembersMenu();
-
-    BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu();
-
-    BiConsumer<CallableOnGameController, String> showEpidemicMenu();
-
-    BiConsumer<CallableOnGameController, String> showStardustMenu();
-
-    BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu();
+//    BiConsumer<CallableOnGameController, String> showVisitLocationMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showThrowDicesMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showChoosePlanetMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showChooseEnginesMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showChooseCannonsMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showSmallDanObjMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showBigMeteoriteMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showBigShotMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showHandleRemoveCrewMembersMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showEpidemicMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showStardustMenu();
+//
+//    BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu();
 
     void showLittleDeck(int littleDeckChoice);
 
@@ -195,7 +196,30 @@ public interface ClientView {
 
     void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts);
 
+    void showVisitLocationMenu();
+    void showThrowDicesMenu();
+    void showChoosePlanetMenu();
+    void showChooseEnginesMenu();
+    void showAcceptTheRewardMenu();
+    void showChooseCannonsMenu();
+    void showSmallDanObjMenu();
+    void showBigMeteoriteMenu();
+    void showBigShotMenu();
+    void showHandleRemoveCrewMembersMenu();
+    void showHandleCubesRewardMenu();
+    void showEpidemicMenu();
+    void showStardustMenu();
+    void showHandleCubesMalusMenu();
+
+
+
     void showFirstToEnter();
 
     void setIsTestFlight(boolean isTestFlight);
+
+    void showCurrentRanking();
+
+    void showCrewPlacementMenu();
+
+    void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips);
 }

@@ -161,6 +161,19 @@ public class Deck {
             allCards.addAll(cards.stream().filter(AdventureCard::isTestFlightCard).toList());
         else
             allCards.addAll(cards);
+
+        // TODO per marco
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+        allCards.addAll(Deck.loadAbandonedShipFromJson());
+        allCards.addAll(Deck.loadAbandonedShipFromJson());
+        allCards.addAll(Deck.loadAbandonedShipFromJson());
+        allCards.addAll(Deck.loadAbandonedShipFromJson());
+        allCards.addAll(Deck.loadAbandonedShipFromJson());
+
     }
 
     /**

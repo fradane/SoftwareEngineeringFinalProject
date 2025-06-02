@@ -26,16 +26,35 @@ public enum GameState implements Serializable {
             if (!gameModel.isTestFlight())
                 gameModel.notifyStopHourglass();
 
+            // First, check all shipboards to identify incorrect components
+            gameModel.getPlayers().values().forEach(player -> {
+                player.getPersonalBoard().checkShipBoard();
+            });
+
+            // After checking all shipboards, send notifications
             gameModel.notifyInvalidShipBoards();
             gameModel.notifyValidShipBoards();
+
+            //Controlla se tutte le navi sono corrette e cambia fase se necessario
+            gameModel.checkAndTransitionToNextPhase();
         }
 
+    },
+
+    PLACE_CREW {
+        @Override
+        public void run(GameModel gameModel) {
+            gameModel.handleCrewPlacementPhase();
+        }
     },
 
     CREATE_DECK {
 
         @Override
         public void run(GameModel gameModel) {
+            //TODO
+            //gameModel.getDeck().mergeIntoGameDeck();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
             gameModel.getDeck().createGameDeck(gameModel.isTestFlight());
         }
 
@@ -47,6 +66,7 @@ public enum GameState implements Serializable {
         public void run(GameModel gameModel) {
             try {
                 gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard());
+                gameModel.setCurrGameState(GameState.PLAY_CARD);
             } catch (EmptyStackException e) {
                 //TODO
                 gameModel.setCurrAdventureCard(null);

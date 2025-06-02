@@ -3,6 +3,8 @@ package it.polimi.ingsw.is25am33.client.controller;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.controller.GameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -14,7 +16,6 @@ import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -264,7 +265,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
                 case "notifyCurrAdventureCard":
                     if (clientController != null) {
-                        clientController.notifyCurrAdventureCard(nickname, notification.getParamString());
+                        clientController.notifyCurrAdventureCard(
+                                nickname,
+                                notification.getParamClientCard(),
+                                notification.getParamBoolean()
+                        );
                     }
                     break;
 
@@ -323,8 +328,9 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     break;
 
                 case "notifyShipBoardUpdate":
+                    //TODO da aggiustare mettondo i componentsPerType
                     if (clientController != null) {
-                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix() );
+                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix(), notification.getParamComponentsPerType());
                     }
                     break;
 
@@ -378,7 +384,8 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                                 nickname,
                                 notification.getParamString(),
                                 notification.getParamShipBoardAsMatrix(),
-                                notification.getParamIncorrectlyPositionedCoordinates()
+                                notification.getParamIncorrectlyPositionedCoordinates(),
+                                notification.getParamComponentsPerType()
                         );
                     }
                     break;
@@ -389,7 +396,8 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                                 nickname,
                                 notification.getParamString(),
                                 notification.getParamShipBoardAsMatrix(),
-                                notification.getParamIncorrectlyPositionedCoordinates()
+                                notification.getParamIncorrectlyPositionedCoordinates(),
+                                notification.getParamComponentsPerType()
                         );
                     }
                     break;
@@ -401,7 +409,75 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                                 notification.getParamString(),
                                 notification.getParamShipBoardAsMatrix(),
                                 notification.getParamIncorrectlyPositionedCoordinates(),
-                                notification.getParamShipParts()
+                                notification.getParamShipParts(),
+                                notification.getParamComponentsPerType()
+                        );
+                    }
+                    break;
+
+                case "notifyCurrAdventureCardUpdate":
+                    if (clientController != null) {
+                        clientController.notifyCurrAdventureCardUpdate(
+                                nickname,
+                                notification.getParamClientCard()
+                        );
+                    }
+                    break;
+
+                case "notifyPlayerVisitedPlanet":
+                    if (clientController != null) {
+                        clientController.notifyPlayerVisitedPlanet(
+                                nickname,
+                                notification.getParamString(),
+                                notification.getParamClientCard()
+                        );
+                    }
+                    break;
+
+                case "notifyCrewPlacementPhase":
+                    if (clientController != null) {
+                        clientController.notifyCrewPlacementPhase(
+                                nickname
+                        );
+                    }
+                    break;
+
+                case "notifyCrewPlacementComplete":
+                    if (clientController != null) {
+                        clientController.notifyCrewPlacementComplete(
+                                nickname,
+                                notification.getParamString(),
+                                notification.getParamShipMatrix(),
+                                notification.getParamComponentsPerType()
+                        );
+                    }
+                    break;
+
+                case "notifyPrefabShipsAvailable":
+                    if (clientController != null) {
+                        clientController.notifyPrefabShipsAvailable(
+                                nickname,
+                                notification.getParamPrefabShips()
+                        );
+                    }
+                    break;
+
+                case "notifyPlayerSelectedPrefabShip":
+                    if (clientController != null) {
+                        clientController.notifyPlayerSelectedPrefabShip(
+                                nickname,
+                                notification.getParamString(),
+                                notification.getParamPrefabShips().get(0)
+                        );
+                    }
+                    break;
+
+                case "notifyPrefabShipSelectionResult":
+                    if (clientController != null) {
+                        clientController.notifyPrefabShipSelectionResult(
+                                nickname,
+                                notification.getParamBoolean(),
+                                notification.getParamString()
                         );
                     }
                     break;
@@ -422,6 +498,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
             }
         } catch (Exception e) {
             System.err.println("Error handling notification: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -491,8 +568,35 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerPlacePlaceholder(String nickname) {
+    public void playerPlacesPawn(String nickname) {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPlacePlaceholder");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void handleClientChoice(String nickname, PlayerChoicesDataStructure choice) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "handleClientChoice");
+        outMessage.setParamChoice(choice);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void submitCrewChoices(String nickname, Map<Coordinates, CrewMember> choices) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "submitCrewChoices");
+        outMessage.setParamCrewChoices(choices);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void requestPrefabShips(String nickname) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "requestPrefabShips");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void requestSelectPrefabShip(String nickname, String prefabShipId) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "requestSelectPrefabShip");
+        outMessage.setParamString(prefabShipId);
         out.println(ClientSerializer.serialize(outMessage));
     }
 
@@ -551,7 +655,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     @Override
     public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords) throws RemoteException{
-        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseCabin");
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseCabins");
         outMessage.setParamCabinCoordinates(cabinCoords);
 
         out.println(ClientSerializer.serialize(outMessage));
