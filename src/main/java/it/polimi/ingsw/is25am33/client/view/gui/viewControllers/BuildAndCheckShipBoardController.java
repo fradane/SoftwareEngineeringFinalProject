@@ -3,6 +3,8 @@ package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import javafx.animation.RotateTransition;
 import javafx.application.Platform;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class BuildAndCheckShipBoardController extends GuiController implements BoardsEventHandler {
 
@@ -66,6 +69,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     @FXML
     public StackPane pawnButtonPane;
     @FXML
+    public Button confirmCrewMemberButton;
+    @FXML
+    public Button pickRandomComponentButton;
+    @FXML
+    public Button visibleComponentButton;
+    @FXML
     private ImageView visibleCard1 = new ImageView();
     @FXML
     private ImageView visibleCard2 = new ImageView();
@@ -92,6 +101,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     private Level2BoardsController boardsController;
     private final int FIXED_COMPONENT_LENGTH = 70;
     private Optional<BiConsumer<Integer, Integer>> correctShipBoardAction = Optional.empty();
+
+    private final Map<Coordinates, Set<ColorLifeSupport>> cabinsWithLifeSupport = new HashMap<>();
+    private final Map<Coordinates, CrewMember> crewMemberChoice = new HashMap<>();
+    private CrewMember currentCrewMemberChoice;
 
     public void initialize() {
 
@@ -201,7 +214,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
             // TODO
             if (shipboard.getBookedComponents().size() == 2 && shipboard.getFocusedComponent() != null) {
-                showMessage("You already have two components booked");
+                showMessage("You already have two components booked", false);
                 return;
             }
 
@@ -226,7 +239,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     private void handleInvalidComponent(int row, int column) {
 
         if (row == 4 && (column == 8 || column == 9)) {
-            showMessage("Remove one of the wrongly placed components");
+            showMessage("Remove one of the wrongly placed components", true);
             return;
         }
 
@@ -234,7 +247,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             this.boardsController.removeHighlightColor();
             clientController.removeComponent(row, column);
         } else
-            showMessage("Remove one of the wrongly placed components");
+            showMessage("Remove one of the wrongly placed components", true);
     }
 
     private void handleShipParts(int row, int column) {
@@ -246,7 +259,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                                     this.boardsController.removeHighlightColor();
                                     clientController.handleShipPartSelection(i + 1);
                                     },
-                                () -> showMessage("Invalid selection, try again")
+                                () -> showMessage("Invalid selection, try again", false)
                         );
     }
 
@@ -330,15 +343,34 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         clientController.endBuildShipBoardPhase();
 
         Platform.runLater(() -> {
-            hourglassBox.setVisible(false);
             visibleComponentsPanel.setVisible(false);
             componentsBoxV.setVisible(false);
             componentsBoxH.setVisible(false);
-            bottomBox.setVisible(false);
+            visibleComponentButton.setVisible(false);
+            visibleComponentButton.setManaged(false);
+            pickRandomComponentButton.setVisible(false);
+            pickRandomComponentButton.setManaged(false);
+            endPhaseButton.setVisible(false);
+            endPhaseButton.setManaged(false);
+            littleDeckComboBox.setVisible(false);
+            littleDeckComboBox.setManaged(false);
         });
     }
 
-    public void showMessage(String message) {
+    public void showMessage(String message, boolean isPersistent) {
+
+        if (isPersistent) {
+            Platform.runLater(() -> {
+                messageLabel.getTransforms().clear();
+                messageLabel.setText(message);
+                messageLabel.setOpacity(1.0);
+            });
+            return;
+        }
+
+        // Stop any ongoing transitions before starting new fade
+        messageLabel.getTransforms().clear();
+
         Platform.runLater(() -> {
             messageLabel.setText(message);
             messageLabel.setOpacity(0.0);
@@ -400,7 +432,9 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                         action.accept(row, column);
                         //correctShipBoardAction = Optional.empty();
                     },
-                    () -> showMessage("This action is not allowed in this phase"));
+                    () -> showMessage("This action is not allowed in this phase", false));
+        else if (clientModel.getGameState() == GameState.PLACE_CREW)
+            handleCrewPlacement(row, column);
     }
 
     public void handlePlacePawnButton() {
@@ -429,5 +463,94 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             componentsBoxH.setVisible(false);
             bottomBox.setVisible(false);
         });
+    }
+
+    public void showCrewPlacementMenu(boolean isPurpleSubmitted) {
+
+        confirmCrewMemberButton.setVisible(true);
+        confirmCrewMemberButton.setManaged(true);
+
+        ShipBoardClient shipBoard = clientModel.getMyShipboard();
+        this.cabinsWithLifeSupport.putAll(shipBoard.getCabinsWithLifeSupport());
+
+        boolean hasPurple = cabinsWithLifeSupport.keySet()
+                .stream()
+                .map(cabinsWithLifeSupport::get)
+                .anyMatch(colors -> colors.contains(ColorLifeSupport.PURPLE));
+
+        boolean hasBrown = cabinsWithLifeSupport.keySet()
+                .stream()
+                .map(cabinsWithLifeSupport::get)
+                .anyMatch(colors -> colors.contains(ColorLifeSupport.BROWN));
+
+        if (hasPurple && !isPurpleSubmitted) {
+            this.currentCrewMemberChoice = CrewMember.PURPLE_ALIEN;
+            showMessage("Select the cabin you want to place the purple alien in then press CONFIRM...", true);
+            cabinsWithLifeSupport.keySet()
+                    .stream()
+                    .filter(coords -> cabinsWithLifeSupport.get(coords).contains(ColorLifeSupport.PURPLE))
+                    .forEach(coords -> boardsController.applyHighlightEffect(coords, Color.PURPLE));
+        } else if (hasBrown) {
+            this.currentCrewMemberChoice = CrewMember.BROWN_ALIEN;
+            showMessage("Select the cabin you want to place the brown alien in then press CONFIRM...", true);
+            cabinsWithLifeSupport.keySet()
+                    .stream()
+                    .filter(coords -> cabinsWithLifeSupport.get(coords).contains(ColorLifeSupport.BROWN))
+                    .forEach(coords -> boardsController.applyHighlightEffect(coords, Color.BROWN));
+        } else {
+            this.currentCrewMemberChoice = CrewMember.BROWN_ALIEN;
+            handleConfirmCrewMemberButton();
+        }
+
+    }
+
+    private void handleCrewPlacement(int row, int column) {
+
+        if (!cabinsWithLifeSupport.containsKey(new Coordinates(row, column)))
+            return;
+
+        boardsController.removeHighlightColor();
+        Coordinates selectedCoords = new Coordinates(row, column);
+
+        if (this.currentCrewMemberChoice == CrewMember.PURPLE_ALIEN) {
+
+            if (this.crewMemberChoice.containsValue(CrewMember.PURPLE_ALIEN)) {
+                Coordinates removedCoords = crewMemberChoice.keySet()
+                        .stream()
+                        .filter(coords -> crewMemberChoice.get(coords) == CrewMember.PURPLE_ALIEN)
+                        .findFirst()
+                        .get();
+                this.boardsController.applyHighlightEffect(removedCoords, Color.PURPLE);
+                this.crewMemberChoice.remove(removedCoords);
+            }
+            this.crewMemberChoice.put(selectedCoords, CrewMember.PURPLE_ALIEN);
+            boardsController.applyHighlightEffect(selectedCoords, Color.GREEN);
+
+        } else if (this.currentCrewMemberChoice == CrewMember.BROWN_ALIEN) {
+
+            if (this.crewMemberChoice.containsValue(CrewMember.BROWN_ALIEN)) {
+                Coordinates removedCoords = crewMemberChoice.keySet()
+                        .stream()
+                        .filter(coords -> crewMemberChoice.get(coords) == CrewMember.BROWN_ALIEN)
+                        .findFirst()
+                        .get();
+                this.boardsController.applyHighlightEffect(removedCoords, Color.BROWN);
+                this.crewMemberChoice.remove(removedCoords);
+            }
+            this.crewMemberChoice.put(selectedCoords, CrewMember.BROWN_ALIEN);
+            boardsController.applyHighlightEffect(selectedCoords, Color.GREEN);
+
+        }
+    }
+
+    public void handleConfirmCrewMemberButton() {
+
+        if (this.currentCrewMemberChoice == CrewMember.PURPLE_ALIEN)
+            showCrewPlacementMenu(true);
+        else {
+            confirmCrewMemberButton.setVisible(false);
+            confirmCrewMemberButton.setManaged(false);
+            clientController.submitCrewChoices(crewMemberChoice);
+        }
     }
 }

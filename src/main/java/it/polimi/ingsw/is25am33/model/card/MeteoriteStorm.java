@@ -24,7 +24,6 @@ public class MeteoriteStorm extends AdventureCard {
 
     public MeteoriteStorm(List<Meteorite> meteorites) {
         this.meteorites = meteorites;
-        this.meteoriteIterator = meteorites.iterator();
     }
 
     @JsonIgnore
@@ -77,6 +76,8 @@ public class MeteoriteStorm extends AdventureCard {
                         throw new RuntimeException(e);
                     }
                 }).toList();
+
+        this.meteoriteIterator = meteorites.iterator();
 
     }
 

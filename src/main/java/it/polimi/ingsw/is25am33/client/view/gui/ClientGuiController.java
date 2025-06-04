@@ -104,7 +104,8 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showCrewPlacementMenu() {
-        //TODO
+        if (buildAndCheckShipBoardController != null)
+            buildAndCheckShipBoardController.showCrewPlacementMenu(false);
     }
 
     @Override
@@ -244,7 +245,7 @@ public class ClientGuiController extends Application implements ClientView {
 
             case BUILD_SHIPBOARD, CHECK_SHIPBOARD:
                 if (buildAndCheckShipBoardController != null) {
-                    buildAndCheckShipBoardController.showMessage(message.split("\n")[0]);
+                    buildAndCheckShipBoardController.showMessage(message.split("\n")[0], false);
                 }
 
         }

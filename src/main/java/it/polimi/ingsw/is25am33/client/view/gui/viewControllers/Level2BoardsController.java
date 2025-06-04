@@ -386,9 +386,11 @@ public class Level2BoardsController {
         dropShadow.setOffsetY(3.0);
 
         featureImageView.setEffect(dropShadow);
+        featureImageView.setFitWidth(40);
+        featureImageView.setPreserveRatio(true);
 
         switch (component.getLabel()) {
-            case "CAB":
+            case "CAB", "MCB":
 
                 List<CrewMember> crewMembers = ((Cabin) component).getInhabitants();
 
@@ -403,7 +405,8 @@ public class Level2BoardsController {
                     featureImage = new Image(Objects.requireNonNull(getClass()
                             .getResourceAsStream("/gui/graphics/crewMembers/brown_alien.png")));
                 } else if (crewMembers.size() == 1) {
-
+                    featureImage = new Image(Objects.requireNonNull(getClass()
+                            .getResourceAsStream("/gui/graphics/crewMembers/human.png")));
                 } else {
 
                 }
@@ -458,6 +461,13 @@ public class Level2BoardsController {
         Button button = buttonMap.get(buttonId);
 
         Platform.runLater(() -> {
+
+            if (shadowedButtons.contains(button)) {
+                shadowedButtons.remove(button);
+                button.setEffect(null);
+                button.getStyleClass().remove("no-hover");
+            }
+
             DropShadow shadow = new DropShadow();
             shadowedButtons.add(button);
             shadow.setColor(color);

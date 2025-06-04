@@ -122,8 +122,9 @@
             <Button fx:id="pickRandomComponentButton" onAction="#handlePickRandomComponentButton" styleClass="action-button" text="Random Component" />
             <Button fx:id="visibleComponentButton" onAction="#handleVisibleComponentButton" styleClass="action-button" text="Visible Component" />
             <Button fx:id="endPhaseButton" onAction="#handleEndPhaseButton" styleClass="action-button" text="End ship building phase" />
+            <Button fx:id="confirmCrewMemberButton" onAction="#handleConfirmCrewMemberButton" styleClass="action-button" text="CONFIRM" visible="false" managed="false"/>
 
-            <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box">
+            <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box" >
                 <items>
                     <FXCollections fx:factory="observableArrayList">
                         <Integer fx:value="1" />

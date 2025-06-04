@@ -55,7 +55,7 @@
                             <ImageView fitWidth="40" preserveRatio="true" >
                                 <Image url="@graphics/crewMembers/brown_alien.png" />
                                 <effect>
-                                    <DropShadow color="black" offsetX="5" offsetY="5" />
+                                    <DropShadow color="black" spread="0.6" radius="15" />
                                 </effect>
                             </ImageView>
                         </StackPane>
