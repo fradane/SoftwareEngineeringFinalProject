@@ -161,6 +161,14 @@ public class Deck {
 //        allCards.addAll(Deck.loadStardustFromJson());
 //        allCards.addAll(Deck.loadWarFieldFromJson());
 
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+
+
 //        allCards.addAll(Deck.loadStardustFromJson());
 //        allCards.addAll(Deck.loadStardustFromJson());
 //        allCards.addAll(Deck.loadStardustFromJson());

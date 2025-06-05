@@ -2,7 +2,11 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
+import it.polimi.ingsw.is25am33.client.model.card.ClientMeteoriteStorm;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.interfaces.ShotSenderCard;
+import it.polimi.ingsw.is25am33.model.component.Cannon;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
@@ -11,7 +15,9 @@ import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
 import it.polimi.ingsw.is25am33.model.component.Shield;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Meteorite;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
+import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
 
@@ -24,7 +30,6 @@ public class MeteoriteStorm extends AdventureCard {
 
     public MeteoriteStorm(List<Meteorite> meteorites) {
         this.meteorites = meteorites;
-        this.meteoriteIterator = meteorites.iterator();
     }
 
     @JsonIgnore
@@ -63,8 +68,11 @@ public class MeteoriteStorm extends AdventureCard {
 
     @Override
     public ClientCard toClientCard() {
-        //TODO
-        return null;
+        List<ClientDangerousObject> clientDangerousObjects = new ArrayList<>();
+        for(Meteorite meteorite : meteorites) {
+            clientDangerousObjects.add(new ClientDangerousObject(meteorite.getDangerousObjType(),meteorite.getDirection(), -1));
+        }
+        return new ClientMeteoriteStorm(this.getCardName(),this.imageName,clientDangerousObjects);
     }
 
     public void convertIdsToMeteorites() {
@@ -77,7 +85,7 @@ public class MeteoriteStorm extends AdventureCard {
                         throw new RuntimeException(e);
                     }
                 }).toList();
-
+        this.meteoriteIterator = meteorites.iterator();
     }
 
     public void setMeteorites(List<Meteorite> meteorites) {
@@ -98,11 +106,16 @@ public class MeteoriteStorm extends AdventureCard {
         this.meteoriteIDs = meteoriteID;
     }
 
-    public void playerDecidedHowToDefendTheirSelvesFromSmallMeteorite(Shield chosenShield, BatteryBox chosenBatteryBox) {
-
+    public void playerDecidedHowToDefendTheirSelvesFromSmallMeteorite(List<Coordinates> chosenShieldsCoords, List<Coordinates> chosenBatteryBoxesCoords) {
+        Shield chosenShield = null;
+        BatteryBox chosenBatteryBox = null;
         ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
-
         DangerousObj currMeteorite = gameModel.getCurrDangerousObj();
+
+        if(!chosenShieldsCoords.isEmpty() && !chosenBatteryBoxesCoords.isEmpty()) {
+            chosenShield = (Shield) personalBoard.getComponentAt(chosenShieldsCoords.getFirst());
+            chosenBatteryBox = (BatteryBox) personalBoard.getComponentAt(chosenBatteryBoxesCoords.getFirst());
+        }
 
         if (personalBoard.isItGoingToHitTheShip(currMeteorite) &&
                 personalBoard.isExposed(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
@@ -116,6 +129,12 @@ public class MeteoriteStorm extends AdventureCard {
 
                 chosenBatteryBox.useBattery();
 
+                Player currentPlayer=gameModel.getCurrPlayer();
+                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
+                });
+
+
             } else {
                 personalBoard.handleDangerousObject(currMeteorite);
             }
@@ -125,17 +144,25 @@ public class MeteoriteStorm extends AdventureCard {
         if(gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
         } else if (meteoriteIterator.hasNext()) {
-            setCurrState( CardState.THROW_DICES);
             gameModel.resetPlayerIterator();
+            setCurrState( CardState.THROW_DICES);
         } else {
             setCurrState( CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
         }
 
     }
 
-    public void playerDecidedHowToDefendTheirSelvesFromBigMeteorite(DoubleCannon chosenDoubleCannon, BatteryBox chosenBatteryBox) {
-
+    public void playerDecidedHowToDefendTheirSelvesFromBigMeteorite(List<Coordinates> chosenDoubleCannonsCoords, List<Coordinates> chosenBatteryBoxesCoords) {
+        Cannon chosenDoubleCannon = null;
+        BatteryBox chosenBatteryBox = null;
         ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
+
+        if(!chosenDoubleCannonsCoords.isEmpty() && !chosenBatteryBoxesCoords.isEmpty()) {
+            chosenDoubleCannon = (Cannon) personalBoard.getComponentAt(chosenDoubleCannonsCoords.getFirst());
+            chosenBatteryBox = (BatteryBox) personalBoard.getComponentAt(chosenBatteryBoxesCoords.getFirst());
+        }
 
         DangerousObj currMeteorite = gameModel.getCurrDangerousObj();
 
@@ -163,10 +190,12 @@ public class MeteoriteStorm extends AdventureCard {
         if(gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
         } else if (meteoriteIterator.hasNext()) {
-            setCurrState( CardState.THROW_DICES);
             gameModel.resetPlayerIterator();
+            setCurrState( CardState.THROW_DICES);
         } else {
             setCurrState( CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
         }
 
     }

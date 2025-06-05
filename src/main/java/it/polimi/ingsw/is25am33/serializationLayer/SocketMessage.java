@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.serializationLayer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -33,7 +34,7 @@ public class SocketMessage {
     private CardState paramCardState;
     private Component paramComponent;
     private Component[][] paramShipBoardAsMatrix;
-    private DangerousObj paramDangerousObj;
+    private ClientDangerousObject paramDangerousObj;
     private List<List<String>> paramLittleVisibleDecks;
     private Map<Integer, Component> paramVisibleComponents;
     private Set<Coordinates> paramIncorrectlyPositionedCoordinates;
@@ -54,7 +55,7 @@ public class SocketMessage {
         this.paramGameState = GameState.SETUP;
         this.paramComponent = new BatteryBox(new HashMap<>(), 0);
         this.paramGameId = "";
-        this.paramDangerousObj = new BigShot(Direction.NORTH);
+        this.paramDangerousObj = new ClientDangerousObject("BigShot", Direction.NORTH,1);
         this.paramActivableCoordinates = new ArrayList<>();
         this.paramBatteryBoxCoordinates = new ArrayList<>();
         this.paramCabinCoordinates = new ArrayList<>();
@@ -206,11 +207,11 @@ public class SocketMessage {
         this.paramCardState = paramCardState;
     }
 
-    public void setParamDangerousObj(DangerousObj paramDangerousObj) {
+    public void setParamDangerousObj(ClientDangerousObject paramDangerousObj) {
         this.paramDangerousObj = paramDangerousObj;
     }
 
-    public DangerousObj getParamDangerousObj() {
+    public ClientDangerousObject getParamDangerousObj() {
         return paramDangerousObj;
     }
 

@@ -261,23 +261,10 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException{
 
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-
-        List<Cannon> cannons = doubleCannonsCoords
-                .stream()
-                .map(shipBoard::getComponentAt)
-                .map(Cannon.class::cast)
-                .toList();
-
-        List<BatteryBox> batteryBoxes = batteryBoxesCoords
-                .stream()
-                .map(shipBoard::getComponentAt)
-                .map(BatteryBox.class::cast)
-                .toList();
 
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenDoubleCannons(cannons)
+                .setChosenDoubleCannons(doubleCannonsCoords)
                 .setChosenBatteryBoxes(batteryBoxesCoords)
                 .build();
 
@@ -303,51 +290,28 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords) throws RemoteException {
+    public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords) throws RemoteException {
 
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-        BatteryBox batteryBox = null;
-        Shield shield = null;
-
-        // check whether the coordinates are valid
-        if (!shieldCoords.isCoordinateInvalid() && !batteryBoxCoords.isCoordinateInvalid()) {
-            shield = ((Shield) shipBoard.getComponentAt(shieldCoords));
-            batteryBox = ((BatteryBox) shipBoard.getComponentAt(batteryBoxCoords));
-        }
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenBatteryBox(batteryBox)
-                .setChosenShield(shield)
+                .setChosenBatteryBoxes(batteryBoxCoords)
+                .setChosenShield(shieldCoords)
                 .build();
 
         gameModel.getCurrAdventureCard().play(choice);
     }
 
     @Override
-    public void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords) {
-
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-        BatteryBox batteryBox = null;
-        DoubleCannon doubleCannon = null;
+    public void playerHandleBigMeteorite(String nickname, List<Coordinates> doubleCannonCoords, List<Coordinates> batteryBoxCoords) {
 
         PlayerChoicesDataStructure choice;
 
-        // check whether the coordinates are valid
-        if (!doubleCannonCoords.isCoordinateInvalid() && !batteryBoxCoords.isCoordinateInvalid()) {
-            doubleCannon = ((DoubleCannon) shipBoard.getComponentAt(doubleCannonCoords));
-            batteryBox = ((BatteryBox) shipBoard.getComponentAt(batteryBoxCoords));
-
             choice = new PlayerChoicesDataStructure
                     .Builder()
-                    .setChosenBatteryBox(batteryBox)
-                    .setChosenDoubleCannon(doubleCannon)
+                    .setChosenBatteryBoxes(batteryBoxCoords)
+                    .setChosenDoubleCannons(doubleCannonCoords)
                     .build();
-        }else {
-            choice = new PlayerChoicesDataStructure
-                    .Builder()
-                    .build();
-        }
 
         gameModel.getCurrAdventureCard().play(choice);
     }

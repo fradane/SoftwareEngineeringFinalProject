@@ -5,6 +5,7 @@ import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
@@ -428,7 +429,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) {
+    public void notifyDangerousObjAttack(String nickname, ClientDangerousObject dangerousObj) {
         clientModel.setCurrDangerousObj(dangerousObj);
         view.showDangerousObj();
     }
@@ -575,8 +576,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         || cardState == CardState.CHOOSE_PLANET
         || cardState == CardState.VISIT_LOCATION
         || cardState == CardState.REMOVE_CREW_MEMBERS
-        || cardState == CardState.CHOOSE_ENGINES;
-       // || cardState == CardState.STARDUST;
+        || cardState == CardState.CHOOSE_ENGINES
+        || cardState == CardState.DANGEROUS_ATTACK;
     }
 
     @Override
@@ -882,23 +883,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords){
-        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
-
-        List<Cannon> cannons = doubleCannonsCoords
-                .stream()
-                .map(shipBoard::getComponentAt)
-                .map(Cannon.class::cast)
-                .toList();
-
-        List<BatteryBox> batteryBoxes = batteryBoxesCoords
-                .stream()
-                .map(shipBoard::getComponentAt)
-                .map(BatteryBox.class::cast)
-                .toList();
 
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenDoubleCannons(cannons)
+                .setChosenDoubleCannons(doubleCannonsCoords)
                 .setChosenBatteryBoxes(batteryBoxesCoords)
                 .build();
 
@@ -960,30 +948,16 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords){
+    public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
-
-        BatteryBox batteryBox = null;
-        Shield shield = null;
 
         PlayerChoicesDataStructure playerChoiceDataStructure;
 
-        // check whether the coordinates are valid
-        if (!shieldCoords.isCoordinateInvalid() && !batteryBoxCoords.isCoordinateInvalid()) {
-            shield = ((Shield) shipBoard.getComponentAt(shieldCoords));
-            batteryBox = ((BatteryBox) shipBoard.getComponentAt(batteryBoxCoords));
-
-            playerChoiceDataStructure = new PlayerChoicesDataStructure
-                    .Builder()
-                    .setChosenBatteryBox(batteryBox)
-                    .setChosenShield(shield)
-                    .build();
-        }else{
-            playerChoiceDataStructure = new PlayerChoicesDataStructure
-                    .Builder()
-                    .build();
-        }
-
+        playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenBatteryBoxes(batteryBoxCoords)
+                .setChosenShield(shieldCoords)
+                .build();
 
         try{
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);
@@ -992,29 +966,16 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords){
+    public void playerHandleBigMeteorite(String nickname, List<Coordinates> doubleCannonCoords, List<Coordinates> batteryBoxCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
-
-        BatteryBox batteryBox = null;
-        DoubleCannon doubleCannon = null;
 
         PlayerChoicesDataStructure playerChoiceDataStructure;
 
-        // check whether the coordinates are valid
-        if (!doubleCannonCoords.isCoordinateInvalid() && !batteryBoxCoords.isCoordinateInvalid()) {
-            doubleCannon = ((DoubleCannon) shipBoard.getComponentAt(doubleCannonCoords));
-            batteryBox = ((BatteryBox) shipBoard.getComponentAt(batteryBoxCoords));
-
             playerChoiceDataStructure = new PlayerChoicesDataStructure
                     .Builder()
-                    .setChosenBatteryBox(batteryBox)
-                    .setChosenDoubleCannon(doubleCannon)
+                    .setChosenBatteryBoxes(batteryBoxCoords)
+                    .setChosenDoubleCannons(doubleCannonCoords)
                     .build();
-        }else {
-            playerChoiceDataStructure = new PlayerChoicesDataStructure
-                    .Builder()
-                    .build();
-        }
 
         try{
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);

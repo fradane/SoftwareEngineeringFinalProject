@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.enumFiles;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -75,8 +76,8 @@ public enum CardState {
     DANGEROUS_ATTACK {
         @Override
         public void showRelatedMenu(ClientView view) {
-            DangerousObj currDangerousObject = view.getClientModel().getCurrDangerousObj();
-            String type = currDangerousObject.getDangerousObjType();
+            ClientDangerousObject currDangerousObject = view.getClientModel().getCurrDangerousObj();
+            String type = currDangerousObject.getType();
 
             if (type.contains("SmallMeteorite") || type.contains("SmallShot")) {
                 view.showSmallDanObjMenu();
@@ -150,8 +151,8 @@ public enum CardState {
         public void showRelatedMenu(ClientView view) {
             // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
         }
+
     };
 
-    //public abstract BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view);
     public abstract void showRelatedMenu(ClientView view);
 }

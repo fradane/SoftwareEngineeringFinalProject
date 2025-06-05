@@ -39,9 +39,9 @@ public interface CallableOnGameController extends Remote {
 
     void playerWantsToAcceptTheReward(String nickname, Boolean choice) throws IOException;
 
-    void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords) throws IOException;
+    void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords) throws IOException;
 
-    void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords) throws IOException;
+    void playerHandleBigMeteorite(String nickname, List<Coordinates> doubleCannonCoords, List<Coordinates> batteryBoxCoords) throws IOException;
 
     void playerHandleBigShot(String nickname) throws IOException;
 

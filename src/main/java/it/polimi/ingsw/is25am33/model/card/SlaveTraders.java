@@ -65,9 +65,14 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
         this.crewMalus = crewMalus;
     }
 
-    private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
+    private void currPlayerChoseCannonsToActivate(List<Coordinates> chosenDoubleCannonsCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
 
         List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
+        List<Cannon> chosenDoubleCannons = new ArrayList<>();
+
+        for(Coordinates chosenDoubleCannonCoord : chosenDoubleCannonsCoords) {
+            chosenDoubleCannons.add((Cannon) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenDoubleCannonCoord));
+        }
         for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
             chosenBatteryBoxes.add((BatteryBox) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
         }

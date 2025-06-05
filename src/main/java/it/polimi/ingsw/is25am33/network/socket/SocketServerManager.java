@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.network.socket;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
@@ -233,11 +234,11 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 break;
 
             case "playerHandleSmallMeteorite":
-                gameControllers.get(nickname).playerHandleSmallDanObj(nickname, inMessage.getParamActivableCoordinates().getFirst(), inMessage.getParamBatteryBoxCoordinates().getFirst());
+                gameControllers.get(nickname).playerHandleSmallDanObj(nickname, inMessage.getParamActivableCoordinates(), inMessage.getParamBatteryBoxCoordinates());
                 break;
 
             case "playerHandleBigMeteorite":
-                gameControllers.get(nickname).playerHandleBigMeteorite(nickname, inMessage.getParamActivableCoordinates().getFirst(), inMessage.getParamBatteryBoxCoordinates().getFirst());
+                gameControllers.get(nickname).playerHandleBigMeteorite(nickname, inMessage.getParamActivableCoordinates(), inMessage.getParamBatteryBoxCoordinates());
                 break;
 
             case "playerHandleBigShot":
@@ -407,7 +408,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws IOException{
+    public void notifyDangerousObjAttack(String nickname, ClientDangerousObject dangerousObj) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyDangerousObjAttack");
         outMessage.setParamDangerousObj(dangerousObj);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));

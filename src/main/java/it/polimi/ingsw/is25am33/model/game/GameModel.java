@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.model.game;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -170,7 +171,7 @@ public class GameModel {
     }
 
     public static int throwDices() {
-        return (int) (Math.random() * 12) + 1;
+        return (int) (Math.random() * 11) + 1;
     }
 
     public DangerousObj getCurrDangerousObj() {
@@ -182,7 +183,7 @@ public class GameModel {
         this.currDangerousObj = dangerousObj;
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyDangerousObjAttack(nicknameToNotify, currDangerousObj);
+                clientController.notifyDangerousObjAttack(nicknameToNotify, new ClientDangerousObject(currDangerousObj.getDangerousObjType(),currDangerousObj.getDirection(),currDangerousObj.getCoordinate()));
         });
 
     }
@@ -432,7 +433,10 @@ public class GameModel {
         synchronized (stateTransitionLock){
             if (areAllShipsCorrect()) {
                 // Cambia allo stato successivo
-                setCurrGameState(GameState.CREATE_DECK);
+                if(currGameState==GameState.CHECK_SHIPBOARD)
+                    setCurrGameState(GameState.CREATE_DECK);
+                else
+                    setCurrGameState(GameState.DRAW_CARD);
             }
         }
     }

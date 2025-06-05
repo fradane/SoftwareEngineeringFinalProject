@@ -24,10 +24,8 @@ public class PlayerChoicesDataStructure implements Serializable {
     private final List<Cabin> chosenCabins;
     private final List<Storage> chosenStorage;
     private final boolean hasAcceptedTheReward;
-    private final Shield chosenShield;
-    private final BatteryBox chosenBatteryBox;
-    private final DoubleCannon chosenDoubleCannon;
-    private final List<Cannon> chosenDoubleCannons;
+    private final List<Coordinates> chosenShields;
+    private final List<Coordinates> chosenDoubleCannons;
 
     private PlayerChoicesDataStructure(Builder builder) {
         this.chosenDoubleEngines = builder.chosenDoubleEngines;
@@ -37,9 +35,7 @@ public class PlayerChoicesDataStructure implements Serializable {
         this.chosenCabins = builder.chosenCabins;
         this.chosenStorage = builder.chosenStorage;
         this.hasAcceptedTheReward = builder.hasAcceptedTheReward;
-        this.chosenShield = builder.chosenShield;
-        this.chosenBatteryBox = builder.chosenBatteryBox;
-        this.chosenDoubleCannon = builder.chosenDoubleCannon;
+        this.chosenShields = builder.chosenShields;
         this.chosenDoubleCannons = builder.chosenDoubleCannons;
     }
 
@@ -111,8 +107,8 @@ public class PlayerChoicesDataStructure implements Serializable {
      *
      * @return an {@link Optional} containing the chosen {@link Shield} component, or empty if not set.
      */
-    public Optional<Shield> getChosenShield() {
-        return Optional.ofNullable(chosenShield);
+    public Optional<List<Coordinates>> getChosenShield() {
+        return Optional.ofNullable(chosenShields);
     }
 
     /**
@@ -120,25 +116,25 @@ public class PlayerChoicesDataStructure implements Serializable {
      *
      * @return an {@link Optional} containing the chosen {@link BatteryBox} component, or empty if not set.
      */
-    public Optional<BatteryBox> getChosenBatteryBox() {
-        return Optional.ofNullable(chosenBatteryBox);
-    }
+//    public Optional<BatteryBox> getChosenBatteryBox() {
+//        return Optional.ofNullable(chosenBatteryBox);
+//    }
 
     /**
      * Returns the double cannon selected by the player, if any.
      *
      * @return an {@link Optional} containing the chosen {@link DoubleCannon} component, or empty if not set.
      */
-    public Optional<DoubleCannon> getChosenDoubleCannon() {
-        return Optional.ofNullable(chosenDoubleCannon);
-    }
+//    public Optional<DoubleCannon> getChosenDoubleCannon() {
+//        return Optional.ofNullable(chosenDoubleCannon);
+//    }
 
     /**
      * Returns the list of double cannons selected by the player, if any.
      *
      * @return an {@link Optional} containing the list of chosen {@link Cannon} components, or empty if not set.
      */
-    public Optional<List<Cannon>> getChosenDoubleCannons() {
+    public Optional<List<Coordinates>> getChosenDoubleCannons() {
         return Optional.ofNullable(chosenDoubleCannons);
     }
 
@@ -154,10 +150,8 @@ public class PlayerChoicesDataStructure implements Serializable {
         private List<Cabin> chosenCabins;
         private List<Storage> chosenStorage;
         private boolean hasAcceptedTheReward;
-        private Shield chosenShield;
-        private BatteryBox chosenBatteryBox;
-        private DoubleCannon chosenDoubleCannon;
-        private List<Cannon> chosenDoubleCannons;
+        private List<Coordinates> chosenShields;
+        private List<Coordinates> chosenDoubleCannons;
         /**
          * Sets the list of double engines selected by the player.
          *
@@ -238,11 +232,11 @@ public class PlayerChoicesDataStructure implements Serializable {
         /**
          * Sets the shield selected by the player.
          *
-         * @param chosenShield the chosen {@link Shield} component.
+         * @param chosenShields the chosen {@link Shield} component.
          * @return this builder instance for method chaining.
          */
-        public Builder setChosenShield(Shield chosenShield) {
-            this.chosenShield = chosenShield;
+        public Builder setChosenShield(List<Coordinates> chosenShields) {
+            this.chosenShields = chosenShields;
             return this;
         }
 
@@ -252,10 +246,10 @@ public class PlayerChoicesDataStructure implements Serializable {
          * @param chosenBatteryBox the chosen {@link BatteryBox} component.
          * @return this builder instance for method chaining.
          */
-        public Builder setChosenBatteryBox(BatteryBox chosenBatteryBox) {
-            this.chosenBatteryBox = chosenBatteryBox;
-            return this;
-        }
+//        public Builder setChosenBatteryBox(BatteryBox chosenBatteryBox) {
+//            this.chosenBatteryBox = chosenBatteryBox;
+//            return this;
+//        }
 
         /**
          * Sets the double cannon selected by the player.
@@ -263,10 +257,10 @@ public class PlayerChoicesDataStructure implements Serializable {
          * @param chosenDoubleCannon the chosen {@link DoubleCannon} component.
          * @return this builder instance for method chaining.
          */
-        public Builder setChosenDoubleCannon(DoubleCannon chosenDoubleCannon) {
-            this.chosenDoubleCannon = chosenDoubleCannon;
-            return this;
-        }
+//        public Builder setChosenDoubleCannon(DoubleCannon chosenDoubleCannon) {
+//            this.chosenDoubleCannon = chosenDoubleCannon;
+//            return this;
+//        }
 
         /**
          * Sets the list of double cannons selected by the player.
@@ -274,7 +268,7 @@ public class PlayerChoicesDataStructure implements Serializable {
          * @param chosenDoubleCannons the list of chosen {@link Cannon} components.
          * @return this builder instance for method chaining.
          */
-        public Builder setChosenDoubleCannons(List<Cannon> chosenDoubleCannons) {
+        public Builder setChosenDoubleCannons(List<Coordinates> chosenDoubleCannons) {
             this.chosenDoubleCannons = chosenDoubleCannons;
             return this;
         }

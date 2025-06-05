@@ -574,19 +574,19 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords) throws RemoteException{
+    public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "playerHandleSmallMeteorite");
-        outMessage.setParamActivableCoordinates(List.of(shieldCoords));
-        outMessage.setParamBatteryBoxCoordinates(List.of(batteryBoxCoords));
+        outMessage.setParamActivableCoordinates(shieldCoords);
+        outMessage.setParamBatteryBoxCoordinates(batteryBoxCoords);
 
         out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
-    public void playerHandleBigMeteorite(String nickname, Coordinates doubleCannonCoords, Coordinates batteryBoxCoords) throws RemoteException {
+    public void playerHandleBigMeteorite(String nickname, List<Coordinates> doubleCannonCoords, List<Coordinates> batteryBoxCoords) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerHandleBigMeteorite");
-        outMessage.setParamActivableCoordinates(List.of(doubleCannonCoords));
-        outMessage.setParamBatteryBoxCoordinates(List.of(batteryBoxCoords));
+        outMessage.setParamActivableCoordinates(doubleCannonCoords);
+        outMessage.setParamBatteryBoxCoordinates(batteryBoxCoords);
 
         out.println(ClientSerializer.serialize(outMessage));
     }

@@ -22,7 +22,7 @@ public class SmallMeteorite extends Meteorite {
 
     @Override
     public void startAttack(PlayerChoicesDataStructure playerChoices, MeteoriteStorm card) {
-        card.playerDecidedHowToDefendTheirSelvesFromSmallMeteorite(playerChoices.getChosenShield().orElseThrow(), playerChoices.getChosenBatteryBox().orElseThrow());
+        card.playerDecidedHowToDefendTheirSelvesFromSmallMeteorite(playerChoices.getChosenShield().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
     }
 
     @Override

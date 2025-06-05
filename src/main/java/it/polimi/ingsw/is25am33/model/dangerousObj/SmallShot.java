@@ -20,7 +20,7 @@ public class SmallShot extends Shot {
 
     @Override
     public void startAttack(PlayerChoicesDataStructure playerChoices, ShotSenderCard card) {
-        card.playerDecidedHowToDefendTheirSelvesFromSmallShot(playerChoices.getChosenShield().orElseThrow(), playerChoices.getChosenBatteryBox().orElseThrow());
+        card.playerDecidedHowToDefendTheirSelvesFromSmallShot(playerChoices.getChosenShield().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
     }
 
     @Override

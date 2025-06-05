@@ -101,9 +101,15 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
     }
 
-    private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
+    private void currPlayerChoseCannonsToActivate(List<Coordinates> chosenDoubleCannonsCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
 
         List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
+        List<Cannon> chosenDoubleCannons = new ArrayList<>();
+
+        for(Coordinates chosenDoubleCannonCoord : chosenDoubleCannonsCoords) {
+            chosenDoubleCannons.add((Cannon) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenDoubleCannonCoord));
+        }
+
         for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
             chosenBatteryBoxes.add((BatteryBox) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
         }
@@ -157,10 +163,11 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
     }
 
     @Override
-    public void playerDecidedHowToDefendTheirSelvesFromSmallShot(Shield chosenShield, BatteryBox chosenBatteryBox) {
+    public void playerDecidedHowToDefendTheirSelvesFromSmallShot(List<Coordinates> chosenShieldsCoords, List<Coordinates> chosenBatteryBoxesCoords) {
 
         ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
-
+        Shield chosenShield= (Shield) personalBoard.getComponentAt(chosenShieldsCoords.getFirst());
+        BatteryBox chosenBatteryBox = (BatteryBox) personalBoard.getComponentAt(chosenBatteryBoxesCoords.getFirst());
         DangerousObj currShot = gameModel.getCurrDangerousObj();
 
         if (personalBoard.isItGoingToHitTheShip(currShot)) {

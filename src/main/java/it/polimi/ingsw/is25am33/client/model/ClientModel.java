@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.client.model;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -18,7 +19,7 @@ public class ClientModel {
     private ClientCard currAdventureCard;
     private CardState currCardState;
     private GameState gameState;
-    private DangerousObj currDangerousObj;
+    private ClientDangerousObject currDangerousObj;
     private String currentPlayer;
     private Map<Integer, Component> visibleComponents = new ConcurrentHashMap<>();
     private List<List<String>> littleVisibleDecks = new ArrayList<>();
@@ -77,7 +78,7 @@ public class ClientModel {
         return currAdventureCard;
     }
 
-    public void setCurrDangerousObj(DangerousObj currDangerousObj) {
+    public void setCurrDangerousObj(ClientDangerousObject currDangerousObj) {
         this.currDangerousObj = currDangerousObj;
     }
 
@@ -120,7 +121,7 @@ public class ClientModel {
         this.visibleComponents = visibleComponents;
     }
 
-    public DangerousObj getCurrDangerousObj() {
+    public ClientDangerousObject getCurrDangerousObj() {
         return currDangerousObj;
     }
 

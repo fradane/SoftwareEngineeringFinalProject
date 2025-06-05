@@ -53,7 +53,7 @@ public class ClientCLIView implements ClientView {
     private List<Coordinates> selectedCabins = new ArrayList<>();
     private List<Coordinates> selectedCannons = new ArrayList<>();
     private List<Coordinates> selectedBatteries = new ArrayList<>();
-    private Coordinates selectedShield = null;
+    private List<Coordinates> selectedShields = new ArrayList<>();
     private Coordinates currentSelection = null;
     private boolean waitingForBatterySelection = false;
     private StorageSelectionManager storageManager = null;
@@ -519,9 +519,9 @@ public class ClientCLIView implements ClientView {
 //            case "SMUGGLERS":
 //                displaySmugglersInfo((ClientSmugglers) card, output);
 //                break;
-//            case "MeteoriteStorm":
-//                displayMeteoriteStormInfo((ClientMeteoriteStorm) card, output);
-//                break;
+            case "MeteoriteStorm":
+                displayMeteoriteStormInfo((ClientMeteoriteStorm) card, output);
+                break;
             case "FreeSpace":
                 displayFreeSpaceInfo((ClientFreeSpace) card, output);
                break;
@@ -615,18 +615,17 @@ public class ClientCLIView implements ClientView {
 //        output.append("\n");
 //    }
 
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayMeteoriteStormInfo(ClientMeteoriteStorm storm, StringBuilder output) {
-//        output.append("Meteorites: ").append(storm.getMeteoriteCount()).append("\n");
-//
-//        if (!storm.getMeteorites().isEmpty()) {
-//            output.append("\nMeteorite Details:\n");
-//            for (int i = 0; i < storm.getMeteorites().size(); i++) {
-//                ClientDangerousObject meteorite = storm.getMeteorites().get(i);
-//                output.append("  Meteorite ").append(i + 1).append(": ").append(meteorite.getDisplayString()).append("\n");
-//            }
-//        }
-//    }
+    private void displayMeteoriteStormInfo(ClientMeteoriteStorm storm, StringBuilder output) {
+        output.append("ATTENCTION! There are ").append(storm.getMeteoriteCount()).append(" meteorites.").append("\n");
+
+        if (!storm.getMeteorites().isEmpty()) {
+            output.append("\nMeteorite Details:\n");
+            for (int i = 0; i < storm.getMeteorites().size(); i++) {
+                ClientDangerousObject meteorite = storm.getMeteorites().get(i);
+                output.append("  Meteorite ").append(i + 1).append(": ").append(meteorite.getType()).append(" "+ meteorite.getDirection()).append("\n");
+            }
+        }
+    }
 
     private void displayFreeSpaceInfo(ClientFreeSpace freeSpace, StringBuilder output) {
         output.append("Free movement through space using engines\n");
@@ -680,7 +679,7 @@ public class ClientCLIView implements ClientView {
         selectedEngines.clear();
         selectedCannons.clear();
         selectedBatteries.clear();
-        selectedShield = null;
+        selectedShields.clear();
         currentSelection = null;
 
         showMessage(String.format("""
@@ -745,12 +744,12 @@ public class ClientCLIView implements ClientView {
                 return ClientState.THROW_DICES_MENU;
             case DANGEROUS_ATTACK:
                 // Determine specific type based on dangerous object
-                DangerousObj obj = clientModel.getCurrDangerousObj();
+                ClientDangerousObject obj = clientModel.getCurrDangerousObj();
                 if (obj != null) {
-                    String type = obj.getDangerousObjType();
+                    String type = obj.getType();
                     if (type.contains("Small")) {
                         return ClientState.HANDLE_SMALL_DANGEROUS_MENU;
-                    } else if (type.contains("BigMeteorite")) {
+                    } else if (type.contains("bigMeteorite")) {
                         return ClientState.HANDLE_BIG_METEORITE_MENU;
                     } else if (type.contains("BigShot")) {
                         return ClientState.HANDLE_BIG_SHOT_MENU;
@@ -1327,7 +1326,10 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showThrowDicesMenu() {
-        setClientState(ClientState.THROW_DICES_MENU);
+        if(clientModel.isMyTurn())
+            setClientState(ClientState.THROW_DICES_MENU);
+        else
+            setClientState(WAIT_THE_FIRST_PLAYER);
 
         ClientCard card = clientModel.getCurrAdventureCard();
         if (card.getCardType().equals("Pirates") ||card.getCardType().equals("SlaveTraders")) {
@@ -1335,8 +1337,14 @@ public class ClientCLIView implements ClientView {
         } else if (card.getCardType().equals("MeteoriteStorm")) {
             showMessage("\nMeteors are heading your way!", STANDARD);
         }
-
-        showMessage("Press Enter to throw dice and see where they hit...", ASK);
+        if(clientModel.isMyTurn()) {
+            setClientState(ClientState.THROW_DICES_MENU);
+            showMessage("Press Enter to throw dice and see where they hit...", ASK);
+        }
+        else {
+            setClientState(WAIT_THE_FIRST_PLAYER);
+            showMessage("The first player is throwing dices, wait...", STANDARD);
+        }
     }
 
     /**
@@ -1381,33 +1389,25 @@ public class ClientCLIView implements ClientView {
         this.showMyShipBoard();
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleEngines().isEmpty() ) {
             showMessage("No double engines available.", STANDARD);
-            showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i motori singoli", STANDARD);
-            showMessage("ATTENZIONE! se la tua shipBoard non ha potenza motrice sarai elimato!", ERROR);
+            showMessage("You can use only single engine", STANDARD);
+            showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
             clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
             return;
         }
 
         if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
             showMessage("No battery boxes available so you can't activate double engine.", STANDARD);
-            showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i motori singoli", STANDARD);
-            showMessage("ATTENZIONE! se la tua shipBoard non ha potenza motrice sarai elimato!", ERROR);
+            showMessage("You can use only single engine", STANDARD);
+            showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
             clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
             return;
         }
-        //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
-        Boolean thereIsAvilableBattery = false;
-        List<BatteryBox> batteryBoxes = clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes();
-        for (BatteryBox batteryBox : batteryBoxes) {
-            if (batteryBox.getRemainingBatteries() >=1) {
-                thereIsAvilableBattery = true;
-                break;
-            }
-        }
 
-        if(!thereIsAvilableBattery) {
+        //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
+        if(!isThereAvailableBattery()) {
             showMessage("Hai finito le batterie coglione so you can't activate double engine.", STANDARD);
-            showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i motori singoli", STANDARD);
-            showMessage("ATTENZIONE! se la tua shipBoard non ha potenza motrice sarai elimato!", ERROR);
+            showMessage("You can use only single engine", STANDARD);
+            showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
             clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
             return;
         }
@@ -1477,16 +1477,39 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showSmallDanObjMenu() {
-//        setClientState(ClientState.HANDLE_SMALL_DANGEROUS_MENU);
-//
-//        String dangerObj = clientModel.getCurrDangerousObj().getDangerousObjType();
-//        showMessage("\n" + dangerObj + " incoming!", STANDARD);
-//
-//        // Show ship to visualize shields
-//        this.showMyShipBoard();
-//
-//        showMessage("You can activate a shield or let the object hit your ship.", STANDARD);
-//        showMessage("Enter coordinates of a shield (row column) or 'none' to skip: ", ASK);
+        //setClientState(ClientState.HANDLE_SMALL_DANGEROUS_MENU);
+
+        showMessage("\n" + clientModel.getCurrDangerousObj().getType()+ " incoming!", STANDARD);
+
+        // Show ship to visualize shields
+        this.showMyShipBoard();
+
+        if(clientModel.getShipboardOf(clientController.getNickname()).getShields().isEmpty() ) {
+            showMessage("No shield available.", STANDARD);
+            showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
+            clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
+            return;
+        }
+
+        if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
+            showMessage("No battery boxes available so you can't activate shield.", STANDARD);
+            showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
+            clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
+            return;
+        }
+
+        //se non ci sono batterie disponibili nei box allora non puoi attivare nessuno scudo
+        if(!isThereAvailableBattery()) {
+            showMessage("Hai finito le batterie coglione so you can't activate shield.", STANDARD);
+            showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
+            clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
+            return;
+        }
+
+
+        showMessage("You can activate a shield or let the object hit your ship.", STANDARD);
+        showMessage("Enter coordinates of a shield (row column) or 'done' to skip: ", ASK);
+
     }
 
     @Override
@@ -1498,8 +1521,30 @@ public class ClientCLIView implements ClientView {
         // Show ship to visualize cannons
         this.showMyShipBoard();
 
+        if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleCannons().isEmpty() ) {
+            showMessage("No double Cannon available.", STANDARD);
+            showMessage("ATTENTION! You can defend only with single cannon!", NOTIFICATION_INFO);
+            clientController.playerHandleBigMeteorite(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            return;
+        }
+
+        if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
+            showMessage("No battery boxes available so you can't activate Double Cannons.", STANDARD);
+            showMessage("ATTENTION! You can defend only with single cannon!", NOTIFICATION_INFO);
+            clientController.playerHandleBigMeteorite(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            return;
+        }
+
+        //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
+        if(!isThereAvailableBattery()) {
+            showMessage("Hai finito le batterie coglione so you can't activate double Cannon.", STANDARD);
+            showMessage("You can use only single Cannon", STANDARD);
+            clientController.playerHandleBigMeteorite(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            return;
+        }
+
         showMessage("You can use a double cannon to destroy it or let it hit your ship.", STANDARD);
-        showMessage("Enter coordinates of a double cannon (row column) or 'none' to skip: ", ASK);
+        showMessage("Enter coordinates of a double cannon (row column) or 'done' to skip: ", ASK);
     }
 
     @Override
@@ -2297,8 +2342,8 @@ public class ClientCLIView implements ClientView {
             }
 
             if(selectedEngines.contains(coords)) {
-                showMessage("Motore già selezionato", ERROR);
-                showMessage("Selezionare un altro motore o 'done' per confermare", ASK);
+                showMessage("Engine already selected", ERROR);
+                showMessage("Select another one or 'done' to confirm", ASK);
                 return;
             }
 
@@ -2311,7 +2356,7 @@ public class ClientCLIView implements ClientView {
         }
     }
 
-    private void handleBatterySelectionForEngines(String input){
+    private void handleBatterySelection(String input){
         try {
             Coordinates coords = parseCoordinates(input);
             if (coords == null) return;
@@ -2321,7 +2366,7 @@ public class ClientCLIView implements ClientView {
 
             if (component == null || !shipBoard.getBatteryBoxes().contains(component)) {
                 showMessage("No battery box at these coordinates.", ERROR);
-                showMessage("Selezionare un'altra batteria o 'done' per confermare", ASK);
+                showMessage("Select another one or 'done' to confirm", ASK);
                 return;
             }
 
@@ -2330,7 +2375,6 @@ public class ClientCLIView implements ClientView {
 
             //se quel box non contiene batterie non posso selezionarlo
             if(batteryBox.getRemainingBatteries()==0){
-                setClientState(CHOOSE_ENGINES_SELECT_BATTERY);
                 showMessage("This batteryBox is empty!", ERROR);
                 showMessage("Please select another one or 'cancel' to cancel the choise", ASK);
                 return;
@@ -2345,15 +2389,35 @@ public class ClientCLIView implements ClientView {
             }
 
             if(batteryBox.getRemainingBatteries()==frequency){
-                showMessage("hai già selezionato gtutte le batterie disponibili in questo batteryBox", ERROR);
+                showMessage("This battery box is empty", ERROR);
                 showMessage("Please select another one or 'cancel' to cancel the choise", ASK);
                 return;
             }
 
             // Aggiungi la batteria e torna alla selezione del motore
             selectedBatteries.add(coords);
-            showMessage("Engine and battery selected. Enter another engine or 'done' to finish: ", ASK);
-            setClientState(ClientState.CHOOSE_ENGINES_MENU);
+
+            if(clientState==CHOOSE_ENGINES_SELECT_BATTERY){
+                showMessage("Engine and battery selected. Enter another engine or 'done' to finish: ", ASK);
+                setClientState(CHOOSE_ENGINES_MENU);
+                return;
+            }
+
+            if(clientState==HANDLE_SMALL_DANGEROUS_SELECT_BATTERY) {
+                showMessage("Shield and battery selected", STANDARD);
+                    clientController.playerHandleSmallDanObj(clientController.getNickname(), selectedShields, selectedBatteries);
+                    selectedShields.clear();
+                    selectedBatteries.clear();
+                return;
+            }
+
+            if(clientState== CHOOSE_CANNONS_SELECT_BATTERY_BIGMETEORITE){
+                showMessage("Double Cannon and battery selected", STANDARD);
+                clientController.playerHandleBigMeteorite(clientController.getNickname(), selectedCannons, selectedBatteries);
+                selectedCannons.clear();
+                selectedBatteries.clear();
+            }
+
         } catch (Exception e) {
             showMessage("Error processing coordinates: " + e.getMessage(), ERROR);
         }
@@ -2375,7 +2439,11 @@ public class ClientCLIView implements ClientView {
             // Passa alla selezione della batteria
             selectedCannons.add(coords);
             showMessage("Now select a battery box for this cannon (row column): ", ASK);
-            setClientState(ClientState.CHOOSE_CANNONS_SELECT_BATTERY);
+
+            if(clientState==ClientState.HANDLE_BIG_METEORITE_MENU){
+                setClientState(CHOOSE_CANNONS_SELECT_BATTERY_BIGMETEORITE);
+            }
+
         } catch (Exception e) {
             showMessage("Error processing coordinates: " + e.getMessage(), ERROR);
         }
@@ -2395,7 +2463,7 @@ public class ClientCLIView implements ClientView {
             }
 
             // Passa alla selezione della batteria
-            selectedShield = coords;
+            selectedShields.add( coords);
             showMessage("Now select a battery box for this shield (row column): ", ASK);
             setClientState(ClientState.HANDLE_SMALL_DANGEROUS_SELECT_BATTERY);
         } catch (Exception e) {
@@ -2925,11 +2993,12 @@ public class ClientCLIView implements ClientView {
 
 
                 case CHOOSE_ENGINES_MENU:
+
                     if (input.equalsIgnoreCase("done")) {
 
                         if (selectedEngines.isEmpty()) {
                             showMessage("You didn't select any engine.", STANDARD);
-                            showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i motori singoli", STANDARD);
+                            showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i tuoi motori singoli", STANDARD);
                         }
 
                         clientController.playerChoseDoubleEngines(
@@ -2940,6 +3009,7 @@ public class ClientCLIView implements ClientView {
                     } else {
                         handleEngineSelection(input);
                     }
+
                     break;
 
                 case ACCEPT_REWARD_MENU:
@@ -2953,20 +3023,35 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case HANDLE_SMALL_DANGEROUS_MENU:
-                    //TODO controllare che numero di batterie e cannoni sono in numero uguale, forse già fatto all'interno di handleShipSelection
-                    if (input.equalsIgnoreCase("none")) {
+
+                    if (input.equalsIgnoreCase("done")){
+
+                        if(selectedShields.isEmpty()){
+                            showMessage("You didn't select any shield. The meteorite hits your ship", STANDARD);
+                        }
                         clientController.playerHandleSmallDanObj(
-                                clientController.getNickname(), new Coordinates(-1, -1), new Coordinates(-1, -1));
-                    } else {
+                                clientController.getNickname(), selectedShields, selectedBatteries);
+
+                        selectedBatteries.clear();
+                        selectedShields.clear();
+                    }
+                    else {
                         handleShieldSelection(input);
                     }
                     break;
 
                 case HANDLE_BIG_METEORITE_MENU:
-                    if (input.equalsIgnoreCase("none")) {
+
+                    if (input.equalsIgnoreCase("done")){
+
+                        if(selectedCannons.isEmpty()){
+                            showMessage("You didn't select any cannon. The meteorite hits your ship", STANDARD);
+                        }
+
                         clientController.playerHandleBigMeteorite(
-                                clientController.getNickname(), new Coordinates(-1, -1), new Coordinates(-1, -1));
-                    } else {
+                                clientController.getNickname(), selectedCannons, selectedBatteries);
+                    }
+                    else {
                         handleCannonSelection(input);
                     }
                     break;
@@ -2998,7 +3083,7 @@ public class ClientCLIView implements ClientView {
                     handleCannonSelection(input);
                     break;
                 case CHOOSE_CANNONS_SELECT_BATTERY:
-                   // handleBatterySelectionForCannon(input);
+                   handleBatterySelection(input);
                     break;
                 case CHOOSE_ENGINES_SELECT_BATTERY:
                     if (input.equalsIgnoreCase("cancel")) {
@@ -3008,7 +3093,31 @@ public class ClientCLIView implements ClientView {
                         showMessage("Please choose an engine or 'done' to confirm.", ASK);
                     }
                     else {
-                        handleBatterySelectionForEngines(input);
+                        handleBatterySelection(input);
+                    }
+                    break;
+
+                case HANDLE_SMALL_DANGEROUS_SELECT_BATTERY:
+                    if (input.equalsIgnoreCase("cancel")) {
+                        selectedShields.clear();
+                        showMessage("You canceled the last chosen shield.", STANDARD);
+                        setClientState(HANDLE_SMALL_DANGEROUS_MENU);
+                        showMessage("Please choose a shield or 'done' to confirm.", ASK);
+                    }
+                    else {
+                        handleBatterySelection(input);
+                    }
+                    break;
+
+                case CHOOSE_CANNONS_SELECT_BATTERY_BIGMETEORITE:
+                    if (input.equalsIgnoreCase("cancel")) {
+                        selectedCannons.clear();
+                        showMessage("You canceled the last chosen Cannons.", STANDARD);
+                        setClientState(HANDLE_BIG_METEORITE_MENU);
+                        showMessage("Please choose a Cannon or 'done' to confirm.", ASK);
+                    }
+                    else {
+                        handleBatterySelection(input);
                     }
                     break;
 
@@ -3023,10 +3132,19 @@ public class ClientCLIView implements ClientView {
 
     }
 
-
-
     public void showExitMenu(){
         scanner.next("exit");
     }
 
+    private boolean isThereAvailableBattery() {
+        List<BatteryBox> batteryBoxes = clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes();
+        for (BatteryBox batteryBox : batteryBoxes) {
+            if (batteryBox.getRemainingBatteries() >= 1) {
+                return true;
+            }
+        }
+        return false ;
+    }
+
 }
+

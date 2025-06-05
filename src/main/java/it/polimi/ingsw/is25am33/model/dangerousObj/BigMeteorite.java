@@ -22,7 +22,7 @@ public class BigMeteorite extends Meteorite {
 
     @Override
     public void startAttack(PlayerChoicesDataStructure playerChoices, MeteoriteStorm card) {
-        card.playerDecidedHowToDefendTheirSelvesFromBigMeteorite(playerChoices.getChosenDoubleCannon().orElseThrow(), playerChoices.getChosenBatteryBox().orElseThrow());
+        card.playerDecidedHowToDefendTheirSelvesFromBigMeteorite(playerChoices.getChosenDoubleCannons().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
     }
 
     @Override

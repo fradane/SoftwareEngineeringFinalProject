@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -28,7 +29,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyGameState(String nickname, GameState gameState) throws IOException;
 
-    void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws IOException;
+    void notifyDangerousObjAttack(String nickname, ClientDangerousObject dangerousObj) throws IOException;
 
     void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws IOException;
 
