@@ -1,6 +1,8 @@
 package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
@@ -9,7 +11,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -18,13 +19,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
-import net.bytebuddy.dynamic.DynamicType;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class BuildAndCheckShipBoardController extends GuiController implements BoardsEventHandler {
 
@@ -75,6 +74,8 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     @FXML
     public Button visibleComponentButton;
     @FXML
+    public Button prefabShipBoardButton;
+    @FXML
     private ImageView visibleCard1 = new ImageView();
     @FXML
     private ImageView visibleCard2 = new ImageView();
@@ -94,6 +95,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     private HBox componentsBoxH;
     @FXML
     public ComboBox<Integer> littleDeckComboBox;
+    @FXML
+    public VBox prefabShipsMenu;
+    @FXML
+    public VBox prefabShipsContainer;
+    @FXML
+    public Button cancelPrefabSelectionButton;
 
     private int focusComponentRotation = 0;
     private ModelFxAdapter modelFxAdapter;
@@ -106,33 +113,33 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     private final Map<Coordinates, CrewMember> crewMemberChoice = new HashMap<>();
     private CrewMember currentCrewMemberChoice;
 
-    public void initialize() {
-
-        // loading boards from a different fxml file
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level2Boards.fxml"));
-            VBox mainBoardBox = loader.load();
-            centerStackPane.getChildren().addFirst(mainBoardBox);
-            this.boardsController = loader.getController();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading boards: " + e.getMessage());
-        }
-
-        //borderPane.setVisible(true);
-        modelFxAdapter = new ModelFxAdapter(clientModel);
-
-        this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
-
-        // setting up dynamic elements of the scene
-        setupFocusedComponentBinding();
-        setupTimerBinding();
-        setupVisibleComponentsBinding();
-
-        // initial shipboards refresh
-        modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
-        clientModel.getPlayerClientData().keySet().forEach(nickname -> modelFxAdapter.refreshShipBoardOf(nickname));
-    }
+//    public void initialize() {
+//
+//        // loading boards from a different fxml file
+//        try {
+//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level2Boards.fxml"));
+//            VBox mainBoardBox = loader.load();
+//            centerStackPane.getChildren().addFirst(mainBoardBox);
+//            this.boardsController = loader.getController();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            System.err.println("Error loading boards: " + e.getMessage());
+//        }
+//
+//        //borderPane.setVisible(true);
+//        modelFxAdapter = new ModelFxAdapter(clientModel);
+//
+//        this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
+//
+//        // setting up dynamic elements of the scene
+//        setupFocusedComponentBinding();
+//        setupTimerBinding();
+//        setupVisibleComponentsBinding();
+//
+//        // initial shipboards refresh
+//        modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
+//        clientModel.getPlayerClientData().keySet().forEach(nickname -> modelFxAdapter.refreshShipBoardOf(nickname));
+//    }
 
     private void setupFocusedComponentBinding() {
         modelFxAdapter.getObservableFocusedComponent()
@@ -354,6 +361,14 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             endPhaseButton.setManaged(false);
             littleDeckComboBox.setVisible(false);
             littleDeckComboBox.setManaged(false);
+            timerLabel.setVisible(false);
+            timerLabel.setManaged(false);
+            flipHourglassButton.setVisible(false);
+            flipHourglassButton.setManaged(false);
+            flipsLeftLabel.setVisible(false);
+            flipsLeftLabel.setManaged(false);
+            prefabShipBoardButton.setVisible(false);
+            prefabShipBoardButton.setManaged(false);
         });
     }
 
@@ -461,7 +476,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             visibleComponentsPanel.setVisible(false);
             componentsBoxV.setVisible(false);
             componentsBoxH.setVisible(false);
-            bottomBox.setVisible(false);
         });
     }
 
@@ -552,5 +566,130 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             confirmCrewMemberButton.setManaged(false);
             clientController.submitCrewChoices(crewMemberChoice);
         }
+    }
+
+    public void initialize() {
+        // Caricamento delle board
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level2Boards.fxml"));
+            VBox mainBoardBox = loader.load();
+            centerStackPane.getChildren().addFirst(mainBoardBox);
+            this.boardsController = loader.getController();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Error loading boards: " + e.getMessage());
+        }
+
+        // Prova a utilizzare un ModelFxAdapter condiviso
+        ClientGuiController guiController = ClientGuiController.getInstance();
+        if (guiController != null) {
+            modelFxAdapter = guiController.getSharedModelFxAdapter();
+        } else {
+            // Fallback: crea un nuovo adapter
+            modelFxAdapter = new ModelFxAdapter(clientModel);
+        }
+
+        // Binding e setup
+        this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
+
+        // Altri setup specifici del controller
+        setupFocusedComponentBinding();
+        setupTimerBinding();
+        setupVisibleComponentsBinding();
+
+        // Refresh iniziale
+        modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
+        clientModel.getPlayerClientData().keySet().forEach(nickname ->
+                modelFxAdapter.refreshShipBoardOf(nickname));
+    }
+
+    public void handleGenerateShipBoardButton() {
+        clientController.requestPrefabShipsList();
+    }
+
+    public void showPrefabShipBoards(List<PrefabShipInfo> prefabShips) {
+        Platform.runLater(() -> {
+            // Pulisci il container precedente
+            prefabShipsContainer.getChildren().clear();
+
+            // Crea un elemento per ogni nave prefabbricata
+            for (PrefabShipInfo shipInfo : prefabShips) {
+                // Crea un VBox per contenere nome, descrizione e pulsante
+                VBox shipCard = new VBox();
+                shipCard.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                shipCard.setSpacing(10.0);
+                shipCard.getStyleClass().add("component-controls");
+                shipCard.setPadding(new javafx.geometry.Insets(15, 15, 15, 15));
+
+                // Nome della nave
+                Label nameLabel = new Label(shipInfo.getName());
+                nameLabel.getStyleClass().add("controls-title");
+                shipCard.getChildren().add(nameLabel);
+
+                // Descrizione della nave
+                Label descLabel = new Label(shipInfo.getDescription());
+                descLabel.getStyleClass().add("timer-label");
+                descLabel.setWrapText(true);
+                descLabel.setMaxWidth(500);
+                shipCard.getChildren().add(descLabel);
+
+                // Pulsante per selezionare questa nave
+                Button selectButton = new Button("Select Ship");
+                selectButton.getStyleClass().add("action-button");
+                selectButton.setOnAction(_ -> {
+                    hidePrefabShipsMenu();
+                    clientController.selectPrefabShip(shipInfo.getId());
+                });
+                shipCard.getChildren().add(selectButton);
+
+                // Aggiungi la card al container
+                prefabShipsContainer.getChildren().add(shipCard);
+            }
+
+            // Mostra il menu
+            prefabShipsMenu.setVisible(true);
+            prefabShipsMenu.setManaged(true);
+        });
+    }
+
+    public void handleCancelPrefabSelection() {
+        hidePrefabShipsMenu();
+    }
+
+    private void hidePrefabShipsMenu() {
+        Platform.runLater(() -> {
+            prefabShipsMenu.setVisible(false);
+            prefabShipsMenu.setManaged(false);
+            prefabShipsContainer.getChildren().clear();
+        });
+    }
+
+    public void prepareForPhaseTransition() {
+        // Pulisci eventuali effetti o evidenziazioni
+        if (this.boardsController != null) {
+            this.boardsController.removeHighlightColor();
+        }
+
+        // Nascondi elementi dell'interfaccia che sono specifici di questa fase
+        Platform.runLater(() -> {
+            if (visibleComponentsPanel != null) visibleComponentsPanel.setVisible(false);
+            if (componentsBoxV != null) componentsBoxV.setVisible(false);
+            if (componentsBoxH != null) componentsBoxH.setVisible(false);
+            if (componentControlsPanel != null) componentControlsPanel.setVisible(false);
+            if (littleDeckFlowPane != null) {
+                littleDeckFlowPane.setVisible(false);
+                littleDeckFlowPane.setManaged(false);
+            }
+            if (pawnButtonPane != null) {
+                pawnButtonPane.setVisible(false);
+                pawnButtonPane.setManaged(false);
+            }
+            if (prefabShipsMenu != null) {
+                prefabShipsMenu.setVisible(false);
+                prefabShipsMenu.setManaged(false);
+            }
+            if (hourglassBox != null) hourglassBox.setVisible(false);
+            if (bottomBox != null) bottomBox.setVisible(false);
+        });
     }
 }

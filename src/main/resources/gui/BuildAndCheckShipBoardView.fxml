@@ -62,7 +62,38 @@
         <StackPane fx:id="centerStackPane">
             <!-- Dynamically insert shipboards and flying boards -->
 
-            <!-- Little Deck Panel - rimane come overlay -->
+            <!-- Menu Navi Prefabbricate - elemento più alto dello stack -->
+            <VBox fx:id="prefabShipsMenu" alignment="CENTER" managed="false" styleClass="little-deck-container" visible="false" StackPane.alignment="CENTER">
+                <Label styleClass="controls-title" text="Choose a Prefab Ship">
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin>
+                </Label>
+
+                <!-- TODO cambiare lo stile e ingrandire -->
+                <ScrollPane fitToWidth="true" prefHeight="400.0" prefWidth="600.0" styleClass="component-controls">
+                    <VBox fx:id="prefabShipsContainer" alignment="TOP_CENTER" spacing="10.0" styleClass="component-controls">
+                        <padding>
+                            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                        </padding>
+                        <!-- Le navi prefabbricate verranno aggiunte qui dinamicamente -->
+                    </VBox>
+                </ScrollPane>
+
+                <HBox alignment="CENTER" spacing="20.0">
+                    <Button fx:id="cancelPrefabSelectionButton" onAction="#handleCancelPrefabSelection"
+                            styleClass="action-button" text="Cancel" />
+                    <VBox.margin>
+                        <Insets top="20.0" />
+                    </VBox.margin>
+                </HBox>
+
+                <padding>
+                    <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                </padding>
+            </VBox>
+
+            <!-- Little Deck Panel -->
             <FlowPane fx:id="littleDeckFlowPane" alignment="CENTER" hgap="20.0" managed="false" styleClass="little-deck-container" vgap="20.0" visible="false" StackPane.alignment="CENTER">
                 <ImageView fx:id="visibleCard1" fitWidth="200" preserveRatio="true">
                     <FlowPane.margin>
@@ -84,12 +115,13 @@
                 </padding>
             </FlowPane>
 
-
-            <StackPane fx:id="pawnButtonPane" managed="false" styleClass="little-deck-container" visible="false" />
+            <StackPane fx:id="pawnButtonPane" managed="false" styleClass="little-deck-container" visible="false">
                 <Button fx:id="placePawnButton" onAction="#handlePlacePawnButton" styleClass="place-pawn-button"
                         text="Press the button to place your pawn, FAST!!!" StackPane.alignment="CENTER"
                         prefWidth="600.0" prefHeight="100.0" style="-fx-font-size: 18pt;" visible="false" />
             </StackPane>
+
+        </StackPane>
     </center>
 
     <right>
@@ -122,6 +154,7 @@
             <Button fx:id="pickRandomComponentButton" onAction="#handlePickRandomComponentButton" styleClass="action-button" text="Random Component" />
             <Button fx:id="visibleComponentButton" onAction="#handleVisibleComponentButton" styleClass="action-button" text="Visible Component" />
             <Button fx:id="endPhaseButton" onAction="#handleEndPhaseButton" styleClass="action-button" text="End ship building phase" />
+            <Button fx:id="prefabShipBoardButton" onAction="#handleGenerateShipBoardButton" styleClass="action-button" text="Load a prebuilt ship board" />
             <Button fx:id="confirmCrewMemberButton" onAction="#handleConfirmCrewMemberButton" styleClass="action-button" text="CONFIRM" visible="false" managed="false"/>
 
             <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box" >

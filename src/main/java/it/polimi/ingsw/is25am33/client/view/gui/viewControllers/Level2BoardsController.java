@@ -5,7 +5,6 @@ import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.component.LifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -26,6 +25,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -64,22 +65,22 @@ public class Level2BoardsController {
     private final int FIXED_COMPONENT_LENGTH = 70;
     private final int FIXED_BOOKED_COMPONENT_HEIGHT = 55;
 
-    private static final Map<Integer, Point2D> flyingBoardPositions = Map.ofEntries(
-            Map.entry(0, new Point2D(149.0, 189.0)),
-            Map.entry(1, new Point2D(192.0, 171.0)),
-            Map.entry(2, new Point2D(238.0, 160.0)),
-            Map.entry(3, new Point2D(282.0, 154.0)),
-            Map.entry(4, new Point2D(327.0, 155.0)),
-            Map.entry(5, new Point2D(371.0, 160.0)),
-            Map.entry(6, new Point2D(415.0, 173.0)),
-            Map.entry(7, new Point2D(458.0, 191.0)),
-            Map.entry(8, new Point2D(497.0, 219.0)),
-            Map.entry(9, new Point2D(524.0, 261.0)),
-            Map.entry(10, new Point2D(517.0, 313.0)),
-            Map.entry(11, new Point2D(493.0, 352.0)),
-            Map.entry(12, new Point2D(452.0, 377.0)),
-            Map.entry(13, new Point2D(409.0, 393.0))
-            // TODO finire le posizioni
+    private static final Map<Integer, Point2D> flyingBoardRelativePositions = Map.ofEntries(
+            Map.entry(0, new Point2D(0.248, 0.315)), // 149/600, 189/600
+            Map.entry(1, new Point2D(0.32, 0.285)),  // 192/600, 171/600
+            Map.entry(2, new Point2D(0.397, 0.267)), // 238/600, 160/600
+            Map.entry(3, new Point2D(0.47, 0.257)),  // 282/600, 154/600
+            Map.entry(4, new Point2D(0.545, 0.258)), // 327/600, 155/600
+            Map.entry(5, new Point2D(0.618, 0.267)), // 371/600, 160/600
+            Map.entry(6, new Point2D(0.692, 0.288)), // 415/600, 173/600
+            Map.entry(7, new Point2D(0.763, 0.318)), // 458/600, 191/600
+            Map.entry(8, new Point2D(0.828, 0.365)), // 497/600, 219/600
+            Map.entry(9, new Point2D(0.873, 0.435)), // 524/600, 261/600
+            Map.entry(10, new Point2D(0.862, 0.522)), // 517/600, 313/600
+            Map.entry(11, new Point2D(0.822, 0.587)), // 493/600, 352/600
+            Map.entry(12, new Point2D(0.753, 0.628)), // 452/600, 377/600
+            Map.entry(13, new Point2D(0.682, 0.655)) // 409/600, 393/600
+            // Converti le altre posizioni in percentuali
     );
 
     public void bindBoards(ModelFxAdapter modelFxAdapter, BoardsEventHandler boardsEventHandler, ClientModel clientModel) {
@@ -91,10 +92,12 @@ public class Level2BoardsController {
         setupShipBoardNavigationBarAndBoards();
         setupBookedComponentsBindings();
         setupGridBindings(modelFxAdapter.getMyObservableMatrix());
+
+        clientModel.getPlayerClientData().forEach((nickname, _) -> clientModel.refreshShipBoardOf(nickname));
     }
 
     public void initialize() {
-        
+
     }
 
     public void handleGridButtonClick(ActionEvent actionEvent) {
@@ -110,7 +113,16 @@ public class Level2BoardsController {
     }
 
     private void setupFlyingBoardBinding() {
+        // Ottieni l'ImageView della flying board
+        ImageView flyingBoardImageView = (ImageView) flyingBoard.getChildren().getFirst();
 
+        // Aggiungi listener per il ridimensionamento dell'immagine
+        flyingBoardImageView.fitWidthProperty().addListener((_, _, _) ->
+                updatePawnPositions(flyingBoardImageView));
+        flyingBoardImageView.fitHeightProperty().addListener((_, _, _) ->
+                updatePawnPositions(flyingBoardImageView));
+
+        // Binding iniziale delle posizioni dei pawn
         clientModel.getColorRanking()
                 .forEach((playerColor, position) -> {
                     modelFxAdapter.getObservableColorRanking().put(playerColor, new SimpleObjectProperty<>(position));
@@ -119,31 +131,23 @@ public class Level2BoardsController {
         modelFxAdapter.getObservableColorRanking()
                 .forEach((color, position) -> position.addListener((_, _, newVal) ->
                         Platform.runLater(() -> {
-                            double x = flyingBoardPositions.get(newVal).getX();
-                            double y = flyingBoardPositions.get(newVal).getY();
-
+                            // Aggiorna visibilità
                             switch (color) {
                                 case RED:
-                                    redPawn.setLayoutX(x);
-                                    redPawn.setLayoutY(y);
                                     redPawn.setVisible(true);
                                     break;
                                 case GREEN:
-                                    greenPawn.setLayoutX(x);
-                                    greenPawn.setLayoutY(y);
                                     greenPawn.setVisible(true);
                                     break;
                                 case BLUE:
-                                    bluePawn.setLayoutX(x);
-                                    bluePawn.setLayoutY(y);
                                     bluePawn.setVisible(true);
                                     break;
                                 case YELLOW:
-                                    yellowPawn.setLayoutX(x);
-                                    yellowPawn.setLayoutY(y);
                                     yellowPawn.setVisible(true);
                                     break;
                             }
+                            // Aggiorna posizioni
+                            updatePawnPositions(flyingBoardImageView);
                         })));
     }
 
@@ -171,8 +175,8 @@ public class Level2BoardsController {
 
                     // other players ship board binding
                     ObjectProperty<Component>[][] observableMatrix = modelFxAdapter.getObservableShipBoardOf(nickname);
-                    for (int row = 4; row < 8; row++) {
-                        for (int column = 3; column < 9; column++) {
+                    for (int row = 4; row <= 8; row++) {
+                        for (int column = 3; column <= 9; column++) {
                             int finalColumn = column;
                             int finalRow = row;
                             observableMatrix[row][column].addListener((_, _, newVal) ->
@@ -185,15 +189,16 @@ public class Level2BoardsController {
                     Pair<ObjectProperty<Component>, ObjectProperty<Component>> reservedComponents = modelFxAdapter.getObservableBookedComponentsOf(nickname);
                     reservedComponents.getKey()
                                     .addListener((_, _, newVal) ->
-                                            Platform.runLater(() -> updateReservedComponentImage(shipBoardsAndReservedComponents.get(playerStackPane).getKey(), newVal)));
+                                            Platform.runLater(() ->
+                                                    updateReservedComponentImage(shipBoardsAndReservedComponents.get(playerStackPane).getKey(), newVal)));
 
                     reservedComponents.getValue()
                                     .addListener((_, _, newVal) ->
-                                            Platform.runLater(() -> updateReservedComponentImage(shipBoardsAndReservedComponents.get(playerStackPane).getValue(), newVal)));
+                                            Platform.runLater(() ->
+                                                    updateReservedComponentImage(shipBoardsAndReservedComponents.get(playerStackPane).getValue(), newVal)));
 
                     // navigation button binding
                     setUpNavigationButton(nickname);
-
                 });
 
     }
@@ -230,16 +235,40 @@ public class Level2BoardsController {
      */
     private void updateOtherShipBoardsAppearance(StackPane playerStackPane, Component newVal, int row, int column) {
         try {
-            if (newVal != null) {
-                String componentFile = newVal.toString().split("\\n")[0];
-                Image image = new Image(Objects.requireNonNull(getClass()
-                        .getResourceAsStream("/gui/graphics/component/" + componentFile)));
-                Objects.requireNonNull(getNodeFromGridPane(((GridPane) playerStackPane.getChildren().get(1)), row - 4, column - 3)).setImage(image);
-            } else {
-                Objects.requireNonNull(getNodeFromGridPane(((GridPane) playerStackPane.getChildren().get(1)), row - 4, column - 3)).setImage(null);
+            StackPane cellStackPane = getNodeFromGridPane(((GridPane) playerStackPane.getChildren().get(1)), row - 4, column - 3);
+
+            if (cellStackPane != null && !cellStackPane.getChildren().isEmpty()) {
+                // Ottieni la prima ImageView dallo StackPane (quella di default)
+                ImageView imageView = (ImageView) cellStackPane.getChildren().getFirst();
+
+                if (newVal != null) {
+                    String componentFile = newVal.toString().split("\\n")[0];
+                    Image image = new Image(Objects.requireNonNull(getClass()
+                            .getResourceAsStream("/gui/graphics/component/" + componentFile)));
+                    imageView.setImage(image);
+                    imageView.setRotate(newVal.getRotation() * 90);
+
+                    StackPane newStackPane = getUpdatedStackPaneWithImages(imageView, newVal);
+                    GridPane gridPane = (GridPane) playerStackPane.getChildren().get(1);
+
+                    // Rimuovi il nodo esistente, se presente
+                    Node existingNode = getNodeFromGridPane(gridPane, row - 4, column - 3);
+                    if (existingNode != null) {
+                        gridPane.getChildren().remove(existingNode);
+                    }
+
+                    // Imposta posizione e aggiungi il nuovo StackPane
+                    GridPane.setRowIndex(newStackPane, row - 4);
+                    GridPane.setColumnIndex(newStackPane, column - 3);
+                    gridPane.getChildren().add(newStackPane);
+                } else {
+                    imageView.setImage(null);
+                    imageView.setRotate(0);
+                }
             }
         } catch (Exception e) {
             System.err.println("Error updating component appearance: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -252,20 +281,24 @@ public class Level2BoardsController {
             imageView.setFitHeight(FIXED_BOOKED_COMPONENT_HEIGHT);
             imageView.setRotate(newVal.getRotation() * 90);
             imageView.setImage(image);
-            GridPane.setMargin(imageView, new Insets(0, 0, 0, 10));
+            // Nota: GridPane.setMargin va applicato al parent StackPane, non all'ImageView
+            if (imageView.getParent() != null) {
+                GridPane.setMargin(imageView.getParent(), new Insets(0, 0, 0, 10));
+            }
         } else {
             imageView.setImage(null);
+            imageView.setRotate(0);
         }
     }
 
-    private ImageView getNodeFromGridPane(GridPane gridPane, int row, int column) {
+    private StackPane getNodeFromGridPane(GridPane gridPane, int row, int column) {
         for (Node node : gridPane.getChildren()) {
             Integer rowIndex = GridPane.getRowIndex(node);
             Integer colIndex = GridPane.getColumnIndex(node);
 
             // Default values are 0 if null
             if ((rowIndex == null ? 0 : rowIndex) == row && (colIndex == null ? 0 : colIndex) == column) {
-                return (ImageView) node;
+                return (StackPane) node;
             }
         }
         return null; // Nessun nodo trovato in quella posizione
@@ -311,7 +344,6 @@ public class Level2BoardsController {
             button.setStyle("-fx-background-color: transparent;");
         }
 
-
     }
 
     private void setupBookedComponentsBindings() {
@@ -349,6 +381,44 @@ public class Level2BoardsController {
         }
     }
 
+    // Nuovo metodo per aggiornare le posizioni dei pawn in base alla dimensione attuale dell'immagine
+    private void updatePawnPositions(ImageView flyingBoardImageView) {
+        double imgWidth = flyingBoardImageView.getFitWidth();
+        double imgHeight = flyingBoardImageView.getFitHeight();
+
+        // Calcola l'offset dell'immagine rispetto al StackPane
+        double offsetX = (flyingBoard.getWidth() - imgWidth) / 2;
+        double offsetY = (flyingBoard.getHeight() - imgHeight) / 2;
+
+        modelFxAdapter.getObservableColorRanking().forEach((color, positionProperty) -> {
+            int position = positionProperty.get();
+            Point2D relativePos = flyingBoardRelativePositions.get(position);
+
+            // Calcola la posizione assoluta in base alle dimensioni attuali dell'immagine
+            double x = relativePos.getX() * imgWidth + offsetX;
+            double y = relativePos.getY() * imgHeight + offsetY;
+
+            switch (color) {
+                case RED:
+                    redPawn.setLayoutX(x);
+                    redPawn.setLayoutY(y);
+                    break;
+                case GREEN:
+                    greenPawn.setLayoutX(x);
+                    greenPawn.setLayoutY(y);
+                    break;
+                case BLUE:
+                    bluePawn.setLayoutX(x);
+                    bluePawn.setLayoutY(y);
+                    break;
+                case YELLOW:
+                    yellowPawn.setLayoutX(x);
+                    yellowPawn.setLayoutY(y);
+                    break;
+            }
+        });
+    }
+
     private void updateButtonAppearance(Button button, Component component) {
         if (component != null) {
             try {
@@ -357,12 +427,12 @@ public class Level2BoardsController {
                         .getResourceAsStream("/gui/graphics/component/" + fileName)));
                 ImageView imgView = new ImageView(img);
                 button.setVisible(true);
-                button.setManaged(false);
+                button.setManaged(true);
                 imgView.setFitWidth(FIXED_COMPONENT_LENGTH);
                 imgView.setFitHeight(FIXED_COMPONENT_LENGTH);
                 imgView.setPreserveRatio(true);
                 imgView.setRotate(component.getRotation() * 90);
-                StackPane stackPane = updateComponentFeatures(imgView, component);
+                StackPane stackPane = getUpdatedStackPaneWithImages(imgView, component);
                 button.setGraphic(stackPane);
             } catch (Exception e) {
                 System.err.println("Error updating button appearance: " + e.getMessage());
@@ -375,18 +445,22 @@ public class Level2BoardsController {
         }
     }
 
-    private StackPane updateComponentFeatures(ImageView imgView, Component component) {
+    private StackPane getUpdatedStackPaneWithImages(ImageView imgView, Component component) {
 
         ImageView featureImageView = new ImageView();
-        Image featureImage = null;
+        Image featureImage;
         DropShadow dropShadow = new DropShadow();
 
         dropShadow.setColor(Color.BLACK);
         dropShadow.setOffsetX(3.0);
         dropShadow.setOffsetY(3.0);
+        dropShadow.setSpread(0.6);
+        dropShadow.setRadius(15);
+
 
         featureImageView.setEffect(dropShadow);
         featureImageView.setFitWidth(40);
+        featureImageView.setFitHeight(40);
         featureImageView.setPreserveRatio(true);
 
         switch (component.getLabel()) {
@@ -397,7 +471,7 @@ public class Level2BoardsController {
                 System.err.println("Size: " + crewMembers.size());
 
                 if (crewMembers.isEmpty()) {
-                    break;
+                    return new StackPane(imgView);
                 } else if (crewMembers.contains(CrewMember.PURPLE_ALIEN)) {
                     featureImage = new Image(Objects.requireNonNull(getClass()
                             .getResourceAsStream("/gui/graphics/crewMembers/purple_alien.png")));
@@ -409,9 +483,33 @@ public class Level2BoardsController {
                             .getResourceAsStream("/gui/graphics/crewMembers/human.png")));
                 } else {
 
-                }
+                    ImageView featureImageView1 = new ImageView();
+                    Image featureImage1;
 
+                    featureImageView1.setEffect(dropShadow);
+                    featureImageView1.setFitWidth(40);
+                    featureImageView1.setFitHeight(40);
+                    featureImageView1.setPreserveRatio(true);
+
+                    featureImage = new Image(Objects.requireNonNull(getClass()
+                            .getResourceAsStream("/gui/graphics/crewMembers/human.png")));
+
+                    featureImage1 = new Image(Objects.requireNonNull(getClass()
+                            .getResourceAsStream("/gui/graphics/crewMembers/human.png")));
+
+                    featureImageView.setImage(featureImage);
+                    featureImageView1.setImage(featureImage1);
+
+                    featureImageView.setTranslateX(-10);   // sinistra
+                    featureImageView1.setTranslateX(10);    // destra
+
+                    return new StackPane(imgView, featureImageView1, featureImageView);
+
+                }
                 break;
+
+            default:
+                return new StackPane(imgView);
 
         }
 

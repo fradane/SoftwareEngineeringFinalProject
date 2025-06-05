@@ -6,7 +6,6 @@ import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Engine;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,7 +42,7 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
         return null;
     }
 
-    public void currPlayerChoseEnginesToActivate(List<Engine> chosenDoubleEngines, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
+    private void currPlayerChoseEnginesToActivate(List<Engine> chosenDoubleEngines, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
 
         if (chosenDoubleEngines == null || chosenBatteryBoxes == null)
             throw new IllegalArgumentException("Null lists");

@@ -2920,6 +2920,10 @@ public class ClientCLIView implements ClientView {
         if (input.equals("exit")) {
             clientController.leaveGame();
         } else if (input.trim().split("\\s+")[0].equals("show")) {
+            if (input.trim().split("\\s+").length != 2) {
+                showMessage("Invalid show command", ERROR);
+                return;
+            }
             clientController.showShipBoard(input.trim().split("\\s+")[1]);
             return;
         } else if (input.equals("rank")) {

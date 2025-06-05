@@ -44,7 +44,7 @@ public class GameModel {
     private Integer numClientsFinishedTimer = 0;
     private Boolean isRestartInProgress = false;
 
-    private Map<String, Boolean> crewPlacementCompleted = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> crewPlacementCompleted = new ConcurrentHashMap<>();
 
     // Lock per la transizione di stato
     private final Object stateTransitionLock = new Object();
@@ -383,10 +383,15 @@ public class GameModel {
 
                 if (flyingBoard.getCurrentRanking().size() == maxPlayers)
                     setCurrGameState(GameState.CHECK_SHIPBOARD);
-                else
-                    gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                        clientController.notifyFirstToEnter(nicknameToNotify);
-                    });
+                else {
+                    Set<String> notRankedPlayers = players.keySet()
+                            .stream()
+                            .filter(nickname -> !flyingBoard.getRanking().containsKey(players.get(nickname)))
+                            .collect(Collectors.toSet());
+
+                    gameClientNotifier.notifyClients(notRankedPlayers, (nicknameToNotify, clientController) ->
+                            clientController.notifyFirstToEnter(nicknameToNotify));
+                }
             }
         }
     }
@@ -503,7 +508,7 @@ public class GameModel {
         }
     }
 
-    private Object crewPlacementCompletedLock = new Object();
+    private final Object crewPlacementCompletedLock = new Object();
     /**
      * Segna un giocatore come completato per la fase di posizionamento equipaggio.
      */
