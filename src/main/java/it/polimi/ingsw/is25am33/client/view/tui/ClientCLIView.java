@@ -3201,11 +3201,16 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case CREW_PLACEMENT_MENU:
+                    setClientState(WAITING_FOR_SERVER);
                     handleCrewPlacementInput(input);
                     break;
 
                 case NO_CREW_TO_PLACE:
+                    setClientState(WAITING_FOR_SERVER);
                     clientController.submitCrewChoices(new HashMap<>());
+                    break;
+
+                case WAITING_FOR_SERVER:
                     break;
 
                 case VISIT_LOCATION_MENU:

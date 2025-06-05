@@ -24,6 +24,7 @@ public enum ClientState {
     PLACE_PLACEHOLDER,
     CREW_PLACEMENT_MENU,
     NO_CREW_TO_PLACE,
+    WAITING_FOR_SERVER,
 
     // Card-related states - general
     PLAY_CARD,
