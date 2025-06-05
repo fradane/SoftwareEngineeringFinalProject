@@ -40,9 +40,7 @@
     <left>
         <!-- Pannello sinistro per componenti visibili -->
         <VBox fx:id="visibleComponentsPanel" maxWidth="300" minWidth="250" styleClass="visible-components-panel">
-            <HBox alignment="CENTER" spacing="10.0" styleClass="component-controls">
-                <Label styleClass="component-controls" text="Visible Components" />
-            </HBox>
+            <HBox alignment="CENTER" spacing="10.0" styleClass="component-controls"> </HBox>
 
             <ScrollPane fx:id="componentsScrollPane" fitToWidth="true" styleClass="component-controls" VBox.vgrow="ALWAYS">
                 <VBox fx:id="componentsContainer" alignment="TOP_CENTER" styleClass="component-controls">
@@ -88,8 +86,7 @@
         <!-- Pannello destro con componente e controlli -->
         <VBox fx:id="componentsBoxV" maxWidth="350" minWidth="300" spacing="20.0">
             <!-- Pannello dei controlli componente -->
-            <VBox fx:id="componentControlsPanel" alignment="CENTER" managed="false" spacing="15.0" styleClass="component-controls" visible="false">
-                <Label styleClass="controls-title" text="Component Controls" />
+            <VBox fx:id="componentControlsPanel" alignment="CENTER"  spacing="20.0" styleClass="component-controls"  visible="false" managed="false">
 
                 <Button fx:id="rotateComponentButton" onAction="#handleRotateComponentButton" styleClass="component-control-button" text="Rotate Component" />
                 <Button fx:id="releaseComponentButton" onAction="#handleReleaseComponentButton" styleClass="component-control-button" text="Release Component" />
@@ -112,7 +109,6 @@
     <bottom>
         <HBox fx:id="bottomBox" alignment="CENTER" spacing="15.0" styleClass="action-bar">
             <Button fx:id="pickRandomComponentButton" onAction="#handlePickRandomComponentButton" styleClass="action-button" text="Random Component" />
-            <Button fx:id="visibleComponentButton" onAction="#handleVisibleComponentButton" styleClass="action-button" text="Visible Component" />
             <Button fx:id="endPhaseButton" onAction="#handleEndPhaseButton" styleClass="action-button" text="End ship building phase" />
 
             <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box">

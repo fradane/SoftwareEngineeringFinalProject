@@ -261,6 +261,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 default -> null;
             };
         } catch (IOException e) {
+//            System.err.println("Connection refused: " + e.getMessage());
             view.showError("Connection refused: " + e.getMessage());
             return null;
         }
@@ -289,7 +290,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     private CallableOnDNS setUpRMIConnection() throws IOException {
-        String serverAddress = "192.168.1.9";
+        String serverAddress = "localhost";
 
         try {
             Registry registry = LocateRegistry.getRegistry(serverAddress, NetworkConfiguration.RMI_PORT);

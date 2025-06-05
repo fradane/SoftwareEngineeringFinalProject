@@ -276,9 +276,7 @@ public class ClientGuiController extends Application implements ClientView {
 
         if (buildAndCheckShipBoardController != null) return;
 
-        boolean isTestFlight = clientController.getCurrentGameInfo().isTestFlight();
-
-        String fxmlPath =  isTestFlight ? "/gui/Shipboard_1.fxml" : "/gui/BuildAndCheckShipBoardView.fxml";
+        String fxmlPath = "/gui/BuildAndCheckShipBoardView.fxml";
 
         javafx.application.Platform.runLater(() -> {
             try {

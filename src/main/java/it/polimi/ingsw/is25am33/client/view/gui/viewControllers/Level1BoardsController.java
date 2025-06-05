@@ -4,7 +4,6 @@ import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -24,9 +23,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class Level2BoardsController implements BoardsController{
+public class Level1BoardsController implements BoardsController {
 
     @FXML public Pane pawnsPane;
     @FXML public StackPane boardsPane;
@@ -83,18 +81,18 @@ public class Level2BoardsController implements BoardsController{
         setupFlyingBoardBinding();
         setupShipBoardNavigationBar();
         setupBookedComponentsBindings();
-        setupGridBindings(modelFxAdapter.getObservableShipBoardOf(clientModel.getMyNickname()));
+        setupGridBindings(modelFxAdapter.getMineObservableMatrix());
     }
 
     public void initialize() {
-        
+
     }
 
     public void handleGridButtonClick(ActionEvent actionEvent) {
         Button clickedButton = (Button) actionEvent.getSource();
         String id = clickedButton.getId();
 
-        // Parsing corretto dell'ID del pulsante
+        // Correct parsing of the button ID
         String[] parts = id.replace("button", "").split("_");
         int row = Integer.parseInt(parts[0]);
         int column = Integer.parseInt(parts[1]);
@@ -109,6 +107,7 @@ public class Level2BoardsController implements BoardsController{
                     modelFxAdapter.getObservableColorRanking().put(playerColor, new SimpleObjectProperty<>(position));
                 });
 
+        // Positioning of the spaceships on the flying board
         modelFxAdapter.getObservableColorRanking()
                 .forEach((color, position) -> {
                     position.addListener((_, _, newVal) -> Platform.runLater(() -> {
@@ -202,6 +201,7 @@ public class Level2BoardsController implements BoardsController{
 
     }
 
+    // Returns the ImageView at the given row and column in the GridPane, or null if not found.
     private ImageView getNodeFromGridPane(GridPane gridPane, int row, int column) {
         for (Node node : gridPane.getChildren()) {
             Integer rowIndex = GridPane.getRowIndex(node);
@@ -289,7 +289,8 @@ public class Level2BoardsController implements BoardsController{
             Button button = entry.getValue();
             ObjectProperty<Component> cellProperty = observableMatrix[modelRow][modelCol];
 
-            cellProperty.addListener((_, _, newVal) -> Platform.runLater(() -> updateButtonAppearance(button, newVal)));
+            cellProperty.addListener((_, _, newVal) ->
+                    Platform.runLater(() -> updateButtonAppearance(button, newVal)));
 
             Component initialComponent = cellProperty.get();
             if (initialComponent != null) {
@@ -382,12 +383,12 @@ public class Level2BoardsController implements BoardsController{
     public void removeHighlightColor() {
 
         shadowedButtons.forEach(button ->
-                            Platform.runLater(() -> {
-                                shadowedButtons.remove(button);
-                                button.setEffect(null);
-                                button.getStyleClass().remove("no-hover");
-                            })
-                        );
+                Platform.runLater(() -> {
+                    shadowedButtons.remove(button);
+                    button.setEffect(null);
+                    button.getStyleClass().remove("no-hover");
+                })
+        );
 
     }
 
