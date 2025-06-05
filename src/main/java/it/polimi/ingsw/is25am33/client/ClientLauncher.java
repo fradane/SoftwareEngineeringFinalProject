@@ -39,22 +39,6 @@ public class ClientLauncher {
                             "╚═══════════════════════════════════════════════════════════════════════════╝";
         System.out.println(titleScreen);
 
-        SocketMessage message = new SocketMessage();
-        List<Coordinates> cabinCoords = new ArrayList<>();
-        cabinCoords.add(new Coordinates(0, 0));
-        cabinCoords.add(new Coordinates(1, 1));
-        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
-                .Builder()
-                .setChosenCabins(cabinCoords)
-                .build();
-        message.setParamChoice(playerChoiceDataStructure);
-
-        String messaggioSerializzato = ClientSerializer.serialize(message);
-        System.out.println(messaggioSerializzato);
-
-        PlayerChoicesDataStructure messaggioDeserializzato = ServerDeserializer.deserializeObj(messaggioSerializzato, SocketMessage.class).getParamChoice();
-        System.out.println(messaggioDeserializzato);
-
 
         if (args.length != 2) {
             System.err.println("Invalid parameters. Exiting...");

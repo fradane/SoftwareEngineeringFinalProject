@@ -197,6 +197,10 @@ public class Planets extends AdventureCard implements PlayerMover {
             System.out.println("Added " + cube + " to storage");
         }
 
+        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+        });
+
         // Muovi il giocatore indietro
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 

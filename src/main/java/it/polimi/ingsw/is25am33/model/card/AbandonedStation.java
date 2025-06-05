@@ -179,15 +179,21 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
             System.out.println("Added " + cube + " to storage");
         }
 
+        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+        });
+
         // Muovi il giocatore indietro
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
-        });
+//        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+//            clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
+//        });
 
-        // Procedi con il prossimo giocatore o termina la carta
-        proceedToNextPlayerOrEndCard();
+        // Termina la carta
+        setCurrState(CardState.END_OF_CARD);
+        gameModel.resetPlayerIterator();
+        gameModel.setCurrGameState(GameState.DRAW_CARD);
     }
 
     private void proceedToNextPlayerOrEndCard() {
