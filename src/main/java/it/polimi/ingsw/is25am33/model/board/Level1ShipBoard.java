@@ -30,6 +30,7 @@ public class Level1ShipBoard extends ShipBoard implements ShipBoardClient {
 
     public Level1ShipBoard(PlayerColor color, GameClientNotifier gameClientNotifier, boolean isGui) {
         super(color, gameClientNotifier, isGui);
+        this.validPositions = level1ValidPositions;
     }
 
     @Override

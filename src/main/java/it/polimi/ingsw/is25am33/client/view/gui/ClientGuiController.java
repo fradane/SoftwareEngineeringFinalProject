@@ -398,28 +398,37 @@ public class ClientGuiController extends Application implements ClientView {
         return clientModel;
     }
 
+    // TODO
+    @Override
+    public void showBuildShipBoardMenu() {
+
+        if (buildAndCheckShipBoardController != null) return;
+
+        String fxmlPath = "/gui/BuildAndCheckShipBoardView.fxml";
+
+        javafx.application.Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+                Parent root = loader.load();
+                buildAndCheckShipBoardController = loader.getController();
+                GuiController.setClientModel(clientModel);
+                primaryStage.setScene(new Scene(root));
+                primaryStage.show();
+            } catch (IOException e) {
+                System.out.println("Error while loading the shipboard view.");
+                e.printStackTrace();
+            }
+        });
+    }
+
 //    @Override
 //    public void showBuildShipBoardMenu() {
-//
 //        if (buildAndCheckShipBoardController != null) return;
 //
 //        boolean isTestFlight = clientController.getCurrentGameInfo().isTestFlight();
+//        String fxmlPath = isTestFlight ? "/gui/Shipboard_1.fxml" : "/gui/BuildAndCheckShipBoardView.fxml";
 //
-//        String fxmlPath =  isTestFlight ? "/gui/Shipboard_1.fxml" : "/gui/BuildAndCheckShipBoardView.fxml";
-//
-//        javafx.application.Platform.runLater(() -> {
-//            try {
-//                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-//                Parent root = loader.load();
-//                buildAndCheckShipBoardController = loader.getController();
-//                GuiController.setClientModel(clientModel);
-//                primaryStage.setScene(new Scene(root));
-//                primaryStage.show();
-//            } catch (IOException e) {
-//                System.out.println("Error while loading the shipboard view.");
-//                e.printStackTrace();
-//            }
-//        });
+//        Platform.runLater(() -> buildAndCheckShipBoardController = loadView(fxmlPath));
 //    }
 
     @Override
@@ -539,16 +548,6 @@ public class ClientGuiController extends Application implements ClientView {
                 mainMenuViewController.setAvailableGames();
             }
         });
-    }
-
-    @Override
-    public void showBuildShipBoardMenu() {
-        if (buildAndCheckShipBoardController != null) return;
-
-        boolean isTestFlight = clientController.getCurrentGameInfo().isTestFlight();
-        String fxmlPath = isTestFlight ? "/gui/Shipboard_1.fxml" : "/gui/BuildAndCheckShipBoardView.fxml";
-
-        Platform.runLater(() -> buildAndCheckShipBoardController = loadView(fxmlPath));
     }
 
     @Override

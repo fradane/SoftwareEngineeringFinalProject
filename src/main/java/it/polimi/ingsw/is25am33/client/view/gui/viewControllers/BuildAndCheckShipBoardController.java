@@ -105,10 +105,9 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     private int focusComponentRotation = 0;
     private ModelFxAdapter modelFxAdapter;
     private List<Set<Coordinates>> shipParts = new ArrayList<>();
-    private Level2BoardsController boardsController;
+    private BoardsController boardsController;
     private final int FIXED_COMPONENT_LENGTH = 70;
     private Optional<BiConsumer<Integer, Integer>> correctShipBoardAction = Optional.empty();
-
     private final Map<Coordinates, Set<ColorLifeSupport>> cabinsWithLifeSupport = new HashMap<>();
     private final Map<Coordinates, CrewMember> crewMemberChoice = new HashMap<>();
     private CrewMember currentCrewMemberChoice;
@@ -119,7 +118,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 //        try {
 //            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level2Boards.fxml"));
 //            VBox mainBoardBox = loader.load();
-//            centerStackPane.getChildren().addFirst(mainBoardBox);
+//            centerStackPane.getChildren().add(mainBoardBox);
 //            this.boardsController = loader.getController();
 //        } catch (IOException e) {
 //            e.printStackTrace();
@@ -166,6 +165,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             .addListener((InvalidationListener) _ -> Platform.runLater(() -> {
                 componentsContainer.getChildren().clear();
 
+                //aggunto da claude
+                componentsContainer.getStyleClass().clear();
+                componentsContainer.getStyleClass().add("components-container");
+
                 List<String> visibleComponents = new ArrayList<>(modelFxAdapter.getObservableVisibleComponents());
 
                 for (String string : visibleComponents) {
@@ -175,10 +178,19 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                     imageView.setFitWidth(FIXED_COMPONENT_LENGTH);
                     imageView.setFitHeight(FIXED_COMPONENT_LENGTH);
 
+                    // Applica classe CSS all'ImageView aggiunto da claude
+                    imageView.getStyleClass().add("image-view");
+
+
                     // button set up
                     Button button = new Button();
                     button.setGraphic(imageView);
-                    button.getStyleClass().add("cell-button");
+
+                    //aggiunto da claude
+                    button.getStyleClass().clear();
+                    button.getStyleClass().add("component-item");
+
+                    // button.getStyleClass().add("cell-button");
                     componentsContainer.getChildren().add(button);
 
                     // set up the button action
@@ -194,6 +206,18 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
                 componentsScrollPane.setContent(componentsContainer);
             }));
+    }
+
+    //aggiunto da claude
+    private void applyInitialStyling() {
+        Platform.runLater(() -> {
+            // Applica classi CSS ai componenti principali
+            visibleComponentsPanel.getStyleClass().add("visible-components-panel");
+            componentsScrollPane.getStyleClass().add("components-scroll-pane");
+
+            // Se hai un titolo per il pannello, applicagli anche la classe
+            // panelTitleLabel.getStyleClass().add("panel-title");
+        });
     }
 
     private void setupTimerBinding() {
@@ -335,15 +359,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     public ModelFxAdapter getModelFxAdapter() {
         return modelFxAdapter;
-    }
-
-    public void handleVisibleComponentButton() {
-        if(clientModel.getMyShipboard().getFocusedComponent() == null) {
-            Platform.runLater(() -> {
-                visibleComponentsPanel.setVisible(true);
-                visibleComponentsPanel.setManaged(true);
-            });
-        }
     }
 
     public void handleEndPhaseButton() {
@@ -533,7 +548,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                         .stream()
                         .filter(coords -> crewMemberChoice.get(coords) == CrewMember.PURPLE_ALIEN)
                         .findFirst()
-                        .get();
+                        .orElseThrow();
                 this.boardsController.applyHighlightEffect(removedCoords, Color.PURPLE);
                 this.crewMemberChoice.remove(removedCoords);
             }
@@ -547,7 +562,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                         .stream()
                         .filter(coords -> crewMemberChoice.get(coords) == CrewMember.BROWN_ALIEN)
                         .findFirst()
-                        .get();
+                        .orElseThrow();
                 this.boardsController.applyHighlightEffect(removedCoords, Color.BROWN);
                 this.crewMemberChoice.remove(removedCoords);
             }
@@ -571,10 +586,28 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     public void initialize() {
         // Caricamento delle board
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level2Boards.fxml"));
-            VBox mainBoardBox = loader.load();
-            centerStackPane.getChildren().addFirst(mainBoardBox);
-            this.boardsController = loader.getController();
+            if(clientController.getCurrentGameInfo().isTestFlight()) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level1Boards.fxml"));
+                VBox mainBoardBox = loader.load();
+                this.boardsController = loader.getController();
+
+                Platform.runLater(() -> {
+                    centerStackPane.getChildren().addFirst(mainBoardBox);
+                    this.boardsController = loader.getController();
+                    littleDeckComboBox.setVisible(false);
+                    littleDeckComboBox.setManaged(false);
+                    hourglassBox.setVisible(false);
+                    hourglassBox.setManaged(false);
+                    flipHourglassButton.setVisible(false);
+                    flipHourglassButton.setManaged(false);
+                });
+
+            } else {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level2Boards.fxml"));
+                VBox mainBoardBox = loader.load();
+                this.boardsController = loader.getController();
+                Platform.runLater(() -> centerStackPane.getChildren().addFirst(mainBoardBox));
+            }
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error loading boards: " + e.getMessage());
@@ -601,6 +634,9 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
         clientModel.getPlayerClientData().keySet().forEach(nickname ->
                 modelFxAdapter.refreshShipBoardOf(nickname));
+
+        // claude
+        applyInitialStyling();
     }
 
     public void handleGenerateShipBoardButton() {

@@ -304,11 +304,11 @@
     -fx-background-color: -fx-space-blue-light;
 }
 
-/* Aggiungi questi stili al tuo file galaxy-truckers.css */
+/* ===== SEZIONE VISIBLE COMPONENTS - AGGIORNATA ===== */
 
-/* Pannello sinistro - Componenti visibili */
+/* Pannello principale dei componenti visibili */
 .visible-components-panel {
-    -fx-background-color: rgba(0, 0, 0, 0.4); /* uguale al timer-container */
+    -fx-background-color: rgba(0, 0, 0, 0.4);
     -fx-background-radius: 8px;
     -fx-border-color: -fx-space-blue;
     -fx-border-radius: 8px;
@@ -316,7 +316,6 @@
     -fx-padding: 10px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
 }
-
 
 /* Header del pannello componenti */
 .panel-header {
@@ -336,9 +335,9 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 5, 0, 0, 1);
 }
 
-/* ScrollPane per i componenti - stesso stile del timer container */
+/* ScrollPane per i componenti - tema scuro completo */
 .components-scroll-pane {
-    -fx-background-color: -fx-space-blue-light;
+    -fx-background-color: -fx-space-dark;
     -fx-background-radius: 8px;
     -fx-border-color: -fx-space-blue;
     -fx-border-radius: 8px;
@@ -346,19 +345,27 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
 }
 
+/* Viewport dello ScrollPane */
 .components-scroll-pane .viewport {
-    -fx-background-color: -fx-space-blue-light;
-    -fx-background-radius: 8px;
+    -fx-background-color: -fx-space-dark;
+    -fx-background-radius: 6px;
 }
 
+/* Contenuto dello ScrollPane */
+.components-scroll-pane .content {
+    -fx-background-color: -fx-space-dark;
+    -fx-background-radius: 6px;
+}
+
+/* Scrollbar verticale */
 .components-scroll-pane .scroll-bar:vertical {
-    -fx-background-color: -fx-space-blue-light;
-    -fx-background-radius: 4px;
+    -fx-background-color: transparent;
     -fx-pref-width: 8px;
+    -fx-opacity: 0.7;
 }
 
 .components-scroll-pane .scroll-bar:vertical .track {
-    -fx-background-color: -fx-space-blue-light;
+    -fx-background-color: rgba(0, 0, 0, 0.3);
     -fx-background-radius: 4px;
 }
 
@@ -372,53 +379,120 @@
     -fx-background-color: -fx-space-blue-light;
 }
 
+.components-scroll-pane .scroll-bar:vertical .thumb:pressed {
+    -fx-background-color: -fx-space-accent;
+}
+
+/* Bottoni di incremento/decremento dello scrollbar */
 .components-scroll-pane .scroll-bar .increment-button,
 .components-scroll-pane .scroll-bar .decrement-button {
-    -fx-background-color: -fx-space-blue-light;
+    -fx-background-color: transparent;
     -fx-pref-height: 0;
     -fx-pref-width: 0;
 }
 
+/* Corner dello ScrollPane */
 .components-scroll-pane .corner {
-    -fx-background-color: -fx-space-blue-light;
+    -fx-background-color: -fx-space-dark;
 }
 
-/* Container dei componenti */
+/* Container principale dei componenti (VBox) */
 .components-container {
-    -fx-background-color: -fx-space-blue-light;
-    -fx-spacing: 10px;
+    -fx-background-color: -fx-space-dark;
+    -fx-spacing: 8px;
+    -fx-padding: 5px;
+    -fx-background-radius: 6px;
 }
 
-/* Stili per i componenti individuali - stesso stile degli action-button */
+/* Stili per i bottoni dei componenti individuali */
 .component-item {
-    -fx-background-color: -fx-space-blue;
+    -fx-background-color: rgba(30, 50, 83, 0.8);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-background-radius: 5px;
-    -fx-padding: 8px 12px;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
     -fx-font-size: 11px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
 }
 
 .component-item:hover {
     -fx-background-color: -fx-space-blue-light;
-    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 5, 0, 0, 0);
+    -fx-border-color: rgba(255, 179, 0, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.4), 5, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }
 
 .component-item:pressed {
     -fx-background-color: derive(-fx-space-blue-light, -10%);
-    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 3, 0, 0, 0);
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 3, 0, 0, 0);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
 }
 
 .component-item.selected {
     -fx-background-color: -fx-space-accent;
     -fx-text-fill: -fx-space-dark;
+    -fx-border-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.8), 8, 0, 0, 0);
 }
 
-/* Immagini dei componenti */
-.component-image {
+/* Immagini dei componenti all'interno dei bottoni */
+.component-item .image-view {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 2, 0, 0, 1);
+}
+
+/* Stile per i bottoni dentro il container (fallback) */
+.components-container .button {
+    -fx-background-color: rgba(30, 50, 83, 0.8);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px;
+    -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+}
+
+.components-container .button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-border-color: rgba(255, 179, 0, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.4), 5, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.components-container .button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 3, 0, 0, 0);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+/* Stile per container vuoto */
+.components-container:empty {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-border-color: rgba(108, 117, 125, 0.3);
+    -fx-border-style: dashed;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-min-height: 100px;
+}
+
+/* Etichetta per stato vuoto */
+.empty-components-label {
+    -fx-text-fill: -fx-space-gray;
+    -fx-font-style: italic;
+    -fx-font-size: 12px;
+    -fx-alignment: center;
 }
 
 .place-pawn-button {

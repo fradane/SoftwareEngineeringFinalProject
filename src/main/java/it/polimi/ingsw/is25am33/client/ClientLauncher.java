@@ -58,7 +58,7 @@ public class ClientLauncher {
 
 
         if (args.length != 2) {
-            System.err.println("Invalid parameters. Exiting...");
+            System.err.println("Not enough parameters. Exiting...");
             return;
         }
 
@@ -83,7 +83,7 @@ public class ClientLauncher {
 
                 CallableOnDNS dns = clientController.selectNetworkProtocol(args[1]);
                 if (dns == null) {
-                    System.err.println("Invalid parameters. Exiting...");
+                    System.err.println("DNS is null. Exiting...");
                     return;
                 }
                 clientController.setDns(dns);

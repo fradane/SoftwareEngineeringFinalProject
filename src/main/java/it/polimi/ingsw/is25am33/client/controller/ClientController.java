@@ -268,6 +268,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 default -> null;
             };
         } catch (IOException e) {
+//            System.err.println("Connection refused: " + e.getMessage());
             view.showError("Connection refused: " + e.getMessage());
             return null;
         }
