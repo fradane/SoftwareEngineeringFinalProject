@@ -848,10 +848,17 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             return;
         }
 
-        ClientAbandonedShip shipCard = (ClientAbandonedShip) clientModel.getCurrAdventureCard();
+        // Handle both AbandonedShip and AbandonedStation
+        ClientCard currentCard = clientModel.getCurrAdventureCard();
+        int crewRequirement = 0;
+
+        if (currentCard instanceof CrewMalusCard) {
+            crewRequirement = ((CrewMalusCard) currentCard).getCrewMalus();
+        }
+
         int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
 
-        if (choice==true && totalCrew < shipCard.getCrewMalus()) {
+        if (choice==true && totalCrew < crewRequirement) {
             view.showMessage("You only have " + totalCrew + " crew members. you cannot visit the location", ERROR);
             view.showMessage("Your choice has been automatically set to false", STANDARD);
             choice=false;

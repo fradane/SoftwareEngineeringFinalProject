@@ -513,9 +513,9 @@ public class ClientCLIView implements ClientView {
             case "AbandonedShip":
                 displayAbandonedShipInfo((ClientAbandonedShip) card, output);
                 break;
-//            case "AbandonedStation":
-//                displayAbandonedStationInfo((ClientAbandonedStation) card, output);
-//                break;
+            case "AbandonedStation":
+                displayAbandonedStationInfo((ClientAbandonedStation) card, output);
+                break;
 //            case "Pirates":
 //                displayPiratesInfo((ClientPirates) card, output);
 //                break;
@@ -555,6 +555,23 @@ public class ClientCLIView implements ClientView {
                 .append(" crew members, gain ").append(ship.getReward())
                 .append(" credits, and move back ").append(ship.getStepsBack())
                 .append(" spaces.");
+    }
+
+    private void displayAbandonedStationInfo(ClientAbandonedStation station, StringBuilder output) {
+        output.append("Crew Required: ").append(station.getRequiredCrewMembers()).append("\n");
+        output.append("Steps Back: ").append(station.getStepsBack()).append("\n");
+        
+        output.append("Rewards: ");
+        if (station.getReward() != null && !station.getReward().isEmpty()) {
+            station.getReward().forEach(cube -> output.append(cube.name()).append(" "));
+        } else {
+            output.append("None");
+        }
+        output.append("\n");
+        
+        output.append("\nYou can accept the reward if you have enough crew members.");
+        output.append("\nIf you accept, you'll gain cargo cubes and move back ")
+              .append(station.getStepsBack()).append(" spaces.");
     }
 
     private void displayPlanetsInfo(ClientPlanets planets, StringBuilder output) {
@@ -1358,7 +1375,21 @@ public class ClientCLIView implements ClientView {
                 return;
             }
         } else if (card.getCardType().equals("AbandonedStation")) {
-            message.append("You've found an abandoned station! If you have enough crew, you can visit to get cargo.\n");
+            ClientAbandonedStation stationCard = (ClientAbandonedStation) card;
+            message.append("You've found an abandoned station!\n\n");
+            message.append("If you have at least ").append(stationCard.getRequiredCrewMembers())
+                   .append(" crew members, you can visit to get cargo.\n");
+                   
+            // Check if player has enough crew
+            int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
+            if (totalCrew < stationCard.getRequiredCrewMembers()) {
+                setClientState(ClientState.CANNOT_VISIT_LOCATION);
+                message.append(ANSI_RED + "WARNING: You only have ").append(totalCrew)
+                       .append(" crew members. You cannot accept this reward!\n\n" + ANSI_RESET);
+                showMessage(message.toString(), STANDARD);
+                showMessage("Press any key to continue.", ASK);
+                return;
+            }
         }
 
         message.append("Do you want to visit this location? [Y/n]");
@@ -1767,10 +1798,10 @@ public class ClientCLIView implements ClientView {
             ClientPlanets planets = (ClientPlanets) card;
             return planets.getPlayerReward(clientModel.getMyNickname());
         }
-//        else if (card instanceof ClientAbandonedStation) {
-//            // AbandonedStation has a direct list of rewards
-//            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
-//        }
+        else if (card instanceof ClientAbandonedStation) {
+            // AbandonedStation has a direct list of rewards
+            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
+        }
 //        else if (card instanceof ClientSmugglers) {
 //            // Smugglers have a direct list of rewards
 //            return new ArrayList<>(((ClientSmugglers) card).getReward());

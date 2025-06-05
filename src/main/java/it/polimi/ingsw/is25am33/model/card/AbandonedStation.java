@@ -1,17 +1,18 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedStation;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
-import it.polimi.ingsw.is25am33.model.*;
+import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
+import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
+import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
 import it.polimi.ingsw.is25am33.model.component.Storage;
-import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 
-import java.rmi.RemoteException;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class AbandonedStation extends AdventureCard implements PlayerMover {
 
@@ -50,8 +51,12 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
 
     @Override
     public ClientCard toClientCard() {
-        //TODO
-        return null;
+        return new ClientAbandonedStation(cardName, imageName, requiredCrewMembers, reward, stepsBack);
+    }
+
+    @Override
+    public void setLevel(int level) {
+        this.level = level;
     }
 
     public void setRequiredCrewMembers(int requiredCrewMembers) {
@@ -88,66 +93,126 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         this.cardName = this.getClass().getSimpleName();
     }
 
-    private void currPlayerWantsToVisit (boolean wantsToVisit) throws IllegalDecisionException {
-
-        if (wantsToVisit) {
-            if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < requiredCrewMembers)
-                throw new IllegalDecisionException("Player has not enough crew members");
-            setCurrState( CardState.REMOVE_CREW_MEMBERS);
-        } else if (gameModel.hasNextPlayer()) {
-            gameModel.nextPlayer();
-        } else {
-            setCurrState(CardState.END_OF_CARD);
+    private void currPlayerWantsToVisit(boolean wantsToVisit) throws IllegalDecisionException {
+        try {
+            if (wantsToVisit) {
+                if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < requiredCrewMembers)
+                    throw new IllegalDecisionException("Player has not enough crew members");
+                setCurrState(CardState.HANDLE_CUBES_REWARD);
+            } else if (gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
+                setCurrState(CardState.VISIT_LOCATION);
+            } else {
+                setCurrState(CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
+            }
+        } catch (Exception e) {
+            System.err.println("Error in currPlayerWantsToVisit: " + e.getMessage());
+            e.printStackTrace();
         }
-
     }
 
     private void currPlayerChoseCargoCubeStorage(List<Storage> chosenStorage) {
+        List<CargoCube> stationRewards = new ArrayList<>(reward);
 
-        if (chosenStorage.size() != reward.size())
-            throw new IllegalArgumentException("Incorrect number of storages");
+        // Caso 1: Il giocatore non ha scelto nessuno storage
+        if (chosenStorage.isEmpty()) {
+            System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
+                    " cannot accept any rewards due to lack of storage space");
+            proceedToNextPlayerOrEndCard();
+            return;
+        }
 
-        IntStream.range(0, chosenStorage.size()).forEach(i -> {
-            if (!(chosenStorage.get(i) instanceof SpecialStorage) && reward.get(i) == CargoCube.RED)
-                throw new IllegalArgumentException("Trying to store a RED cube in a non-special storage");
-        });
+        // Caso 2: Il giocatore ha scelto meno storage dei reward disponibili
+        if (chosenStorage.size() < stationRewards.size()) {
+            List<CargoCube> rewardsToProcess = stationRewards.subList(0, chosenStorage.size());
+            List<CargoCube> discardedRewards = stationRewards.subList(chosenStorage.size(), stationRewards.size());
 
-        chosenStorage.forEach(storage -> {
-            if(storage.isFull()) {
-                List<CargoCube> sortedStorage = storage.getStockedCubes();
-                sortedStorage.sort(CargoCube.byValue);
-                CargoCube lessValuableCargoCube = sortedStorage.getFirst();
-                storage.removeCube(lessValuableCargoCube);
+            System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
+                    " can only accept " + chosenStorage.size() +
+                    " out of " + stationRewards.size() + " rewards");
+            System.out.println("Discarded rewards: " + discardedRewards);
+
+            stationRewards = rewardsToProcess;
+        }
+
+        // Caso 3: Il giocatore ha scelto più storage dei reward
+        if (chosenStorage.size() > stationRewards.size()) {
+            chosenStorage = chosenStorage.subList(0, stationRewards.size());
+        }
+
+        // Validazione: controlla che i cubi RED vadano solo in SpecialStorage
+        for (int i = 0; i < Math.min(chosenStorage.size(), stationRewards.size()); i++) {
+            Storage storage = chosenStorage.get(i);
+            CargoCube cube = stationRewards.get(i);
+
+            if (storage == null) {
+                continue;
             }
-            storage.addCube(reward.removeFirst());
+
+            if (!(storage instanceof SpecialStorage) && cube == CargoCube.RED) {
+                throw new IllegalArgumentException("Trying to store a RED cube in a non-special storage");
+            }
+        }
+
+        // Processa i cubi effettivamente posizionabili
+        for (int i = 0; i < Math.min(chosenStorage.size(), stationRewards.size()); i++) {
+            Storage storage = chosenStorage.get(i);
+            CargoCube cube = stationRewards.get(i);
+
+            if (storage == null) {
+                System.out.println("Cube " + cube + " discarded - no valid storage selected");
+                continue;
+            }
+
+            // Se lo storage è pieno, rimuovi il cubo meno prezioso
+            if (storage.isFull()) {
+                List<CargoCube> sortedStorage = new ArrayList<>(storage.getStockedCubes());
+                sortedStorage.sort(CargoCube.byValue);
+                CargoCube lessValuableCargoCube = sortedStorage.get(0);
+                storage.removeCube(lessValuableCargoCube);
+                System.out.println("Removed " + lessValuableCargoCube + " to make space for " + cube);
+            }
+
+            storage.addCube(cube);
+            System.out.println("Added " + cube + " to storage");
+        }
+
+        // Muovi il giocatore indietro
+        movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
+
+        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
         });
 
-        movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
-        setCurrState( CardState.END_OF_CARD);
+        // Procedi con il prossimo giocatore o termina la carta
+        proceedToNextPlayerOrEndCard();
+    }
 
+    private void proceedToNextPlayerOrEndCard() {
+        if (gameModel.hasNextPlayer()) {
+            gameModel.nextPlayer();
+            setCurrState(CardState.VISIT_LOCATION);
+        } else {
+            setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
+        }
     }
 
     @Override
     public String toString() {
-        // Parte sinistra: box dati statici
-        String firstString = String.format("""
-        %s
-        ┌────────────────────────────┐
-        │     AbandonedStation       │
-        ├────────────────────────────┤
-        │ Crew Required:     x%-2d     │
-        │ Steps Back:        x%-2d     │
-        │ Rewards:           x%-2d     │
-        └────────────────────────────┘
-        """, imageName, requiredCrewMembers, stepsBack, reward != null ? reward.size() : 0);
-
-        StringBuilder secondString = new StringBuilder("   ");
-        if (reward != null && !reward.isEmpty()) {
-            secondString.append("Rewards:\n");
-            for (int i = 0; i < reward.size(); i++) {
-                secondString.append(String.format("   Reward %d: %s%n", i + 1, reward.get(i).name()));            }
-        }
-        return firstString + secondString;
+        return String.format("""
+           %s
+           ┌────────────────────────────┐
+           │     Abandoned Station      │
+           ├────────────────────────────┤
+           │ Crew Required:     x%-2d     │
+           │ Reward Cubes:      x%-2d     │
+           │ Steps Back:        %-2d      │
+           └────────────────────────────┘
+           """, imageName, requiredCrewMembers, reward != null ? reward.size() : 0, stepsBack);
     }
 
 }

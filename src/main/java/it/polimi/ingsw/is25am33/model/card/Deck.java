@@ -171,11 +171,17 @@ public class Deck {
 
 
 
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+
+        allCards.addAll(Deck.loadAbandonedStationFromJson());
+        allCards.addAll(Deck.loadAbandonedStationFromJson());
+        allCards.addAll(Deck.loadAbandonedStationFromJson());
+        allCards.addAll(Deck.loadAbandonedStationFromJson());
+        allCards.addAll(Deck.loadAbandonedStationFromJson());
     }
 
     /**
