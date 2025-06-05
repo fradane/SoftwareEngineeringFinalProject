@@ -2,10 +2,12 @@ package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
+import it.polimi.ingsw.is25am33.client.model.card.CrewMalusCard;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
@@ -15,6 +17,7 @@ import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -378,9 +381,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException {
+    public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
         clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
+        clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
 
         // Mostra il menu solo se è la propria shipBoard
         if (shipOwnerNickname.equals(nickname)) {
@@ -389,9 +393,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException {
+    public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
         clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
+        clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
 
         // Mostra il menu solo se è la propria shipBoard
         if (shipOwnerNickname.equals(nickname)) {
@@ -400,9 +405,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts) throws RemoteException {
+    public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
         clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
+        clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
 
 
         // Gestisce la selezione solo se è la propria shipBoard
@@ -471,6 +477,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         //clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponentsCoordinates().add(component);
     }
 
+    @Override
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) {
+        clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
+        clientModel.getShipboardOf(nickname).setComponentsPerType(componentsPerType);
+    }
+
     /**
      * Notifies the client that the player called nickname has the focus on a specific component.
      *
@@ -531,6 +543,52 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyPlayerVisitedPlanet(String nicknameToNotify, String nickname, ClientCard adventureCard) throws IOException {
         if(!clientModel.isMyTurn())
             view.showMessage(clientModel.getCurrentPlayer() + " just visited a planet", NOTIFICATION_INFO);
+    }
+
+    @Override
+    public void notifyCrewPlacementPhase(String nicknameToNotify) throws IOException {
+        clientModel.setGameState(GameState.PLACE_CREW);
+        view.showCrewPlacementMenu();
+    }
+
+    @Override
+    public void notifyCrewPlacementComplete(String nicknameToNotify, String playerNickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException {
+        clientModel.getShipboardOf(playerNickname).setShipMatrix(shipMatrix);
+        clientModel.getShipboardOf(playerNickname).setComponentsPerType(componentsPerType);
+
+        if (playerNickname.equals(nickname)) {
+            view.showMessage("Your crew placement is complete!", STANDARD);
+        } else {
+            view.showMessage(playerNickname + " has completed crew placement.", NOTIFICATION_INFO);
+        }
+    }
+
+    public void submitCrewChoices(Map<Coordinates, CrewMember> choices) {
+        try {
+            // Validazione locale
+            validateCrewChoices(choices);
+
+            // Invia al server
+            serverController.submitCrewChoices(nickname, choices);
+        } catch (IllegalArgumentException e) {
+            view.showError(e.getMessage());
+            view.showCrewPlacementMenu();
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    private void validateCrewChoices(Map<Coordinates, CrewMember> choices) {
+        // Verifica massimo 1 alieno per colore
+        long purpleCount = choices.values().stream().filter(c -> c == CrewMember.PURPLE_ALIEN).count();
+        long brownCount = choices.values().stream().filter(c -> c == CrewMember.BROWN_ALIEN).count();
+
+        if (purpleCount > 1) {
+            throw new IllegalArgumentException("You can have at most 1 purple alien");
+        }
+        if (brownCount > 1) {
+            throw new IllegalArgumentException("You can have at most 1 brown alien");
+        }
     }
 
     @Override
@@ -829,10 +887,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         ClientAbandonedShip shipCard = (ClientAbandonedShip) clientModel.getCurrAdventureCard();
         int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
+
         if (choice==true && totalCrew < shipCard.getCrewMalus()) {
             view.showMessage("You only have " + totalCrew + " crew members. you cannot visit the location", ERROR);
-            view.showVisitLocationMenu();
-            return;
+            view.showMessage("Your choice has been automatically set to false", STANDARD);
+            choice=false;
         }
 
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
@@ -897,8 +956,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void playerChoseCabins(String nickname, List<Coordinates> cabinCoords){
+    public boolean playerChoseCabins(String nickname, List<Coordinates> cabinCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+        CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
+
+        if(cabinCoords.size()<card.getCrewMalus()){
+            view.showMessage("Not the right amount of crew members", ERROR);
+            return false;
+        }
 
         List<Cabin> cabins = cabinCoords
                 .stream()
@@ -906,9 +971,16 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .map(Cabin.class::cast)
                 .toList();
 
+        for (Cabin cabin : cabins.stream().distinct().toList()) {
+            if (Collections.frequency(cabins, cabin) > cabin.getInhabitants().size()) {
+                view.showMessage("You have selected a cabin more times than its actual crewMember occupancy", ERROR);
+                return false;
+            }
+        }
+
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenCabins(cabins)
+                .setChosenCabins(cabinCoords)
                 .build();
 
         try{
@@ -916,6 +988,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }catch (IOException e){
             handleRemoteException(e);
         }
+        return true;
     }
 
     public void playerWantsToVisitPlanet(String nickname, int choice){
@@ -998,20 +1071,20 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void playerChoseStorage(String nickname, List<Coordinates> storageCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
-        List<Storage> storage = new ArrayList<>();
+        List<Storage> storages = new ArrayList<>();
 
         if (!storageCoords.isEmpty()) {
             for (Coordinates coords : storageCoords) {
                 if (coords.isCoordinateInvalid()) {
                     // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
-                    storage.add(null);
+                    storages.add(null);
                 } else {
                     Component component = shipBoard.getComponentAt(coords);
                     if (component instanceof Storage) {
-                        storage.add((Storage) component);
+                        storages.add((Storage) component);
                     } else {
                         // Se le coordinate non puntano a uno storage, aggiungi null
-                        storage.add(null);
+                        storages.add(null);
                     }
                 }
             }
@@ -1020,7 +1093,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenStorage(storage)
+                .setChosenStorage(storages)
                 .build();
 
         try {
@@ -1075,4 +1148,50 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         leaveGame();
     }
 
+
+    public void requestPrefabShipsList() {
+        try {
+            // Richiedi la lista in modo asincrono
+            view.showMessage("Requesting prefabricated ships list...", STANDARD);
+            serverController.requestPrefabShips(nickname);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    @Override
+    public void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException {
+        // Memorizza le navi disponibili nel model
+        clientModel.setAvailablePrefabShips(prefabShips);
+
+        // Mostra il menu con le navi disponibili
+        view.showPrefabShipsMenu(prefabShips);
+    }
+
+    @Override
+    public void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipInfo) throws IOException {
+        if (!playerNickname.equals(nickname)) {
+            view.showMessage(playerNickname + " has selected a prefabricated ship: " + prefabShipInfo.getName(), NOTIFICATION_INFO);
+        }
+    }
+
+    public void selectPrefabShip(String prefabShipId) {
+        try {
+            view.showMessage("Requesting prefab ship selection...", STANDARD);
+            serverController.requestSelectPrefabShip(nickname, prefabShipId);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    @Override
+    public void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException {
+        if (success) {
+            view.showMessage("Prefab ship selected successfully! Waiting for other players...", STANDARD);
+            // Aggiornare lo stato se necessario
+        } else {
+            view.showError("Failed to select prefab ship: " + errorMessage);
+            view.showBuildShipBoardMenu();
+        }
+    }
 }

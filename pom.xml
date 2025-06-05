@@ -59,6 +59,12 @@
         </dependency>
         <!--JACKSON dependencies - END -->
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>2.15.0</version>
+        </dependency>
+
         <!--MOCKITO dependencies - START -->
         <dependency>
             <groupId>org.mockito</groupId>

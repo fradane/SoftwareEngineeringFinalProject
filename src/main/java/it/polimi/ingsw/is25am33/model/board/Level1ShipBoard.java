@@ -4,7 +4,8 @@ import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 
-public class Level1ShipBoard extends ShipBoard {
+
+public class Level1ShipBoard extends ShipBoard implements ShipBoardClient {
 
     public Level1ShipBoard(PlayerColor color, GameClientNotifier gameClientNotifier) {
         super(color, gameClientNotifier);
@@ -20,5 +21,16 @@ public class Level1ShipBoard extends ShipBoard {
         return false;
     }
 
+
+    @Override
+    public Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport() {
+        // In modalità test flight, nessuna cabina può avere alieni
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public boolean canAcceptAlien(Coordinates coords, CrewMember alien) {
+        return false;
+    }
 
 }

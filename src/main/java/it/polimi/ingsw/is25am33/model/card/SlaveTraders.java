@@ -2,6 +2,8 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
@@ -110,7 +112,14 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
     }
 
-    private void currPlayerChoseRemovableCrewMembers(List<Cabin> chosenCabins) throws IllegalArgumentException{
+    private void currPlayerChoseRemovableCrewMembers(List<Coordinates> chosenCabinsCoordinate) throws IllegalArgumentException{
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        //non viene fatto il controllo se sono tutte cabine perchè già fatto lato client
+        List<Cabin> chosenCabins = chosenCabinsCoordinate
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Cabin.class::cast)
+                .toList();
 
         removeMemberProcess(chosenCabins, crewMalus);
 

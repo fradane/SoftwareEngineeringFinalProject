@@ -1,14 +1,22 @@
 package it.polimi.ingsw.is25am33.model.board;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
+
+import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
 
 import java.rmi.RemoteException;
 
+import java.util.Map;
+import java.util.Set;
+
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.NORTH;
 
-public class Level2ShipBoard extends ShipBoard{
+public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
 
     static boolean[][] level2ValidPositions = {
             {false, false, false, false, false, false, false, false, false, false, false, false},
@@ -70,5 +78,17 @@ public class Level2ShipBoard extends ShipBoard{
     // TODO indice del reserved component da mettere in focus e accertarsi della notify
     public void focusReservedComponent(int choice) {
 
+    }
+
+    @Override
+    public Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport() {
+        // Utilizza l'implementazione della classe padre
+        return super.getCabinsWithLifeSupport();
+    }
+
+    @Override
+    public boolean canAcceptAlien(Coordinates coords, CrewMember alien) {
+        // Utilizza l'implementazione della classe padre
+        return super.canAcceptAlien(coords, alien);
     }
 }

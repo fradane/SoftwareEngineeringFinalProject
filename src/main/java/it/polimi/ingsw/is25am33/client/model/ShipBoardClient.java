@@ -1,9 +1,9 @@
 package it.polimi.ingsw.is25am33.client.model;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.game.Player;
@@ -441,7 +441,7 @@ public interface ShipBoardClient {
 
     void checkPosition(int x, int y);
 
-    void setComponentsPerType(Map<Class<?>, List<Object>> componentsPerType);
+    void setComponentsPerType(Map<Class<?>, List<Component>> componentsPerType);
 
     Map<Coordinates, Storage> getCoordinatesAndStorages();
 
@@ -453,6 +453,16 @@ public interface ShipBoardClient {
      */
     Map<Coordinates, Cabin> getCoordinatesAndCabinsWithCrew();
 
-    Map<Class<?>, List<Object>> getComponentsPerType();
+    /**
+     * Restituisce una mappa di cabine connesse a moduli di supporto vitale.
+     */
+    Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport();
+
+    /**
+     * Verifica se un alieno può essere posizionato in una cabina.
+     */
+    boolean canAcceptAlien(Coordinates coords, CrewMember alien);
+
+    Map<Class<?>, List<Component>> getComponentsPerType();
 
 }

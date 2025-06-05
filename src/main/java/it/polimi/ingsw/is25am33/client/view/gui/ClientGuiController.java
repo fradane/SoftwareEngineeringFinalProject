@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.client.view.gui;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
@@ -94,6 +95,16 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showCurrentRanking() {
+        //TODO
+    }
+
+    @Override
+    public void showCrewPlacementMenu() {
+        //TODO
+    }
+
+    @Override
+    public void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips) {
         //TODO
     }
 

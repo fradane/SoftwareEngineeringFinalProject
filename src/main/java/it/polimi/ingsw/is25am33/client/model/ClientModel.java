@@ -25,6 +25,15 @@ public class ClientModel {
     private List<List<String>> littleVisibleDecks = new ArrayList<>();
     private boolean isMyTurn;
     private Hourglass hourglass;
+    private List<PrefabShipInfo> availablePrefabShips = new ArrayList<>();
+
+    public List<PrefabShipInfo> getAvailablePrefabShips() {
+        return availablePrefabShips;
+    }
+
+    public void setAvailablePrefabShips(List<PrefabShipInfo> availablePrefabShips) {
+        this.availablePrefabShips = availablePrefabShips;
+    }
 
     public Hourglass getHourglass() {
         return hourglass;

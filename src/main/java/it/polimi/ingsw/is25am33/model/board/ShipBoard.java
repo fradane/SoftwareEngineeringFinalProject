@@ -46,7 +46,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     /**
      * A map that groups components based on their class (type).
      */
-    protected Map<Class<?>, List<Object>> componentsPerType = new HashMap<>();
+    protected Map<Class<?>, List<Component>> componentsPerType = new HashMap<>();
 
     /**
      * A list of components that are not currently active on the board (either removed or awaiting placement).
@@ -77,8 +77,10 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         connectors.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.WEST,  ConnectorType.UNIVERSAL);
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
-        shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = new MainCabin(connectors, color);
         this.gameClientNotifier = gameClientNotifier;
+        Cabin mainCabin = new MainCabin(connectors, color);
+        shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = mainCabin;
+        mainCabin.insertInComponentsMap(componentsPerType);
     }
 
     public void setPlayer(Player player) {
@@ -91,7 +93,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
     }
 
-    public Map<Class<?>, List<Object>> getComponentsPerType() {
+    public Map<Class<?>, List<Component>> getComponentsPerType() {
         synchronized (componentsPerType) {
             return componentsPerType;
         }
@@ -276,9 +278,6 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 //
 //                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
 //                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-//                    } catch (IOException e) {
-//                        System.err.println("Remote Exception");
-//                    }
 //                });
 //
 //            focusedComponent = null;
@@ -290,6 +289,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         synchronized (shipMatrix) {
 
           checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
+
             shipMatrix[x][y] = focusedComponent;
 
             focusedComponent.insertInComponentsMap(componentsPerType);
@@ -303,9 +303,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                 });
 
             focusedComponent = null;
-
         }
-
     }
 
     public boolean isAimingAComponent(Component componentToPlace, int x, int y) {
@@ -689,7 +687,10 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<CrewMember> getCrewMembers() {
-        List<Object> cabins = componentsPerType.getOrDefault(Cabin.class, Collections.emptyList());
+        List<Component> cabins = new ArrayList<>(componentsPerType.getOrDefault(Cabin.class, Collections.emptyList())); // necessario fare la new ArrayList perchè emptyList è immutabile
+
+        if(componentsPerType.get(MainCabin.class)!=null)
+            cabins.addAll(componentsPerType.get(MainCabin.class));
 
         return cabins.stream()
                 .map(Cabin.class::cast)
@@ -705,7 +706,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Cabin> getCabin() {
-        List<Object> cabins = componentsPerType.getOrDefault(Cabin.class, Collections.emptyList());
+        List<Component> cabins = componentsPerType.getOrDefault(Cabin.class, Collections.emptyList());
 
         return cabins.stream()
                 .map(Cabin.class::cast)
@@ -763,7 +764,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<DoubleCannon> getDoubleCannons () {
-        List<Object> cannons = componentsPerType.getOrDefault(DoubleCannon.class, Collections.emptyList());
+        List<Component> cannons = componentsPerType.getOrDefault(DoubleCannon.class, Collections.emptyList());
 
         return cannons.stream()
                 .map(DoubleCannon.class::cast)
@@ -777,7 +778,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Cannon> getSingleCannons () {
-        List<Object> cannons = componentsPerType.getOrDefault(Cannon.class, Collections.emptyList());
+        List<Component> cannons = componentsPerType.getOrDefault(Cannon.class, Collections.emptyList());
 
         return cannons.stream()
                 .map(Cannon.class::cast)
@@ -818,7 +819,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<DoubleEngine> getDoubleEngines () {
-        List<Object> engines = componentsPerType.getOrDefault(DoubleEngine.class, Collections.emptyList());
+        List<Component> engines = componentsPerType.getOrDefault(DoubleEngine.class, Collections.emptyList());
 
         return engines.stream()
                 .map(DoubleEngine.class::cast)
@@ -832,7 +833,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Engine> getSingleEngines () {
-        List<Object> engines = componentsPerType.getOrDefault(Engine.class, Collections.emptyList());
+        List<Component> engines = componentsPerType.getOrDefault(Engine.class, Collections.emptyList());
 
         return engines.stream()
                 .map(Engine.class::cast)
@@ -883,7 +884,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<StandardStorage> getStandardStorages() {
-        List<Object> storages = componentsPerType.getOrDefault(StandardStorage.class, Collections.emptyList());
+        List<Component> storages = componentsPerType.getOrDefault(StandardStorage.class, Collections.emptyList());
 
         return storages.stream()
                 .map(StandardStorage.class::cast)
@@ -897,7 +898,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<SpecialStorage> getSpecialStorages() {
-        List<Object> storages = componentsPerType.getOrDefault(SpecialStorage.class, Collections.emptyList());
+        List<Component> storages = componentsPerType.getOrDefault(SpecialStorage.class, Collections.emptyList());
 
         return storages.stream()
                 .map(SpecialStorage.class::cast)
@@ -921,7 +922,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<BatteryBox> getBatteryBoxes() {
-        List<Object> batteries = componentsPerType.getOrDefault(BatteryBox.class, Collections.emptyList());
+        List<Component> batteries = componentsPerType.getOrDefault(BatteryBox.class, Collections.emptyList());
 
         return batteries.stream()
                 .map(BatteryBox.class::cast)
@@ -935,7 +936,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<Shield> getShields() {
-        List<Object> shields = componentsPerType.getOrDefault(Shield.class, Collections.emptyList());
+        List<Component> shields = componentsPerType.getOrDefault(Shield.class, Collections.emptyList());
 
         return shields.stream()
                 .map(Shield.class::cast)
@@ -1143,13 +1144,19 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
     }
 
+    public Map<Class<?>, List<Component>> getComponentsPerType() {
+        return componentsPerType;
+    }
+
+
+
     /**
      * Removes a component from the componentsPerType map
      * @param component The component to remove
      */
     private void removeFromComponentsMap(Component component) {
         Class<?> componentClass = component.getClass();
-        List<Object> componentsList = componentsPerType.get(componentClass);
+        List<Component> componentsList = componentsPerType.get(componentClass);
         if (componentsList != null) {
             componentsList.remove(component);
             // Se la lista diventa vuota, potresti volerla rimuovere dalla mappa
@@ -1159,7 +1166,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
     }
 
-    public void setComponentsPerType(Map<Class<?>, List<Object>> componentsPerType) {
+    public void setComponentsPerType(Map<Class<?>, List<Component>> componentsPerType) {
         this.componentsPerType = componentsPerType;
     }
 

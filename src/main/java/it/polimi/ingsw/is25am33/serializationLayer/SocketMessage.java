@@ -1,21 +1,27 @@
 package it.polimi.ingsw.is25am33.serializationLayer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientPlanets;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.board.*;
+import it.polimi.ingsw.is25am33.model.card.Planets;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.BigShot;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
-import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
-import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
-import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
+import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SocketMessage {
 
     private String senderNickname;
@@ -40,48 +46,128 @@ public class SocketMessage {
     private Set<Coordinates> paramIncorrectlyPositionedCoordinates;
     private Set<Set<Coordinates>> paramShipParts;
     private Set<Coordinates> paramShipPart;
-    private Map<Class<?>, List<Object>> paramComponentsPerType;
+    private Map<Class<?>, List<Component>> paramComponentsPerType;
+    private PlayerChoicesDataStructure paramChoice;
+    @JsonDeserialize(keyUsing = ServerDeserializer.class)
+    private Map<Coordinates, CrewMember> paramCrewChoices;
+    private ClientCard paramClientCard;
+    private Component[][] paramShipMatrix;
+    private List<PrefabShipInfo> paramPrefabShips;
+
+//    public SocketMessage(String senderNickname, String actions) {
+//        this.senderNickname = senderNickname;
+//        this.actions = actions;
+//        this.paramString = "";
+//        this.paramCoordinates = new Coordinates();
+//        this.paramGameInfo = new ArrayList<>();
+//        this.paramInt = 0;
+//        this.paramBoolean = false;
+//        this.paramPlayerColor = PlayerColor.GREEN;
+//        this.paramShipBoardAsMatrix = new Component[0][0];
+//        this.paramGameState = GameState.SETUP;
+//        this.paramComponent = new BatteryBox(new HashMap<>(), 0);
+//        this.paramGameId = "";
+//        this.paramDangerousObj = new BigShot(Direction.NORTH);
+//        this.paramActivableCoordinates = new ArrayList<>();
+//        this.paramBatteryBoxCoordinates = new ArrayList<>();
+//        this.paramCabinCoordinates = new ArrayList<>();
+//        this.paramVisibleComponents = new HashMap<>();
+//        this.paramLittleVisibleDecks = new ArrayList<>();
+//        this.paramCardState=CardState.START_CARD;
+//        this.paramComponentsPerType = new HashMap<>();
+//        this.paramChoice = new PlayerChoicesDataStructure.Builder().build();
+//        this.paramCrewChoices = new HashMap<>();
+//        //TODO capire se posso sostituire con this.paramClientCard = null;
+//        this.paramClientCard = new ClientPlanets();
+//        this.paramShipMatrix = new Component[0][0];
+//    }
 
     public SocketMessage(String senderNickname, String actions) {
         this.senderNickname = senderNickname;
         this.actions = actions;
-        this.paramString = "";
-        this.paramCoordinates = new Coordinates();
-        this.paramGameInfo = new ArrayList<>();
+        this.paramString = null;
+        this.paramCoordinates = null;
+        this.paramGameInfo = null;
         this.paramInt = 0;
         this.paramBoolean = false;
-        this.paramPlayerColor = PlayerColor.GREEN;
-        this.paramShipBoardAsMatrix = new Component[0][0];
-        this.paramGameState = GameState.SETUP;
-        this.paramComponent = new BatteryBox(new HashMap<>(), 0);
-        this.paramGameId = "";
-        this.paramDangerousObj = new ClientDangerousObject("BigShot", Direction.NORTH,1);
-        this.paramActivableCoordinates = new ArrayList<>();
-        this.paramBatteryBoxCoordinates = new ArrayList<>();
-        this.paramCabinCoordinates = new ArrayList<>();
-        this.paramVisibleComponents = new HashMap<>();
-        this.paramLittleVisibleDecks = new ArrayList<>();
-        this.paramCardState=CardState.START_CARD;
-        this.paramComponentsPerType = new ConcurrentHashMap<>();
+        this.paramPlayerColor = null;
+        this.paramShipBoardAsMatrix = null;
+        this.paramGameState = null;
+        this.paramComponent = null;
+        this.paramGameId = null;
+        this.paramDangerousObj = null;
+        this.paramActivableCoordinates = null;
+        this.paramBatteryBoxCoordinates = null;
+        this.paramCabinCoordinates = null;
+        this.paramVisibleComponents = null;
+        this.paramLittleVisibleDecks = null;
+        this.paramCardState=null;
+        this.paramComponentsPerType = null;
+        this.paramChoice = null;
+        this.paramCrewChoices = null;
+        this.paramClientCard = null;
+        this.paramShipMatrix = null;
+        this.paramPrefabShips = null;
+        this.paramDangerousObj = null;
     }
 
     public SocketMessage() {
+    }
+
+    public List<PrefabShipInfo> getParamPrefabShips() {
+        return paramPrefabShips;
+    }
+
+    public void setParamPrefabShips(List<PrefabShipInfo> paramPrefabShips) {
+        this.paramPrefabShips = paramPrefabShips;
     }
 
     public Map<Integer, Component> getParamVisibleComponents() {
         return paramVisibleComponents;
     }
 
-    public void setParamVisibleComponents(Map<Integer, Component> paramVisibleComponents) {
-        this.paramVisibleComponents = paramVisibleComponents;
+    public Component[][] getParamShipMatrix() {
+        return paramShipMatrix;
     }
 
-    public Map<Class<?>, List<Object>> getParamComponentsPerType() {
+    public void setParamShipMatrix(Component[][] paramShipMatrix) {
+        this.paramShipMatrix = paramShipMatrix;
+    }
+
+    public ClientCard getParamClientCard() {
+        return paramClientCard;
+    }
+
+    public void setParamClientCard(ClientCard paramClientCard) {
+        this.paramClientCard = paramClientCard;
+    }
+
+    public Map<Coordinates, CrewMember> getParamCrewChoices() {
+        return paramCrewChoices;
+    }
+
+    public void setParamCrewChoices(Map<Coordinates, CrewMember> crewChoices) {
+        this.paramCrewChoices = crewChoices;
+    }
+
+    public PlayerChoicesDataStructure getParamChoice() {
+        return paramChoice;
+    }
+
+    public void setParamChoice(PlayerChoicesDataStructure paramChoice) {
+        this.paramChoice = paramChoice;
+    }
+
+    public Map<Class<?>, List<Component>> getParamComponentsPerType() {
         return paramComponentsPerType;
     }
 
-    public void setParamComponentsPerType(Map<Class<?>, List<Object>> paramComponentsPerType) {
+    public void setParamComponentsPerType(Map<Class<?>, List<Component>> paramComponentsPerType) {
         this.paramComponentsPerType = paramComponentsPerType;
+    }
+
+    public void setParamVisibleComponents(Map<Integer, Component> paramVisibleComponents) {
+        this.paramVisibleComponents = paramVisibleComponents;
     }
 
     public List<Coordinates> getParamActivableCoordinates() {

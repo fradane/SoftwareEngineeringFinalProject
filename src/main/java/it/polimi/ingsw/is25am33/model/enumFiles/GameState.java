@@ -39,6 +39,13 @@ public enum GameState implements Serializable {
 
     },
 
+    PLACE_CREW {
+        @Override
+        public void run(GameModel gameModel) {
+            gameModel.handleCrewPlacementPhase();
+        }
+    },
+
     CREATE_DECK {
 
         @Override
