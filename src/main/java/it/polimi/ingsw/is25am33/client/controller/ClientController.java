@@ -1090,6 +1090,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         List<Storage> storages = new ArrayList<>();
 
+        //TODO rimuovere la conversione a List<Storage>
         if (!storageCoords.isEmpty()) {
             for (Coordinates coords : storageCoords) {
                 if (coords.isCoordinateInvalid()) {
@@ -1110,7 +1111,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenStorage(storages)
+                .setChosenStorage(storageCoords)
                 .build();
 
         try {

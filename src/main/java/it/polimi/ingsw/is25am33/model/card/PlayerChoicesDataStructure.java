@@ -23,7 +23,7 @@ public class PlayerChoicesDataStructure implements Serializable {
     private final int chosenPlanetIndex;
     private final boolean wantsToVisit;
     private final List<Coordinates> chosenCabins;
-    private final List<Storage> chosenStorage;
+    private final List<Coordinates> chosenStorage;
     private final boolean hasAcceptedTheReward;
     private final Shield chosenShield;
     private final BatteryBox chosenBatteryBox;
@@ -112,7 +112,7 @@ public class PlayerChoicesDataStructure implements Serializable {
      * @return an {@link Optional} containing the chosen {@link Storage} component, or empty if not set.
      */
     @JsonIgnore
-    public Optional<List<Storage>> getChosenStorage() {
+    public Optional<List<Coordinates>> getChosenStorage() {
         return Optional.ofNullable(chosenStorage);
     }
 
@@ -181,7 +181,7 @@ public class PlayerChoicesDataStructure implements Serializable {
         private int chosenPlanetIndex;
         private boolean wantsToVisit;
         private List<Coordinates> chosenCabins;
-        private List<Storage> chosenStorage;
+        private List<Coordinates> chosenStorage;
         private boolean hasAcceptedTheReward;
         private Shield chosenShield;
         private BatteryBox chosenBatteryBox;
@@ -248,7 +248,7 @@ public class PlayerChoicesDataStructure implements Serializable {
          * @param chosenStorage the chosen {@link Storage} component.
          * @return this builder instance for method chaining.
          */
-        public Builder setChosenStorage(List<Storage> chosenStorage) {
+        public Builder setChosenStorage(List<Coordinates> chosenStorage) {
             this.chosenStorage = chosenStorage;
             return this;
         }

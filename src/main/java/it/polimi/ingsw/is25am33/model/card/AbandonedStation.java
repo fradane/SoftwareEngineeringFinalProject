@@ -2,6 +2,10 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedStation;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.component.Cabin;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
@@ -113,11 +117,29 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         }
     }
 
-    private void currPlayerChoseCargoCubeStorage(List<Storage> chosenStorage) {
+    private void currPlayerChoseCargoCubeStorage(List<Coordinates> chosenStorageCoords) {
         List<CargoCube> stationRewards = new ArrayList<>(reward);
 
+        //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        List<Storage> chosenStorages = new ArrayList();
+        for (Coordinates coords : chosenStorageCoords) {
+            if (coords.isCoordinateInvalid()) {
+                // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
+                chosenStorages.add(null);
+            } else {
+                Component component = shipBoard.getComponentAt(coords);
+                if (component instanceof Storage) {
+                    chosenStorages.add((Storage) component);
+                } else {
+                    // Se le coordinate non puntano a uno storage, aggiungi null
+                    chosenStorages.add(null);
+                }
+            }
+        }
+
         // Caso 1: Il giocatore non ha scelto nessuno storage
-        if (chosenStorage.isEmpty()) {
+        if (chosenStorages.isEmpty()) {
             System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
                     " cannot accept any rewards due to lack of storage space");
             proceedToNextPlayerOrEndCard();
@@ -125,12 +147,12 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         }
 
         // Caso 2: Il giocatore ha scelto meno storage dei reward disponibili
-        if (chosenStorage.size() < stationRewards.size()) {
-            List<CargoCube> rewardsToProcess = stationRewards.subList(0, chosenStorage.size());
-            List<CargoCube> discardedRewards = stationRewards.subList(chosenStorage.size(), stationRewards.size());
+        if (chosenStorages.size() < stationRewards.size()) {
+            List<CargoCube> rewardsToProcess = stationRewards.subList(0, chosenStorages.size());
+            List<CargoCube> discardedRewards = stationRewards.subList(chosenStorages.size(), stationRewards.size());
 
             System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
-                    " can only accept " + chosenStorage.size() +
+                    " can only accept " + chosenStorages.size() +
                     " out of " + stationRewards.size() + " rewards");
             System.out.println("Discarded rewards: " + discardedRewards);
 
@@ -138,13 +160,13 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         }
 
         // Caso 3: Il giocatore ha scelto più storage dei reward
-        if (chosenStorage.size() > stationRewards.size()) {
-            chosenStorage = chosenStorage.subList(0, stationRewards.size());
+        if (chosenStorages.size() > stationRewards.size()) {
+            chosenStorages = chosenStorages.subList(0, stationRewards.size());
         }
 
         // Validazione: controlla che i cubi RED vadano solo in SpecialStorage
-        for (int i = 0; i < Math.min(chosenStorage.size(), stationRewards.size()); i++) {
-            Storage storage = chosenStorage.get(i);
+        for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
+            Storage storage = chosenStorages.get(i);
             CargoCube cube = stationRewards.get(i);
 
             if (storage == null) {
@@ -157,8 +179,8 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         }
 
         // Processa i cubi effettivamente posizionabili
-        for (int i = 0; i < Math.min(chosenStorage.size(), stationRewards.size()); i++) {
-            Storage storage = chosenStorage.get(i);
+        for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
+            Storage storage = chosenStorages.get(i);
             CargoCube cube = stationRewards.get(i);
 
             if (storage == null) {

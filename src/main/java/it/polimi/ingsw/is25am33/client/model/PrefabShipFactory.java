@@ -33,6 +33,13 @@ public class PrefabShipFactory {
                 false
         ));
 
+        PREFAB_SHIPS.put("nave_scorretta", new PrefabShipInfo(
+                "nave_scorretta",
+                "Nave Scorretta",
+                "nave scorretta per fare controlli sulla nave",
+                false
+        ));
+
     }
 
     /**
@@ -60,9 +67,28 @@ public class PrefabShipFactory {
                 return applyBasicShip(shipBoard);
             case "cargo_hauler":
                 return applyCargoHauler(shipBoard);
+            case "nave_scorretta":
+                return applyNaveScorretta(shipBoard);
             default:
                 return false;
         }
+    }
+
+    private static boolean applyNaveScorretta(ShipBoard shipBoard) {
+        // Clear any existing components except the main cabin
+        clearShipBoard(shipBoard);
+
+        // Add components around the main cabin
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 6);
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 8);
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 6, 7);
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 5, 8);
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 8, 5);
+        addComponent(shipBoard, new Cannon(createSimpleConnectors()), 8, 6);
+
+        shipBoard.checkShipBoard();
+
+        return true;
     }
 
     private static boolean applyBasicShip(ShipBoard shipBoard) {
