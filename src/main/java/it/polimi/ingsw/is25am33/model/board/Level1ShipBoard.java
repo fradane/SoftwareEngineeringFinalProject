@@ -1,8 +1,15 @@
 package it.polimi.ingsw.is25am33.model.board;
 
+import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
+import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 
 public class Level1ShipBoard extends ShipBoard implements ShipBoardClient {
@@ -12,8 +19,9 @@ public class Level1ShipBoard extends ShipBoard implements ShipBoardClient {
     }
 
     @Override
-    public void handleDangerousObject(DangerousObj obj) {
-
+    public int[] handleDangerousObject(DangerousObj obj) {
+        int[] a = new int[0];
+        return a;
     }
 
     @Override

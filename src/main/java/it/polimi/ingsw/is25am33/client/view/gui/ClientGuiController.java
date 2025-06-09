@@ -383,6 +383,10 @@ public class ClientGuiController extends Application implements ClientView {
 
     }
 
+    public void showComponentHitInfo(Coordinates coordinates){
+
+    }
+
 //    @Override
 //    public BiConsumer<CallableOnGameController, String> showVisitLocationMenu() {
 //        return null;

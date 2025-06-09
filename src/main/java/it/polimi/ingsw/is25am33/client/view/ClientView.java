@@ -220,4 +220,6 @@ public interface ClientView {
     void showCrewPlacementMenu();
 
     void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips);
+
+    void showComponentHitInfo(Coordinates coordinates);
 }

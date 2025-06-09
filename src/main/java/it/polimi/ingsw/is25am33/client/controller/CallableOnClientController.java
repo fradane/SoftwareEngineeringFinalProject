@@ -92,7 +92,7 @@ public interface CallableOnClientController extends Remote {
 
     void pongToClientFromServer(String nickname) throws IOException;
 
-    void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Object>> componentsPerType ) throws IOException;
+    void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Component>> componentsPerType ) throws IOException;
 
 
     void notifyCrewPlacementPhase(String nicknameToNotify) throws IOException;
@@ -102,4 +102,6 @@ public interface CallableOnClientController extends Remote {
     void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException;
     void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipName) throws IOException;
     void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException;
+
+    void notifyCoordinateOfComponentHit(String nicknameToNotify, String nickname, Coordinates coordinates) throws IOException;
 }

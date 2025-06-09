@@ -437,7 +437,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyDangerousObjAttack(String nickname, ClientDangerousObject dangerousObj) {
         clientModel.setCurrDangerousObj(dangerousObj);
-        view.showDangerousObj();
+        //view.showDangerousObj();
     }
 
     @Override
@@ -475,12 +475,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     // TODO marco, controllare
     public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
         //clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponentsCoordinates().add(component);
-    }
-
-    @Override
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) {
-        clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
-        clientModel.getShipboardOf(nickname).setComponentsPerType(componentsPerType);
     }
 
     /**
@@ -610,7 +604,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.showNewCardState();
 
         //TODO probabilemnte da rimuovere perchè inutile
-        if (!clientModel.isMyTurn() && cardState != CardState.START_CARD && cardState != CardState.END_OF_CARD && cardState != CardState.STARDUST) {
+        if (!clientModel.isMyTurn() && cardState != CardState.START_CARD && cardState != CardState.END_OF_CARD && cardState != CardState.STARDUST ) {
             view.showMessage("Wait for " + clientModel.getCurrentPlayer() + " to make his choice", NOTIFICATION_INFO);
         }
 
@@ -622,9 +616,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Object>> componentsPerType) throws IOException{
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException{
         clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(nickname).setComponentsPerType(componentsPerType);
+    }
+
+    public void notifyCoordinateOfComponentHit(String nicknameToNotify, String nickname, Coordinates coordinates) throws IOException{
+        view.showComponentHitInfo(coordinates);
     }
 
     //Insieme di stati che non vanno notificati a meno che tu non sia il player di turno
@@ -635,7 +633,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         || cardState == CardState.VISIT_LOCATION
         || cardState == CardState.REMOVE_CREW_MEMBERS
         || cardState == CardState.CHOOSE_ENGINES
-        || cardState == CardState.DANGEROUS_ATTACK;
+        || cardState == CardState.DANGEROUS_ATTACK
+        || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK;
     }
 
     @Override
@@ -644,7 +643,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Object>> componentsPerType ){
+    public void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Component>> componentsPerType ){
         ShipBoardClient shipBoardClient = clientModel.getShipboardOf(playerNickname);
         shipBoardClient.setComponentsPerType(componentsPerType);
     }
@@ -1118,6 +1117,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void stardustEvent(String nickname){
         try{
             serverController.stardustEvent(nickname);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void startCheckShipBoardAfterAttack(String nickname, Coordinates coordinates){
+        try{
+            serverController.startCheckShipBoardAfterAttack(nickname);
         }catch (IOException e){
             handleRemoteException(e);
         }

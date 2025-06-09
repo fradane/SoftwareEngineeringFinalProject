@@ -10,6 +10,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.EMPTY;
 import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.SINGLE;
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.WEST;
@@ -25,6 +26,15 @@ public class PrefabShipFactory {
                 "A simple ship with essential components",
                 false
         ));
+
+        PREFAB_SHIPS.put("ship_for_meteorites", new PrefabShipInfo(
+                "ship_for_meteorites",
+                "ship_for_meteorites",
+                "A ship with cannon, double cannon and shield",
+                false
+        ));
+
+
     }
 
     /**
@@ -50,9 +60,26 @@ public class PrefabShipFactory {
         switch (prefabShipId) {
             case "basic_ship":
                 return applyBasicShip(shipBoard);
+            case "ship_for_meteorites":
+                return applyMeteoriteShip(shipBoard);
             default:
                 return false;
         }
+    }
+
+    private static boolean applyMeteoriteShip(ShipBoard shipBoard){
+        clearShipBoard(shipBoard);
+
+        addComponent(shipBoard, new DoubleCannon(createCustomConnectors(EMPTY,SINGLE,SINGLE,SINGLE)), 7, 8);
+        addComponent(shipBoard, new Shield(createSimpleConnectors()), 8, 8);
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 6);
+        addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY,SINGLE,SINGLE,SINGLE)), 6, 7);
+        addComponent(shipBoard, new BatteryBox(createSimpleConnectors(),3), 8, 7);
+        addComponent(shipBoard, new BatteryBox(createSimpleConnectors(),2), 7, 5);
+        addComponent(shipBoard, new DoubleCannon(createCustomConnectors(EMPTY,SINGLE,SINGLE,SINGLE)), 6, 5);
+
+        shipBoard.checkShipBoard();
+        return true;
     }
 
     private static boolean applyBasicShip(ShipBoard shipBoard) {

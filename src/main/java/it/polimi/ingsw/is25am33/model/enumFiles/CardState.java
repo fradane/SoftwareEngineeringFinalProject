@@ -145,6 +145,14 @@ public enum CardState {
         }
     },
 
+    CHECK_SHIPBOARD_AFTER_ATTACK{
+        @Override
+        public void showRelatedMenu(ClientView view) {
+            // TODO Potrebbe mostrare una schermata informativa o per ulteriori azioni
+        }
+
+    },
+
     END_OF_CARD {
 
         @Override

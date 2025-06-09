@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.client.model;
 
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -401,8 +402,9 @@ public interface ShipBoardClient {
      * Handles the effect of a dangerous object (DangerousObj) on the ship
      *
      * @param obj The dangerous object to handle
+     * @return
      */
-    void handleDangerousObject(DangerousObj obj);
+    int[] handleDangerousObject(DangerousObj obj);
 
     /**
      * Checks whether the ship can defend itself from a dangerous object using single cannons
@@ -462,6 +464,8 @@ public interface ShipBoardClient {
      * Verifica se un alieno può essere posizionato in una cabina.
      */
     boolean canAcceptAlien(Coordinates coords, CrewMember alien);
+
+    Set<Coordinates> getCoordinatesOfComponents(List<? extends Component> components);
 
     Map<Class<?>, List<Component>> getComponentsPerType();
 

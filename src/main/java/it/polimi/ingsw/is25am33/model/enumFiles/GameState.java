@@ -1,5 +1,7 @@
 package it.polimi.ingsw.is25am33.model.enumFiles;
 
+import it.polimi.ingsw.is25am33.client.view.ClientView;
+import it.polimi.ingsw.is25am33.model.card.MeteoriteStorm;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.io.Serializable;

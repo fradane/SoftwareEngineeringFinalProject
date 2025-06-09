@@ -26,7 +26,7 @@ public class MeteoriteStorm extends AdventureCard {
     private List<Meteorite> meteorites;
     private List<String> meteoriteIDs;
     private Iterator<Meteorite> meteoriteIterator;
-    private static final List<CardState> cardStates = List.of(CardState.THROW_DICES, CardState.DANGEROUS_ATTACK);
+    private static final List<CardState> cardStates = List.of(CardState.THROW_DICES, CardState.DANGEROUS_ATTACK, CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
 
     public MeteoriteStorm(List<Meteorite> meteorites) {
         this.meteorites = meteorites;
@@ -59,6 +59,9 @@ public class MeteoriteStorm extends AdventureCard {
                 break;
             case DANGEROUS_ATTACK:
                 ((Meteorite) gameModel.getCurrDangerousObj()).startAttack(playerChoices, this);
+                break;
+            case CHECK_SHIPBOARD_AFTER_ATTACK:
+                this.checkShipBoardAfterAttack();
                 break;
             default:
                 throw new UnknownStateException("Unknown current state");
@@ -96,7 +99,8 @@ public class MeteoriteStorm extends AdventureCard {
     private void throwDices() {
 
         Meteorite currMeteorite = meteoriteIterator.next();
-        currMeteorite.setCoordinates(GameModel.throwDices());
+        //currMeteorite.setCoordinates(GameModel.throwDices());
+        currMeteorite.setCoordinates(8);
         gameModel.setCurrDangerousObj(currMeteorite);
         setCurrState(CardState.DANGEROUS_ATTACK);
 
@@ -106,7 +110,27 @@ public class MeteoriteStorm extends AdventureCard {
         this.meteoriteIDs = meteoriteID;
     }
 
+    public void checkShipBoardAfterAttack(){
+        gameModel.notifyInvalidShipBoards();
+        if(gameModel.areAllShipsCorrect()) {
+
+            if (gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
+                setCurrState(CardState.DANGEROUS_ATTACK);
+            }
+            else if (meteoriteIterator.hasNext()) {
+                gameModel.resetPlayerIterator();
+                setCurrState(CardState.THROW_DICES);
+            } else {
+                setCurrState(CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
+            }
+        }
+    }
+
     public void playerDecidedHowToDefendTheirSelvesFromSmallMeteorite(List<Coordinates> chosenShieldsCoords, List<Coordinates> chosenBatteryBoxesCoords) {
+        Player currentPlayer=gameModel.getCurrPlayer();
         Shield chosenShield = null;
         BatteryBox chosenBatteryBox = null;
         ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
@@ -117,54 +141,48 @@ public class MeteoriteStorm extends AdventureCard {
             chosenBatteryBox = (BatteryBox) personalBoard.getComponentAt(chosenBatteryBoxesCoords.getFirst());
         }
 
-        if (personalBoard.isItGoingToHitTheShip(currMeteorite) &&
-                personalBoard.isExposed(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
+        if (personalBoard.isItGoingToHitTheShip(currMeteorite) && personalBoard.isExposed(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
 
             if (chosenShield != null && chosenBatteryBox != null) {
 
                 if (chosenBatteryBox.getRemainingBatteries() == 0)
                     throw new IllegalStateException("Not enough batteries");
-                if (chosenShield.getDirections().stream().anyMatch(d -> d == currMeteorite.getDirection()))
-                    throw new IllegalArgumentException("Not correct direction");
 
                 chosenBatteryBox.useBattery();
 
-                Player currentPlayer=gameModel.getCurrPlayer();
                 gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
 
+                if (chosenShield.getDirections().stream().allMatch(d -> d != currMeteorite.getDirection()))
+                    gameModel.updateShipBoardAfterBeenHit();
+
+
 
             } else {
-                personalBoard.handleDangerousObject(currMeteorite);
+                gameModel.updateShipBoardAfterBeenHit();
             }
 
         }
-
-        if(gameModel.hasNextPlayer()) {
-            gameModel.nextPlayer();
-        } else if (meteoriteIterator.hasNext()) {
-            gameModel.resetPlayerIterator();
-            setCurrState( CardState.THROW_DICES);
-        } else {
-            setCurrState( CardState.END_OF_CARD);
-            gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
+        else if(chosenShield != null && chosenBatteryBox != null){
+            chosenBatteryBox.useBattery();
+            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
+            });
         }
-
     }
 
     public void playerDecidedHowToDefendTheirSelvesFromBigMeteorite(List<Coordinates> chosenDoubleCannonsCoords, List<Coordinates> chosenBatteryBoxesCoords) {
+        Player currentPlayer=gameModel.getCurrPlayer();
         Cannon chosenDoubleCannon = null;
         BatteryBox chosenBatteryBox = null;
         ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        DangerousObj currMeteorite = gameModel.getCurrDangerousObj();
 
         if(!chosenDoubleCannonsCoords.isEmpty() && !chosenBatteryBoxesCoords.isEmpty()) {
             chosenDoubleCannon = (Cannon) personalBoard.getComponentAt(chosenDoubleCannonsCoords.getFirst());
             chosenBatteryBox = (BatteryBox) personalBoard.getComponentAt(chosenBatteryBoxesCoords.getFirst());
         }
-
-        DangerousObj currMeteorite = gameModel.getCurrDangerousObj();
 
         if (personalBoard.isItGoingToHitTheShip(currMeteorite) && !personalBoard.isThereACannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
 
@@ -172,30 +190,33 @@ public class MeteoriteStorm extends AdventureCard {
 
                 if (chosenBatteryBox.getRemainingBatteries() == 0)
                     throw new IllegalStateException("Not enough batteries");
-                if (chosenDoubleCannon.getFireDirection() != currMeteorite.getDirection())
-                    throw new IllegalArgumentException("Not correct direction");
 
                 if (personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
                     chosenBatteryBox.useBattery();
+
+
+                    gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                        clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
+                    });
+
                 } else {
-                    personalBoard.handleDangerousObject(currMeteorite);
+                    gameModel.updateShipBoardAfterBeenHit();
                 }
 
             } else {
-                personalBoard.handleDangerousObject(currMeteorite);
+                gameModel.updateShipBoardAfterBeenHit();
             }
 
         }
+        else {
 
-        if(gameModel.hasNextPlayer()) {
-            gameModel.nextPlayer();
-        } else if (meteoriteIterator.hasNext()) {
-            gameModel.resetPlayerIterator();
-            setCurrState( CardState.THROW_DICES);
-        } else {
-            setCurrState( CardState.END_OF_CARD);
-            gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
+            if(chosenDoubleCannon != null && chosenBatteryBox != null) {
+                chosenBatteryBox.useBattery();
+                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+                });
+            }
+            gameModel.updateShipBoardAfterBeenHit();
         }
 
     }

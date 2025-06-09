@@ -296,6 +296,9 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 dns.pongToServerFromClient(nickname);
                 break;
 
+            case "startCheckShipBoardAfterAttack":
+                    gameControllers.get(nickname).startCheckShipBoardAfterAttack(nickname);
+                break;
             default:
                 System.err.println("Invalid action: " + action);
                 throw new RemoteException("Not properly formatted json");
@@ -639,10 +642,17 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         //System.out.println("Pong inviato a " + nickname);
     }
 
-    public void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Object>> componentsPerType ){
+    public void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Component>> componentsPerType ){
         SocketMessage outMessage = new SocketMessage("server", "notifyComponentPerType");
         outMessage.setParamString(playerNickname);
         outMessage.setParamComponentsPerType(componentsPerType);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    public void notifyCoordinateOfComponentHit(String nicknameToNotify, String nickname, Coordinates coordinates) throws IOException{
+        SocketMessage outMessage = new SocketMessage("server", "notifyCoordinateOfComponentHit");
+        outMessage.setParamString(nickname);
+        outMessage.setParamCoordinates(coordinates);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 

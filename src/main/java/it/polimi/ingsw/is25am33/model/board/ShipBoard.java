@@ -535,7 +535,6 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         removeFromComponentsMap(componentToRemove);
         incorrectlyPositionedComponentsCoordinates.remove(new Coordinates(x, y));
         shipMatrix[x][y] = null;
-
         return identifyShipParts(x, y);
     }
 
@@ -558,7 +557,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                                         .mapToObj(i -> shipMatrix[i][pos])
                                         .toArray(Component[]::new)
                                 : shipMatrix[pos] )
-                .anyMatch(component -> component instanceof Cannon && ((Cannon) component).getFireDirection() == direction );
+                .anyMatch(component -> component instanceof Cannon && !(component instanceof DoubleCannon) && ((Cannon) component).getFireDirection() == direction );
     }
 
     /**
@@ -591,7 +590,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     public boolean isItGoingToHitTheShip(DangerousObj obj){
         Component[] componentsInObjectDirection = getOrderedComponentsInDirection(obj.getCoordinate(), obj.getDirection());
-        return componentsInObjectDirection.length != 0;
+        if(Arrays.stream(componentsInObjectDirection).allMatch(Objects::isNull))
+            return false;
+        return true;
     }
 
     /**
@@ -1046,7 +1047,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @throws IllegalArgumentException If the position is invalid.
      */
     public int[] findFirstComponentInDirection(int pos, Direction direction) {
-        int x, y;
+        int x=0, y=0;
 
         if( pos < 0 || pos >= BOARD_DIMENSION)
             throw new IllegalArgumentException("Invalid position: " + pos);
@@ -1058,11 +1059,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                 break;
             case SOUTH:
                 y = pos;
-                x = 12;
+                x = 11;
                 break;
             case EAST:
                 x = pos;
-                y = 12;
+                y = 11;
                 break;
             case WEST:
                 x = pos;
@@ -1072,7 +1073,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                 throw new IllegalStateException("Unexpected value: " + direction);
         }
 
-        while (shipMatrix[x][y] == null) {
+        while (x<12 && y<12 && shipMatrix[x][y] == null) {
             switch (direction) {
                 case NORTH:
                     x ++;
@@ -1090,6 +1091,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                     throw new IllegalStateException("Unexpected value: " + direction);
             }
         }
+
+        if(x==12 || y==12)
+            return null;
 
         return new int[]{x, y};
     }
@@ -1111,8 +1115,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * Handles the effect of a dangerous object (DangerousObj) on the ship.
      *
      * @param obj The dangerous object to handle.
+     * @return
      */
-    public abstract void handleDangerousObject(DangerousObj obj);
+    public abstract int[] handleDangerousObject(DangerousObj obj);
 
     /**
      * Checks whether the ship can defend itself from a dangerous object using single cannons.
@@ -1144,9 +1149,6 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
     }
 
-    public Map<Class<?>, List<Component>> getComponentsPerType() {
-        return componentsPerType;
-    }
 
 
 
@@ -1213,5 +1215,98 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
 
         return result;
+    }
+
+    /**
+     * Restituisce una mappa di cabine connesse a moduli di supporto vitale.
+     * Le chiavi sono le coordinate delle cabine, i valori sono gli insiemi dei colori di supporto vitale collegati.
+     */
+    @JsonIgnore
+    public Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport() {
+        Map<Coordinates, Set<ColorLifeSupport>> result = new HashMap<>();
+
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                Component component = shipMatrix[i][j];
+
+                // Verifica se è una cabina (non MainCabin)
+                if (component instanceof Cabin && !(component instanceof MainCabin)) {
+                    Set<ColorLifeSupport> supports = getConnectedLifeSupports(i, j);
+
+                    if (!supports.isEmpty()) {
+                        result.put(new Coordinates(i, j), supports);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public Set<Coordinates> getCoordinatesOfComponents(List<? extends Component> components) {
+        Set<Coordinates> coordinatesOfComponents= new HashSet<>();
+
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                Component component = shipMatrix[i][j];
+
+                if (components.contains(component)) {
+                    coordinatesOfComponents.add(new Coordinates(i, j));
+                }
+            }
+        }
+
+        return coordinatesOfComponents;
+    }
+
+    /**
+     * Trova tutti i moduli di supporto vitale connessi alla posizione specificata.
+     */
+    private Set<ColorLifeSupport> getConnectedLifeSupports(int x, int y) {
+        Set<ColorLifeSupport> result = new HashSet<>();
+
+        for (Direction direction : Direction.values()) {
+            int[] neighbor = getNeighborCoordinates(x, y, direction);
+            int neighborX = neighbor[0];
+            int neighborY = neighbor[1];
+
+            if (isValidPosition(neighborX, neighborY) && shipMatrix[neighborX][neighborY] instanceof LifeSupport) {
+                // Verifica che i connettori combacino
+                ConnectorType srcConnector = shipMatrix[x][y].getConnectors().get(direction);
+                ConnectorType destConnector = shipMatrix[neighborX][neighborY].getConnectors().get(getOppositeDirection(direction));
+
+                if (areConnectorsCompatible(srcConnector, destConnector)) {
+                    LifeSupport lifeSupport = (LifeSupport) shipMatrix[neighborX][neighborY];
+                    result.add(lifeSupport.getLifeSupportColor());
+                }
+            }
+        }
+
+        //System.out.println("\n " + x + " " + y + " " + result);
+
+        return result;
+    }
+
+    /**
+     * Verifica se un alieno può essere posizionato in una cabina in base ai colori di supporto vitale.
+     */
+    public boolean canAcceptAlien(Coordinates coords, CrewMember alien) {
+        Set<ColorLifeSupport> supports = getConnectedLifeSupports(coords.getX(), coords.getY());
+
+        if (supports.isEmpty()) {
+            return false; // Nessun supporto vitale
+        }
+
+        if (alien == CrewMember.PURPLE_ALIEN) {
+            return supports.contains(ColorLifeSupport.PURPLE);
+        } else if (alien == CrewMember.BROWN_ALIEN) {
+            return supports.contains(ColorLifeSupport.BROWN);
+        }
+
+        return false; // Non è un alieno
+    }
+
+    public MainCabin getMainCabin(){
+        return (MainCabin) shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]];
     }
 }

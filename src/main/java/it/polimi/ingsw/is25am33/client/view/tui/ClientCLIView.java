@@ -11,18 +11,15 @@ import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.Planet;
 import it.polimi.ingsw.is25am33.model.component.*;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -56,6 +53,7 @@ public class ClientCLIView implements ClientView {
     private List<Coordinates> selectedBatteries = new ArrayList<>();
     private List<Coordinates> selectedShields = new ArrayList<>();
     private Coordinates currentSelection = null;
+    private Coordinates hitComponent = null;
     private boolean waitingForBatterySelection = false;
     private StorageSelectionManager storageManager = null;
     private Map<Integer, Coordinates> crewPlacementCoordinatesMap = new HashMap<>();
@@ -569,6 +567,12 @@ public class ClientCLIView implements ClientView {
         }
     }
 
+    public void showComponentHitInfo(Coordinates coordinates){
+            showMessage("The component at coordinates " + coordinates.getX() + "-"+ coordinates.getY() + " has been hit", STANDARD);
+            hitComponent = coordinates;
+            return;
+    }
+
     //TODO uncommentare quando si inizia ad implementare questa carta
 //    private void displayAbandonedShipInfo(ClientAbandonedShip ship, StringBuilder output) {
 //        output.append("Crew Required: ").append(ship.getCrewMalus()).append("\n");
@@ -733,6 +737,9 @@ public class ClientCLIView implements ClientView {
             case STARDUST_MENU:
                 showStardustMenu();
                 break;
+            case CHECK_SHIPBOARD_AFTER_ATTACK:
+                checkShipBoardAfterAttackMenu();
+                break;
         }
     }
 
@@ -761,7 +768,7 @@ public class ClientCLIView implements ClientView {
                         return ClientState.HANDLE_BIG_SHOT_MENU;
                     }
                 }
-                return ClientState.HANDLE_SMALL_DANGEROUS_MENU; // Default
+                return ClientState.HANDLE_SMALL_DANGEROUS_MENU;// Default
             case ACCEPT_THE_REWARD:
                 return ClientState.ACCEPT_REWARD_MENU;
             case HANDLE_CUBES_REWARD:
@@ -774,6 +781,8 @@ public class ClientCLIView implements ClientView {
                 return ClientState.EPIDEMIC_MENU;
             case STARDUST:
                 return ClientState.STARDUST_MENU;
+            case CHECK_SHIPBOARD_AFTER_ATTACK:
+                return ClientState.CHECK_SHIPBOARD_AFTER_ATTACK;
             default:
                 return ClientState.PLAY_CARD;
         }
@@ -875,6 +884,18 @@ public class ClientCLIView implements ClientView {
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         showShipBoard(shipBoard, nickname);
         showMessage("TEXT TO BE CHANGED: non fare nulla che stai apposto così", STANDARD);
+    }
+
+    public void checkShipBoardAfterAttackMenu(){
+        if(hitComponent!=null) {
+            clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
+            hitComponent=null;
+        }
+        else {
+            showMessage("GOOD JOB! You are save!", STANDARD);
+            setClientState(WAIT_PLAYER);
+            clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(),hitComponent);
+        }
     }
 
     @Override
@@ -1362,10 +1383,6 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showThrowDicesMenu() {
-        if(clientModel.isMyTurn())
-            setClientState(ClientState.THROW_DICES_MENU);
-        else
-            setClientState(WAIT_THE_FIRST_PLAYER);
 
         ClientCard card = clientModel.getCurrAdventureCard();
         if (card.getCardType().equals("Pirates") ||card.getCardType().equals("SlaveTraders")) {
@@ -1373,12 +1390,13 @@ public class ClientCLIView implements ClientView {
         } else if (card.getCardType().equals("MeteoriteStorm")) {
             showMessage("\nMeteors are heading your way!", STANDARD);
         }
+
         if(clientModel.isMyTurn()) {
             setClientState(ClientState.THROW_DICES_MENU);
             showMessage("Press Enter to throw dice and see where they hit...", ASK);
         }
         else {
-            setClientState(WAIT_THE_FIRST_PLAYER);
+            setClientState(WAIT_PLAYER);
             showMessage("The first player is throwing dices, wait...", STANDARD);
         }
     }
@@ -1420,9 +1438,25 @@ public class ClientCLIView implements ClientView {
         // Reset the selection state
         selectedEngines.clear();
         selectedBatteries.clear();
+        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
 
-        // Show ship to visualize engines
-        this.showMyShipBoard();
+        List<DoubleEngine> availableDoubleEngines = clientModel.getShipboardOf(clientModel.getMyNickname()).getDoubleEngines();
+        availableDoubleEngines.removeAll(selectedEngines);
+        Set<Coordinates> availableDoubleEngineCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableDoubleEngines);
+        // Rimuovi cabine già scelte
+        colorMap.put(ANSI_GREEN, availableDoubleEngineCoords); // Cabine disponibili
+
+        List<Engine> engine = clientModel.getShipboardOf(clientModel.getMyNickname()).getSingleEngines();
+        Set<Coordinates> engineCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(engine);
+
+        colorMap.put(ANSI_BLUE, engineCoords);
+
+        showMessage("\nYou can activate double engines to gain extra movement. " +
+                "Each double engine requires one battery.", STANDARD);
+
+// Mostra la nave con i motori selezionabili evidenziati in verde e i motori singoli in blu
+        this.showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()), clientModel.getMyNickname(), colorMap);
+
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleEngines().isEmpty() ) {
             showMessage("No double engines available.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
@@ -1449,8 +1483,6 @@ public class ClientCLIView implements ClientView {
         }
 
         setClientState(ClientState.CHOOSE_ENGINES_MENU);
-        showMessage("\nYou can activate double engines to gain extra movement. " +
-                "Each double engine requires one battery.", STANDARD);
         showMessage("Enter coordinates of a double engine (row column) or 'done' when finished: ", ASK);
     }
 
@@ -1515,14 +1547,23 @@ public class ClientCLIView implements ClientView {
     public void showSmallDanObjMenu() {
         //setClientState(ClientState.HANDLE_SMALL_DANGEROUS_MENU);
 
-        showMessage("\n" + clientModel.getCurrDangerousObj().getType()+ " incoming!", STANDARD);
+        StringBuilder smallDangerousInfo = new StringBuilder();
+        smallDangerousInfo.append("\n").append(clientModel.getCurrDangerousObj().getType()).append(" incoming!");
+        smallDangerousInfo.append("\n").append(clientModel.getCurrDangerousObj().toString());
+        showMessage(smallDangerousInfo.toString(),STANDARD);
 
-        // Show ship to visualize shields
-        this.showMyShipBoard();
+        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
+
+        List<Shield> availableShields = clientModel.getShipboardOf(clientModel.getMyNickname()).getShields();
+        availableShields.removeAll(selectedShields);
+        Set<Coordinates> availableShieldsCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableShields);
+        colorMap.put(ANSI_GREEN, availableShieldsCoords);
+        showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
 
         if(clientModel.getShipboardOf(clientController.getNickname()).getShields().isEmpty() ) {
             showMessage("No shield available.", STANDARD);
             showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
+            setClientState(WAIT_PLAYER);
             clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
             return;
         }
@@ -1530,6 +1571,7 @@ public class ClientCLIView implements ClientView {
         if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
             showMessage("No battery boxes available so you can't activate shield.", STANDARD);
             showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
+            setClientState(WAIT_PLAYER);
             clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
             return;
         }
@@ -1538,6 +1580,7 @@ public class ClientCLIView implements ClientView {
         if(!isThereAvailableBattery()) {
             showMessage("Hai finito le batterie coglione so you can't activate shield.", STANDARD);
             showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
+            setClientState(WAIT_PLAYER);
             clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
             return;
         }
@@ -1550,16 +1593,32 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showBigMeteoriteMenu() {
-        setClientState(ClientState.HANDLE_BIG_METEORITE_MENU);
+       // setClientState(ClientState.HANDLE_BIG_METEORITE_MENU);
+        selectedCannons.clear();
+        selectedBatteries.clear();
 
-        showMessage("\nBig Meteorite incoming!", STANDARD);
+        StringBuilder bigMeteoriteInfo = new StringBuilder();
+        bigMeteoriteInfo.append("\n").append(" Big Meteorite incoming!");
+        bigMeteoriteInfo.append("\n").append(clientModel.getCurrDangerousObj().toString());
+        showMessage(bigMeteoriteInfo.toString(),STANDARD);
 
-        // Show ship to visualize cannons
-        this.showMyShipBoard();
+        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
+
+        List<DoubleCannon> availableDoubleCannons = clientModel.getShipboardOf(clientModel.getMyNickname()).getDoubleCannons();
+        availableDoubleCannons.removeAll(selectedCannons);
+        Set<Coordinates> availableDoubleCannonsCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableDoubleCannons);
+        colorMap.put(ANSI_GREEN, availableDoubleCannonsCoords);
+
+        List<Cannon> cannons = clientModel.getShipboardOf(clientModel.getMyNickname()).getSingleCannons();
+        Set<Coordinates> cannonsCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(cannons);
+        colorMap.put(ANSI_BLUE, cannonsCoords);
+
+        showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
 
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleCannons().isEmpty() ) {
             showMessage("No double Cannon available.", STANDARD);
             showMessage("ATTENTION! You can defend only with single cannon!", NOTIFICATION_INFO);
+            setClientState(WAIT_PLAYER);
             clientController.playerHandleBigMeteorite(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
             return;
         }
@@ -1567,6 +1626,7 @@ public class ClientCLIView implements ClientView {
         if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
             showMessage("No battery boxes available so you can't activate Double Cannons.", STANDARD);
             showMessage("ATTENTION! You can defend only with single cannon!", NOTIFICATION_INFO);
+            setClientState(WAIT_PLAYER);
             clientController.playerHandleBigMeteorite(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
             return;
         }
@@ -1579,7 +1639,7 @@ public class ClientCLIView implements ClientView {
             return;
         }
 
-        showMessage("You can use a double cannon to destroy it or let it hit your ship.", STANDARD);
+        showMessage("You can use a double or single cannon to destroy it or let it hit your ship.", STANDARD);
         showMessage("Enter coordinates of a double cannon (row column) or 'done' to skip: ", ASK);
     }
 
@@ -2512,6 +2572,7 @@ public class ClientCLIView implements ClientView {
 
             if (component == null || !shipBoard.getDoubleEngines().contains(component)) {
                 showMessage("No double engine at these coordinates.", ERROR);
+                showMessage("Please try again or 'done' to confirm.", ASK);
                 return;
             }
 
@@ -2523,6 +2584,7 @@ public class ClientCLIView implements ClientView {
 
             selectedEngines.add(coords);
             // Passa alla selezione della batteria
+            showBatteryBoxesWhitColor();
             showMessage("Now select a battery box for this engine (row column) or 'cancel' to cancel the choise", ASK);
             setClientState(ClientState.CHOOSE_ENGINES_SELECT_BATTERY);
         } catch (Exception e) {
@@ -2540,7 +2602,7 @@ public class ClientCLIView implements ClientView {
 
             if (component == null || !shipBoard.getBatteryBoxes().contains(component)) {
                 showMessage("No battery box at these coordinates.", ERROR);
-                showMessage("Select another one or 'done' to confirm", ASK);
+                showMessage("Please try again or 'done' to confirm.", ASK);
                 return;
             }
 
@@ -2579,6 +2641,7 @@ public class ClientCLIView implements ClientView {
 
             if(clientState==HANDLE_SMALL_DANGEROUS_SELECT_BATTERY) {
                 showMessage("Shield and battery selected", STANDARD);
+                setClientState(WAIT_PLAYER);
                     clientController.playerHandleSmallDanObj(clientController.getNickname(), selectedShields, selectedBatteries);
                     selectedShields.clear();
                     selectedBatteries.clear();
@@ -2587,6 +2650,7 @@ public class ClientCLIView implements ClientView {
 
             if(clientState== CHOOSE_CANNONS_SELECT_BATTERY_BIGMETEORITE){
                 showMessage("Double Cannon and battery selected", STANDARD);
+                setClientState(WAIT_PLAYER);
                 clientController.playerHandleBigMeteorite(clientController.getNickname(), selectedCannons, selectedBatteries);
                 selectedCannons.clear();
                 selectedBatteries.clear();
@@ -2612,6 +2676,7 @@ public class ClientCLIView implements ClientView {
 
             // Passa alla selezione della batteria
             selectedCannons.add(coords);
+            showBatteryBoxesWhitColor();
             showMessage("Now select a battery box for this cannon (row column): ", ASK);
 
             if(clientState==ClientState.HANDLE_BIG_METEORITE_MENU){
@@ -2633,11 +2698,13 @@ public class ClientCLIView implements ClientView {
 
             if (component == null || !shipBoard.getShields().contains(component)) {
                 showMessage("No shield at these coordinates.", ERROR);
+                showMessage("Please try again or 'done' to confirm.", ASK);
                 return;
             }
 
             // Passa alla selezione della batteria
             selectedShields.add( coords);
+            showBatteryBoxesWhitColor();
             showMessage("Now select a battery box for this shield (row column): ", ASK);
             setClientState(ClientState.HANDLE_SMALL_DANGEROUS_SELECT_BATTERY);
         } catch (Exception e) {
@@ -3414,6 +3481,7 @@ public class ClientCLIView implements ClientView {
                         if(selectedShields.isEmpty()){
                             showMessage("You didn't select any shield. The meteorite hits your ship", STANDARD);
                         }
+                        setClientState(WAIT_PLAYER);
                         clientController.playerHandleSmallDanObj(
                                 clientController.getNickname(), selectedShields, selectedBatteries);
 
@@ -3432,9 +3500,10 @@ public class ClientCLIView implements ClientView {
                         if(selectedCannons.isEmpty()){
                             showMessage("You didn't select any cannon. The meteorite hits your ship", STANDARD);
                         }
-
-                        clientController.playerHandleBigMeteorite(
-                                clientController.getNickname(), selectedCannons, selectedBatteries);
+                        setClientState(WAIT_PLAYER);
+                        clientController.playerHandleBigMeteorite(clientController.getNickname(), selectedCannons, selectedBatteries);
+                        selectedCannons.clear();
+                        selectedBatteries.clear();
                     }
                     else {
                         handleCannonSelection(input);
@@ -3473,8 +3542,6 @@ public class ClientCLIView implements ClientView {
                 case CANNOT_VISIT_LOCATION:
                     clientController.playerWantsToAcceptTheReward(clientController.getNickname(), false);
                     break;
-
-
 
                 case CHOOSE_CANNONS_MENU:
                     handleCannonSelection(input);
@@ -3517,6 +3584,12 @@ public class ClientCLIView implements ClientView {
                         handleBatterySelection(input);
                     }
                     break;
+                case WAIT_PLAYER:
+                    showMessage("This isn't your turn. Wait for other player, they are so sloooooow. Please wait...", STANDARD);
+                    break;
+
+                case CHECK_SHIPBOARD_AFTER_ATTACK:
+                    break;
 
                 default:
                     showMessage("", ERROR);
@@ -3543,5 +3616,14 @@ public class ClientCLIView implements ClientView {
         return false ;
     }
 
+    private void showBatteryBoxesWhitColor(){
+        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
+
+        List<BatteryBox> availableBatteryBoxes = clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes();
+        availableBatteryBoxes.removeAll(selectedBatteries);
+        Set<Coordinates> availableBatteryBoxCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableBatteryBoxes);
+        colorMap.put(ANSI_GREEN, availableBatteryBoxCoords);
+        showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+    }
 }
 

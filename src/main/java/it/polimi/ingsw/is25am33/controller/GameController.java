@@ -476,65 +476,39 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerWantsToRemoveComponent(String nickname, Coordinates coordinates) throws RemoteException {
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-        Set<Set<Coordinates>> shipParts = shipBoard.removeAndRecalculateShipParts(coordinates.getX(), coordinates.getY());
+        if(coordinates!=null) {
+            ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+            Set<Set<Coordinates>> shipParts = shipBoard.removeAndRecalculateShipParts(coordinates.getX(), coordinates.getY());
 
-        // Memorizza le ship parts per questo giocatore
-        temporaryShipParts.put(nickname, shipParts);
+            // Memorizza le ship parts per questo giocatore
+            temporaryShipParts.put(nickname, shipParts);
 
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
-            try {
-                Component[][] shipMatrix = shipBoard.getShipMatrix();
-                Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
-                Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
-                if(shipParts.size() == 1){
-                    shipBoard.checkShipBoard();
-                    if(incorrectlyPositionedComponentsCoordinates.isEmpty()) {
+            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                try {
+                    Component[][] shipMatrix = shipBoard.getShipMatrix();
+                    Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
+                    Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+                    if (shipParts.size() == 1) {
+                        shipBoard.checkShipBoard();
+                        if (incorrectlyPositionedComponentsCoordinates.isEmpty()) {
+                            clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+
+                        } else
+                            clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+                    } else if (shipParts.isEmpty())
                         clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+                    else
+                        clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts, componentsPerType);
+                } catch (RemoteException e) {
+                    System.err.println("Remote Exception");
+                }
+            });
+            if (shipParts.size() == 1) //ovvero ho direttamente rimosso un componente
+                // Controllo se tutte le navi sono corrette e in caso cambio la fase
+                gameModel.checkAndTransitionToNextPhase();
 
-                    }else
-                        clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
-                }else if(shipParts.isEmpty())
-                    clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
-                else
-                    clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts, componentsPerType);
-            } catch (RemoteException e) {
-                System.err.println("Remote Exception");
-            }
-        });
-
-        if(shipParts.size() == 1) //ovvero ho direttamente rimosso un componente
-            // Controllo se tutte le navi sono corrette e in caso cambio la fase
-            gameModel.checkAndTransitionToNextPhase();
-
-
+        }
     }
-
-//    @Override
-//    public void playerChoseShipPart(String nickname, Set<Coordinates> chosenShipPart) throws RemoteException {
-//        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-//
-//        // Obtain all ship parts memorized for this player
-//        Set<Set<Coordinates>> allShipParts = temporaryShipParts.get(nickname);
-//
-//        if (allShipParts != null) {
-//            // Remove all ship parts EXCEPT the chosen one
-//            for (Set<Coordinates> shipPart : allShipParts) {
-//                if (!shipPart.equals(chosenShipPart)) {
-//                    shipBoard.removeShipPart(shipPart);
-//                }
-//            }
-//
-//            // After removing parts, check the entire ship board for incorrect components
-//            shipBoard.checkShipBoard();
-//
-//            // Clean up the temporary map
-//            temporaryShipParts.remove(nickname);
-//        }
-//
-//        // Check if all ships are correct and change phase if necessary
-//        gameModel.checkAndTransitionToNextPhase();
-//    }
 
     @Override
     public void playerChoseShipPart(String nickname, Set<Coordinates> chosenShipPart) throws RemoteException {
@@ -598,6 +572,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                     }
                 }
         );
+    }
+
+    public void startCheckShipBoardAfterAttack(String nickname){
+        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+        gameModel.getCurrAdventureCard().play(choice);
     }
 
     @Override

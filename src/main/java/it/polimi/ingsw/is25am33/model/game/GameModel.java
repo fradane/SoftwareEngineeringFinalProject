@@ -6,6 +6,7 @@ import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.board.*;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -201,7 +202,7 @@ public class GameModel {
      */
     public void resetPlayerIterator() {
         playerIterator = currRanking.iterator();
-        currPlayer = playerIterator.next();
+        setCurrPlayer(playerIterator.next());
     }
 
     public void setCurrRanking(List<Player> currRanking) {
@@ -438,11 +439,26 @@ public class GameModel {
                 // Cambia allo stato successivo
                 if(currGameState==GameState.CHECK_SHIPBOARD)
                     setCurrGameState(GameState.PLACE_CREW);
-                else
-                    setCurrGameState(GameState.DRAW_CARD);
+                else if(currGameState==GameState.PLAY_CARD )
+                    currAdventureCard.play(new PlayerChoicesDataStructure());
             }
         }
     }
+
+    public void updateShipBoardAfterBeenHit(){
+        ShipBoard shipBoard = currPlayer.getPersonalBoard();
+        int[] hitCoordinates = shipBoard.handleDangerousObject(currDangerousObj);
+        if(hitCoordinates == null) {
+            currAdventureCard.setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
+            return;
+        }
+        shipBoard.getIncorrectlyPositionedComponentsCoordinates().add(new Coordinates(hitCoordinates[0], hitCoordinates[1]));
+        gameClientNotifier.notifyClients(Set.of(currPlayer.getNickname()),(nicknameToNotify, clientController) -> {
+            clientController.notifyCoordinateOfComponentHit(nicknameToNotify,currPlayer.getNickname(),new Coordinates(hitCoordinates[0], hitCoordinates[1]));
+        });
+        currAdventureCard.setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
+    }
+
     public void setGameContext(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
     }

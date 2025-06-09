@@ -334,10 +334,6 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
                     //TODO da aggiustare mettondo i componentsPerType
-                    if (clientController != null) {
-                        clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix(), notification.getParamComponentsPerType());
-                    }
-                    break;
 
                 case "notifyPlayerCredits":
                     if (clientController != null) {
@@ -507,6 +503,12 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                 case "PONG":
                     if (clientController != null) {
                         clientController.pongToClientFromServer(nickname);
+                    }
+                    break;
+
+                case "notifyCoordinateOfComponentHit":
+                    if (clientController != null) {
+                        clientController.notifyCoordinateOfComponentHit(nickname, notification.getParamString(), notification.getParamCoordinates());
                     }
                     break;
                 default:
@@ -749,4 +751,8 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    public void startCheckShipBoardAfterAttack(String nickname) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nickname, "startCheckShipBoardAfterAttack");
+        out.println(ClientSerializer.serialize(outMessage));
+    }
 }
