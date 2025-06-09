@@ -1,4 +1,3 @@
-
 package it.polimi.ingsw.is25am33.network;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
@@ -13,7 +12,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
 
 public class DNS extends UnicastRemoteObject implements CallableOnDNS {
     //ad ogni game il suo gameController
@@ -25,7 +23,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private static Thread socketThread;
     private static Thread rmiThread;
-    private static ServerPingPongManager serverPingPongManager= new ServerPingPongManager();
+    private static final ServerPingPongManager serverPingPongManager = new ServerPingPongManager();
 
     public static void main(String[] args) throws RemoteException {
 
@@ -39,7 +37,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
             // starts RMI thread
             rmiThread = new Thread(new RMIServerRunnable(dns));
             rmiThread.start();
-        }catch(Exception e) {
+        } catch(Exception e) {
             socketThread.interrupt();
             rmiThread.interrupt();
         }
@@ -48,14 +46,6 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     public DNS() throws RemoteException {
         super();
-    }
-
-    public static Map<String, GameController> getGameControllers() {
-        return gameControllers;
-    }
-
-    public Map<String, CallableOnClientController> getClients() {
-        return clients;
     }
 
     public Map<String, GameController> getClientGame() {
@@ -84,7 +74,9 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
                     ()-> {
                         try {
                             pingToClientFromServer(nickname);
-                        } catch (IOException e) {}
+                        } catch (IOException e) {
+                            System.err.println("Remote Exception in pingToClientFromServer: " + e.getMessage());
+                        }
                     }
             );
         }).start();
@@ -93,7 +85,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
             try {
                 controller.notifyGameInfos(nickname, getAvailableGames());
             } catch (IOException e) {
-                System.err.println("Remote Exception");
+                System.err.println("Remote Exception in notifyGameInfos: " + e.getMessage());
             }
         }).start();
 
@@ -140,6 +132,8 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
         // creates a new controller for this gameModel
         GameController newGameController = new GameController(gameId, numPlayers, isTestFlight, this);
+
+        // TODO luca perche sincronizzi su una variabile locale?
         synchronized (newGameController) {
             gameControllers.put(gameId, newGameController);
 

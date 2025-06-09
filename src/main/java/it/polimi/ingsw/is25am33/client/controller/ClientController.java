@@ -25,6 +25,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.text.NumberFormat;
 import java.util.*;
 
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
@@ -249,14 +250,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * Permette all'utente di selezionare il protocollo di rete
      * @return L'implementazione di NetworkManager scelta
      */
-    public CallableOnDNS selectNetworkProtocol(String choice) {
+    public CallableOnDNS selectNetworkProtocol(boolean isRmi, String serverAddress, int serverPort) {
 
         try {
-            return switch (choice) {
-                case "rmi" -> this.setUpRMIConnection();
-                case "socket" -> this.setUpSocketConnection();
-                default -> null;
-            };
+            return isRmi ?
+                    this.setUpRMIConnection(serverAddress, serverPort) :
+                    this.setUpSocketConnection(serverAddress, serverPort);
         } catch (IOException e) {
             view.showError("Connection refused: " + e.getMessage());
             return null;
@@ -285,25 +284,27 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 //        }
     }
 
-    private CallableOnDNS setUpRMIConnection() throws IOException {
-        String serverAddress = "localhost";
+    private CallableOnDNS setUpRMIConnection(String serverAddress, int serverPort) throws IOException {
 
         try {
-            Registry registry = LocateRegistry.getRegistry(serverAddress, NetworkConfiguration.RMI_PORT);
+            Registry registry = LocateRegistry.getRegistry(serverAddress, serverPort);
             CallableOnDNS dns = (CallableOnDNS) registry.lookup(NetworkConfiguration.DNS_NAME);
             connected = true;
             System.out.println("[RMI] Connected to RMI Server");
             return dns;
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid port number parameter: " + e.getMessage());
         } catch (Exception e) {
             throw new RemoteException("Could not connect to RMI Server: " + e.getMessage());
         }
 
+        return null;
     }
 
-    private CallableOnDNS setUpSocketConnection() throws IOException {
+    private CallableOnDNS setUpSocketConnection(String serverAddress, int serverPort) throws IOException {
 
         SocketClientManager socketClientManager = new SocketClientManager(this);
-        socketClientManager.connect();
+        socketClientManager.connect(serverAddress, serverPort);
 
         return socketClientManager;
 

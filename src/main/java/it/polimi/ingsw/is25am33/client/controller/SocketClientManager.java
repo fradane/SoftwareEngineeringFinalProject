@@ -7,6 +7,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
+import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.serializationLayer.client.ClientDeserializer;
 import it.polimi.ingsw.is25am33.serializationLayer.client.ClientSerializer;
 import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
@@ -103,8 +104,6 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
-
-
     @Override
     public boolean registerWithNickname(String nickname, CallableOnClientController controller) throws RemoteException {
 
@@ -124,14 +123,20 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     }
 
-    public void connect() throws IOException {
-        socket = new Socket("127.0.0.1", 1234);
-        System.out.println("Connected to server at " + socket.getRemoteSocketAddress());
+    public void connect(String serverAddress, int serverPort) throws IOException {
 
-        out = new PrintWriter(socket.getOutputStream(), true);
-        in = new Scanner(socket.getInputStream());
+        try {
+            socket = new Socket(serverAddress, serverPort);
+            System.out.println("Connected to server at " + socket.getRemoteSocketAddress());
 
-        startMessageHandlerThread();
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new Scanner(socket.getInputStream());
+
+            startMessageHandlerThread();
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid port number parameter: " + e.getMessage());
+        }
+
     }
 
     @Override

@@ -1,7 +1,6 @@
 package it.polimi.ingsw.is25am33.network.socket;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
-import it.polimi.ingsw.is25am33.client.controller.SocketClientManager;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -11,10 +10,10 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.DNS;
+import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerSerializer;
 import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
-import javafx.print.Printer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -31,12 +30,10 @@ import java.util.concurrent.Executors;
 
 public class SocketServerManager implements Runnable, CallableOnClientController {
 
-    final int port = 1234;
-    DNS dns;
+    private final DNS dns;
 
     private final Map<String, CallableOnGameController> gameControllers = new ConcurrentHashMap<>();
     private final Map<String, PrintWriter> writers = new ConcurrentHashMap<>();
-    private boolean readInput = true;
 
     public SocketServerManager(DNS dns) {
         this.dns = dns;
@@ -48,7 +45,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         final ExecutorService executor = Executors.newFixedThreadPool(10);
         ServerSocket serverSocket;
         try {
-            serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket(NetworkConfiguration.DEFAULT_SOCKET_SERVER_PORT);
         } catch (final IOException e) {
             System.err.println(e.getMessage());
             return;
