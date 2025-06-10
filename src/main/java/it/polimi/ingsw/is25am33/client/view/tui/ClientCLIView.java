@@ -1026,117 +1026,6 @@ public class ClientCLIView implements ClientView {
 
     }
 
-//    @Override
-//    public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
-//
-//        Component[][] shipBoard = shipBoardClient.getShipMatrix();
-//        List<Component> bookedComponents = shipBoardClient.getBookedComponents();
-//        String[] reservedComponent1 = new String[7];
-//        String[] reservedComponent2 = new String[7];
-//
-//        if (!bookedComponents.isEmpty())
-//            reservedComponent1 = shipBoardClient.getBookedComponents().getFirst().toString().split("\\n");
-//        if (bookedComponents.size() == 2)
-//            reservedComponent2 = shipBoardClient.getBookedComponents().get(1).toString().split("\\n");
-//
-//
-//        String[] legendLines = {
-//                "LEGEND - component label and explanation on attributes:",
-//                "",
-//                "• BBX = battery box - number of remaining batteries",
-//                "• CAB = cabin - number and type of members",
-//                "• CAN = cannon - fire direction",
-//                "• 2CN = double cannons - fire direction",
-//                "• 2EN = double engines - power direction",
-//                "• ENG = engine - power direction",
-//                "• LSP = life support - type of life support",
-//                "• MCB = main cabin - number and type of members",
-//                "• SLD = shield - covered directions",
-//                "• SPS = special storage - left storages",
-//                "• STS = standard storage - left storages",
-//                "• STR = structural modules",
-//                ""
-//        };
-//
-//        StringBuilder output = new StringBuilder();
-//
-//        int legendIndex = 0;
-//        int componentIndex = 0;
-//
-//        output.append(String.format("\nHere's the ship board of " + shipBoardOwnerNickname + ":\n"));
-//
-//        // Stampa numeri delle colonne
-//        output.append("       ");
-//        for (int col = 4; col <= 10; col++) {
-//            output.append(String.format("   %2d     ", col));
-//        }
-//
-//          output.append(String.format("\t\t" + legendLines[legendIndex++] + "\n"));
-//
-//        // TODO generalizzare il caso per il livello 1
-//        for (int i = 4; i <= 8; i++) {
-//            // Ogni cella viene stampata su 4 righe
-//            for (int line = 0; line < 4; line++) {
-//                if (line == 2) {
-//                    output.append(String.format(" %2d   ", i + 1));
-//                } else {
-//                    output.append("      ");
-//                }
-//                for (int j = 3; j <= 9; j++) {
-//                    Component cell = shipBoard[i][j];
-//                    switch (line) {
-//                        case 0:
-//                            output.append("+---------");
-//                            break;
-//
-//                        case 1:
-//                            output.append(String.format("|    %1s    ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())));
-//                            break;
-//
-//                        case 2: output.append(String.format("| %1s %3s %1s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.WEST).fromConnectorTypeToValue()),
-//                                Level2ShipBoard.isOutsideShipboard(i, j) ? (ANSI_RED + "OUT" + ANSI_RESET) : (cell == null ? "" : cell.getLabel()),
-//                                Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.EAST).fromConnectorTypeToValue())));
-//                            break;
-//
-//                        case 3: output.append(String.format("|    %1s %2s ", Level2ShipBoard.isOutsideShipboard(i, j) ? "X" : (cell == null ? "" : cell.getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue()),
-//                                Level2ShipBoard.isOutsideShipboard(i, j) ? "" : (cell == null ? "" : (ANSI_BLUE + (cell.getMainAttribute().length() == 2 ? "" : " ") + cell.getMainAttribute() + ANSI_RESET))));
-//                            break;
-//                    }
-//                }
-//
-//                if (line == 0) {
-//                    output.append("+");
-//                } else {
-//                    output.append("|");
-//                }
-//
-//                if (legendIndex <= legendLines.length - 1)
-//                    output.append(String.format("\t\t" + legendLines[legendIndex++] + "\n"));
-//                else if (componentIndex <= 6) {
-//                    if (reservedComponent1[componentIndex] != null) output.append(String.format("\t\t\t" + reservedComponent1[componentIndex]));
-//                    if (reservedComponent2[componentIndex] != null) output.append(String.format("\t\t\t" + reservedComponent2[componentIndex]));
-//                    output.append("\n");
-//                    componentIndex++;
-//                }
-//
-//            }
-//        }
-//
-//        output.append("      ");
-//        output.append("+---------".repeat(7));
-//        output.append("+\n");
-//        output.append("> ");
-//
-//        showMessage(output.toString(), ASK);
-//    }
-
-    /**
-     * Displays the ship board of a specified player's ship in a formatted textual representation.
-     * It includes components, their labels, attributes, and a legend explaining the component types.
-     *
-     * @param shipBoardClient the client that provides the ship matrix and booked components
-     * @param shipBoardOwnerNickname the nickname of the owner of the ship board being displayed
-     */
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
         showShipBoard(shipBoardClient, shipBoardOwnerNickname, Collections.emptyMap());
@@ -1438,24 +1327,8 @@ public class ClientCLIView implements ClientView {
         // Reset the selection state
         selectedEngines.clear();
         selectedBatteries.clear();
-        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
 
-        List<DoubleEngine> availableDoubleEngines = clientModel.getShipboardOf(clientModel.getMyNickname()).getDoubleEngines();
-        availableDoubleEngines.removeAll(selectedEngines);
-        Set<Coordinates> availableDoubleEngineCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableDoubleEngines);
-        // Rimuovi cabine già scelte
-        colorMap.put(ANSI_GREEN, availableDoubleEngineCoords); // Cabine disponibili
-
-        List<Engine> engine = clientModel.getShipboardOf(clientModel.getMyNickname()).getSingleEngines();
-        Set<Coordinates> engineCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(engine);
-
-        colorMap.put(ANSI_BLUE, engineCoords);
-
-        showMessage("\nYou can activate double engines to gain extra movement. " +
-                "Each double engine requires one battery.", STANDARD);
-
-// Mostra la nave con i motori selezionabili evidenziati in verde e i motori singoli in blu
-        this.showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()), clientModel.getMyNickname(), colorMap);
+        showEngineWithColor();
 
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleEngines().isEmpty() ) {
             showMessage("No double engines available.", STANDARD);
@@ -1482,6 +1355,8 @@ public class ClientCLIView implements ClientView {
             return;
         }
 
+        showMessage("\nYou can activate double engines." +
+                "Each double engine requires one battery.", STANDARD);
         setClientState(ClientState.CHOOSE_ENGINES_MENU);
         showMessage("Enter coordinates of a double engine (row column) or 'done' when finished: ", ASK);
     }
@@ -1552,13 +1427,7 @@ public class ClientCLIView implements ClientView {
         smallDangerousInfo.append("\n").append(clientModel.getCurrDangerousObj().toString());
         showMessage(smallDangerousInfo.toString(),STANDARD);
 
-        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
-
-        List<Shield> availableShields = clientModel.getShipboardOf(clientModel.getMyNickname()).getShields();
-        availableShields.removeAll(selectedShields);
-        Set<Coordinates> availableShieldsCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableShields);
-        colorMap.put(ANSI_GREEN, availableShieldsCoords);
-        showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+        showShieldWithColor();
 
         if(clientModel.getShipboardOf(clientController.getNickname()).getShields().isEmpty() ) {
             showMessage("No shield available.", STANDARD);
@@ -1602,18 +1471,7 @@ public class ClientCLIView implements ClientView {
         bigMeteoriteInfo.append("\n").append(clientModel.getCurrDangerousObj().toString());
         showMessage(bigMeteoriteInfo.toString(),STANDARD);
 
-        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
-
-        List<DoubleCannon> availableDoubleCannons = clientModel.getShipboardOf(clientModel.getMyNickname()).getDoubleCannons();
-        availableDoubleCannons.removeAll(selectedCannons);
-        Set<Coordinates> availableDoubleCannonsCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableDoubleCannons);
-        colorMap.put(ANSI_GREEN, availableDoubleCannonsCoords);
-
-        List<Cannon> cannons = clientModel.getShipboardOf(clientModel.getMyNickname()).getSingleCannons();
-        Set<Coordinates> cannonsCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(cannons);
-        colorMap.put(ANSI_BLUE, cannonsCoords);
-
-        showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+        showCannonWithColor();
 
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleCannons().isEmpty() ) {
             showMessage("No double Cannon available.", STANDARD);
@@ -2584,7 +2442,7 @@ public class ClientCLIView implements ClientView {
 
             selectedEngines.add(coords);
             // Passa alla selezione della batteria
-            showBatteryBoxesWhitColor();
+            showBatteryBoxesWithColor();
             showMessage("Now select a battery box for this engine (row column) or 'cancel' to cancel the choise", ASK);
             setClientState(ClientState.CHOOSE_ENGINES_SELECT_BATTERY);
         } catch (Exception e) {
@@ -2676,7 +2534,7 @@ public class ClientCLIView implements ClientView {
 
             // Passa alla selezione della batteria
             selectedCannons.add(coords);
-            showBatteryBoxesWhitColor();
+            showBatteryBoxesWithColor();
             showMessage("Now select a battery box for this cannon (row column): ", ASK);
 
             if(clientState==ClientState.HANDLE_BIG_METEORITE_MENU){
@@ -2704,7 +2562,7 @@ public class ClientCLIView implements ClientView {
 
             // Passa alla selezione della batteria
             selectedShields.add( coords);
-            showBatteryBoxesWhitColor();
+            showBatteryBoxesWithColor();
             showMessage("Now select a battery box for this shield (row column): ", ASK);
             setClientState(ClientState.HANDLE_SMALL_DANGEROUS_SELECT_BATTERY);
         } catch (Exception e) {
@@ -3459,6 +3317,7 @@ public class ClientCLIView implements ClientView {
                         selectedBatteries.clear();
 
                     } else {
+                        showEngineWithColor();
                         handleEngineSelection(input);
                     }
 
@@ -3489,6 +3348,7 @@ public class ClientCLIView implements ClientView {
                         selectedShields.clear();
                     }
                     else {
+                        showShieldWithColor();
                         handleShieldSelection(input);
                     }
                     break;
@@ -3506,6 +3366,7 @@ public class ClientCLIView implements ClientView {
                         selectedBatteries.clear();
                     }
                     else {
+                        showCannonWithColor();
                         handleCannonSelection(input);
                     }
                     break;
@@ -3553,6 +3414,7 @@ public class ClientCLIView implements ClientView {
                     if (input.equalsIgnoreCase("cancel")) {
                         selectedEngines.removeLast();
                         showMessage("You canceled the last chosen engine.", STANDARD);
+
                         setClientState(CHOOSE_ENGINES_MENU);
                         showMessage("Please choose an engine or 'done' to confirm.", ASK);
                     }
@@ -3616,13 +3478,54 @@ public class ClientCLIView implements ClientView {
         return false ;
     }
 
-    private void showBatteryBoxesWhitColor(){
+    private void showBatteryBoxesWithColor(){
         Map<String, Set<Coordinates>> colorMap = new HashMap<>();
 
         List<BatteryBox> availableBatteryBoxes = clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes();
         availableBatteryBoxes.removeAll(selectedBatteries);
         Set<Coordinates> availableBatteryBoxCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableBatteryBoxes);
         colorMap.put(ANSI_GREEN, availableBatteryBoxCoords);
+
+        showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+    }
+
+    public void showEngineWithColor(){
+        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
+
+        List<DoubleEngine> availableDoubleEngines = clientModel.getShipboardOf(clientModel.getMyNickname()).getDoubleEngines();
+        availableDoubleEngines.removeAll(selectedEngines);
+        Set<Coordinates> availableDoubleEngineCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableDoubleEngines);
+        colorMap.put(ANSI_GREEN, availableDoubleEngineCoords);
+
+        List<Engine> engine = clientModel.getShipboardOf(clientModel.getMyNickname()).getSingleEngines();
+        Set<Coordinates> engineCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(engine);
+        colorMap.put(ANSI_BLUE, engineCoords);
+
+        showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+    }
+
+    public void showShieldWithColor() {
+        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
+
+        List<Shield> availableShields = clientModel.getShipboardOf(clientModel.getMyNickname()).getShields();
+        availableShields.removeAll(selectedShields);
+        Set<Coordinates> availableShieldsCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableShields);
+        colorMap.put(ANSI_GREEN, availableShieldsCoords);
+        showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()), clientModel.getMyNickname(), colorMap);
+    }
+
+    public void showCannonWithColor(){
+        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
+
+        List<DoubleCannon> availableDoubleCannons = clientModel.getShipboardOf(clientModel.getMyNickname()).getDoubleCannons();
+        availableDoubleCannons.removeAll(selectedCannons);
+        Set<Coordinates> availableDoubleCannonsCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableDoubleCannons);
+        colorMap.put(ANSI_GREEN, availableDoubleCannonsCoords);
+
+        List<Cannon> cannons = clientModel.getShipboardOf(clientModel.getMyNickname()).getSingleCannons();
+        Set<Coordinates> cannonsCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(cannons);
+        colorMap.put(ANSI_BLUE, cannonsCoords);
+
         showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
     }
 }

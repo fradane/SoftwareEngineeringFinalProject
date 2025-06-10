@@ -282,7 +282,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
             case "requestSelectPrefabShip":
                 gameControllers.get(nickname).requestSelectPrefabShip(nickname, inMessage.getParamString());
 
-            // TODO debug
             case "showMessage":
                 String message = inMessage.getParamString();
                 gameControllers.get(nickname).showMessage(message);

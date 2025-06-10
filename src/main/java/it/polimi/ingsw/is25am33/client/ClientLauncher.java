@@ -7,17 +7,28 @@ import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
+import it.polimi.ingsw.is25am33.model.component.Cannon;
+import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.component.Shield;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
+import it.polimi.ingsw.is25am33.serializationLayer.client.ClientDeserializer;
 import it.polimi.ingsw.is25am33.serializationLayer.client.ClientSerializer;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
+import it.polimi.ingsw.is25am33.serializationLayer.server.ServerSerializer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 
 public class ClientLauncher {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String titleScreen ="╔═══════════════════════════════════════════════════════════════════════════╗\n" +
                             "║                                                                           ║\n" +
                             "║     ███████╗ █████╗ ██╗      █████╗ ██╗  ██╗██╗   ██╗                     ║\n" +
@@ -39,21 +50,41 @@ public class ClientLauncher {
                             "╚═══════════════════════════════════════════════════════════════════════════╝";
         System.out.println(titleScreen);
 
-        SocketMessage message = new SocketMessage();
-        List<Coordinates> cabinCoords = new ArrayList<>();
-        cabinCoords.add(new Coordinates(0, 0));
-        cabinCoords.add(new Coordinates(1, 1));
-        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
-                .Builder()
-                .setChosenCabins(cabinCoords)
-                .build();
-        message.setParamChoice(playerChoiceDataStructure);
+//        SocketMessage message = new SocketMessage();
+//        Map<Direction,ConnectorType> connectors = new HashMap<>();
+//        connectors.put(NORTH,ConnectorType.EMPTY);
+//        connectors.put(EAST,ConnectorType.EMPTY);
+//        connectors.put(SOUTH,ConnectorType.UNIVERSAL);
+//        connectors.put(WEST,ConnectorType.SINGLE);
+//
+//        Shield cannon = new Shield(connectors);
+//
+//        message.setParamComponent(cannon);
 
-        String messaggioSerializzato = ClientSerializer.serialize(message);
-        System.out.println(messaggioSerializzato);
+//        List<Coordinates> doubleCannonCoords = new ArrayList<>();
+//        doubleCannonCoords.add(new Coordinates(0, 0));
+//        doubleCannonCoords.add(new Coordinates(1, 1));
+//
+//        List<Coordinates> batteryBoxCoords = new ArrayList<>();
+//        batteryBoxCoords.add(new Coordinates(0,    1));
+//        batteryBoxCoords.add(new Coordinates(1, 2));
+//
+//        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+//                .Builder()
+//                .setChosenDoubleCannons(doubleCannonCoords)
+//                .setChosenBatteryBoxes(batteryBoxCoords)
+//                .build();
+//
+//        message.setParamChoice(playerChoiceDataStructure);
 
-        PlayerChoicesDataStructure messaggioDeserializzato = ServerDeserializer.deserializeObj(messaggioSerializzato, SocketMessage.class).getParamChoice();
-        System.out.println(messaggioDeserializzato);
+//        //System.out.println(cannon.getDirections());
+//        System.out.println(message.getParamComponent());
+//
+//        String messaggioSerializzato = ServerSerializer.serialize(message);
+//        System.out.println(messaggioSerializzato);
+//
+//        Component messaggioDeserializzato = ClientDeserializer.deserialize(messaggioSerializzato, SocketMessage.class).getParamComponent();
+//        System.out.println(messaggioDeserializzato);
 
 
         if (args.length != 2) {

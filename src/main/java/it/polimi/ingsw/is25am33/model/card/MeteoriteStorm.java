@@ -99,8 +99,7 @@ public class MeteoriteStorm extends AdventureCard {
     private void throwDices() {
 
         Meteorite currMeteorite = meteoriteIterator.next();
-        //currMeteorite.setCoordinates(GameModel.throwDices());
-        currMeteorite.setCoordinates(8);
+        currMeteorite.setCoordinates(GameModel.throwDices());
         gameModel.setCurrDangerousObj(currMeteorite);
         setCurrState(CardState.DANGEROUS_ATTACK);
 
@@ -164,11 +163,16 @@ public class MeteoriteStorm extends AdventureCard {
             }
 
         }
-        else if(chosenShield != null && chosenBatteryBox != null){
-            chosenBatteryBox.useBattery();
-            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
-            });
+        else{
+
+            if(chosenShield != null && chosenBatteryBox != null){
+                chosenBatteryBox.useBattery();
+                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
+                });
+            }
+
+            setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
         }
     }
 
@@ -184,31 +188,29 @@ public class MeteoriteStorm extends AdventureCard {
             chosenBatteryBox = (BatteryBox) personalBoard.getComponentAt(chosenBatteryBoxesCoords.getFirst());
         }
 
-        if (personalBoard.isItGoingToHitTheShip(currMeteorite) && !personalBoard.isThereACannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
+        if (personalBoard.isItGoingToHitTheShip(currMeteorite) && !personalBoard.isThereACannon(currMeteorite.getCoordinate(), currMeteorite.getDirection()) && !personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection()) ) {
 
             if (chosenDoubleCannon != null && chosenBatteryBox != null) {
 
                 if (chosenBatteryBox.getRemainingBatteries() == 0)
                     throw new IllegalStateException("Not enough batteries");
 
-                if (personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
-                    chosenBatteryBox.useBattery();
+                chosenBatteryBox.useBattery();
 
+                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
+                });
 
-                    gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
-                        clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
-                    });
-
-                } else {
+                if (!personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
                     gameModel.updateShipBoardAfterBeenHit();
+                    return;
                 }
 
             } else {
                 gameModel.updateShipBoardAfterBeenHit();
             }
 
-        }
-        else {
+        } else{
 
             if(chosenDoubleCannon != null && chosenBatteryBox != null) {
                 chosenBatteryBox.useBattery();
@@ -216,7 +218,8 @@ public class MeteoriteStorm extends AdventureCard {
                     clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
             }
-            gameModel.updateShipBoardAfterBeenHit();
+
+            setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
         }
 
     }

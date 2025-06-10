@@ -20,7 +20,7 @@ public class Shield extends Component implements Activable, Rotatable {
      * The directions in which the shield is active.
      * By default, it is set to {@code Direction.NORTH} and {@code Direction.EAST}.
      */
-    private final List<Direction> direction = new ArrayList<>(List.of(Direction.NORTH, Direction.EAST));
+    private final List<Direction> directions = new ArrayList<>(List.of(Direction.NORTH, Direction.EAST));
 
     /**
      * Default constructor for {@code Shield}.
@@ -62,7 +62,7 @@ public class Shield extends Component implements Activable, Rotatable {
             |    %s    |
             +---------+
             fireDirection: %s
-            """, imageName, north, west, east, south, direction);
+            """, imageName, north, west, east, south, directions);
     }
 
     /**
@@ -71,7 +71,7 @@ public class Shield extends Component implements Activable, Rotatable {
      * @return a list of {@code Direction} where the shield is active
      */
     public List<Direction> getDirections() {
-        return direction;
+        return directions;
     }
 
     /**
@@ -80,7 +80,7 @@ public class Shield extends Component implements Activable, Rotatable {
     @Override
     public void rotate() {
         super.rotate();
-        direction.replaceAll(this::shiftDirection);
+        directions.replaceAll(this::shiftDirection);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class Shield extends Component implements Activable, Rotatable {
     @Override
     @JsonIgnore
     public String getMainAttribute() {
-        return direction.stream()
+        return directions.stream()
                 .map(direction -> switch (direction) {
                     case NORTH -> "N";
                     case SOUTH -> "S";

@@ -54,34 +54,6 @@ public class SocketMessage {
     private Component[][] paramShipMatrix;
     private List<PrefabShipInfo> paramPrefabShips;
 
-//    public SocketMessage(String senderNickname, String actions) {
-//        this.senderNickname = senderNickname;
-//        this.actions = actions;
-//        this.paramString = "";
-//        this.paramCoordinates = new Coordinates();
-//        this.paramGameInfo = new ArrayList<>();
-//        this.paramInt = 0;
-//        this.paramBoolean = false;
-//        this.paramPlayerColor = PlayerColor.GREEN;
-//        this.paramShipBoardAsMatrix = new Component[0][0];
-//        this.paramGameState = GameState.SETUP;
-//        this.paramComponent = new BatteryBox(new HashMap<>(), 0);
-//        this.paramGameId = "";
-//        this.paramDangerousObj = new BigShot(Direction.NORTH);
-//        this.paramActivableCoordinates = new ArrayList<>();
-//        this.paramBatteryBoxCoordinates = new ArrayList<>();
-//        this.paramCabinCoordinates = new ArrayList<>();
-//        this.paramVisibleComponents = new HashMap<>();
-//        this.paramLittleVisibleDecks = new ArrayList<>();
-//        this.paramCardState=CardState.START_CARD;
-//        this.paramComponentsPerType = new HashMap<>();
-//        this.paramChoice = new PlayerChoicesDataStructure.Builder().build();
-//        this.paramCrewChoices = new HashMap<>();
-//        //TODO capire se posso sostituire con this.paramClientCard = null;
-//        this.paramClientCard = new ClientPlanets();
-//        this.paramShipMatrix = new Component[0][0];
-//    }
-
     public SocketMessage(String senderNickname, String actions) {
         this.senderNickname = senderNickname;
         this.actions = actions;

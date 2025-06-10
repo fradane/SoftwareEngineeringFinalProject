@@ -141,8 +141,23 @@ public class PlayerChoicesDataStructure implements Serializable {
     }
 
     // Getter per la serializzazione JSON
-    public List<Coordinates> getCabins() {
+   public List<Coordinates> getCabins() {
         return chosenCabins;
+    }
+    public List<Storage> getStorage() {
+        return chosenStorage;
+    }
+    public List<Coordinates> getDoubleCannons() {
+        return chosenDoubleCannons;
+    }
+    public List<Coordinates> getDoubleEngines() {
+        return chosenDoubleEngines;
+    }
+    public List<Coordinates> getBatteryBoxes() {
+        return chosenBatteryBoxes;
+    }
+    public List<Coordinates> getShields() {
+        return chosenShields;
     }
 
 

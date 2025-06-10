@@ -88,9 +88,9 @@ public class ClientDeserializer extends KeyDeserializer {
     public static void main(String[] args) {
 
         try {
-            ClientDeserializer.deserialize("""
-            {"level":1,"cardName":"Planets","availablePlanets":[{"reward":["RED","RED"],"busy":false},{"reward":["RED","BLUE","BLUE"],"busy":false},{"reward":["YELLOW"],"busy":false}],"stepsBack":-2}
-            """, Planets.class);
+//            ClientDeserializer.deserialize("""
+//            {"level":1,"cardName":"Planets","availablePlanets":[{"reward":["RED","RED"],"busy":false},{"reward":["RED","BLUE","BLUE"],"busy":false},{"reward":["YELLOW"],"busy":false}],"stepsBack":-2}
+//            """, Planets.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
