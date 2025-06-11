@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.client.model;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
@@ -63,7 +63,7 @@ public interface ShipBoardClient {
      *
      * @param gameContext The game context to set
      */
-    void setGameContext(GameContext gameContext);
+    void setGameContext(GameClientNotifier gameContext);
 
     /**
      * Sets the focused component

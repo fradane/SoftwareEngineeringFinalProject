@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class Level1ShipBoard extends ShipBoard implements ShipBoardClient {
 
-    public Level1ShipBoard(PlayerColor color, GameContext gameContext) {
+    public Level1ShipBoard(PlayerColor color, GameClientNotifier gameContext) {
         super(color,gameContext);
     }
 

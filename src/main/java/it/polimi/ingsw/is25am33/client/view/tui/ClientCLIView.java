@@ -516,6 +516,9 @@ public class ClientCLIView implements ClientView {
             case "AbandonedStation":
                 displayAbandonedStationInfo((ClientAbandonedStation) card, output);
                 break;
+            case "Epidemic":
+                displayEpidemicInfo((ClientEpidemic) card, output);
+                break;
 //            case "Pirates":
 //                displayPiratesInfo((ClientPirates) card, output);
 //                break;
@@ -530,9 +533,6 @@ public class ClientCLIView implements ClientView {
 //                break;
 //            case "FreeSpace":
 //                displayFreeSpaceInfo((ClientFreeSpace) card, output);
-//                break;
-//            case "Epidemic":
-//                displayEpidemicInfo((ClientEpidemic) card, output);
 //                break;
 //            case "Stardust":
 //                displayStardustInfo((ClientStardust) card, output);
@@ -572,6 +572,13 @@ public class ClientCLIView implements ClientView {
         output.append("\nYou can accept the reward if you have enough crew members.");
         output.append("\nIf you accept, you'll gain cargo cubes and move back ")
               .append(station.getStepsBack()).append(" spaces.");
+    }
+
+    private void displayEpidemicInfo(ClientEpidemic epidemic, StringBuilder output) {
+        output.append("Epidemic Card\n");
+        output.append("Effect: Each occupied cabin connected to another occupied cabin will lose one crew member.\n");
+        output.append("\nThe epidemic spreads through connected living quarters, affecting crew members in adjacent cabins.\n");
+        output.append("Wait to see the results of the epidemic spread...");
     }
 
     private void displayPlanetsInfo(ClientPlanets planets, StringBuilder output) {
@@ -794,6 +801,8 @@ public class ClientCLIView implements ClientView {
                 return ClientState.CHOOSE_CABIN_MENU;
             case EPIDEMIC:
                 return ClientState.EPIDEMIC_MENU;
+            case WAIT_FOR_CONFIRM_REMOVAL_HANDLED:
+                return ClientState.HANDLE_INFECTED_CREW_REMOVAL;
             case STARDUST:
                 return ClientState.STARDUST_MENU;
             default:
@@ -1834,11 +1843,12 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showEpidemicMenu() {
+        //TODO valutare se togliere il contenuto di questo metodo
         setClientState(ClientState.EPIDEMIC_MENU);
 
         showMessage("\nAn epidemic is spreading throughout the fleet!", STANDARD);
         showMessage("Each occupied cabin connected to another occupied cabin will lose one crew member.", STANDARD);
-        showMessage("Press Enter to continue...", ASK);
+        showMessage("Wait to see how the epidemic is going to spread...", STANDARD);
     }
 
     @Override

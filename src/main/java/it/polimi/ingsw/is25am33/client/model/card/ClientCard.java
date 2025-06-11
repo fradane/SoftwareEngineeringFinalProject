@@ -19,6 +19,7 @@ import java.io.Serializable;
         @JsonSubTypes.Type(value = ClientPlanets.class, name = "Planets"),
         @JsonSubTypes.Type(value = ClientAbandonedShip.class, name = "AbandonedShip"),
         @JsonSubTypes.Type(value = ClientAbandonedStation.class, name = "AbandonedStation"),
+        @JsonSubTypes.Type(value = ClientEpidemic.class, name = "Epidemic"),
         // Aggiungi tutte le altre sottoclassi di ClientCard
 })
 public abstract class ClientCard implements Serializable{

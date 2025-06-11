@@ -1,6 +1,6 @@
 package it.polimi.ingsw.is25am33.model.board;
 
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
@@ -15,7 +15,7 @@ public abstract class FlyingBoard {
     private final Set<Player> outPlayers;
     protected int runLength;
     protected final Map<Player, Integer> ranking;
-    protected GameContext gameContext;
+    protected GameClientNotifier gameContext;
 
     /**
      * Constructor to initialize runLength, outPlayers, and ranking.
@@ -28,7 +28,7 @@ public abstract class FlyingBoard {
         this.ranking = new ConcurrentHashMap<>();
     }
 
-    public void setGameContext(GameContext gameContext) {
+    public void setGameContext(GameClientNotifier gameContext) {
         this.gameContext = gameContext;
     }
 

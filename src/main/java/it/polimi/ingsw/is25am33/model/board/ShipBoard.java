@@ -19,7 +19,7 @@ import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 
 public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
-    protected GameContext gameContext;
+    protected GameClientNotifier gameContext;
 
     /**
      * The size of the board where components can be placed. Just one length as the board is squared.
@@ -71,7 +71,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      *
      * @param color The color associated with the player.
      */
-    public ShipBoard(PlayerColor color, GameContext gameContext) {
+    public ShipBoard(PlayerColor color, GameClientNotifier gameContext) {
         Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
         connectors.put(Direction.NORTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
@@ -101,7 +101,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return incorrectlyPositionedComponentsCoordinates;
     }
 
-    public void setGameContext(GameContext gameContext) {
+    public void setGameContext(GameClientNotifier gameContext) {
         this.gameContext = gameContext;
     }
 

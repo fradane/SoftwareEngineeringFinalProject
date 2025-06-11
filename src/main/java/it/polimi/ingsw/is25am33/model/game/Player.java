@@ -1,17 +1,16 @@
 package it.polimi.ingsw.is25am33.model.game;
 
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 
 import java.io.Serializable;
-import java.rmi.RemoteException;
 
 public class Player implements Serializable {
     private final String nickname;
     private int ownedCredits;
-    private GameContext gameContext;
+    private GameClientNotifier gameContext;
     private final ShipBoard personalBoard;
     private final PlayerColor playerColor;
 
@@ -26,11 +25,11 @@ public class Player implements Serializable {
         return playerColor;
     }
 
-    public void setGameContext(GameContext gameContext) {
+    public void setGameContext(GameClientNotifier gameContext) {
         this.gameContext = gameContext;
     }
 
-    public GameContext getGameContext() {
+    public GameClientNotifier getGameContext() {
         return gameContext;
     }
 

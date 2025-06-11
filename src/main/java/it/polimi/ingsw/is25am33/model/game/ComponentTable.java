@@ -1,12 +1,10 @@
 package it.polimi.ingsw.is25am33.model.game;
 
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.ComponentLoader;
-import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import javafx.util.Pair;
 
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -16,14 +14,14 @@ public class ComponentTable {
     private final Stack<Component> hiddenComponents = new Stack<>();
     private final Map<Integer, Component> visibleComponents = new ConcurrentHashMap<>();
     private Integer currVisibleIndex = 1;
-    private GameContext gameContext;
+    private GameClientNotifier gameContext;
 
     public ComponentTable() {
         hiddenComponents.addAll(ComponentLoader.loadComponents());
         Collections.shuffle(hiddenComponents);
     }
 
-    public void setGameContext(GameContext gameContext) {
+    public void setGameContext(GameClientNotifier gameContext) {
         this.gameContext = gameContext;
     }
 

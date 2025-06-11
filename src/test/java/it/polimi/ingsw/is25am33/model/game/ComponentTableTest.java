@@ -1,13 +1,12 @@
 package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.ThrowingBiConsumer;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,7 +47,7 @@ class ComponentTableTest {
         ComponentTable table = new ComponentTable();
 
         // Create a mock GameContext with a no-op notifyAllClients implementation
-        GameContext mockContext = new GameContext(null, nullCCCC) {
+        GameClientNotifier mockContext = new GameClientNotifier(null, nullCCCC) {
             @Override
             public void notifyAllClients(ThrowingBiConsumer<String, CallableOnClientController, IOException> consumer) {}
         };

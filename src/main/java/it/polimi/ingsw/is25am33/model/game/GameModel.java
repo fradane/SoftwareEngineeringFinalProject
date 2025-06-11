@@ -36,7 +36,7 @@ public class GameModel {
     private GameState currGameState;
     private final Deck deck;
     private final ComponentTable componentTable;
-    private GameContext gameContext;
+    private GameClientNotifier gameContext;
 
     // attributes useful for hourglass restarting
     private final Object hourglassLock = new Object();
@@ -118,7 +118,7 @@ public class GameModel {
     }
 
     public void createGameContext(ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
-        this.gameContext = new GameContext(this,clientControllers);
+        this.gameContext = new GameClientNotifier(this,clientControllers);
         deck.setGameContext(gameContext);
         flyingBoard.setGameContext(gameContext);
         componentTable.setGameContext(gameContext);
@@ -157,7 +157,7 @@ public class GameModel {
         currGameState.run(this);
     }
 
-    public GameContext getGameContext() {
+    public GameClientNotifier getGameContext() {
         return gameContext;
     }
 
@@ -444,7 +444,7 @@ public class GameModel {
             }
         }
     }
-    public void setGameContext(GameContext gameContext) {
+    public void setGameContext(GameClientNotifier gameContext) {
         this.gameContext = gameContext;
     }
 

@@ -1,7 +1,7 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
-import it.polimi.ingsw.is25am33.model.GameContext;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
@@ -31,7 +31,7 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
             {false, false, false, false, false, false, false, false, false, false, false, false}
     };
 
-    public Level2ShipBoard(PlayerColor playerColor, GameContext gameContext) {
+    public Level2ShipBoard(PlayerColor playerColor, GameClientNotifier gameContext) {
         super(playerColor, gameContext);
         this.validPositions = level2ValidPositions;
     }

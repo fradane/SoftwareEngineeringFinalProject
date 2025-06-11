@@ -1,23 +1,19 @@
 package it.polimi.ingsw.is25am33.model;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
-import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
-import it.polimi.ingsw.is25am33.network.socket.SocketServerManager;
 
 import java.io.IOException;
-import java.net.SocketException;
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 
-public class GameContext {
+public class GameClientNotifier {
     private final GameModel gameModel;
     private Map<String, CallableOnClientController> clientControllers = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    public GameContext(GameModel gameModel, ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
+    public GameClientNotifier(GameModel gameModel, ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
         this.gameModel = gameModel;
         this.clientControllers = clientControllers;
     }

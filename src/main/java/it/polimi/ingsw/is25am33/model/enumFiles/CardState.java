@@ -101,6 +101,12 @@ public enum CardState {
             view.showEpidemicMenu();
         }
     },
+    WAIT_FOR_CONFIRM_REMOVAL_HANDLED {
+        @Override
+        public void showRelatedMenu(ClientView view) {
+            // No specific menu needed - clients just need to confirm
+        }
+    },
     STARDUST {
         @Override
         public void showRelatedMenu(ClientView view) {
