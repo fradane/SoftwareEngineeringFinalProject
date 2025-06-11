@@ -21,7 +21,7 @@
                 <Button fx:id="goBackButton" onAction="#handleGoBackButton" styleClass="nav-button" text="Go Back" />
             </HBox>
 
-            <VBox fx:id="hourglassBox" alignment="CENTER_LEFT" spacing="5" styleClass="timer-container">
+            <VBox alignment="CENTER_LEFT" spacing="5" styleClass="timer-container">
                 <HBox>
                     <Label fx:id="timerLabel" styleClass="timer-label" />
                     <Button fx:id="flipHourglassButton" minHeight="-Infinity" minWidth="-Infinity"

@@ -39,7 +39,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
             // starts RMI thread
             rmiThread = new Thread(new RMIServerRunnable(dns));
             rmiThread.start();
-        }catch(Exception e) {
+        } catch(Exception e) {
             socketThread.interrupt();
             rmiThread.interrupt();
         }

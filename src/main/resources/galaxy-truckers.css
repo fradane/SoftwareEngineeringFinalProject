@@ -516,3 +516,36 @@
     -fx-background-color: derive(-fx-space-blue-light, -10%);
     -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 4, 0, 0, 1);
 }
+
+/* Card Display Panel - Pannello laterale per visualizzazione carte */
+.card-display-panel {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+/* Card Image Container - Container per l'immagine della carta con bordo blu */
+.card-image-container {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 3, 0, 0, 1);
+    -fx-min-height: 220px;
+    -fx-max-height: 220px;
+    -fx-pref-height: 220px;
+}
+
+.card-image {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,255,0.4), 5, 0.5, 0, 0); /* opzionale: effetto luce */
+    -fx-border-color: #007bff; /* blu fine */
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px; /* margine interno */
+}

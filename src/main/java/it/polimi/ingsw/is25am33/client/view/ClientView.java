@@ -4,10 +4,12 @@ import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
 import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
-import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -15,7 +17,6 @@ import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 /**
  * Interfaccia che definisce le operazioni di visualizzazione del client.
@@ -109,13 +110,13 @@ public interface ClientView {
      * @return Il colore del giocatore corrispondente
      */
     default PlayerColor intToPlayerColor(int colorChoice) {
-        switch (colorChoice) {
-            case 1: return PlayerColor.RED;
-            case 2: return PlayerColor.BLUE;
-            case 3: return PlayerColor.GREEN;
-            case 4: return PlayerColor.YELLOW;
-            default: return PlayerColor.RED;
-        }
+        return switch (colorChoice) {
+            case 1 -> PlayerColor.RED;
+            case 2 -> PlayerColor.BLUE;
+            case 3 -> PlayerColor.GREEN;
+            case 4 -> PlayerColor.YELLOW;
+            default -> PlayerColor.RED;
+        };
     }
 
     String askPlayerColor(List<PlayerColor> availableColors);
@@ -196,21 +197,38 @@ public interface ClientView {
 
     void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts);
 
+
+    // ----------------- CARD PHASE MENU -----------------
+
     void showVisitLocationMenu();
+
     void showThrowDicesMenu();
+
     void showChoosePlanetMenu();
+
     void showChooseEnginesMenu();
+
     void showAcceptTheRewardMenu();
+
     void showChooseCannonsMenu();
+
     void showSmallDanObjMenu();
+
     void showBigMeteoriteMenu();
+
     void showBigShotMenu();
+
     void showHandleRemoveCrewMembersMenu();
+
     void showHandleCubesRewardMenu();
+
     void showEpidemicMenu();
+
     void showStardustMenu();
+
     void showHandleCubesMalusMenu();
 
+    // ---------------------------------------------------
 
 
     void showFirstToEnter();
@@ -222,4 +240,92 @@ public interface ClientView {
     void showCrewPlacementMenu();
 
     void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips);
+
+    default ClientState cardStateToClientState(CardState cardState, ClientModel clientModel) {
+        switch (cardState) {
+            case VISIT_LOCATION:
+                return ClientState.VISIT_LOCATION_MENU;
+            case CHOOSE_PLANET:
+                return ClientState.CHOOSE_PLANET_MENU;
+            case CHOOSE_CANNONS:
+                return ClientState.CHOOSE_CANNONS_MENU;
+            case CHOOSE_ENGINES:
+                return ClientState.CHOOSE_ENGINES_MENU;
+            case THROW_DICES:
+                return ClientState.THROW_DICES_MENU;
+            case DANGEROUS_ATTACK:
+                // Determine specific type based on a dangerous object
+                DangerousObj obj = clientModel.getCurrDangerousObj();
+                if (obj != null) {
+                    String type = obj.getDangerousObjType();
+                    if (type.contains("Small")) {
+                        return ClientState.HANDLE_SMALL_DANGEROUS_MENU;
+                    } else if (type.contains("BigMeteorite")) {
+                        return ClientState.HANDLE_BIG_METEORITE_MENU;
+                    } else if (type.contains("BigShot")) {
+                        return ClientState.HANDLE_BIG_SHOT_MENU;
+                    }
+                }
+                return ClientState.HANDLE_SMALL_DANGEROUS_MENU; // Default
+            case ACCEPT_THE_REWARD:
+                return ClientState.ACCEPT_REWARD_MENU;
+            case HANDLE_CUBES_REWARD:
+                return ClientState.HANDLE_CUBES_REWARD_MENU;
+            case HANDLE_CUBES_MALUS:
+                return ClientState.HANDLE_CUBES_MALUS_MENU;
+            case REMOVE_CREW_MEMBERS:
+                return ClientState.CHOOSE_CABIN_MENU;
+            case EPIDEMIC:
+                return ClientState.EPIDEMIC_MENU;
+            case STARDUST:
+                return ClientState.STARDUST_MENU;
+            default:
+                return ClientState.PLAY_CARD;
+        }
+    }
+
+    default void showCardStateMenu(ClientState mappedState) {
+        // Automatically show the appropriate menu based on the mapped state
+        switch (mappedState) {
+            case VISIT_LOCATION_MENU:
+                showVisitLocationMenu();
+                break;
+            case CHOOSE_CABIN_MENU:
+                showHandleRemoveCrewMembersMenu();
+                break;
+            case CHOOSE_PLANET_MENU:
+                showChoosePlanetMenu();
+                break;
+            case CHOOSE_CANNONS_MENU:
+                showChooseCannonsMenu();
+                break;
+            case CHOOSE_ENGINES_MENU:
+                showChooseEnginesMenu();
+                break;
+            case THROW_DICES_MENU:
+                showThrowDicesMenu();
+                break;
+            case ACCEPT_REWARD_MENU:
+                showAcceptTheRewardMenu();
+                break;
+            case HANDLE_SMALL_DANGEROUS_MENU:
+                showSmallDanObjMenu();
+                break;
+            case HANDLE_BIG_METEORITE_MENU:
+                showBigMeteoriteMenu();
+                break;
+            case HANDLE_BIG_SHOT_MENU:
+                showBigShotMenu();
+                break;
+            case HANDLE_CUBES_REWARD_MENU:
+                showHandleCubesRewardMenu();
+                break;
+            case EPIDEMIC_MENU:
+                showEpidemicMenu();
+                break;
+            case STARDUST_MENU:
+                showStardustMenu();
+                break;
+        }
+    }
 }

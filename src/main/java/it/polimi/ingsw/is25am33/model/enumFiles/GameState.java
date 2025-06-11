@@ -54,8 +54,8 @@ public enum GameState implements Serializable {
         public void run(GameModel gameModel) {
             //TODO
             //gameModel.getDeck().mergeIntoGameDeck();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
             gameModel.getDeck().createGameDeck(gameModel.isTestFlight());
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 
     },

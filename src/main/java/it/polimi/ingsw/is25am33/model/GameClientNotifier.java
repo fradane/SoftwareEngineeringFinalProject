@@ -53,7 +53,7 @@ public class GameClientNotifier {
         futureNicknames.forEach((future, nickname) -> {
             try {
                 //TODO reimplstare a 5 secondi
-                future.get(5, TimeUnit.SECONDS);
+                future.get(1000, TimeUnit.SECONDS);
             } catch (TimeoutException | InterruptedException | ExecutionException e) {
                 System.err.println("TIMEOUT: Client " + nickname + " non risponde dopo 5 secondi");
                 future.cancel(true); // Importante: cancella il task

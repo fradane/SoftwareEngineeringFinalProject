@@ -54,30 +54,24 @@ public abstract class BoardsController {
     protected abstract Map<Integer, Point2D> getFlyingBoardRelativePositions();
 
     public void removeHighlightColor() {
-        shadowedButtons.forEach(button ->
+        shadowedButtons.forEach(button -> {
+                shadowedButtons.remove(button);
                 Platform.runLater(() -> {
-                    shadowedButtons.remove(button);
                     button.setEffect(null);
                     button.getStyleClass().remove("no-hover");
-                })
-        );
+                });
+        });
     }
 
     public void applyHighlightEffect(Coordinates coordinates, Color color) {
 
         String buttonId = coordinates.getX() + "_" + coordinates.getY();
         Button button = buttonMap.get(buttonId);
+        shadowedButtons.add(button);
 
         Platform.runLater(() -> {
 
-            if (shadowedButtons.contains(button)) {
-                shadowedButtons.remove(button);
-                button.setEffect(null);
-                button.getStyleClass().remove("no-hover");
-            }
-
             DropShadow shadow = new DropShadow();
-            shadowedButtons.add(button);
             shadow.setColor(color);
             shadow.setRadius(10);
             shadow.setSpread(0.5);

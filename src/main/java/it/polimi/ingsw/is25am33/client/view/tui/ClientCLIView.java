@@ -15,18 +15,15 @@ import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
 import it.polimi.ingsw.is25am33.model.component.Storage;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -688,7 +685,7 @@ public class ClientCLIView implements ClientView {
     @Override
     public void showNewCardState() {
         CardState currentCardState = clientModel.getCurrCardState();
-        ClientState mappedState = cardStateToClientState(currentCardState);
+        ClientState mappedState = cardStateToClientState(currentCardState, clientModel);
         setClientState(mappedState);
 
         // Reset selection state
@@ -703,95 +700,10 @@ public class ClientCLIView implements ClientView {
                     🃏  [Card Update]
                     🆕  New Card State: %s
                     ===================================
-                    """, currentCardState.toString()), STANDARD);
+                    """, currentCardState), STANDARD);
 
-        // Automatically show the appropriate menu based on the mapped state
-        switch (mappedState) {
-            case VISIT_LOCATION_MENU:
-                showVisitLocationMenu();
-                break;
-            case CHOOSE_CABIN_MENU:
-                showHandleRemoveCrewMembersMenu();
-                break;
-            case CHOOSE_PLANET_MENU:
-                showChoosePlanetMenu();
-                break;
-            case CHOOSE_CANNONS_MENU:
-                showChooseCannonsMenu();
-                break;
-            case CHOOSE_ENGINES_MENU:
-                showChooseEnginesMenu();
-                break;
-            case THROW_DICES_MENU:
-                showThrowDicesMenu();
-                break;
-            case ACCEPT_REWARD_MENU:
-                showAcceptTheRewardMenu();
-                break;
-            case HANDLE_SMALL_DANGEROUS_MENU:
-                showSmallDanObjMenu();
-                break;
-            case HANDLE_BIG_METEORITE_MENU:
-                showBigMeteoriteMenu();
-                break;
-            case HANDLE_BIG_SHOT_MENU:
-                showBigShotMenu();
-                break;
-            case HANDLE_CUBES_REWARD_MENU:
-                showHandleCubesRewardMenu();
-                break;
-            case EPIDEMIC_MENU:
-                showEpidemicMenu();
-                break;
-            case STARDUST_MENU:
-                showStardustMenu();
-                break;
-        }
+        showCardStateMenu(mappedState);
     }
-
-    public ClientState cardStateToClientState(CardState cardState) {
-        switch (cardState) {
-            case VISIT_LOCATION:
-                return ClientState.VISIT_LOCATION_MENU;
-            case CHOOSE_PLANET:
-                return ClientState.CHOOSE_PLANET_MENU;
-            case CHOOSE_CANNONS:
-                return ClientState.CHOOSE_CANNONS_MENU;
-            case CHOOSE_ENGINES:
-                return ClientState.CHOOSE_ENGINES_MENU;
-            case THROW_DICES:
-                return ClientState.THROW_DICES_MENU;
-            case DANGEROUS_ATTACK:
-                // Determine specific type based on a dangerous object
-                DangerousObj obj = clientModel.getCurrDangerousObj();
-                if (obj != null) {
-                    String type = obj.getDangerousObjType();
-                    if (type.contains("Small")) {
-                        return ClientState.HANDLE_SMALL_DANGEROUS_MENU;
-                    } else if (type.contains("BigMeteorite")) {
-                        return ClientState.HANDLE_BIG_METEORITE_MENU;
-                    } else if (type.contains("BigShot")) {
-                        return ClientState.HANDLE_BIG_SHOT_MENU;
-                    }
-                }
-                return ClientState.HANDLE_SMALL_DANGEROUS_MENU; // Default
-            case ACCEPT_THE_REWARD:
-                return ClientState.ACCEPT_REWARD_MENU;
-            case HANDLE_CUBES_REWARD:
-                return ClientState.HANDLE_CUBES_REWARD_MENU;
-            case HANDLE_CUBES_MALUS:
-                return ClientState.HANDLE_CUBES_MALUS_MENU;
-            case REMOVE_CREW_MEMBERS:
-                return ClientState.CHOOSE_CABIN_MENU;
-            case EPIDEMIC:
-                return ClientState.EPIDEMIC_MENU;
-            case STARDUST:
-                return ClientState.STARDUST_MENU;
-            default:
-                return ClientState.PLAY_CARD;
-        }
-    }
-
 
     @Override
     public void showBuildShipBoardMenu() {
@@ -3323,7 +3235,7 @@ public class ClientCLIView implements ClientView {
                 case HANDLE_SMALL_DANGEROUS_MENU:
                     //TODO controllare che numero di batterie e cannoni sono in numero uguale, forse già fatto all'interno di handleShipSelection
                     if (input.equalsIgnoreCase("none")) {
-                        clientController.playerHandleSmallDanObj(
+                        clientController.playerHandlesSmallDanObj(
                                 clientController.getNickname(), new Coordinates(-1, -1), new Coordinates(-1, -1));
                     } else {
                         handleShieldSelection(input);

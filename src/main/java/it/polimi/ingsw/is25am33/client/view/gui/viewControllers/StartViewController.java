@@ -37,6 +37,11 @@ public class StartViewController extends GuiController{
 
     }
 
+    @Override
+    void showMessage(String message, boolean isPermanent) {
+
+    }
+
     private void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(true);

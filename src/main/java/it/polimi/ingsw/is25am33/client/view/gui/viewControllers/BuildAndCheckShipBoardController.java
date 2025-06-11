@@ -34,10 +34,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     @FXML
     public Button rotateComponentButton;
     @FXML
-    public HBox shipNavigationBar;
-    @FXML
-    public Button myShipButton;
-    @FXML
     public Button releaseComponentButton;
     @FXML
     public Label timerLabel;
@@ -55,8 +51,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     public Label messageLabel;
     @FXML
     public Button endPhaseButton;
-    @FXML
-    public VBox hourglassBox;
     @FXML
     public VBox componentsBoxV;
     @FXML
@@ -368,8 +362,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             visibleComponentsPanel.setVisible(false);
             componentsBoxV.setVisible(false);
             componentsBoxH.setVisible(false);
-            visibleComponentButton.setVisible(false);
-            visibleComponentButton.setManaged(false);
             pickRandomComponentButton.setVisible(false);
             pickRandomComponentButton.setManaged(false);
             endPhaseButton.setVisible(false);
@@ -387,42 +379,17 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         });
     }
 
-    public void showMessage(String message, boolean isPersistent) {
+    @Override
+    public void showMessage(String message, boolean isPermanent) {
 
-        if (isPersistent) {
-            Platform.runLater(() -> {
-                messageLabel.getTransforms().clear();
-                messageLabel.setText(message);
-                messageLabel.setOpacity(1.0);
-            });
+        if (isPermanent) {
+            Platform.runLater(() -> showPermanentMessage(message, messageLabel));
             return;
         }
 
         // Stop any ongoing transitions before starting new fade
         messageLabel.getTransforms().clear();
-
-        Platform.runLater(() -> {
-            messageLabel.setText(message);
-            messageLabel.setOpacity(0.0);
-
-            // Fade in
-            javafx.animation.FadeTransition fadeIn = new javafx.animation.FadeTransition(javafx.util.Duration.seconds(0.5), messageLabel);
-            fadeIn.setFromValue(0.0);
-            fadeIn.setToValue(1.0);
-
-            // Pause before fading out
-            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(2.0));
-
-            // Fade out
-            javafx.animation.FadeTransition fadeOut = new javafx.animation.FadeTransition(javafx.util.Duration.seconds(0.5), messageLabel);
-            fadeOut.setFromValue(1.0);
-            fadeOut.setToValue(0.0);
-            fadeOut.setOnFinished(_ -> messageLabel.setText(""));
-
-            // Play sequence
-            javafx.animation.SequentialTransition sequence = new javafx.animation.SequentialTransition(fadeIn, pause, fadeOut);
-            sequence.play();
-        });
+        Platform.runLater(() -> showNonPermanentMessage(message, messageLabel));
     }
 
     public void showInvalidComponents() {
@@ -487,7 +454,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             pawnButtonPane.setManaged(true);
             placePawnButton.setVisible(true);
             placePawnButton.setManaged(true);
-            hourglassBox.setVisible(false);
             visibleComponentsPanel.setVisible(false);
             componentsBoxV.setVisible(false);
             componentsBoxH.setVisible(false);
@@ -518,6 +484,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             cabinsWithLifeSupport.keySet()
                     .stream()
                     .filter(coords -> cabinsWithLifeSupport.get(coords).contains(ColorLifeSupport.PURPLE))
+                    .filter(coords -> !crewMemberChoice.containsKey(coords))
                     .forEach(coords -> boardsController.applyHighlightEffect(coords, Color.PURPLE));
         } else if (hasBrown) {
             this.currentCrewMemberChoice = CrewMember.BROWN_ALIEN;
@@ -525,6 +492,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             cabinsWithLifeSupport.keySet()
                     .stream()
                     .filter(coords -> cabinsWithLifeSupport.get(coords).contains(ColorLifeSupport.BROWN))
+                    .filter(coords -> !crewMemberChoice.containsKey(coords))
                     .forEach(coords -> boardsController.applyHighlightEffect(coords, Color.BROWN));
         } else {
             this.currentCrewMemberChoice = CrewMember.BROWN_ALIEN;
@@ -538,11 +506,11 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         if (!cabinsWithLifeSupport.containsKey(new Coordinates(row, column)))
             return;
 
-        boardsController.removeHighlightColor();
         Coordinates selectedCoords = new Coordinates(row, column);
 
         if (this.currentCrewMemberChoice == CrewMember.PURPLE_ALIEN) {
 
+            // if the player has previously selected a purple alien and has changed its idea
             if (this.crewMemberChoice.containsValue(CrewMember.PURPLE_ALIEN)) {
                 Coordinates removedCoords = crewMemberChoice.keySet()
                         .stream()
@@ -556,7 +524,13 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             boardsController.applyHighlightEffect(selectedCoords, Color.GREEN);
 
         } else if (this.currentCrewMemberChoice == CrewMember.BROWN_ALIEN) {
+            // if the player has already selected this cabin for the purple alien
+            if (this.crewMemberChoice.containsKey(selectedCoords)) {
+                showMessage("This cabin was already selected for the PURPLE alien", false);
+                return;
+            }
 
+            // if the player has previously selected a brown alien and has changed its idea
             if (this.crewMemberChoice.containsValue(CrewMember.BROWN_ALIEN)) {
                 Coordinates removedCoords = crewMemberChoice.keySet()
                         .stream()
@@ -596,8 +570,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                     this.boardsController = loader.getController();
                     littleDeckComboBox.setVisible(false);
                     littleDeckComboBox.setManaged(false);
-                    hourglassBox.setVisible(false);
-                    hourglassBox.setManaged(false);
                     flipHourglassButton.setVisible(false);
                     flipHourglassButton.setManaged(false);
                 });
@@ -724,7 +696,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                 prefabShipsMenu.setVisible(false);
                 prefabShipsMenu.setManaged(false);
             }
-            if (hourglassBox != null) hourglassBox.setVisible(false);
             if (bottomBox != null) bottomBox.setVisible(false);
         });
     }

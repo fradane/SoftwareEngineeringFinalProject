@@ -163,7 +163,8 @@ public class MainMenuViewController extends GuiController {
         joinOtherPlayersScreen.setManaged(true);
     }
 
-    public void showError(String errorMessage) {
+    @Override
+    public void showMessage(String errorMessage, boolean isPermanent) {
 
         Platform.runLater(() -> {
             joinGameForm.setVisible(false);

@@ -1,6 +1,8 @@
 package it.polimi.ingsw.is25am33.client.view.gui;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import javafx.beans.property.ObjectProperty;
@@ -22,6 +24,7 @@ public class ModelFxAdapter {
     private final Map<String, ObjectProperty<Component>[][]> observableShipBoards;
     private final Map<String, Pair<ObjectProperty<Component>, ObjectProperty<Component>>> observableBookedComponents;
     private final Map<PlayerColor, ObjectProperty<Integer>> observableColorRanking;
+    private final ObjectProperty<ClientCard> observableCurrAdventureCard;
 
     @SuppressWarnings("unchecked")
     public ModelFxAdapter(ClientModel clientModel) {
@@ -35,6 +38,7 @@ public class ModelFxAdapter {
         this.observableShipBoards = new ConcurrentHashMap<>();
         this.observableColorRanking = new ConcurrentHashMap<>();
         this.observableBookedComponents = new ConcurrentHashMap<>();
+        this.observableCurrAdventureCard = new SimpleObjectProperty<>();
 
         // initialize shipboards
         clientModel.getPlayerClientData()
@@ -66,6 +70,10 @@ public class ModelFxAdapter {
         return observableShipBoards.get(clientModel.getMyNickname());
     }
 
+    public ObjectProperty<ClientCard> getObservableCurrAdventureCard() {
+        return observableCurrAdventureCard;
+    }
+
     public ObjectProperty<Component> getObservableFocusedComponent() {
         return observableFocusedComponent;
     }
@@ -89,6 +97,8 @@ public class ModelFxAdapter {
     public Pair<ObjectProperty<Component>, ObjectProperty<Component>> getObservableBookedComponentsOf(String nickname) {
         return observableBookedComponents.get(nickname);
     }
+
+
 
     /* -------------- REFRESH METHODS -------------- */
 
@@ -147,6 +157,10 @@ public class ModelFxAdapter {
                     if (observableColorRanking.containsKey(playerColor))
                         observableColorRanking.get(playerColor).set(position);
                 });
+    }
+
+    public void refreshCurrAdventureCard() {
+        observableCurrAdventureCard.set(clientModel.getCurrAdventureCard());
     }
 
 }

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane prefHeight="700.0" prefWidth="1200.0"
             styleClass="game-background"
             stylesheets="@/galaxy-truckers.css"
-            prefHeight="700.0" prefWidth="1200.0"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.CardPhaseController">
 
     <!-- Header superiore con titolo del gioco e messaggi -->
@@ -18,11 +19,10 @@
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </padding>
 
-            <Label text="Galaxy Truckers" styleClass="screen-title" />
+            <Label styleClass="screen-title" text="Galaxy Truckers" />
 
             <StackPane>
-                <Label fx:id="messageLabel" text="Benvenuto in Galaxy Truckers!"
-                       style="-fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 5px 0 0 0;" />
+                <Label fx:id="messageLabel" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 5px 0 0 0;" />
             </StackPane>
 
         </VBox>
@@ -36,17 +36,19 @@
 
     <!-- Pannello destro per l'immagine -->
     <right>
-        <VBox spacing="10.0" prefWidth="200.0">
-            <padding>
-                <Insets bottom="20.0" left="10.0" right="20.0" top="20.0" />
-            </padding>
-
-            <StackPane>
-                <ImageView fx:id="componentImageView" fitWidth="150.0" fitHeight="150.0" preserveRatio="true"
-                           styleClass="component-image"/>
-            </StackPane>
-
-        </VBox>
+        <!-- Container per l'immagine della carta -->
+        <StackPane styleClass="card-image-container" StackPane.alignment="CENTER" VBox.vgrow="ALWAYS">
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+            <ImageView fx:id="cardImageView" fitWidth="200.0" preserveRatio="true" styleClass="card-image" />
+        </StackPane>
     </right>
+
+    <bottom>
+        <HBox fx:id="bottomHBox" alignment="CENTER" spacing="15.0" styleClass="action-bar">
+            <!-- dynamic buttons to make choices through card states -->
+        </HBox>
+    </bottom>
 
 </BorderPane>

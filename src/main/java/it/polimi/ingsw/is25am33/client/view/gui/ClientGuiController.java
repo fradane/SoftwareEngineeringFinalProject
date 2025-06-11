@@ -7,9 +7,11 @@ import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.*;
+import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
 import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -23,10 +25,13 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,12 +41,11 @@ public class ClientGuiController extends Application implements ClientView {
     final ClientController clientController;
     private static ClientGuiController instance;
     private Stage primaryStage;
-    private boolean isTestFlight;
 
-    StartViewController startViewController;
-    MainMenuViewController mainMenuViewController;
-    BuildAndCheckShipBoardController buildAndCheckShipBoardController;
-    CardPhaseController cardPhaseController;
+    private StartViewController startViewController;
+    private MainMenuViewController mainMenuViewController;
+    private BuildAndCheckShipBoardController buildAndCheckShipBoardController;
+    private CardPhaseController cardPhaseController;
 
     public static ClientGuiController getInstance() {
         return instance;
@@ -51,6 +55,21 @@ public class ClientGuiController extends Application implements ClientView {
     public void start(Stage primaryStage) throws Exception {
         instance = this;
         this.primaryStage = primaryStage;
+
+        // Icona per barra del titolo
+        primaryStage.getIcons().add(new javafx.scene.image.Image(
+                Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/galaxy_trucker_icon.png"))
+        ));
+
+        // Icona per la taskbar/dock
+        try {
+            if (Taskbar.isTaskbarSupported()) {
+                java.awt.Image dockIcon = ImageIO.read(Objects.requireNonNull(getClass().getResource("/gui/graphics/galaxy_trucker_icon.png")));
+                Taskbar.getTaskbar().setIconImage(dockIcon);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to set Taskbar icon: not supported by current OS");
+        }
 
         // Carica il container principale, ma imposta manualmente il controller
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/MainContainer.fxml"));
@@ -65,6 +84,7 @@ public class ClientGuiController extends Application implements ClientView {
         primaryStage.setTitle("Galaxy Trucker");
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setFullScreen(true);
 
         // Carica la schermata iniziale
         loadStartView();
@@ -98,7 +118,7 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void setIsTestFlight(boolean isTestFlight) {
-        this.isTestFlight = isTestFlight;
+
     }
 
     @Override
@@ -173,7 +193,8 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showChoosePlanetMenu() {
-        //TODO
+        if (cardPhaseController != null)
+            cardPhaseController.showChoosePlanetMenu();
     }
 
     @Override
@@ -385,7 +406,9 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showNewCardState() {
-
+        CardState currentCardState = clientModel.getCurrCardState();
+        ClientState mappedState = cardStateToClientState(currentCardState, clientModel);
+        this.showCardStateMenu(mappedState);
     }
 
     @Override
@@ -399,37 +422,38 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     // TODO
+//    @Override
+//    public void showBuildShipBoardMenu() {
+//
+//        if (buildAndCheckShipBoardController != null) return;
+//
+//        String fxmlPath = "/gui/BuildAndCheckShipBoardView.fxml";
+//
+//        javafx.application.Platform.runLater(() -> {
+//            try {
+//                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+//                Parent root = loader.load();
+//                buildAndCheckShipBoardController = loader.getController();
+//                GuiController.setClientModel(clientModel);
+//                primaryStage.setScene(new Scene(root));
+//                primaryStage.show();
+//            } catch (IOException e) {
+//                System.out.println("Error while loading the shipboard view.");
+//                e.printStackTrace();
+//            }
+//        });
+//    }
+
     @Override
     public void showBuildShipBoardMenu() {
-
+        // if not the first time return
         if (buildAndCheckShipBoardController != null) return;
 
         String fxmlPath = "/gui/BuildAndCheckShipBoardView.fxml";
-
-        javafx.application.Platform.runLater(() -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-                Parent root = loader.load();
-                buildAndCheckShipBoardController = loader.getController();
-                GuiController.setClientModel(clientModel);
-                primaryStage.setScene(new Scene(root));
-                primaryStage.show();
-            } catch (IOException e) {
-                System.out.println("Error while loading the shipboard view.");
-                e.printStackTrace();
-            }
-        });
+        Platform.runLater(() ->
+                buildAndCheckShipBoardController = loadView(fxmlPath)
+        );
     }
-
-//    @Override
-//    public void showBuildShipBoardMenu() {
-//        if (buildAndCheckShipBoardController != null) return;
-//
-//        boolean isTestFlight = clientController.getCurrentGameInfo().isTestFlight();
-//        String fxmlPath = isTestFlight ? "/gui/Shipboard_1.fxml" : "/gui/BuildAndCheckShipBoardView.fxml";
-//
-//        Platform.runLater(() -> buildAndCheckShipBoardController = loadView(fxmlPath));
-//    }
 
     @Override
     public void notifyNoMoreComponentAvailable() {
@@ -595,7 +619,7 @@ public class ClientGuiController extends Application implements ClientView {
         switch (errorMessage) {
             case "Color already in use", "GameModel already started":
                 if (mainMenuViewController != null) {
-                    mainMenuViewController.showError(errorMessage);
+                    mainMenuViewController.showMessage(errorMessage, false);
                 }
                 break;
             default:

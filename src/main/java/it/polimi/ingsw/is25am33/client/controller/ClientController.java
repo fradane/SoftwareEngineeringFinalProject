@@ -268,7 +268,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 default -> null;
             };
         } catch (IOException e) {
-//            System.err.println("Connection refused: " + e.getMessage());
             view.showError("Connection refused: " + e.getMessage());
             return null;
         }
@@ -1013,7 +1012,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
 
-        if(cabinCoords.size()<card.getCrewMalus()){
+        if (cabinCoords.size()<card.getCrewMalus()) {
             view.showMessage("Not the right amount of crew members", ERROR);
             return false;
         }
@@ -1054,9 +1053,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .setChosenPlanetIndex(choice)
                 .build();
 
-        try{
+        try {
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);
-        }catch (IOException e){
+        } catch (IOException e) {
             handleRemoteException(e);
         }
     }
@@ -1074,7 +1073,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void playerHandleSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords){
+    public void playerHandlesSmallDanObj(String nickname, Coordinates shieldCoords, Coordinates batteryBoxCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
 
         BatteryBox batteryBox = null;

@@ -92,6 +92,8 @@ public class ClientModel {
 
     public void setCurrAdventureCard(ClientCard currAdventureCard) {
         this.currAdventureCard = currAdventureCard;
+        if (modelFxAdapter != null)
+            modelFxAdapter.refreshCurrAdventureCard();
     }
 
     public ClientCard getCurrAdventureCard() {
