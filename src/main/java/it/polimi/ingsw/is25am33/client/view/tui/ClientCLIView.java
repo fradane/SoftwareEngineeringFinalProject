@@ -511,9 +511,9 @@ public class ClientCLIView implements ClientView {
 //            case "AbandonedStation":
 //                displayAbandonedStationInfo((ClientAbandonedStation) card, output);
 //                break;
-//            case "Pirates":
-//                displayPiratesInfo((ClientPirates) card, output);
-//                break;
+            case "Pirates":
+                displayPiratesInfo((ClientPirates) card, output);
+                break;
 //            case "SlaveTraders":
 //                displaySlaveTradersInfo((ClientSlaveTraders) card, output);
 //                break;
@@ -588,21 +588,21 @@ public class ClientCLIView implements ClientView {
 //        station.getReward().forEach(cube -> output.append(cube.name()).append(" "));
 //        output.append("\n");
 //    }
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayPiratesInfo(ClientPirates pirates, StringBuilder output) {
-//        output.append("Required Fire Power: ").append(pirates.getRequiredFirePower()).append("\n");
-//        output.append("Reward: ").append(pirates.getReward()).append(" credits\n");
-//        output.append("Steps Back: ").append(pirates.getStepsBack()).append("\n");
-//        output.append("Shots: ").append(pirates.getShotCount()).append("\n");
-//
-//        if (!pirates.getShots().isEmpty()) {
-//            output.append("\nShot Details:\n");
-//            for (int i = 0; i < pirates.getShots().size(); i++) {
-//                ClientDangerousObject shot = pirates.getShots().get(i);
-//                output.append("  Shot ").append(i + 1).append(": ").append(shot.getDisplayString()).append("\n");
-//            }
-//        }
-//    }
+
+    private void displayPiratesInfo(ClientPirates pirates, StringBuilder output) {
+        output.append("Required Fire Power: ").append(pirates.getRequiredFirePower()).append("\n");
+        output.append("Reward: ").append(pirates.getReward()).append(" credits\n");
+        output.append("Steps Back: ").append(pirates.getStepsBack()).append("\n");
+        output.append("Shots: ").append(pirates.getDangerousObjCount()).append("\n");
+
+        if (!pirates.getShots().isEmpty()) {
+            output.append("\nShot Details:\n");
+            for (int i = 0; i < pirates.getShots().size(); i++) {
+                ClientDangerousObject shot = pirates.getShots().get(i);
+                output.append("  Shot ").append(i + 1).append(": ").append(shot.getType()).append("\n");
+            }
+        }
+    }
 
     //TODO uncommentare quando si inizia ad implementare questa carta
 //    private void displaySlaveTradersInfo(ClientSlaveTraders slaveTraders, StringBuilder output) {
@@ -623,7 +623,7 @@ public class ClientCLIView implements ClientView {
 //    }
 
     private void displayMeteoriteStormInfo(ClientMeteoriteStorm storm, StringBuilder output) {
-        output.append("ATTENCTION! There are ").append(storm.getMeteoriteCount()).append(" meteorites.").append("\n");
+        output.append("ATTENTTION! There are ").append(storm.getDangerousObjCount()).append(" meteorites.").append("\n");
 
         if (!storm.getMeteorites().isEmpty()) {
             output.append("\nMeteorite Details:\n");
@@ -764,7 +764,7 @@ public class ClientCLIView implements ClientView {
                         return ClientState.HANDLE_SMALL_DANGEROUS_MENU;
                     } else if (type.contains("bigMeteorite")) {
                         return ClientState.HANDLE_BIG_METEORITE_MENU;
-                    } else if (type.contains("BigShot")) {
+                    } else if (type.contains("bigShot")) {
                         return ClientState.HANDLE_BIG_SHOT_MENU;
                     }
                 }
@@ -1363,18 +1363,17 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showAcceptTheRewardMenu() {
-        setClientState(ClientState.ACCEPT_REWARD_MENU);
 
         ClientCard card = clientModel.getCurrAdventureCard();
         String rewardStr = "";
         String stepsStr = "";
 
         // Extract reward and steps information based on card type
-//        if (card.hasReward()) {
-//            if (card instanceof ClientPirates) {
-//                ClientPirates pirates = (ClientPirates) card;
-//                rewardStr = String.valueOf(pirates.getReward());
-//                stepsStr = String.valueOf(pirates.getStepsBack());
+        if (card.hasReward()) {
+            if (card instanceof ClientPirates) {
+                ClientPirates pirates = (ClientPirates) card;
+                rewardStr = String.valueOf(pirates.getReward());
+                stepsStr = String.valueOf(pirates.getStepsBack());
 //            } else if (card instanceof ClientAbandonedShip) {
 //                ClientAbandonedShip ship = (ClientAbandonedShip) card;
 //                rewardStr = String.valueOf(ship.getReward());
@@ -1383,8 +1382,8 @@ public class ClientCLIView implements ClientView {
 //                ClientSlaveTraders traders = (ClientSlaveTraders) card;
 //                rewardStr = String.valueOf(traders.getReward());
 //                stepsStr = String.valueOf(traders.getStepsBack());
-//            }
-//        }
+            }
+        }
 
         showMessage("\nYou've succeeded!", STANDARD);
         if (!rewardStr.isEmpty() && !stepsStr.isEmpty()) {
@@ -1396,26 +1395,52 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showChooseCannonsMenu() {
-//        setClientState(ClientState.CHOOSE_CANNONS_MENU);
-//
-//        ClientCard card = clientModel.getCurrAdventureCard();
-//        String strengthStr = "";
-//
-//        // Extract fire power requirement based on card type
-//        if (card instanceof ClientPirates) {
-//            strengthStr = String.valueOf(((ClientPirates) card).getRequiredFirePower());
+        // Reset the selection state
+        selectedCannons.clear();
+        selectedBatteries.clear();
+
+        ClientCard card = clientModel.getCurrAdventureCard();
+        StringBuilder message = new StringBuilder("\n");
+
+        // Extract fire power requirement based on card type
+        if (card instanceof ClientPirates) {
+            message.append("\nEnemy firepower: " ).append(((ClientPirates) card).getRequiredFirePower());
+            message.append("\n You can choose double cannons to defeat pirates");
+            message.append("\n REMEMBER! If you don't defeat pirates, you will be attacked!");
+
 //        } else if (card instanceof ClientSlaveTraders) {
 //            strengthStr = String.valueOf(((ClientSlaveTraders) card).getRequiredFirePower());
 //        } else if (card instanceof ClientSmugglers) {
 //            strengthStr = String.valueOf(((ClientSmugglers) card).getRequiredFirePower());
-//        }
-//
-//        if (!strengthStr.isEmpty()) {
-//            showMessage("\nEnemy firepower: " + strengthStr, STANDARD);
-//        }
-//
-//        this.showMyShipBoard();
-//        showMessage("Enter coordinates of a double cannon (row column) or 'done' when finished: ", ASK);
+        }
+
+        showCannonWithColor();
+
+        if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleCannons().isEmpty() ) {
+            showMessage("No double cannon available.", STANDARD);
+            showMessage("You can use only single cannon", STANDARD);
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            return;
+        }
+
+        if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
+            showMessage("No battery boxes available so you can't activate double cannon.", STANDARD);
+            showMessage("You can use only single cannon", STANDARD);
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);            return;
+        }
+
+        //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
+        if(!isThereAvailableBattery()) {
+            showMessage("Hai finito le batterie coglione so you can't activate double cannon.", STANDARD);
+            showMessage("You can use only single cannon", STANDARD);
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);            return;
+        }
+
+        showMessage("\nYou can activate double cannon." +
+                "Each double cannon requires one battery.", STANDARD);
+        setClientState(ClientState.CHOOSE_CANNONS_MENU);
+        showMessage(message.toString(), STANDARD);
+        showMessage("Enter coordinates of a double cannon (row column) or 'done' when finished: ", ASK);
     }
 
     @Override
@@ -1503,10 +1528,12 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showBigShotMenu() {
-        setClientState(ClientState.HANDLE_BIG_SHOT_MENU);
-
+        StringBuilder BigShotInfo = new StringBuilder();
+        BigShotInfo.append("\n").append(clientModel.getCurrDangerousObj().getType()).append(" incoming!");
+        BigShotInfo.append("\n").append(clientModel.getCurrDangerousObj().toString());
+        showMessage(BigShotInfo.toString(),STANDARD);
         showMessage("\nBig Shot incoming! Nothing can stop this...", STANDARD);
-        showMessage("Press Enter to see where it hits...", ASK);
+        showMessage("Press Enter to see the effect on your ship", ASK);
     }
 
     @Override
@@ -2497,6 +2524,12 @@ public class ClientCLIView implements ClientView {
                 return;
             }
 
+            if(clientState==CHOOSE_CANNONS_SELECT_BATTERY){
+                showMessage("Cannon and battery selected. Enter another cannon or 'done' to finish: ", ASK);
+                setClientState(CHOOSE_CANNONS_MENU);
+                return;
+            }
+
             if(clientState==HANDLE_SMALL_DANGEROUS_SELECT_BATTERY) {
                 showMessage("Shield and battery selected", STANDARD);
                 setClientState(WAIT_PLAYER);
@@ -2529,6 +2562,13 @@ public class ClientCLIView implements ClientView {
 
             if (component == null || !shipBoard.getDoubleCannons().contains(component)) {
                 showMessage("No double cannon at these coordinates.", ERROR);
+                showMessage("Please try again or 'done' to confirm.", ASK);
+                return;
+            }
+
+            if(selectedCannons.contains(coords)) {
+                showMessage("Cannon already selected", ERROR);
+                showMessage("Select another one or 'done' to confirm", ASK);
                 return;
             }
 
@@ -2539,6 +2579,9 @@ public class ClientCLIView implements ClientView {
 
             if(clientState==ClientState.HANDLE_BIG_METEORITE_MENU){
                 setClientState(CHOOSE_CANNONS_SELECT_BATTERY_BIGMETEORITE);
+            }
+            else if(clientState == CHOOSE_CANNONS_MENU){
+                setClientState(CHOOSE_CANNONS_SELECT_BATTERY);
             }
 
         } catch (Exception e) {
@@ -3310,7 +3353,7 @@ public class ClientCLIView implements ClientView {
                             showMessage("You didn't select any engine.", STANDARD);
                             showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i tuoi motori singoli", STANDARD);
                         }
-
+                        setClientState(WAIT_PLAYER);
                         clientController.playerChoseDoubleEngines(
                                 clientController.getNickname(), selectedEngines, selectedBatteries);
                         selectedEngines.clear();
@@ -3405,11 +3448,37 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case CHOOSE_CANNONS_MENU:
-                    handleCannonSelection(input);
+                    if (input.equalsIgnoreCase("done")) {
+
+                        if (selectedCannons.isEmpty()) {
+                            showMessage("You didn't select any cannon.", STANDARD);
+                            showMessage("Nel calcolo della tua potenza di fuoco verranno conteggiati solo i tuoi cannoni singoli", STANDARD);
+                        }
+                        setClientState(WAIT_PLAYER);
+                        clientController.playerChoseDoubleCannons(
+                                clientController.getNickname(), selectedCannons, selectedBatteries);
+                        selectedCannons.clear();
+                        selectedBatteries.clear();
+
+                    } else {
+                        showCannonWithColor();
+                        handleCannonSelection(input);
+                    }
                     break;
+
                 case CHOOSE_CANNONS_SELECT_BATTERY:
-                   handleBatterySelection(input);
+                    if (input.equalsIgnoreCase("cancel")) {
+                        selectedCannons.removeLast();
+                        showMessage("You canceled the last chosen cannon.", STANDARD);
+
+                        setClientState(CHOOSE_CANNONS_MENU);
+                        showMessage("Please choose an cannon or 'done' to confirm.", ASK);
+                    }
+                    else {
+                        handleBatterySelection(input);
+                    }
                     break;
+
                 case CHOOSE_ENGINES_SELECT_BATTERY:
                     if (input.equalsIgnoreCase("cancel")) {
                         selectedEngines.removeLast();

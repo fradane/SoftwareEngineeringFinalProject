@@ -31,7 +31,7 @@ public class ClientMeteoriteStorm extends ClientCard implements Serializable {
         return "MeteoriteStorm";
     }
 
-    public int getMeteoriteCount() {
+    public int getDangerousObjCount() {
       return meteorites.size();
     }
 

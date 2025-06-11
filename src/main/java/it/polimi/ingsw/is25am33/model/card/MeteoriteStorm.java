@@ -15,6 +15,7 @@ import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
 import it.polimi.ingsw.is25am33.model.component.Shield;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Meteorite;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.game.Player;
@@ -91,11 +92,6 @@ public class MeteoriteStorm extends AdventureCard {
         this.meteoriteIterator = meteorites.iterator();
     }
 
-    public void setMeteorites(List<Meteorite> meteorites) {
-        this.meteorites = meteorites;
-        this.meteoriteIterator = meteorites.iterator();
-    }
-
     private void throwDices() {
 
         Meteorite currMeteorite = meteoriteIterator.next();
@@ -107,6 +103,11 @@ public class MeteoriteStorm extends AdventureCard {
 
     public void setMeteoriteID(List<String> meteoriteID) {
         this.meteoriteIDs = meteoriteID;
+    }
+
+    public void setMeteorites(List<Meteorite> meteorites) {
+        this.meteorites = meteorites;
+        this.meteoriteIterator = meteorites.iterator();
     }
 
     public void checkShipBoardAfterAttack(){
@@ -153,10 +154,11 @@ public class MeteoriteStorm extends AdventureCard {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
 
-                if (chosenShield.getDirections().stream().allMatch(d -> d != currMeteorite.getDirection()))
+                if (chosenShield.getDirections().stream().noneMatch(d -> d == currMeteorite.getDirection()))
                     gameModel.updateShipBoardAfterBeenHit();
-
-
+                else {
+                    setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
+                }
 
             } else {
                 gameModel.updateShipBoardAfterBeenHit();
@@ -188,7 +190,7 @@ public class MeteoriteStorm extends AdventureCard {
             chosenBatteryBox = (BatteryBox) personalBoard.getComponentAt(chosenBatteryBoxesCoords.getFirst());
         }
 
-        if (personalBoard.isItGoingToHitTheShip(currMeteorite) && !personalBoard.isThereACannon(currMeteorite.getCoordinate(), currMeteorite.getDirection()) && !personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection()) ) {
+        if (personalBoard.isItGoingToHitTheShip(currMeteorite)) {
 
             if (chosenDoubleCannon != null && chosenBatteryBox != null) {
 
@@ -201,10 +203,14 @@ public class MeteoriteStorm extends AdventureCard {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
 
-                if (!personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
+                if (!personalBoard.isThereACannon(currMeteorite.getCoordinate(), currMeteorite.getDirection()) && !personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
                     gameModel.updateShipBoardAfterBeenHit();
-                    return;
                 }
+                else if(doubleCannonDestroyMeteorite(chosenDoubleCannonsCoords.getFirst(),chosenDoubleCannon) || personalBoard.isThereACannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())){
+                    setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
+                }
+                else
+                    gameModel.updateShipBoardAfterBeenHit();
 
             } else {
                 gameModel.updateShipBoardAfterBeenHit();
@@ -261,6 +267,15 @@ public class MeteoriteStorm extends AdventureCard {
             "EAST",  "→",
             "WEST",  "←"
     );
+
+    private boolean doubleCannonDestroyMeteorite(Coordinates doubleCannonCoordinates, Cannon doubleCannon) {
+        if(doubleCannon.getFireDirection().equals(Direction.NORTH) || doubleCannon.getFireDirection().equals(Direction.SOUTH)) {
+            return doubleCannonCoordinates.getY() == gameModel.getCurrDangerousObj().getCoordinate();
+        }
+        else{
+            return doubleCannonCoordinates.getX() == gameModel.getCurrDangerousObj().getCoordinate();
+        }
+    }
 
 }
 

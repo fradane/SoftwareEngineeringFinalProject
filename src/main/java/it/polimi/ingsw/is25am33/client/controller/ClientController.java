@@ -634,7 +634,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         || cardState == CardState.REMOVE_CREW_MEMBERS
         || cardState == CardState.CHOOSE_ENGINES
         || cardState == CardState.DANGEROUS_ATTACK
-        || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK;
+        || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK
+        || cardState == CardState.ACCEPT_THE_REWARD
+        || cardState == CardState.CHOOSE_CANNONS;
+
     }
 
     @Override
