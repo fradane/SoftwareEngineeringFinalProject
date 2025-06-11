@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model.component;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
@@ -14,7 +15,8 @@ import java.util.*;
  * Abstract representation of a generic component within the system.
  * A component has state, orientation, and directional connectors.
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = BatteryBox.class, name = "BatteryBox"),
         @JsonSubTypes.Type(value = Cabin.class, name = "Cabin"),
@@ -48,6 +50,7 @@ public abstract class Component implements Serializable {
      */
     private Map<Direction, ConnectorType> connectors;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("type")
     protected String type;
 
     /**
@@ -141,8 +144,15 @@ public abstract class Component implements Serializable {
      * @param map a map where the key is a {@code Class<?>} representing the component's class type,
      *            and the value is a list of objects of that class type
      */
-    public void insertInComponentsMap(Map<Class<?>, List<Object>> map) {
+    public void insertInComponentsMap(Map<Class<?>, List<Component>> map) {
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Component component = (Component) o;
+        return Objects.equals(imageName, component.imageName);
     }
 
     @JsonIgnore

@@ -7,6 +7,7 @@ import it.polimi.ingsw.is25am33.model.game.GameModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.function.BiConsumer;
 

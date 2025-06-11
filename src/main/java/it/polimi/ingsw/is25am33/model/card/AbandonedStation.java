@@ -1,7 +1,9 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
+import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
 import it.polimi.ingsw.is25am33.model.component.Storage;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
@@ -9,13 +11,13 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class AbandonedStation extends AdventureCard implements PlayerMover {
 
     private int stepsBack;
     private int requiredCrewMembers;
     private List<CargoCube> reward;
-    private Iterator<CargoCube> rewardIterator;
     private static final List<CardState> cardStates = List.of(CardState.VISIT_LOCATION, CardState.HANDLE_CUBES_REWARD);
 
     @Override
@@ -46,13 +48,18 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
 
     }
 
+    @Override
+    public ClientCard toClientCard() {
+        //TODO
+        return null;
+    }
+
     public void setRequiredCrewMembers(int requiredCrewMembers) {
         this.requiredCrewMembers = requiredCrewMembers;
     }
 
     public void setReward(List<CargoCube> reward) {
         this.reward = reward;
-        this.rewardIterator = reward.iterator();
     }
 
     public void setStepsBack(int stepsBack) {
@@ -74,7 +81,6 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
     public AbandonedStation(int stepsBack, int requiredCrewMembers, List<CargoCube> reward) {
         this.stepsBack = stepsBack;
         this.requiredCrewMembers = requiredCrewMembers;
-        this.rewardIterator = reward.iterator();
         this.reward = reward;
     }
 
@@ -96,24 +102,28 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
 
     }
 
-    private void currPlayerChoseCargoCubeStorage (Storage chosenStorage) {
+    private void currPlayerChoseCargoCubeStorage(List<Storage> chosenStorage) {
 
-        if(chosenStorage.isFull()) {
-            List<CargoCube> sortedStorage = chosenStorage.getStockedCubes();
-            sortedStorage.sort(CargoCube.byValue);
-            CargoCube lessValuableCargoCube = sortedStorage.getFirst();
-            chosenStorage.removeCube(lessValuableCargoCube);
-        }
+        if (chosenStorage.size() != reward.size())
+            throw new IllegalArgumentException("Incorrect number of storages");
 
-        chosenStorage.addCube(rewardIterator.next());
+        IntStream.range(0, chosenStorage.size()).forEach(i -> {
+            if (!(chosenStorage.get(i) instanceof SpecialStorage) && reward.get(i) == CargoCube.RED)
+                throw new IllegalArgumentException("Trying to store a RED cube in a non-special storage");
+        });
+
+        chosenStorage.forEach(storage -> {
+            if(storage.isFull()) {
+                List<CargoCube> sortedStorage = storage.getStockedCubes();
+                sortedStorage.sort(CargoCube.byValue);
+                CargoCube lessValuableCargoCube = sortedStorage.getFirst();
+                storage.removeCube(lessValuableCargoCube);
+            }
+            storage.addCube(reward.removeFirst());
+        });
 
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
-
-        if (rewardIterator.hasNext()) {
-            rewardIterator.next();
-        } else {
-            setCurrState( CardState.END_OF_CARD);
-        }
+        setCurrState( CardState.END_OF_CARD);
 
     }
 

@@ -19,6 +19,7 @@ public class PlayerClientData {
 
     private String nickname;
     private int credits;
+    private boolean isOut;
     private int flyingBoardPosition;
     private ShipBoardClient shipBoard;
     private PlayerColor color;
@@ -29,6 +30,7 @@ public class PlayerClientData {
         this.color = color;
         this.shipBoard = isTestFlight ? new Level1ShipBoard(color, new GameClientNotifier(null, new ConcurrentHashMap<>())) : new Level2ShipBoard(color, new GameClientNotifier(null, new ConcurrentHashMap<>()));
         this.shipBoard.setPlayer(new Player(nickname, (ShipBoard) this.shipBoard, color));
+        this.flyingBoardPosition = 0;
     }
 
     public PlayerColor getColor() {
@@ -71,8 +73,12 @@ public class PlayerClientData {
         this.shipBoard = shipBoard;
     }
 
+    public void setOut(boolean isOut) {
+        this.isOut = isOut;
+    }
+
     public boolean isOut() {
-        return flyingBoardPosition == -1;
+        return isOut;
     }
 
 }

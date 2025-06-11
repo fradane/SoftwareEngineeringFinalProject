@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.model.card;
 
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
@@ -72,7 +73,7 @@ class FreeSpaceTest {
         IntStream.range(0, 4).forEach(i -> {
 
             assertEquals(gameModel.getCurrPlayer(), players.get(i));
-            ((FreeSpace) card).currPlayerChoseEnginesToActivate(doubleEngines, batteryBoxes);
+            ((FreeSpace) card).currPlayerChoseEnginesToActivate(null, null);
 
         });
 
@@ -105,7 +106,7 @@ class FreeSpaceTest {
         List<BatteryBox> batteryBoxes = new ArrayList<>(List.of(batteryBox, batteryBox, batteryBox));
 
         Exception e = assertThrows(IllegalArgumentException.class, () -> {
-            ((FreeSpace) card).currPlayerChoseEnginesToActivate(doubleEngines, batteryBoxes);
+            ((FreeSpace) card).currPlayerChoseEnginesToActivate(null, null);
         });
 
         assertEquals("The number of engines does not match the number of battery boxes", e.getMessage());
@@ -124,7 +125,7 @@ class FreeSpaceTest {
         List<BatteryBox> batteryBoxes = new ArrayList<>(List.of(batteryBox, batteryBox, batteryBox));
 
         Exception e = assertThrows(IllegalArgumentException.class, () -> {
-            ((FreeSpace) card).currPlayerChoseEnginesToActivate(doubleEngines, batteryBoxes);
+            ((FreeSpace) card).currPlayerChoseEnginesToActivate(null, null);
         });
 
         assertEquals("The number of required batteries is not enough", e.getMessage());
@@ -142,8 +143,8 @@ class FreeSpaceTest {
 
         PlayerChoicesDataStructure playerChoices = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenBatteryBoxes(batteryBoxes)
-                .setChosenDoubleEngines(doubleEngines)
+                .setChosenBatteryBoxes(new ArrayList<Coordinates>())
+                .setChosenDoubleEngines(new ArrayList<Coordinates>())
                 .build();
 
         IntStream.range(0, 4).forEach(i -> {
@@ -168,8 +169,8 @@ class FreeSpaceTest {
 
         PlayerChoicesDataStructure playerChoices = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenBatteryBoxes(batteryBoxes)
-                .setChosenDoubleEngines(doubleEngines)
+                .setChosenBatteryBoxes(new ArrayList<Coordinates>())
+                .setChosenDoubleEngines(new ArrayList<Coordinates>())
                 .build();
 
         card.setCurrState(CardState.START_CARD);

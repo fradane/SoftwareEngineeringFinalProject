@@ -4,16 +4,15 @@ module it.polimi.ingsw.is25am33 {
     requires javafx.controls;
     requires javafx.fxml;
     // JSON serialization library
-    requires com.fasterxml.jackson.databind;
-    requires com.fasterxml.jackson.annotation;
     // Java standard libraries
     requires java.smartcardio;
-    requires java.desktop;
     requires java.management.rmi;
-    requires java.logging;
     requires java.rmi;
     requires org.jetbrains.annotations;
     requires net.bytebuddy;
+    requires com.fasterxml.jackson.datatype.jdk8;
+    requires com.fasterxml.jackson.databind;
+    requires java.logging;
 
     // JavaFX Configuration
     // Allows JavaFX to access the main package for FXML loading
@@ -46,24 +45,24 @@ module it.polimi.ingsw.is25am33 {
     exports it.polimi.ingsw.is25am33.model.dangerousObj;
     exports it.polimi.ingsw.is25am33.model.board to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.is25am33.model.dangerousObj to com.fasterxml.jackson.databind;
-    
+
     // Controller and network exports
     exports it.polimi.ingsw.is25am33.controller;
     exports it.polimi.ingsw.is25am33.network.common to java.rmi;
     exports it.polimi.ingsw.is25am33.network;
-    
+
     // Client-side exports
     exports it.polimi.ingsw.is25am33.client;
     exports it.polimi.ingsw.is25am33.client.view;
     exports it.polimi.ingsw.is25am33.client.controller;
-    
+
     // Serialization layer exports
     exports it.polimi.ingsw.is25am33.serializationLayer to com.fasterxml.jackson.databind;
     exports it.polimi.ingsw.is25am33.serializationLayer.client to com.fasterxml.jackson.databind;
     exports it.polimi.ingsw.is25am33.serializationLayer.server to com.fasterxml.jackson.databind;
-    
+
     // Main application export
-    exports it.polimi.ingsw.is25am33;
+    //exports it.polimi.ingsw.is25am33;
     exports it.polimi.ingsw.is25am33.model.enumFiles;
     opens it.polimi.ingsw.is25am33.model.enumFiles to com.fasterxml.jackson.databind, java.rmi;
     opens it.polimi.ingsw.is25am33.client to com.fasterxml.jackson.databind;
@@ -74,4 +73,5 @@ module it.polimi.ingsw.is25am33 {
     exports it.polimi.ingsw.is25am33.client.view.tui;
     exports it.polimi.ingsw.is25am33.client.model;
     opens it.polimi.ingsw.is25am33.client.model to com.fasterxml.jackson.databind;
+    exports it.polimi.ingsw.is25am33.client.model.card;
 }

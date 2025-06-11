@@ -79,7 +79,7 @@ public class Deck {
      * organizing them based on their levels, shuffling, populating the visible and non-visible little decks,
      * and notifying all clients of the current state of the little visible decks.
      *
-     * @param gameModel The game model instance to which the little decks will be associated.
+     * @param gameModel The game model instance with which the little decks will be associated.
      */
     public void setUpLittleDecks(GameModel gameModel) {
 
@@ -150,16 +150,78 @@ public class Deck {
      * - War Fields
      */
     private void loadCards() {
-        allCards.addAll(Deck.loadAbandonedShipFromJson());
-        allCards.addAll(Deck.loadAbandonedStationFromJson());
-        allCards.addAll(Deck.loadFreeSpaceFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedStationFromJson());
+//        allCards.addAll(Deck.loadFreeSpaceFromJson());
+//        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadSlaveTradersFromJson());
+//        allCards.addAll(Deck.loadSmugglersFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadWarFieldFromJson());
+//
         allCards.addAll(Deck.loadMeteoriteStormFromJson());
-        allCards.addAll(Deck.loadPiratesFromJson());
-        allCards.addAll(Deck.loadPlanetsFromJson());
-        allCards.addAll(Deck.loadSlaveTradersFromJson());
-        //TODO allCards.addAll(Deck.loadSmugglersFromJson());
-        allCards.addAll(Deck.loadStardustFromJson());
-        //TODO allCards.addAll(Deck.loadWarFieldFromJson());
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+        allCards.addAll(Deck.loadMeteoriteStormFromJson());
+
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//                allCards.addAll(Deck.loadPiratesFromJson());
+//                allCards.addAll(Deck.loadPiratesFromJson());
+//                allCards.addAll(Deck.loadPiratesFromJson());
+//                allCards.addAll(Deck.loadPiratesFromJson());
+//                allCards.addAll(Deck.loadPiratesFromJson());
+//                allCards.addAll(Deck.loadPiratesFromJson());
+//                allCards.addAll(Deck.loadPiratesFromJson());
+//                allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+//        allCards.addAll(Deck.loadPiratesFromJson());
+
+
+
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+//        allCards.addAll(Deck.loadStardustFromJson());
+
+
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+//        allCards.addAll(Deck.loadPlanetsFromJson());
+
+//          allCards.addAll(Deck.loadFreeSpaceFromJson());
+//          allCards.addAll(Deck.loadFreeSpaceFromJson());
+//          allCards.addAll(Deck.loadFreeSpaceFromJson());
+//          allCards.addAll(Deck.loadFreeSpaceFromJson());
+//          allCards.addAll(Deck.loadFreeSpaceFromJson());
+
+
+
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
+//        allCards.addAll(Deck.loadAbandonedShipFromJson());
     }
 
     /**

@@ -4,10 +4,28 @@ import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
+import it.polimi.ingsw.is25am33.model.component.Cannon;
+import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.component.Shield;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
+import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
+import it.polimi.ingsw.is25am33.serializationLayer.client.ClientDeserializer;
+import it.polimi.ingsw.is25am33.serializationLayer.client.ClientSerializer;
+import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
+import it.polimi.ingsw.is25am33.serializationLayer.server.ServerSerializer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.*;
+
+import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 
 public class ClientLauncher {
 

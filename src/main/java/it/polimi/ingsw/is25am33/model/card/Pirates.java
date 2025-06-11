@@ -1,7 +1,11 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
+import it.polimi.ingsw.is25am33.client.model.card.ClientPirates;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.interfaces.ShotSenderCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
@@ -12,19 +16,37 @@ import it.polimi.ingsw.is25am33.model.component.Cannon;
 import it.polimi.ingsw.is25am33.model.component.Shield;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
 
-public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCannonActivator {
+public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCannonActivator, ShotSenderCard {
 
     private List<Shot> shots;
     private List<String> shotIDs;
-    private static final List<CardState> cardStates = List.of(CardState.CHOOSE_CANNONS, CardState.ACCEPT_THE_REWARD, CardState.THROW_DICES, CardState.DANGEROUS_ATTACK);
+    private static final List<CardState> cardStates = List.of(CardState.CHOOSE_CANNONS, CardState.ACCEPT_THE_REWARD, CardState.THROW_DICES, CardState.DANGEROUS_ATTACK, CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
     private final List<Player> defeatedPlayers = new ArrayList<>();
     private Iterator<Shot> shotIterator;
-    private Iterator<Player> playerIterator;
+    private Iterator<Player> defeatedPlayerIterator;
+    private Player currDefeatedPlayer;
+
+    public List<String> getShotIDs() {
+        return shotIDs;
+    }
+
+    public void setShotIDs(List<String> shotIDs) {
+        this.shotIDs = shotIDs;
+    }
+
+    public List<Shot> getShots() {
+        return shots;
+    }
+
+    public void setShots(List<Shot> shots) {
+        this.shots = shots;
+    }
 
     public Pirates(List<Shot> shots) {
         this.shots = shots;
@@ -55,28 +77,22 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
             case DANGEROUS_ATTACK:
                 ((Shot) gameModel.getCurrDangerousObj()).startAttack(playerChoices, this);
                 break;
+            case CHECK_SHIPBOARD_AFTER_ATTACK:
+                this.checkShipBoardAfterAttack();
+                break;
             default:
                 throw new UnknownStateException("Unknown current state");
         }
 
     }
 
-    public void setShotIDs(List<String> shotIDs) {
-        this.shotIDs = shotIDs;
-    }
-
-    public void setShots(List<Shot> shots) {
-        this.shots = shots;
-        shotIterator = shots.iterator();
-    }
-
-    @JsonIgnore
-    public List<Shot> getShots() {
-        return shots;
-    }
-
-    public List<String> getShotIDs() {
-        return shotIDs;
+    @Override
+    public ClientCard toClientCard() {
+        List<ClientDangerousObject> clientDangerousObjects = new ArrayList<>();
+        for(Shot shot : shots) {
+            clientDangerousObjects.add(new ClientDangerousObject(shot.getDangerousObjType(),shot.getDirection(), -1));
+        }
+        return new ClientPirates(this.getCardName(),this.imageName,clientDangerousObjects,this.requiredFirePower,this.reward,this.stepsBack);
     }
 
     public void convertIdsToShots() {
@@ -90,32 +106,76 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
                     }
                 }).toList();
 
+        this.shotIterator = shots.iterator();
     }
 
-    private void currPlayerChoseCannonsToActivate(List<Cannon> chosenDoubleCannons, List<BatteryBox> chosenBatteryBoxes) throws IllegalArgumentException {
+    public void setMeteoriteID(List<String> meteoriteID) {
+        this.shotIDs = shotIDs;
+    }
+
+    public void checkShipBoardAfterAttack(){
+        gameModel.notifyInvalidShipBoards();
+        if(gameModel.areAllShipsCorrect()) {
+
+            if (defeatedPlayerIterator.hasNext()) {
+                currDefeatedPlayer= defeatedPlayerIterator.next();
+                gameModel.setCurrPlayer(currDefeatedPlayer);
+                setCurrState(CardState.DANGEROUS_ATTACK);
+            }
+            else if (shotIterator.hasNext()) {
+                defeatedPlayerIterator =defeatedPlayers.iterator();
+                currDefeatedPlayer= defeatedPlayerIterator.next();
+                gameModel.setCurrPlayer(currDefeatedPlayer);
+                setCurrState(CardState.THROW_DICES);
+            } else {
+                setCurrState(CardState.END_OF_CARD);
+                defeatedPlayers.clear();
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
+            }
+        }
+    }
+
+    private void currPlayerChoseCannonsToActivate(List<Coordinates> chosenDoubleCannonsCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
+        Player currentPlayer=gameModel.getCurrPlayer();
+        List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
+        List<Cannon> chosenDoubleCannons = new ArrayList<>();
+
+        for(Coordinates chosenDoubleCannonCoord : chosenDoubleCannonsCoords) {
+            chosenDoubleCannons.add((Cannon) currentPlayer.getPersonalBoard().getComponentAt(chosenDoubleCannonCoord));
+        }
+
+        for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
+            chosenBatteryBoxes.add((BatteryBox) currentPlayer.getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
+        }
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
+        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+        });
 
         if (currPlayerCannonPower > requiredFirePower) {
 
             setCurrState( CardState.ACCEPT_THE_REWARD);
 
         } else {
-
-            if (currPlayerCannonPower < requiredFirePower) defeatedPlayers.add(gameModel.getCurrPlayer());
+            defeatedPlayers.add(gameModel.getCurrPlayer());
 
             if (gameModel.hasNextPlayer()) {
                 gameModel.nextPlayer();
+                setCurrState(CardState.CHOOSE_CANNONS);
             } else {
-
                 if (defeatedPlayers.isEmpty()) {
-                    setCurrState( CardState.END_OF_CARD);
+                    setCurrState(CardState.END_OF_CARD);
+                    gameModel.resetPlayerIterator();
+                    gameModel.setCurrGameState(GameState.DRAW_CARD);
                 } else {
-                    setCurrState(CardState.THROW_DICES );
+                    defeatedPlayerIterator =defeatedPlayers.iterator();
+                    currDefeatedPlayer= defeatedPlayerIterator.next();
+                    gameModel.setCurrPlayer(currDefeatedPlayer);
+                    setCurrState(CardState.THROW_DICES);
                 }
-
             }
-
         }
 
     }
@@ -133,20 +193,33 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         if (hasPlayerAcceptedTheReward) {
             gameModel.getCurrPlayer().addCredits(reward);
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
+
         }
 
         if (defeatedPlayers.isEmpty()) {
             setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
         } else {
+            defeatedPlayerIterator = defeatedPlayers.iterator();
+            currDefeatedPlayer= defeatedPlayerIterator.next();
+            gameModel.setCurrPlayer(currDefeatedPlayer);
             setCurrState(CardState.THROW_DICES);
         }
     }
 
-    public void playerDecidedHowToDefendTheirSelvesFromSmallShot(Shield chosenShield, BatteryBox chosenBatteryBox) {
-
+    @Override
+    public void playerDecidedHowToDefendTheirSelvesFromSmallShot(List<Coordinates> chosenShieldsCoords, List<Coordinates> chosenBatteryBoxesCoords) {
+        Player currentPlayer=gameModel.getCurrPlayer();
         ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
-
+        Shield chosenShield = null;
+        BatteryBox chosenBatteryBox = null;
         DangerousObj currShot = gameModel.getCurrDangerousObj();
+
+        if(!chosenShieldsCoords.isEmpty() && !chosenBatteryBoxesCoords.isEmpty()) {
+            chosenShield = (Shield) personalBoard.getComponentAt(chosenShieldsCoords.getFirst());
+            chosenBatteryBox = (BatteryBox) personalBoard.getComponentAt(chosenBatteryBoxesCoords.getFirst());
+        }
 
         if (personalBoard.isItGoingToHitTheShip(currShot)) {
 
@@ -154,45 +227,47 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
                 if (chosenBatteryBox.getRemainingBatteries() == 0)
                     throw new IllegalStateException("Not enough batteries");
-                if (chosenShield.getDirections().stream().anyMatch(d -> d == currShot.getDirection()))
-                    throw new IllegalArgumentException("Not correct direction");
 
                 chosenBatteryBox.useBattery();
+                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+                });
+
+                if (chosenShield.getDirections().stream().noneMatch(d -> d == currShot.getDirection())){
+                    gameModel.updateShipBoardAfterBeenHit();
+                }else{
+                    setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
+                }
 
             } else {
-                personalBoard.handleDangerousObject(currShot);
+                gameModel.updateShipBoardAfterBeenHit();
             }
 
+        }else{
+            if(chosenShield != null && chosenBatteryBox != null) {
+                chosenBatteryBox.useBattery();
+                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+                });
+            }
+            setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
         }
 
-        if(playerIterator.hasNext()) {
-            gameModel.nextPlayer();
-        } else if (shotIterator.hasNext()) {
-            setCurrState( CardState.THROW_DICES);
-            playerIterator = defeatedPlayers.iterator();
-        } else {
-            setCurrState( CardState.END_OF_CARD);
-        }
+
 
     }
 
+    @Override
     public void playerIsAttackedByABigShot() {
 
         ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
-
         DangerousObj currShot = gameModel.getCurrDangerousObj();
 
         if (!personalBoard.isItGoingToHitTheShip(currShot)) {
-            personalBoard.handleDangerousObject(currShot);
+            setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
         }
-
-        if(playerIterator.hasNext()) {
-            gameModel.nextPlayer();
-        } else if (shotIterator.hasNext()) {
-            setCurrState( CardState.THROW_DICES);
-            playerIterator = defeatedPlayers.iterator();
-        } else {
-            setCurrState( CardState.END_OF_CARD);
+        else{
+            gameModel.updateShipBoardAfterBeenHit();
         }
 
     }

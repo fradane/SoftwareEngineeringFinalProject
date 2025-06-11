@@ -1,15 +1,17 @@
 package it.polimi.ingsw.is25am33.client.model;
 
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import javafx.beans.property.ObjectProperty;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -400,8 +402,9 @@ public interface ShipBoardClient {
      * Handles the effect of a dangerous object (DangerousObj) on the ship
      *
      * @param obj The dangerous object to handle
+     * @return
      */
-    void handleDangerousObject(DangerousObj obj);
+    int[] handleDangerousObject(DangerousObj obj);
 
     /**
      * Checks whether the ship can defend itself from a dangerous object using single cannons
@@ -439,5 +442,31 @@ public interface ShipBoardClient {
     }
 
     void checkPosition(int x, int y);
+
+    void setComponentsPerType(Map<Class<?>, List<Component>> componentsPerType);
+
+    Map<Coordinates, Storage> getCoordinatesAndStorages();
+
+    /**
+     * Returns a map where keys are coordinates and values are Cabin components that have crew members.
+     * Only includes coordinates that have Cabin components with at least one inhabitant.
+     *
+     * @return A map of coordinates to Cabin objects with crew
+     */
+    Map<Coordinates, Cabin> getCoordinatesAndCabinsWithCrew();
+
+    /**
+     * Restituisce una mappa di cabine connesse a moduli di supporto vitale.
+     */
+    Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport();
+
+    /**
+     * Verifica se un alieno può essere posizionato in una cabina.
+     */
+    boolean canAcceptAlien(Coordinates coords, CrewMember alien);
+
+    Set<Coordinates> getCoordinatesOfComponents(List<? extends Component> components);
+
+    Map<Class<?>, List<Component>> getComponentsPerType();
 
 }

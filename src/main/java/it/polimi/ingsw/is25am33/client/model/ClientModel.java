@@ -1,5 +1,7 @@
 package it.polimi.ingsw.is25am33.client.model;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -14,15 +16,24 @@ public class ClientModel {
 
     private String myNickname;
     private final Map<String, PlayerClientData> playerClientData = new ConcurrentHashMap<>();
-    private String currAdventureCard;
+    private ClientCard currAdventureCard;
     private CardState currCardState;
     private GameState gameState;
-    private DangerousObj currDangerousObj;
+    private ClientDangerousObject currDangerousObj;
     private String currentPlayer;
     private Map<Integer, Component> visibleComponents = new ConcurrentHashMap<>();
     private List<List<String>> littleVisibleDecks = new ArrayList<>();
     private boolean isMyTurn;
     private Hourglass hourglass;
+    private List<PrefabShipInfo> availablePrefabShips = new ArrayList<>();
+
+    public List<PrefabShipInfo> getAvailablePrefabShips() {
+        return availablePrefabShips;
+    }
+
+    public void setAvailablePrefabShips(List<PrefabShipInfo> availablePrefabShips) {
+        this.availablePrefabShips = availablePrefabShips;
+    }
 
     public Hourglass getHourglass() {
         return hourglass;
@@ -33,7 +44,7 @@ public class ClientModel {
     }
 
     public void eliminatePlayer(String nickname) {
-        playerClientData.get(nickname).setFlyingBoardPosition(-1);
+        playerClientData.get(nickname).setOut(true);
     }
 
     public void setMyNickname(String myNickname) {
@@ -41,7 +52,7 @@ public class ClientModel {
     }
 
     public boolean isMyTurn() {
-        return isMyTurn;
+        return myNickname.equals(currentPlayer);
     }
 
     public void setMyTurn(boolean myTurn) {
@@ -68,15 +79,15 @@ public class ClientModel {
         this.gameState = gameState;
     }
 
-    public void setCurrAdventureCard(String currAdventureCard) {
+    public void setCurrAdventureCard(ClientCard currAdventureCard) {
         this.currAdventureCard = currAdventureCard;
     }
 
-    public String getCurrAdventureCard() {
+    public ClientCard getCurrAdventureCard() {
         return currAdventureCard;
     }
 
-    public void setCurrDangerousObj(DangerousObj currDangerousObj) {
+    public void setCurrDangerousObj(ClientDangerousObject currDangerousObj) {
         this.currDangerousObj = currDangerousObj;
     }
 
@@ -119,7 +130,7 @@ public class ClientModel {
         this.visibleComponents = visibleComponents;
     }
 
-    public DangerousObj getCurrDangerousObj() {
+    public ClientDangerousObject getCurrDangerousObj() {
         return currDangerousObj;
     }
 
@@ -156,17 +167,6 @@ public class ClientModel {
                 .stream()
                 .filter(player -> playerClientData.get(player).isOut())
                 .collect(Collectors.toSet());
-    }
-
-    public LinkedHashMap<String, PlayerClientData> finalRanking(){
-        return playerClientData.entrySet().stream()
-                .sorted(Map.Entry.<String, PlayerClientData>comparingByValue(Comparator.comparingInt(PlayerClientData::getCredits).reversed()))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1,e2)->e1,
-                        LinkedHashMap::new
-                ));
     }
 
     public void setNickname(String nickname) {

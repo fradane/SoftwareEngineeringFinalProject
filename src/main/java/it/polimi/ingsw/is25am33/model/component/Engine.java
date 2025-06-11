@@ -4,13 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Represents an engine component, extending the {@code Component} class.
  * Implements the {@code Rotatable} interface.
  */
-public class Engine extends Component implements Rotatable {
+public class Engine extends Component implements Rotatable, Serializable {
 
     /**
      * The direction in which the engine provides power.

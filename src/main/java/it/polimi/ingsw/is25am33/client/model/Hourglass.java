@@ -76,13 +76,20 @@ public class Hourglass {
                 try {
                     controller.notifyHourglassEnded();
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    controller.handleRemoteException(e);
                 }
 
                 isRunning = false;
             }
 
         }, 0, 1, TimeUnit.SECONDS);
+    }
+
+    public void stop() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+            isRunning = false;
+        }
     }
 
 }

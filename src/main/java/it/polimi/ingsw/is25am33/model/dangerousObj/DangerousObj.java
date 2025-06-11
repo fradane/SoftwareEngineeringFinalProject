@@ -2,11 +2,8 @@ package it.polimi.ingsw.is25am33.model.dangerousObj;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import it.polimi.ingsw.is25am33.client.view.ClientView;
-import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
-import java.util.function.BiConsumer;
 import java.io.Serializable;
 
 @JsonTypeInfo(
@@ -47,7 +44,6 @@ public abstract class DangerousObj implements Serializable {
         this.coordinate = coordinate;
     }
 
-    public abstract BiConsumer<CallableOnGameController, String> showRelatedMenu(ClientView view);
 }
 
 

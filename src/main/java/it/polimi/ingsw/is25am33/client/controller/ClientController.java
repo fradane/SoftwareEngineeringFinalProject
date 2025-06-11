@@ -1,16 +1,23 @@
 package it.polimi.ingsw.is25am33.client.controller;
 
-import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
-import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
+import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
+import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
+import it.polimi.ingsw.is25am33.client.model.card.CrewMalusCard;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
+import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
+import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -49,7 +56,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public ClientController(ClientModel clientModel, ClientPingPongManager clientPingPongManager) throws RemoteException {
         super();
         this.clientModel = clientModel;
-        this.clientPingPongManager=clientPingPongManager;
+        this.clientPingPongManager= clientPingPongManager;
     }
 
     public void run() {
@@ -313,6 +320,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void leaveGame() {
         try {
             if (currentGameId != null) {
+                serverController.leaveGameAfterCreation(nickname,true);
                 inGame = false;
                 gameStarted = false;
                 currentGameId = null;
@@ -329,7 +337,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyShipCorrect(String nicknameToNotify) throws IOException {
+    public void notifyShipCorrect(String nicknameToNotify) {
         // TODO rimuovere
     }
 
@@ -340,12 +348,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws IOException {
+    public void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) {
         view.showMessage(newPlayerNickname + " joined the game!", NOTIFICATION_INFO);
     }
 
     @Override
-    public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws IOException {
+    public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) {
         gameStarted = true;
         clientModel.setGameState(GameState.BUILD_SHIPBOARD);
         gameInfo.getConnectedPlayers().forEach((nickname, color) -> clientModel.addPlayer(nickname, color, gameInfo.isTestFlight()));
@@ -356,7 +364,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws IOException {
+    public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) {
         if (nickname.equals(this.nickname))
             nickname = "you";
 
@@ -364,19 +372,20 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws IOException {
+    public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) {
 
     }
 
     @Override
-    public void notifyRemovalResult(String nicknameToNotify, boolean success) throws IOException {
+    public void notifyRemovalResult(String nicknameToNotify, boolean success) {
 
     }
 
     @Override
-    public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException {
+    public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
         clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
+        clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
 
         // Mostra il menu solo se è la propria shipBoard
         if (shipOwnerNickname.equals(nickname)) {
@@ -385,9 +394,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates) throws RemoteException {
+    public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
         clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
+        clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
 
         // Mostra il menu solo se è la propria shipBoard
         if (shipOwnerNickname.equals(nickname)) {
@@ -396,9 +406,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts) throws RemoteException {
+    public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
         clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
+        clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
 
 
         // Gestisce la selezione solo se è la propria shipBoard
@@ -408,58 +419,63 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    @Override
+    public void notifyCardStarted(String nicknameToNotify) throws IOException {
+
+    }
+
     public void setCurrentShipPartsList(Set<Set<Coordinates>> shipParts) {
         this.currentShipPartsList = new ArrayList<>(shipParts);
     }
 
 
     @Override
-    public void notifyGameState(String nickname, GameState gameState) throws IOException{
+    public void notifyGameState(String nickname, GameState gameState) {
         clientModel.setGameState(gameState);
         view.showNewGameState();
     }
 
     @Override
-    public void notifyDangerousObjAttack(String nickname, DangerousObj dangerousObj) throws IOException{
+    public void notifyDangerousObjAttack(String nickname, ClientDangerousObject dangerousObj) {
         clientModel.setCurrDangerousObj(dangerousObj);
-        view.showDangerousObj();
+        //view.showDangerousObj();
     }
 
     @Override
-    public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws IOException{
+    public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) {
         clientModel.setCurrentPlayer(nickname);
         view.showMessage("Current player is: " + nickname, STANDARD);
+
+//        if(clientModel.isMyTurn())
+//            view.showNewCardState();
     }
 
     @Override
-    public void notifyCurrAdventureCard(String nickname, String adventureCard) throws IOException{
+    public void notifyCurrAdventureCard(String nickname, ClientCard adventureCard, boolean isFirstTime) {
         clientModel.setCurrAdventureCard(adventureCard);
-        view.showCurrAdventureCard(true);
+        view.showCurrAdventureCard(isFirstTime);
     }
 
     @Override
-    public void notifyAddVisibleComponents(String nickname, int index, Component component) throws IOException{
+    public void notifyAddVisibleComponents(String nickname, int index, Component component) {
         clientModel.getVisibleComponents().put(index, component);
     }
 
     @Override
-    public void notifyRemoveVisibleComponents(String nickname, int index) throws IOException{
+    public void notifyRemoveVisibleComponents(String nickname, int index) {
         clientModel.getVisibleComponents().remove(index);
     }
 
     @Override
-    public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException {
-        clientModel.getShipboardOf(nickname).getShipMatrix()[coordinates.getX()][coordinates.getY()] = component;
+    public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) {
+        ShipBoardClient shipboard = clientModel.getShipboardOf(nickname);
+        shipboard.setFocusedComponent(component);
+        shipboard.placeComponentWithFocus(coordinates.getX(), coordinates.getY());
     }
 
     // TODO marco, controllare
     public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
         //clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponentsCoordinates().add(component);
-    }
-
-    @Override
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix) throws IOException {
-        clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
     }
 
     /**
@@ -471,66 +487,187 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * @throws RemoteException if a communication-related error occurs during the remote method call
      */
     @Override
-    public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException {
+    public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component focusedComponent) {
         clientModel.getShipboardOf(nickname).setFocusedComponent(focusedComponent);
     }
 
     @Override
-    public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws IOException {
+    public void notifyReleaseComponent(String nicknameToNotify, String nickname) {
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
     }
 
     @Override
-    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) throws IOException {
+    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) {
         clientModel.getShipboardOf(nickname).getBookedComponents().add(component);
     }
 
     @Override
-    public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws IOException {
+    public void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) {
+        int oldCredits = clientModel.getPlayerClientData().get(nickname).getCredits();
         clientModel.updatePlayerCredits(nickname, credits);
-        view.showMessage(nickname + " has " + credits + " credits.", STANDARD);
+        if(clientModel.getMyNickname().equals(nickname)) {
+            view.showMessage("You have just earned " + (credits - oldCredits) + " credits\n", STANDARD);
+            view.showMessage("You now own " + credits + " credits\n", STANDARD);
+        }else
+            view.showMessage(nickname + " has " + credits + " credits.", STANDARD);
     }
 
     @Override
-    public void notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) throws IOException{
+    public void notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) {
         clientModel.updatePlayerPosition(nickname,newPosition);
+        view.showMessage("\n" + nickname + " has changed its position", NOTIFICATION_INFO);
+        view.showCurrentRanking();
     }
 
     @Override
-    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws IOException{
+    public void notifyStopHourglass(String nicknameToNotify) {
+        clientModel.getHourglass().stop();
+    }
+
+    @Override
+    public void notifyFirstToEnter(String nicknameToNotify) {
+        view.showFirstToEnter();
+    }
+
+    @Override
+    public void notifyCurrAdventureCardUpdate(String nicknameToNotify, ClientCard adventureCard) throws IOException {
+        clientModel.setCurrAdventureCard(adventureCard);
+    }
+
+    @Override
+    public void notifyPlayerVisitedPlanet(String nicknameToNotify, String nickname, ClientCard adventureCard) throws IOException {
+        if(!clientModel.isMyTurn())
+            view.showMessage(clientModel.getCurrentPlayer() + " just visited a planet", NOTIFICATION_INFO);
+    }
+
+    @Override
+    public void notifyCrewPlacementPhase(String nicknameToNotify) throws IOException {
+        clientModel.setGameState(GameState.PLACE_CREW);
+        view.showCrewPlacementMenu();
+    }
+
+    @Override
+    public void notifyCrewPlacementComplete(String nicknameToNotify, String playerNickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException {
+        clientModel.getShipboardOf(playerNickname).setShipMatrix(shipMatrix);
+        clientModel.getShipboardOf(playerNickname).setComponentsPerType(componentsPerType);
+
+        if (playerNickname.equals(nickname)) {
+            view.showMessage("Your crew placement is complete!", STANDARD);
+        } else {
+            view.showMessage(playerNickname + " has completed crew placement.", NOTIFICATION_INFO);
+        }
+    }
+
+    public void submitCrewChoices(Map<Coordinates, CrewMember> choices) {
+        try {
+            // Validazione locale
+            validateCrewChoices(choices);
+
+            // Invia al server
+            serverController.submitCrewChoices(nickname, choices);
+        } catch (IllegalArgumentException e) {
+            view.showError(e.getMessage());
+            view.showCrewPlacementMenu();
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    private void validateCrewChoices(Map<Coordinates, CrewMember> choices) {
+        // Verifica massimo 1 alieno per colore
+        long purpleCount = choices.values().stream().filter(c -> c == CrewMember.PURPLE_ALIEN).count();
+        long brownCount = choices.values().stream().filter(c -> c == CrewMember.BROWN_ALIEN).count();
+
+        if (purpleCount > 1) {
+            throw new IllegalArgumentException("You can have at most 1 purple alien");
+        }
+        if (brownCount > 1) {
+            throw new IllegalArgumentException("You can have at most 1 brown alien");
+        }
+    }
+
+    @Override
+    public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) {
         clientModel.eliminatePlayer(nickname);
         view.showMessage(nickname + " was eliminated.", STANDARD);
     }
 
     @Override
-    public void notifyCardState(String nickname, CardState cardState) throws IOException {
+    public void notifyCardState(String nickname, CardState cardState) {
+        if(isStateRegardingCurrentPlayerOnly(cardState)){
+            if(!clientModel.isMyTurn()) {
+                view.showMessage(clientModel.getCurrentPlayer() + " is currently playing. Soon will to be your turn\n", NOTIFICATION_INFO);
+                return;
+            }
+        }
+
         clientModel.setCardState(cardState);
         view.showNewCardState();
+
+        //TODO probabilemnte da rimuovere perchè inutile
+        if (!clientModel.isMyTurn() && cardState != CardState.START_CARD && cardState != CardState.END_OF_CARD && cardState != CardState.STARDUST ) {
+            view.showMessage("Wait for " + clientModel.getCurrentPlayer() + " to make his choice", NOTIFICATION_INFO);
+        }
+
+
+//        if (clientModel.isMyTurn() && cardState != CardState.END_OF_CARD) {
+//            // Chiama direttamente il metodo showRelatedMenu sul CardState
+//            cardState.showRelatedMenu(view);
+//        }
     }
 
     @Override
-    public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDecks) throws IOException {
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException{
+        clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
+        clientModel.getShipboardOf(nickname).setComponentsPerType(componentsPerType);
+    }
+
+    public void notifyCoordinateOfComponentHit(String nicknameToNotify, String nickname, Coordinates coordinates) throws IOException{
+        view.showComponentHitInfo(coordinates);
+    }
+
+    //Insieme di stati che non vanno notificati a meno che tu non sia il player di turno
+    private boolean isStateRegardingCurrentPlayerOnly(CardState cardState){
+        //TODO capire quali altri stati entrano in questa categoria e aggiungerli sotto. Probabilmente da togliere perchè tutti gli stati sono RegardingCurrentPlayerOnly
+        return cardState == CardState.HANDLE_CUBES_REWARD
+        || cardState == CardState.CHOOSE_PLANET
+        || cardState == CardState.VISIT_LOCATION
+        || cardState == CardState.REMOVE_CREW_MEMBERS
+        || cardState == CardState.CHOOSE_ENGINES
+        || cardState == CardState.DANGEROUS_ATTACK
+        || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK
+        || cardState == CardState.ACCEPT_THE_REWARD
+        || cardState == CardState.CHOOSE_CANNONS;
+
+    }
+
+    @Override
+    public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDecks) {
         clientModel.setLittleVisibleDeck(littleVisibleDecks);
     }
 
     @Override
-    public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayerNickname) throws IOException {
-        view.showMessage(disconnectedPlayerNickname + " disconnected.", ERROR);
-        view.showMessage("GAME ENDED", STANDARD);
+    public void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Component>> componentsPerType ){
+        ShipBoardClient shipBoardClient = clientModel.getShipboardOf(playerNickname);
+        shipBoardClient.setComponentsPerType(componentsPerType);
     }
 
-    public void forcedDisconnection(String nicknameToNotify, String gameId) throws IOException {
+    @Override
+    public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayerNickname) {
+        view.showMessage(disconnectedPlayerNickname + " disconnected.", ERROR);
+        view.showMessage("GAME ENDED", STANDARD);
         leaveGame();
     }
 
-    public void cardPhase() {
-
-        while(clientModel.getGameState() == GameState.PLAY_CARD) {
-            if (clientModel.isMyTurn())
-                clientModel.getCurrCardState().showRelatedMenu(view).accept(serverController, nickname);
-        }
-
-    }
+    //TODO probabilmente sarà da cancellare quando la fase di gioco funzionerà
+//    public void cardPhase() {
+//
+//        while(clientModel.getGameState() == GameState.PLAY_CARD) {
+//            if (clientModel.isMyTurn())
+//                clientModel.getCurrCardState().showRelatedMenu(view).accept(serverController, nickname);
+//        }
+//
+//    }
 
     public void notifyHourglassEnded() throws IOException {
         serverController.notifyHourglassEnded(nickname);
@@ -574,7 +711,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    private void handleRemoteException(IOException e) {
+    public void handleRemoteException(IOException e) {
         System.err.println("Remote exception: " + e);
         System.exit(1);
     }
@@ -593,7 +730,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         try {
             row--;
             column--;
-            // TODO aggiungere il check sul componente
+            //TODO uncommentare checkPosition, serve commentarlo solo per testing checkShipBoardPhase
+            //clientModel.getShipboardOf(nickname).checkPosition(row, column);
             serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column), clientModel.getShipboardOf(nickname).getFocusedComponent().getRotation());
             view.showBuildShipBoardMenu();
         } catch (IOException e) {
@@ -724,6 +862,278 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    public void endBuildShipBoardPhase() {
+        try {
+            view.showMessage("""
+                    Your ship is ready, now wait for other player to finish theirs, they are sooooooo slow.
+                    Anyway use the <show> command as before to see any shipboard or <rank> to see the current ranking.
+                    >\s""", ASK);
+            serverController.playerEndsBuildShipBoardPhase(nickname);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    public void placePlaceholder() {
+        try {
+            serverController.playerPlacePlaceholder(nickname);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerWantsToVisitLocation(String nickname, Boolean choice){
+        if (!clientModel.isMyTurn()) {
+            view.showMessage("This is not your turn, please wait for others to choose...", ERROR);
+            return;
+        }
+
+        ClientAbandonedShip shipCard = (ClientAbandonedShip) clientModel.getCurrAdventureCard();
+        int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
+
+        if (choice==true && totalCrew < shipCard.getCrewMalus()) {
+            view.showMessage("You only have " + totalCrew + " crew members. you cannot visit the location", ERROR);
+            view.showMessage("Your choice has been automatically set to false", STANDARD);
+            choice=false;
+        }
+
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setWantsToVisit(choice)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerWantsToThrowDices(String nickname){
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords){
+        //TODO fare controlli di validità dei valori inseriti
+        if(doubleEnginesCoords.size()!=batteryBoxesCoords.size())
+            throw new IllegalArgumentException("il numero di motori non corrisponde al numero di batterie");
+
+        if(!clientModel.isMyTurn()) {
+            view.showMessage("This is not your turn, please wait for others to chose ...", ERROR);
+            return;
+        }
+
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenDoubleEngines(doubleEnginesCoords)
+                .setChosenBatteryBoxes(batteryBoxesCoords)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords){
+
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenDoubleCannons(doubleCannonsCoords)
+                .setChosenBatteryBoxes(batteryBoxesCoords)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public boolean playerChoseCabins(String nickname, List<Coordinates> cabinCoords){
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+        CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
+
+        if(cabinCoords.size()<card.getCrewMalus()){
+            view.showMessage("Not the right amount of crew members", ERROR);
+            return false;
+        }
+
+        List<Cabin> cabins = cabinCoords
+                .stream()
+                .map(shipBoard::getComponentAt)
+                .map(Cabin.class::cast)
+                .toList();
+
+        for (Cabin cabin : cabins.stream().distinct().toList()) {
+            if (Collections.frequency(cabins, cabin) > cabin.getInhabitants().size()) {
+                view.showMessage("You have selected a cabin more times than its actual crewMember occupancy", ERROR);
+                return false;
+            }
+        }
+
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenCabins(cabinCoords)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+        return true;
+    }
+
+    public void playerWantsToVisitPlanet(String nickname, int choice){
+        if(!clientModel.isMyTurn()) {
+            view.showMessage("This is not your turn, please wait for others to chose ...", ERROR);
+            return;
+        }
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenPlanetIndex(choice)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerWantsToAcceptTheReward(String nickname, Boolean choice){
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setHasAcceptedTheReward(choice)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords){
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+
+        PlayerChoicesDataStructure playerChoiceDataStructure;
+
+        playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenBatteryBoxes(batteryBoxCoords)
+                .setChosenShield(shieldCoords)
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerHandleBigMeteorite(String nickname, List<Coordinates> doubleCannonCoords, List<Coordinates> batteryBoxCoords){
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+
+        PlayerChoicesDataStructure playerChoiceDataStructure;
+
+            playerChoiceDataStructure = new PlayerChoicesDataStructure
+                    .Builder()
+                    .setChosenBatteryBoxes(batteryBoxCoords)
+                    .setChosenDoubleCannons(doubleCannonCoords)
+                    .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerHandleBigShot(String nickname){
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerChoseStorage(String nickname, List<Coordinates> storageCoords){
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+        List<Storage> storages = new ArrayList<>();
+
+        if (!storageCoords.isEmpty()) {
+            for (Coordinates coords : storageCoords) {
+                if (coords.isCoordinateInvalid()) {
+                    // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
+                    storages.add(null);
+                } else {
+                    Component component = shipBoard.getComponentAt(coords);
+                    if (component instanceof Storage) {
+                        storages.add((Storage) component);
+                    } else {
+                        // Se le coordinate non puntano a uno storage, aggiungi null
+                        storages.add(null);
+                    }
+                }
+            }
+        }
+        // Se la lista è vuota, significa che il giocatore non può/non vuole salvare nessun cubo
+
+        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenStorage(storages)
+                .build();
+
+        try {
+            serverController.handleClientChoice(nickname, choice);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    public void spreadEpidemic(String nickname){
+        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void stardustEvent(String nickname){
+        try{
+            serverController.stardustEvent(nickname);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void startCheckShipBoardAfterAttack(String nickname, Coordinates coordinates){
+        try{
+            serverController.startCheckShipBoardAfterAttack(nickname);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
     //manda il ping dal client al server
     public void pingToServerFromClient(String nickname) throws IOException{
         dns.pingToServerFromClient(nickname);
@@ -745,4 +1155,54 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             System.exit(0);
     }
 
+    public void forcedDisconnection(String nicknameToNotify, String gameId) throws IOException {
+        leaveGame();
+    }
+
+
+    public void requestPrefabShipsList() {
+        try {
+            // Richiedi la lista in modo asincrono
+            view.showMessage("Requesting prefabricated ships list...", STANDARD);
+            serverController.requestPrefabShips(nickname);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    @Override
+    public void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException {
+        // Memorizza le navi disponibili nel model
+        clientModel.setAvailablePrefabShips(prefabShips);
+
+        // Mostra il menu con le navi disponibili
+        view.showPrefabShipsMenu(prefabShips);
+    }
+
+    @Override
+    public void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipInfo) throws IOException {
+        if (!playerNickname.equals(nickname)) {
+            view.showMessage(playerNickname + " has selected a prefabricated ship: " + prefabShipInfo.getName(), NOTIFICATION_INFO);
+        }
+    }
+
+    public void selectPrefabShip(String prefabShipId) {
+        try {
+            view.showMessage("Requesting prefab ship selection...", STANDARD);
+            serverController.requestSelectPrefabShip(nickname, prefabShipId);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    @Override
+    public void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException {
+        if (success) {
+            view.showMessage("Prefab ship selected successfully! Waiting for other players...", STANDARD);
+            // Aggiornare lo stato se necessario
+        } else {
+            view.showError("Failed to select prefab ship: " + errorMessage);
+            view.showBuildShipBoardMenu();
+        }
+    }
 }

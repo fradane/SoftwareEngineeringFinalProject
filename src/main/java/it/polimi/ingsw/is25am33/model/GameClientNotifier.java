@@ -1,10 +1,16 @@
 package it.polimi.ingsw.is25am33.model;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
+import it.polimi.ingsw.is25am33.network.socket.SocketServerManager;
+
 import java.io.IOException;
+import java.net.SocketException;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.BiConsumer;
 
 /**
  * Anche se il sistema utilizza un meccanismo di ping-pong per rilevare la disconnessione dei client,
@@ -42,7 +48,9 @@ public class GameClientNotifier {
             Future<?> future = executor.submit(() -> {
                 try{
                     consumer.accept(nickname, clientController);
-                } catch (IOException  e) {}
+                } catch (IOException  e) {
+                    System.err.println("Errore nella notifica del client: " + nickname);
+                }
             });
             futureNicknames.put(future, nickname);
         });
@@ -55,12 +63,12 @@ public class GameClientNotifier {
             }
         });
 
-    }
+       }
 
     public void notifyDisconnection(String nicknameOfDisconectedPlayer) {
         clientControllers.forEach((nicknameToNotify, clientController) -> {
                 try {
-                    clientController.notifyPlayerDisconnected(nicknameToNotify, "nicknameOfDisconectedPlayer" );
+                    clientController.notifyPlayerDisconnected(nicknameToNotify, nicknameOfDisconectedPlayer );
                 } catch (IOException e) {}
         });
         closeAllClients();
@@ -75,7 +83,6 @@ public class GameClientNotifier {
         });
     }
 
-
     public void notifyClients(Set<String> playersNicknameToBeNotified, ThrowingBiConsumer<String, CallableOnClientController, IOException> consumer) {
         Map<Future<?>, String> futureNicknames = new HashMap<>();
 
@@ -86,7 +93,9 @@ public class GameClientNotifier {
             Future<?> future = executor.submit(() -> {
                 try {
                     consumer.accept(nickname, clientController);
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    System.err.println("Errore nella notifica del client: " + nickname);
+                }
             });
             futureNicknames.put(future, nickname);
         });
@@ -94,7 +103,7 @@ public class GameClientNotifier {
         futureNicknames.forEach((future, nickname) -> {
             try {
                 future.get(1, TimeUnit.SECONDS);
-            } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            } catch (Exception e) {
                 System.err.println("Timeout nella notifica del client: " + nickname);
                 future.cancel(true);
             }
