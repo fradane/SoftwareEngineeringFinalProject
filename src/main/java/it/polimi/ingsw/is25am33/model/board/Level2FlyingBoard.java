@@ -72,9 +72,10 @@ public class Level2FlyingBoard extends FlyingBoard {
             int initialPosition = initialPositionIterator.next();
             ranking.put(player, initialPosition);
 
-        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyRankingUpdate(nicknameToNotify, player.getNickname(), initialPosition);
-        });
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyRankingUpdate(nicknameToNotify, player.getNickname(), initialPosition);
+            });
+
             return ranking.size();
         }
 

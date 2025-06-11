@@ -1,12 +1,14 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import javafx.application.Platform;
 
 import java.io.Serializable;
 import java.util.*;
@@ -71,16 +73,16 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      *
      * @param color The color associated with the player.
      */
-    public ShipBoard(PlayerColor color, GameClientNotifier gameClientNotifier) {
+    public ShipBoard(PlayerColor color, GameClientNotifier gameClientNotifier, boolean isGui) {
         Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
         connectors.put(Direction.NORTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
         connectors.put(Direction.WEST,  ConnectorType.UNIVERSAL);
         connectors.put(Direction.EAST,  ConnectorType.UNIVERSAL);
-        this.gameClientNotifier = gameClientNotifier;
         Cabin mainCabin = new MainCabin(connectors, color);
         shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]] = mainCabin;
         mainCabin.insertInComponentsMap(componentsPerType);
+        this.gameClientNotifier = gameClientNotifier;
     }
 
     public void setPlayer(Player player) {
@@ -132,7 +134,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 //     * @param positions Boolean matrix indicating valid or invalid positions.
 //     * @throws IllegalStateException If the validPositions matrix has already been initialized.
 //     */
-//    public static void initializeValidPositions(boolean[][] positions) throws IllegalStateException {
+//    Public static void initializeValidPositions(boolean[][] positions) throws IllegalStateException {
 //        if (validPositions == null) {
 //            validPositions = positions;
 //        } else {

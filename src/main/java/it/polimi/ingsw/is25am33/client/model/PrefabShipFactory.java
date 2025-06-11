@@ -1,9 +1,7 @@
 package it.polimi.ingsw.is25am33.client.model;
 
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.*;
-import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
@@ -24,6 +22,13 @@ public class PrefabShipFactory {
                 "basic_ship",
                 "Basic Ship",
                 "A simple ship with essential components",
+                false
+        ));
+
+        PREFAB_SHIPS.put("basic_gui_shipboard", new PrefabShipInfo(
+                "basic_gui_shipboard",
+                "GUI ship",
+                "A simple ship, but GUI friendly",
                 false
         ));
 
@@ -57,14 +62,38 @@ public class PrefabShipFactory {
      * Applies a prefab ship configuration to the given ship board
      */
     public static boolean applyPrefabShip(ShipBoard shipBoard, String prefabShipId) {
-        switch (prefabShipId) {
-            case "basic_ship":
-                return applyBasicShip(shipBoard);
-            case "ship_for_meteorites":
-                return applyMeteoriteShip(shipBoard);
-            default:
-                return false;
-        }
+        return switch (prefabShipId) {
+            case "basic_ship" -> applyBasicShip(shipBoard);
+            case "basic_gui_shipboard" -> applyGuiBasicShip(shipBoard);
+            case "ship_for_meteorites" -> applyMeteoriteShip(shipBoard);
+            default -> false;
+        };
+    }
+
+    private static boolean applyGuiBasicShip(ShipBoard shipBoard) {
+
+        clearShipBoard(shipBoard);
+
+        ComponentLoader.loadComponents()
+                .stream()
+                .filter(component -> switch (component.getImageName()) {
+                    case "GT-new_tiles_16_for_web143.jpg",
+                         "GT-new_tiles_16_for_web51.jpg",
+                         "GT-new_tiles_16_for_web141.jpg",
+                         "GT-new_tiles_16_for_web47.jpg" -> true;
+                    default -> false;
+                })
+                .forEach(component -> {
+                    String imageName = component.getImageName();
+                    switch (imageName) {
+                        case "GT-new_tiles_16_for_web143.jpg" -> addComponent(shipBoard, component, 7, 8);
+                        case "GT-new_tiles_16_for_web51.jpg" -> addComponent(shipBoard, component, 7, 9);
+                        case "GT-new_tiles_16_for_web47.jpg" -> addComponent(shipBoard, component, 7, 6);
+                        case "GT-new_tiles_16_for_web141.jpg" -> addComponent(shipBoard, component, 7, 5);
+                    }
+                });
+
+        return true;
     }
 
     private static boolean applyMeteoriteShip(ShipBoard shipBoard){
@@ -116,7 +145,7 @@ public class PrefabShipFactory {
      * Helper per creare una mappa di connettori personalizzati
      */
     private static Map<Direction, ConnectorType> createCustomConnectors(ConnectorType north, ConnectorType south,
-                                                                 ConnectorType east, ConnectorType west) {
+                                                                        ConnectorType east, ConnectorType west) {
         Map<Direction, ConnectorType> connectors = new EnumMap<>(Direction.class);
         connectors.put(NORTH, north);
         connectors.put(SOUTH, south);
@@ -192,6 +221,8 @@ public class PrefabShipFactory {
     }
 
     // Metodi per creare i vari tipi di componenti...
+
+
 
 
 }

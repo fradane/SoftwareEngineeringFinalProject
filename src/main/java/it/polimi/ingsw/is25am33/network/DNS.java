@@ -12,6 +12,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 public class DNS extends UnicastRemoteObject implements CallableOnDNS {
     //ad ogni game il suo gameController
@@ -46,6 +47,14 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     public DNS() throws RemoteException {
         super();
+    }
+
+    public static Map<String, GameController> getGameControllers() {
+        return gameControllers;
+    }
+
+    public Map<String, CallableOnClientController> getClients() {
+        return clients;
     }
 
     public Map<String, GameController> getClientGame() {
@@ -163,7 +172,8 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
         futureNicknames.forEach((future, clientNickname) -> {
             try {
-                future.get(5, TimeUnit.SECONDS);
+                //TODO riabbassare a 5 secondi
+                future.get(1000, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 System.err.println("Timeout nella notifica del client: " + clientNickname);
                 future.cancel(true);
@@ -178,7 +188,6 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     public void removeGame(String gameId) {
         gameControllers.remove(gameId);
-
         Map<Future<?>, String> futureNicknames = new HashMap<>();
         List<GameInfo> availableGames = getAvailableGames();
 
@@ -194,7 +203,8 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
         futureNicknames.forEach((future, clientNickname) -> {
             try {
-                future.get(5, TimeUnit.SECONDS);
+                //TODO riabbassare a 1 secondo
+                future.get(1000, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 System.err.println("Timeout nella notifica del client: " + clientNickname);
                 future.cancel(true);

@@ -2,6 +2,8 @@ package it.polimi.ingsw.is25am33.model.board;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
@@ -30,8 +32,8 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
             {false, false, false, false, false, false, false, false, false, false, false, false}
     };
 
-    public Level2ShipBoard(PlayerColor playerColor, GameClientNotifier gameClientNotifier) {
-        super(playerColor, gameClientNotifier);
+    public Level2ShipBoard(PlayerColor playerColor, GameClientNotifier gameClientNotifier, boolean isGui) {
+        super(playerColor, gameClientNotifier, isGui);
         this.validPositions = level2ValidPositions;
     }
 
@@ -58,23 +60,23 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
     }
 
     public boolean canDifendItselfWithSingleCannons(DangerousObj obj){
-        if(obj.getDirection() == NORTH){
-            if(!isThereACannon(obj.getCoordinate(), obj.getDirection()))
-                return false;
-        }else{
-            if(
-                    !isThereACannon(obj.getCoordinate(), obj.getDirection())
-                            && !isThereACannon(obj.getCoordinate() - 1, obj.getDirection())
-                            && !isThereACannon(obj.getCoordinate() + 1, obj.getDirection())
-            )
-                return false;
+        if (obj.getDirection() == NORTH) {
+            return isThereACannon(obj.getCoordinate(), obj.getDirection());
+        } else {
+            return isThereACannon(obj.getCoordinate(), obj.getDirection())
+                    || isThereACannon(obj.getCoordinate() - 1, obj.getDirection())
+                    || isThereACannon(obj.getCoordinate() + 1, obj.getDirection());
         }
-        return true;
     }
 
-    // TODO indice del reserved component da mettere in focus e accertarsi della notify
+    /* TODO indice del reserved component da mettere in focus e accertarsi della notify,
+        fatto da fra ma marco deve controllare e aggiungere cose :) */
     public void focusReservedComponent(int choice) {
+        if (choice < 0 || choice >= getBookedComponents().size())
+            return;
 
+        Component reservedComponent = getBookedComponents().remove(choice);
+        setFocusedComponent(reservedComponent);
     }
 
     @Override

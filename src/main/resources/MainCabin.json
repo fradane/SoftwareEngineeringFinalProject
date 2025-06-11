@@ -8,7 +8,7 @@
       "WEST": "UNIVERSAL"
     },
     "color": "BLUE",
-    "imageName": "GT-new_tiles_16_for web33.jpg"
+    "imageName": "GT-new_tiles_16_for_web33.jpg"
   },
   {
     "type": "MainCabin",
@@ -19,7 +19,7 @@
       "WEST": "UNIVERSAL"
     },
     "color": "GREEN",
-    "imageName": "GT-new_tiles_16_for web34.jpg"
+    "imageName": "GT-new_tiles_16_for_web34.jpg"
   },
   {
     "type": "MainCabin",
@@ -30,7 +30,7 @@
       "WEST": "UNIVERSAL"
     },
     "color": "RED",
-    "imageName": "GT-new_tiles_16_for web52.jpg"
+    "imageName": "GT-new_tiles_16_for_web52.jpg"
   },
   {
     "type": "MainCabin",
@@ -41,6 +41,6 @@
       "WEST": "UNIVERSAL"
     },
     "color": "YELLOW",
-    "imageName": "GT-new_tiles_16_for web61.jpg"
+    "imageName": "GT-new_tiles_16_for_web61.jpg"
   }
 ]

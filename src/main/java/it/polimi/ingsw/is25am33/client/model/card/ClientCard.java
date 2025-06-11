@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 
-import javax.smartcardio.Card;
 import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

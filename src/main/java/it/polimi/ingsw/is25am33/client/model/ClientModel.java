@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.client.model;
 
+import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -25,7 +26,17 @@ public class ClientModel {
     private List<List<String>> littleVisibleDecks = new ArrayList<>();
     private boolean isMyTurn;
     private Hourglass hourglass;
+    private ModelFxAdapter modelFxAdapter;
     private List<PrefabShipInfo> availablePrefabShips = new ArrayList<>();
+
+    public void setModelFxAdapter(ModelFxAdapter modelFxAdapter) {
+        this.modelFxAdapter = modelFxAdapter;
+    }
+
+    public void refreshShipBoardOf(String nickname) {
+        if (modelFxAdapter != null)
+            modelFxAdapter.refreshShipBoardOf(nickname);
+    }
 
     public List<PrefabShipInfo> getAvailablePrefabShips() {
         return availablePrefabShips;
@@ -81,6 +92,8 @@ public class ClientModel {
 
     public void setCurrAdventureCard(ClientCard currAdventureCard) {
         this.currAdventureCard = currAdventureCard;
+        if (modelFxAdapter != null)
+            modelFxAdapter.refreshCurrAdventureCard();
     }
 
     public ClientCard getCurrAdventureCard() {
@@ -101,6 +114,24 @@ public class ClientModel {
 
     public Map<String, PlayerClientData> getPlayerClientData() {
         return playerClientData;
+    }
+
+    public ShipBoardClient getMyShipboard() {
+        return playerClientData.get(myNickname).getShipBoard();
+    }
+
+    public Map<PlayerColor, Integer> getColorRanking() {
+        Map<PlayerColor, Integer> ranking = new HashMap<>();
+
+        playerClientData.keySet()
+                .stream()
+                .filter(player -> !playerClientData.get(player).isOut())
+                .forEach(nickname -> ranking.put(
+                        playerClientData.get(nickname).getColor(),
+                        playerClientData.get(nickname).getFlyingBoardPosition()
+                ));
+
+        return ranking;
     }
 
     /**
@@ -150,8 +181,8 @@ public class ClientModel {
         playerClientData.get(nickname).setFlyingBoardPosition(newPosition);
     }
 
-    public void addPlayer(String nickname, PlayerColor color, boolean isTestFlight) {
-        playerClientData.put(nickname, new PlayerClientData(nickname, color, isTestFlight));
+    public void addPlayer(String nickname, PlayerColor color, boolean isTestFlight, boolean isGui) {
+        playerClientData.put(nickname, new PlayerClientData(nickname, color, isTestFlight, isGui));
     }
 
     public ShipBoardClient getShipboardOf(String nickname) {
@@ -171,5 +202,15 @@ public class ClientModel {
 
     public void setNickname(String nickname) {
         this.myNickname = nickname;
+    }
+
+    public void refreshVisibleComponents() {
+        if (modelFxAdapter != null)
+            modelFxAdapter.refreshVisibleComponents();
+    }
+
+    public void refreshRanking() {
+        if (modelFxAdapter != null)
+            modelFxAdapter.refreshRanking();
     }
 }

@@ -49,7 +49,8 @@ public class GameClientNotifier {
                 try{
                     consumer.accept(nickname, clientController);
                 } catch (IOException  e) {
-                    System.err.println("Errore nella notifica del client: " + nickname);
+                    System.out.println("ERRORE notifyAllClients: " + e.getMessage());
+                    e.printStackTrace();
                 }
             });
             futureNicknames.put(future, nickname);
@@ -57,8 +58,10 @@ public class GameClientNotifier {
 
         futureNicknames.forEach((future, nickname) -> {
             try {
-                future.get(5, TimeUnit.SECONDS);
+                //TODO reimplstare a 5 secondi
+                future.get(1000, TimeUnit.SECONDS);
             } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                System.err.println("TIMEOUT: Client " + nickname + " non risponde dopo 5 secondi");
                 future.cancel(true);
             }
         });
@@ -102,8 +105,9 @@ public class GameClientNotifier {
 
         futureNicknames.forEach((future, nickname) -> {
             try {
-                future.get(1, TimeUnit.SECONDS);
-            } catch (Exception e) {
+                //TODO riabbassare ad un 1 secondo
+                future.get(1000, TimeUnit.SECONDS);
+            } catch (TimeoutException | InterruptedException | ExecutionException e) {
                 System.err.println("Timeout nella notifica del client: " + nickname);
                 future.cancel(true);
             }

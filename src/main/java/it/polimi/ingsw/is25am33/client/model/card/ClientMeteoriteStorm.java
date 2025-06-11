@@ -19,6 +19,7 @@ public class ClientMeteoriteStorm extends ClientCard implements Serializable {
     public List<ClientDangerousObject> getMeteorites() {
         return meteorites;
     }
+
     public void setMeteorites(List<ClientDangerousObject> meteorites) {
         this.meteorites = meteorites;
     }

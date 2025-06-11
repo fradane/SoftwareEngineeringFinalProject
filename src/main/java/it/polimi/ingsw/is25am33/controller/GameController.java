@@ -129,7 +129,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             dns.removeGame(getGameInfo().getGameId());
             System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
         }
-
+        //se un client è crashato lo stato del gioco viene settato a false in automatico alla ricezione della disconnessione
     }
 
     @Override
@@ -170,13 +170,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerEndsBuildShipBoardPhase(String nickname) {
-        gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname));
-        if (gameModel.getFlyingBoard().getCurrentRanking().size() == gameModel.getMaxPlayers())
+        if (gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname)) == gameModel.getMaxPlayers())
             gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
     }
 
     @Override
-    public void playerPlacePlaceholder(String nickname) {
+    public void playerPlacesPawn(String nickname) {
         if (gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname)) == gameModel.getMaxPlayers())
             gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
     }
@@ -503,6 +502,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                     System.err.println("Remote Exception");
                 }
             });
+
             if (shipParts.size() == 1) //ovvero ho direttamente rimosso un componente
                 // Controllo se tutte le navi sono corrette e in caso cambio la fase
                 gameModel.checkAndTransitionToNextPhase();

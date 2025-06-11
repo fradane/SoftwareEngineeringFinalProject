@@ -5,7 +5,8 @@
     "crewMalus": 3,
     "reward": 5,
     "stepsBack": -1,
-    "requiredFirePower": 6
+    "requiredFirePower": 6,
+    "isTestFlightCard": false
   },
 
   {
@@ -14,6 +15,7 @@
     "crewMalus": 4,
     "reward": 8,
     "stepsBack": -2,
-    "requiredFirePower": 7
+    "requiredFirePower": 7,
+    "isTestFlightCard": false
   }
 ]

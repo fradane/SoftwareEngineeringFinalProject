@@ -33,7 +33,7 @@ public class Cabin extends Component{
      */
     public Cabin(Map<Direction, ConnectorType> connectors) {
         super(connectors);
-        inhabitants = new ArrayList<CrewMember>();
+        inhabitants = new ArrayList<>();
     }
 
 
@@ -60,7 +60,7 @@ public class Cabin extends Component{
             | %s     %s |
             |    %s    |
             +---------+
-            """,imageName, north, west, east, south);
+            """, imageName, north, west, east, south);
     }
 
     /**

@@ -591,7 +591,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerPlacePlaceholder(String nickname) {
+    public void playerPlacesPawn(String nickname) {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPlacePlaceholder");
         out.println(ClientSerializer.serialize(outMessage));
     }

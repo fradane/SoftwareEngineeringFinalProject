@@ -1,0 +1,206 @@
+package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
+
+import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
+import it.polimi.ingsw.is25am33.model.component.Component;
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.util.Pair;
+
+import java.util.*;
+
+public class Level2BoardsController extends BoardsController {
+
+    @FXML public Pane pawnsPane;
+    @FXML public StackPane boardsPane;
+    @FXML private Button button04_03, button04_04, button04_05, button04_07, button04_08, button04_09;
+    @FXML private Button button05_04, button05_05, button05_06, button05_07, button05_08;
+    @FXML private Button button06_03, button06_04, button06_05, button06_06, button06_07, button06_08, button06_09;
+    @FXML private Button button07_03, button07_04, button07_05, button07_06, button07_07, button07_08, button07_09;
+    @FXML private Button button08_03, button08_04, button08_05, button08_07, button08_08, button08_09;
+
+    @FXML private GridPane player2Grid, player3Grid, player4Grid;
+
+    private final int FIXED_BOOKED_COMPONENT_HEIGHT = 55;
+
+    private static final Map<Integer, Point2D> flyingBoardRelativePositions = Map.ofEntries(
+            Map.entry(0, new Point2D(0.248, 0.315)), // 149/600, 189/600
+            Map.entry(1, new Point2D(0.32, 0.285)),  // 192/600, 171/600
+            Map.entry(2, new Point2D(0.397, 0.267)), // 238/600, 160/600
+            Map.entry(3, new Point2D(0.47, 0.257)),  // 282/600, 154/600
+            Map.entry(4, new Point2D(0.545, 0.258)), // 327/600, 155/600
+            Map.entry(5, new Point2D(0.618, 0.267)), // 371/600, 160/600
+            Map.entry(6, new Point2D(0.692, 0.288)), // 415/600, 173/600
+            Map.entry(7, new Point2D(0.763, 0.318)), // 458/600, 191/600
+            Map.entry(8, new Point2D(0.828, 0.365)), // 497/600, 219/600
+            Map.entry(9, new Point2D(0.873, 0.435)), // 524/600, 261/600
+            Map.entry(10, new Point2D(0.862, 0.522)), // 517/600, 313/600
+            Map.entry(11, new Point2D(0.822, 0.587)), // 493/600, 352/600
+            Map.entry(12, new Point2D(0.753, 0.628)), // 452/600, 377/600
+            Map.entry(13, new Point2D(0.682, 0.655)) // 409/600, 393/600
+            // Converti le altre posizioni in percentuali
+    );
+
+    @Override
+    protected Map<Integer, Point2D> getFlyingBoardRelativePositions() {
+        return flyingBoardRelativePositions;
+    }
+
+    @Override
+    public void bindBoards(ModelFxAdapter modelFxAdapter, BoardsEventHandler boardsEventHandler, ClientModel clientModel) {
+        this.modelFxAdapter = modelFxAdapter;
+        this.boardsEventHandler = boardsEventHandler;
+        this.clientModel = clientModel;
+        initializeButtonMap();
+        setupFlyingBoardBinding();
+        setupShipBoardNavigationBarAndBoards();
+        setupMyBookedComponentsBinding();
+        setupGridBindings(modelFxAdapter.getMyObservableMatrix());
+
+        clientModel.getPlayerClientData().forEach((nickname, _) -> clientModel.refreshShipBoardOf(nickname));
+    }
+
+    public void initialize() {
+
+    }
+
+    @Override
+    protected void initializeButtonMap() {
+
+        // Riga 4 del modello -> Riga 0 della griglia UI
+        buttonMap.put("4_3", button04_03);   buttonMap.put("4_4", button04_04);   buttonMap.put("4_5", button04_05);
+        buttonMap.put("4_7", button04_07);   buttonMap.put("4_8", button04_08);   buttonMap.put("4_9", button04_09);
+
+        // Riga 5 del modello -> Riga 1 della griglia UI
+        buttonMap.put("5_4", button05_04);   buttonMap.put("5_5", button05_05);
+        buttonMap.put("5_6", button05_06);   buttonMap.put("5_7", button05_07);   buttonMap.put("5_8", button05_08);
+
+        // Riga 6 del modello -> Riga 2 della griglia UI (CENTRO!)
+        buttonMap.put("6_3", button06_03);   buttonMap.put("6_4", button06_04);   buttonMap.put("6_5", button06_05);
+        buttonMap.put("6_6", button06_06);   buttonMap.put("6_7", button06_07);   buttonMap.put("6_8", button06_08);   buttonMap.put("6_9", button06_09);
+
+        // Riga 7 del modello -> Riga 3 della griglia UI
+        buttonMap.put("7_3", button07_03);   buttonMap.put("7_4", button07_04);   buttonMap.put("7_5", button07_05);
+        buttonMap.put("7_6", button07_06);   buttonMap.put("7_7", button07_07);   buttonMap.put("7_8", button07_08);   buttonMap.put("7_9", button07_09);
+
+        // Riga 8 del modello -> Riga 4 della griglia UI
+        buttonMap.put("8_3", button08_03);   buttonMap.put("8_4", button08_04);   buttonMap.put("8_5", button08_05);
+        buttonMap.put("8_7", button08_07);   buttonMap.put("8_8", button08_08);   buttonMap.put("8_9", button08_09);
+
+    }
+
+    private void updateOthersBookedComponents(ImageView imageView, Component newVal) {
+        if (newVal != null) {
+            String componentFile = newVal.toString().split("\\n")[0];
+            Image image = new Image(Objects.requireNonNull(getClass()
+                    .getResourceAsStream("/gui/graphics/component/" + componentFile)));
+            imageView.setFitWidth(FIXED_BOOKED_COMPONENT_HEIGHT);
+            imageView.setFitHeight(FIXED_BOOKED_COMPONENT_HEIGHT);
+            imageView.setRotate(newVal.getRotation() * 90);
+            imageView.setImage(image);
+            // Nota: GridPane.setMargin va applicato al parent StackPane, non all'ImageView
+            if (imageView.getParent() != null) {
+                GridPane.setMargin(imageView.getParent(), new Insets(0, 0, 0, 10));
+            }
+        } else {
+            imageView.setImage(null);
+            imageView.setRotate(0);
+        }
+    }
+
+    private void updateMyBookedComponents(Button button, Component newVal) {
+
+        if(newVal != null) {
+            String bookedComponentFile = newVal.toString().split("\\n")[0];
+            Image image = new Image(Objects.requireNonNull(getClass()
+                    .getResourceAsStream("/gui/graphics/component/" + bookedComponentFile)));
+            ImageView imageview = new ImageView(image);
+            imageview.setFitWidth(FIXED_BOOKED_COMPONENT_HEIGHT);
+            imageview.setFitHeight(FIXED_BOOKED_COMPONENT_HEIGHT);
+            button.setAlignment(Pos.CENTER_RIGHT);
+            button.setGraphic(imageview);
+        } else {
+            button.setGraphic(null);
+            button.setStyle("-fx-background-color: transparent;");
+        }
+
+    }
+
+    private void setupMyBookedComponentsBinding() {
+
+        Pair<ObjectProperty<Component>, ObjectProperty<Component>> reservedComponents = modelFxAdapter.getObservableBookedComponentsOf(clientModel.getMyNickname());
+
+        reservedComponents.getKey()
+                .addListener((_, _, newVal) ->
+                        Platform.runLater(() -> updateMyBookedComponents(button04_08, newVal))
+                );
+
+        reservedComponents.getValue()
+                .addListener((_, _, newVal) ->
+                        Platform.runLater(() -> updateMyBookedComponents(button04_09, newVal))
+                );
+    }
+
+    protected void setupOthersBookedComponentBinding(String nickname, Pair<ImageView, ImageView> imageViewImageViewPair) {
+        // reserved components binding
+        Pair<ObjectProperty<Component>, ObjectProperty<Component>> reservedComponents = modelFxAdapter.getObservableBookedComponentsOf(nickname);
+        reservedComponents.getKey()
+                .addListener((_, _, newVal) ->
+                        Platform.runLater(() ->
+                                updateOthersBookedComponents(imageViewImageViewPair.getKey(), newVal)));
+
+        reservedComponents.getValue()
+                .addListener((_, _, newVal) ->
+                        Platform.runLater(() ->
+                                updateOthersBookedComponents(imageViewImageViewPair.getValue(), newVal)));
+    }
+
+//    // Nuovo metodo per aggiornare le posizioni dei pawn in base alla dimensione attuale dell'immagine
+//    private void updatePawnPositions(ImageView flyingBoardImageView) {
+//        double imgWidth = flyingBoardImageView.getFitWidth();
+//        double imgHeight = flyingBoardImageView.getFitHeight();
+//
+//        // Calcola l'offset dell'immagine rispetto al StackPane
+//        double offsetX = (flyingBoard.getWidth() - imgWidth) / 2;
+//        double offsetY = (flyingBoard.getHeight() - imgHeight) / 2;
+//
+//        modelFxAdapter.getObservableColorRanking().forEach((color, positionProperty) -> {
+//            int position = positionProperty.get();
+//            Point2D relativePos = flyingBoardRelativePositions.get(position);
+//
+//            // Calcola la posizione assoluta in base alle dimensioni attuali dell'immagine
+//            double x = relativePos.getX() * imgWidth + offsetX;
+//            double y = relativePos.getY() * imgHeight + offsetY;
+//
+//            switch (color) {
+//                case RED:
+//                    redPawn.setLayoutX(x);
+//                    redPawn.setLayoutY(y);
+//                    break;
+//                case GREEN:
+//                    greenPawn.setLayoutX(x);
+//                    greenPawn.setLayoutY(y);
+//                    break;
+//                case BLUE:
+//                    bluePawn.setLayoutX(x);
+//                    bluePawn.setLayoutY(y);
+//                    break;
+//                case YELLOW:
+//                    yellowPawn.setLayoutX(x);
+//                    yellowPawn.setLayoutY(y);
+//                    break;
+//            }
+//        });
+//    }
+
+}

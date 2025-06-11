@@ -61,7 +61,7 @@ public interface CallableOnGameController extends Remote {
 
     void notifyHourglassEnded(String nickname) throws IOException;
 
-    void leaveGameAfterCreation( String nickname, Boolean isFirst) throws IOException;
+    void leaveGameAfterCreation(String nickname, Boolean isFirst) throws IOException;
 
     void playerWantsToRemoveComponent(String nickname, Coordinates coordinate) throws IOException;
 
@@ -69,13 +69,14 @@ public interface CallableOnGameController extends Remote {
 
     void playerWantsToFocusReservedComponent(String nickname, int choice) throws IOException;
 
-    void playerPlacePlaceholder(String nickname) throws IOException;
+    void playerPlacesPawn(String nickname) throws IOException;
 
     void handleClientChoice(String nickname, PlayerChoicesDataStructure choice) throws IOException;
 
     void submitCrewChoices(String nickname, Map<Coordinates, CrewMember> choices) throws IOException;
 
     void requestPrefabShips(String nickname) throws IOException;
+
     void requestSelectPrefabShip(String nickname, String prefabShipId) throws IOException;
 
     void startCheckShipBoardAfterAttack(String nickname) throws IOException;

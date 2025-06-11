@@ -1,13 +1,13 @@
 package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.ThrowingBiConsumer;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,7 +53,7 @@ class ComponentTableTest {
         };
 
         // Assign the mock context to the component table
-        table.setGameContext(mockContext);
+        table.setGameContext(dummyClientNotifier);
 
         // Add 10 components to the visible list and store the 9th one for later verification
         Component chosenComponent = null;

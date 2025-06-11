@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
@@ -40,15 +41,15 @@ import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
 public class ClientController extends UnicastRemoteObject implements CallableOnClientController {
 
     private ClientView view;
-    private boolean connected = false;
     private CallableOnDNS dns;
     private CallableOnGameController serverController;
-    private String currentGameId;
+    private GameInfo currentGameInfo;
     private boolean inGame = false;
     private String nickname;
     boolean gameStarted = false;
     private final ClientModel clientModel;
     private final ObservableList<GameInfo> observableGames = FXCollections.observableArrayList();
+    private boolean isTestFlight;
     private final ClientPingPongManager clientPingPongManager;
 
     private List<Set<Coordinates>> currentShipPartsList = new ArrayList<>();
@@ -56,7 +57,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public ClientController(ClientModel clientModel, ClientPingPongManager clientPingPongManager) throws RemoteException {
         super();
         this.clientModel = clientModel;
-        this.clientPingPongManager= clientPingPongManager;
+        this.clientPingPongManager = clientPingPongManager;
     }
 
     public void run() {
@@ -72,7 +73,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public String getCurrentGameId() {
-        return currentGameId;
+        return currentGameInfo.getGameId();
     }
 
     public ClientModel getClientModel() {
@@ -104,6 +105,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 view.showMainMenu();
             }
         } catch (IOException e) {
+            System.err.println(e.getMessage());
             view.showError("Error registering nickname: " + attemptedNickname);
         }
 
@@ -148,10 +150,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             } else {
                 serverController = gameInfo.getGameController();
             }
-            currentGameId = gameInfo.getGameId();
+            currentGameInfo = gameInfo;
+            this.isTestFlight = gameInfo.isTestFlight();
+            view.setIsTestFlight(this.isTestFlight);
             inGame = true;
 
-            view.notifyGameCreated(currentGameId);
+            view.notifyGameCreated(gameInfo.getGameId());
             view.notifyPlayerJoined(this.nickname, gameInfo);
             view.showMessage("Waiting for other players to join...", STANDARD);
         } catch (IOException e) {
@@ -179,8 +183,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 return;
             }
 
-            currentGameId = chosenGameId;
-
             // if the dns was SocketClientManager (e.g., the client is socket), the serverController is the SocketClientManager used as a dns before
             if (dns instanceof SocketClientManager) {
                 serverController = (SocketClientManager) dns;
@@ -190,6 +192,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             }
             inGame = true;
             view.showWaitingForPlayers();
+            currentGameInfo = observableGames.stream().filter(info -> info.getGameId().equals(chosenGameId)).findFirst().orElseThrow();
+            isTestFlight = currentGameInfo.isTestFlight();
+            view.setIsTestFlight(isTestFlight);
 
         } catch (NumberFormatException e) {
             view.showError("Invalid color choice: " + e.getMessage());
@@ -296,7 +301,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         try {
             Registry registry = LocateRegistry.getRegistry(serverAddress, serverPort);
             CallableOnDNS dns = (CallableOnDNS) registry.lookup(NetworkConfiguration.DNS_NAME);
-            connected = true;
             System.out.println("[RMI] Connected to RMI Server");
             return dns;
         } catch (NumberFormatException e) {
@@ -319,11 +323,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void leaveGame() {
         try {
-            if (currentGameId != null) {
+            if (currentGameInfo != null) {
                 serverController.leaveGameAfterCreation(nickname,true);
                 inGame = false;
                 gameStarted = false;
-                currentGameId = null;
+                currentGameInfo = null;
                 serverController.leaveGameAfterCreation(nickname,true);
                 System.exit(0);
             }
@@ -356,11 +360,16 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) {
         gameStarted = true;
         clientModel.setGameState(GameState.BUILD_SHIPBOARD);
-        gameInfo.getConnectedPlayers().forEach((nickname, color) -> clientModel.addPlayer(nickname, color, gameInfo.isTestFlight()));
+        gameInfo.getConnectedPlayers().forEach((nickname, color) -> clientModel.addPlayer(nickname, color, gameInfo.isTestFlight(), view instanceof ClientGuiController));
         view.notifyGameStarted(GameState.BUILD_SHIPBOARD);
+        currentGameInfo = gameInfo;
         view.showBuildShipBoardMenu();
-        clientModel.setHourglass(new Hourglass(gameInfo.isTestFlight(), this));
-        clientModel.getHourglass().start(view, "game");
+
+        if (!gameInfo.isTestFlight()) {
+            clientModel.setHourglass(new Hourglass(this));
+            clientModel.getHourglass().start(view, "game");
+        }
+
     }
 
     @Override
@@ -386,6 +395,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
         clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
+        clientModel.refreshShipBoardOf(shipOwnerNickname);
 
         // Mostra il menu solo se è la propria shipBoard
         if (shipOwnerNickname.equals(nickname)) {
@@ -398,6 +408,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
         clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
+        clientModel.refreshShipBoardOf(shipOwnerNickname);
 
         // Mostra il menu solo se è la propria shipBoard
         if (shipOwnerNickname.equals(nickname)) {
@@ -410,7 +421,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(shipOwnerNickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(shipOwnerNickname).setIncorrectlyPositionedComponentsCoordinates(incorrectlyPositionedComponentsCoordinates);
         clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
-
+        clientModel.refreshShipBoardOf(shipOwnerNickname);
 
         // Gestisce la selezione solo se è la propria shipBoard
         if (shipOwnerNickname.equals(nickname)) {
@@ -427,7 +438,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void setCurrentShipPartsList(Set<Set<Coordinates>> shipParts) {
         this.currentShipPartsList = new ArrayList<>(shipParts);
     }
-
 
     @Override
     public void notifyGameState(String nickname, GameState gameState) {
@@ -459,11 +469,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyAddVisibleComponents(String nickname, int index, Component component) {
         clientModel.getVisibleComponents().put(index, component);
+        clientModel.refreshVisibleComponents();
     }
 
     @Override
     public void notifyRemoveVisibleComponents(String nickname, int index) {
         clientModel.getVisibleComponents().remove(index);
+        clientModel.refreshVisibleComponents();
     }
 
     @Override
@@ -471,6 +483,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         ShipBoardClient shipboard = clientModel.getShipboardOf(nickname);
         shipboard.setFocusedComponent(component);
         shipboard.placeComponentWithFocus(coordinates.getX(), coordinates.getY());
+        clientModel.refreshShipBoardOf(nickname);
     }
 
     // TODO marco, controllare
@@ -489,16 +502,21 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component focusedComponent) {
         clientModel.getShipboardOf(nickname).setFocusedComponent(focusedComponent);
+        clientModel.refreshShipBoardOf(nickname);
     }
 
     @Override
     public void notifyReleaseComponent(String nicknameToNotify, String nickname) {
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
+        clientModel.refreshShipBoardOf(nickname);
     }
 
     @Override
-    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component ) {
+    public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws IOException {
         clientModel.getShipboardOf(nickname).getBookedComponents().add(component);
+        clientModel.getShipboardOf(nickname).setFocusedComponent(null);
+        // TODO controllare metodo per riservare
+        clientModel.refreshShipBoardOf(nickname);
     }
 
     @Override
@@ -508,7 +526,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         if(clientModel.getMyNickname().equals(nickname)) {
             view.showMessage("You have just earned " + (credits - oldCredits) + " credits\n", STANDARD);
             view.showMessage("You now own " + credits + " credits\n", STANDARD);
-        }else
+        } else
             view.showMessage(nickname + " has " + credits + " credits.", STANDARD);
     }
 
@@ -517,6 +535,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.updatePlayerPosition(nickname,newPosition);
         view.showMessage("\n" + nickname + " has changed its position", NOTIFICATION_INFO);
         view.showCurrentRanking();
+        clientModel.refreshRanking();
     }
 
     @Override
@@ -550,6 +569,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyCrewPlacementComplete(String nicknameToNotify, String playerNickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException {
         clientModel.getShipboardOf(playerNickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(playerNickname).setComponentsPerType(componentsPerType);
+        clientModel.refreshShipBoardOf(playerNickname);
 
         if (playerNickname.equals(nickname)) {
             view.showMessage("Your crew placement is complete!", STANDARD);
@@ -656,7 +676,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayerNickname) {
         view.showMessage(disconnectedPlayerNickname + " disconnected.", ERROR);
         view.showMessage("GAME ENDED", STANDARD);
-        leaveGame();
     }
 
     //TODO probabilmente sarà da cancellare quando la fase di gioco funzionerà
@@ -728,27 +747,24 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void placeFocusedComponent(int row, int column) {
         try {
-            row--;
-            column--;
-            //TODO uncommentare checkPosition, serve commentarlo solo per testing checkShipBoardPhase
-            //clientModel.getShipboardOf(nickname).checkPosition(row, column);
+            clientModel.getShipboardOf(nickname).checkPosition(row, column);
             serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column), clientModel.getShipboardOf(nickname).getFocusedComponent().getRotation());
             view.showBuildShipBoardMenu();
         } catch (IOException e) {
             handleRemoteException(e);
         } catch (IllegalArgumentException e) {
             view.showMessage("Invalid coordinates: " + e.getMessage() + "\n", ERROR);
+            // TODO togliere
+            System.err.println("Invalid coordinates: " + e.getMessage());
         }
     }
 
     public void removeComponent(int row, int column) {
-        try{
-            row --;
-            column--;
+        try {
             serverController.playerWantsToRemoveComponent(nickname, new Coordinates(row, column));
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             view.showMessage("Invalid coordinates: " + e.getMessage() + "\n", ERROR);
-        }catch (IOException e) {
+        } catch (IOException e) {
             handleRemoteException(e);
         }
     }
@@ -835,17 +851,20 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             return;
         }
 
+
         try {
             Component component = clientModel.getShipboardOf(nickname).getBookedComponents().remove(choice);
-            clientModel.getShipboardOf(nickname).setFocusedComponent(component);
-            // TODO da sostituire con:
-            // ((Level2ShipBoard) clientModel.getShipboardOf(nickname)).focusReservedComponent(choice);
-
+            clientModel.getMyShipboard().setFocusedComponent(component);
+            // TODO da sostituire: aggiungere il caso in cui non si possa piu riservare
+            //((Level2ShipBoard) clientModel.getShipboardOf(nickname)).focusReservedComponent(choice);
             serverController.playerWantsToFocusReservedComponent(nickname, choice);
+
+            clientModel.refreshShipBoardOf(nickname);
             view.showPickedComponentAndMenu();
         } catch (IOException e) {
             handleRemoteException(e);
         }
+
     }
 
     public void handleShipPartSelection(int choice) {
@@ -862,6 +881,31 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    //manda il ping dal client al server
+    public void pingToServerFromClient(String nickname) throws IOException{
+        dns.pingToServerFromClient(nickname);
+    }
+
+    //quando ricevo il pong di risposta dal server resetto il timeout
+    public void pongToClientFromServer(String nickname) throws IOException{
+        //System.out.println("Pong dal server");
+        clientPingPongManager.onPongReceived(this::handleDisconnection);
+    }
+
+    //quando il server manda il ping al client
+    public void pingToClientFromServer(String nickname) throws IOException{
+       //System.out.println("Ping dal server");
+        dns.pongToServerFromClient(nickname);
+    }
+
+    public void handleDisconnection() {
+        System.exit(0);
+    }
+
+    public void forcedDisconnection(String nicknameToNotify, String gameId) throws IOException {
+        leaveGame();
+    }
+
     public void endBuildShipBoardPhase() {
         try {
             view.showMessage("""
@@ -874,13 +918,18 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void placePlaceholder() {
+    public void placePawn() {
         try {
-            serverController.playerPlacePlaceholder(nickname);
+            serverController.playerPlacesPawn(nickname);
         } catch (IOException e) {
             handleRemoteException(e);
         }
     }
+
+    public GameInfo getCurrentGameInfo() {
+        return currentGameInfo;
+    }
+
 
     public void playerWantsToVisitLocation(String nickname, Boolean choice){
         if (!clientModel.isMyTurn()) {
@@ -963,7 +1012,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
 
-        if(cabinCoords.size()<card.getCrewMalus()){
+        if (cabinCoords.size()<card.getCrewMalus()) {
             view.showMessage("Not the right amount of crew members", ERROR);
             return false;
         }
@@ -1004,9 +1053,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .setChosenPlanetIndex(choice)
                 .build();
 
-        try{
+        try {
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);
-        }catch (IOException e){
+        } catch (IOException e) {
             handleRemoteException(e);
         }
     }
@@ -1133,32 +1182,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             handleRemoteException(e);
         }
     }
-
-    //manda il ping dal client al server
-    public void pingToServerFromClient(String nickname) throws IOException{
-        dns.pingToServerFromClient(nickname);
-    }
-
-    //quando ricevo il pong di risposta dal server resetto il timeout
-    public void pongToClientFromServer(String nickname) throws IOException{
-        //System.out.println("Pong dal server");
-        clientPingPongManager.onPongReceived(this::handleDisconnection);
-    }
-
-    //quando il server manda il ping al client
-    public void pingToClientFromServer(String nickname) throws IOException{
-       //System.out.println("Ping dal server");
-        dns.pongToServerFromClient(nickname);
-    }
-
-    public void handleDisconnection() {
-            System.exit(0);
-    }
-
-    public void forcedDisconnection(String nicknameToNotify, String gameId) throws IOException {
-        leaveGame();
-    }
-
 
     public void requestPrefabShipsList() {
         try {

@@ -25,7 +25,9 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
-            gameModel.notifyStopHourglass();
+            if (!gameModel.isTestFlight())
+                gameModel.notifyStopHourglass();
+
             // First, check all shipboards to identify incorrect components
             gameModel.getPlayers().values().forEach(player -> {
                 player.getPersonalBoard().checkShipBoard();
@@ -52,7 +54,9 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
-            gameModel.getDeck().mergeIntoGameDeck();
+            //TODO
+            //gameModel.getDeck().mergeIntoGameDeck();
+            gameModel.getDeck().createGameDeck(gameModel.isTestFlight());
             gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 

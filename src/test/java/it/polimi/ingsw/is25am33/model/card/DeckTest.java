@@ -2,6 +2,8 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
+import it.polimi.ingsw.is25am33.model.ThrowingBiConsumer;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,14 +19,14 @@ class DeckTest {
 
     private Deck deck;
     private GameModel dummyGameModel;
-    private GameClientNotifier dummyGameClientNotifier;
 
     @BeforeEach
     void setUp() {
         deck = new Deck();
         dummyGameModel = new GameModel(null, 2, false);
-        dummyGameClientNotifier = new GameClientNotifier(null,null) {
-            public void notifyAllClients(BiConsumer<String, CallableOnClientController> action) {}
+        GameClientNotifier dummyGameClientNotifier = new GameClientNotifier(null,null) {
+            @Override
+            public void notifyAllClients(ThrowingBiConsumer<String, CallableOnClientController, IOException> consumer) {}
         };
         deck.setGameContext(dummyGameClientNotifier);
         dummyGameModel.setGameContext(dummyGameClientNotifier);
@@ -118,7 +119,7 @@ class DeckTest {
         int expectedTotalCards = 3 * 4; // 3 visible decks and 1 non-visible deck, each with 3 cards
 
         // Act
-        deck.mergeIntoGameDeck();
+        deck.createGameDeck(false);
 
         // Check
         List<AdventureCard> gameDeckField = null;
@@ -144,7 +145,7 @@ class DeckTest {
 
         // Prepare the decks
         deck.setUpLittleDecks(dummyGameModel);
-        deck.mergeIntoGameDeck();
+        deck.createGameDeck(false);
 
         // Draw a card
         AdventureCard drawnCard = deck.drawCard();
@@ -172,7 +173,7 @@ class DeckTest {
 
         // Prepare the decks and empty the game deck manually
         deck.setUpLittleDecks(dummyGameModel);
-        deck.mergeIntoGameDeck();
+        deck.createGameDeck(false);
 
         // Draw all cards
         for (int i = 0; i < 12; i++) {
@@ -214,4 +215,42 @@ class DeckTest {
         assertFalse(deck.isLittleDeckAvailable(2), "Deck 2 should not be available after being claimed");
     }
 
+    @Test
+    void testSetUpLittleDecksWithTestFlightTrueSkipsSetup() {
+        GameModel testFlightGameModel = new GameModel(null, 2, true); // isTestFlight = true
+        deck.setUpLittleDecks(testFlightGameModel);
+
+        // Since isTestFlight is true, little decks should remain empty
+        assertTrue(deck.getLittleVisibleDecks().stream().allMatch(List::isEmpty), "All little visible decks should be empty for test flight");
+        assertTrue(deck.getLittleNotVisibleDeck().isEmpty(), "Little not visible deck should be empty for test flight");
+        assertTrue(deck.getLittleVisibleDecksString().isEmpty(), "Little visible decks string should be empty for test flight");
+    }
+
+    @Test
+    void testCreateGameDeckWithTestFlightAddsAllCards() {
+        GameModel testFlightGameModel = new GameModel(null, 2, true); // isTestFlight = true
+        deck.setGameContext(dummyGameModel.getGameContext());
+        deck.setUpLittleDecks(testFlightGameModel);
+        deck.createGameDeck(true); // Force add all loaded cards
+
+        // The game deck should contain all cards loaded
+        List<AdventureCard> allCards = deck.getAllCards();
+        assertFalse(allCards.isEmpty(), "All cards should be loaded for test flight");
+
+        List<AdventureCard> gameDeckCards;
+        try {
+            var gameDeckField = Deck.class.getDeclaredField("gameDeck");
+            gameDeckField.setAccessible(true);
+            gameDeckCards = (List<AdventureCard>) gameDeckField.get(deck);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            fail("Reflection access failed: " + e.getMessage());
+            return;
+        }
+
+        assertEquals(allCards.size(), gameDeckCards.size(), "Game deck should contain all loaded cards in test flight mode");
+        assertTrue(gameDeckCards.containsAll(allCards), "Game deck should contain exactly all loaded cards");
+    }
+
 }
+
+

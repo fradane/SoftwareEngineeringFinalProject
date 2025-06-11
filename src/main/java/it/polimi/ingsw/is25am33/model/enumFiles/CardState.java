@@ -163,4 +163,6 @@ public enum CardState {
     };
 
     public abstract void showRelatedMenu(ClientView view);
+    // TODO chi ha scritto questo todo
+    //TODO setProperty
 }

@@ -14,8 +14,24 @@ import java.util.Set;
 
 public class Level1ShipBoard extends ShipBoard implements ShipBoardClient {
 
-    public Level1ShipBoard(PlayerColor color, GameClientNotifier gameClientNotifier) {
-        super(color, gameClientNotifier);
+    static boolean[][] level1ValidPositions = {
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, true, false, false, false, false, false},
+            {false, false, false, false, false, true, true, true, false, false, false, false},
+            {false, false, false, false, true, true, true, true, true, false, false, false},
+            {false, false, false, false, true, true, true, true, true, false, false, false},
+            {false, false, false, false, true, true, false, true, true, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false},
+            {false, false, false, false, false, false, false, false, false, false, false, false}
+    };
+
+    public Level1ShipBoard(PlayerColor color, GameClientNotifier gameClientNotifier, boolean isGui) {
+        super(color, gameClientNotifier, isGui);
+        this.validPositions = level1ValidPositions;
     }
 
     @Override
@@ -29,6 +45,9 @@ public class Level1ShipBoard extends ShipBoard implements ShipBoardClient {
         return false;
     }
 
+    public static Boolean isOutsideShipboard(int x, int y) {
+        return !level1ValidPositions[x][y];
+    }
 
     @Override
     public Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport() {

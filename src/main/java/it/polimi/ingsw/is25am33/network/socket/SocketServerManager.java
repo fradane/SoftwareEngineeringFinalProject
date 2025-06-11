@@ -177,7 +177,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 break;
 
             case "playerPlacePlaceholder":
-                gameControllers.get(nickname).playerPlacePlaceholder(nickname);
+                gameControllers.get(nickname).playerPlacesPawn(nickname);
                 break;
 
             case "playerWantsToReleaseLittleDeck":

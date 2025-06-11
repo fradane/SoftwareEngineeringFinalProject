@@ -92,14 +92,14 @@ public class ComponentLoader {
 
         List<Component> components = new ArrayList<>();
         //TODO unncommetare. commentati solo per dubug
-          components.addAll(ComponentLoader.loadBatteryBoxes());
-//        components.addAll(ComponentLoader.loadCabin());
+//        components.addAll(ComponentLoader.loadBatteryBoxes());
+        components.addAll(ComponentLoader.loadCabin());
+        components.addAll(ComponentLoader.loadLifeSupport());
 //        components.addAll(ComponentLoader.loadCannon());
-        components.addAll(ComponentLoader.loadDoubleCannon());
+//        components.addAll(ComponentLoader.loadDoubleCannon());
 //        components.addAll(ComponentLoader.loadDoubleEngine());
 //        components.addAll(ComponentLoader.loadEngine());
-//        components.addAll(ComponentLoader.loadLifeSupport());
-        components.addAll(ComponentLoader.loadShield());
+//        components.addAll(ComponentLoader.loadShield());
 //        components.addAll(ComponentLoader.loadSpecialStorage());
 //        components.addAll(ComponentLoader.loadStandardStorage());
 //        components.addAll(ComponentLoader.loadStructuralModules());

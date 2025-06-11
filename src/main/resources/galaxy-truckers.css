@@ -1,0 +1,551 @@
+/* galaxy-truckers.css */
+
+/* Colori principali */
+* {
+    -fx-space-dark: #1c1c1c;
+    -fx-space-darker: #0e0e0e;
+    -fx-space-blue: #1e3253;
+    -fx-space-blue-light: #2a4e8b;
+    -fx-space-accent: #ffb300;
+    -fx-space-accent-hover: #ffc233;
+    -fx-space-green: #28a745;
+    -fx-space-red: #dc3545;
+    -fx-space-gray: #6c757d;
+}
+
+/* Stile di base per l'intero gioco */
+.game-background {
+    -fx-background-color: -fx-space-dark;
+    /* -fx-background-image: url("stars-bg.png");  Aggiungi un'immagine stelle se disponibile */
+    -fx-text-fill: white;
+}
+
+/* Header e titolo */
+.top-container {
+    -fx-background-color: -fx-space-darker;
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+    -fx-border-color: derive(-fx-space-blue, 20%);
+    -fx-border-width: 0 0 1px 0;
+}
+
+.screen-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 5, 0, 0, 1);
+}
+
+/* Container del timer */
+.timer-container {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-spacing: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+/* Stili Timer */
+.timer-label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0, 0, 1);
+    -fx-min-width: 50px;
+}
+
+.timer-warning {
+    -fx-text-fill: -fx-space-red;
+    -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.8), 5, 0, 0, 0);
+}
+
+/* Stili Hourglass Button */
+.hourglass-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 6px 10px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-font-size: 11px;
+    -fx-min-width: 110px;
+}
+
+.hourglass-button.hourglass-enabled {
+    -fx-background-color: -fx-space-green;
+}
+
+.hourglass-button.hourglass-enabled:hover {
+    -fx-background-color: derive(-fx-space-green, 15%);
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.5), 5, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.hourglass-button.hourglass-enabled:pressed {
+    -fx-background-color: derive(-fx-space-green, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.7), 3, 0, 0, 0);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.hourglass-button.hourglass-disabled {
+    -fx-background-color: -fx-space-gray;
+    -fx-cursor: default;
+    -fx-opacity: 0.6;
+}
+
+.hourglass-button.hourglass-disabled:hover {
+    -fx-background-color: -fx-space-gray;
+    -fx-effect: none;
+}
+
+/* Bottone navigazione "Go Back" */
+.nav-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-font-size: 12px;
+}
+
+.nav-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 5, 0, 0, 0);
+}
+
+.nav-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 3, 0, 0, 0);
+}
+
+/* Container componenti */
+.component-display {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+
+/* Container della plancia */
+.board-container {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-padding: 10px;
+}
+
+/* Controlli componente */
+.component-controls {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-min-width: 150px;
+    -fx-max-width: 180px;
+}
+
+.controls-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+}
+
+.component-control-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-min-width: 120px;
+    -fx-font-size: 11px;
+}
+
+.component-control-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 5, 0, 0, 0);
+}
+
+.component-control-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 3, 0, 0, 0);
+}
+
+/* Navigazione tra navi */
+.ship-navigation {
+    -fx-padding: 5px;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-radius: 15px;
+}
+
+.ship-nav-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 15px;
+    -fx-padding: 8px 15px;
+    -fx-border-radius: 15px;
+    -fx-cursor: hand;
+}
+
+.ship-nav-button:hover {
+    -fx-background-color: derive(-fx-space-blue, 20%);
+}
+
+.ship-nav-button.active {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+}
+
+.not-available-cell-button {
+    -fx-background-color: transparent;
+}
+
+/* Bottoni celle griglia */
+.cell-button {
+    -fx-background-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-cursor: hand;
+}
+
+.cell-button:hover {
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 5, 0, 0, 0);
+}
+
+.cell-button.no-hover:hover {
+    -fx-border-color: inherit;
+    -fx-effect: none;
+}
+
+.cell-button:pressed {
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.7), 10, 0, 0, 0);
+}
+
+/* Little Deck */
+.little-deck-container {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-accent;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+}
+
+/* Barra delle azioni in basso */
+.action-bar {
+    -fx-background-color: -fx-space-darker;
+    -fx-padding: 15px;
+    -fx-spacing: 15px;
+    -fx-border-color: derive(-fx-space-blue, 20%);
+    -fx-border-width: 1px 0 0 0;
+}
+
+/* Stile bottoni azione */
+.action-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}
+
+.action-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+.action-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+}
+
+/* ComboBox styling */
+.game-combo-box {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}
+
+.game-combo-box:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+.game-combo-box .arrow {
+    -fx-background-color: white;
+}
+
+.game-combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.game-combo-box .list-cell {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+}
+
+.game-combo-box .list-cell:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+/* ===== SEZIONE VISIBLE COMPONENTS - AGGIORNATA ===== */
+
+/* Pannello principale dei componenti visibili */
+.visible-components-panel {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+/* Header del pannello componenti */
+.panel-header {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+.panel-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 5, 0, 0, 1);
+}
+
+/* ScrollPane per i componenti - tema scuro completo */
+.components-scroll-pane {
+    -fx-background-color: -fx-space-dark;
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+/* Viewport dello ScrollPane */
+.components-scroll-pane .viewport {
+    -fx-background-color: -fx-space-dark;
+    -fx-background-radius: 6px;
+}
+
+/* Contenuto dello ScrollPane */
+.components-scroll-pane .content {
+    -fx-background-color: -fx-space-dark;
+    -fx-background-radius: 6px;
+}
+
+/* Scrollbar verticale */
+.components-scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+    -fx-opacity: 0.7;
+}
+
+.components-scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 4px;
+}
+
+.components-scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: -fx-space-blue;
+    -fx-background-radius: 4px;
+    -fx-background-insets: 1px;
+}
+
+.components-scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+.components-scroll-pane .scroll-bar:vertical .thumb:pressed {
+    -fx-background-color: -fx-space-accent;
+}
+
+/* Bottoni di incremento/decremento dello scrollbar */
+.components-scroll-pane .scroll-bar .increment-button,
+.components-scroll-pane .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-pref-height: 0;
+    -fx-pref-width: 0;
+}
+
+/* Corner dello ScrollPane */
+.components-scroll-pane .corner {
+    -fx-background-color: -fx-space-dark;
+}
+
+/* Container principale dei componenti (VBox) */
+.components-container {
+    -fx-background-color: -fx-space-dark;
+    -fx-spacing: 8px;
+    -fx-padding: 5px;
+    -fx-background-radius: 6px;
+}
+
+/* Stili per i bottoni dei componenti individuali */
+.component-item {
+    -fx-background-color: rgba(30, 50, 83, 0.8);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-font-size: 11px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+}
+
+.component-item:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-border-color: rgba(255, 179, 0, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.4), 5, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.component-item:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 3, 0, 0, 0);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.component-item.selected {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+    -fx-border-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.8), 8, 0, 0, 0);
+}
+
+/* Immagini dei componenti all'interno dei bottoni */
+.component-item .image-view {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 2, 0, 0, 1);
+}
+
+/* Stile per i bottoni dentro il container (fallback) */
+.components-container .button {
+    -fx-background-color: rgba(30, 50, 83, 0.8);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+}
+
+.components-container .button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-border-color: rgba(255, 179, 0, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.4), 5, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.components-container .button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 3, 0, 0, 0);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+/* Stile per container vuoto */
+.components-container:empty {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-border-color: rgba(108, 117, 125, 0.3);
+    -fx-border-style: dashed;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-min-height: 100px;
+}
+
+/* Etichetta per stato vuoto */
+.empty-components-label {
+    -fx-text-fill: -fx-space-gray;
+    -fx-font-style: italic;
+    -fx-font-size: 12px;
+    -fx-alignment: center;
+}
+
+.place-pawn-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 14px 24px;
+    -fx-font-size: 14px;
+    -fx-min-width: 180px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+.place-pawn-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 6, 0, 0, 1);
+}
+
+.place-pawn-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 4, 0, 0, 1);
+}
+
+/* Card Display Panel - Pannello laterale per visualizzazione carte */
+.card-display-panel {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+/* Card Image Container - Container per l'immagine della carta con bordo blu */
+.card-image-container {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 3, 0, 0, 1);
+    -fx-min-height: 220px;
+    -fx-max-height: 220px;
+    -fx-pref-height: 220px;
+}
+
+.card-image {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,255,0.4), 5, 0.5, 0, 0); /* opzionale: effetto luce */
+    -fx-border-color: #007bff; /* blu fine */
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px; /* margine interno */
+}

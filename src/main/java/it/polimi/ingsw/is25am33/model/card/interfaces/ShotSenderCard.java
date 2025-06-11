@@ -11,6 +11,6 @@ public interface ShotSenderCard {
 
     void playerDecidedHowToDefendTheirSelvesFromSmallShot(List<Coordinates> chosenShieldsCoords, List<Coordinates> chosenBatteryBoxesCoords);
 
-    public void playerIsAttackedByABigShot();
+    void playerIsAttackedByABigShot();
 
 }

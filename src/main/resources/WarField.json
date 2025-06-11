@@ -9,7 +9,8 @@
     },
     "stepsBack": -3,
     "crewMalus": 2,
-    "shotIDs": ["small_south", "big_south"]
+    "shotIDs": ["small_south", "big_south"],
+    "isTestFlightCard": true
   },
 
   {
@@ -22,6 +23,7 @@
     },
     "stepsBack": -4,
     "cubeMalus": 3,
-    "shotIDs": ["small_north", "small_west", "small_east", "big_south"]
+    "shotIDs": ["small_north", "small_west", "small_east", "big_south"],
+    "isTestFlightCard": false
   }
 ]

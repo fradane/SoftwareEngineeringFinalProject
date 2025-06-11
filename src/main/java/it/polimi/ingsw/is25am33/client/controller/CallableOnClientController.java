@@ -79,6 +79,7 @@ public interface CallableOnClientController extends Remote {
     void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts , Map<Class<?>, List<Component>> componentsPerType) throws RemoteException;
 
     void notifyCardStarted(String nicknameToNotify)throws IOException;
+
     void notifyStopHourglass(String nicknameToNotify) throws IOException;
 
     void notifyFirstToEnter(String nicknameToNotify) throws IOException;
@@ -86,6 +87,7 @@ public interface CallableOnClientController extends Remote {
     void notifyCurrAdventureCardUpdate(String nicknameToNotify, ClientCard adventureCard) throws IOException;
 
     void notifyPlayerVisitedPlanet(String nicknameToNotify, String nickname, ClientCard adventureCard) throws IOException;
+
     void forcedDisconnection(String nickname, String gameId) throws IOException;
 
     void pingToClientFromServer(String nickname) throws IOException;
@@ -94,13 +96,14 @@ public interface CallableOnClientController extends Remote {
 
     void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Component>> componentsPerType ) throws IOException;
 
-
     void notifyCrewPlacementPhase(String nicknameToNotify) throws IOException;
 
     void notifyCrewPlacementComplete(String nicknameToNotify, String playerNickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException;
 
     void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException;
+
     void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipName) throws IOException;
+
     void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException;
 
     void notifyCoordinateOfComponentHit(String nicknameToNotify, String nickname, Coordinates coordinates) throws IOException;

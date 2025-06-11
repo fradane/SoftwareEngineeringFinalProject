@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
  * Abstract class representing a FlyingBoard that keeps track of players and their positions.
  */
 public abstract class FlyingBoard {
-    private Set<Player> outPlayers;
+    private final Set<Player> outPlayers;
     protected int runLenght;
-    protected Map<Player, Integer> ranking;
+    protected final Map<Player, Integer> ranking;
     protected GameClientNotifier gameClientNotifier;
 
     /**

@@ -1,4 +1,5 @@
 package it.polimi.ingsw.is25am33.network.rmi;
+
 import it.polimi.ingsw.is25am33.network.DNS;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 

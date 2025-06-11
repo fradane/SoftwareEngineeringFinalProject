@@ -8,7 +8,7 @@
       "WEST": "UNIVERSAL"
     },
     "maxCapacity": 1,
-    "imageName": "GT-new_tiles_16_for web62.jpg"
+    "imageName": "GT-new_tiles_16_for_web62.jpg"
   },
   {
     "type": "SpecialStorage",
@@ -19,7 +19,7 @@
       "WEST": "UNIVERSAL"
     },
     "maxCapacity": 1,
-    "imageName": "GT-new_tiles_16_for web63.jpg"
+    "imageName": "GT-new_tiles_16_for_web63.jpg"
   },
   {
     "type": "SpecialStorage",
@@ -30,7 +30,7 @@
       "WEST": "UNIVERSAL"
     },
     "maxCapacity": 1,
-    "imageName": "GT-new_tiles_16_for web64.jpg"
+    "imageName": "GT-new_tiles_16_for_web64.jpg"
   },
   {
     "type": "SpecialStorage",
@@ -41,7 +41,7 @@
       "WEST": "UNIVERSAL"
     },
     "maxCapacity": 1,
-    "imageName": "GT-new_tiles_16_for web65.jpg"
+    "imageName": "GT-new_tiles_16_for_web65.jpg"
   },
   {
     "type": "SpecialStorage",
@@ -52,7 +52,7 @@
       "WEST": "UNIVERSAL"
     },
     "maxCapacity": 1,
-    "imageName": "GT-new_tiles_16_for web66.jpg"
+    "imageName": "GT-new_tiles_16_for_web66.jpg"
   },
   {
     "type": "SpecialStorage",
@@ -63,7 +63,7 @@
       "WEST": "UNIVERSAL"
     },
     "maxCapacity": 1,
-    "imageName": "GT-new_tiles_16_for web67.jpg"
+    "imageName": "GT-new_tiles_16_for_web67.jpg"
   },
   {
     "type": "SpecialStorage",
@@ -74,7 +74,7 @@
       "WEST": "SINGLE"
     },
     "maxCapacity": 2,
-    "imageName": "GT-new_tiles_16_for web68.jpg"
+    "imageName": "GT-new_tiles_16_for_web68.jpg"
   },
   {
     "type": "SpecialStorage",
@@ -85,7 +85,7 @@
       "WEST": "SINGLE"
     },
     "maxCapacity": 2,
-    "imageName": "GT-new_tiles_16_for web69.jpg"
+    "imageName": "GT-new_tiles_16_for_web69.jpg"
   },
   {
     "type": "SpecialStorage",
@@ -96,6 +96,6 @@
       "WEST": "DOUBLE"
     },
     "maxCapacity": 2,
-    "imageName": "GT-new_tiles_16_for web70.jpg"
+    "imageName": "GT-new_tiles_16_for_web70.jpg"
   }
 ]

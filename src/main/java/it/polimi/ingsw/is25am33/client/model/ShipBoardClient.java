@@ -1,5 +1,7 @@
 package it.polimi.ingsw.is25am33.client.model;
 
+import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.*;
@@ -8,7 +10,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.game.Player;
-import javafx.beans.property.ObjectProperty;
 
 import java.util.List;
 import java.util.Map;
@@ -402,7 +403,6 @@ public interface ShipBoardClient {
      * Handles the effect of a dangerous object (DangerousObj) on the ship
      *
      * @param obj The dangerous object to handle
-     * @return
      */
     int[] handleDangerousObject(DangerousObj obj);
 
@@ -435,11 +435,6 @@ public interface ShipBoardClient {
      * @return The component that was released
      */
     Component releaseFocusedComponent();
-
-    // TODO da togliere
-    default ObjectProperty<Component>[][] getObservableMatrix() {
-        return null;
-    }
 
     void checkPosition(int x, int y);
 
