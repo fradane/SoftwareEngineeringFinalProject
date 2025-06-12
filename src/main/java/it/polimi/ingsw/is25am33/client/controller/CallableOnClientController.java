@@ -91,4 +91,6 @@ public interface CallableOnClientController extends Remote {
     void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException;
     void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipName) throws IOException;
     void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException;
+
+    void notifyInfectedCrewMembersRemoved(String nicknameToNotify, Set<Coordinates> cabinCoordinatesWithNeighbors) throws IOException;
 }

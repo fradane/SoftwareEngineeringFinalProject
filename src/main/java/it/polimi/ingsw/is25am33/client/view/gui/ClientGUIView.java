@@ -31,4 +31,9 @@ public abstract class ClientGUIView implements ClientView {
         //TODO
     }
 
+    @Override
+    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
+        //TODO
+    }
+
 }

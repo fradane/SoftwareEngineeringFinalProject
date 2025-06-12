@@ -19,13 +19,11 @@ import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -1307,6 +1305,17 @@ public class ClientCLIView implements ClientView {
         showMessage(menu.toString(), ASK);
     }
 
+    @Override
+    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
+        String nickname = clientModel.getMyNickname();
+        ShipBoardClient shipboard = clientModel.getShipboardOf(nickname);
+        if(cabinWithNeighbors.size() > 0) {
+            showShipBoard(shipboard, nickname, Map.of(ANSI_BLUE, cabinWithNeighbors));
+            showMessage("The colored cabins are those where you lost an infected crew membership", STANDARD);
+        }else
+            showMessage("You had no infected crew membership", STANDARD);
+    }
+
     /**
      * Determina il colore ANSI da applicare alla coordinata specificata
      * basandosi sulla mappa dei colori fornita.
@@ -1843,12 +1852,9 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showEpidemicMenu() {
-        //TODO valutare se togliere il contenuto di questo metodo
-        setClientState(ClientState.EPIDEMIC_MENU);
-
         showMessage("\nAn epidemic is spreading throughout the fleet!", STANDARD);
         showMessage("Each occupied cabin connected to another occupied cabin will lose one crew member.", STANDARD);
-        showMessage("Wait to see how the epidemic is going to spread...", STANDARD);
+        showMessage("Press any key see how the epidemic is going to spread...", STANDARD);
     }
 
     @Override

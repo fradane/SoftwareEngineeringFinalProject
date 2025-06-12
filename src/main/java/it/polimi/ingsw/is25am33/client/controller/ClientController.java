@@ -3,7 +3,6 @@ package it.polimi.ingsw.is25am33.client.controller;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
-import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.CrewMalusCard;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
@@ -604,7 +603,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         return cardState == CardState.HANDLE_CUBES_REWARD
         || cardState == CardState.CHOOSE_PLANET
         || cardState == CardState.VISIT_LOCATION
-        || cardState == CardState.REMOVE_CREW_MEMBERS;
+        || cardState == CardState.REMOVE_CREW_MEMBERS
+        || cardState == CardState.EPIDEMIC;
     }
 
     @Override
@@ -1189,5 +1189,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             view.showError("Failed to select prefab ship: " + errorMessage);
             view.showBuildShipBoardMenu();
         }
+    }
+
+    @Override
+    public void notifyInfectedCrewMembersRemoved(String nicknameToNotify, Set<Coordinates> cabinCoordinatesWithNeighbors) throws IOException {
+        view.showInfectedCrewMembersRemoved(cabinCoordinatesWithNeighbors);
     }
 }

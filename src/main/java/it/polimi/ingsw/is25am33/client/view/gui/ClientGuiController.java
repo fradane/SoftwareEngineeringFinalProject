@@ -10,7 +10,6 @@ import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.GuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.StartViewController;
-import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
@@ -29,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 
 public class ClientGuiController extends Application implements ClientView {
 
@@ -104,6 +102,11 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips) {
+        //TODO
+    }
+
+    @Override
+    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
         //TODO
     }
 

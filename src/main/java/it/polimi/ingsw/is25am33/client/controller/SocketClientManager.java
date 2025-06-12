@@ -318,7 +318,6 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     break;
 
                 case "notifyShipBoardUpdate":
-                    //TODO da aggiustare mettondo i componentsPerType
                     if (clientController != null) {
                         clientController.notifyShipBoardUpdate(null, notification.getParamString(), notification.getParamShipBoardAsMatrix(), notification.getParamComponentsPerType());
                     }
@@ -466,6 +465,15 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                                 nickname,
                                 notification.getParamBoolean(),
                                 notification.getParamString()
+                        );
+                    }
+                    break;
+
+                case "notifyInfectedCrewMembersRemoved":
+                    if (clientController != null) {
+                        clientController.notifyInfectedCrewMembersRemoved(
+                                nickname,
+                                notification.getParamShipPart()
                         );
                     }
                     break;

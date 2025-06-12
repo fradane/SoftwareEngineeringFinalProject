@@ -5,7 +5,6 @@ import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
-import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
@@ -15,7 +14,6 @@ import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 /**
  * Interfaccia che definisce le operazioni di visualizzazione del client.
@@ -220,4 +218,6 @@ public interface ClientView {
     void showCrewPlacementMenu();
 
     void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips);
+
+    void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors);
 }
