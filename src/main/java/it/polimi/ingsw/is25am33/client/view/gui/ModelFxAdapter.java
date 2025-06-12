@@ -47,8 +47,7 @@ public class ModelFxAdapter {
                     Component[][] shipMatrix = playerClientData.getShipBoard().getShipMatrix();
                     for (int i = 0; i < 12; i++) {
                         for (int j = 0; j < 12; j++) {
-                            if (i == 6 && j == 6)
-                                System.out.println(shipMatrix[i][j]);
+                            //if (i == 6 && j == 6) System.out.println(shipMatrix[i][j]);
                             SimpleObjectProperty<Component> prop = new SimpleObjectProperty<>(shipMatrix[i][j]);
                             observableShipBoards.get(nickname)[i][j] = prop;
                         }
@@ -128,7 +127,7 @@ public class ModelFxAdapter {
         Component[][] rawMatrix = clientModel.getShipboardOf(nickname).getShipMatrix();
         for (int i = 0; i < 12; i++) {
             for (int j = 0; j < 12; j++) {
-                if (i == 6 && j == 6) System.out.println(rawMatrix[i][j]);
+                //if (i == 6 && j == 6) System.out.println(rawMatrix[i][j]);
                 observableShipBoards.get(nickname)[i][j].set(rawMatrix[i][j]);
             }
         }

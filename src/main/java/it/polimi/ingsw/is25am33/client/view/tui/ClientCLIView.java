@@ -911,7 +911,8 @@ public class ClientCLIView implements ClientView {
         showMessage("TEXT TO BE CHANGED: non fare nulla che stai apposto così", STANDARD);
     }
 
-    public void checkShipBoardAfterAttackMenu(){
+    @Override
+    public void checkShipBoardAfterAttackMenu() {
         if(hitComponent!=null) {
             clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
             hitComponent=null;
@@ -2289,7 +2290,13 @@ public class ClientCLIView implements ClientView {
 
         List<String> sortedRanking = clientModel.getSortedRanking();
 
-        int topScore = clientModel.getPlayerClientData().get(sortedRanking.getFirst()).getFlyingBoardPosition();
+        int topScore;
+        try {
+            topScore = clientModel.getPlayerClientData().get(sortedRanking.getFirst()).getFlyingBoardPosition();
+        } catch (NoSuchElementException e) {
+            showMessage("No active players found!", ERROR);
+            return;
+        }
 
         //TODO commentato perche avere 0 come punteggio puo verificarsi anche durante il gioco non solo prima della costruzione
 //        if (topScore == 0) {

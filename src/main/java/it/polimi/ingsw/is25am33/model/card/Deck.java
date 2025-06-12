@@ -149,15 +149,6 @@ public class Deck {
 //        cards.addAll(Deck.loadAbandonedShipFromJson());
 //        cards.addAll(Deck.loadAbandonedStationFromJson());
 //        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
 //        cards.addAll(Deck.loadPiratesFromJson());
 //        cards.addAll(Deck.loadPlanetsFromJson());
 //        cards.addAll(Deck.loadPlanetsFromJson());
@@ -170,6 +161,22 @@ public class Deck {
 //        cards.addAll(Deck.loadSmugglersFromJson());
 //        cards.addAll(Deck.loadStardustFromJson());
 //        cards.addAll(Deck.loadWarFieldFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+
 
         if (isTestFlight)
             allCards.addAll(cards.stream().filter(AdventureCard::isTestFlightCard).toList());

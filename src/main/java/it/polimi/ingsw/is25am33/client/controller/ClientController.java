@@ -640,6 +640,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException{
         clientModel.getShipboardOf(nickname).setShipMatrix(shipMatrix);
         clientModel.getShipboardOf(nickname).setComponentsPerType(componentsPerType);
+        clientModel.refreshShipBoardOf(nickname);
     }
 
     public void notifyCoordinateOfComponentHit(String nicknameToNotify, String nickname, Coordinates coordinates) throws IOException{

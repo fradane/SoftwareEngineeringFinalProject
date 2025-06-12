@@ -228,6 +228,8 @@ public interface ClientView {
 
     void showHandleCubesMalusMenu();
 
+    void checkShipBoardAfterAttackMenu();
+
     // ---------------------------------------------------
 
 
@@ -256,7 +258,7 @@ public interface ClientView {
             case THROW_DICES:
                 return ClientState.THROW_DICES_MENU;
             case DANGEROUS_ATTACK:
-                // Determine specific type based on a dangerous object
+                // Determine specific type based on dangerous object
                 ClientDangerousObject obj = clientModel.getCurrDangerousObj();
                 if (obj != null) {
                     String type = obj.getType();
@@ -268,7 +270,7 @@ public interface ClientView {
                         return ClientState.HANDLE_BIG_SHOT_MENU;
                     }
                 }
-                return ClientState.HANDLE_SMALL_DANGEROUS_MENU; // Default
+                return ClientState.HANDLE_SMALL_DANGEROUS_MENU;// Default
             case ACCEPT_THE_REWARD:
                 return ClientState.ACCEPT_REWARD_MENU;
             case HANDLE_CUBES_REWARD:
@@ -281,6 +283,8 @@ public interface ClientView {
                 return ClientState.EPIDEMIC_MENU;
             case STARDUST:
                 return ClientState.STARDUST_MENU;
+            case CHECK_SHIPBOARD_AFTER_ATTACK:
+                return ClientState.CHECK_SHIPBOARD_AFTER_ATTACK;
             default:
                 return ClientState.PLAY_CARD;
         }
@@ -327,6 +331,9 @@ public interface ClientView {
                 break;
             case STARDUST_MENU:
                 showStardustMenu();
+                break;
+            case CHECK_SHIPBOARD_AFTER_ATTACK:
+                checkShipBoardAfterAttackMenu();
                 break;
         }
     }
