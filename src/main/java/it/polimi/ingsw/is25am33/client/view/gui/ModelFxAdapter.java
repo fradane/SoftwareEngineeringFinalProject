@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.client.view.gui;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -25,6 +26,7 @@ public class ModelFxAdapter {
     private final Map<String, Pair<ObjectProperty<Component>, ObjectProperty<Component>>> observableBookedComponents;
     private final Map<PlayerColor, ObjectProperty<Integer>> observableColorRanking;
     private final ObjectProperty<ClientCard> observableCurrAdventureCard;
+    private final ObjectProperty<Pair<String, Coordinates>> observableChangedAttributes;
 
     @SuppressWarnings("unchecked")
     public ModelFxAdapter(ClientModel clientModel) {
@@ -39,6 +41,7 @@ public class ModelFxAdapter {
         this.observableColorRanking = new ConcurrentHashMap<>();
         this.observableBookedComponents = new ConcurrentHashMap<>();
         this.observableCurrAdventureCard = new SimpleObjectProperty<>();
+        this.observableChangedAttributes = new SimpleObjectProperty<>();
 
         // initialize shipboards
         clientModel.getPlayerClientData()
@@ -97,7 +100,9 @@ public class ModelFxAdapter {
         return observableBookedComponents.get(nickname);
     }
 
-
+    public ObjectProperty<Pair<String, Coordinates>> getObservableChangedAttributesProperty() {
+        return observableChangedAttributes;
+    }
 
     /* -------------- REFRESH METHODS -------------- */
 
@@ -127,8 +132,18 @@ public class ModelFxAdapter {
         Component[][] rawMatrix = clientModel.getShipboardOf(nickname).getShipMatrix();
         for (int i = 0; i < 12; i++) {
             for (int j = 0; j < 12; j++) {
-                //if (i == 6 && j == 6) System.out.println(rawMatrix[i][j]);
-                observableShipBoards.get(nickname)[i][j].set(rawMatrix[i][j]);
+
+                Component oldComponent = getObservableShipBoardOf(nickname)[i][j].get();
+                Component newComponent = rawMatrix[i][j];
+
+                if (oldComponent == null || newComponent == null)
+                    getObservableShipBoardOf(nickname)[i][j].set(rawMatrix[i][j]);
+                else if (!oldComponent.getGuiHash().equals(newComponent.getGuiHash())) {
+                    synchronized (observableChangedAttributes) {
+                        observableChangedAttributes.set(new Pair<>(nickname, new Coordinates(i, j)));
+                    }
+                }
+
             }
         }
 
