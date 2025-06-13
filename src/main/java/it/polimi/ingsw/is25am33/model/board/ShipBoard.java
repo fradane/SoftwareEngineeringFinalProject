@@ -806,7 +806,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @return The total firepower.
      */
     public double countTotalFirePower(List<Cannon> cannonsToCountFirePower) {
-        Stream<Cannon> singleCannons = cannonsToCountFirePower.stream().filter(cannon -> !(cannon instanceof DoubleCannon));
+        Stream<Cannon> singleCannons = this.getSingleCannons().stream().filter(cannon -> !(cannon instanceof DoubleCannon));
         Stream<DoubleCannon> doubleCannons = cannonsToCountFirePower.stream().filter(cannon -> cannon instanceof DoubleCannon).map(cannon -> (DoubleCannon) cannon);
 
         double singleCannonsFirePower = singleCannons.mapToDouble(cannon -> cannon.getFireDirection() == NORTH ? 1 : 0.5).sum();

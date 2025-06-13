@@ -158,7 +158,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
             setCurrState( CardState.ACCEPT_THE_REWARD);
 
-        } else {
+        } else if(currPlayerCannonPower < requiredFirePower){
             defeatedPlayers.add(gameModel.getCurrPlayer());
 
             if (gameModel.hasNextPlayer()) {
@@ -175,6 +175,16 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
                     gameModel.setCurrPlayer(currDefeatedPlayer);
                     setCurrState(CardState.THROW_DICES);
                 }
+            }
+        }else{
+            if(gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
+                setCurrState(CardState.CHOOSE_CANNONS);
+            }
+            else{
+                setCurrState(CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
             }
         }
 

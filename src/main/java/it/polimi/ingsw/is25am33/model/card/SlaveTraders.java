@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientSlaveTraders;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
@@ -12,16 +13,17 @@ import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Cannon;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
+import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMemberRemover, DoubleCannonActivator {
-
     private int crewMalus;
     private final static List<CardState> cardStates = List.of(CardState.CHOOSE_CANNONS, CardState.ACCEPT_THE_REWARD, CardState.REMOVE_CREW_MEMBERS);
 
-    public SlaveTraders(int crewMalus) {
+    public SlaveTraders( int crewMalus) {
         this.crewMalus = crewMalus;
     }
 
@@ -59,27 +61,30 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
     @Override
     public ClientCard toClientCard() {
-        //TODO
-        return null;
+        return new ClientSlaveTraders(this.cardName, this.imageName,this.requiredFirePower, this.reward, this.crewMalus, this.stepsBack);
     }
 
-    public void setCrewMalus(int crewMalus) {
+    public void setCrewMalus() {
         this.crewMalus = crewMalus;
     }
 
     private void currPlayerChoseCannonsToActivate(List<Coordinates> chosenDoubleCannonsCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
-
+        Player currentPlayer=gameModel.getCurrPlayer();
         List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
         List<Cannon> chosenDoubleCannons = new ArrayList<>();
 
         for(Coordinates chosenDoubleCannonCoord : chosenDoubleCannonsCoords) {
-            chosenDoubleCannons.add((Cannon) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenDoubleCannonCoord));
+            chosenDoubleCannons.add((Cannon) currentPlayer.getPersonalBoard().getComponentAt(chosenDoubleCannonCoord));
         }
+
         for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
-            chosenBatteryBoxes.add((BatteryBox) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
+            chosenBatteryBoxes.add((BatteryBox) currentPlayer.getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
         }
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
+        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+        });
 
         if (currPlayerCannonPower > requiredFirePower) {
 
@@ -89,14 +94,15 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
             if (gameModel.hasNextPlayer()) {
                 gameModel.nextPlayer();
+                setCurrState( CardState.CHOOSE_CANNONS );
             } else {
                 setCurrState( CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
             }
 
         } else {
-
             setCurrState( CardState.REMOVE_CREW_MEMBERS );
-
         }
 
     }
@@ -107,8 +113,11 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
             gameModel.getCurrPlayer().addCredits(reward);
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
         }
-
-        setCurrState(CardState.END_OF_CARD);
+        else {
+            setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
+        }
 
     }
 
@@ -122,12 +131,17 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
                 .toList();
 
         removeMemberProcess(chosenCabins, crewMalus);
+        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoardAsMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+        });
 
         if (gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
             setCurrState(CardState.CHOOSE_CANNONS);
         } else {
             setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 
     }

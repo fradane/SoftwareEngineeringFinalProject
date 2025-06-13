@@ -106,7 +106,7 @@ public class PrefabShipFactory {
         addComponent(shipBoard, new BatteryBox(createSimpleConnectors(),3), 8, 7);
         addComponent(shipBoard, new BatteryBox(createSimpleConnectors(),2), 7, 5);
         addComponent(shipBoard, new DoubleCannon(createCustomConnectors(EMPTY,SINGLE,SINGLE,SINGLE)), 6, 5);
-
+        addComponent(shipBoard, new DoubleCannon(createCustomConnectors(EMPTY,SINGLE,SINGLE,SINGLE)), 8, 9);
         shipBoard.checkShipBoard();
         return true;
     }

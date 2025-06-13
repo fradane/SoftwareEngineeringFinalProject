@@ -1009,11 +1009,16 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public boolean playerChoseCabins(String nickname, List<Coordinates> cabinCoords){
+    public boolean playerChoseCabins(String nickname, List<Coordinates> cabinCoords) {
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
 
-        if (cabinCoords.size()<card.getCrewMalus()) {
+        if (shipBoard.getCrewMembers().size() <= card.getCrewMalus() && cabinCoords.size() < shipBoard.getCrewMembers().size()) {
+            view.showMessage("You must select all your crew members", ERROR);
+            return false;
+        }
+
+        if (cabinCoords.size()<card.getCrewMalus() && shipBoard.getCrewMembers().size() > card.getCrewMalus() ) {
             view.showMessage("Not the right amount of crew members", ERROR);
             return false;
         }

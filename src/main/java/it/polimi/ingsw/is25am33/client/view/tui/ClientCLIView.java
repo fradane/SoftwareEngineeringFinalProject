@@ -526,9 +526,9 @@ public class ClientCLIView implements ClientView {
             case "Pirates":
                 displayPiratesInfo((ClientPirates) card, output);
                 break;
-//            case "SlaveTraders":
-//                displaySlaveTradersInfo((ClientSlaveTraders) card, output);
-//                break;
+            case "SlaveTraders":
+                displaySlaveTradersInfo((ClientSlaveTraders) card, output);
+                break;
 //            case "SMUGGLERS":
 //                displaySmugglersInfo((ClientSmugglers) card, output);
 //                break;
@@ -616,13 +616,12 @@ public class ClientCLIView implements ClientView {
         }
     }
 
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displaySlaveTradersInfo(ClientSlaveTraders slaveTraders, StringBuilder output) {
-//        output.append("Fire Power Required: ").append(slaveTraders.getRequiredFirePower()).append("\n");
-//        output.append("Crew Malus: ").append(slaveTraders.getCrewMalus()).append("\n");
-//        output.append("Reward: ").append(slaveTraders.getReward()).append(" credits\n");
-//        output.append("Steps Back: ").append(slaveTraders.getStepsBack()).append("\n");
-//    }
+    private void displaySlaveTradersInfo(ClientSlaveTraders slaveTraders, StringBuilder output) {
+        output.append("Fire Power Required: ").append(slaveTraders.getRequiredFirePower()).append("\n");
+        output.append("Crew Malus: ").append(slaveTraders.getCrewMalus()).append("\n");
+        output.append("Reward: ").append(slaveTraders.getReward()).append(" credits\n");
+        output.append("Steps Back: ").append(slaveTraders.getStepsBack()).append("\n");
+    }
 
     //TODO uncommentare quando si inizia ad implementare questa carta
 //    private void displaySmugglersInfo(ClientSmugglers smugglers, StringBuilder output) {
@@ -635,7 +634,7 @@ public class ClientCLIView implements ClientView {
 //    }
 
     private void displayMeteoriteStormInfo(ClientMeteoriteStorm storm, StringBuilder output) {
-        output.append("ATTENTTION! There are ").append(storm.getDangerousObjCount()).append(" meteorites.").append("\n");
+        output.append("ATTENTION! There are ").append(storm.getDangerousObjCount()).append(" meteorites.").append("\n");
 
         if (!storm.getMeteorites().isEmpty()) {
             output.append("\nMeteorite Details:\n");
@@ -707,101 +706,9 @@ public class ClientCLIView implements ClientView {
                     🆕  New Card State: %s
                     ===================================
                     """, currentCardState), STANDARD);
-
-        // Automatically show the appropriate menu based on the mapped state
-        /*switch (mappedState) {
-            case VISIT_LOCATION_MENU:
-                showVisitLocationMenu();
-                break;
-            case CHOOSE_CABIN_MENU:
-                showHandleRemoveCrewMembersMenu();
-                break;
-            case CHOOSE_PLANET_MENU:
-                showChoosePlanetMenu();
-                break;
-            case CHOOSE_CANNONS_MENU:
-                showChooseCannonsMenu();
-                break;
-            case CHOOSE_ENGINES_MENU:
-                showChooseEnginesMenu();
-                break;
-            case THROW_DICES_MENU:
-                showThrowDicesMenu();
-                break;
-            case ACCEPT_REWARD_MENU:
-                showAcceptTheRewardMenu();
-                break;
-            case HANDLE_SMALL_DANGEROUS_MENU:
-                showSmallDanObjMenu();
-                break;
-            case HANDLE_BIG_METEORITE_MENU:
-                showBigMeteoriteMenu();
-                break;
-            case HANDLE_BIG_SHOT_MENU:
-                showBigShotMenu();
-                break;
-            case HANDLE_CUBES_REWARD_MENU:
-                showHandleCubesRewardMenu();
-                break;
-            case EPIDEMIC_MENU:
-                showEpidemicMenu();
-                break;
-            case STARDUST_MENU:
-                showStardustMenu();
-                break;
-            case CHECK_SHIPBOARD_AFTER_ATTACK:
-                checkShipBoardAfterAttackMenu();
-                break;
-        }*/
-
                 // TODO clientCLI
         showCardStateMenu(mappedState);
     }
-
-    /*public ClientState cardStateToClientState(CardState cardState) {
-        switch (cardState) {
-            case VISIT_LOCATION:
-                return ClientState.VISIT_LOCATION_MENU;
-            case CHOOSE_PLANET:
-                return ClientState.CHOOSE_PLANET_MENU;
-            case CHOOSE_CANNONS:
-                return ClientState.CHOOSE_CANNONS_MENU;
-            case CHOOSE_ENGINES:
-                return ClientState.CHOOSE_ENGINES_MENU;
-            case THROW_DICES:
-                return ClientState.THROW_DICES_MENU;
-            case DANGEROUS_ATTACK:
-                // Determine specific type based on dangerous object
-                ClientDangerousObject obj = clientModel.getCurrDangerousObj();
-                if (obj != null) {
-                    String type = obj.getType();
-                    if (type.contains("Small")) {
-                        return ClientState.HANDLE_SMALL_DANGEROUS_MENU;
-                    } else if (type.contains("bigMeteorite")) {
-                        return ClientState.HANDLE_BIG_METEORITE_MENU;
-                    } else if (type.contains("bigShot")) {
-                        return ClientState.HANDLE_BIG_SHOT_MENU;
-                    }
-                }
-                return ClientState.HANDLE_SMALL_DANGEROUS_MENU;// Default
-            case ACCEPT_THE_REWARD:
-                return ClientState.ACCEPT_REWARD_MENU;
-            case HANDLE_CUBES_REWARD:
-                return ClientState.HANDLE_CUBES_REWARD_MENU;
-            case HANDLE_CUBES_MALUS:
-                return ClientState.HANDLE_CUBES_MALUS_MENU;
-            case REMOVE_CREW_MEMBERS:
-                return ClientState.CHOOSE_CABIN_MENU;
-            case EPIDEMIC:
-                return ClientState.EPIDEMIC_MENU;
-            case STARDUST:
-                return ClientState.STARDUST_MENU;
-            case CHECK_SHIPBOARD_AFTER_ATTACK:
-                return ClientState.CHECK_SHIPBOARD_AFTER_ATTACK;
-            default:
-                return ClientState.PLAY_CARD;
-        }
-    }*/
 
     @Override
     public void showBuildShipBoardMenu() {
@@ -1415,10 +1322,10 @@ public class ClientCLIView implements ClientView {
 //                ClientAbandonedShip ship = (ClientAbandonedShip) card;
 //                rewardStr = String.valueOf(ship.getReward());
 //                stepsStr = String.valueOf(ship.getStepsBack());
-//            } else if (card instanceof ClientSlaveTraders) {
-//                ClientSlaveTraders traders = (ClientSlaveTraders) card;
-//                rewardStr = String.valueOf(traders.getReward());
-//                stepsStr = String.valueOf(traders.getStepsBack());
+            } else if (card instanceof ClientSlaveTraders) {
+                ClientSlaveTraders traders = (ClientSlaveTraders) card;
+                rewardStr = String.valueOf(traders.getReward());
+                stepsStr = String.valueOf(traders.getStepsBack());
             }
         }
 
@@ -1585,6 +1492,8 @@ public class ClientCLIView implements ClientView {
 
         crewToRemove = card.getCrewMalus();
 
+        showMessage("\nYou need to remove " + crewToRemove + " crew member(s).", STANDARD);
+
         // Get cabins with crew
         Map<Coordinates, Cabin> cabinsWithCrew = clientModel.getShipboardOf(clientModel.getMyNickname())
                 .getCoordinatesAndCabinsWithCrew();
@@ -1608,36 +1517,15 @@ public class ClientCLIView implements ClientView {
             }
         }
 
+        if(card.getCrewMalus()>=clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size()) {
+            cabinInfo.append("You have not member enough. You must sacrifice all crew members.\n");
+            showMessage(cabinInfo.toString(), STANDARD);
+            showMessage("ATTENTION! you will be eliminated", ERROR);
+        }
+
         showMessage(cabinInfo.toString(), STANDARD);
-        showMessage("\nYou need to remove " + crewToRemove + " crew member(s).", STANDARD);
         showMessage("Enter coordinates of a cabin to remove crew from (row column) or 'done' when finished: ", ASK);
 
-//        setClientState(ClientState.CHOOSE_CABIN_MENU);
-//
-//        // Mostra la nave per visualizzare le cabine
-//        this.showMyShipBoard();
-//
-//        // Cerca di trovare il numero di membri dell'equipaggio da rimuovere
-//        String cardName = clientModel.getCurrAdventureCard();
-//        String crewStr = "";
-//        for (String line : cardName.split("\n")) {
-//            if (line.contains("Crew Lost:") || line.contains("crewMalus")) {
-//                crewStr = line.replaceAll(".*[Cc]rew\\s?(Lost|Malus):\\s+x(\\d+).*", "$2").trim();
-//                break;
-//            }
-//        }
-//
-//        int crewToRemove = 1;
-//        try {
-//            if (!crewStr.isEmpty()) {
-//                crewToRemove = Integer.parseInt(crewStr);
-//            }
-//        } catch (NumberFormatException e) {
-//            // Fallback a un valore predefinito
-//        }
-//
-//        showMessage("\nYou need to remove " + crewToRemove + " crew member(s).", STANDARD);
-//        showMessage("Enter coordinates of a cabin to remove crew from: ", ASK);
     }
 
     @Override
@@ -2845,7 +2733,7 @@ public class ClientCLIView implements ClientView {
                     }
                 }
             } else {
-                if(card.getCrewMalus() - selectedCabins.size() == 0) {
+                if(card.getCrewMalus() - selectedCabins.size() == 0 || selectedCabins.size()==clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size()) {
                     showMessage("You cannot select more cabin. Please press done: ", ASK);
                     return;
                 }
@@ -2872,7 +2760,7 @@ public class ClientCLIView implements ClientView {
                     showMessage("No occupied cabin at these coordinates.", ERROR);
                 }
             }
-            if((card.getCrewMalus() - selectedCabins.size()) == 0)
+            if((card.getCrewMalus() - selectedCabins.size()) == 0 || selectedCabins.size()==clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size())
                showMessage("You have completed your choices, please press done: ", ASK);
             else
                 showMessage("You still need to remove " + (card.getCrewMalus() - selectedCabins.size()) +" crew member(s). Enter another cabin coordinate: ", ASK);
