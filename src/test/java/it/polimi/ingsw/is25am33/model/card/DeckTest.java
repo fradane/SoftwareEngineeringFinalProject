@@ -28,8 +28,8 @@ class DeckTest {
             @Override
             public void notifyAllClients(ThrowingBiConsumer<String, CallableOnClientController, IOException> consumer) {}
         };
-        deck.setGameContext(dummyGameContext);
-        dummyGameModel.setGameContext(dummyGameContext);
+        deck.setGameClientNotifier(dummyGameContext);
+        dummyGameModel.setGameClientNotifier(dummyGameContext);
     }
 
     @Test

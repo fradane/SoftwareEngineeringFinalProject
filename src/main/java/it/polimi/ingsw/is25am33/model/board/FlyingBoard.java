@@ -15,7 +15,7 @@ public abstract class FlyingBoard {
     private final Set<Player> outPlayers;
     protected int runLength;
     protected final Map<Player, Integer> ranking;
-    protected GameClientNotifier gameContext;
+    protected GameClientNotifier gameClientNotifier;
 
     /**
      * Constructor to initialize runLength, outPlayers, and ranking.
@@ -28,8 +28,8 @@ public abstract class FlyingBoard {
         this.ranking = new ConcurrentHashMap<>();
     }
 
-    public void setGameContext(GameClientNotifier gameContext) {
-        this.gameContext = gameContext;
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
+        this.gameClientNotifier = gameClientNotifier;
     }
 
     /**
@@ -63,12 +63,16 @@ public abstract class FlyingBoard {
      *
      * @param player The player to be marked as out.
      */
-    public void addOutPlayer(Player player) {
+    public void addOutPlayer(Player player, boolean isLandingVoluntarily) {
         outPlayers.add(player);
         ranking.remove(player);
+        player.setEarlyLanded(true);
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyEliminatedPlayer(nicknameToNotify, player.getNickname());
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+            if(isLandingVoluntarily)
+                clientController.notifyPlayerEarlyLanded(nicknameToNotify, player.getNickname());
+            else
+                clientController.notifyEliminatedPlayer(nicknameToNotify, player.getNickname());
         });
     }
 
@@ -100,7 +104,7 @@ public abstract class FlyingBoard {
                 .filter(player -> maxPosition - ranking.get(player) > runLength)
                 .collect(Collectors.toList());
 
-        playersToRemove.forEach(this::addOutPlayer);
+        playersToRemove.forEach(player -> addOutPlayer(player, false));
         ranking.keySet().removeAll(playersToRemove);
     }
 
@@ -125,7 +129,7 @@ public abstract class FlyingBoard {
 
         int finalNewPosition = newPosition;
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyRankingUpdate(nicknameToNotify,player.getNickname(), finalNewPosition);
         });
 

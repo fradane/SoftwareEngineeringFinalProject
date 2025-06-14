@@ -574,6 +574,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
+    public void playerWantsToLand(String nickname) throws IOException {
+        //TODO
+    }
+
+    @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPicksVisibleComponent");
         outMessage.setParamInt(choice);

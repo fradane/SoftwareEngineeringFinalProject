@@ -4,7 +4,6 @@ import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedStation;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
-import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
@@ -201,7 +200,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
             System.out.println("Added " + cube + " to storage");
         }
 
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
         });
 

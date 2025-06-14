@@ -17,6 +17,7 @@ import it.polimi.ingsw.is25am33.model.component.Storage;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import org.jetbrains.annotations.NotNull;
 
 import java.rmi.RemoteException;
@@ -1314,6 +1315,14 @@ public class ClientCLIView implements ClientView {
             showMessage("The colored cabins are those where you lost an infected crew membership", STANDARD);
         }else
             showMessage("You had no infected crew membership", STANDARD);
+    }
+
+    @Override
+    public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
+        setClientState(END_GAME_PHASE);
+        //TODO
+
+        showMessage("Press any key to leave the game", ASK);
     }
 
     /**
@@ -2944,6 +2953,9 @@ public class ClientCLIView implements ClientView {
         } else if (input.equals("rank")) {
             showCurrentRanking();
             return;
+        } else if (input.equals("land")){
+            clientController.land();
+            return;
         }
 
         try {
@@ -3364,6 +3376,11 @@ public class ClientCLIView implements ClientView {
 
                 case CANNOT_VISIT_LOCATION:
                     clientController.playerWantsToAcceptTheReward(clientController.getNickname(), false);
+                    break;
+
+                case END_GAME_PHASE:
+                    //TODO controllare che il metodo corretto da chiamare sia leaveGame
+                    clientController.leaveGame();
                     break;
 
 

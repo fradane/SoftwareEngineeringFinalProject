@@ -30,7 +30,7 @@ public class Deck {
     private final List<AdventureCard> littleNotVisibleDeck;
     private final List<List<String>> littleVisibleDecksString;
     private final Stack<AdventureCard> gameDeck;
-    private GameClientNotifier gameContext;
+    private GameClientNotifier gameClientNotifier;
     private final List<Boolean> isLittleDeckFree = new ArrayList<>(List.of(true, true, true));
 
     /**
@@ -49,8 +49,8 @@ public class Deck {
         gameDeck = new Stack<>();
     }
 
-    public void setGameContext(GameClientNotifier gameContext){
-        this.gameContext = gameContext;
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier){
+        this.gameClientNotifier = gameClientNotifier;
     }
 
     /**
@@ -101,7 +101,7 @@ public class Deck {
 
         mapLittleDecksToString();
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyVisibleDeck(nicknameToNotify, littleVisibleDecksString);
         });
 

@@ -14,7 +14,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActivator {
 
@@ -169,7 +168,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             System.out.println("Added " + cube + " to storage");
         }
 
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
         });
 

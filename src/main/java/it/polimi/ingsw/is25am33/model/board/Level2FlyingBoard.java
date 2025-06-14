@@ -3,7 +3,6 @@ package it.polimi.ingsw.is25am33.model.board;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
-import java.rmi.RemoteException;
 import java.util.*;
 
 /**
@@ -63,7 +62,7 @@ public class Level2FlyingBoard extends FlyingBoard {
     @Override
     public int getCreditsForPosition(Player player) {
         int index = getCurrentRanking().indexOf(player);
-        return credits.get(index);
+        return index >= 0 ? credits.get(index) : 0;
     }
 
     @Override
@@ -73,7 +72,7 @@ public class Level2FlyingBoard extends FlyingBoard {
             int initialPosition = initialPositionIterator.next();
             ranking.put(player, initialPosition);
 
-            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyRankingUpdate(nicknameToNotify, player.getNickname(), initialPosition);
             });
 

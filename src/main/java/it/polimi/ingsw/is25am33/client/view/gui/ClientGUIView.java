@@ -4,6 +4,7 @@ package it.polimi.ingsw.is25am33.client.view.gui;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,11 @@ public abstract class ClientGUIView implements ClientView {
 
     @Override
     public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
+        //TODO
+    }
+
+    @Override
+    public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
         //TODO
     }
 

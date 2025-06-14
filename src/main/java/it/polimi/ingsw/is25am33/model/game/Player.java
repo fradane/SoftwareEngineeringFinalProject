@@ -10,9 +10,10 @@ import java.io.Serializable;
 public class Player implements Serializable {
     private final String nickname;
     private int ownedCredits;
-    private GameClientNotifier gameContext;
+    private GameClientNotifier GameClientNotifier;
     private final ShipBoard personalBoard;
     private final PlayerColor playerColor;
+    private boolean isEarlyLanded;
 
     public Player(String nickname, ShipBoard personalBoard, PlayerColor playerColor) {
         this.nickname = nickname;
@@ -25,12 +26,12 @@ public class Player implements Serializable {
         return playerColor;
     }
 
-    public void setGameContext(GameClientNotifier gameContext) {
-        this.gameContext = gameContext;
+    public void setGameClientNotifier(GameClientNotifier GameClientNotifier) {
+        this.GameClientNotifier = GameClientNotifier;
     }
 
-    public GameClientNotifier getGameContext() {
-        return gameContext;
+    public GameClientNotifier getGameClientNotifier() {
+        return GameClientNotifier;
     }
 
     public String getNickname() {
@@ -41,7 +42,7 @@ public class Player implements Serializable {
 
         ownedCredits += number;
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        GameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyPlayerCredits(nicknameToNotify, nickname, ownedCredits);
         });
 
@@ -63,5 +64,12 @@ public class Player implements Serializable {
         this.ownedCredits = ownedCredits;
     }
 
+    public boolean isEarlyLanded() {
+        return isEarlyLanded;
+    }
+
+    public void setEarlyLanded(boolean earlyLanded) {
+        isEarlyLanded = earlyLanded;
+    }
 }
 

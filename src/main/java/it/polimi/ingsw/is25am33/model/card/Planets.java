@@ -105,11 +105,11 @@ public class Planets extends AdventureCard implements PlayerMover {
 
             String currPlayerNickname = gameModel.getCurrPlayer().getNickname();
 
-            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyPlayerVisitedPlanet(nicknameToNotify, currPlayerNickname, clientCard);
             });
 
-            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyCurrAdventureCardUpdate(nicknameToNotify, clientCard);
             });
 
@@ -218,14 +218,14 @@ public class Planets extends AdventureCard implements PlayerMover {
             System.out.println("Added " + cube + " to storage");
         }
 
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
         });
 
         // Muovi il giocatore indietro
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
         });
 

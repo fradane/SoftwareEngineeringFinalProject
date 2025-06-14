@@ -9,11 +9,8 @@ import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.io.Serializable;
-import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.function.BiConsumer;
 
 public abstract class AdventureCard implements Serializable {
 
@@ -86,7 +83,7 @@ public abstract class AdventureCard implements Serializable {
     public void setCurrState(CardState currState)  {
         this.currState = currState;
 
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyCardState(nicknameToNotify, currState);
         });
     }

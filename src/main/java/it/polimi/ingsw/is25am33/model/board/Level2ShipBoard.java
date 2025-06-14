@@ -31,8 +31,8 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
             {false, false, false, false, false, false, false, false, false, false, false, false}
     };
 
-    public Level2ShipBoard(PlayerColor playerColor, GameClientNotifier gameContext) {
-        super(playerColor, gameContext);
+    public Level2ShipBoard(PlayerColor playerColor, GameClientNotifier gameClientNotifier) {
+        super(playerColor, gameClientNotifier);
         this.validPositions = level2ValidPositions;
     }
 
@@ -47,7 +47,7 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
         notActiveComponents.add(focusedComponent);
         focusedComponent.setCurrState(ComponentState.BOOKED);
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyBookedComponent(nicknameToNotify, player.getNickname(), focusedComponent);
         });
 

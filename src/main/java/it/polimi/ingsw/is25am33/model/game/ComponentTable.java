@@ -14,15 +14,15 @@ public class ComponentTable {
     private final Stack<Component> hiddenComponents = new Stack<>();
     private final Map<Integer, Component> visibleComponents = new ConcurrentHashMap<>();
     private Integer currVisibleIndex = 1;
-    private GameClientNotifier gameContext;
+    private GameClientNotifier gameClientNotifier;
 
     public ComponentTable() {
         hiddenComponents.addAll(ComponentLoader.loadComponents());
         Collections.shuffle(hiddenComponents);
     }
 
-    public void setGameContext(GameClientNotifier gameContext) {
-        this.gameContext = gameContext;
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
+        this.gameClientNotifier = gameClientNotifier;
     }
 
     public Component pickHiddenComponent(){
@@ -40,7 +40,7 @@ public class ComponentTable {
         synchronized (visibleComponents) {
             visibleComponents.put(currVisibleIndex, component);
 
-            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyAddVisibleComponents(nicknameToNotify, currVisibleIndex, component);
             });
             currVisibleIndex++;
@@ -56,7 +56,7 @@ public class ComponentTable {
             return null;
         }
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyRemoveVisibleComponents(nicknameToNotify, index);
         });
 

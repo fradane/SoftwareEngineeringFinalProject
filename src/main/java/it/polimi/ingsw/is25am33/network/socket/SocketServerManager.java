@@ -11,6 +11,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import it.polimi.ingsw.is25am33.network.DNS;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerSerializer;
@@ -406,6 +407,16 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyInfectedCrewMembersRemoved");
         outMessage.setParamShipPart(cabinCoordinatesWithNeighbors);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyPlayersFinalData(String nicknameToNotify, List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) throws IOException {
+        //TODO
+    }
+
+    @Override
+    public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
+        //TODO
     }
 
     @Override

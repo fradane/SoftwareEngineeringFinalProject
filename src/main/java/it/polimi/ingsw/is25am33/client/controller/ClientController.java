@@ -19,6 +19,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.client.model.Hourglass;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 import javafx.collections.FXCollections;
@@ -1194,5 +1195,23 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyInfectedCrewMembersRemoved(String nicknameToNotify, Set<Coordinates> cabinCoordinatesWithNeighbors) throws IOException {
         view.showInfectedCrewMembersRemoved(cabinCoordinatesWithNeighbors);
+    }
+
+    @Override
+    public void notifyPlayersFinalData(String nicknameToNotify, List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) throws IOException {
+        view.showEndGameInfo(finalRanking, playersNicknamesWithPrettiestShip);
+    }
+
+    @Override
+    public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
+        //TODO
+    }
+
+    public void land() {
+        try {
+            serverController.playerWantsToLand(nickname);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
     }
 }

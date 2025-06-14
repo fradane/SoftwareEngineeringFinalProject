@@ -6,10 +6,7 @@ import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
-import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
-import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
+import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -36,7 +33,7 @@ public class GameModel {
     private GameState currGameState;
     private final Deck deck;
     private final ComponentTable componentTable;
-    private GameClientNotifier gameContext;
+    private GameClientNotifier GameClientNotifier;
 
     // attributes useful for hourglass restarting
     private final Object hourglassLock = new Object();
@@ -95,7 +92,7 @@ public class GameModel {
                     }
                 }
 
-                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                GameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                         clientController.notifyHourglassRestarted(nicknameToNotify, nickname, flipsLeft);
                 });
 
@@ -117,11 +114,11 @@ public class GameModel {
         return componentTable;
     }
 
-    public void createGameContext(ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
-        this.gameContext = new GameClientNotifier(this,clientControllers);
-        deck.setGameContext(gameContext);
-        flyingBoard.setGameContext(gameContext);
-        componentTable.setGameContext(gameContext);
+    public void createGameClientNotifier(ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
+        this.GameClientNotifier = new GameClientNotifier(this,clientControllers);
+        deck.setGameClientNotifier(GameClientNotifier);
+        flyingBoard.setGameClientNotifier(GameClientNotifier);
+        componentTable.setGameClientNotifier(GameClientNotifier);
     }
 
     public String getGameId() {
@@ -150,15 +147,15 @@ public class GameModel {
 
             this.currGameState = currGameState;
 
-            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            GameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyGameState(nicknameToNotify, currGameState);
             });
         }
         currGameState.run(this);
     }
 
-    public GameClientNotifier getGameContext() {
-        return gameContext;
+    public GameClientNotifier getGameClientNotifier() {
+        return GameClientNotifier;
     }
 
     public GameState getCurrGameState() {
@@ -181,7 +178,7 @@ public class GameModel {
 
         this.currDangerousObj = dangerousObj;
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        GameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyDangerousObjAttack(nicknameToNotify, currDangerousObj);
         });
 
@@ -210,7 +207,7 @@ public class GameModel {
 
         this.currPlayer = player;
 
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        GameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyCurrPlayerChanged(nicknameToNotify, player.getNickname());
         });
 
@@ -239,7 +236,7 @@ public class GameModel {
             // Map server card to client card
             ClientCard clientCard = currAdventureCard.toClientCard();
 
-            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            GameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyCurrAdventureCard(nicknameToNotify, clientCard, true);
             });
 
@@ -269,7 +266,7 @@ public class GameModel {
         setCurrPlayer(playerIterator.next());
         currAdventureCard.setCurrState(currAdventureCard.getFirstState());
 
-        getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+        getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyCardStarted(nicknameToNotify);
         });
     }
@@ -278,7 +275,7 @@ public class GameModel {
 
         Map<Player, Integer> x = new HashMap<>();
 
-        players.values().forEach(player -> {
+        players.values().stream().filter(player -> !player.isEarlyLanded()).forEach(player -> {
             x.put(player, player.getPersonalBoard().countExposed());
         });
 
@@ -294,33 +291,37 @@ public class GameModel {
 
             int credits = player.getOwnedCredits();
 
+            // gestisce già il fatto che un player potrebbe essere earlyLanded
             credits += flyingBoard.getCreditsForPosition(player);
 
+            // gestisce già il fatto che un player potrebbe essere earlyLanded
             if (getPlayerWithPrettiestShip().contains(player))
                 credits += flyingBoard.getPrettiestShipReward();
 
-            credits += player.getPersonalBoard().getStorages()
-                                .stream()
-                                .flatMap(storage -> storage.getStockedCubes().stream())
-                                .mapToInt(stockedCube -> {
-                                    switch (stockedCube) {
-                                        case BLUE -> {
-                                            return 1;
-                                        }
-                                        case GREEN -> {
-                                            return 2;
-                                        }
-                                        case YELLOW -> {
-                                            return 3;
-                                        }
-                                        case RED -> {
-                                            return 4;
-                                        }
-                                        default -> {
-                                            return 0;
-                                        }
-                                    }
-                                }).sum();
+            int creditsForStockedCubes = player.getPersonalBoard().getStorages()
+                    .stream()
+                    .flatMap(storage -> storage.getStockedCubes().stream())
+                    .mapToInt(stockedCube -> {
+                        switch (stockedCube) {
+                            case BLUE -> {
+                                return 1;
+                            }
+                            case GREEN -> {
+                                return 2;
+                            }
+                            case YELLOW -> {
+                                return 3;
+                            }
+                            case RED -> {
+                                return 4;
+                            }
+                            default -> {
+                                return 0;
+                            }
+                        }
+                    }).sum();
+
+            credits += player.isEarlyLanded() ? creditsForStockedCubes/2 : creditsForStockedCubes;
 
             credits -= player.getPersonalBoard().getNotActiveComponents().size();
 
@@ -330,10 +331,10 @@ public class GameModel {
     }
 
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController){
-        gameContext.getClientControllers().put(nickname, clientController);
-        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color,gameContext) : new Level2ShipBoard(color, gameContext);
+        GameClientNotifier.getClientControllers().put(nickname, clientController);
+        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color, GameClientNotifier) : new Level2ShipBoard(color, GameClientNotifier);
         Player player = new Player(nickname, shipBoard, color);
-        player.setGameContext(gameContext);
+        player.setGameClientNotifier(GameClientNotifier);
         players.put(nickname, player);
         shipBoard.setPlayer(player);
     }
@@ -365,7 +366,7 @@ public class GameModel {
                 if (flyingBoard.getCurrentRanking().size() == maxPlayers)
                     setCurrGameState(GameState.CHECK_SHIPBOARD);
                 else
-                    gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+                    GameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                         clientController.notifyFirstToEnter(nicknameToNotify);
                     });
             }
@@ -393,7 +394,7 @@ public class GameModel {
                 .map(Player::getNickname)
                 .collect(Collectors.toSet());
 
-        gameContext.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
+        GameClientNotifier.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
             try {
                 Player player = players.get(nicknameToNotify);
                 ShipBoard shipBoard = player.getPersonalBoard();
@@ -415,7 +416,7 @@ public class GameModel {
                 .map(Player::getNickname)
                 .collect(Collectors.toSet());
 
-        gameContext.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
+        GameClientNotifier.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
             try {
                 Player player = players.get(nicknameToNotify);
                 ShipBoard shipBoard = player.getPersonalBoard();
@@ -444,12 +445,12 @@ public class GameModel {
             }
         }
     }
-    public void setGameContext(GameClientNotifier gameContext) {
-        this.gameContext = gameContext;
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
+        this.GameClientNotifier = gameClientNotifier;
     }
 
     public void notifyStopHourglass() {
-        gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+        GameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyStopHourglass(nicknameToNotify);
         });
     }
@@ -467,7 +468,7 @@ public class GameModel {
             setCurrGameState(GameState.CREATE_DECK);
         } else {
             // In modalità normale, notifica i client di iniziare la fase di scelta
-            gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
+            GameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyCrewPlacementPhase(nicknameToNotify);
             });
         }
@@ -506,4 +507,17 @@ public class GameModel {
         }
     }
 
+    public List<PlayerFinalData> getRankingWithPlayerFinalData() {
+
+
+        List<PlayerFinalData> finalRankingWithPlayerFinalData = currRanking.stream().map(player -> {
+            int credits = player.getOwnedCredits();
+            boolean isEarlyLanded = player.isEarlyLanded();
+            List<CargoCube> allOwnedCubes = player.getPersonalBoard().getStorages().stream().flatMap(storage -> storage.getStockedCubes().stream()).collect(Collectors.toList());
+            int lostComponents = player.getPersonalBoard().getNotActiveComponents().size();
+            return new PlayerFinalData(credits, isEarlyLanded, allOwnedCubes, lostComponents);
+        }).collect(Collectors.toList());
+
+        return finalRankingWithPlayerFinalData;
+    }
 }

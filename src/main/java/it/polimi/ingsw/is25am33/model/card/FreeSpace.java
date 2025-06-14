@@ -60,7 +60,7 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
 
         // check whether the declared engine power equals 0, in this case the player must be disqualified
         if (stepsForward == 0) {
-            gameModel.getFlyingBoard().addOutPlayer(gameModel.getCurrPlayer());
+            gameModel.getFlyingBoard().addOutPlayer(gameModel.getCurrPlayer(), false);
         } else {
             chosenBatteryBoxes.forEach(BatteryBox::useBattery);
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsForward);

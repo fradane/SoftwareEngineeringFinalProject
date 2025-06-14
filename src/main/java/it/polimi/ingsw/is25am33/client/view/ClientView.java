@@ -10,6 +10,7 @@ import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 
 import java.util.List;
 import java.util.Map;
@@ -220,4 +221,6 @@ public interface ClientView {
     void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips);
 
     void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors);
+
+    void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip);
 }

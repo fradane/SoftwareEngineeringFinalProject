@@ -13,8 +13,8 @@ import java.util.Set;
 
 public class Level1ShipBoard extends ShipBoard implements ShipBoardClient {
 
-    public Level1ShipBoard(PlayerColor color, GameClientNotifier gameContext) {
-        super(color,gameContext);
+    public Level1ShipBoard(PlayerColor color, GameClientNotifier gameClientNotifier) {
+        super(color, gameClientNotifier);
     }
 
     @Override

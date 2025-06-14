@@ -53,7 +53,7 @@ class ComponentTableTest {
         };
 
         // Assign the mock context to the component table
-        table.setGameContext(mockContext);
+        table.setGameClientNotifier(mockContext);
 
         // Add 10 components to the visible list and store the 9th one for later verification
         Component chosenComponent = null;
