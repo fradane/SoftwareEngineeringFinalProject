@@ -33,7 +33,7 @@ public class Deck {
     private GameClientNotifier gameClientNotifier;
     private final List<Boolean> isLittleDeckFree = new ArrayList<>(List.of(true, true, true));
 
-    public void setGameContext(GameClientNotifier gameClientNotifier){
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier){
         this.gameClientNotifier = gameClientNotifier;
     }
 
@@ -156,30 +156,38 @@ public class Deck {
 //        cards.addAll(Deck.loadStardustFromJson());
 //        cards.addAll(Deck.loadWarFieldFromJson());
 
-        cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
+                cards.addAll(Deck.loadFreeSpaceFromJson());
+                cards.addAll(Deck.loadFreeSpaceFromJson());
+                cards.addAll(Deck.loadFreeSpaceFromJson());
+                cards.addAll(Deck.loadFreeSpaceFromJson());
+                cards.addAll(Deck.loadFreeSpaceFromJson());
+                cards.addAll(Deck.loadFreeSpaceFromJson());
+                cards.addAll(Deck.loadFreeSpaceFromJson());
+                cards.addAll(Deck.loadFreeSpaceFromJson());
+                cards.addAll(Deck.loadFreeSpaceFromJson());
 
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
-                cards.addAll(Deck.loadSlaveTradersFromJson());
+
+
+
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());//        cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+//                cards.addAll(Deck.loadWarFieldFromJson());
+
+
+
 
 
 

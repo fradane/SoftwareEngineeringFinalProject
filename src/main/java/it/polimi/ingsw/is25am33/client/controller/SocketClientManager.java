@@ -516,6 +516,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                         clientController.notifyCoordinateOfComponentHit(nickname, notification.getParamString(), notification.getParamCoordinates());
                     }
                     break;
+                case "notifyLeastResourcedPlayer":
+                    if (clientController != null) {
+                        clientController.notifyLeastResourcedPlayer(nickname, notification.getParamString());
+                    }
+                    break;
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
@@ -723,6 +728,12 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     @Override
     public void stardustEvent(String nickname) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "stardustEvent");
+        out.println(outMessage);
+    }
+
+    @Override
+    public void evaluatedCrewMembers(String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "stardustEvent");
         out.println(outMessage);
     }

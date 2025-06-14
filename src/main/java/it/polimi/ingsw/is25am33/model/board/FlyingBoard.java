@@ -27,7 +27,7 @@ public abstract class FlyingBoard {
         this.ranking = new HashMap<>();
     }
 
-    public void setGameContext(GameClientNotifier gameClientNotifier) {
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
     }
 

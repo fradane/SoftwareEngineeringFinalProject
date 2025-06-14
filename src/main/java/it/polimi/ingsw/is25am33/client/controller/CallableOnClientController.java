@@ -107,4 +107,6 @@ public interface CallableOnClientController extends Remote {
     void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException;
 
     void notifyCoordinateOfComponentHit(String nicknameToNotify, String nickname, Coordinates coordinates) throws IOException;
+
+    void notifyLeastResourcedPlayer(String nicknameToNotify, String nicknameAndMotivations) throws IOException;
 }

@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static it.polimi.ingsw.is25am33.client.view.tui.ClientState.EVALUATE_CREW_MEMBERS_MENU;
+
 /**
  * Interfaccia che definisce le operazioni di visualizzazione del client.
  * Può essere implementata sia da una CLI che da una GUI.
@@ -143,34 +145,6 @@ public interface ClientView {
 
     void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents);
 
-//    BiConsumer<CallableOnGameController, String> showVisitLocationMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showThrowDicesMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showChoosePlanetMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showChooseEnginesMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showChooseCannonsMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showSmallDanObjMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showBigMeteoriteMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showBigShotMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showHandleRemoveCrewMembersMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showEpidemicMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showStardustMenu();
-//
-//    BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu();
-
     void showLittleDeck(int littleDeckChoice);
 
     void updateTimeLeft(int timeLeft, int flipsLeft);
@@ -230,6 +204,8 @@ public interface ClientView {
 
     void checkShipBoardAfterAttackMenu();
 
+    void showCrewMembersInfo();
+
     // ---------------------------------------------------
 
 
@@ -285,6 +261,8 @@ public interface ClientView {
                 return ClientState.STARDUST_MENU;
             case CHECK_SHIPBOARD_AFTER_ATTACK:
                 return ClientState.CHECK_SHIPBOARD_AFTER_ATTACK;
+            case EVALUATE_CREW_MEMBERS:
+                return EVALUATE_CREW_MEMBERS_MENU;
             default:
                 return ClientState.PLAY_CARD;
         }
@@ -335,6 +313,9 @@ public interface ClientView {
             case CHECK_SHIPBOARD_AFTER_ATTACK:
                 checkShipBoardAfterAttackMenu();
                 break;
+            case EVALUATE_CREW_MEMBERS_MENU:
+                showCrewMembersInfo();
+            break;
         }
     }
 }

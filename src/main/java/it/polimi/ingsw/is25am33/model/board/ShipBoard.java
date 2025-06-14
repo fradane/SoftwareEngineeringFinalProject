@@ -109,7 +109,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return incorrectlyPositionedComponentsCoordinates;
     }
 
-    public void setGameContext(GameClientNotifier gameClientNotifier) {
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
     }
 
@@ -812,7 +812,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         double singleCannonsFirePower = singleCannons.mapToDouble(cannon -> cannon.getFireDirection() == NORTH ? 1 : 0.5).sum();
         double doubleCannonsFirePower = doubleCannons.mapToDouble(cannon -> cannon.getFireDirection() == NORTH ? 2 : 1).sum();
 
-        return singleCannonsFirePower + doubleCannonsFirePower;
+        return singleCannonsFirePower + doubleCannonsFirePower + getPurpleAlien()*2;
     }
 
     /**
@@ -860,13 +860,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @return The total engine power.
      */
     public int countTotalEnginePower(List<Engine> enginesToCountEnginePower) {
-            return enginesToCountEnginePower.size()*2+getSingleEngines().size();
-//        Stream<Engine> singleEngines = getSingleEngines().stream().filter(engine -> !(engine instanceof DoubleEngine));
-//        Stream<DoubleEngine> doubleEngines = enginesToCountEnginePower.stream().filter(engine -> engine instanceof DoubleEngine).map(engine -> (DoubleEngine) engine);
-//
-//        int totalEnginePower = (int) (singleEngines.count() + 2 * doubleEngines.count());
-//
-//        return totalEnginePower;
+            return enginesToCountEnginePower.size()*2+getSingleEngines().size()+getPurpleAlien()*2;
     }
 
     /**
@@ -1306,6 +1300,22 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
 
         return false; // Non è un alieno
+    }
+
+    public int getPurpleAlien(){
+        for(CrewMember crewMember: getCrewMembers()){
+            if(crewMember == CrewMember.PURPLE_ALIEN)
+                return 1;
+        }
+        return 0;
+    }
+
+    public int getBrownAlien(){
+        for(CrewMember crewMember: getCrewMembers()){
+            if(crewMember == CrewMember.BROWN_ALIEN)
+                return 1;
+        }
+        return 0;
     }
 
     public MainCabin getMainCabin(){

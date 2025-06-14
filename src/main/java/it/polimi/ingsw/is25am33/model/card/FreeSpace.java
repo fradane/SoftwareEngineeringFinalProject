@@ -11,7 +11,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class FreeSpace extends AdventureCard implements PlayerMover {
@@ -79,7 +78,7 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
 
             Player currentPlayer=gameModel.getCurrPlayer();
 
-            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
             });
 

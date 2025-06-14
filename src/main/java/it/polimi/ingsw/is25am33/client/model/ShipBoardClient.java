@@ -64,7 +64,7 @@ public interface ShipBoardClient {
      *
      * @param gameClientNotifier The game context to set
      */
-    void setGameContext(GameClientNotifier gameClientNotifier);
+    void setGameClientNotifier(GameClientNotifier gameClientNotifier);
 
     /**
      * Sets the focused component

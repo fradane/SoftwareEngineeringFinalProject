@@ -3,7 +3,6 @@ package it.polimi.ingsw.is25am33.model.card;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientSlaveTraders;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
@@ -82,7 +81,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
         }
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
         });
 
@@ -131,7 +130,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
                 .toList();
 
         removeMemberProcess(chosenCabins, crewMalus);
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoardAsMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
         });
 

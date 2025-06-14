@@ -4,8 +4,8 @@
     "level": 1,
     "categories": {
       "EVALUATE_CREW_MEMBERS": "STEPS_BACK",
-      "EVALUATE_ENGINE_POWER": "REMOVE_CREW_MEMBERS",
-      "EVALUATE_CANNON_POWER": "DANGEROUS_ATTACK"
+      "CHOOSE_ENGINES": "REMOVE_CREW_MEMBERS",
+      "CHOOSE_CANNONS": "DANGEROUS_ATTACK"
     },
     "stepsBack": -3,
     "crewMalus": 2,
@@ -17,8 +17,8 @@
     "imageName": "GT-cards_II_IT_0116.jpg",
     "level": 2,
     "categories": {
-      "EVALUATE_CANNON_POWER": "STEPS_BACK",
-      "EVALUATE_ENGINE_POWER": "HANDLE_CUBES_MALUS",
+      "CHOOSE_CANNONS": "STEPS_BACK",
+      "CHOOSE_ENGINES": "HANDLE_CUBES_MALUS",
       "EVALUATE_CREW_MEMBERS": "DANGEROUS_ATTACK"
     },
     "stepsBack": -4,

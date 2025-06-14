@@ -91,7 +91,7 @@ public abstract class AdventureCard {
     public void setCurrState(CardState currState)  {
         this.currState = currState;
 
-        gameModel.getGameContext().notifyAllClients(
+        gameModel.getGameClientNotifier().notifyAllClients(
                 (nicknameToNotify, clientController) -> clientController.notifyCardState(nicknameToNotify, currState)
         );
     }

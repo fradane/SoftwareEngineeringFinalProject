@@ -5,13 +5,11 @@ import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.client.model.card.ClientMeteoriteStorm;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.card.interfaces.ShotSenderCard;
 import it.polimi.ingsw.is25am33.model.component.Cannon;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
-import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
 import it.polimi.ingsw.is25am33.model.component.Shield;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Meteorite;
@@ -150,7 +148,7 @@ public class MeteoriteStorm extends AdventureCard {
 
                 chosenBatteryBox.useBattery();
 
-                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
 
@@ -169,7 +167,7 @@ public class MeteoriteStorm extends AdventureCard {
 
             if(chosenShield != null && chosenBatteryBox != null){
                 chosenBatteryBox.useBattery();
-                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
             }
@@ -199,7 +197,7 @@ public class MeteoriteStorm extends AdventureCard {
 
                 chosenBatteryBox.useBattery();
 
-                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
 
@@ -220,7 +218,7 @@ public class MeteoriteStorm extends AdventureCard {
 
             if(chosenDoubleCannon != null && chosenBatteryBox != null) {
                 chosenBatteryBox.useBattery();
-                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
             }

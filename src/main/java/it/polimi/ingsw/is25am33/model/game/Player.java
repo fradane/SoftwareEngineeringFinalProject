@@ -25,12 +25,8 @@ public class Player implements Serializable {
         return playerColor;
     }
 
-    public void setGameContext(GameClientNotifier gameClientNotifier) {
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
-    }
-
-    public GameClientNotifier getGameContext() {
-        return gameClientNotifier;
     }
 
     public String getNickname() {

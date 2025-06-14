@@ -39,7 +39,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     public GameController(String gameId, int maxPlayers, boolean isTestFlight, DNS dns) throws RemoteException {
         this.gameModel = new GameModel(gameId, maxPlayers, isTestFlight);
-        this.gameModel.createGameContext(clientControllers);
+        this.gameModel.createGameClientNotifier(clientControllers);
         this.dns = dns;
     }
 
@@ -123,8 +123,8 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         clientControllers.remove(nickname);
         System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
         //se sono il primo a chiamare e ci sono altri client notifico e chiudo altrimenti se ho rimosso gia tutti i client chiudo il gioco
-        if(isFirst && !gameModel.getGameContext().getClientControllers().isEmpty())
-            gameModel.getGameContext().notifyDisconnection(nickname);
+        if(isFirst && !gameModel.getGameClientNotifier().getClientControllers().isEmpty())
+            gameModel.getGameClientNotifier().notifyDisconnection(nickname);
         else if(clientControllers.isEmpty()) {
             dns.removeGame(getGameInfo().getGameId());
             System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
@@ -198,7 +198,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             applyCrewChoices(shipBoard, choices);
 
             // Notifica tutti i client
-            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyCrewPlacementComplete(nicknameToNotify, nickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
             });
 
@@ -206,7 +206,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             gameModel.markCrewPlacementCompleted(nickname);
         } catch (IllegalArgumentException e) {
             // Notifica l'errore solo al client che ha inviato scelte non valide
-            gameModel.getGameContext().notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
+            gameModel.getGameClientNotifier().notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
                 System.out.println("ERRORE submitCrewChoices: " + e.getMessage());
                 e.printStackTrace();
                 //TODO capire se ha senso aggiugnere un metodo notifyError per mostrare gli erorri generici
@@ -453,6 +453,15 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getCurrAdventureCard().play(choice);
     }
 
+    public void evaluatedCrewMembers(String nickname) throws RemoteException{
+
+        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
+                .Builder()
+                .build();
+
+        gameModel.getCurrAdventureCard().play(choice);
+    }
+
     @Override
     public boolean playerWantsToWatchLittleDeck(String nickname, int littleDeckChoice) {
         return gameModel.getDeck().isLittleDeckAvailable(littleDeckChoice);
@@ -482,7 +491,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             // Memorizza le ship parts per questo giocatore
             temporaryShipParts.put(nickname, shipParts);
 
-            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 try {
                     Component[][] shipMatrix = shipBoard.getShipMatrix();
                     Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
@@ -529,7 +538,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             shipBoard.checkShipBoard();
 
 
-            gameModel.getGameContext().notifyAllClients( (nicknameToNotify, clientController) -> {
+            gameModel.getGameClientNotifier().notifyAllClients( (nicknameToNotify, clientController) -> {
                 try {
                     Component[][] shipMatrix = shipBoard.getShipMatrix();
                     Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
@@ -562,7 +571,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         List<PrefabShipInfo> prefabShips = PrefabShipFactory.getAvailablePrefabShips(gameModel.isTestFlight());
 
         // Notifica il client in modo asincrono
-        gameModel.getGameContext().notifyClients(
+        gameModel.getGameClientNotifier().notifyClients(
                 Set.of(nickname),
                 (nicknameToNotify, clientController) -> {
                     try {
@@ -608,7 +617,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             }
 
             // Notifica il client del successo
-            gameModel.getGameContext().notifyClients(
+            gameModel.getGameClientNotifier().notifyClients(
                     Set.of(nickname),
                     (nicknameToNotify, clientController) -> {
                         try {
@@ -619,12 +628,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                     }
             );
 
-            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyShipBoardUpdate(nicknameToNotify, nickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
             });
 
             // Notifica tutti i client della scelta
-            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyPlayerSelectedPrefabShip(nicknameToNotify, nickname, prefabShipInfo);
             });
 
@@ -635,7 +644,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     private void notifySelectionFailure(String nickname, String errorMessage) {
-        gameModel.getGameContext().notifyClients(
+        gameModel.getGameClientNotifier().notifyClients(
                 Set.of(nickname),
                 (nicknameToNotify, clientController) -> {
                     try {

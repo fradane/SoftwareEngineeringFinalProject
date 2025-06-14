@@ -2,7 +2,6 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
-import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.ThrowingBiConsumer;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
@@ -28,8 +27,8 @@ class DeckTest {
             @Override
             public void notifyAllClients(ThrowingBiConsumer<String, CallableOnClientController, IOException> consumer) {}
         };
-        deck.setGameContext(dummyGameClientNotifier);
-        dummyGameModel.setGameContext(dummyGameClientNotifier);
+        deck.setGameClientNotifier(dummyGameClientNotifier);
+        dummyGameModel.setGameClientNotifier(dummyGameClientNotifier);
     }
 
     @Test
@@ -229,7 +228,7 @@ class DeckTest {
     @Test
     void testCreateGameDeckWithTestFlightAddsAllCards() {
         GameModel testFlightGameModel = new GameModel(null, 2, true); // isTestFlight = true
-        deck.setGameContext(dummyGameModel.getGameContext());
+        deck.setGameClientNotifier(dummyGameModel.getGameClientNotifier());
         deck.setUpLittleDecks(testFlightGameModel);
         deck.createGameDeck(true); // Force add all loaded cards
 

@@ -262,6 +262,10 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).stardustEvent(nickname);
                 break;
 
+            case "evaluatedCrewMembers":
+                gameControllers.get(nickname).evaluatedCrewMembers(nickname);
+                break;
+
             case "notifyHourglassEnded":
                 gameControllers.get(nickname).notifyHourglassEnded(nickname);
                 break;
@@ -654,6 +658,12 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyCoordinateOfComponentHit");
         outMessage.setParamString(nickname);
         outMessage.setParamCoordinates(coordinates);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    public  void notifyLeastResourcedPlayer(String nicknameToNotify, String nicknameAndMotivations) throws IOException{
+        SocketMessage outMessage = new SocketMessage("server", "notifyLeastResourcedPlayer");
+        outMessage.setParamString(nicknameAndMotivations);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 

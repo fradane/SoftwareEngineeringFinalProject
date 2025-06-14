@@ -502,6 +502,13 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showCrewMembersInfo(){
+
+    }
+
+
+
+    @Override
     public void notifyHourglassStarted(int flipsLeft, String nickname) {
 
     }

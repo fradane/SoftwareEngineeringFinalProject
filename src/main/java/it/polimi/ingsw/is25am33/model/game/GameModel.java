@@ -120,11 +120,11 @@ public class GameModel {
         return componentTable;
     }
 
-    public void createGameContext(ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
+    public void createGameClientNotifier(ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
         this.gameClientNotifier = new GameClientNotifier(this,clientControllers);
-        deck.setGameContext(gameClientNotifier);
-        flyingBoard.setGameContext(gameClientNotifier);
-        componentTable.setGameContext(gameClientNotifier);
+        deck.setGameClientNotifier(gameClientNotifier);
+        flyingBoard.setGameClientNotifier(gameClientNotifier);
+        componentTable.setGameClientNotifier(gameClientNotifier);
     }
 
     public String getGameId() {
@@ -160,7 +160,7 @@ public class GameModel {
         currGameState.run(this);
     }
 
-    public GameClientNotifier getGameContext() {
+    public GameClientNotifier getGameClientNotifier() {
         return gameClientNotifier;
     }
 
@@ -335,7 +335,7 @@ public class GameModel {
         gameClientNotifier.getClientControllers().put(nickname, clientController);
         ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color, gameClientNotifier, false) : new Level2ShipBoard(color, gameClientNotifier, false);
         Player player = new Player(nickname, shipBoard, color);
-        player.setGameContext(gameClientNotifier);
+        player.setGameClientNotifier(gameClientNotifier);
         players.put(nickname, player);
         shipBoard.setPlayer(player);
     }
@@ -471,7 +471,7 @@ public class GameModel {
         }
     }
 
-    public void setGameContext(GameClientNotifier gameClientNotifier) {
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
     }
 

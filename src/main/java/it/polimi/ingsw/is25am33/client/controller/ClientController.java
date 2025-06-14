@@ -647,6 +647,18 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.showComponentHitInfo(coordinates);
     }
 
+    public  void notifyLeastResourcedPlayer(String nicknameToNotify, String nicknameAndMotivations){
+        view.showMessage(nicknameAndMotivations, STANDARD);
+    }
+
+    public void evaluatedCrewMembers(){
+        try{
+            serverController.evaluatedCrewMembers(nickname);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
     //Insieme di stati che non vanno notificati a meno che tu non sia il player di turno
     private boolean isStateRegardingCurrentPlayerOnly(CardState cardState){
         //TODO capire quali altri stati entrano in questa categoria e aggiungerli sotto. Probabilmente da togliere perchè tutti gli stati sono RegardingCurrentPlayerOnly
