@@ -11,7 +11,7 @@ import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
 import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.GuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewController;
-import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController;
+//import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.StartViewController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;

@@ -123,8 +123,8 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         clientControllers.remove(nickname);
         System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
         //se sono il primo a chiamare e ci sono altri client notifico e chiudo altrimenti se ho rimosso gia tutti i client chiudo il gioco
-        if(isFirst && !gameModel.getGameContext().getClientControllers().isEmpty())
-            gameModel.getGameContext().notifyDisconnection(nickname);
+        if(isFirst && !gameModel.getGameClientNotifier().getClientControllers().isEmpty())
+            gameModel.getGameClientNotifier().notifyDisconnection(nickname);
         else if(clientControllers.isEmpty()) {
             dns.removeGame(getGameInfo().getGameId());
             System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
@@ -487,15 +487,15 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                     Component[][] shipMatrix = shipBoard.getShipMatrix();
                     Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
                     Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
-                    if(shipParts.size() <= 1){
+                    if (shipParts.size() <= 1) {
                         shipBoard.checkShipBoard();
-                        if(incorrectlyPositionedComponentsCoordinates.isEmpty()) {
+                        if (incorrectlyPositionedComponentsCoordinates.isEmpty()) {
                             clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
 
-                        }else
+                        } else
                             clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
                     }//else if(shipParts.isEmpty())
-                     //   clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+                    //   clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
                     else
                         clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts, componentsPerType);
                 } catch (RemoteException e) {
@@ -503,7 +503,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 }
             });
 
-            if(shipParts.size() <= 1) //ovvero ho direttamente rimosso un componente
+            if (shipParts.size() <= 1) //ovvero ho direttamente rimosso un componente
                 // Controllo se tutte le navi sono corrette e in caso cambio la fase
                 gameModel.checkAndTransitionToNextPhase();
         }

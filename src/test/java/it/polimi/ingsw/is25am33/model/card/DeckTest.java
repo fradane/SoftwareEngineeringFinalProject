@@ -231,7 +231,7 @@ class DeckTest {
     @Test
     void testCreateGameDeckWithTestFlightAddsAllCards() {
         GameModel testFlightGameModel = new GameModel(null, 2, true); // isTestFlight = true
-        deck.setGameContext(dummyGameModel.getGameContext());
+        deck.setGameClientNotifier(dummyGameModel.getGameClientNotifier());
         deck.setUpLittleDecks(testFlightGameModel);
         deck.createGameDeck(true); // Force add all loaded cards
 

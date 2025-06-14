@@ -144,7 +144,7 @@ public class PlayerChoicesDataStructure implements Serializable {
    public List<Coordinates> getCabins() {
         return chosenCabins;
     }
-    public List<Storage> getStorage() {
+    public List<Coordinates> getStorage() {
         return chosenStorage;
     }
     public List<Coordinates> getDoubleCannons() {

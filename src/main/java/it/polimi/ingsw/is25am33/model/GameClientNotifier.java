@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
-
-public class GameClientNotifier {
 /**
  * Anche se il sistema utilizza un meccanismo di ping-pong per rilevare la disconnessione dei client,
  * manteniamo l'uso dei Future con timeout per evitare che una singola chiamata remota (RMI o socket)

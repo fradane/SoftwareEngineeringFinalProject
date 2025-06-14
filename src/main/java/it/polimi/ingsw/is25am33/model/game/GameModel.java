@@ -182,7 +182,7 @@ public class GameModel {
         this.currDangerousObj = dangerousObj;
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyDangerousObjAttack(nicknameToNotify, currDangerousObj);
+                clientController.notifyDangerousObjAttack(nicknameToNotify, new ClientDangerousObject(currDangerousObj.getDangerousObjType(), currDangerousObj.getDirection(), currDangerousObj.getCoordinate()));
         });
 
     }
@@ -334,7 +334,7 @@ public class GameModel {
 
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController){
         gameClientNotifier.getClientControllers().put(nickname, clientController);
-        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color, GameClientNotifier) : new Level2ShipBoard(color, GameClientNotifier);
+        ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color, gameClientNotifier, false) : new Level2ShipBoard(color, gameClientNotifier, false);
         Player player = new Player(nickname, shipBoard, color);
         player.setGameClientNotifier(gameClientNotifier);
         players.put(nickname, player);
@@ -424,15 +424,13 @@ public class GameModel {
                 .collect(Collectors.toSet());
 
         gameClientNotifier.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
-            try {
-                Player player = players.get(nicknameToNotify);
-                ShipBoard shipBoard = player.getPersonalBoard();
-                Component[][] shipMatrix = shipBoard.getShipMatrix();
-                Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
-                Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+            Player player = players.get(nicknameToNotify);
+            ShipBoard shipBoard = player.getPersonalBoard();
+            Component[][] shipMatrix = shipBoard.getShipMatrix();
+            Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
+            Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
 
-                clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
-
+            clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
         });
     }
 

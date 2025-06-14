@@ -150,7 +150,7 @@ public class MeteoriteStorm extends AdventureCard {
 
                 chosenBatteryBox.useBattery();
 
-                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
 
@@ -169,7 +169,7 @@ public class MeteoriteStorm extends AdventureCard {
 
             if(chosenShield != null && chosenBatteryBox != null){
                 chosenBatteryBox.useBattery();
-                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
             }
@@ -199,7 +199,7 @@ public class MeteoriteStorm extends AdventureCard {
 
                 chosenBatteryBox.useBattery();
 
-                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
 
@@ -220,7 +220,7 @@ public class MeteoriteStorm extends AdventureCard {
 
             if(chosenDoubleCannon != null && chosenBatteryBox != null) {
                 chosenBatteryBox.useBattery();
-                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
             }
