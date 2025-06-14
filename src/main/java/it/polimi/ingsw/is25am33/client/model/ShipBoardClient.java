@@ -243,7 +243,7 @@ public interface ShipBoardClient {
      *
      * @return A set of cabins that meet the adjacency criterion
      */
-    Set<Cabin> cabinWithNeighbors();
+    Set<Coordinates> getCabinCoordinatesWithNeighbors();
 
     /**
      * Checks whether there are no incorrectly placed components on the ship

@@ -9,6 +9,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 
 import java.io.IOException;
 import java.rmi.Remote;
@@ -104,4 +105,10 @@ public interface CallableOnClientController extends Remote {
     void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException;
 
     void notifyCoordinateOfComponentHit(String nicknameToNotify, String nickname, Coordinates coordinates) throws IOException;
+
+    void notifyInfectedCrewMembersRemoved(String nicknameToNotify, Set<Coordinates> cabinCoordinatesWithNeighbors) throws IOException;
+
+    void notifyPlayersFinalData(String nicknameToNotify, List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip ) throws IOException;
+
+    void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException;
 }

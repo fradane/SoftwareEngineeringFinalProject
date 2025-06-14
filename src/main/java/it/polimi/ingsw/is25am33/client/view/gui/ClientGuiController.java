@@ -9,12 +9,17 @@ import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.*;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
 import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
+import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.GuiController;
+import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewController;
+import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.ShipBoardViewController;
+import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.StartViewController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -162,6 +167,16 @@ public class ClientGuiController extends Application implements ClientView {
     public void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips) {
         if (buildAndCheckShipBoardController != null)
             buildAndCheckShipBoardController.showPrefabShipBoards(prefabShips);
+    }
+
+    @Override
+    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
+        //TODO
+    }
+
+    @Override
+    public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
+        //TODO
     }
 
     @Override

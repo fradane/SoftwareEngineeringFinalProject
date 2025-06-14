@@ -1,17 +1,14 @@
 package it.polimi.ingsw.is25am33.model;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
-import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
-import it.polimi.ingsw.is25am33.network.socket.SocketServerManager;
 
 import java.io.IOException;
-import java.net.SocketException;
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 
+public class GameClientNotifier {
 /**
  * Anche se il sistema utilizza un meccanismo di ping-pong per rilevare la disconnessione dei client,
  * manteniamo l'uso dei Future con timeout per evitare che una singola chiamata remota (RMI o socket)

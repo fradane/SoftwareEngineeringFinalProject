@@ -27,7 +27,7 @@ public abstract class FlyingBoard {
         this.ranking = new HashMap<>();
     }
 
-    public void setGameContext(GameClientNotifier gameClientNotifier) {
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
     }
 
@@ -63,12 +63,16 @@ public abstract class FlyingBoard {
      *
      * @param player The player to be marked as out.
      */
-    public void addOutPlayer(Player player) {
+    public void addOutPlayer(Player player, boolean isLandingVoluntarily) {
         outPlayers.add(player);
         ranking.remove(player);
+        player.setEarlyLanded(true);
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyEliminatedPlayer(nicknameToNotify, player.getNickname());
+            if(isLandingVoluntarily)
+                clientController.notifyPlayerEarlyLanded(nicknameToNotify, player.getNickname());
+            else
+                clientController.notifyEliminatedPlayer(nicknameToNotify, player.getNickname());
         });
     }
 
@@ -101,7 +105,7 @@ public abstract class FlyingBoard {
                 .filter(player -> maxPosition - ranking.get(player) > runLenght)
                 .collect(Collectors.toList());
 
-        playersToRemove.forEach(this::addOutPlayer);
+        playersToRemove.forEach(player -> addOutPlayer(player, false));
         ranking.keySet().removeAll(playersToRemove);
     }
 

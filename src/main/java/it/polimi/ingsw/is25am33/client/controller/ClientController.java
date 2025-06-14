@@ -5,7 +5,6 @@ import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
-import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.client.model.card.CrewMalusCard;
@@ -23,6 +22,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.client.model.Hourglass;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 import javafx.collections.FXCollections;
@@ -658,7 +658,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         || cardState == CardState.DANGEROUS_ATTACK
         || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK
         || cardState == CardState.ACCEPT_THE_REWARD
-        || cardState == CardState.CHOOSE_CANNONS;
+        || cardState == CardState.CHOOSE_CANNONS
+        || cardState == CardState.EPIDEMIC;
 
     }
 
@@ -938,10 +939,17 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             return;
         }
 
-        ClientAbandonedShip shipCard = (ClientAbandonedShip) clientModel.getCurrAdventureCard();
+        // Handle both AbandonedShip and AbandonedStation
+        ClientCard currentCard = clientModel.getCurrAdventureCard();
+        int crewRequirement = 0;
+
+        if (currentCard instanceof CrewMalusCard) {
+            crewRequirement = ((CrewMalusCard) currentCard).getCrewMalus();
+        }
+
         int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
 
-        if (choice==true && totalCrew < shipCard.getCrewMalus()) {
+        if (choice==true && totalCrew < crewRequirement) {
             view.showMessage("You only have " + totalCrew + " crew members. you cannot visit the location", ERROR);
             view.showMessage("Your choice has been automatically set to false", STANDARD);
             choice=false;
@@ -1126,6 +1134,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         List<Storage> storages = new ArrayList<>();
 
+        //TODO rimuovere la conversione a List<Storage>
         if (!storageCoords.isEmpty()) {
             for (Coordinates coords : storageCoords) {
                 if (coords.isCoordinateInvalid()) {
@@ -1146,7 +1155,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenStorage(storages)
+                .setChosenStorage(storageCoords)
                 .build();
 
         try {
@@ -1227,6 +1236,29 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         } else {
             view.showError("Failed to select prefab ship: " + errorMessage);
             view.showBuildShipBoardMenu();
+        }
+    }
+
+    @Override
+    public void notifyInfectedCrewMembersRemoved(String nicknameToNotify, Set<Coordinates> cabinCoordinatesWithNeighbors) throws IOException {
+        view.showInfectedCrewMembersRemoved(cabinCoordinatesWithNeighbors);
+    }
+
+    @Override
+    public void notifyPlayersFinalData(String nicknameToNotify, List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) throws IOException {
+        view.showEndGameInfo(finalRanking, playersNicknamesWithPrettiestShip);
+    }
+
+    @Override
+    public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
+        //TODO
+    }
+
+    public void land() {
+        try {
+            serverController.playerWantsToLand(nickname);
+        }catch (IOException e){
+            handleRemoteException(e);
         }
     }
 }

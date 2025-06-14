@@ -13,6 +13,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import it.polimi.ingsw.is25am33.network.DNS;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
@@ -399,7 +400,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     @Override
     public void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException {
-        //TODO
         SocketMessage outMessage = new SocketMessage("server", "notifyPrefabShipsAvailable");
         outMessage.setParamPrefabShips(prefabShips);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
@@ -407,7 +407,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     @Override
     public void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipInfo) throws IOException {
-        //TODO
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerSelectedPrefabShip");
         outMessage.setParamString(playerNickname);
         outMessage.setParamPrefabShips(List.of(prefabShipInfo));
@@ -416,11 +415,27 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     @Override
     public void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException {
-        //TODO
         SocketMessage outMessage = new SocketMessage("server", "notifyPrefabShipSelectionResult");
         outMessage.setParamBoolean(success);
         outMessage.setParamString(errorMessage);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyInfectedCrewMembersRemoved(String nicknameToNotify, Set<Coordinates> cabinCoordinatesWithNeighbors) throws IOException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyInfectedCrewMembersRemoved");
+        outMessage.setParamShipPart(cabinCoordinatesWithNeighbors);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyPlayersFinalData(String nicknameToNotify, List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) throws IOException {
+        //TODO
+    }
+
+    @Override
+    public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
+        //TODO
     }
 
     @Override

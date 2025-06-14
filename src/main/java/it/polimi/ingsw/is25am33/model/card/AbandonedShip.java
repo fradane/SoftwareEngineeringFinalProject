@@ -130,7 +130,7 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
         removeMemberProcess(chosenCabins, crewMalus);
 
         String currPlayerNickname = gameModel.getCurrPlayer().getNickname();
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyShipBoardUpdate(nicknameToNotify, currPlayerNickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
         });
 

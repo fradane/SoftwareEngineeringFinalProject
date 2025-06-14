@@ -8,6 +8,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -91,9 +92,9 @@ public abstract class AdventureCard {
     public void setCurrState(CardState currState)  {
         this.currState = currState;
 
-        gameModel.getGameContext().notifyAllClients(
-                (nicknameToNotify, clientController) -> clientController.notifyCardState(nicknameToNotify, currState)
-        );
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyCardState(nicknameToNotify, currState);
+        });
     }
 
     @JsonIgnore

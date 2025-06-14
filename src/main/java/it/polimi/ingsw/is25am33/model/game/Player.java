@@ -13,6 +13,7 @@ public class Player implements Serializable {
     private GameClientNotifier gameClientNotifier;
     private final ShipBoard personalBoard;
     private final PlayerColor playerColor;
+    private boolean isEarlyLanded;
 
     public Player(String nickname, ShipBoard personalBoard, PlayerColor playerColor) {
         this.nickname = nickname;
@@ -63,5 +64,12 @@ public class Player implements Serializable {
         this.ownedCredits = ownedCredits;
     }
 
+    public boolean isEarlyLanded() {
+        return isEarlyLanded;
+    }
+
+    public void setEarlyLanded(boolean earlyLanded) {
+        isEarlyLanded = earlyLanded;
+    }
 }
 

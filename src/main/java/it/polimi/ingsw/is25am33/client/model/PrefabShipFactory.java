@@ -40,6 +40,21 @@ public class PrefabShipFactory {
         ));
 
 
+
+        PREFAB_SHIPS.put("cargo_hauler", new PrefabShipInfo(
+                "cargo_hauler",
+                "Cargo Hauler",
+                "A mid-sized cargo ship with 3 crew cabins and 2 storage units, perfect for freight missions",
+                false
+        ));
+
+        PREFAB_SHIPS.put("nave_scorretta", new PrefabShipInfo(
+                "nave_scorretta",
+                "Nave Scorretta",
+                "nave scorretta per fare controlli sulla nave",
+                false
+        ));
+
     }
 
     /**
@@ -64,6 +79,8 @@ public class PrefabShipFactory {
     public static boolean applyPrefabShip(ShipBoard shipBoard, String prefabShipId) {
         return switch (prefabShipId) {
             case "basic_ship" -> applyBasicShip(shipBoard);
+            case "cargo_hauler" -> applyCargoHauler(shipBoard);
+            case "nave_scorretta" -> applyNaveScorretta(shipBoard);
             case "basic_gui_shipboard" -> applyGuiBasicShip(shipBoard);
             case "ship_for_meteorites" -> applyMeteoriteShip(shipBoard);
             default -> false;
@@ -111,6 +128,23 @@ public class PrefabShipFactory {
         return true;
     }
 
+    private static boolean applyNaveScorretta(ShipBoard shipBoard) {
+        // Clear any existing components except the main cabin
+        clearShipBoard(shipBoard);
+
+        // Add components around the main cabin
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 6);
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 8);
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 6, 7);
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 5, 8);
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 8, 5);
+        addComponent(shipBoard, new Cannon(createSimpleConnectors()), 8, 6);
+
+        shipBoard.checkShipBoard();
+
+        return true;
+    }
+
     private static boolean applyBasicShip(ShipBoard shipBoard) {
         // Clear any existing components except the main cabin
         clearShipBoard(shipBoard);
@@ -120,6 +154,24 @@ public class PrefabShipFactory {
         addComponent(shipBoard, new Cabin(createSimpleConnectors()), 8, 8);
         addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 6);
         addComponent(shipBoard, new Cabin(createSimpleConnectors()), 6, 7);
+
+        shipBoard.checkShipBoard();
+
+        return true;
+    }
+
+    private static boolean applyCargoHauler(ShipBoard shipBoard) {
+        // Clear any existing components except the main cabin
+        clearShipBoard(shipBoard);
+
+        // Add 3 Cabins around the main cabin
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 6);  // Right of main cabin
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 8, 6);  // Far right of main cabin
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 5);  // Above right cabin
+
+        // Add 2 StandardStorage units
+        addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 2), 6, 7);  // Below main cabin
+        addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 3), 7, 8);  // Below right cabin
 
         shipBoard.checkShipBoard();
 
@@ -221,8 +273,6 @@ public class PrefabShipFactory {
     }
 
     // Metodi per creare i vari tipi di componenti...
-
-
 
 
 }
