@@ -1251,7 +1251,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
-        //TODO
+        view.showPlayerEarlyEnded(nickname);
     }
 
     public void land() {
@@ -1259,6 +1259,15 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             serverController.playerWantsToLand(nickname);
         }catch (IOException e){
             handleRemoteException(e);
+        }
+    }
+
+    public void skipToLastCard() {
+        try {
+            serverController.debugSkipToLastCard();
+            view.showMessage("Successfully skipped to last card!", STANDARD);
+        } catch (IOException e) {
+            view.showMessage("Failed to skip cards: " + e.getMessage(), ERROR);
         }
     }
 }

@@ -180,6 +180,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showPlayerEarlyEnded(String nickname) {
+        //TODO
+    }
+
+    @Override
     public void showInvalidShipBoardMenu() {
         if (buildAndCheckShipBoardController != null)
             buildAndCheckShipBoardController.showInvalidComponents();

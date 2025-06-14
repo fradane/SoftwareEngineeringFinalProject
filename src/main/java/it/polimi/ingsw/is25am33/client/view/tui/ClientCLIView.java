@@ -1273,9 +1273,277 @@ public class ClientCLIView implements ClientView {
     @Override
     public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
         setClientState(END_GAME_PHASE);
-        //TODO
 
+        // Get the current player's nickname
+        String myNickname = clientModel.getMyNickname();
+
+        // Find current player's position in ranking (1-based index)
+        int myPosition = -1;
+        PlayerFinalData myData = null;
+        List<String> sortedNicknames = clientModel.getSortedRanking();
+
+        for (int i = 0; i < sortedNicknames.size(); i++) {
+            if (sortedNicknames.get(i).equals(myNickname)) {
+                myPosition = i + 1;
+                myData = finalRanking.get(i);
+                break;
+            }
+        }
+
+        // Build the final game screen
+        StringBuilder output = new StringBuilder();
+
+        // Header
+        output.append("\n╔═══════════════════════════════════════════════════════════════════════╗\n");
+        if (myData != null && myData.isEarlyLanded()) {
+            output.append("║                        🛬 FINE DEL VIAGGIO 🛬                         ║\n");
+        } else {
+            output.append("║                        🚀 FINE DEL VIAGGIO 🚀                         ║\n");
+        }
+        output.append("╠═══════════════════════════════════════════════════════════════════════╣\n");
+        output.append("║                                                                       ║\n");
+        output.append("║ CLASSIFICA FINALE:                                                    ║\n");
+        output.append("║                                                                       ║\n");
+
+        // Show final ranking
+        String[] medals = {"🥇", "🥈", "🥉"};
+        int maxCredits = finalRanking.get(0).getTotalCredits();
+
+        for (int i = 0; i < sortedNicknames.size(); i++) {
+            String nickname = sortedNicknames.get(i);
+            PlayerFinalData data = finalRanking.get(i);
+
+            // Build player line with dynamic formatting
+            String medal = i < 3 ? medals[i] : "💥";
+            String positionStr = String.format("%d°", i + 1);
+            String playerName = nickname.equals(myNickname) ? "TU (" + nickname + ")" : nickname;
+
+            // Format the main player info with proper spacing
+            String baseInfo = String.format("%s %s %-15s - %3d crediti cosmici",
+                    medal, positionStr, playerName, data.getTotalCredits());
+
+            // Add winner/early landing info
+            String extraInfo = "";
+            if (i == 0 && data.getTotalCredits() > 0) {
+                extraInfo = "[VINCITORE!]";
+            } else if (nickname.equals(myNickname) && data.getTotalCredits() > 0 && !data.isEarlyLanded()) {
+                extraInfo = "[Sei tra i vincitori!]";
+            }
+            if (data.isEarlyLanded()) {
+                extraInfo += extraInfo.isEmpty() ? "[Atterraggio anticipato]" : " [Atterraggio anticipato]";
+            }
+
+            // Calculate padding to align everything properly
+            String fullLine = baseInfo + "  " + extraInfo;
+            output.append(String.format("║ %-69s ║\n", fullLine));
+        }
+
+        // Show detailed breakdown for current player
+        if (myData != null) {
+            output.append("║                                                                       ║\n");
+            output.append("║ ═══════════════════════════════════════════════════════════════════  ║\n");
+            output.append("║                                                                       ║\n");
+
+            if (myData.isEarlyLanded()) {
+                output.append("║ IL TUO RIEPILOGO (Atterraggio anticipato):                           ║\n");
+            } else {
+                output.append("║ IL TUO RIEPILOGO:                                                     ║\n");
+            }
+            output.append("║                                                                       ║\n");
+
+            // Calculate initial credits by subtracting bonuses/penalties
+            int initialCredits = calculateInitialCredits(myData, myPosition, playersNicknamesWithPrettiestShip.contains(myNickname));
+
+            output.append(String.format("║ Crediti iniziali: %45d 💰   ║\n", initialCredits));
+
+            // Show bonuses and penalties
+            if (!myData.isEarlyLanded()) {
+                // Normal player gets full bonuses
+                int positionBonus = getPositionBonus(myPosition);
+                String positionLine = String.format("+ Ricompensa arrivo (%d° posto):", myPosition);
+                output.append(String.format("║ %-40s %+3d 💰   ║\n", positionLine, positionBonus));
+
+                int cubesValue = calculateCubesValue(myData.getAllOwnedCubes(), false);
+                String cubesLine = String.format("+ Vendita merci (%s):", formatCubes(myData.getAllOwnedCubes()));
+                output.append(String.format("║ %-40s %+3d 💰   ║\n", cubesLine, cubesValue));
+
+                if (playersNicknamesWithPrettiestShip.contains(myNickname)) {
+                    int prettiestBonus = getPrettiestShipBonus();
+                    output.append(String.format("║ %-40s %+3d 💰   ║\n", "+ Nave più bella:", prettiestBonus));
+                }
+            } else {
+                // Early landed player
+                output.append("║ ❌ Ricompensa arrivo:                          -- (non applicabile)   ║\n");
+                output.append("║ + Vendita merci (DIMEZZATA):                                         ║\n");
+
+                int cubesValue = calculateCubesValue(myData.getAllOwnedCubes(), true);
+                String cubesLine = String.format("  (%s) a metà prezzo:", formatCubes(myData.getAllOwnedCubes()));
+                output.append(String.format("║ %-40s %+3d 💰   ║\n", cubesLine, cubesValue));
+
+                output.append("║ ❌ Nave più bella:                             -- (non applicabile)   ║\n");
+            }
+
+            // Lost components penalty (always applied)
+            if (myData.getLostComponents() > 0) {
+                String penaltyLine = String.format("- Componenti persi (%d):", myData.getLostComponents());
+                output.append(String.format("║ %-40s %3d 💰   ║\n", penaltyLine, -myData.getLostComponents()));
+            }
+
+            output.append("║ ─────────────────────────────────────────────────────────────────────║\n");
+            output.append(String.format("║ TOTALE FINALE: %48d 💰   ║\n", myData.getTotalCredits()));
+            output.append("║                                                                       ║\n");
+
+            // Final message
+            if (myPosition == 1 && myData.getTotalCredits() > 0) {
+                output.append("║ 🏆 Complimenti! Sei il vincitore assoluto!                           ║\n");
+            } else if (myData.getTotalCredits() > 0 && myData.isEarlyLanded()) {
+                output.append("║ ⚠️  Hai abbandonato la corsa, ma sei comunque tra i vincitori!       ║\n");
+            } else if (myData.getTotalCredits() > 0) {
+                output.append("║ 🏆 Complimenti! Sei tra i vincitori!                                 ║\n");
+            } else {
+                output.append("║ 😔 Purtroppo non hai vinto questa volta...                           ║\n");
+            }
+        }
+
+        output.append("║                                                                       ║\n");
+        output.append("╚═══════════════════════════════════════════════════════════════════════╝\n\n");
+
+        showMessage(output.toString(), STANDARD);
         showMessage("Press any key to leave the game", ASK);
+    }
+
+    // Helper method to calculate initial credits by removing bonuses/penalties
+    private int calculateInitialCredits(PlayerFinalData data, int position, boolean hasPrettiestShip) {
+        int totalCredits = data.getTotalCredits();
+
+        // Remove position bonus (only for normal landing)
+        if (!data.isEarlyLanded()) {
+            totalCredits -= getPositionBonus(position);
+        }
+
+        // Remove cubes value
+        int cubesValue = calculateCubesValue(data.getAllOwnedCubes(), data.isEarlyLanded());
+        totalCredits -= cubesValue;
+
+        // Remove prettiest ship bonus (only for normal landing)
+        if (!data.isEarlyLanded() && hasPrettiestShip) {
+            totalCredits -= getPrettiestShipBonus();
+        }
+
+        // Add back lost components penalty (it was subtracted, so we add it)
+        totalCredits += data.getLostComponents();
+
+        return totalCredits;
+    }
+
+    // Helper method to get position bonus based on game rules
+    private int getPositionBonus(int position) {
+        // Check if it's test flight or normal game
+        if (isTestFlight) {
+            // Test flight bonuses: 4, 3, 2, 1
+            switch (position) {
+                case 1: return 4;
+                case 2: return 3;
+                case 3: return 2;
+                case 4: return 1;
+                default: return 0;
+            }
+        } else {
+            // Normal game bonuses: 8, 6, 4, 2
+            switch (position) {
+                case 1: return 8;
+                case 2: return 6;
+                case 3: return 4;
+                case 4: return 2;
+                default: return 0;
+            }
+        }
+    }
+
+    // Helper method to get prettiest ship bonus based on game mode
+    private int getPrettiestShipBonus() {
+        return isTestFlight ? 2 : 4;
+    }
+
+    // Helper method to calculate total value of cargo cubes
+    private int calculateCubesValue(List<CargoCube> cubes, boolean isHalved) {
+        int total = 0;
+        for (CargoCube cube : cubes) {
+            switch (cube) {
+                case BLUE: total += 1; break;
+                case GREEN: total += 2; break;
+                case YELLOW: total += 3; break;
+                case RED: total += 4; break;
+            }
+        }
+        return isHalved ? total / 2 : total;
+    }
+
+    // Helper method to format cubes display
+    private String formatCubes(List<CargoCube> cubes) {
+        int red = 0, yellow = 0, green = 0, blue = 0;
+
+        for (CargoCube cube : cubes) {
+            switch (cube) {
+                case RED: red++; break;
+                case YELLOW: yellow++; break;
+                case GREEN: green++; break;
+                case BLUE: blue++; break;
+            }
+        }
+
+        return String.format("%d🟥 %d🟨 %d🟩 %d🟦", red, yellow, green, blue);
+    }
+
+    @Override
+    public void showPlayerEarlyEnded(String nickname) {
+        // Check if it's the current player who landed early
+        if (nickname.equals(clientModel.getMyNickname())) {
+            // Current player has landed early
+            StringBuilder output = new StringBuilder();
+            output.append("\n╔═══════════════════════════════════════════════════════════════════════╗\n");
+            output.append("║                    🛬 ATTERRAGGIO ANTICIPATO 🛬                       ║\n");
+            output.append("╠═══════════════════════════════════════════════════════════════════════╣\n");
+            output.append("║                                                                       ║\n");
+            output.append("║ Il tuo razzo segna-rotta è stato rimosso dalla plancia di volo!      ║\n");
+            output.append("║                                                                       ║\n");
+            output.append("║ Hai abbandonato la corsa spaziale e sei atterrato in sicurezza.      ║\n");
+            output.append("║ D'ora in poi sarai solo uno spettatore per il resto del viaggio.     ║\n");
+            output.append("║                                                                       ║\n");
+            output.append("║ ⚠️  RICORDA:                                                          ║\n");
+            output.append("║ • Nessuna carta avrà più effetto su di te                            ║\n");
+            output.append("║ • Non riceverai ricompense per l'ordine di arrivo                    ║\n");
+            output.append("║ • Non potrai competere per la nave più bella                         ║\n");
+            output.append("║ • Le tue merci saranno vendute a metà prezzo                         ║\n");
+            output.append("║ • Pagherai comunque le penalità per i componenti persi               ║\n");
+            output.append("║                                                                       ║\n");
+            output.append("║ Potrai ancora vincere se avrai accumulato abbastanza crediti!        ║\n");
+            output.append("║                                                                       ║\n");
+            output.append("╚═══════════════════════════════════════════════════════════════════════╝\n");
+
+            showMessage(output.toString(), STANDARD);
+        } else {
+            // Another player has landed early - dynamic formatting for name
+            StringBuilder output = new StringBuilder();
+            output.append("\n╔═══════════════════════════════════════════════════════════════════════╗\n");
+            output.append("║                        📢 ANNUNCIO DI VOLO 📢                         ║\n");
+            output.append("╠═══════════════════════════════════════════════════════════════════════╣\n");
+            output.append("║                                                                       ║\n");
+
+            // Format the announcement with dynamic spacing
+            String announcement = nickname + " ha abbandonato la corsa!";
+            int padding = (69 - announcement.length()) / 2;
+            String paddedAnnouncement = String.format("%" + padding + "s%s%" + padding + "s", "", announcement, "");
+            output.append(String.format("║%-69s║\n", paddedAnnouncement));
+
+            output.append("║                                                                       ║\n");
+            output.append("║ Il suo razzo ha effettuato un atterraggio anticipato.                ║\n");
+            output.append("║ Non parteciperà più alle prossime avventure.                          ║\n");
+            output.append("║                                                                       ║\n");
+            output.append("╚═══════════════════════════════════════════════════════════════════════╝\n");
+
+            showMessage(output.toString(), NOTIFICATION_INFO);
+        }
     }
 
     /**
@@ -3121,6 +3389,9 @@ public class ClientCLIView implements ClientView {
             return;
         } else if (input.equals("land")){
             clientController.land();
+            return;
+        } else if (input.equals("skipToLastCard")) {
+            clientController.skipToLastCard();
             return;
         }
 

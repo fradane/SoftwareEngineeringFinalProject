@@ -342,4 +342,6 @@ public interface ClientView {
     void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors);
 
     void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip);
+
+    void showPlayerEarlyEnded(String nickname);
 }

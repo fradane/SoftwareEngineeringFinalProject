@@ -71,6 +71,12 @@ public enum GameState implements Serializable {
         @Override
         public void run(GameModel gameModel) {
             try {
+                if(gameModel.getDeck().hasFinishedCards()){
+                    gameModel.setCurrGameState(GameState.END_GAME);
+                    return;
+                }
+
+
                 gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard());
                 gameModel.setCurrGameState(GameState.PLAY_CARD);
             } catch (EmptyStackException e) {

@@ -651,4 +651,38 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 }
         );
     }
+
+    @Override
+    public void debugSkipToLastCard() throws RemoteException {
+        if (!canSkipCards()) {
+            throw new RemoteException("Cannot skip cards: game not in appropriate state or deck is empty");
+        }
+        
+        try {
+            gameModel.getDeck().skipToLastCard();
+        } catch (IllegalStateException e) {
+            throw new RemoteException(e.getMessage());
+        }
+        
+        if (gameModel.getCurrGameState() != GameState.DRAW_CARD) {
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
+        }
+    }
+    
+    private boolean canSkipCards() {
+        if (!gameModel.isStarted()) {
+            return false;
+        }
+        
+        GameState currentState = gameModel.getCurrGameState();
+        if (currentState == GameState.SETUP || 
+            currentState == GameState.BUILD_SHIPBOARD || 
+            currentState == GameState.CHECK_SHIPBOARD || 
+            currentState == GameState.PLACE_CREW || 
+            currentState == GameState.END_GAME) {
+            return false;
+        }
+        
+        return true;
+    }
 }

@@ -774,4 +774,9 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         SocketMessage outMessage = new SocketMessage(nickname, "startCheckShipBoardAfterAttack");
         out.println(ClientSerializer.serialize(outMessage));
     }
+
+    @Override
+    public void debugSkipToLastCard() throws IOException {
+        //TODO
+    }
 }

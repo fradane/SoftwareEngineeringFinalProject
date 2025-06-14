@@ -2,9 +2,10 @@ package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class PlayerFinalData {
+public class PlayerFinalData implements Serializable {
     private final int totalCredits;
     private final boolean isEarlyLanded;
     private final List<CargoCube> allOwnedCubes;
