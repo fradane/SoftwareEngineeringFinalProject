@@ -68,6 +68,7 @@ public class Level1BoardsController extends BoardsController {
         setupFlyingBoardBinding();
         setupShipBoardNavigationBarAndBoards();
         setupGridBindings(modelFxAdapter.getMyObservableMatrix());
+        setupChangedAttributesBinding();
     }
 
     public void initialize() {

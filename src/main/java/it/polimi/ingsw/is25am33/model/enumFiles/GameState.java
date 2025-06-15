@@ -3,9 +3,13 @@ package it.polimi.ingsw.is25am33.model.enumFiles;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.model.card.MeteoriteStorm;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
+import it.polimi.ingsw.is25am33.model.game.Player;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 
 import java.io.Serializable;
 import java.util.EmptyStackException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public enum GameState implements Serializable {
 
@@ -102,7 +106,7 @@ public enum GameState implements Serializable {
                         .stream()
                         .noneMatch(crewMember -> crewMember.equals(CrewMember.HUMAN))
                 ) {
-                    gameModel.getFlyingBoard().addOutPlayer(player);
+                    gameModel.getFlyingBoard().addOutPlayer(player, false);
                 }
             });
 
@@ -115,6 +119,13 @@ public enum GameState implements Serializable {
         @Override
         public void run(GameModel gameModel) {
             gameModel.calculatePlayersCredits();
+
+            List<PlayerFinalData> finalRankingWithPlayerFinalData = gameModel.getRankingWithPlayerFinalData();
+            List<String> playersNicknamesWithPrettiestShip = gameModel.getPlayerWithPrettiestShip().stream().map(Player::getNickname).collect(Collectors.toList());
+
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyPlayersFinalData(nicknameToNotify, finalRankingWithPlayerFinalData, playersNicknamesWithPrettiestShip);
+            });
         }
 
     };

@@ -427,7 +427,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
-                .setChosenStorage(storage)
+                .setChosenStorage(storageCoords)
                 .build();
 
         gameModel.getCurrAdventureCard().play(choice);
@@ -496,15 +496,15 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                     Component[][] shipMatrix = shipBoard.getShipMatrix();
                     Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
                     Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
-                    if (shipParts.size() == 1) {
+                    if (shipParts.size() <= 1) {
                         shipBoard.checkShipBoard();
                         if (incorrectlyPositionedComponentsCoordinates.isEmpty()) {
                             clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
 
                         } else
                             clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
-                    } else if (shipParts.isEmpty())
-                        clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+                    }//else if(shipParts.isEmpty())
+                    //   clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
                     else
                         clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts, componentsPerType);
                 } catch (RemoteException e) {
@@ -512,10 +512,9 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 }
             });
 
-            if (shipParts.size() == 1) //ovvero ho direttamente rimosso un componente
+            if (shipParts.size() <= 1) //ovvero ho direttamente rimosso un componente
                 // Controllo se tutte le navi sono corrette e in caso cambio la fase
                 gameModel.checkAndTransitionToNextPhase();
-
         }
     }
 
@@ -641,6 +640,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         } catch (Exception e) {
             notifySelectionFailure(nickname, "Internal error: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void playerWantsToLand(String nickname) throws IOException {
+        Player player = gameModel.getPlayers().get(nickname);
+        gameModel.getFlyingBoard().addOutPlayer(player, true);
     }
 
     private void notifySelectionFailure(String nickname, String errorMessage) {

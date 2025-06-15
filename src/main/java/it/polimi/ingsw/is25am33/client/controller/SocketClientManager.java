@@ -489,6 +489,15 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyInfectedCrewMembersRemoved":
+                    if (clientController != null) {
+                        clientController.notifyInfectedCrewMembersRemoved(
+                                nickname,
+                                notification.getParamShipPart()
+                        );
+                    }
+                    break;
+
                 case "notifyComponentPerType":
                     if (clientController != null) {
                         clientController.notifyComponentPerType(
@@ -626,6 +635,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         SocketMessage outMessage = new SocketMessage(nickname, "requestSelectPrefabShip");
         outMessage.setParamString(prefabShipId);
         out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerWantsToLand(String nickname) throws IOException {
+        //TODO
     }
 
     @Override

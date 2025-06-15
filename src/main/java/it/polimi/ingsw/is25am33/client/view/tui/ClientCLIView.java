@@ -18,6 +18,7 @@ import it.polimi.ingsw.is25am33.model.component.Storage;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import org.jetbrains.annotations.NotNull;
 
 import java.rmi.RemoteException;
@@ -520,14 +521,17 @@ public class ClientCLIView implements ClientView {
             case "AbandonedShip":
                 displayAbandonedShipInfo((ClientAbandonedShip) card, output);
                 break;
-//            case "AbandonedStation":
-//                displayAbandonedStationInfo((ClientAbandonedStation) card, output);
-//                break;
             case "Pirates":
                 displayPiratesInfo((ClientPirates) card, output);
                 break;
             case "SlaveTraders":
                 displaySlaveTradersInfo((ClientSlaveTraders) card, output);
+                break;
+            case "AbandonedStation":
+                displayAbandonedStationInfo((ClientAbandonedStation) card, output);
+                break;
+            case "Epidemic":
+                displayEpidemicInfo((ClientEpidemic) card, output);
                 break;
 //            case "SMUGGLERS":
 //                displaySmugglersInfo((ClientSmugglers) card, output);
@@ -562,6 +566,30 @@ public class ClientCLIView implements ClientView {
                 .append(" crew members, gain ").append(ship.getReward())
                 .append(" credits, and move back ").append(ship.getStepsBack())
                 .append(" spaces.");
+    }
+
+    private void displayAbandonedStationInfo(ClientAbandonedStation station, StringBuilder output) {
+        output.append("Crew Required: ").append(station.getRequiredCrewMembers()).append("\n");
+        output.append("Steps Back: ").append(station.getStepsBack()).append("\n");
+
+        output.append("Rewards: ");
+        if (station.getReward() != null && !station.getReward().isEmpty()) {
+            station.getReward().forEach(cube -> output.append(cube.name()).append(" "));
+        } else {
+            output.append("None");
+        }
+        output.append("\n");
+
+        output.append("\nYou can accept the reward if you have enough crew members.");
+        output.append("\nIf you accept, you'll gain cargo cubes and move back ")
+              .append(station.getStepsBack()).append(" spaces.");
+    }
+
+    private void displayEpidemicInfo(ClientEpidemic epidemic, StringBuilder output) {
+        output.append("Epidemic Card\n");
+        output.append("Effect: Each occupied cabin connected to another occupied cabin will lose one crew member.\n");
+        output.append("\nThe epidemic spreads through connected living quarters, affecting crew members in adjacent cabins.\n");
+        output.append("Wait to see the results of the epidemic spread...");
     }
 
     private void displayPlanetsInfo(ClientPlanets planets, StringBuilder output) {
@@ -1141,6 +1169,25 @@ public class ClientCLIView implements ClientView {
         showMessage(menu.toString(), ASK);
     }
 
+    @Override
+    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
+        String nickname = clientModel.getMyNickname();
+        ShipBoardClient shipboard = clientModel.getShipboardOf(nickname);
+        if(cabinWithNeighbors.size() > 0) {
+            showShipBoard(shipboard, nickname, Map.of(ANSI_BLUE, cabinWithNeighbors));
+            showMessage("The colored cabins are those where you lost an infected crew membership", STANDARD);
+        }else
+            showMessage("You had no infected crew membership", STANDARD);
+    }
+
+    @Override
+    public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
+        setClientState(END_GAME_PHASE);
+        //TODO
+
+        showMessage("Press any key to leave the game", ASK);
+    }
+
     /**
      * Determina il colore ANSI da applicare alla coordinata specificata
      * basandosi sulla mappa dei colori fornita.
@@ -1218,7 +1265,21 @@ public class ClientCLIView implements ClientView {
                 return;
             }
         } else if (card.getCardType().equals("AbandonedStation")) {
-            message.append("You've found an abandoned station! If you have enough crew, you can visit to get cargo.\n");
+            ClientAbandonedStation stationCard = (ClientAbandonedStation) card;
+            message.append("You've found an abandoned station!\n\n");
+            message.append("If you have at least ").append(stationCard.getRequiredCrewMembers())
+                   .append(" crew members, you can visit to get cargo.\n");
+
+            // Check if player has enough crew
+            int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
+            if (totalCrew < stationCard.getRequiredCrewMembers()) {
+                setClientState(ClientState.CANNOT_VISIT_LOCATION);
+                message.append(ANSI_RED + "WARNING: You only have ").append(totalCrew)
+                       .append(" crew members. You cannot accept this reward!\n\n" + ANSI_RESET);
+                showMessage(message.toString(), STANDARD);
+                showMessage("Press any key to continue.", ASK);
+                return;
+            }
         }
 
         message.append("Do you want to visit this location? [Y/n]");
@@ -1730,10 +1791,10 @@ public class ClientCLIView implements ClientView {
             ClientPlanets planets = (ClientPlanets) card;
             return planets.getPlayerReward(clientModel.getMyNickname());
         }
-//        else if (card instanceof ClientAbandonedStation) {
-//            // AbandonedStation has a direct list of rewards
-//            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
-//        }
+        else if (card instanceof ClientAbandonedStation) {
+            // AbandonedStation has a direct list of rewards
+            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
+        }
 //        else if (card instanceof ClientSmugglers) {
 //            // Smugglers have a direct list of rewards
 //            return new ArrayList<>(((ClientSmugglers) card).getReward());
@@ -1766,11 +1827,9 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showEpidemicMenu() {
-        setClientState(ClientState.EPIDEMIC_MENU);
-
         showMessage("\nAn epidemic is spreading throughout the fleet!", STANDARD);
         showMessage("Each occupied cabin connected to another occupied cabin will lose one crew member.", STANDARD);
-        showMessage("Press Enter to continue...", ASK);
+        showMessage("Press any key see how the epidemic is going to spread...", STANDARD);
     }
 
     @Override
@@ -2579,6 +2638,9 @@ public class ClientCLIView implements ClientView {
         } else if (input.equals("rank")) {
             showCurrentRanking();
             return;
+        } else if (input.equals("land")){
+            clientController.land();
+            return;
         }
 
         try {
@@ -2909,11 +2971,16 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case CREW_PLACEMENT_MENU:
+                    setClientState(WAITING_FOR_SERVER);
                     handleCrewPlacementInput(input);
                     break;
 
                 case NO_CREW_TO_PLACE:
+                    setClientState(WAITING_FOR_SERVER);
                     clientController.submitCrewChoices(new HashMap<>());
+                    break;
+
+                case WAITING_FOR_SERVER:
                     break;
 
                 case VISIT_LOCATION_MENU:
@@ -3045,6 +3112,11 @@ public class ClientCLIView implements ClientView {
 
                 case CANNOT_VISIT_LOCATION:
                     clientController.playerWantsToAcceptTheReward(clientController.getNickname(), false);
+                    break;
+
+                case END_GAME_PHASE:
+                    //TODO controllare che il metodo corretto da chiamare sia leaveGame
+                    clientController.leaveGame();
                     break;
 
                 case CHOOSE_CANNONS_MENU:

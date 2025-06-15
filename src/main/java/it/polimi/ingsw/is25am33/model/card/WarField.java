@@ -323,17 +323,35 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
     }
 
-    private void currPlayerChoseStorageToRemove(List<Storage> chosenStorage) {
+    private void currPlayerChoseStorageToRemove(List<Coordinates> chosenStorageCoords) {
 
-        if (chosenStorage.size() != cubeMalus)
+        //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        List<Storage> chosenStorages = new ArrayList();
+        for (Coordinates coords : chosenStorageCoords) {
+            if (coords.isCoordinateInvalid()) {
+                // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
+                chosenStorages.add(null);
+            } else {
+                Component component = shipBoard.getComponentAt(coords);
+                if (component instanceof Storage) {
+                    chosenStorages.add((Storage) component);
+                } else {
+                    // Se le coordinate non puntano a uno storage, aggiungi null
+                    chosenStorages.add(null);
+                }
+            }
+        }
+
+        if (chosenStorages.size() != cubeMalus)
             throw new IllegalArgumentException("Incorrect number of storages");
 
-        chosenStorage.stream().distinct().forEach(storage -> {
-            if (Collections.frequency(chosenStorage, storage) > storage.getMaxCapacity() - storage.getStockedCubes().size())
+        chosenStorages.stream().distinct().forEach(storage -> {
+            if (Collections.frequency(chosenStorages, storage) > storage.getMaxCapacity() - storage.getStockedCubes().size())
                 throw new IllegalArgumentException("The number of required storages is not enough");
         });
 
-        chosenStorage.forEach(storage -> {
+        chosenStorages.forEach(storage -> {
             List<CargoCube> sortedStorage = storage.getStockedCubes();
             sortedStorage.sort(CargoCube.byValue);
             CargoCube lessValuableCargoCube = sortedStorage.getFirst();

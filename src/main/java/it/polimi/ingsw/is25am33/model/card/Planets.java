@@ -3,6 +3,9 @@ package it.polimi.ingsw.is25am33.model.card;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientPlanets;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -123,11 +126,29 @@ public class Planets extends AdventureCard implements PlayerMover {
 
     }
 
-    private void currPlayerChoseCargoCubeStorage(List<Storage> chosenStorage) {
+    private void currPlayerChoseCargoCubeStorage(List<Coordinates> chosenStorageCoords) {
         List<CargoCube> planetRewards = new ArrayList<>(currentPlanet.getReward());
 
+        //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        List<Storage> chosenStorages = new ArrayList();
+        for (Coordinates coords : chosenStorageCoords) {
+            if (coords.isCoordinateInvalid()) {
+                // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
+                chosenStorages.add(null);
+            } else {
+                Component component = shipBoard.getComponentAt(coords);
+                if (component instanceof Storage) {
+                    chosenStorages.add((Storage) component);
+                } else {
+                    // Se le coordinate non puntano a uno storage, aggiungi null
+                    chosenStorages.add(null);
+                }
+            }
+        }
+
         // Caso 1: Il giocatore non ha scelto nessuno storage
-        if (chosenStorage.isEmpty()) {
+        if (chosenStorages.isEmpty()) {
             // Scarta tutti i reward - il giocatore non può accettare nessun cubo
             System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
                     " cannot accept any rewards due to lack of storage space");
@@ -138,13 +159,13 @@ public class Planets extends AdventureCard implements PlayerMover {
         }
 
         // Caso 2: Il giocatore ha scelto meno storage dei reward disponibili
-        if (chosenStorage.size() < planetRewards.size()) {
+        if (chosenStorages.size() < planetRewards.size()) {
             // Mantieni solo i primi N reward, dove N = numero di storage scelti
-            List<CargoCube> rewardsToProcess = planetRewards.subList(0, chosenStorage.size());
-            List<CargoCube> discardedRewards = planetRewards.subList(chosenStorage.size(), planetRewards.size());
+            List<CargoCube> rewardsToProcess = planetRewards.subList(0, chosenStorages.size());
+            List<CargoCube> discardedRewards = planetRewards.subList(chosenStorages.size(), planetRewards.size());
 
             System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
-                    " can only accept " + chosenStorage.size() +
+                    " can only accept " + chosenStorages.size() +
                     " out of " + planetRewards.size() + " rewards");
             System.out.println("Discarded rewards: " + discardedRewards);
 
@@ -152,14 +173,14 @@ public class Planets extends AdventureCard implements PlayerMover {
         }
 
         // Caso 3: Il giocatore ha scelto più storage dei reward (non dovrebbe succedere, ma gestiamo)
-        if (chosenStorage.size() > planetRewards.size()) {
+        if (chosenStorages.size() > planetRewards.size()) {
             // Usa solo i primi N storage, dove N = numero di reward
-            chosenStorage = chosenStorage.subList(0, planetRewards.size());
+            chosenStorages = chosenStorages.subList(0, planetRewards.size());
         }
 
         // Validazione: controlla che i cubi RED vadano solo in SpecialStorage
-        for (int i = 0; i < Math.min(chosenStorage.size(), planetRewards.size()); i++) {
-            Storage storage = chosenStorage.get(i);
+        for (int i = 0; i < Math.min(chosenStorages.size(), planetRewards.size()); i++) {
+            Storage storage = chosenStorages.get(i);
             CargoCube cube = planetRewards.get(i);
 
             // Salta gli storage null (coordinate invalide dal client)
@@ -173,8 +194,8 @@ public class Planets extends AdventureCard implements PlayerMover {
         }
 
         // Processa i cubi effettivamente posizionabili
-        for (int i = 0; i < Math.min(chosenStorage.size(), planetRewards.size()); i++) {
-            Storage storage = chosenStorage.get(i);
+        for (int i = 0; i < Math.min(chosenStorages.size(), planetRewards.size()); i++) {
+            Storage storage = chosenStorages.get(i);
             CargoCube cube = planetRewards.get(i);
 
             // Salta gli storage null (il giocatore non può/non vuole piazzare questo cubo)
@@ -196,6 +217,10 @@ public class Planets extends AdventureCard implements PlayerMover {
             storage.addCube(cube);
             System.out.println("Added " + cube + " to storage");
         }
+
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+        });
 
         // Muovi il giocatore indietro
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);

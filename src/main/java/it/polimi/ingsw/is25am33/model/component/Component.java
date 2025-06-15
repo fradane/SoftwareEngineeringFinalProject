@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.*;
@@ -148,11 +149,24 @@ public abstract class Component implements Serializable {
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Component component = (Component) o;
         return Objects.equals(imageName, component.imageName);
+    }
+
+    /**
+     * The Method is used in the GUI to recognize whether this component has changed
+     * one of its attributes, needs override if one of the attributes must be shown
+     * in the graphical interface.
+     *
+     * @return the hash code of the attribute that might have changed or -1 by default
+     */
+    @NotNull
+    public Integer getGuiHash() {
+        return -1;
     }
 
     @JsonIgnore

@@ -24,7 +24,7 @@ public class PlayerChoicesDataStructure implements Serializable {
     private final int chosenPlanetIndex;
     private final boolean wantsToVisit;
     private final List<Coordinates> chosenCabins;
-    private final List<Storage> chosenStorage;
+    private final List<Coordinates> chosenStorage;
     private final boolean hasAcceptedTheReward;
     private final List<Coordinates> chosenShields;
     private final List<Coordinates> chosenDoubleCannons;
@@ -107,7 +107,7 @@ public class PlayerChoicesDataStructure implements Serializable {
      * @return an {@link Optional} containing the chosen {@link Storage} component, or empty if not set.
      */
     @JsonIgnore
-    public Optional<List<Storage>> getChosenStorage() {
+    public Optional<List<Coordinates>> getChosenStorage() {
         return Optional.ofNullable(chosenStorage);
     }
 
@@ -144,7 +144,7 @@ public class PlayerChoicesDataStructure implements Serializable {
    public List<Coordinates> getCabins() {
         return chosenCabins;
     }
-    public List<Storage> getStorage() {
+    public List<Coordinates> getStorage() {
         return chosenStorage;
     }
     public List<Coordinates> getDoubleCannons() {
@@ -171,7 +171,7 @@ public class PlayerChoicesDataStructure implements Serializable {
         private int chosenPlanetIndex;
         private boolean wantsToVisit;
         private List<Coordinates> chosenCabins;
-        private List<Storage> chosenStorage;
+        private List<Coordinates> chosenStorage;
         private boolean hasAcceptedTheReward;
         private List<Coordinates> chosenShields;
         private List<Coordinates> chosenDoubleCannons;
@@ -236,7 +236,7 @@ public class PlayerChoicesDataStructure implements Serializable {
          * @param chosenStorage the chosen {@link Storage} component.
          * @return this builder instance for method chaining.
          */
-        public Builder setChosenStorage(List<Storage> chosenStorage) {
+        public Builder setChosenStorage(List<Coordinates> chosenStorage) {
             this.chosenStorage = chosenStorage;
             return this;
         }

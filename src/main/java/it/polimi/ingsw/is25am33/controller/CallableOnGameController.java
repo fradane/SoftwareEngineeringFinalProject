@@ -79,6 +79,8 @@ public interface CallableOnGameController extends Remote {
 
     void requestSelectPrefabShip(String nickname, String prefabShipId) throws IOException;
 
+    void playerWantsToLand(String nickname) throws IOException;
+
     void startCheckShipBoardAfterAttack(String nickname) throws IOException;
 
     void evaluatedCrewMembers(String nickname) throws IOException;

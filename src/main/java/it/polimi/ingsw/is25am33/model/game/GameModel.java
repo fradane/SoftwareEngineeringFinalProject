@@ -9,10 +9,7 @@ import it.polimi.ingsw.is25am33.model.board.*;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
-import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
-import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
+import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.card.Deck;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
@@ -121,7 +118,7 @@ public class GameModel {
     }
 
     public void createGameClientNotifier(ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
-        this.gameClientNotifier = new GameClientNotifier(this,clientControllers);
+        this.gameClientNotifier = new GameClientNotifier(this, clientControllers);
         deck.setGameClientNotifier(gameClientNotifier);
         flyingBoard.setGameClientNotifier(gameClientNotifier);
         componentTable.setGameClientNotifier(gameClientNotifier);
@@ -185,7 +182,7 @@ public class GameModel {
         this.currDangerousObj = dangerousObj;
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyDangerousObjAttack(nicknameToNotify, new ClientDangerousObject(currDangerousObj.getDangerousObjType(),currDangerousObj.getDirection(),currDangerousObj.getCoordinate()));
+                clientController.notifyDangerousObjAttack(nicknameToNotify, new ClientDangerousObject(currDangerousObj.getDangerousObjType(), currDangerousObj.getDirection(), currDangerousObj.getCoordinate()));
         });
 
     }
@@ -241,9 +238,9 @@ public class GameModel {
             // Map server card to client card
             ClientCard clientCard = currAdventureCard.toClientCard();
 
-        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyCurrAdventureCard(nicknameToNotify, clientCard, true);
-        });
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyCurrAdventureCard(nicknameToNotify, clientCard, true);
+            });
 
     }
 
@@ -271,7 +268,7 @@ public class GameModel {
         setCurrPlayer(playerIterator.next());
         currAdventureCard.setCurrState(currAdventureCard.getFirstState());
 
-        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+        getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyCardStarted(nicknameToNotify);
         });
     }
@@ -280,7 +277,7 @@ public class GameModel {
 
         Map<Player, Integer> x = new HashMap<>();
 
-        players.values().forEach(player -> {
+        players.values().stream().filter(player -> !player.isEarlyLanded()).forEach(player -> {
             x.put(player, player.getPersonalBoard().countExposed());
         });
 
@@ -296,33 +293,37 @@ public class GameModel {
 
             int credits = player.getOwnedCredits();
 
+            // gestisce già il fatto che un player potrebbe essere earlyLanded
             credits += flyingBoard.getCreditsForPosition(player);
 
+            // gestisce già il fatto che un player potrebbe essere earlyLanded
             if (getPlayerWithPrettiestShip().contains(player))
                 credits += flyingBoard.getPrettiestShipReward();
 
-            credits += player.getPersonalBoard().getStorages()
-                                .stream()
-                                .flatMap(storage -> storage.getStockedCubes().stream())
-                                .mapToInt(stockedCube -> {
-                                    switch (stockedCube) {
-                                        case BLUE -> {
-                                            return 1;
-                                        }
-                                        case GREEN -> {
-                                            return 2;
-                                        }
-                                        case YELLOW -> {
-                                            return 3;
-                                        }
-                                        case RED -> {
-                                            return 4;
-                                        }
-                                        default -> {
-                                            return 0;
-                                        }
-                                    }
-                                }).sum();
+            int creditsForStockedCubes = player.getPersonalBoard().getStorages()
+                    .stream()
+                    .flatMap(storage -> storage.getStockedCubes().stream())
+                    .mapToInt(stockedCube -> {
+                        switch (stockedCube) {
+                            case BLUE -> {
+                                return 1;
+                            }
+                            case GREEN -> {
+                                return 2;
+                            }
+                            case YELLOW -> {
+                                return 3;
+                            }
+                            case RED -> {
+                                return 4;
+                            }
+                            default -> {
+                                return 0;
+                            }
+                        }
+                    }).sum();
+
+            credits += player.isEarlyLanded() ? creditsForStockedCubes/2 : creditsForStockedCubes;
 
             credits -= player.getPersonalBoard().getNotActiveComponents().size();
 
@@ -423,14 +424,13 @@ public class GameModel {
                 .collect(Collectors.toSet());
 
         gameClientNotifier.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
-                Player player = players.get(nicknameToNotify);
-                ShipBoard shipBoard = player.getPersonalBoard();
-                Component[][] shipMatrix = shipBoard.getShipMatrix();
-                Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
-                Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+            Player player = players.get(nicknameToNotify);
+            ShipBoard shipBoard = player.getPersonalBoard();
+            Component[][] shipMatrix = shipBoard.getShipMatrix();
+            Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
+            Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
 
-                clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
-
+            clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
         });
     }
 
@@ -470,7 +470,6 @@ public class GameModel {
             }
         }
     }
-
     public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
     }
@@ -547,4 +546,17 @@ public class GameModel {
         }
     }
 
+    public List<PlayerFinalData> getRankingWithPlayerFinalData() {
+
+
+        List<PlayerFinalData> finalRankingWithPlayerFinalData = currRanking.stream().map(player -> {
+            int credits = player.getOwnedCredits();
+            boolean isEarlyLanded = player.isEarlyLanded();
+            List<CargoCube> allOwnedCubes = player.getPersonalBoard().getStorages().stream().flatMap(storage -> storage.getStockedCubes().stream()).collect(Collectors.toList());
+            int lostComponents = player.getPersonalBoard().getNotActiveComponents().size();
+            return new PlayerFinalData(credits, isEarlyLanded, allOwnedCubes, lostComponents);
+        }).collect(Collectors.toList());
+
+        return finalRankingWithPlayerFinalData;
+    }
 }

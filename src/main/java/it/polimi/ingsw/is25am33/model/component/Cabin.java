@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.EnumMap;
@@ -36,6 +37,10 @@ public class Cabin extends Component{
         inhabitants = new ArrayList<>();
     }
 
+    @Override
+    public @NotNull Integer getGuiHash() {
+        return inhabitants ==  null ? -1 : Objects.hash(inhabitants);
+    }
 
     @Override
     public String toString() {

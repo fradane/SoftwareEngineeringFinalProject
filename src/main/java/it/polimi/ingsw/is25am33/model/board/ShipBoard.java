@@ -722,8 +722,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      *
      * @return A set of cabins that meet the adjacency criterion.
      */
-    public Set<Cabin> cabinWithNeighbors() {
-        Set<Cabin> cabinsWithNeighbors = new HashSet<>();
+    public Set<Coordinates> getCabinCoordinatesWithNeighbors() {
+        Set<Coordinates> cabinsCoordinatesWithNeighbors = new HashSet<>();
 
         for (int i = 0; i < BOARD_DIMENSION; i++) {
             for (int j = 0; j < BOARD_DIMENSION; j++) {
@@ -740,7 +740,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
                         Component neighborComponent = shipMatrix[newX][newY];
                         if (neighborComponent instanceof Cabin && ((Cabin) neighborComponent).hasInhabitants()) {
-                            cabinsWithNeighbors.add((Cabin) currentCabin);
+                            cabinsCoordinatesWithNeighbors.add(new Coordinates(i, j));
                             break;
                         }
                     }
@@ -748,7 +748,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             }
         }
 
-        return cabinsWithNeighbors;
+        return cabinsCoordinatesWithNeighbors;
     }
 
     /**

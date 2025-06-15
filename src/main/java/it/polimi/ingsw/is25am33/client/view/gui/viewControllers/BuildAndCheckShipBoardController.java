@@ -156,50 +156,49 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     private void setupVisibleComponentsBinding() {
         modelFxAdapter.getObservableVisibleComponents()
-            .addListener((InvalidationListener) _ -> Platform.runLater(() -> {
-                componentsContainer.getChildren().clear();
+                .addListener((InvalidationListener) _ -> Platform.runLater(() -> {
+                    componentsContainer.getChildren().clear();
 
-                //aggunto da claude
-                componentsContainer.getStyleClass().clear();
-                componentsContainer.getStyleClass().add("components-container");
+                    componentsContainer.getStyleClass().clear();
+                    componentsContainer.getStyleClass().add("components-container");
 
-                List<String> visibleComponents = new ArrayList<>(modelFxAdapter.getObservableVisibleComponents());
+                    List<String> visibleComponents = new ArrayList<>(modelFxAdapter.getObservableVisibleComponents());
 
-                for (String string : visibleComponents) {
-                    // image set up
-                    ImageView imageView = new ImageView(new Image(
-                            Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/component/" + string))));
-                    imageView.setFitWidth(FIXED_COMPONENT_LENGTH);
-                    imageView.setFitHeight(FIXED_COMPONENT_LENGTH);
+                    for (String string : visibleComponents) {
+                        // image set up
+                        ImageView imageView = new ImageView(new Image(
+                                Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/component/" + string))));
+                        imageView.setFitWidth(FIXED_COMPONENT_LENGTH);
+                        imageView.setFitHeight(FIXED_COMPONENT_LENGTH);
 
-                    // Applica classe CSS all'ImageView aggiunto da claude
-                    imageView.getStyleClass().add("image-view");
+                        // Applica classe CSS all'ImageView aggiunto da claude
+                        imageView.getStyleClass().add("image-view");
 
 
-                    // button set up
-                    Button button = new Button();
-                    button.setGraphic(imageView);
+                        // button setup
+                        Button button = new Button();
+                        button.setGraphic(imageView);
 
-                    //aggiunto da claude
-                    button.getStyleClass().clear();
-                    button.getStyleClass().add("component-item");
+                        //aggiunto da claude
+                        button.getStyleClass().clear();
+                        button.getStyleClass().add("component-item");
 
-                    // button.getStyleClass().add("cell-button");
-                    componentsContainer.getChildren().add(button);
+                        // button.getStyleClass().add("cell-button");
+                        componentsContainer.getChildren().add(button);
 
-                    // set up the button action
-                    button.setOnAction(_ -> {
-                        if (clientModel.getMyShipboard().getFocusedComponent() == null) {
-                            clientModel.getVisibleComponents().forEach((index, component) -> {
-                                if (component.toString().split("\\n")[0].equals(string))
-                                    clientController.pickVisibleComponent(index);
-                            });
-                        }
-                    });
-                }
+                        // set up the button action
+                        button.setOnAction(_ -> {
+                            if (clientModel.getMyShipboard().getFocusedComponent() == null) {
+                                clientModel.getVisibleComponents().forEach((index, component) -> {
+                                    if (component.toString().split("\\n")[0].equals(string))
+                                        clientController.pickVisibleComponent(index);
+                                });
+                            }
+                        });
+                    }
 
-                componentsScrollPane.setContent(componentsContainer);
-            }));
+                    componentsScrollPane.setContent(componentsContainer);
+                }));
     }
 
     //aggiunto da claude
@@ -277,15 +276,15 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     private void handleShipParts(int row, int column) {
         IntStream.range(0, shipParts.size() - 1)
-                        .filter(i -> shipParts.get(i).contains(new Coordinates(row, column)))
-                        .findFirst()
-                        .ifPresentOrElse(
-                                i -> {
-                                    this.boardsController.removeHighlightColor();
-                                    clientController.handleShipPartSelection(i + 1);
-                                    },
-                                () -> showMessage("Invalid selection, try again", false)
-                        );
+                .filter(i -> shipParts.get(i).contains(new Coordinates(row, column)))
+                .findFirst()
+                .ifPresentOrElse(
+                        i -> {
+                            this.boardsController.removeHighlightColor();
+                            clientController.handleShipPartSelection(i + 1);
+                        },
+                        () -> showMessage("Invalid selection, try again", false)
+                );
     }
 
     public void handleLittleDeck() {
@@ -358,25 +357,27 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     public void handleEndPhaseButton() {
         clientController.endBuildShipBoardPhase();
 
-        Platform.runLater(() -> {
-            visibleComponentsPanel.setVisible(false);
-            componentsBoxV.setVisible(false);
-            componentsBoxH.setVisible(false);
-            pickRandomComponentButton.setVisible(false);
-            pickRandomComponentButton.setManaged(false);
-            endPhaseButton.setVisible(false);
-            endPhaseButton.setManaged(false);
-            littleDeckComboBox.setVisible(false);
-            littleDeckComboBox.setManaged(false);
-            timerLabel.setVisible(false);
-            timerLabel.setManaged(false);
-            flipHourglassButton.setVisible(false);
-            flipHourglassButton.setManaged(false);
-            flipsLeftLabel.setVisible(false);
-            flipsLeftLabel.setManaged(false);
-            prefabShipBoardButton.setVisible(false);
-            prefabShipBoardButton.setManaged(false);
-        });
+        Platform.runLater(this::disableBuildShipboardElements);
+    }
+
+    private void disableBuildShipboardElements() {
+        visibleComponentsPanel.setVisible(false);
+        componentsBoxV.setVisible(false);
+        componentsBoxH.setVisible(false);
+        pickRandomComponentButton.setVisible(false);
+        pickRandomComponentButton.setManaged(false);
+        endPhaseButton.setVisible(false);
+        endPhaseButton.setManaged(false);
+        littleDeckComboBox.setVisible(false);
+        littleDeckComboBox.setManaged(false);
+        timerLabel.setVisible(false);
+        timerLabel.setManaged(false);
+        flipHourglassButton.setVisible(false);
+        flipHourglassButton.setManaged(false);
+        flipsLeftLabel.setVisible(false);
+        flipsLeftLabel.setManaged(false);
+        prefabShipBoardButton.setVisible(false);
+        prefabShipBoardButton.setManaged(false);
     }
 
     @Override
@@ -448,15 +449,11 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     public void showFirstToEnterButton() {
         Platform.runLater(() -> {
-            littleDeckFlowPane.setVisible(false);
-            littleDeckFlowPane.setManaged(false);
+            this.disableBuildShipboardElements();
             pawnButtonPane.setVisible(true);
             pawnButtonPane.setManaged(true);
             placePawnButton.setVisible(true);
             placePawnButton.setManaged(true);
-            visibleComponentsPanel.setVisible(false);
-            componentsBoxV.setVisible(false);
-            componentsBoxH.setVisible(false);
         });
     }
 
@@ -547,7 +544,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     }
 
     public void handleConfirmCrewMemberButton() {
-
         if (this.currentCrewMemberChoice == CrewMember.PURPLE_ALIEN)
             showCrewPlacementMenu(true);
         else {

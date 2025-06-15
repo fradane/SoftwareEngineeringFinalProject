@@ -63,9 +63,13 @@ public abstract class BoardsController {
         });
     }
 
+    private String fromCoordsToButtonId(Coordinates coords) {
+        return coords.getX() + "_" + coords.getY();
+    }
+
     public void applyHighlightEffect(Coordinates coordinates, Color color) {
 
-        String buttonId = coordinates.getX() + "_" + coordinates.getY();
+        String buttonId = fromCoordsToButtonId(coordinates);
         Button button = buttonMap.get(buttonId);
         shadowedButtons.add(button);
 
@@ -407,5 +411,23 @@ public abstract class BoardsController {
         featureImageView.setImage(featureImage);
         return new StackPane(imgView, featureImageView);
     }
+
+    protected void setupChangedAttributesBinding() {
+        modelFxAdapter.getObservableChangedAttributesProperty()
+                .addListener((_, _, newValue) -> {
+                    String nickname = newValue.getKey();
+                    Coordinates coords = newValue.getValue();
+                    Component updatedComponent = clientModel.getShipboardOf(nickname).getShipMatrix()[coords.getX()][coords.getY()];
+
+                    if (nickname.equals(clientModel.getMyNickname())) {
+                        Button button = buttonMap.get(fromCoordsToButtonId(coords));
+                        Platform.runLater(() -> updateButtonAppearance(button, updatedComponent));
+                    } else {
+                        StackPane playerStackPane = otherPlayersShipBoards.get(nickname);
+                        Platform.runLater(() -> updateOtherShipBoardsAppearance(playerStackPane, updatedComponent, coords.getX(), coords.getY()));
+                    }
+        });
+    }
+
 
 }

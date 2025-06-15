@@ -4,14 +4,12 @@ import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import javafx.collections.ObservableList;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 
 import java.io.IOException;
 import java.rmi.Remote;
@@ -107,6 +105,12 @@ public interface CallableOnClientController extends Remote {
     void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException;
 
     void notifyCoordinateOfComponentHit(String nicknameToNotify, String nickname, Coordinates coordinates) throws IOException;
+
+    void notifyInfectedCrewMembersRemoved(String nicknameToNotify, Set<Coordinates> cabinCoordinatesWithNeighbors) throws IOException;
+
+    void notifyPlayersFinalData(String nicknameToNotify, List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip ) throws IOException;
+
+    void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException;
 
     void notifyLeastResourcedPlayer(String nicknameToNotify, String nicknameAndMotivations) throws IOException;
 }
