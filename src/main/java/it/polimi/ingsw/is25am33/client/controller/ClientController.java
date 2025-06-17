@@ -1044,8 +1044,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         return true;
     }
 
-    public void playerWantsToVisitPlanet(String nickname, int choice){
-        if(!clientModel.isMyTurn()) {
+    public void playerWantsToVisitPlanet(String nickname, int choice) {
+        if (!clientModel.isMyTurn()) {
             view.showMessage("This is not your turn, please wait for others to chose ...", ERROR);
             return;
         }
@@ -1067,9 +1067,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .setHasAcceptedTheReward(choice)
                 .build();
 
-        try{
+        try {
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);
-        }catch (IOException e){
+        } catch (IOException e) {
             handleRemoteException(e);
         }
     }

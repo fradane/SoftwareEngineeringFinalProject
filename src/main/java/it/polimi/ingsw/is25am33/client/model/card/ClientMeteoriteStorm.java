@@ -13,7 +13,7 @@ public class ClientMeteoriteStorm extends ClientCard implements Serializable {
 
     public ClientMeteoriteStorm(String cardName, String imageName, List<ClientDangerousObject> meteorites) {
         super(cardName, imageName);
-        this.meteorites=meteorites;
+        this.meteorites = meteorites;
     }
 
     public List<ClientDangerousObject> getMeteorites() {
@@ -24,6 +24,7 @@ public class ClientMeteoriteStorm extends ClientCard implements Serializable {
         this.meteorites = meteorites;
     }
 
+    @Override
     public CardState getFirstState() {
         return CardState.CHOOSE_ENGINES;
     }

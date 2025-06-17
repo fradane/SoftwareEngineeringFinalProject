@@ -64,6 +64,7 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
             chosenBatteryBoxes.add((BatteryBox) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
         }
 
+        // TODO perche è stato commentato
 //        chosenDoubleEnginesCoords.stream().distinct().forEach(box -> {
 //            if (Collections.frequency(chosenBatteryBoxesCoords, box) > box.getRemainingBatteries())
 //                throw new IllegalArgumentException("The number of required batteries is not enough");

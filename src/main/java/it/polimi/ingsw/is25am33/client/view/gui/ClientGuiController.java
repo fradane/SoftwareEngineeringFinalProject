@@ -5,6 +5,8 @@ import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
+import it.polimi.ingsw.is25am33.client.model.card.ClientFreeSpace;
+import it.polimi.ingsw.is25am33.client.model.card.ClientStarDust;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.*;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
@@ -204,7 +206,13 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showChooseEnginesMenu() {
-        //TODO
+        // TODO controllare come viene gestito per altre carte
+        if (cardPhaseController != null) {
+            if (clientModel.getCurrAdventureCard() instanceof ClientFreeSpace)
+                cardPhaseController.showFreeSpaceMenu();
+            else
+                System.err.println("Not FreeSpace card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
+        }
     }
 
     @Override
@@ -249,7 +257,13 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showStardustMenu() {
-        //TODO
+        // TODO controllare poi le altre carte
+        if (cardPhaseController != null) {
+            if (clientModel.getCurrAdventureCard() instanceof ClientStarDust)
+                cardPhaseController.showStardustMenu();
+            else
+                System.err.println("Not Stardust card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
+        }
     }
 
     @Override

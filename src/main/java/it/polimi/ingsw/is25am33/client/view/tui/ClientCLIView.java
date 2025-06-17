@@ -635,7 +635,7 @@ public class ClientCLIView implements ClientView {
 //    }
 
     private void displayMeteoriteStormInfo(ClientMeteoriteStorm storm, StringBuilder output) {
-        output.append("ATTENTTION! There are ").append(storm.getDangerousObjCount()).append(" meteorites.").append("\n");
+        output.append("ATTENTION! There are ").append(storm.getDangerousObjCount()).append(" meteorites.").append("\n");
 
         if (!storm.getMeteorites().isEmpty()) {
             output.append("\nMeteorite Details:\n");
@@ -1371,7 +1371,7 @@ public class ClientCLIView implements ClientView {
             showMessage("No double engines available.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
             showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
+            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedEngines, selectedBatteries);
             return;
         }
 
@@ -1379,16 +1379,16 @@ public class ClientCLIView implements ClientView {
             showMessage("No battery boxes available so you can't activate double engine.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
             showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
+            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedEngines, selectedBatteries);
             return;
         }
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
-        if(!isThereAvailableBattery()) {
+        if (!isThereAvailableBattery()) {
             showMessage("Hai finito le batterie coglione so you can't activate double engine.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
             showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
+            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedEngines, selectedBatteries);
             return;
         }
 
@@ -1918,14 +1918,14 @@ public class ClientCLIView implements ClientView {
 //
 //    @Override
 //    public BiConsumer<CallableOnGameController, String> showChoosePlanetMenu(){
-////        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip). ", defaultInterrogationPrompt));
-////        return(server, nickname) -> {
-////            try {
-////                server.playerWantsToVisitPlanet(nickname, choice);
-////            } catch (RemoteException e) {
-////                throw new RuntimeException(e);
-////            }
-////        };
+//        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip). ", defaultInterrogationPrompt));
+//        return(server, nickname) -> {
+//            try {
+//                server.playerWantsToVisitPlanet(nickname, choice);
+//            } catch (RemoteException e) {
+//                throw new RuntimeException(e);
+//            }
+//        };
 //        return null;
 //        // TODO
 //    }

@@ -547,8 +547,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         if (this.currentCrewMemberChoice == CrewMember.PURPLE_ALIEN)
             showCrewPlacementMenu(true);
         else {
-            confirmCrewMemberButton.setVisible(false);
-            confirmCrewMemberButton.setManaged(false);
+            Platform.runLater(() -> {
+                confirmCrewMemberButton.setVisible(false);
+                confirmCrewMemberButton.setManaged(false);
+            });
             clientController.submitCrewChoices(crewMemberChoice);
         }
     }
