@@ -2,13 +2,18 @@ package it.polimi.ingsw.is25am33.client;
 
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientPlanets;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.Planet;
+import it.polimi.ingsw.is25am33.model.card.Planets;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.Cannon;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.Shield;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
@@ -55,6 +60,21 @@ public class ClientLauncher {
                 ║  -Evita meteoriti, combatti pirati, consegna tubi... diventa leggenda!-   ║
                 ║                                                                           ║
                 ╚═══════════════════════════════════════════════════════════════════════════╝""";
+
+        List<Planet> planets = new ArrayList<>();
+        Planet planet1 = new Planet(List.of(CargoCube.RED,CargoCube.BLUE));
+        planets.add(planet1);
+        Map<String, Planet> playerPlanet = new HashMap<>();
+        playerPlanet.put("player1", planet1);
+        ClientCard card = new ClientPlanets("imageName", "Planets", planets, playerPlanet, 3);
+
+        SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCardUpdate");
+        outMessage.setParamClientCard(card);
+        String messaggioSerializzato = ServerSerializer.serialize(outMessage);
+
+        System.out.println(messaggioSerializzato);
+
+
         System.out.println(titleScreen);
 
         // parsing parameters

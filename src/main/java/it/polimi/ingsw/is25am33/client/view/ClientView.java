@@ -316,11 +316,16 @@ public interface ClientView {
                 break;
             case EVALUATE_CREW_MEMBERS_MENU:
                 showCrewMembersInfo();
-            break;
+                break;
+            case HANDLE_CUBES_MALUS_MENU:
+                showHandleCubesMalusMenu();
+                break;
         }
     }
 
     void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors);
 
     void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip);
+
+    void showCubes(ShipBoardClient shipboardOf, String nickname);
 }

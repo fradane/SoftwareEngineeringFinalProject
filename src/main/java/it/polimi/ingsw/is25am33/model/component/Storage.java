@@ -8,6 +8,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Represents a storage component, extending the {@code Component} class.
@@ -127,53 +128,6 @@ public abstract class Storage extends Component {
     }
 
     /**
-     * Removes all instances of a specific {@code CargoCube} from the storage.
-     *
-     * @param cube the {@code CargoCube} to remove
-     * @throws IllegalArgumentException if the cube is not present in the storage
-     */
-    public void removeAllCargoCubesOfType(CargoCube cube) throws IllegalArgumentException {
-        if (!stockedCubes.contains(cube)) throw new IllegalArgumentException("cube not exist");
-        stockedCubes.removeIf(cube::equals);
-    }
-
-    /**
-     * Removes a specified number of instances of a specific {@code CargoCube} from the storage.
-     *
-     * @param cube the {@code CargoCube} to remove
-     * @param n the number of cubes to remove
-     * @throws IllegalArgumentException if there are not enough cubes to remove
-     */
-    public void removeCargoCubesOfType(CargoCube cube, int n) throws IllegalArgumentException {
-        if (!stockedCubes.contains(cube)) throw new IllegalArgumentException("cube not exist");
-        int count = 0;
-        for (CargoCube c : stockedCubes) {
-            if (cube.equals(c))
-                count++;
-        }
-        if (count < n) throw new IllegalArgumentException("wrong number of cubes");
-
-        for (int i = 0; i < n; i++) {
-            stockedCubes.remove(cube);
-        }
-    }
-
-    /**
-     * Checks if the storage contains a specific {@code CargoCube}.
-     *
-     * @param cube the {@code CargoCube} to check for
-     * @return true if the cube is in storage, false otherwise
-     */
-    public boolean containsCargoCube(CargoCube cube) {
-        for (CargoCube c : stockedCubes) {
-            if (cube.equals(c)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Checks if the storage is full.
      *
      * @return true if the storage is full, false otherwise
@@ -186,6 +140,6 @@ public abstract class Storage extends Component {
     @Override
     @JsonIgnore
     public String getMainAttribute() {
-        return Integer.toString(maxCapacity - stockedCubes.size());
+        return maxCapacity-stockedCubes.size()+"";
     }
 }

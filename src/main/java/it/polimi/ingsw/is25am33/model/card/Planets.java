@@ -44,6 +44,10 @@ public class Planets extends AdventureCard implements PlayerMover {
         return stepsBack;
     }
 
+    public Map<String, Planet> getPlayerPlanet() {
+        return playerPlanet;
+    }
+
     @JsonIgnore
     public Planet getCurrentPlanet() {
         return currentPlanet;

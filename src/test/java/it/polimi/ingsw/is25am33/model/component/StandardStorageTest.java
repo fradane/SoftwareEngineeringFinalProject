@@ -55,45 +55,5 @@ class StandardStorageTest {
         assertEquals(exception.getMessage(),"Empty storage");
     }
 
-    @Test
-    void removeAllCubeOfType(){
-        storage.addCube(CargoCube.BLUE);
-        storage.addCube(CargoCube.GREEN);
-        storage.addCube(CargoCube.BLUE);
-        storage.removeAllCargoCubesOfType(CargoCube.BLUE);
-
-        List<CargoCube> cargoCubeExpected = new ArrayList<>();
-        cargoCubeExpected.add(CargoCube.GREEN);
-        assertEquals(cargoCubeExpected,storage.getStockedCubes(), "remove all Cube of type");
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> storage.removeAllCargoCubesOfType(CargoCube.RED));
-        assertEquals(exception.getMessage(),"cube not exist");
-
-    }
-
-    @Test
-    void removeCargoCubesOfType(){
-        storage.addCube(CargoCube.BLUE);
-        storage.addCube(CargoCube.BLUE);
-        storage.addCube(CargoCube.BLUE);
-        storage.removeCargoCubesOfType(CargoCube.BLUE,2);
-
-        List<CargoCube> cargoCubeExpected = new ArrayList<>();
-        cargoCubeExpected.add(CargoCube.BLUE);
-
-        assertEquals(cargoCubeExpected,storage.getStockedCubes(), "remove all Cube of type");
-        Exception exception1 = assertThrows(IllegalArgumentException.class, () -> storage.removeCargoCubesOfType(CargoCube.RED,1));
-        assertEquals(exception1.getMessage(),"cube not exist");
-
-        Exception exception2 = assertThrows(IllegalArgumentException.class, () -> storage.removeCargoCubesOfType(CargoCube.BLUE,2));
-        assertEquals(exception2.getMessage(),"wrong number of cubes");
-    }
-
-    @Test
-    void containsCargoCube(){
-        storage.addCube(CargoCube.BLUE);
-        assertTrue(storage.containsCargoCube(CargoCube.BLUE));
-        assertFalse(storage.containsCargoCube(CargoCube.RED));
-    }
 
 }

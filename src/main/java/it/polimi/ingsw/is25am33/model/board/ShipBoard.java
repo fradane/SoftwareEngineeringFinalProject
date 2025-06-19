@@ -1,14 +1,12 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
-import javafx.application.Platform;
 
 import java.io.Serializable;
 import java.util.*;
@@ -188,6 +186,27 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
         // No proper (non-EMPTY) connections found
         return false;
+    }
+
+    @Override
+    public List<CargoCube> getCargoCubes(){
+        List<CargoCube> cargoCubes = new ArrayList<>();
+
+        for(Storage storage: this.getStorages()){
+            for(CargoCube cube: storage.getStockedCubes()){
+                cargoCubes.add(cube);
+            }
+        }
+        return cargoCubes;
+    }
+
+    @Override
+    public int getTotalAvailableBattery(){
+        int result = 0;
+        for(BatteryBox batteryBox: this.getBatteryBoxes()){
+            result= result + batteryBox.getRemainingBatteries();
+        }
+        return result;
     }
 
     // throws an exception if is not allowed to place the component in that position

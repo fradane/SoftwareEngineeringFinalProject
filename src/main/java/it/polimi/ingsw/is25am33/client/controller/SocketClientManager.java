@@ -737,19 +737,19 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     @Override
     public void spreadEpidemic(String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "spreadEpidemic");
-        out.println(outMessage);
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
     public void stardustEvent(String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "stardustEvent");
-        out.println(outMessage);
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
     public void evaluatedCrewMembers(String nickname) throws RemoteException{
-        SocketMessage outMessage = new SocketMessage(nickname, "stardustEvent");
-        out.println(outMessage);
+        SocketMessage outMessage = new SocketMessage(nickname, "evaluatedCrewMembers");
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override

@@ -158,6 +158,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showCubes(ShipBoardClient shipBoardClient, String nickname) {
+
+    }
+
+    @Override
     public void showCrewPlacementMenu() {
         if (buildAndCheckShipBoardController != null)
             buildAndCheckShipBoardController.showCrewPlacementMenu(false);

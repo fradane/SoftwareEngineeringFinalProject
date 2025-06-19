@@ -759,6 +759,18 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                         () -> view.showMessage("Player not found\n", STANDARD));
     }
 
+    public void showCubes(String nickname) {
+        clientModel.getPlayerClientData()
+                .keySet()
+                .stream()
+                .filter(player -> player.equals(nickname))
+                .findFirst()
+                .ifPresentOrElse(player -> view.showCubes(clientModel.getShipboardOf(player), nickname),
+                        () -> view.showMessage("Player not found\n", STANDARD));
+    }
+
+
+
     public void placeFocusedComponent(int row, int column) {
         try {
             clientModel.getShipboardOf(nickname).checkPosition(row, column);
@@ -1138,6 +1150,24 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void playerHandleBigShot(String nickname){
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
+                .build();
+
+        try{
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        }catch (IOException e){
+            handleRemoteException(e);
+        }
+    }
+
+    public void playerChoseStorageAndBattery(String nickname, List<Coordinates> storageCoords, List<Coordinates> batteryBoxCoords){
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+
+        PlayerChoicesDataStructure playerChoiceDataStructure;
+
+        playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenBatteryBoxes(batteryBoxCoords)
+                .setChosenStorage(storageCoords)
                 .build();
 
         try{

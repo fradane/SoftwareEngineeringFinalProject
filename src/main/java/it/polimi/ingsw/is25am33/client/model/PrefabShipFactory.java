@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.client.model;
 
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
@@ -18,6 +19,13 @@ public class PrefabShipFactory {
 
     static {
         // Inizializza le navi prefabbricate disponibili
+        PREFAB_SHIPS.put("storage_ship", new PrefabShipInfo(
+                "storage_ship",
+                "storage_ship",
+                "Ship for testing cube malus",
+                false
+        ));
+
         PREFAB_SHIPS.put("basic_ship", new PrefabShipInfo(
                 "basic_ship",
                 "Basic Ship",
@@ -83,8 +91,40 @@ public class PrefabShipFactory {
             case "nave_scorretta" -> applyNaveScorretta(shipBoard);
             case "basic_gui_shipboard" -> applyGuiBasicShip(shipBoard);
             case "ship_for_meteorites" -> applyMeteoriteShip(shipBoard);
+            case "storage_ship" -> applyStorageShip(shipBoard);
+
             default -> false;
         };
+    }
+
+    private static boolean applyStorageShip(ShipBoard shipBoard) {
+        clearShipBoard(shipBoard);
+
+        StandardStorage storageWithBluAndYellowCube = new StandardStorage(createSimpleConnectors(), 3);
+        //storageWithBluAndYellowCube.addCube(CargoCube.BLUE);
+        //storageWithBluAndYellowCube.addCube(CargoCube.YELLOW);
+
+        StandardStorage storageWithGreenAndYellowCube = new StandardStorage(createSimpleConnectors(), 2);
+       storageWithGreenAndYellowCube.addCube(CargoCube.GREEN);
+//        storageWithGreenAndYellowCube.addCube(CargoCube.YELLOW);
+
+        SpecialStorage storageWithRedAndBlueCube = new SpecialStorage(createSimpleConnectors(), 2);
+        storageWithRedAndBlueCube.addCube(CargoCube.RED);
+       // storageWithRedAndBlueCube.addCube(CargoCube.BLUE);
+
+        addComponent(shipBoard, storageWithBluAndYellowCube, 7, 8);
+        addComponent(shipBoard, new Shield(createSimpleConnectors()), 8, 8);
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 6);
+        addComponent(shipBoard, new Cannon(createSimpleConnectors()), 6, 7);
+        addComponent(shipBoard, new BatteryBox(createSimpleConnectors(),3), 8, 7);
+        addComponent(shipBoard, storageWithGreenAndYellowCube, 7, 5);
+        //addComponent(shipBoard, new BatteryBox(createSimpleConnectors(),2), 7, 3);
+        addComponent(shipBoard, storageWithRedAndBlueCube, 7, 4);
+        addComponent(shipBoard, new DoubleEngine(createSimpleConnectors()), 8, 9);
+        addComponent(shipBoard, new DoubleCannon(createSimpleConnectors()), 6, 5);
+
+        shipBoard.checkShipBoard();
+        return true;
     }
 
     private static boolean applyGuiBasicShip(ShipBoard shipBoard) {

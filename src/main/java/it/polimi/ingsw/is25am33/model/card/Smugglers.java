@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientSmugglers;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
@@ -10,6 +11,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
+import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -36,7 +38,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
 
     @Override
     public CardState getFirstState() {
-        return null;
+        return CardState.CHOOSE_CANNONS;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
                 this.currPlayerDecidedToGetTheReward(playerChoices.hasAcceptedTheReward());
                 break;
             case HANDLE_CUBES_MALUS:
-                this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow());
+                this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow(),playerChoices.getChosenBatteryBoxes().orElseThrow());
                 break;
             case HANDLE_CUBES_REWARD:
                 this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
@@ -61,37 +63,51 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
 
     @Override
     public ClientCard toClientCard() {
-        //TODO
-
-        return null;
+        return new ClientSmugglers(cardName, imageName, requiredFirePower, reward, stepsBack, cubeMalus );
     }
 
     private void currPlayerChoseCannonsToActivate(List<Coordinates> chosenDoubleCannonsCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
-
+        Player currentPlayer=gameModel.getCurrPlayer();
         List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
         List<Cannon> chosenDoubleCannons = new ArrayList<>();
 
         for(Coordinates chosenDoubleCannonCoord : chosenDoubleCannonsCoords) {
-            chosenDoubleCannons.add((Cannon) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenDoubleCannonCoord));
+            chosenDoubleCannons.add((Cannon) currentPlayer.getPersonalBoard().getComponentAt(chosenDoubleCannonCoord));
         }
 
         for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
-            chosenBatteryBoxes.add((BatteryBox) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
+            chosenBatteryBoxes.add((BatteryBox) currentPlayer.getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
         }
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+        });
 
         if (currPlayerCannonPower > requiredFirePower)
             setCurrState(CardState.ACCEPT_THE_REWARD);
-        else
+        else if(currPlayerCannonPower == requiredFirePower){
+            if(gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
+                setCurrState(CardState.CHOOSE_CANNONS);
+            }else{
+                setCurrState(CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
+            }
+        }else
             setCurrState(CardState.HANDLE_CUBES_MALUS);
+
     }
 
     private void currPlayerDecidedToGetTheReward(boolean hasPlayerAcceptedTheReward) {
         if (hasPlayerAcceptedTheReward)
             setCurrState(CardState.HANDLE_CUBES_REWARD);
-        else
+        else{
             setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
+        }
     }
 
     private void currPlayerChoseCargoCubeStorage(List<Coordinates> chosenStorageCoords) {
@@ -185,10 +201,6 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         // Muovi il giocatore indietro
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
-//        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
-//            clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
-//        });
-
         // Termina la carta
         setCurrState(CardState.END_OF_CARD);
         gameModel.resetPlayerIterator();
@@ -206,39 +218,37 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         }
     }
 
-    private void currPlayerChoseStorageToRemove(List<Coordinates> chosenStorageCoords) {
+    private void currPlayerChoseStorageToRemove(List<Coordinates> chosenStorageCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
 
         //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
+        Player currentPlayer=gameModel.getCurrPlayer();
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
         List<Storage> chosenStorages = new ArrayList();
-        for (Coordinates coords : chosenStorageCoords) {
-            if (coords.isCoordinateInvalid()) {
-                // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
-                chosenStorages.add(null);
-            } else {
-                Component component = shipBoard.getComponentAt(coords);
-                if (component instanceof Storage) {
-                    chosenStorages.add((Storage) component);
-                } else {
-                    // Se le coordinate non puntano a uno storage, aggiungi null
-                    chosenStorages.add(null);
-                }
-            }
+        List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
+
+        for (Coordinates chosenStorageCoord : chosenStorageCoords) {
+            chosenStorages.add((Storage) currentPlayer.getPersonalBoard().getComponentAt(chosenStorageCoord));
+        }
+        for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
+            chosenBatteryBoxes.add((BatteryBox) currentPlayer.getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
         }
 
-        if (chosenStorages.size() < cubeMalus)
-            throw new IllegalArgumentException("Not enough storages");
+        if(!chosenStorages.isEmpty()) {
 
-        chosenStorages.stream().distinct().forEach(storage -> {
-            if (Collections.frequency(chosenStorages, storage) > storage.getMaxCapacity() - storage.getStockedCubes().size())
-                throw new IllegalArgumentException("The number of required storages is not enough");
-        });
+            chosenStorages.forEach(storage -> {
+                List<CargoCube> sortedStorage = storage.getStockedCubes();
+                sortedStorage.sort(CargoCube.byValue);
+                CargoCube moreValuableCargoCube = sortedStorage.getLast();
+                storage.removeCube(moreValuableCargoCube);
+            });
 
-        chosenStorages.forEach(storage -> {
-            List<CargoCube> sortedStorage = storage.getStockedCubes();
-            sortedStorage.sort(CargoCube.byValue);
-            CargoCube lessValuableCargoCube = sortedStorage.getFirst();
-            storage.removeCube(lessValuableCargoCube);
+        }
+
+        if(!chosenBatteryBoxes.isEmpty())
+            chosenBatteryBoxes.forEach(BatteryBox::useBattery);
+
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
         });
 
         if (gameModel.hasNextPlayer()) {
@@ -246,6 +256,8 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             setCurrState(CardState.CHOOSE_CANNONS);
         } else {
             setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 
     }

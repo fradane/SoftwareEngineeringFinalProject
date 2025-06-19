@@ -35,14 +35,13 @@ class EngineTest {
         engine.rotate();
         engine.rotate();
         engine.rotate();
-
         engine.rotate();
 
         Map<Direction, ConnectorType> connectorsExpected = new LinkedHashMap<>();
-        connectorsExpected.put(Direction.NORTH, ConnectorType.DOUBLE);
-        connectorsExpected.put(Direction.EAST, ConnectorType.EMPTY);
-        connectorsExpected.put(Direction.SOUTH, ConnectorType.SINGLE);
-        connectorsExpected.put(Direction.WEST, ConnectorType.UNIVERSAL);
+        connectorsExpected.put(Direction.NORTH, ConnectorType.UNIVERSAL);
+        connectorsExpected.put(Direction.EAST, ConnectorType.DOUBLE);
+        connectorsExpected.put(Direction.SOUTH, ConnectorType.EMPTY);
+        connectorsExpected.put(Direction.WEST, ConnectorType.SINGLE);
 
         assertEquals(connectorsExpected, engine.getConnectors(), "Different Connector");
     }

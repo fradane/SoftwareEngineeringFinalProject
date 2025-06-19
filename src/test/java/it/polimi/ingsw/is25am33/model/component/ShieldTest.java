@@ -33,14 +33,13 @@ class ShieldTest {
         shield.rotate();
         shield.rotate();
         shield.rotate();
-
         shield.rotate();
 
         Map<Direction, ConnectorType> connectorsExpected = new LinkedHashMap<>();
         connectorsExpected.put(Direction.NORTH, ConnectorType.EMPTY);
-        connectorsExpected.put(Direction.EAST, ConnectorType.UNIVERSAL);
-        connectorsExpected.put(Direction.SOUTH, ConnectorType.DOUBLE);
-        connectorsExpected.put(Direction.WEST, ConnectorType.EMPTY);
+        connectorsExpected.put(Direction.EAST, ConnectorType.EMPTY);
+        connectorsExpected.put(Direction.SOUTH, ConnectorType.UNIVERSAL);
+        connectorsExpected.put(Direction.WEST, ConnectorType.DOUBLE);
 
         assertEquals(connectorsExpected, shield.getConnectors(), "Different Connector");
 
@@ -57,8 +56,8 @@ class ShieldTest {
         //shield.setDirection();
 
         List<Direction> coveredDirectionsExpected = new ArrayList<>();
-        coveredDirectionsExpected.add(Direction.WEST);
-        coveredDirectionsExpected.add(Direction.NORTH);
+        coveredDirectionsExpected.add(Direction.EAST);
+        coveredDirectionsExpected.add(Direction.SOUTH);
 
         assertEquals(coveredDirectionsExpected, shield.getDirections(), "Different direction covered");
 

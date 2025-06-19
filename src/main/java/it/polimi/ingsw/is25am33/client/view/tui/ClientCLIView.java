@@ -10,6 +10,7 @@ import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.Planet;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -65,6 +66,9 @@ public class ClientCLIView implements ClientView {
     private StorageSelectionManager storageManager = null;
     private Map<Integer, Coordinates> crewPlacementCoordinatesMap = new HashMap<>();
     private Map<Coordinates, CrewMember> crewChoices = new HashMap<>();
+    private int cubeMalus;
+    private List<Coordinates> mostPreciousCube;
+    private List<Coordinates> selectedStorage = new ArrayList<>();
 
     // Definizione dei colori ANSI (funziona nei terminali che supportano i colori ANSI).
     private static final String ANSI_RED = "\u001B[31m";
@@ -542,9 +546,6 @@ public class ClientCLIView implements ClientView {
             case "FreeSpace":
                 displayFreeSpaceInfo((ClientFreeSpace) card, output);
                break;
-//            case "Epidemic":
-//                displayEpidemicInfo((ClientEpidemic) card, output);
-//                break;
             case "StarDust":
                 displayStardustInfo((ClientStarDust) card, output);
                 break;
@@ -619,27 +620,11 @@ public class ClientCLIView implements ClientView {
             showMessage(player + "has" + clientModel.getShipboardOf(player).getCrewMembers().size() + " crew members", STANDARD);
         }
         if(clientModel.isMyTurn()){
-            showMessage("Press enter to start the first phase", ASK);
+            showMessage("Press enter to start this phase", ASK);
         }
         else
             setClientState(WAIT_PLAYER);
     }
-
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayAbandonedShipInfo(ClientAbandonedShip ship, StringBuilder output) {
-//        output.append("Crew Required: ").append(ship.getCrewMalus()).append("\n");
-//        output.append("Reward: ").append(ship.getReward()).append(" credits\n");
-//        output.append("Steps Back: ").append(ship.getStepsBack()).append("\n");
-//    }
-
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayAbandonedStationInfo(ClientAbandonedStation station, StringBuilder output) {
-//        output.append("Crew Required: ").append(station.getRequiredCrewMembers()).append("\n");
-//        output.append("Steps Back: ").append(station.getStepsBack()).append("\n");
-//        output.append("Rewards: ");
-//        station.getReward().forEach(cube -> output.append(cube.name()).append(" "));
-//        output.append("\n");
-//    }
 
     private void displayPiratesInfo(ClientPirates pirates, StringBuilder output) {
         output.append("Required Fire Power: ").append(pirates.getRequiredFirePower()).append("\n");
@@ -688,12 +673,6 @@ public class ClientCLIView implements ClientView {
     private void displayFreeSpaceInfo(ClientFreeSpace freeSpace, StringBuilder output) {
         output.append("Free movement through space using engines\n");
     }
-
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayEpidemicInfo(ClientEpidemic epidemic, StringBuilder output) {
-//        output.append("Epidemic spreading! Crew in adjacent cabins will be affected.\n");
-//    }
-
 
     private void displayStardustInfo(ClientStarDust stardust, StringBuilder output) {
         output.append("Stardust field! Ships will move back based on exposed connectors.\n");
@@ -1005,6 +984,27 @@ public class ClientCLIView implements ClientView {
             }
         }
 
+    }
+
+    @Override
+    public void showCubes(ShipBoardClient shipboardOf, String nickname) {
+        StringBuilder output = new StringBuilder();
+        if(shipboardOf.getStorages().isEmpty())
+            output.append("No storages were found.\n");
+        else {
+            shipboardOf.getCoordinatesAndStorages().forEach((coordinates, storage) -> {
+                if (storage.getStockedCubes().isEmpty())
+                    output.append("There aren't stocked cubes in the storage at " + (coordinates.getX()+1) +" "+(coordinates.getY()+1) + "\n");
+                else {
+                    for (CargoCube cube : storage.getStockedCubes()) {
+                        output.append("In the storage at " + (coordinates.getX()+1)+" "+ (coordinates.getY()+1) + " there are " + storage.getStockedCubes().size() + " cubes:\n");
+                        output.append(cube.toString()).append("\n");
+                    }
+                }
+            });
+        }
+
+        showMessage(output.toString(), STANDARD);
     }
 
     @Override
@@ -1441,9 +1441,12 @@ public class ClientCLIView implements ClientView {
 
         showCannonWithColor();
 
+        showMessage(message.toString(), STANDARD);
+
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleCannons().isEmpty() ) {
             showMessage("No double cannon available.", STANDARD);
             showMessage("You can use only single cannon", STANDARD);
+            setClientState(WAIT_PLAYER);
             clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
             return;
         }
@@ -1451,20 +1454,23 @@ public class ClientCLIView implements ClientView {
         if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
             showMessage("No battery boxes available so you can't activate double cannon.", STANDARD);
             showMessage("You can use only single cannon", STANDARD);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);            return;
+            setClientState(WAIT_PLAYER);
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            return;
         }
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
         if(!isThereAvailableBattery()) {
             showMessage("Hai finito le batterie coglione so you can't activate double cannon.", STANDARD);
             showMessage("You can use only single cannon", STANDARD);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);            return;
+            setClientState(WAIT_PLAYER);
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            return;
         }
 
         showMessage("\nYou can activate double cannon." +
                 "Each double cannon requires one battery.", STANDARD);
         setClientState(ClientState.CHOOSE_CANNONS_MENU);
-        showMessage(message.toString(), STANDARD);
         showMessage("Enter coordinates of a double cannon (row column) or 'done' when finished: ", ASK);
     }
 
@@ -1617,7 +1623,7 @@ public class ClientCLIView implements ClientView {
         List<CargoCube> rewardCubes = extractCubeRewardsFromCurrentCard();
 
         // Initialize the storage manager with the cube rewards
-        storageManager = new StorageSelectionManager(rewardCubes, getMyShipBoard());
+        storageManager = new StorageSelectionManager(rewardCubes, 0, getMyShipBoard());
 
         // Check if the player has any storage available
         if (!storageManager.hasAnyStorage()) {
@@ -1732,6 +1738,7 @@ public class ClientCLIView implements ClientView {
 
         CargoCube currentCube = storageManager.getCurrentCube();
         if (currentCube != null) {
+            showStorageWithColor();
             message.append("Prossimo cubo da posizionare: ").append(currentCube)
                     .append(" (valore: ").append(currentCube.getValue()).append(")")
                     .append(currentCube == CargoCube.RED ? " - Questo cubo richiede uno storage speciale!" : "")
@@ -1795,10 +1802,10 @@ public class ClientCLIView implements ClientView {
             // AbandonedStation has a direct list of rewards
             return new ArrayList<>(((ClientAbandonedStation) card).getReward());
         }
-//        else if (card instanceof ClientSmugglers) {
-//            // Smugglers have a direct list of rewards
-//            return new ArrayList<>(((ClientSmugglers) card).getReward());
-//        }
+        else if (card instanceof ClientSmugglers) {
+            // Smugglers have a direct list of rewards
+            return new ArrayList<>(((ClientSmugglers) card).getReward());
+        }
 
         // If no rewards were found or the card type doesn't have rewards
         if (cubes.isEmpty() && clientModel.getCurrCardState() == CardState.HANDLE_CUBES_REWARD) {
@@ -1853,13 +1860,45 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showHandleCubesMalusMenu() {
-        setClientState(ClientState.HANDLE_CUBES_MALUS_MENU);
 
-        // Mostra la nave per visualizzare i depositi
-        this.showMyShipBoard();
+        if(!clientModel.isMyTurn()){
+            setClientState(WAIT_PLAYER);
+            return;
+        }
 
-        showMessage("\nYou must discard some cargo cubes!", STANDARD);
+        if(clientModel.getCurrAdventureCard().getCardName().equals("WarField")) {
+            ClientWarField card = (ClientWarField) clientModel.getCurrAdventureCard();
+            cubeMalus=card.getCubeMalus();
+
+            storageManager = new StorageSelectionManager(new ArrayList<>(), cubeMalus, clientModel.getShipboardOf(clientModel.getMyNickname()));
+            // Mostra la nave per visualizzare i depositi
+            this.showStorageWithColor();
+            showMessage("\nYou must remove " +cubeMalus +" cargo cubes!", STANDARD);
+        }
+
+        mostPreciousCube= storageManager.mostPreciousCube();
+
+        if(clientModel.getShipboardOf(clientModel.getMyNickname()).getStorages().isEmpty()|| clientModel.getShipboardOf(clientModel.getMyNickname()).getCargoCubes().isEmpty()) {
+            if(!clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes().isEmpty()) {
+                showMessage("You don't have any storage",STANDARD);
+                showMessage("You have to give back the batteries instead of the cubes ", STANDARD);
+                setClientState(CHOOSE_BATTERY_CUBES);
+                showBatteryBoxesWithColor();
+                showMessage("Enter coordinates of a battery to remove: ", ASK);
+                return;
+            } else {
+                showMessage("You don't have any storage and battery boxes",STANDARD);
+                showMessage("You are safe...for now", STANDARD);
+                setClientState(WAIT_PLAYER);
+                clientController.playerChoseStorage(clientController.getNickname(), selectedStorage);
+                mostPreciousCube.clear();
+                return;
+            }
+        }
+        setClientState(ClientState.CHOOSE_STORAGE_FOR_CUBEMALUS);
+        showMessage("You have to give back the most precious cubes", STANDARD);
         showMessage("Enter coordinates of a storage to remove a cargo cube from: ", ASK);
+
     }
 
     private ShipBoardClient getMyShipBoard() {
@@ -2124,9 +2163,11 @@ public class ClientCLIView implements ClientView {
             BatteryBox batteryBox = (BatteryBox) component;
 
             //se quel box non contiene batterie non posso selezionarlo
+            //TODO bisognerebbe diversificare nel caso in cui si stiano scegliendo batterie al posto di cubi ma non ho voglia
+            // quindi ho fatto che se premi cancel non succede un cazzo
             if(batteryBox.getRemainingBatteries()==0){
                 showMessage("This batteryBox is empty!", ERROR);
-                showMessage("Please select another one or 'cancel' to cancel the choise", ASK);
+                showMessage("Please select another one or 'cancel' to cancel the last choise", ASK);
                 return;
             }
 
@@ -2138,23 +2179,41 @@ public class ClientCLIView implements ClientView {
                 }
             }
 
+            //TODO stessa cosa qua
             if(batteryBox.getRemainingBatteries()==frequency){
                 showMessage("This battery box is empty", ERROR);
-                showMessage("Please select another one or 'cancel' to cancel the choise", ASK);
+                showMessage("Please select another one or 'cancel' to cancel the last choise", ASK);
                 return;
             }
 
             // Aggiungi la batteria e torna alla selezione del motore
             selectedBatteries.add(coords);
 
+
             if(clientState==CHOOSE_ENGINES_SELECT_BATTERY){
-                showMessage("Engine and battery selected. Enter another engine or 'done' to finish: ", ASK);
+                showEngineWithColor();
+                showMessage("Engine and battery selected", STANDARD);
+                if(selectedEngines.size()==clientModel.getShipboardOf(clientModel.getMyNickname()).getDoubleEngines().size()){
+                    setClientState(WAIT_PLAYER);
+                    showMessage("You have selected all the engines", STANDARD);
+                    clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
+                    return;
+                }
+                showMessage("Choose another engine or 'done' to finish: ", ASK);
                 setClientState(CHOOSE_ENGINES_MENU);
                 return;
             }
 
             if(clientState==CHOOSE_CANNONS_SELECT_BATTERY){
-                showMessage("Cannon and battery selected. Enter another cannon or 'done' to finish: ", ASK);
+                showCannonWithColor();
+                showMessage("Cannon and battery selected", STANDARD);
+                if(selectedCannons.size()==clientModel.getShipboardOf(clientModel.getMyNickname()).getDoubleCannons().size()){
+                    setClientState(WAIT_PLAYER);
+                    showMessage("You have selected all the cannons", STANDARD);
+                    clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+                    return;
+                }
+                showMessage("Choose another cannons or 'done' to finish: ", ASK);
                 setClientState(CHOOSE_CANNONS_MENU);
                 return;
             }
@@ -2174,6 +2233,25 @@ public class ClientCLIView implements ClientView {
                 clientController.playerHandleBigMeteorite(clientController.getNickname(), selectedCannons, selectedBatteries);
                 selectedCannons.clear();
                 selectedBatteries.clear();
+            }
+
+            if(clientState == CHOOSE_BATTERY_CUBES) {
+
+                if (selectedBatteries.size() + selectedStorage.size() == cubeMalus
+                        || clientModel.getShipboardOf(clientModel.getMyNickname()).getTotalAvailableBattery()==selectedBatteries.size()) {
+                    showMessage(" All cargo cubes and batteries has been selected", STANDARD);
+                    setClientState(WAIT_PLAYER);
+                    clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStorage, selectedBatteries);
+                    selectedBatteries.clear();
+                    selectedStorage.clear();
+                    mostPreciousCube.clear();
+                }else{
+                    showBatteryBoxesWithColor();
+                    showMessage("You still need to remove " + (cubeMalus- selectedStorage.size()- selectedBatteries.size()) +" battery (s). Enter another battery box coordinate: ", STANDARD);
+                    showMessage("Battery box selected. Enter another battery box. ", ASK);
+                    setClientState(CHOOSE_BATTERY_CUBES);
+                }
+
             }
 
         } catch (Exception e) {
@@ -2242,7 +2320,7 @@ public class ClientCLIView implements ClientView {
         }
     }
 
-    private void handleStorageSelection(String input) {
+    private void handleStorageSelectionForReward(String input) {
         //TODO OPTIONAL: aggiugnere possibilità di rifare da capo le scelte. Per esempio in caso un client sbagliasse a posizionare un cubo
         if (input.equalsIgnoreCase("done")) {
             // Se l'utente ha finito ma non ha selezionato tutti gli storage possibili
@@ -2392,6 +2470,28 @@ public class ClientCLIView implements ClientView {
             }
         } catch (Exception e) {
             showMessage("Errore nel processare le coordinate: " + e.getMessage(), ERROR);
+        }
+    }
+
+    private void handleStorageSelectionForMalus(String input){
+        try {
+            Coordinates coords = parseCoordinates(input);
+            if (coords == null) return;
+
+            ShipBoardClient shipBoard = clientModel.getShipboardOf(clientModel.getMyNickname());
+            Component component = shipBoard.getComponentAt(coords);
+
+            if (component == null || !shipBoard.getStorages().contains(component)) {
+                showMessage("No storage at these coordinates.", ERROR);
+                showStorageWithColor();
+                showMessage("Please try again or 'done' to confirm.", ASK);
+                return;
+            }
+
+            selectedStorage.add(coords);
+
+        } catch (Exception e) {
+            showMessage("Error processing coordinates: " + e.getMessage(), ERROR);
         }
     }
 
@@ -2634,6 +2734,14 @@ public class ClientCLIView implements ClientView {
                 return;
             }
             clientController.showShipBoard(input.trim().split("\\s+")[1]);
+            return;
+        }
+        else if (input.trim().split("\\s+")[0].equals("cube")) {
+            if (input.trim().split("\\s+").length != 2) {
+                showMessage("Invalid cubes command", ERROR);
+                return;
+            }
+            clientController.showCubes(input.trim().split("\\s+")[1]);
             return;
         } else if (input.equals("rank")) {
             showCurrentRanking();
@@ -3097,7 +3205,7 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case HANDLE_CUBES_REWARD_MENU:
-                    handleStorageSelection(input); // false = reward
+                    handleStorageSelectionForReward(input); // false = reward
                     break;
 
                 case CANNOT_ACCEPT_CUBES_REWARDS:
@@ -3107,7 +3215,7 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case HANDLE_CUBES_MALUS_MENU:
-                    handleStorageSelection(input); // true = malus
+                    handleStorageSelectionForMalus(input); // true = malus
                     break;
 
                 case CANNOT_VISIT_LOCATION:
@@ -3188,6 +3296,16 @@ public class ClientCLIView implements ClientView {
                     }
                     break;
 
+                case CHOOSE_BATTERY_CUBES:
+
+                    if (input.equalsIgnoreCase("cancel")) {
+                        showBatteryBoxesWithColor();
+                        showMessage("Please choose another box: ", ASK);
+                    } else {
+                        handleBatterySelection(input);
+                    }
+                    break;
+
                 case EVALUATE_CREW_MEMBERS_MENU:
                     clientController.evaluatedCrewMembers();
                     break;
@@ -3196,6 +3314,44 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case CHECK_SHIPBOARD_AFTER_ATTACK:
+                    break;
+
+                case CHOOSE_STORAGE_FOR_CUBEMALUS:
+                        try{
+                            Coordinates coords = parseCoordinates(input);
+
+                            if(mostPreciousCube.contains(coords)){
+                                mostPreciousCube.remove(coords);
+                                selectedStorage.add(coords);
+                                showMessage("Storage selected.", STANDARD);
+                                if(!mostPreciousCube.isEmpty()){
+                                    showStorageWithColor();
+                                    showMessage("You still need to remove " + mostPreciousCube.size() +" cube (s). Enter another storage coordinate: ", ASK);
+                                }
+                                else{
+                                    if(selectedStorage.size() == cubeMalus){
+                                        setClientState(WAIT_PLAYER);
+                                        clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStorage, selectedBatteries);
+                                        selectedStorage.clear();
+                                        selectedBatteries.clear();
+                                        mostPreciousCube.clear();
+                                    }
+                                    else{
+                                        setClientState(CHOOSE_BATTERY_CUBES);
+                                        showBatteryBoxesWithColor();
+                                        showMessage("You still need to remove " + (cubeMalus- selectedStorage.size()) +" battery (s). Enter a battery box coordinate: ", ASK);
+                                        handleBatterySelection(input);
+                                    }
+                                }
+                            } else{
+                                showStorageWithColor();
+                                showMessage("ATTENTION! There are a more precious cube on the ship!", STANDARD);
+                                showMessage("You must remove them. Please enter storage coordinate: ", ASK);
+                            }
+
+                        } catch (NumberFormatException e) {
+                            showMessage("Invalid input. Please enter valid numbers for row and column.", ERROR);
+                        }
                     break;
 
                 default:
@@ -3273,5 +3429,22 @@ public class ClientCLIView implements ClientView {
 
         showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
     }
+
+    public void showStorageWithColor(){
+        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
+
+        List<SpecialStorage> availableSpecialStorages = clientModel.getShipboardOf(clientModel.getMyNickname()).getSpecialStorages();
+        availableSpecialStorages.removeAll(selectedStorage);
+        Set<Coordinates> availableSpecialStoragesCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableSpecialStorages);
+        colorMap.put(ANSI_GREEN, availableSpecialStoragesCoords);
+
+        List<StandardStorage> availableStandardStorages = clientModel.getShipboardOf(clientModel.getMyNickname()).getStandardStorages();
+        availableStandardStorages.removeAll(selectedStorage);
+        Set<Coordinates> availableStandardStoragesCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableStandardStorages);
+        colorMap.put(ANSI_BLUE, availableStandardStoragesCoords);
+
+        showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+    }
+
 }
 

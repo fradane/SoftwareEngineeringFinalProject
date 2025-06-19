@@ -22,7 +22,7 @@ import java.io.Serializable;
         @JsonSubTypes.Type(value = ClientFreeSpace.class, name = "FreeSpace"),
         @JsonSubTypes.Type(value = ClientPirates.class, name = "Pirates"),
         @JsonSubTypes.Type(value = ClientSlaveTraders.class, name = "SlaveTraders"),
-        @JsonSubTypes.Type(value = ClientWarField.class, name = "WarField")
+        @JsonSubTypes.Type(value = ClientWarField.class, name = "WarField"),
         @JsonSubTypes.Type(value = ClientPirates.class, name = "Pirates"),
         @JsonSubTypes.Type(value = ClientAbandonedStation.class, name = "AbandonedStation"),
         @JsonSubTypes.Type(value = ClientEpidemic.class, name = "Epidemic"),

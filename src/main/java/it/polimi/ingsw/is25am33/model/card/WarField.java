@@ -32,7 +32,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
     private List<String> shotIDs;
     @JsonDeserialize(as = LinkedHashMap.class)
     private Map<CardState, CardState> categories;
-    private Pair<Player, Double> leastResourcedPlayer;
+    private Pair<Player, Double> leastResourcedPlayer = null;
     private Iterator<CardState> phasesIterator;
     private Iterator<Shot> shotIterator;
 
@@ -64,7 +64,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
                 this.currPlayerChoseRemovableCrewMembers(playerChoices.getChosenCabins().orElseThrow());
                 break;
             case HANDLE_CUBES_MALUS:
-                this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow());
+                this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
                 break;
             case THROW_DICES:
                 this.throwDices();
@@ -193,8 +193,10 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
             clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
         });
 
-        if (leastResourcedPlayer == null || currPlayerCannonPower < leastResourcedPlayer.getValue())
-            leastResourcedPlayer = new Pair<>(gameModel.getCurrPlayer(), currPlayerCannonPower);
+        if (leastResourcedPlayer == null || currPlayerCannonPower < leastResourcedPlayer.getValue() ||
+                (currPlayerCannonPower == leastResourcedPlayer.getValue() &&
+                        gameModel.getFlyingBoard().getPlayerPosition(leastResourcedPlayer.getKey())<gameModel.getFlyingBoard().getPlayerPosition(currentPlayer)))
+            leastResourcedPlayer = new Pair<>(gameModel.getCurrPlayer(), (double) currPlayerCannonPower);
 
         if (gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
@@ -202,7 +204,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
         }
         else{
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyLeastResourcedPlayer(nicknameToNotify,new StringBuilder(leastResourcedPlayer.getKey().getNickname()+" has the least fire power of all").toString());
+                clientController.notifyLeastResourcedPlayer(nicknameToNotify, leastResourcedPlayer.getKey().getNickname() + " has the least fire power of all");
             });
             handleMalus();
         }
@@ -233,7 +235,9 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
         });
         int currPlayerEnginePower = gameModel.getCurrPlayer().getPersonalBoard().countTotalEnginePower(chosenDoubleEngines);
 
-        if (leastResourcedPlayer == null || currPlayerEnginePower < leastResourcedPlayer.getValue())
+        if (leastResourcedPlayer == null || currPlayerEnginePower < leastResourcedPlayer.getValue() ||
+                (currPlayerEnginePower == leastResourcedPlayer.getValue() &&
+                gameModel.getFlyingBoard().getPlayerPosition(leastResourcedPlayer.getKey())<gameModel.getFlyingBoard().getPlayerPosition(currentPlayer)))
             leastResourcedPlayer = new Pair<>(gameModel.getCurrPlayer(), (double) currPlayerEnginePower);
 
         if (gameModel.hasNextPlayer()) {
@@ -242,7 +246,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
         }
         else{
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyLeastResourcedPlayer(nicknameToNotify,new StringBuilder(leastResourcedPlayer.getKey().getNickname()+" has the least engine power of all").toString());
+                clientController.notifyLeastResourcedPlayer(nicknameToNotify, leastResourcedPlayer.getKey().getNickname() + " has the least engine power of all");
             });
             handleMalus();
         }
@@ -251,16 +255,15 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
     public void countCrewMembers() {
 
-        gameModel.getPlayers().keySet()
-                .stream()
-                .map(nickname -> gameModel.getPlayers().get(nickname))
-                .min(Comparator.comparingInt(player -> player.getPersonalBoard().getCrewMembers().size()))
-                .ifPresent(player -> {
-                    leastResourcedPlayer = new Pair<>(player, (double) player.getPersonalBoard().getCrewMembers().size());
-                });
+        for(Player player : gameModel.getPlayers().values()) {
+            if(leastResourcedPlayer==null || leastResourcedPlayer.getValue()>player.getPersonalBoard().getCrewMembers().size() ||
+                    (leastResourcedPlayer.getValue()==player.getPersonalBoard().getCrewMembers().size() &&
+                            gameModel.getFlyingBoard().getPlayerPosition(leastResourcedPlayer.getKey())<gameModel.getFlyingBoard().getPlayerPosition(player)))
+                leastResourcedPlayer = new Pair<>(player, (double) player.getPersonalBoard().getCrewMembers().size());
+        }
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyLeastResourcedPlayer(nicknameToNotify,new StringBuilder(leastResourcedPlayer.getKey().getNickname()+" has the least members of all").toString());
+            clientController.notifyLeastResourcedPlayer(nicknameToNotify, leastResourcedPlayer.getKey().getNickname() + " has the least members of all");
         });
 
         handleMalus();
@@ -285,7 +288,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
             else
                 setCurrState(categories.get(currState));
         }
-
+        leastResourcedPlayer=null;
     }
 
     private void currPlayerChoseRemovableCrewMembers(List<Coordinates> chosenCabinsCoordinate) throws IllegalArgumentException {
@@ -307,8 +310,11 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
             gameModel.resetPlayerIterator();
             setCurrState(phasesIterator.next());
 
-        } else
+        } else {
             setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
+        }
 
     }
 
@@ -323,39 +329,37 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
     }
 
-    private void currPlayerChoseStorageToRemove(List<Coordinates> chosenStorageCoords) {
+    private void currPlayerChoseStorageToRemove(List<Coordinates> chosenStorageCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
 
         //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
+        Player currentPlayer=gameModel.getCurrPlayer();
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
         List<Storage> chosenStorages = new ArrayList();
-        for (Coordinates coords : chosenStorageCoords) {
-            if (coords.isCoordinateInvalid()) {
-                // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
-                chosenStorages.add(null);
-            } else {
-                Component component = shipBoard.getComponentAt(coords);
-                if (component instanceof Storage) {
-                    chosenStorages.add((Storage) component);
-                } else {
-                    // Se le coordinate non puntano a uno storage, aggiungi null
-                    chosenStorages.add(null);
-                }
-            }
+        List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
+
+        for (Coordinates chosenStorageCoord : chosenStorageCoords) {
+            chosenStorages.add((Storage) currentPlayer.getPersonalBoard().getComponentAt(chosenStorageCoord));
+        }
+        for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
+            chosenBatteryBoxes.add((BatteryBox) currentPlayer.getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
         }
 
-        if (chosenStorages.size() != cubeMalus)
-            throw new IllegalArgumentException("Incorrect number of storages");
+        if(!chosenStorages.isEmpty()) {
 
-        chosenStorages.stream().distinct().forEach(storage -> {
-            if (Collections.frequency(chosenStorages, storage) > storage.getMaxCapacity() - storage.getStockedCubes().size())
-                throw new IllegalArgumentException("The number of required storages is not enough");
-        });
+            chosenStorages.forEach(storage -> {
+                List<CargoCube> sortedStorage = storage.getStockedCubes();
+                sortedStorage.sort(CargoCube.byValue);
+                CargoCube moreValuableCargoCube = sortedStorage.getLast();
+                storage.removeCube(moreValuableCargoCube);
+            });
 
-        chosenStorages.forEach(storage -> {
-            List<CargoCube> sortedStorage = storage.getStockedCubes();
-            sortedStorage.sort(CargoCube.byValue);
-            CargoCube lessValuableCargoCube = sortedStorage.getFirst();
-            storage.removeCube(lessValuableCargoCube);
+        }
+
+        if(!chosenBatteryBoxes.isEmpty())
+            chosenBatteryBoxes.forEach(BatteryBox::useBattery);
+
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
         });
 
         if (phasesIterator.hasNext()) {
@@ -363,6 +367,8 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
             setCurrState(phasesIterator.next());
         } else {
             setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 
     }
@@ -411,8 +417,6 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
             }
             setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
         }
-
-
 
     }
 
