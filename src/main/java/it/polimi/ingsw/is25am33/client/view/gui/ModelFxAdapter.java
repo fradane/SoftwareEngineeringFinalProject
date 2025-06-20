@@ -3,7 +3,6 @@ package it.polimi.ingsw.is25am33.client.view.gui;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.card.AdventureCard;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import javafx.beans.property.ObjectProperty;
@@ -27,9 +26,12 @@ public class ModelFxAdapter {
     private final Map<PlayerColor, ObjectProperty<Integer>> observableColorRanking;
     private final ObjectProperty<ClientCard> observableCurrAdventureCard;
     private final ObjectProperty<Pair<String, Coordinates>> observableChangedAttributes;
+    private final Boolean isCardAdapter;
+    private final Object rankingLock = new Object();
+    private final Object visibleComponentsLock  = new Object();
 
     @SuppressWarnings("unchecked")
-    public ModelFxAdapter(ClientModel clientModel) {
+    public ModelFxAdapter(ClientModel clientModel, Boolean isCardAdapter) {
         this.clientModel = clientModel;
         clientModel.setModelFxAdapter(this);
 
@@ -42,16 +44,16 @@ public class ModelFxAdapter {
         this.observableBookedComponents = new ConcurrentHashMap<>();
         this.observableCurrAdventureCard = new SimpleObjectProperty<>();
         this.observableChangedAttributes = new SimpleObjectProperty<>();
+        this.isCardAdapter = isCardAdapter;
 
         // initialize shipboards
         clientModel.getPlayerClientData()
-                .forEach((nickname, playerClientData) -> {
+                .forEach((nickname, _) -> {
                     observableShipBoards.put(nickname, new ObjectProperty[12][12]);
-                    Component[][] shipMatrix = playerClientData.getShipBoard().getShipMatrix();
                     for (int i = 0; i < 12; i++) {
                         for (int j = 0; j < 12; j++) {
                             //if (i == 6 && j == 6) System.out.println(shipMatrix[i][j]);
-                            SimpleObjectProperty<Component> prop = new SimpleObjectProperty<>(shipMatrix[i][j]);
+                            SimpleObjectProperty<Component> prop = new SimpleObjectProperty<>();
                             observableShipBoards.get(nickname)[i][j] = prop;
                         }
                     }
@@ -65,11 +67,15 @@ public class ModelFxAdapter {
     /* -------------- GETTERS -------------- */
 
     public ObjectProperty<Component>[][] getObservableShipBoardOf(String nickname) {
-        return observableShipBoards.get(nickname);
+        synchronized (observableShipBoards.get(nickname)) {
+            return observableShipBoards.get(nickname);
+        }
     }
 
     public ObjectProperty<Component>[][] getMyObservableMatrix() {
-        return observableShipBoards.get(clientModel.getMyNickname());
+        synchronized (observableShipBoards.get(clientModel.getMyNickname())) {
+            return observableShipBoards.get(clientModel.getMyNickname());
+        }
     }
 
     public ObjectProperty<ClientCard> getObservableCurrAdventureCard() {
@@ -97,11 +103,17 @@ public class ModelFxAdapter {
     }
 
     public Pair<ObjectProperty<Component>, ObjectProperty<Component>> getObservableBookedComponentsOf(String nickname) {
-        return observableBookedComponents.get(nickname);
+        synchronized (observableShipBoards.get(nickname)) {
+            return observableBookedComponents.get(nickname);
+        }
     }
 
     public ObjectProperty<Pair<String, Coordinates>> getObservableChangedAttributesProperty() {
         return observableChangedAttributes;
+    }
+
+    public Boolean isCardAdapter() {
+        return isCardAdapter;
     }
 
     /* -------------- REFRESH METHODS -------------- */
@@ -113,14 +125,16 @@ public class ModelFxAdapter {
 
     public void refreshVisibleComponents() {
         observableVisibleComponents.clear();
-        observableVisibleComponents.addAll(
-                clientModel.getVisibleComponents()
-                        .keySet()
-                        .stream()
-                        .map(index -> clientModel.getVisibleComponents().get(index))
-                        .map(component -> component.toString().trim().split("\\n")[0])
-                        .toList()
-        );
+        synchronized (visibleComponentsLock) {
+            observableVisibleComponents.addAll(
+                    clientModel.getVisibleComponents()
+                            .keySet()
+                            .stream()
+                            .map(index -> clientModel.getVisibleComponents().get(index))
+                            .map(component -> component.toString().trim().split("\\n")[0])
+                            .toList()
+            );
+        }
     }
 
     public void refreshShipBoardOf(String nickname) {
@@ -128,49 +142,58 @@ public class ModelFxAdapter {
         if (nickname.equals(clientModel.getMyNickname()))
             observableFocusedComponent.set(clientModel.getMyShipboard().getFocusedComponent());
 
-        // refresh the shipboard
-        Component[][] rawMatrix = clientModel.getShipboardOf(nickname).getShipMatrix();
-        for (int i = 0; i < 12; i++) {
-            for (int j = 0; j < 12; j++) {
+        synchronized (observableShipBoards.get(nickname)) {
 
-                Component oldComponent = getObservableShipBoardOf(nickname)[i][j].get();
-                Component newComponent = rawMatrix[i][j];
+            // refresh the shipboard
+            Component[][] rawMatrix = clientModel.getShipboardOf(nickname).getShipMatrix();
 
-                if (oldComponent == null || newComponent == null)
-                    getObservableShipBoardOf(nickname)[i][j].set(rawMatrix[i][j]);
-                else if (!oldComponent.getGuiHash().equals(newComponent.getGuiHash())) {
-                    synchronized (observableChangedAttributes) {
-                        observableChangedAttributes.set(new Pair<>(nickname, new Coordinates(i, j)));
+            for (int i = 0; i < 12; i++) {
+                for (int j = 0; j < 12; j++) {
+
+                    Component oldComponent = getObservableShipBoardOf(nickname)[i][j].get();
+                    Component newComponent = rawMatrix[i][j];
+
+                    if ((oldComponent == null || newComponent == null)) {
+                        if (oldComponent == null && newComponent == null)
+                            continue;
+                        getObservableShipBoardOf(nickname)[i][j].set(newComponent);
+                        System.out.println("updating shipboard of " + nickname + " from " + oldComponent + " to " + newComponent);
+                    } else if (!oldComponent.getGuiHash().equals(newComponent.getGuiHash())) {
+                        synchronized (observableChangedAttributes) {
+                            observableChangedAttributes.set(new Pair<>(nickname, new Coordinates(i, j)));
+                        }
                     }
+
                 }
-
             }
+
+            // refresh the booked components
+            List<Component> bookedComponents = clientModel.getShipboardOf(nickname).getBookedComponents();
+
+
+            observableBookedComponents.get(nickname)
+                    .getKey()
+                    .set(
+                            !bookedComponents.isEmpty() ? bookedComponents.getFirst() : null
+                    );
+
+            observableBookedComponents.get(nickname)
+                    .getValue()
+                    .set(
+                            bookedComponents.size() > 1 ? bookedComponents.get(1) : null
+                    );
         }
-
-        // refresh the booked components
-        List<Component> bookedComponents = clientModel.getShipboardOf(nickname).getBookedComponents();
-
-
-        observableBookedComponents.get(nickname)
-                .getKey()
-                .set(
-                        !bookedComponents.isEmpty() ? bookedComponents.getFirst() : null
-                );
-
-        observableBookedComponents.get(nickname)
-                .getValue()
-                .set(
-                        bookedComponents.size() > 1 ? bookedComponents.get(1) : null
-                );
 
     }
 
     public void refreshRanking() {
-        clientModel.getColorRanking()
-                .forEach((playerColor, position) -> {
-                    if (observableColorRanking.containsKey(playerColor))
-                        observableColorRanking.get(playerColor).set(position);
-                });
+        synchronized (rankingLock) {
+            clientModel.getColorRanking()
+                    .forEach((playerColor, position) -> {
+                        if (observableColorRanking.containsKey(playerColor))
+                            observableColorRanking.get(playerColor).set(position);
+                    });
+        }
     }
 
     public void refreshCurrAdventureCard() {

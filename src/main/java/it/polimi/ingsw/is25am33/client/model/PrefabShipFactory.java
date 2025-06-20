@@ -85,6 +85,7 @@ public class PrefabShipFactory {
                 })
                 .forEach(component -> {
                     String imageName = component.getImageName();
+                    System.out.println(imageName);
                     switch (imageName) {
                         case "GT-new_tiles_16_for_web143.jpg" -> addComponent(shipBoard, component, 7, 8);
                         case "GT-new_tiles_16_for_web51.jpg" -> addComponent(shipBoard, component, 7, 9);

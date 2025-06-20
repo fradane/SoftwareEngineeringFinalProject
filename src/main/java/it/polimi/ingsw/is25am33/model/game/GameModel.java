@@ -99,7 +99,7 @@ public class GameModel {
                 }
 
                 gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                        clientController.notifyHourglassRestarted(nicknameToNotify, nickname, flipsLeft);
+                    clientController.notifyHourglassRestarted(nicknameToNotify, nickname, flipsLeft);
                 });
 
                 flipsLeft--;
@@ -154,7 +154,7 @@ public class GameModel {
             this.currGameState = currGameState;
 
             gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyGameState(nicknameToNotify, currGameState);
+                clientController.notifyGameState(nicknameToNotify, currGameState);
             });
         }
         currGameState.run(this);
@@ -185,7 +185,7 @@ public class GameModel {
         this.currDangerousObj = dangerousObj;
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyDangerousObjAttack(nicknameToNotify, new ClientDangerousObject(currDangerousObj.getDangerousObjType(),currDangerousObj.getDirection(),currDangerousObj.getCoordinate()));
+            clientController.notifyDangerousObjAttack(nicknameToNotify, new ClientDangerousObject(currDangerousObj.getDangerousObjType(),currDangerousObj.getDirection(),currDangerousObj.getCoordinate()));
         });
 
     }
@@ -214,7 +214,7 @@ public class GameModel {
         this.currPlayer = player;
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyCurrPlayerChanged(nicknameToNotify, player.getNickname());
+            clientController.notifyCurrPlayerChanged(nicknameToNotify, player.getNickname());
         });
 
     }
@@ -236,10 +236,10 @@ public class GameModel {
     }
 
     public void setCurrAdventureCard(AdventureCard currAdventureCard) {
-            this.currAdventureCard = currAdventureCard;
+        this.currAdventureCard = currAdventureCard;
 
-            // Map server card to client card
-            ClientCard clientCard = currAdventureCard.toClientCard();
+        // Map server card to client card
+        ClientCard clientCard = currAdventureCard.toClientCard();
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyCurrAdventureCard(nicknameToNotify, clientCard, true);
@@ -263,9 +263,7 @@ public class GameModel {
         if (currAdventureCard == null || currAdventureCard.getCurrState() != CardState.START_CARD)
             throw new IllegalStateException("Not the right state");
 
-        //TODO uncommentare quando sarà pronta la creazione della classifica fatta da Fra
         setCurrRanking(flyingBoard.getCurrentRanking());
-        //setCurrRanking(new ArrayList<>(players.values()));
         currAdventureCard.setGame(this);
         playerIterator = currRanking.iterator();
         setCurrPlayer(playerIterator.next());
@@ -280,13 +278,16 @@ public class GameModel {
 
         Map<Player, Integer> x = new HashMap<>();
 
-        players.values().forEach(player -> {
-            x.put(player, player.getPersonalBoard().countExposed());
-        });
+        players.values().forEach(player ->
+                x.put(player, player.getPersonalBoard().countExposed())
+        );
 
         Integer minValue = Collections.min(x.values());
 
-        return x.keySet().stream().filter(player -> x.get(player).equals(minValue)).toList();
+        return x.keySet()
+                .stream()
+                .filter(player -> x.get(player).equals(minValue))
+                .toList();
 
     }
 
@@ -302,27 +303,27 @@ public class GameModel {
                 credits += flyingBoard.getPrettiestShipReward();
 
             credits += player.getPersonalBoard().getStorages()
-                                .stream()
-                                .flatMap(storage -> storage.getStockedCubes().stream())
-                                .mapToInt(stockedCube -> {
-                                    switch (stockedCube) {
-                                        case BLUE -> {
-                                            return 1;
-                                        }
-                                        case GREEN -> {
-                                            return 2;
-                                        }
-                                        case YELLOW -> {
-                                            return 3;
-                                        }
-                                        case RED -> {
-                                            return 4;
-                                        }
-                                        default -> {
-                                            return 0;
-                                        }
-                                    }
-                                }).sum();
+                    .stream()
+                    .flatMap(storage -> storage.getStockedCubes().stream())
+                    .mapToInt(stockedCube -> {
+                        switch (stockedCube) {
+                            case BLUE -> {
+                                return 1;
+                            }
+                            case GREEN -> {
+                                return 2;
+                            }
+                            case YELLOW -> {
+                                return 3;
+                            }
+                            case RED -> {
+                                return 4;
+                            }
+                            default -> {
+                                return 0;
+                            }
+                        }
+                    }).sum();
 
             credits -= player.getPersonalBoard().getNotActiveComponents().size();
 
@@ -423,13 +424,13 @@ public class GameModel {
                 .collect(Collectors.toSet());
 
         gameClientNotifier.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
-                Player player = players.get(nicknameToNotify);
-                ShipBoard shipBoard = player.getPersonalBoard();
-                Component[][] shipMatrix = shipBoard.getShipMatrix();
-                Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
-                Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+            Player player = players.get(nicknameToNotify);
+            ShipBoard shipBoard = player.getPersonalBoard();
+            Component[][] shipMatrix = shipBoard.getShipMatrix();
+            Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
+            Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
 
-                clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+            clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
 
         });
     }
@@ -442,13 +443,13 @@ public class GameModel {
                 .collect(Collectors.toSet());
 
         gameClientNotifier.notifyClients(playersNicknameToBeNotified, (nicknameToNotify, clientController) -> {
-                Player player = players.get(nicknameToNotify);
-                ShipBoard shipBoard = player.getPersonalBoard();
-                Component[][] shipMatrix = shipBoard.getShipMatrix();
-                Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
-                Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+            Player player = players.get(nicknameToNotify);
+            ShipBoard shipBoard = player.getPersonalBoard();
+            Component[][] shipMatrix = shipBoard.getShipMatrix();
+            Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
+            Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
 
-                clientController.notifyValidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+            clientController.notifyValidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
 
         });
     }

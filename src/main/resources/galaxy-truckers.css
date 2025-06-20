@@ -549,3 +549,24 @@
     -fx-background-radius: 10px;
     -fx-padding: 10px; /* margine interno */
 }
+
+.custom-popup-button {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-background-radius: 6px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 5, 0, 0, 1);
+}
+
+.custom-popup-button:hover {
+    -fx-background-color: -fx-space-accent-hover;
+    -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.5), 6, 0, 0, 1);
+}
+
+.custom-popup-button:pressed {
+    -fx-background-color: derive(-fx-space-accent-hover, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.6), 4, 0, 0, 0);
+}

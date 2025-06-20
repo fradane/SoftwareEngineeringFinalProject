@@ -537,7 +537,7 @@ public class ClientCLIView implements ClientView {
                 break;
             case "FreeSpace":
                 displayFreeSpaceInfo((ClientFreeSpace) card, output);
-               break;
+                break;
 //            case "Epidemic":
 //                displayEpidemicInfo((ClientEpidemic) card, output);
 //                break;
@@ -580,9 +580,9 @@ public class ClientCLIView implements ClientView {
     }
 
     public void showComponentHitInfo(Coordinates coordinates){
-            showMessage("The component at coordinates " + coordinates.getX() + "-"+ coordinates.getY() + " has been hit", STANDARD);
-            hitComponent = coordinates;
-            return;
+        showMessage("The component at coordinates " + coordinates.getX() + "-"+ coordinates.getY() + " has been hit", STANDARD);
+        hitComponent = coordinates;
+        return;
     }
 
     //TODO uncommentare quando si inizia ad implementare questa carta
@@ -754,7 +754,7 @@ public class ClientCLIView implements ClientView {
                 break;
         }*/
 
-                // TODO clientCLI
+        // TODO clientCLI
         showCardStateMenu(mappedState);
     }
 
@@ -1317,11 +1317,10 @@ public class ClientCLIView implements ClientView {
             showMessage("\nMeteors are heading your way!", STANDARD);
         }
 
-        if(clientModel.isMyTurn()) {
+        if (clientModel.isMyTurn()) {
             setClientState(ClientState.THROW_DICES_MENU);
             showMessage("Press Enter to throw dice and see where they hit...", ASK);
-        }
-        else {
+        } else {
             setClientState(WAIT_PLAYER);
             showMessage("The first player is throwing dices, wait...", STANDARD);
         }
@@ -1524,7 +1523,7 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showBigMeteoriteMenu() {
-       // setClientState(ClientState.HANDLE_BIG_METEORITE_MENU);
+        // setClientState(ClientState.HANDLE_BIG_METEORITE_MENU);
         selectedCannons.clear();
         selectedBatteries.clear();
 
@@ -1918,14 +1917,14 @@ public class ClientCLIView implements ClientView {
 //
 //    @Override
 //    public BiConsumer<CallableOnGameController, String> showChoosePlanetMenu(){
-////        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip). ", defaultInterrogationPrompt));
-////        return(server, nickname) -> {
-////            try {
-////                server.playerWantsToVisitPlanet(nickname, choice);
-////            } catch (RemoteException e) {
-////                throw new RuntimeException(e);
-////            }
-////        };
+    ////        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip). ", defaultInterrogationPrompt));
+    ////        return(server, nickname) -> {
+    ////            try {
+    ////                server.playerWantsToVisitPlanet(nickname, choice);
+    ////            } catch (RemoteException e) {
+    ////                throw new RuntimeException(e);
+    ////            }
+    ////        };
 //        return null;
 //        // TODO
 //    }
@@ -2576,9 +2575,9 @@ public class ClientCLIView implements ClientView {
             if(clientState==HANDLE_SMALL_DANGEROUS_SELECT_BATTERY) {
                 showMessage("Shield and battery selected", STANDARD);
                 setClientState(WAIT_PLAYER);
-                    clientController.playerHandleSmallDanObj(clientController.getNickname(), selectedShields, selectedBatteries);
-                    selectedShields.clear();
-                    selectedBatteries.clear();
+                clientController.playerHandleSmallDanObj(clientController.getNickname(), selectedShields, selectedBatteries);
+                selectedShields.clear();
+                selectedBatteries.clear();
                 return;
             }
 
@@ -2873,7 +2872,7 @@ public class ClientCLIView implements ClientView {
                 }
             }
             if((card.getCrewMalus() - selectedCabins.size()) == 0)
-               showMessage("You have completed your choices, please press done: ", ASK);
+                showMessage("You have completed your choices, please press done: ", ASK);
             else
                 showMessage("You still need to remove " + (card.getCrewMalus() - selectedCabins.size()) +" crew member(s). Enter another cabin coordinate: ", ASK);
         } catch (NumberFormatException e) {

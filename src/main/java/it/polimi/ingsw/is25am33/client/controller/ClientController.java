@@ -2,7 +2,6 @@ package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
-import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedShip;
@@ -16,7 +15,6 @@ import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.*;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
@@ -33,7 +31,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.text.NumberFormat;
 import java.util.*;
 
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
@@ -462,8 +459,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyCurrAdventureCard(String nickname, ClientCard adventureCard, boolean isFirstTime) {
-        clientModel.setCurrAdventureCard(adventureCard);
-        view.showCurrAdventureCard(isFirstTime);
+        new Thread(() -> {
+            clientModel.setCurrAdventureCard(adventureCard);
+            view.showCurrAdventureCard(isFirstTime);
+        }).start();
     }
 
     @Override
@@ -497,7 +496,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * @param nicknameToNotify the nickname of the player to be notified
      * @param nickname the nickname of the player who selected the component
      * @param focusedComponent the component that is being focused on
-     * @throws RemoteException if a communication-related error occurs during the remote method call
      */
     @Override
     public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component focusedComponent) {
@@ -614,8 +612,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyCardState(String nickname, CardState cardState) {
-        if(isStateRegardingCurrentPlayerOnly(cardState)){
-            if(!clientModel.isMyTurn()) {
+        if (isStateRegardingCurrentPlayerOnly(cardState)) {
+            if (!clientModel.isMyTurn()) {
                 view.showMessage(clientModel.getCurrentPlayer() + " is currently playing. Soon will to be your turn\n", NOTIFICATION_INFO);
                 return;
             }
@@ -651,14 +649,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     private boolean isStateRegardingCurrentPlayerOnly(CardState cardState){
         //TODO capire quali altri stati entrano in questa categoria e aggiungerli sotto. Probabilmente da togliere perchè tutti gli stati sono RegardingCurrentPlayerOnly
         return cardState == CardState.HANDLE_CUBES_REWARD
-        || cardState == CardState.CHOOSE_PLANET
-        || cardState == CardState.VISIT_LOCATION
-        || cardState == CardState.REMOVE_CREW_MEMBERS
-        || cardState == CardState.CHOOSE_ENGINES
-        || cardState == CardState.DANGEROUS_ATTACK
-        || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK
-        || cardState == CardState.ACCEPT_THE_REWARD
-        || cardState == CardState.CHOOSE_CANNONS;
+                || cardState == CardState.CHOOSE_PLANET
+                || cardState == CardState.VISIT_LOCATION
+                || cardState == CardState.REMOVE_CREW_MEMBERS
+                || cardState == CardState.CHOOSE_ENGINES
+                || cardState == CardState.DANGEROUS_ATTACK
+                || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK
+                || cardState == CardState.ACCEPT_THE_REWARD
+                || cardState == CardState.CHOOSE_CANNONS;
 
     }
 
@@ -895,7 +893,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     //quando il server manda il ping al client
     public void pingToClientFromServer(String nickname) throws IOException{
-       //System.out.println("Ping dal server");
+        //System.out.println("Ping dal server");
         dns.pongToServerFromClient(nickname);
     }
 
@@ -1097,11 +1095,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
         PlayerChoicesDataStructure playerChoiceDataStructure;
 
-            playerChoiceDataStructure = new PlayerChoicesDataStructure
-                    .Builder()
-                    .setChosenBatteryBoxes(batteryBoxCoords)
-                    .setChosenDoubleCannons(doubleCannonCoords)
-                    .build();
+        playerChoiceDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenBatteryBoxes(batteryBoxCoords)
+                .setChosenDoubleCannons(doubleCannonCoords)
+                .build();
 
         try{
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);

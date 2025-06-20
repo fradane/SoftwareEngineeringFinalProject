@@ -3,8 +3,8 @@ package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.component.Cabin;
-import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -24,6 +24,7 @@ import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 public abstract class BoardsController {
 
@@ -55,11 +56,11 @@ public abstract class BoardsController {
 
     public void removeHighlightColor() {
         shadowedButtons.forEach(button -> {
-                shadowedButtons.remove(button);
-                Platform.runLater(() -> {
-                    button.setEffect(null);
-                    button.getStyleClass().remove("no-hover");
-                });
+            shadowedButtons.remove(button);
+            Platform.runLater(() -> {
+                button.setEffect(null);
+                button.getStyleClass().remove("no-hover");
+            });
         });
     }
 
@@ -340,7 +341,28 @@ public abstract class BoardsController {
         }
     }
 
-    private StackPane getUpdatedStackPaneWithImages(ImageView imgView, Component component) {
+    private StackPane getUpdatedStackPaneWithImages(ImageView componentImageView, Component component) {
+
+        switch (component) {
+            case Cabin cabin -> {
+                return getCabinStackPane(componentImageView, cabin);
+            }
+            case BatteryBox batteryBox -> {
+                return getBatteryBoxStackPane(componentImageView, batteryBox);
+            }
+            case Storage storage -> {
+                return getStorageStackPane(componentImageView, storage);
+            }
+            case null, default -> {
+                return new StackPane(componentImageView);
+            }
+        }
+
+    }
+
+    private StackPane getCabinStackPane(ImageView cabinImageView, Cabin cabin) {
+
+        List<CrewMember> crewMembers = cabin.getInhabitants();
 
         ImageView featureImageView = new ImageView();
         Image featureImage;
@@ -352,64 +374,166 @@ public abstract class BoardsController {
         dropShadow.setSpread(0.6);
         dropShadow.setRadius(15);
 
+        featureImageView.setEffect(dropShadow);
+        featureImageView.setFitWidth(40);
+        featureImageView.setFitHeight(40);
+        featureImageView.setPreserveRatio(true);
+
+        if (crewMembers.isEmpty()) {
+            return new StackPane(cabinImageView);
+        } else if (crewMembers.contains(CrewMember.PURPLE_ALIEN)) {
+            featureImage = new Image(Objects.requireNonNull(getClass()
+                    .getResourceAsStream("/gui/graphics/componentFeature/purple_alien.png")));
+            featureImageView.setImage(featureImage);
+            return new StackPane(cabinImageView, featureImageView);
+        } else if (crewMembers.contains(CrewMember.BROWN_ALIEN)) {
+            featureImage = new Image(Objects.requireNonNull(getClass()
+                    .getResourceAsStream("/gui/graphics/componentFeature/brown_alien.png")));
+            featureImageView.setImage(featureImage);
+            return new StackPane(cabinImageView, featureImageView);
+        } else if (crewMembers.size() == 1) {
+            featureImage = new Image(Objects.requireNonNull(getClass()
+                    .getResourceAsStream("/gui/graphics/componentFeature/human.png")));
+            featureImageView.setImage(featureImage);
+            return new StackPane(cabinImageView, featureImageView);
+        } else {
+
+            ImageView featureImageView1 = new ImageView();
+            Image featureImage1;
+
+            featureImageView1.setEffect(dropShadow);
+            featureImageView1.setFitWidth(40);
+            featureImageView1.setFitHeight(40);
+            featureImageView1.setPreserveRatio(true);
+
+            featureImage = new Image(Objects.requireNonNull(getClass()
+                    .getResourceAsStream("/gui/graphics/componentFeature/human.png")));
+
+            featureImage1 = new Image(Objects.requireNonNull(getClass()
+                    .getResourceAsStream("/gui/graphics/componentFeature/human.png")));
+
+            featureImageView.setImage(featureImage);
+            featureImageView1.setImage(featureImage1);
+
+            featureImageView.setTranslateX(-10);   // left
+            featureImageView1.setTranslateX(10);    // right
+
+            return new StackPane(cabinImageView, featureImageView1, featureImageView);
+        }
+    }
+
+    private StackPane getBatteryBoxStackPane(ImageView batteryImageView, BatteryBox batteryBox) {
+
+        int remainingBatteries = batteryBox.getRemainingBatteries();
+
+        ImageView featureImageView = new ImageView();
+        Image featureImage;
+        DropShadow dropShadow = new DropShadow();
+
+        dropShadow.setColor(Color.BLACK);
+        dropShadow.setOffsetX(3.0);
+        dropShadow.setOffsetY(3.0);
+        dropShadow.setSpread(0.6);
+        dropShadow.setRadius(15);
 
         featureImageView.setEffect(dropShadow);
         featureImageView.setFitWidth(40);
         featureImageView.setFitHeight(40);
         featureImageView.setPreserveRatio(true);
 
-        switch (component.getLabel()) {
-            case "CAB", "MCB":
+        featureImage = new Image(Objects.requireNonNull(getClass()
+                .getResourceAsStream("/gui/graphics/componentFeature/battery.png")));
 
-                List<CrewMember> crewMembers = ((Cabin) component).getInhabitants();
+        if (remainingBatteries == 0) {
+            return new StackPane(batteryImageView);
+        } else if (remainingBatteries == 1) {
+            featureImageView.setImage(featureImage);
+            return new StackPane(batteryImageView, featureImageView);
+        } else if (remainingBatteries == 2) {
+            ImageView featureImageView1 = new ImageView();
 
-                System.err.println("Size: " + crewMembers.size());
+            featureImageView1.setEffect(dropShadow);
+            featureImageView1.setFitWidth(40);
+            featureImageView1.setFitHeight(40);
+            featureImageView1.setPreserveRatio(true);
 
-                if (crewMembers.isEmpty()) {
-                    return new StackPane(imgView);
-                } else if (crewMembers.contains(CrewMember.PURPLE_ALIEN)) {
-                    featureImage = new Image(Objects.requireNonNull(getClass()
-                            .getResourceAsStream("/gui/graphics/crewMembers/purple_alien.png")));
-                } else if (crewMembers.contains(CrewMember.BROWN_ALIEN)) {
-                    featureImage = new Image(Objects.requireNonNull(getClass()
-                            .getResourceAsStream("/gui/graphics/crewMembers/brown_alien.png")));
-                } else if (crewMembers.size() == 1) {
-                    featureImage = new Image(Objects.requireNonNull(getClass()
-                            .getResourceAsStream("/gui/graphics/crewMembers/human.png")));
-                } else {
+            featureImageView1.setImage(featureImage);
+            featureImageView.setImage(featureImage);
 
-                    ImageView featureImageView1 = new ImageView();
-                    Image featureImage1;
+            featureImageView.setTranslateY(-10);   // down
+            featureImageView1.setTranslateY(10);    // up
 
-                    featureImageView1.setEffect(dropShadow);
-                    featureImageView1.setFitWidth(40);
-                    featureImageView1.setFitHeight(40);
-                    featureImageView1.setPreserveRatio(true);
+            return new StackPane(batteryImageView, featureImageView1, featureImageView);
+        } else {
+            ImageView featureImageView1 = new ImageView();
+            ImageView featureImageView2 = new ImageView();
 
-                    featureImage = new Image(Objects.requireNonNull(getClass()
-                            .getResourceAsStream("/gui/graphics/crewMembers/human.png")));
+            featureImageView1.setEffect(dropShadow);
+            featureImageView1.setFitWidth(40);
+            featureImageView1.setFitHeight(40);
+            featureImageView1.setPreserveRatio(true);
+            featureImageView2.setEffect(dropShadow);
+            featureImageView2.setFitWidth(40);
+            featureImageView2.setFitHeight(40);
+            featureImageView2.setPreserveRatio(true);
 
-                    featureImage1 = new Image(Objects.requireNonNull(getClass()
-                            .getResourceAsStream("/gui/graphics/crewMembers/human.png")));
+            featureImageView2.setImage(featureImage);
+            featureImageView1.setImage(featureImage);
+            featureImageView.setImage(featureImage);
+
+            featureImageView.setTranslateY(-10);
+            featureImageView.setTranslateX(10);
+            featureImageView1.setTranslateY(10);
+            featureImageView2.setTranslateY(-10);
+            featureImageView2.setTranslateX(-10);
+
+            return new StackPane(batteryImageView, featureImageView2, featureImageView1, featureImageView);
+        }
+    }
+
+    private StackPane getStorageStackPane(ImageView storageImageView, Storage storage) {
+
+        List<CargoCube> cargoCubes = storage.getStockedCubes();
+
+        StackPane storageStackPane = new StackPane(storageImageView);
+
+        IntStream.range(1, 3)
+                .forEach(i -> {
+
+                    if (cargoCubes.size() < i)
+                        return;
+
+                    ImageView featureImageView = new ImageView();
+                    Image featureImage = null;
+                    DropShadow dropShadow = new DropShadow();
+
+                    dropShadow.setColor(Color.BLACK);
+                    dropShadow.setOffsetX(3.0);
+                    dropShadow.setOffsetY(3.0);
+                    dropShadow.setSpread(0.6);
+                    dropShadow.setRadius(15);
+
+                    featureImageView.setEffect(dropShadow);
+                    featureImageView.setFitWidth(40);
+                    featureImageView.setFitHeight(40);
+                    featureImageView.setPreserveRatio(true);
+
+                    switch (cargoCubes.get(i - 1)) {
+                        case RED ->  featureImage = new Image(Objects.requireNonNull(getClass()
+                                .getResourceAsStream("/gui/graphics/componentFeature/red_cargo_cube.png")));
+                        case GREEN ->  featureImage = new Image(Objects.requireNonNull(getClass()
+                                .getResourceAsStream("/gui/graphics/componentFeature/green_cargo_cube.png")));
+                        case BLUE ->  featureImage = new Image(Objects.requireNonNull(getClass()
+                                .getResourceAsStream("/gui/graphics/componentFeature/blue_cargo_cube.png")));
+                        case YELLOW ->  featureImage = new Image(Objects.requireNonNull(getClass()
+                                .getResourceAsStream("/gui/graphics/componentFeature/yellow_cargo_cube.png")));
+                    }
 
                     featureImageView.setImage(featureImage);
-                    featureImageView1.setImage(featureImage1);
+                    storageStackPane.getChildren().add(featureImageView);
+                });
 
-                    featureImageView.setTranslateX(-10);   // sinistra
-                    featureImageView1.setTranslateX(10);    // destra
-
-                    return new StackPane(imgView, featureImageView1, featureImageView);
-
-                }
-                break;
-
-            default:
-                return new StackPane(imgView);
-
-        }
-
-        featureImageView.setImage(featureImage);
-        return new StackPane(imgView, featureImageView);
+        return storageStackPane;
     }
 
     protected void setupChangedAttributesBinding() {
@@ -426,7 +550,7 @@ public abstract class BoardsController {
                         StackPane playerStackPane = otherPlayersShipBoards.get(nickname);
                         Platform.runLater(() -> updateOtherShipBoardsAppearance(playerStackPane, updatedComponent, coords.getX(), coords.getY()));
                     }
-        });
+                });
     }
 
 
