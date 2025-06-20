@@ -20,7 +20,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.client.model.Hourglass;
-import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
@@ -608,6 +607,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) {
         clientModel.eliminatePlayer(nickname);
         view.showMessage(nickname + " was eliminated.", STANDARD);
+        view.showPlayerEarlyLanded(nickname);
     }
 
     @Override
@@ -1250,7 +1250,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
         clientModel.eliminatePlayer(nickname);
-        view.showPlayerEarlyEnded(nickname);
+        view.showPlayerEarlyLanded(nickname);
     }
 
     public void land() {

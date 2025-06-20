@@ -16,6 +16,7 @@ import it.polimi.ingsw.is25am33.model.dangerousObj.BigShot;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
 
 import java.util.*;
@@ -53,6 +54,8 @@ public class SocketMessage {
     private ClientCard paramClientCard;
     private Component[][] paramShipMatrix;
     private List<PrefabShipInfo> paramPrefabShips;
+    private List<PlayerFinalData> paramPlayerFinalDataRanking;
+    private List<String> paramStringList;
 
     public SocketMessage(String senderNickname, String actions) {
         this.senderNickname = senderNickname;
@@ -81,6 +84,8 @@ public class SocketMessage {
         this.paramShipMatrix = null;
         this.paramPrefabShips = null;
         this.paramDangerousObj = null;
+        this.paramPlayerFinalDataRanking = null;
+        this.paramStringList = null;
     }
 
     public SocketMessage() {
@@ -303,6 +308,22 @@ public class SocketMessage {
 
     public void setParamShipPart(Set<Coordinates> paramShipPart) {
         this.paramShipPart = paramShipPart;
+    }
+
+    public List<PlayerFinalData> getParamPlayerFinalDataRanking() {
+        return paramPlayerFinalDataRanking;
+    }
+
+    public List<String> getParamStringList() {
+        return paramStringList;
+    }
+
+    public void setParamPlayerFinalDataRanking(List<PlayerFinalData> paramPlayerFinalDataRanking) {
+        this.paramPlayerFinalDataRanking = paramPlayerFinalDataRanking;
+    }
+
+    public void setParamStringList(List<String> paramStringList) {
+        this.paramStringList = paramStringList;
     }
 
     @JsonIgnore

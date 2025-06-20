@@ -124,7 +124,7 @@ public class MeteoriteStorm extends AdventureCard {
             } else {
                 setCurrState(CardState.END_OF_CARD);
                 gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             }
         }
     }

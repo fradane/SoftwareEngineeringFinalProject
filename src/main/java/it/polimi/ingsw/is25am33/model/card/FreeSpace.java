@@ -73,6 +73,10 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
         // check whether the declared engine power equals 0, in this case the player must be disqualified
         if (stepsForward == 0) {
             gameModel.getFlyingBoard().addOutPlayer(gameModel.getCurrPlayer(), false);
+
+            if(gameModel.getFlyingBoard().getRanking().isEmpty()){ // tutti i giocatori sono stati eliminati
+                gameModel.setCurrGameState(GameState.END_GAME);
+            }
         } else {
 
             chosenBatteryBoxes.forEach(BatteryBox::useBattery);
@@ -92,7 +96,7 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
         } else {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
     }
 

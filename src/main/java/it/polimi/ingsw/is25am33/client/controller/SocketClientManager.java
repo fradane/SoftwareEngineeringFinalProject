@@ -524,6 +524,18 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                         clientController.notifyCoordinateOfComponentHit(nickname, notification.getParamString(), notification.getParamCoordinates());
                     }
                     break;
+
+                case "notifyPlayersFinalData":
+                    if (clientController != null) {
+                        clientController.notifyPlayersFinalData(nickname, notification.getParamPlayerFinalDataRanking(), notification.getParamStringList());
+                    }
+                    break;
+
+                case "notifyPlayerEarlyLanded":
+                    if (clientController != null) {
+                        clientController.notifyPlayerEarlyLanded(nickname, notification.getParamString());
+                    }
+                    break;
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }

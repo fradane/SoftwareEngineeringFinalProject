@@ -192,7 +192,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         // Termina la carta
         setCurrState(CardState.END_OF_CARD);
         gameModel.resetPlayerIterator();
-        gameModel.setCurrGameState(GameState.DRAW_CARD);
+        gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
     }
 
     private void proceedToNextPlayerOrEndCard() {
@@ -202,7 +202,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         } else {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
     }
 

@@ -102,6 +102,11 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
+            if(gameModel.getFlyingBoard().getRanking().isEmpty()) { // tutti i giocatori sono stati eliminati, per esempio con freeSpace in caso nessuno avesse motori
+                gameModel.setCurrGameState(GameState.END_GAME);
+                return;
+            }
+
             // check doubled players
             gameModel.getFlyingBoard().getDoubledPlayers();
 
@@ -113,11 +118,14 @@ public enum GameState implements Serializable {
                         .noneMatch(crewMember -> crewMember.equals(CrewMember.HUMAN))
                 ) {
                     gameModel.getFlyingBoard().addOutPlayer(player, false);
+                    gameModel.resetPlayerIterator();
                 }
             });
-            //TODO forse bisogna aggiungere il fatto che se non ci sono più engine si esce dal gioco
-            //TODO aggiungere il controllo che se tutti i giocatori sono stati rimossi allora bisogna passare alla fine del gioco
 
+            if(gameModel.getFlyingBoard().getRanking().isEmpty()) // potrebbe essere stato eliminato qualche nuovo giocatore durante la check_players
+                gameModel.setCurrGameState(GameState.END_GAME);
+            else
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 
     },

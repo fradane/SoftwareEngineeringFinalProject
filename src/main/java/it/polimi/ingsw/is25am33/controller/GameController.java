@@ -635,9 +635,11 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerWantsToLand(String nickname) throws IOException {
-        //TODO aggiungere controllo che se tutti i giocatori sono atterrati allora bisogna passare alla fine del gioco
         Player player = gameModel.getPlayers().get(nickname);
         gameModel.getFlyingBoard().addOutPlayer(player, true);
+
+        if(gameModel.getFlyingBoard().getRanking().isEmpty())
+            gameModel.setCurrGameState(GameState.END_GAME);
     }
 
     private void notifySelectionFailure(String nickname, String errorMessage) {

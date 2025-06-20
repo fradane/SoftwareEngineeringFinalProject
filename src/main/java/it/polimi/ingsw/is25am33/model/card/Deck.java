@@ -151,20 +151,20 @@ public class Deck {
 
         List<AdventureCard> cards = new ArrayList<>();
 
-//        cards.addAll(Deck.loadAbandonedShipFromJson());
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadPiratesFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadAbandonedShipFromJson());
+        cards.addAll(Deck.loadAbandonedStationFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadPiratesFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
 //        cards.addAll(Deck.loadPlanetsFromJson());
 //        cards.addAll(Deck.loadPlanetsFromJson());
 //        cards.addAll(Deck.loadPlanetsFromJson());
 //        cards.addAll(Deck.loadPlanetsFromJson());
 //        cards.addAll(Deck.loadSlaveTradersFromJson());
 //        cards.addAll(Deck.loadSmugglersFromJson());
-//        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
 //        cards.addAll(Deck.loadWarFieldFromJson());
 
 
@@ -185,24 +185,24 @@ public class Deck {
 //        cards.addAll(Deck.loadFreeSpaceFromJson());
 
 
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
+//        cards.addAll(Deck.loadAbandonedShipFromJson());
 
 
         if (isTestFlight)

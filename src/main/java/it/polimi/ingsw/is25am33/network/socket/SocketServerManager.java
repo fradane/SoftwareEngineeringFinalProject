@@ -429,12 +429,17 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     @Override
     public void notifyPlayersFinalData(String nicknameToNotify, List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) throws IOException {
-        //TODO
+        SocketMessage outMessage = new SocketMessage("server", "notifyPlayersFinalData");
+        outMessage.setParamPlayerFinalDataRanking(finalRanking);
+        outMessage.setParamStringList(playersNicknamesWithPrettiestShip);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override
     public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
-        //TODO
+        SocketMessage outMessage = new SocketMessage("server", "notifyPlayerEarlyLanded");
+        outMessage.setParamString(nickname);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override

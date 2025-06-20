@@ -107,7 +107,7 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
             } else {
                 setCurrState(CardState.END_OF_CARD);
                 gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             }
         }catch (Exception e){
             System.err.println("Error in currPlayerWantsToVisit: " + e.getMessage());
@@ -140,7 +140,7 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
         setCurrState(CardState.END_OF_CARD);
-        gameModel.setCurrGameState(GameState.DRAW_CARD);
+        gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
 
     }
 

@@ -1432,12 +1432,12 @@ public class ClientCLIView implements ClientView {
             if (myData.isEarlyLanded()) {
                 if (myData.getTotalCredits() > 0) {
                     output.append("   🛬 Hai abbandonato la corsa anticipatamente, ma hai comunque dei crediti!\n");
-                    output.append("   🏆 Complimenti! Sei il vincitore assoluto! 🎊\n");
                 } else {
                     output.append("   🛬 Hai abbandonato la corsa anticipatamente e non hai guadagnato crediti.\n");
-                    output.append("   😔 Purtroppo non sei tra i vincitori questa volta...\n");
                 }
-            } else if (myData.getTotalCredits() == maxCredits && myData.getTotalCredits() > 0) {
+            }
+
+            if (myData.getTotalCredits() == maxCredits && myData.getTotalCredits() > 0) {
                 output.append("   🏆 Complimenti! Sei il vincitore assoluto! 🎊\n");
             } else if (myData.getTotalCredits() > 0) {
                 output.append("   🎉 Complimenti! Sei tra i vincitori!\n");
@@ -1536,7 +1536,7 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
-    public void showPlayerEarlyEnded(String nickname) {
+    public void showPlayerEarlyLanded(String nickname) {
         // Check if it's the current player who landed early
         if (nickname.equals(clientModel.getMyNickname())) {
             // Current player has landed early

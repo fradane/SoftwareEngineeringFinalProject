@@ -343,5 +343,5 @@ public interface ClientView {
 
     void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip);
 
-    void showPlayerEarlyEnded(String nickname);
+    void showPlayerEarlyLanded(String nickname);
 }

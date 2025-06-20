@@ -108,7 +108,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
             } else {
                 setCurrState(CardState.END_OF_CARD);
                 gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             }
         } catch (Exception e) {
             System.err.println("Error in currPlayerWantsToVisit: " + e.getMessage());
@@ -214,7 +214,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         // Termina la carta
         setCurrState(CardState.END_OF_CARD);
         gameModel.resetPlayerIterator();
-        gameModel.setCurrGameState(GameState.DRAW_CARD);
+        gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
     }
 
     private void proceedToNextPlayerOrEndCard() {
@@ -224,7 +224,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         } else {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
     }
 
