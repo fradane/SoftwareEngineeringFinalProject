@@ -5,8 +5,7 @@ import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
-import it.polimi.ingsw.is25am33.client.model.card.ClientFreeSpace;
-import it.polimi.ingsw.is25am33.client.model.card.ClientStarDust;
+import it.polimi.ingsw.is25am33.client.model.card.*;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.*;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
@@ -191,6 +190,12 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public void showVisitLocationMenu() {
         //TODO
+        if (cardPhaseController != null) {
+            if (clientModel.getCurrAdventureCard() instanceof ClientAbandonedShip) {
+                cardPhaseController.showAbandonedShipMenu();
+            } else
+                System.err.println("Not AbandonedShip card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
+        }
     }
 
     @Override
@@ -217,12 +222,26 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showAcceptTheRewardMenu() {
-        //TODO
+        if(cardPhaseController != null) {
+            ClientCard card = clientModel.getCurrAdventureCard();
+            if (card.hasReward()) {
+                if (card instanceof ClientPirates)
+                    cardPhaseController.showRewardMenu();
+            }
+        }
+
     }
 
     @Override
     public void showChooseCannonsMenu() {
         //TODO
+        if (cardPhaseController != null) {
+            if (clientModel.getCurrAdventureCard() instanceof ClientPirates) {
+                cardPhaseController.showPiratesMenu();
+            }
+            else
+                System.err.println("Not PiratesCard: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
+        }
     }
 
     @Override
