@@ -68,5 +68,28 @@ class CabinTest {
         assertFalse(cabin.hasInhabitants(),"inhabitants");
     }
 
+    @Test
+    void getMainAttributeWhenNoInhabitants() {
+        assertEquals("--", cabin.getMainAttribute());
+    }
+
+    @Test
+    void getMainAttributeReturnHHWhenTwoHuman() {
+        cabin.fillCabin(CrewMember.HUMAN);
+        assertEquals("HH", cabin.getMainAttribute());
+    }
+
+    @Test
+    void getMainAttributeReturnPWhenPurpleAlien() {
+        cabin.fillCabin(CrewMember.PURPLE_ALIEN);
+        assertEquals("P", cabin.getMainAttribute());
+    }
+
+    @Test
+    void getMainAttributeReturnBWhenBrownAlien() {
+        cabin.fillCabin(CrewMember.BROWN_ALIEN);
+        assertEquals("B", cabin.getMainAttribute());
+    }
+
 
 }

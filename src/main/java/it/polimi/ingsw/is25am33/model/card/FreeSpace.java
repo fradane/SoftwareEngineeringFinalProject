@@ -73,15 +73,15 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
         int stepsForward = gameModel.getCurrPlayer().getPersonalBoard().countTotalEnginePower(chosenDoubleEngines);
         // check whether the declared engine power equals 0, in this case the player must be disqualified
         if (stepsForward == 0) {
-            gameModel.getFlyingBoard().addOutPlayer(gameModel.getCurrPlayer());
+            gameModel.getFlyingBoard().addOutPlayer(gameModel.getCurrPlayer(), false);
         } else {
 
             chosenBatteryBoxes.forEach(BatteryBox::useBattery);
 
             Player currentPlayer=gameModel.getCurrPlayer();
 
-            gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+               clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
             });
 
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsForward);

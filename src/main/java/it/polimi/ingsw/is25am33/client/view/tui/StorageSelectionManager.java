@@ -19,6 +19,7 @@ public class StorageSelectionManager {
 
     private final List<Coordinates> selectedStorages = new ArrayList<>();
     private final List<CargoCube> cubeRewards;
+    private final int cubeMalus;
     private final ShipBoardClient shipBoard;
     private final List<Storage> availableStorages;
     private final Map<CargoCube, List<Storage>> compatibleStoragesMap;
@@ -29,11 +30,12 @@ public class StorageSelectionManager {
      * @param cubeRewards La lista di cubi reward da assegnare agli storage
      * @param shipBoard La ship board del giocatore contenente gli storage
      */
-    public StorageSelectionManager(List<CargoCube> cubeRewards, ShipBoardClient shipBoard) {
+    public StorageSelectionManager(List<CargoCube> cubeRewards, int cubeMalus, ShipBoardClient shipBoard) {
         this.cubeRewards = new ArrayList<>(cubeRewards);
         this.shipBoard = shipBoard;
         this.availableStorages = new ArrayList<>();
         this.compatibleStoragesMap = new HashMap<>();
+        this.cubeMalus = cubeMalus;
 
         // Inizializza la lista degli storage disponibili
         initializeAvailableStorages();
@@ -477,4 +479,60 @@ public class StorageSelectionManager {
     public void reset() {
         selectedStorages.clear();
     }
+
+    public Map<CargoCube,List<Coordinates>> whereAreCube() {
+
+        //ottengo una lista degli storage che contengono un cubo di quel colore con ripetizioni
+
+        Map<CargoCube,List<Coordinates>> storageAndCubes = new HashMap<>();
+        storageAndCubes.put(CargoCube.RED, new ArrayList<>());
+        storageAndCubes.put(CargoCube.YELLOW, new ArrayList<>());
+        storageAndCubes.put(CargoCube.GREEN, new ArrayList<>());
+        storageAndCubes.put(CargoCube.BLUE, new ArrayList<>());
+
+        shipBoard.getCoordinatesAndStorages().forEach((coordinate, storage) -> {
+            for(CargoCube cube: storage.getStockedCubes()) {
+                if (cube == CargoCube.RED)
+                    storageAndCubes.get(CargoCube.RED).add(coordinate);
+                else if (cube == CargoCube.BLUE)
+                    storageAndCubes.get(CargoCube.BLUE).add(coordinate);
+                else if (cube == CargoCube.YELLOW)
+                    storageAndCubes.get(CargoCube.YELLOW).add(coordinate);
+                else
+                    storageAndCubes.get(CargoCube.GREEN).add(coordinate);
+            }
+        });
+
+        return storageAndCubes;
+    }
+
+    public List<Coordinates> mostPreciousCube() {
+        List<Coordinates> mostPrecious = new ArrayList<>();
+        Map<CargoCube,List<Coordinates>> storageAndCubes = whereAreCube();
+
+
+            for(Coordinates coordinate: storageAndCubes.get(CargoCube.RED)){
+                mostPrecious.add(coordinate);
+                if(mostPrecious.size()==cubeMalus)
+                    return mostPrecious;
+            }
+            for(Coordinates coordinate: storageAndCubes.get(CargoCube.YELLOW)){
+                mostPrecious.add(coordinate);
+                if(mostPrecious.size()==cubeMalus)
+                    return mostPrecious;
+            }
+            for(Coordinates coordinate: storageAndCubes.get(CargoCube.GREEN)){
+                mostPrecious.add(coordinate);
+                if(mostPrecious.size()==cubeMalus)
+                    return mostPrecious;
+            }
+            for(Coordinates coordinate: storageAndCubes.get(CargoCube.BLUE)){
+                mostPrecious.add(coordinate);
+                if(mostPrecious.size()==cubeMalus)
+                    return mostPrecious;
+            }
+
+        return mostPrecious;
+    }
+
 }

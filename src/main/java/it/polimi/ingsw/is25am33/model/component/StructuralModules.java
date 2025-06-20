@@ -29,30 +29,8 @@ public class StructuralModules extends Component {
         super(connectors);
     }
 
-    @Override
-    public String toString() {
-        String north = getConnectors().get(Direction.NORTH) != null
-                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
-                : " ";
-        String south = getConnectors().get(Direction.SOUTH) != null
-                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
-                : " ";
-        String west  = getConnectors().get(Direction.WEST) != null
-                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
-                : " ";
-        String east  = getConnectors().get(Direction.EAST) != null
-                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
-                : " ";
-
-        return String.format("""
-            %s
-            StructuralModules
-            +---------+
-            |    %s    |
-            | %s     %s |
-            |    %s    |
-            +---------+
-            """,imageName, north, west, east, south);
+    public String getComponentName() {
+        return "StructuralModules";
     }
 
     @Override

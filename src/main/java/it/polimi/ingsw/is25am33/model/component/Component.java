@@ -149,12 +149,40 @@ public abstract class Component implements Serializable {
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
     }
 
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        Component component = (Component) o;
+//        return Objects.equals(imageName, component.imageName);
+//    }
+
+    protected abstract String getComponentName();
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Component component = (Component) o;
-        return Objects.equals(imageName, component.imageName);
+    public String toString() {
+        String north = getConnectors().get(Direction.NORTH) != null
+                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
+                : " ";
+        String south = getConnectors().get(Direction.SOUTH) != null
+                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
+                : " ";
+        String west  = getConnectors().get(Direction.WEST) != null
+                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
+                : " ";
+        String east  = getConnectors().get(Direction.EAST) != null
+                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
+                : " ";
+
+        return String.format("""
+            %s
+            %s
+            +---------+
+            |    %s    |
+            | %s     %s |
+            |    %s    |
+            +---------+
+            """, imageName,getComponentName(), north, west, east, south);
     }
 
     /**

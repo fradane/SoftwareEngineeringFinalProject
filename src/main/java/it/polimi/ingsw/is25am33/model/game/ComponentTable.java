@@ -21,7 +21,7 @@ public class ComponentTable {
         Collections.shuffle(hiddenComponents);
     }
 
-    public void setGameContext(GameClientNotifier gameClientNotifier) {
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
     }
 

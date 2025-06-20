@@ -24,6 +24,7 @@ module it.polimi.ingsw.is25am33 {
     opens it.polimi.ingsw.is25am33.model to com.fasterxml.jackson.databind, java.rmi;
     opens it.polimi.ingsw.is25am33.model.component to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.is25am33.model.card to com.fasterxml.jackson.databind;
+    opens it.polimi.ingsw.is25am33.client.model.card to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.is25am33.model.game to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.is25am33.model.board to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.is25am33.serializationLayer to com.fasterxml.jackson.databind;

@@ -45,6 +45,11 @@ public class ClientPlanets extends ClientCard {
         return availablePlanets.size();
     }
 
+    public Map<String, Planet> getPlayerPlanet() {
+        return playerPlanet;
+    }
+
+
     // Setters
     public void setAvailablePlanets(List<Planet> availablePlanets) {
         this.availablePlanets = availablePlanets;
@@ -52,6 +57,10 @@ public class ClientPlanets extends ClientCard {
 
     public void setStepsBack(int stepsBack) {
         this.stepsBack = stepsBack;
+    }
+
+    public void setPlayerPlanet(String playerNickname, Planet planet) {
+        playerPlanet.put(playerNickname, planet);
     }
 
     @Override
@@ -97,4 +106,5 @@ public class ClientPlanets extends ClientCard {
     public List<CargoCube> getPlayerReward(String playerNickname) {
         return playerPlanet.get(playerNickname).getReward();
     }
+
 }

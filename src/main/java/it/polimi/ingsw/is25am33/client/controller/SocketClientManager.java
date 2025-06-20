@@ -489,6 +489,15 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyInfectedCrewMembersRemoved":
+                    if (clientController != null) {
+                        clientController.notifyInfectedCrewMembersRemoved(
+                                nickname,
+                                notification.getParamShipPart()
+                        );
+                    }
+                    break;
+
                 case "notifyComponentPerType":
                     if (clientController != null) {
                         clientController.notifyComponentPerType(
@@ -514,6 +523,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                 case "notifyCoordinateOfComponentHit":
                     if (clientController != null) {
                         clientController.notifyCoordinateOfComponentHit(nickname, notification.getParamString(), notification.getParamCoordinates());
+                    }
+                    break;
+                case "notifyLeastResourcedPlayer":
+                    if (clientController != null) {
+                        clientController.notifyLeastResourcedPlayer(nickname, notification.getParamString());
                     }
                     break;
                 default:
@@ -624,6 +638,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
+    public void playerWantsToLand(String nickname) throws IOException {
+        //TODO
+    }
+
+    @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPicksVisibleComponent");
         outMessage.setParamInt(choice);
@@ -718,13 +737,19 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     @Override
     public void spreadEpidemic(String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "spreadEpidemic");
-        out.println(outMessage);
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override
     public void stardustEvent(String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "stardustEvent");
-        out.println(outMessage);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void evaluatedCrewMembers(String nickname) throws RemoteException{
+        SocketMessage outMessage = new SocketMessage(nickname, "evaluatedCrewMembers");
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override

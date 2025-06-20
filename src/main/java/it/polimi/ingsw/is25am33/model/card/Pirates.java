@@ -150,7 +150,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         }
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
-        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
         });
 
@@ -158,7 +158,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
 
             setCurrState( CardState.ACCEPT_THE_REWARD);
 
-        } else {
+        } else if(currPlayerCannonPower < requiredFirePower){
             defeatedPlayers.add(gameModel.getCurrPlayer());
 
             if (gameModel.hasNextPlayer()) {
@@ -175,6 +175,16 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
                     gameModel.setCurrPlayer(currDefeatedPlayer);
                     setCurrState(CardState.THROW_DICES);
                 }
+            }
+        }else{
+            if(gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
+                setCurrState(CardState.CHOOSE_CANNONS);
+            }
+            else{
+                setCurrState(CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
             }
         }
 
@@ -229,7 +239,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
                     throw new IllegalStateException("Not enough batteries");
 
                 chosenBatteryBox.useBattery();
-                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
 
@@ -246,7 +256,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         }else{
             if(chosenShield != null && chosenBatteryBox != null) {
                 chosenBatteryBox.useBattery();
-                gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
             }

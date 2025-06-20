@@ -1,13 +1,17 @@
 package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientSmugglers;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
+import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
+import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -34,7 +38,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
 
     @Override
     public CardState getFirstState() {
-        return null;
+        return CardState.CHOOSE_CANNONS;
     }
 
     @Override
@@ -47,7 +51,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
                 this.currPlayerDecidedToGetTheReward(playerChoices.hasAcceptedTheReward());
                 break;
             case HANDLE_CUBES_MALUS:
-                this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow());
+                this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow(),playerChoices.getChosenBatteryBoxes().orElseThrow());
                 break;
             case HANDLE_CUBES_REWARD:
                 this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
@@ -59,78 +63,192 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
 
     @Override
     public ClientCard toClientCard() {
-        //TODO
-
-        return null;
+        return new ClientSmugglers(cardName, imageName, requiredFirePower, reward, stepsBack, cubeMalus );
     }
 
     private void currPlayerChoseCannonsToActivate(List<Coordinates> chosenDoubleCannonsCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
-
+        Player currentPlayer=gameModel.getCurrPlayer();
         List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
         List<Cannon> chosenDoubleCannons = new ArrayList<>();
 
         for(Coordinates chosenDoubleCannonCoord : chosenDoubleCannonsCoords) {
-            chosenDoubleCannons.add((Cannon) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenDoubleCannonCoord));
+            chosenDoubleCannons.add((Cannon) currentPlayer.getPersonalBoard().getComponentAt(chosenDoubleCannonCoord));
         }
 
         for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
-            chosenBatteryBoxes.add((BatteryBox) gameModel.getCurrPlayer().getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
+            chosenBatteryBoxes.add((BatteryBox) currentPlayer.getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
         }
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+        });
 
         if (currPlayerCannonPower > requiredFirePower)
             setCurrState(CardState.ACCEPT_THE_REWARD);
-        else
+        else if(currPlayerCannonPower == requiredFirePower){
+            if(gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
+                setCurrState(CardState.CHOOSE_CANNONS);
+            }else{
+                setCurrState(CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
+            }
+        }else
             setCurrState(CardState.HANDLE_CUBES_MALUS);
+
     }
 
     private void currPlayerDecidedToGetTheReward(boolean hasPlayerAcceptedTheReward) {
         if (hasPlayerAcceptedTheReward)
             setCurrState(CardState.HANDLE_CUBES_REWARD);
-        else
+        else{
             setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
+        }
     }
 
-    private void currPlayerChoseCargoCubeStorage(List<Storage> chosenStorage) {
+    private void currPlayerChoseCargoCubeStorage(List<Coordinates> chosenStorageCoords) {
+        List<CargoCube> stationRewards = new ArrayList<>(reward);
 
-        if (chosenStorage.size() != reward.size())
-            throw new IllegalArgumentException("Incorrect number of storages");
+        //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        List<Storage> chosenStorages = new ArrayList();
+        for (Coordinates coords : chosenStorageCoords) {
+            if (coords.isCoordinateInvalid()) {
+                // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
+                chosenStorages.add(null);
+            } else {
+                Component component = shipBoard.getComponentAt(coords);
+                if (component instanceof Storage) {
+                    chosenStorages.add((Storage) component);
+                } else {
+                    // Se le coordinate non puntano a uno storage, aggiungi null
+                    chosenStorages.add(null);
+                }
+            }
+        }
 
-        IntStream.range(0, chosenStorage.size()).forEach(i -> {
-            if (!(chosenStorage.get(i) instanceof SpecialStorage) && reward.get(i) == CargoCube.RED)
+        // Caso 1: Il giocatore non ha scelto nessuno storage
+        if (chosenStorages.isEmpty()) {
+            System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
+                    " cannot accept any rewards due to lack of storage space");
+            proceedToNextPlayerOrEndCard();
+            return;
+        }
+
+        // Caso 2: Il giocatore ha scelto meno storage dei reward disponibili
+        if (chosenStorages.size() < stationRewards.size()) {
+            List<CargoCube> rewardsToProcess = stationRewards.subList(0, chosenStorages.size());
+            List<CargoCube> discardedRewards = stationRewards.subList(chosenStorages.size(), stationRewards.size());
+
+            System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
+                    " can only accept " + chosenStorages.size() +
+                    " out of " + stationRewards.size() + " rewards");
+            System.out.println("Discarded rewards: " + discardedRewards);
+
+            stationRewards = rewardsToProcess;
+        }
+
+        // Caso 3: Il giocatore ha scelto più storage dei reward
+        if (chosenStorages.size() > stationRewards.size()) {
+            chosenStorages = chosenStorages.subList(0, stationRewards.size());
+        }
+
+        // Validazione: controlla che i cubi RED vadano solo in SpecialStorage
+        for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
+            Storage storage = chosenStorages.get(i);
+            CargoCube cube = stationRewards.get(i);
+
+            if (storage == null) {
+                continue;
+            }
+
+            if (!(storage instanceof SpecialStorage) && cube == CargoCube.RED) {
                 throw new IllegalArgumentException("Trying to store a RED cube in a non-special storage");
+            }
+        }
+
+        // Processa i cubi effettivamente posizionabili
+        for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
+            Storage storage = chosenStorages.get(i);
+            CargoCube cube = stationRewards.get(i);
+
+            if (storage == null) {
+                System.out.println("Cube " + cube + " discarded - no valid storage selected");
+                continue;
+            }
+
+            // Se lo storage è pieno, rimuovi il cubo meno prezioso
+            if (storage.isFull()) {
+                List<CargoCube> sortedStorage = new ArrayList<>(storage.getStockedCubes());
+                sortedStorage.sort(CargoCube.byValue);
+                CargoCube lessValuableCargoCube = sortedStorage.get(0);
+                storage.removeCube(lessValuableCargoCube);
+                System.out.println("Removed " + lessValuableCargoCube + " to make space for " + cube);
+            }
+
+            storage.addCube(cube);
+            System.out.println("Added " + cube + " to storage");
+        }
+
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
         });
 
-        chosenStorage.forEach(storage -> {
-            if(storage.isFull()) {
+        // Muovi il giocatore indietro
+        movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
+
+        // Termina la carta
+        setCurrState(CardState.END_OF_CARD);
+        gameModel.resetPlayerIterator();
+        gameModel.setCurrGameState(GameState.DRAW_CARD);
+    }
+
+    private void proceedToNextPlayerOrEndCard() {
+        if (gameModel.hasNextPlayer()) {
+            gameModel.nextPlayer();
+            setCurrState(CardState.VISIT_LOCATION);
+        } else {
+            setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
+        }
+    }
+
+    private void currPlayerChoseStorageToRemove(List<Coordinates> chosenStorageCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
+
+        //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
+        Player currentPlayer=gameModel.getCurrPlayer();
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        List<Storage> chosenStorages = new ArrayList();
+        List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
+
+        for (Coordinates chosenStorageCoord : chosenStorageCoords) {
+            chosenStorages.add((Storage) currentPlayer.getPersonalBoard().getComponentAt(chosenStorageCoord));
+        }
+        for (Coordinates chosenBatteryBoxCoord : chosenBatteryBoxesCoords) {
+            chosenBatteryBoxes.add((BatteryBox) currentPlayer.getPersonalBoard().getComponentAt(chosenBatteryBoxCoord));
+        }
+
+        if(!chosenStorages.isEmpty()) {
+
+            chosenStorages.forEach(storage -> {
                 List<CargoCube> sortedStorage = storage.getStockedCubes();
                 sortedStorage.sort(CargoCube.byValue);
-                CargoCube lessValuableCargoCube = sortedStorage.getFirst();
-                storage.removeCube(lessValuableCargoCube);
-            }
-            storage.addCube(reward.removeFirst());
-        });
+                CargoCube moreValuableCargoCube = sortedStorage.getLast();
+                storage.removeCube(moreValuableCargoCube);
+            });
 
-        movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
-        setCurrState( CardState.END_OF_CARD);
-    }
+        }
 
-    private void currPlayerChoseStorageToRemove(List<Storage> chosenStorage) {
+        if(!chosenBatteryBoxes.isEmpty())
+            chosenBatteryBoxes.forEach(BatteryBox::useBattery);
 
-        if (chosenStorage.size() < cubeMalus)
-            throw new IllegalArgumentException("Not enough storages");
-
-        chosenStorage.stream().distinct().forEach(storage -> {
-            if (Collections.frequency(chosenStorage, storage) > storage.getMaxCapacity() - storage.getStockedCubes().size())
-                throw new IllegalArgumentException("The number of required storages is not enough");
-        });
-
-        chosenStorage.forEach(storage -> {
-            List<CargoCube> sortedStorage = storage.getStockedCubes();
-            sortedStorage.sort(CargoCube.byValue);
-            CargoCube lessValuableCargoCube = sortedStorage.getFirst();
-            storage.removeCube(lessValuableCargoCube);
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
         });
 
         if (gameModel.hasNextPlayer()) {
@@ -138,6 +256,8 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             setCurrState(CardState.CHOOSE_CANNONS);
         } else {
             setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 
     }

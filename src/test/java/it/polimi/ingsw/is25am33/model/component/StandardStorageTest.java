@@ -56,44 +56,54 @@ class StandardStorageTest {
     }
 
     @Test
-    void removeAllCubeOfType(){
-        storage.addCube(CargoCube.BLUE);
-        storage.addCube(CargoCube.GREEN);
-        storage.addCube(CargoCube.BLUE);
-        storage.removeAllCargoCubesOfType(CargoCube.BLUE);
-
-        List<CargoCube> cargoCubeExpected = new ArrayList<>();
-        cargoCubeExpected.add(CargoCube.GREEN);
-        assertEquals(cargoCubeExpected,storage.getStockedCubes(), "remove all Cube of type");
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> storage.removeAllCargoCubesOfType(CargoCube.RED));
-        assertEquals(exception.getMessage(),"cube not exist");
-
+    void addCubeWhenStorageNotFullAndReturnNull() {
+        CargoCube cube = CargoCube.BLUE;
+        CargoCube result = storage.addCube(cube); ;
+        assertNull(result);
+        assertTrue(storage.getStockedCubes().contains(cube));
     }
 
     @Test
-    void removeCargoCubesOfType(){
-        storage.addCube(CargoCube.BLUE);
-        storage.addCube(CargoCube.BLUE);
-        storage.addCube(CargoCube.BLUE);
-        storage.removeCargoCubesOfType(CargoCube.BLUE,2);
+    void addCubeAndReplaceLeastValuableCubeWhenFull() {
+        CargoCube cube1 = CargoCube.BLUE;
+        CargoCube cube2 = CargoCube.GREEN;
+        CargoCube cube3 = CargoCube.YELLOW;
 
-        List<CargoCube> cargoCubeExpected = new ArrayList<>();
-        cargoCubeExpected.add(CargoCube.BLUE);
+        storage.addCube(cube1);
+        storage.addCube(cube2);
 
-        assertEquals(cargoCubeExpected,storage.getStockedCubes(), "remove all Cube of type");
-        Exception exception1 = assertThrows(IllegalArgumentException.class, () -> storage.removeCargoCubesOfType(CargoCube.RED,1));
-        assertEquals(exception1.getMessage(),"cube not exist");
+        CargoCube removedCube = storage.addCube(cube3);
 
-        Exception exception2 = assertThrows(IllegalArgumentException.class, () -> storage.removeCargoCubesOfType(CargoCube.BLUE,2));
-        assertEquals(exception2.getMessage(),"wrong number of cubes");
+        assertEquals(cube1, removedCube); // cube1 è il meno prezioso
+        assertTrue(storage.getStockedCubes().contains(cube2));
+        assertTrue(storage.getStockedCubes().contains(cube3));
+        assertFalse(storage.getStockedCubes().contains(cube1));
     }
 
     @Test
-    void containsCargoCube(){
-        storage.addCube(CargoCube.BLUE);
-        assertTrue(storage.containsCargoCube(CargoCube.BLUE));
-        assertFalse(storage.containsCargoCube(CargoCube.RED));
+    void findLeastValuableCubeReturnNullWhenEmpty() {
+        assertNull(storage.findLeastValuableCube());
     }
 
+    @Test
+    void findLeastValuableCubeReturnLeastValuableCubeWhenNotEmpty() {
+        CargoCube cube1 = CargoCube.BLUE;
+        CargoCube cube2 = CargoCube.YELLOW;
+
+        storage.addCube(cube1);
+        storage.addCube(cube2);
+
+        CargoCube least = storage.findLeastValuableCube();
+        assertEquals(cube1, least);
+    }
+
+    @Test
+    void addCubeThrowExceptionWhenRedCube() {
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            storage.addCube(CargoCube.RED);
+        });
+
+        assertEquals("Red cube in StandardStorage", exception.getMessage());
+    }
 }

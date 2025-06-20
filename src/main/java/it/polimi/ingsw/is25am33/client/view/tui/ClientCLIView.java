@@ -10,6 +10,7 @@ import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.Planet;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -18,6 +19,7 @@ import it.polimi.ingsw.is25am33.model.component.Storage;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import org.jetbrains.annotations.NotNull;
 
 import java.rmi.RemoteException;
@@ -64,6 +66,9 @@ public class ClientCLIView implements ClientView {
     private StorageSelectionManager storageManager = null;
     private Map<Integer, Coordinates> crewPlacementCoordinatesMap = new HashMap<>();
     private Map<Coordinates, CrewMember> crewChoices = new HashMap<>();
+    private int cubeMalus;
+    private List<Coordinates> mostPreciousCube;
+    private List<Coordinates> selectedStorage = new ArrayList<>();
 
     // Definizione dei colori ANSI (funziona nei terminali che supportano i colori ANSI).
     private static final String ANSI_RED = "\u001B[31m";
@@ -520,15 +525,18 @@ public class ClientCLIView implements ClientView {
             case "AbandonedShip":
                 displayAbandonedShipInfo((ClientAbandonedShip) card, output);
                 break;
-//            case "AbandonedStation":
-//                displayAbandonedStationInfo((ClientAbandonedStation) card, output);
-//                break;
             case "Pirates":
                 displayPiratesInfo((ClientPirates) card, output);
                 break;
-//            case "SlaveTraders":
-//                displaySlaveTradersInfo((ClientSlaveTraders) card, output);
-//                break;
+            case "SlaveTraders":
+                displaySlaveTradersInfo((ClientSlaveTraders) card, output);
+                break;
+            case "AbandonedStation":
+                displayAbandonedStationInfo((ClientAbandonedStation) card, output);
+                break;
+            case "Epidemic":
+                displayEpidemicInfo((ClientEpidemic) card, output);
+                break;
 //            case "SMUGGLERS":
 //                displaySmugglersInfo((ClientSmugglers) card, output);
 //                break;
@@ -537,16 +545,13 @@ public class ClientCLIView implements ClientView {
                 break;
             case "FreeSpace":
                 displayFreeSpaceInfo((ClientFreeSpace) card, output);
-                break;
-//            case "Epidemic":
-//                displayEpidemicInfo((ClientEpidemic) card, output);
-//                break;
+               break;
             case "StarDust":
                 displayStardustInfo((ClientStarDust) card, output);
                 break;
-//            case "WarField":
-//                displayWarFieldInfo((ClientWarField) card, output);
-//                break;
+            case "WarField":
+                displayWarFieldInfo((ClientWarField) card, output);
+                break;
             default:
                 output.append("Unknown card type\n");
         }
@@ -562,6 +567,30 @@ public class ClientCLIView implements ClientView {
                 .append(" crew members, gain ").append(ship.getReward())
                 .append(" credits, and move back ").append(ship.getStepsBack())
                 .append(" spaces.");
+    }
+
+    private void displayAbandonedStationInfo(ClientAbandonedStation station, StringBuilder output) {
+        output.append("Crew Required: ").append(station.getRequiredCrewMembers()).append("\n");
+        output.append("Steps Back: ").append(station.getStepsBack()).append("\n");
+
+        output.append("Rewards: ");
+        if (station.getReward() != null && !station.getReward().isEmpty()) {
+            station.getReward().forEach(cube -> output.append(cube.name()).append(" "));
+        } else {
+            output.append("None");
+        }
+        output.append("\n");
+
+        output.append("\nYou can accept the reward if you have enough crew members.");
+        output.append("\nIf you accept, you'll gain cargo cubes and move back ")
+              .append(station.getStepsBack()).append(" spaces.");
+    }
+
+    private void displayEpidemicInfo(ClientEpidemic epidemic, StringBuilder output) {
+        output.append("Epidemic Card\n");
+        output.append("Effect: Each occupied cabin connected to another occupied cabin will lose one crew member.\n");
+        output.append("\nThe epidemic spreads through connected living quarters, affecting crew members in adjacent cabins.\n");
+        output.append("Wait to see the results of the epidemic spread...");
     }
 
     private void displayPlanetsInfo(ClientPlanets planets, StringBuilder output) {
@@ -580,25 +609,22 @@ public class ClientCLIView implements ClientView {
     }
 
     public void showComponentHitInfo(Coordinates coordinates){
-        showMessage("The component at coordinates " + coordinates.getX() + "-"+ coordinates.getY() + " has been hit", STANDARD);
-        hitComponent = coordinates;
+            showMessage("The component at coordinates " + coordinates.getX() + "-"+ coordinates.getY() + " has been hit", STANDARD);
+            hitComponent = coordinates;
     }
 
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayAbandonedShipInfo(ClientAbandonedShip ship, StringBuilder output) {
-//        output.append("Crew Required: ").append(ship.getCrewMalus()).append("\n");
-//        output.append("Reward: ").append(ship.getReward()).append(" credits\n");
-//        output.append("Steps Back: ").append(ship.getStepsBack()).append("\n");
-//    }
-
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayAbandonedStationInfo(ClientAbandonedStation station, StringBuilder output) {
-//        output.append("Crew Required: ").append(station.getRequiredCrewMembers()).append("\n");
-//        output.append("Steps Back: ").append(station.getStepsBack()).append("\n");
-//        output.append("Rewards: ");
-//        station.getReward().forEach(cube -> output.append(cube.name()).append(" "));
-//        output.append("\n");
-//    }
+    public void showCrewMembersInfo(){
+        showMessage("You have " + clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size() + " crew members", STANDARD);
+        for(String player: clientModel.getSortedRanking()) {
+            if(!player.equals(clientModel.getMyNickname()))
+            showMessage(player + "has" + clientModel.getShipboardOf(player).getCrewMembers().size() + " crew members", STANDARD);
+        }
+        if(clientModel.isMyTurn()){
+            showMessage("Press enter to start this phase", ASK);
+        }
+        else
+            setClientState(WAIT_PLAYER);
+    }
 
     private void displayPiratesInfo(ClientPirates pirates, StringBuilder output) {
         output.append("Required Fire Power: ").append(pirates.getRequiredFirePower()).append("\n");
@@ -615,13 +641,12 @@ public class ClientCLIView implements ClientView {
         }
     }
 
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displaySlaveTradersInfo(ClientSlaveTraders slaveTraders, StringBuilder output) {
-//        output.append("Fire Power Required: ").append(slaveTraders.getRequiredFirePower()).append("\n");
-//        output.append("Crew Malus: ").append(slaveTraders.getCrewMalus()).append("\n");
-//        output.append("Reward: ").append(slaveTraders.getReward()).append(" credits\n");
-//        output.append("Steps Back: ").append(slaveTraders.getStepsBack()).append("\n");
-//    }
+    private void displaySlaveTradersInfo(ClientSlaveTraders slaveTraders, StringBuilder output) {
+        output.append("Fire Power Required: ").append(slaveTraders.getRequiredFirePower()).append("\n");
+        output.append("Crew Malus: ").append(slaveTraders.getCrewMalus()).append("\n");
+        output.append("Reward: ").append(slaveTraders.getReward()).append(" credits\n");
+        output.append("Steps Back: ").append(slaveTraders.getStepsBack()).append("\n");
+    }
 
     //TODO uncommentare quando si inizia ad implementare questa carta
 //    private void displaySmugglersInfo(ClientSmugglers smugglers, StringBuilder output) {
@@ -649,24 +674,17 @@ public class ClientCLIView implements ClientView {
         output.append("Free movement through space using engines\n");
     }
 
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayEpidemicInfo(ClientEpidemic epidemic, StringBuilder output) {
-//        output.append("Epidemic spreading! Crew in adjacent cabins will be affected.\n");
-//    }
-
-
     private void displayStardustInfo(ClientStarDust stardust, StringBuilder output) {
         output.append("Stardust field! Ships will move back based on exposed connectors.\n");
     }
 
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displayWarFieldInfo(ClientWarField warField, StringBuilder output) {
-//        output.append("War Zone! Multiple evaluation phases:\n");
-//        output.append("Cube Malus: ").append(warField.getCubeMalus()).append("\n");
-//        output.append("Crew Malus: ").append(warField.getCrewMalus()).append("\n");
-//        output.append("Steps Back: ").append(warField.getStepsBack()).append("\n");
-//        output.append("Shots: ").append(warField.getShotCount()).append("\n");
-//    }
+    private void displayWarFieldInfo(ClientWarField warField, StringBuilder output) {
+        output.append("War Zone! Multiple evaluation phases:\n");
+        output.append("Cube Malus: ").append(warField.getCubeMalus()).append("\n");
+        output.append("Crew Malus: ").append(warField.getCrewMalus()).append("\n");
+        output.append("Steps Back: ").append(warField.getStepsBack()).append("\n");
+        output.append("Shots: ").append(warField.getShots().size()).append("\n");
+    }
 
     @Override
     public void showNewGameState() {
@@ -706,101 +724,9 @@ public class ClientCLIView implements ClientView {
                     🆕  New Card State: %s
                     ===================================
                     """, currentCardState), STANDARD);
-
-        // Automatically show the appropriate menu based on the mapped state
-        /*switch (mappedState) {
-            case VISIT_LOCATION_MENU:
-                showVisitLocationMenu();
-                break;
-            case CHOOSE_CABIN_MENU:
-                showHandleRemoveCrewMembersMenu();
-                break;
-            case CHOOSE_PLANET_MENU:
-                showChoosePlanetMenu();
-                break;
-            case CHOOSE_CANNONS_MENU:
-                showChooseCannonsMenu();
-                break;
-            case CHOOSE_ENGINES_MENU:
-                showChooseEnginesMenu();
-                break;
-            case THROW_DICES_MENU:
-                showThrowDicesMenu();
-                break;
-            case ACCEPT_REWARD_MENU:
-                showAcceptTheRewardMenu();
-                break;
-            case HANDLE_SMALL_DANGEROUS_MENU:
-                showSmallDanObjMenu();
-                break;
-            case HANDLE_BIG_METEORITE_MENU:
-                showBigMeteoriteMenu();
-                break;
-            case HANDLE_BIG_SHOT_MENU:
-                showBigShotMenu();
-                break;
-            case HANDLE_CUBES_REWARD_MENU:
-                showHandleCubesRewardMenu();
-                break;
-            case EPIDEMIC_MENU:
-                showEpidemicMenu();
-                break;
-            case STARDUST_MENU:
-                showStardustMenu();
-                break;
-            case CHECK_SHIPBOARD_AFTER_ATTACK:
-                checkShipBoardAfterAttackMenu();
-                break;
-        }*/
-
-        // TODO clientCLI
+                // TODO clientCLI
         showCardStateMenu(mappedState);
     }
-
-    /*public ClientState cardStateToClientState(CardState cardState) {
-        switch (cardState) {
-            case VISIT_LOCATION:
-                return ClientState.VISIT_LOCATION_MENU;
-            case CHOOSE_PLANET:
-                return ClientState.CHOOSE_PLANET_MENU;
-            case CHOOSE_CANNONS:
-                return ClientState.CHOOSE_CANNONS_MENU;
-            case CHOOSE_ENGINES:
-                return ClientState.CHOOSE_ENGINES_MENU;
-            case THROW_DICES:
-                return ClientState.THROW_DICES_MENU;
-            case DANGEROUS_ATTACK:
-                // Determine specific type based on dangerous object
-                ClientDangerousObject obj = clientModel.getCurrDangerousObj();
-                if (obj != null) {
-                    String type = obj.getType();
-                    if (type.contains("Small")) {
-                        return ClientState.HANDLE_SMALL_DANGEROUS_MENU;
-                    } else if (type.contains("bigMeteorite")) {
-                        return ClientState.HANDLE_BIG_METEORITE_MENU;
-                    } else if (type.contains("bigShot")) {
-                        return ClientState.HANDLE_BIG_SHOT_MENU;
-                    }
-                }
-                return ClientState.HANDLE_SMALL_DANGEROUS_MENU;// Default
-            case ACCEPT_THE_REWARD:
-                return ClientState.ACCEPT_REWARD_MENU;
-            case HANDLE_CUBES_REWARD:
-                return ClientState.HANDLE_CUBES_REWARD_MENU;
-            case HANDLE_CUBES_MALUS:
-                return ClientState.HANDLE_CUBES_MALUS_MENU;
-            case REMOVE_CREW_MEMBERS:
-                return ClientState.CHOOSE_CABIN_MENU;
-            case EPIDEMIC:
-                return ClientState.EPIDEMIC_MENU;
-            case STARDUST:
-                return ClientState.STARDUST_MENU;
-            case CHECK_SHIPBOARD_AFTER_ATTACK:
-                return ClientState.CHECK_SHIPBOARD_AFTER_ATTACK;
-            default:
-                return ClientState.PLAY_CARD;
-        }
-    }*/
 
     @Override
     public void showBuildShipBoardMenu() {
@@ -1061,6 +987,27 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void showCubes(ShipBoardClient shipboardOf, String nickname) {
+        StringBuilder output = new StringBuilder();
+        if(shipboardOf.getStorages().isEmpty())
+            output.append("No storages were found.\n");
+        else {
+            shipboardOf.getCoordinatesAndStorages().forEach((coordinates, storage) -> {
+                if (storage.getStockedCubes().isEmpty())
+                    output.append("There aren't stocked cubes in the storage at " + (coordinates.getX()+1) +" "+(coordinates.getY()+1) + "\n");
+                else {
+                    for (CargoCube cube : storage.getStockedCubes()) {
+                        output.append("In the storage at " + (coordinates.getX()+1)+" "+ (coordinates.getY()+1) + " there are " + storage.getStockedCubes().size() + " cubes:\n");
+                        output.append(cube.toString()).append("\n");
+                    }
+                }
+            });
+        }
+
+        showMessage(output.toString(), STANDARD);
+    }
+
+    @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
         showShipBoard(shipBoardClient, shipBoardOwnerNickname, Collections.emptyMap());
     }
@@ -1222,6 +1169,25 @@ public class ClientCLIView implements ClientView {
         showMessage(menu.toString(), ASK);
     }
 
+    @Override
+    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
+        String nickname = clientModel.getMyNickname();
+        ShipBoardClient shipboard = clientModel.getShipboardOf(nickname);
+        if(cabinWithNeighbors.size() > 0) {
+            showShipBoard(shipboard, nickname, Map.of(ANSI_BLUE, cabinWithNeighbors));
+            showMessage("The colored cabins are those where you lost an infected crew membership", STANDARD);
+        }else
+            showMessage("You had no infected crew membership", STANDARD);
+    }
+
+    @Override
+    public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
+        setClientState(END_GAME_PHASE);
+        //TODO
+
+        showMessage("Press any key to leave the game", ASK);
+    }
+
     /**
      * Determina il colore ANSI da applicare alla coordinata specificata
      * basandosi sulla mappa dei colori fornita.
@@ -1299,7 +1265,21 @@ public class ClientCLIView implements ClientView {
                 return;
             }
         } else if (card.getCardType().equals("AbandonedStation")) {
-            message.append("You've found an abandoned station! If you have enough crew, you can visit to get cargo.\n");
+            ClientAbandonedStation stationCard = (ClientAbandonedStation) card;
+            message.append("You've found an abandoned station!\n\n");
+            message.append("If you have at least ").append(stationCard.getRequiredCrewMembers())
+                   .append(" crew members, you can visit to get cargo.\n");
+
+            // Check if player has enough crew
+            int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
+            if (totalCrew < stationCard.getRequiredCrewMembers()) {
+                setClientState(ClientState.CANNOT_VISIT_LOCATION);
+                message.append(ANSI_RED + "WARNING: You only have ").append(totalCrew)
+                       .append(" crew members. You cannot accept this reward!\n\n" + ANSI_RESET);
+                showMessage(message.toString(), STANDARD);
+                showMessage("Press any key to continue.", ASK);
+                return;
+            }
         }
 
         message.append("Do you want to visit this location? [Y/n]");
@@ -1366,26 +1346,32 @@ public class ClientCLIView implements ClientView {
         showEngineWithColor();
 
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleEngines().isEmpty() ) {
+            setClientState(WAIT_PLAYER);
             showMessage("No double engines available.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
-            showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
+            if (clientModel.getCurrAdventureCard().getCardName().equals("FreeSpace"))
+                showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
             clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedEngines, selectedBatteries);
             return;
         }
 
         if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
+            setClientState(WAIT_PLAYER);
             showMessage("No battery boxes available so you can't activate double engine.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
-            showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
+            if (clientModel.getCurrAdventureCard().getCardName().equals("FreeSpace"))
+                showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
             clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedEngines, selectedBatteries);
             return;
         }
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
-        if (!isThereAvailableBattery()) {
+        if(!isThereAvailableBattery()) {
+            setClientState(WAIT_PLAYER);
             showMessage("Hai finito le batterie coglione so you can't activate double engine.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
-            showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
+            if (clientModel.getCurrAdventureCard().getCardName().equals("FreeSpace"))
+                showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
             clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedEngines, selectedBatteries);
             return;
         }
@@ -1413,10 +1399,10 @@ public class ClientCLIView implements ClientView {
 //                ClientAbandonedShip ship = (ClientAbandonedShip) card;
 //                rewardStr = String.valueOf(ship.getReward());
 //                stepsStr = String.valueOf(ship.getStepsBack());
-//            } else if (card instanceof ClientSlaveTraders) {
-//                ClientSlaveTraders traders = (ClientSlaveTraders) card;
-//                rewardStr = String.valueOf(traders.getReward());
-//                stepsStr = String.valueOf(traders.getStepsBack());
+            } else if (card instanceof ClientSlaveTraders) {
+                ClientSlaveTraders traders = (ClientSlaveTraders) card;
+                rewardStr = String.valueOf(traders.getReward());
+                stepsStr = String.valueOf(traders.getStepsBack());
             }
         }
 
@@ -1441,19 +1427,25 @@ public class ClientCLIView implements ClientView {
         if (card instanceof ClientPirates) {
             message.append("\nEnemy firepower: " ).append(((ClientPirates) card).getRequiredFirePower());
             message.append("\n You can choose double cannons to defeat pirates");
-            message.append("\n REMEMBER! If you don't defeat pirates, you will be attacked!");
+            message.append("\n REMEMBER! If you don't defeat, you will be attacked by shots!");
 
-//        } else if (card instanceof ClientSlaveTraders) {
-//            strengthStr = String.valueOf(((ClientSlaveTraders) card).getRequiredFirePower());
-//        } else if (card instanceof ClientSmugglers) {
+        } else if (card instanceof ClientSlaveTraders) {
+            message.append("\nEnemy firepower: " ).append(((ClientSlaveTraders) card).getRequiredFirePower());
+            message.append("\n You can choose double cannons to defeat slave traders");
+            message.append("\n REMEMBER! If you don't defeat, you will lose crew members!");
+        //}
+//        else if (card instanceof ClientSmugglers) {
 //            strengthStr = String.valueOf(((ClientSmugglers) card).getRequiredFirePower());
         }
 
         showCannonWithColor();
 
+        showMessage(message.toString(), STANDARD);
+
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleCannons().isEmpty() ) {
             showMessage("No double cannon available.", STANDARD);
             showMessage("You can use only single cannon", STANDARD);
+            setClientState(WAIT_PLAYER);
             clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
             return;
         }
@@ -1461,20 +1453,23 @@ public class ClientCLIView implements ClientView {
         if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
             showMessage("No battery boxes available so you can't activate double cannon.", STANDARD);
             showMessage("You can use only single cannon", STANDARD);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);            return;
+            setClientState(WAIT_PLAYER);
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            return;
         }
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
         if(!isThereAvailableBattery()) {
             showMessage("Hai finito le batterie coglione so you can't activate double cannon.", STANDARD);
             showMessage("You can use only single cannon", STANDARD);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);            return;
+            setClientState(WAIT_PLAYER);
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            return;
         }
 
         showMessage("\nYou can activate double cannon." +
                 "Each double cannon requires one battery.", STANDARD);
         setClientState(ClientState.CHOOSE_CANNONS_MENU);
-        showMessage(message.toString(), STANDARD);
         showMessage("Enter coordinates of a double cannon (row column) or 'done' when finished: ", ASK);
     }
 
@@ -1583,6 +1578,8 @@ public class ClientCLIView implements ClientView {
 
         crewToRemove = card.getCrewMalus();
 
+        showMessage("\nYou need to remove " + crewToRemove + " crew member(s).", STANDARD);
+
         // Get cabins with crew
         Map<Coordinates, Cabin> cabinsWithCrew = clientModel.getShipboardOf(clientModel.getMyNickname())
                 .getCoordinatesAndCabinsWithCrew();
@@ -1606,36 +1603,15 @@ public class ClientCLIView implements ClientView {
             }
         }
 
+        if(card.getCrewMalus()>=clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size()) {
+            cabinInfo.append("You have not member enough. You must sacrifice all crew members.\n");
+            showMessage(cabinInfo.toString(), STANDARD);
+            showMessage("ATTENTION! you will be eliminated", ERROR);
+        }
+
         showMessage(cabinInfo.toString(), STANDARD);
-        showMessage("\nYou need to remove " + crewToRemove + " crew member(s).", STANDARD);
         showMessage("Enter coordinates of a cabin to remove crew from (row column) or 'done' when finished: ", ASK);
 
-//        setClientState(ClientState.CHOOSE_CABIN_MENU);
-//
-//        // Mostra la nave per visualizzare le cabine
-//        this.showMyShipBoard();
-//
-//        // Cerca di trovare il numero di membri dell'equipaggio da rimuovere
-//        String cardName = clientModel.getCurrAdventureCard();
-//        String crewStr = "";
-//        for (String line : cardName.split("\n")) {
-//            if (line.contains("Crew Lost:") || line.contains("crewMalus")) {
-//                crewStr = line.replaceAll(".*[Cc]rew\\s?(Lost|Malus):\\s+x(\\d+).*", "$2").trim();
-//                break;
-//            }
-//        }
-//
-//        int crewToRemove = 1;
-//        try {
-//            if (!crewStr.isEmpty()) {
-//                crewToRemove = Integer.parseInt(crewStr);
-//            }
-//        } catch (NumberFormatException e) {
-//            // Fallback a un valore predefinito
-//        }
-//
-//        showMessage("\nYou need to remove " + crewToRemove + " crew member(s).", STANDARD);
-//        showMessage("Enter coordinates of a cabin to remove crew from: ", ASK);
     }
 
     @Override
@@ -1646,7 +1622,7 @@ public class ClientCLIView implements ClientView {
         List<CargoCube> rewardCubes = extractCubeRewardsFromCurrentCard();
 
         // Initialize the storage manager with the cube rewards
-        storageManager = new StorageSelectionManager(rewardCubes, getMyShipBoard());
+        storageManager = new StorageSelectionManager(rewardCubes, 0, getMyShipBoard());
 
         // Check if the player has any storage available
         if (!storageManager.hasAnyStorage()) {
@@ -1761,6 +1737,7 @@ public class ClientCLIView implements ClientView {
 
         CargoCube currentCube = storageManager.getCurrentCube();
         if (currentCube != null) {
+            showStorageWithColor();
             message.append("Prossimo cubo da posizionare: ").append(currentCube)
                     .append(" (valore: ").append(currentCube.getValue()).append(")")
                     .append(currentCube == CargoCube.RED ? " - Questo cubo richiede uno storage speciale!" : "")
@@ -1820,14 +1797,14 @@ public class ClientCLIView implements ClientView {
             ClientPlanets planets = (ClientPlanets) card;
             return planets.getPlayerReward(clientModel.getMyNickname());
         }
-//        else if (card instanceof ClientAbandonedStation) {
-//            // AbandonedStation has a direct list of rewards
-//            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
-//        }
-//        else if (card instanceof ClientSmugglers) {
-//            // Smugglers have a direct list of rewards
-//            return new ArrayList<>(((ClientSmugglers) card).getReward());
-//        }
+        else if (card instanceof ClientAbandonedStation) {
+            // AbandonedStation has a direct list of rewards
+            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
+        }
+        else if (card instanceof ClientSmugglers) {
+            // Smugglers have a direct list of rewards
+            return new ArrayList<>(((ClientSmugglers) card).getReward());
+        }
 
         // If no rewards were found or the card type doesn't have rewards
         if (cubes.isEmpty() && clientModel.getCurrCardState() == CardState.HANDLE_CUBES_REWARD) {
@@ -1856,11 +1833,9 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showEpidemicMenu() {
-        setClientState(ClientState.EPIDEMIC_MENU);
-
         showMessage("\nAn epidemic is spreading throughout the fleet!", STANDARD);
         showMessage("Each occupied cabin connected to another occupied cabin will lose one crew member.", STANDARD);
-        showMessage("Press Enter to continue...", ASK);
+        showMessage("Press any key see how the epidemic is going to spread...", STANDARD);
     }
 
     @Override
@@ -1884,13 +1859,45 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showHandleCubesMalusMenu() {
-        setClientState(ClientState.HANDLE_CUBES_MALUS_MENU);
 
-        // Mostra la nave per visualizzare i depositi
-        this.showMyShipBoard();
+        if(!clientModel.isMyTurn()){
+            setClientState(WAIT_PLAYER);
+            return;
+        }
 
-        showMessage("\nYou must discard some cargo cubes!", STANDARD);
+        if(clientModel.getCurrAdventureCard().getCardName().equals("WarField")) {
+            ClientWarField card = (ClientWarField) clientModel.getCurrAdventureCard();
+            cubeMalus=card.getCubeMalus();
+
+            storageManager = new StorageSelectionManager(new ArrayList<>(), cubeMalus, clientModel.getShipboardOf(clientModel.getMyNickname()));
+            // Mostra la nave per visualizzare i depositi
+            this.showStorageWithColor();
+            showMessage("\nYou must remove " +cubeMalus +" cargo cubes!", STANDARD);
+        }
+
+        mostPreciousCube= storageManager.mostPreciousCube();
+
+        if(clientModel.getShipboardOf(clientModel.getMyNickname()).getStorages().isEmpty()|| clientModel.getShipboardOf(clientModel.getMyNickname()).getCargoCubes().isEmpty()) {
+            if(!clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes().isEmpty()) {
+                showMessage("You don't have any storage",STANDARD);
+                showMessage("You have to give back the batteries instead of the cubes ", STANDARD);
+                setClientState(CHOOSE_BATTERY_CUBES);
+                showBatteryBoxesWithColor();
+                showMessage("Enter coordinates of a battery to remove: ", ASK);
+                return;
+            } else {
+                showMessage("You don't have any storage and battery boxes",STANDARD);
+                showMessage("You are safe...for now", STANDARD);
+                setClientState(WAIT_PLAYER);
+                clientController.playerChoseStorage(clientController.getNickname(), selectedStorage);
+                mostPreciousCube.clear();
+                return;
+            }
+        }
+        setClientState(ClientState.CHOOSE_STORAGE_FOR_CUBEMALUS);
+        showMessage("You have to give back the most precious cubes", STANDARD);
         showMessage("Enter coordinates of a storage to remove a cargo cube from: ", ASK);
+
     }
 
     private ShipBoardClient getMyShipBoard() {
@@ -1900,387 +1907,6 @@ public class ClientCLIView implements ClientView {
     private void showMyShipBoard() {
         this.showShipBoard(getMyShipBoard(), clientModel.getMyNickname());
     }
-
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showThrowDicesMenu(){
-//        askForInput("", "Press any key to throw dices ");
-//
-//        return (server, nickname) -> {
-//            try {
-//                server.playerWantsToThrowDices(nickname);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        };
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showChoosePlanetMenu(){
-//        int choice = Integer.parseInt(askForInput("Choose the index of the planet you want visit, between 1 and " + ((Planets) clientModel.getCurrAdventureCard()).getAvailablePlanets().size() + 1 + " (press 0 to skip). ", defaultInterrogationPrompt));
-//        return(server, nickname) -> {
-//            try {
-//                server.playerWantsToVisitPlanet(nickname, choice);
-//            } catch (RemoteException e) {
-//                throw new RuntimeException(e);
-//            }
-//        };
-//        return null;
-//        // TODO
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showChooseEnginesMenu() {
-//
-//        this.showMyShipBoard();
-//        showMessage("\n", STANDARD);
-//        List<Coordinates> doubleEnginesCoordinates = new ArrayList<>();
-//        List<Coordinates> batteryBoxesCoordinates = new ArrayList<>();
-//        ShipBoardClient shipBoard = getMyShipBoard();
-//
-//        while(true) {
-//
-//            Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double engines you would like to activate or press enter to skip: ");
-//            if (coords == null) break;
-//            if (shipBoard.getDoubleEngines().contains(shipBoard.getComponentAt(coords)))
-//                doubleEnginesCoordinates.add(coords);
-//            else {
-//                showMessage("The selected coordinates are not related to any double engine, try again", STANDARD);
-//                continue;
-//            }
-//
-//            while(true) {
-//
-//                Coordinates batteryCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
-//                if(batteryCoords == null){
-//                    showMessage("You have to select a battery box after choosing a double engine.", STANDARD);
-//                    continue;
-//                }
-//                if (shipBoard.getBatteryBoxes().contains(shipBoard.getComponentAt(batteryCoords))) {
-//                    batteryBoxesCoordinates.add(batteryCoords);
-//                    break;
-//                }
-//                else
-//                    showMessage("The selected coordinates are not related to any battery box, try again", STANDARD);
-//            }
-//        }
-//
-//        return (server, nickname) -> {
-//            try {
-//                server.playerChoseDoubleEngines(nickname, doubleEnginesCoordinates, batteryBoxesCoordinates);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        };
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showAcceptTheRewardMenu() {
-//
-//        while(true) {
-//            String input = askForInput("", "Do you want to accept the reward? [Y/n] ");
-//            if (input.equalsIgnoreCase("Y") || input.isEmpty()) {
-//                return (server, nickname) -> {
-//                    try {
-//                        server.playerWantsToAcceptTheReward(nickname, true);
-//                    } catch (IOException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                };
-//
-//            } else if (input.equalsIgnoreCase("N")) {
-//                return (server, nickname) -> {
-//                    try {
-//                        server.playerWantsToAcceptTheReward(nickname, false);
-//                    } catch (IOException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                };
-//            } else {
-//                showMessage("Invalid input. Please enter Y or N.", STANDARD);
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showChooseCannonsMenu(){
-//        this.showMyShipBoard();
-//        System.out.println();
-//        List<Coordinates> doubleCannonsCoordinates = new ArrayList<>();
-//        List<Coordinates> batteryBoxesCoordinates = new ArrayList<>();
-//        ShipBoardClient myShipBoard = getMyShipBoard();
-//
-//        while(true) {
-//
-//            Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double cannon you would like to activate or press enter to skip: ");
-//            if (coords == null) break;
-//            if (myShipBoard.getDoubleCannons().contains(myShipBoard.getComponentAt(coords)))
-//                doubleCannonsCoordinates.add(coords);
-//            else {
-//                showMessage("The selected coordinates are not related to any double cannons, try again", STANDARD);
-//                continue;
-//            }
-//
-//            while(true) {
-//
-//                Coordinates batteryCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
-//                if(batteryCoords == null){
-//                    showMessage("You have to select a battery box after choosing a double engine.", STANDARD);
-//                    continue;
-//                }
-//                if (myShipBoard.getBatteryBoxes().contains(myShipBoard.getComponentAt(batteryCoords))) {
-//                    batteryBoxesCoordinates.add(batteryCoords);
-//                    break;
-//                }
-//                else
-//                    showMessage("The selected coordinates are not related to any battery box, try again", STANDARD);
-//            }
-//        }
-//
-//        return (server, nickname) -> {
-//            try {
-//                server.playerChoseDoubleCannons(nickname, doubleCannonsCoordinates, batteryBoxesCoordinates);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        };
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showHandleRemoveCrewMembersMenu() {
-//        this.showMyShipBoard();
-//        System.out.println();
-//        List<Coordinates> cabinCoordinates = new ArrayList<>();
-//        ShipBoardClient myShipBoard = getMyShipBoard();
-//
-//        while (true) {
-//            Coordinates coords = readCoordinatesFromUserInput("Select the coordinates (row column) of the cabins from which you want to remove the crew members: ");
-//            if (coords == null) {
-//                showMessage("You have to select cabins", STANDARD);
-//                continue;
-//            }
-//            if (myShipBoard.getCabin().contains(myShipBoard.getComponentAt(coords))) {
-//                cabinCoordinates.add(coords);
-//                break;
-//            } else {
-//                showMessage("The selected coordinates are not related to any cabin, try again", STANDARD);
-//            }
-//        }
-//
-//        return (server, nickname) -> {
-//            try {
-//                server.playerChoseCabins(nickname, cabinCoordinates);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        };
-//
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showSmallDanObjMenu() {
-//
-//        showMessage(clientModel.getCurrDangerousObj().getDangerousObjType() + " incoming!!!", STANDARD);
-//        showMessage("Choose how to defend from it", STANDARD);
-//        ShipBoardClient myShipBoard = getMyShipBoard();
-//
-//        while (true) {
-//            Coordinates activableCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the shield you would like to activate or press enter if you don't need to activate one: ");
-//            if (activableCoords == null)
-//                return (server, nickname) -> {
-//                    try {
-//                        server.playerHandleSmallDanObj(nickname, new Coordinates(), new Coordinates());
-//                    } catch (IOException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                };
-//
-//            if(myShipBoard.getShields().contains(myShipBoard.getComponentAt(activableCoords))) {
-//                showMessage("The selected coordinates are not related to any shield, try again", STANDARD);
-//                continue;
-//            }
-//
-//            Coordinates batteryBoxCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
-//            if(myShipBoard.getBatteryBoxes().contains(myShipBoard.getComponentAt(batteryBoxCoords))) {
-//                showMessage("The selected coordinates are not related to any battery box, try again", STANDARD);
-//                continue;
-//            }
-//
-//            return (server, nickname) -> {
-//                try {
-//                    server.playerHandleSmallDanObj(nickname, activableCoords, batteryBoxCoords);
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            };
-//        }
-//
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showBigMeteoriteMenu() {
-//
-//        showMessage(clientModel.getCurrDangerousObj().getDangerousObjType() + " incoming!!!", STANDARD);
-//        showMessage("Choose how to defend from it", STANDARD);
-//        ShipBoardClient myShipBoard = getMyShipBoard();
-//
-//        while (true) {
-//            Coordinates doubleCannonCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the double cannon you would like to activate or press enter if you don't need to activate one: ");
-//            if (doubleCannonCoords == null)
-//                return (server, nickname) -> {
-//                    try {
-//                        server.playerHandleBigMeteorite(nickname, new Coordinates(), new Coordinates());
-//                    } catch (IOException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                };
-//
-//            if(myShipBoard.getDoubleCannons().contains(myShipBoard.getComponentAt(doubleCannonCoords))) {
-//                showMessage("The selected coordinates are not related to any double cannon, try again", STANDARD);
-//                continue;
-//            }
-//
-//            Coordinates batteryBoxCoords = readCoordinatesFromUserInput("Select the coordinates (row column) for the battery box you would like to activate: ");
-//            if(myShipBoard.getBatteryBoxes().contains(myShipBoard.getComponentAt(batteryBoxCoords))) {
-//                showMessage("The selected coordinates are not related to any battery box, try again", STANDARD);
-//                continue;
-//            }
-//
-//            return (server, nickname) -> {
-//                try {
-//                    server.playerHandleBigMeteorite(nickname, doubleCannonCoords, batteryBoxCoords);
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            };
-//        }
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showBigShotMenu() {
-//
-//        showMessage("Big shot incoming!!!\nLet's hope it will miss your ship because there is nothing you can do :(", STANDARD);
-//        return (server, nickname) -> {
-//            try {
-//                server.playerHandleBigShot(nickname);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        };
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showEpidemicMenu() {
-//        showMessage("An epidemic is spreading!!!\nRemoving 1 crew member (human or alien) from every occupied cabin connected to another occupied cabin...", STANDARD);
-//        return(server, nickname) -> {
-//            try {
-//                server.spreadEpidemic(nickname);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        };
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showStardustMenu() {
-//        showMessage("Stardust is coming!\nMaking one step back for every exposed component on you ship...", STANDARD);
-//        return(server, nickname) -> {
-//            try {
-//                server.stardustEvent(nickname);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        };
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showHandleCubesRewardMenu() {
-//
-//        while (true){
-//            Coordinates coords = readCoordinatesFromUserInput("Choose the coordinates (row column) of the storage where you would like to store the cargo cube or press enter to skip this reward: ");
-//            if (coords == null) return (server, nickname) -> {
-//                try {
-//                    server.playerChoseStorage(nickname, new Coordinates());
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            };
-//
-//            ShipBoardClient myShipBoard = getMyShipBoard();
-//
-//            List<Component> storages = new ArrayList<>();
-//            storages.addAll(myShipBoard.getSpecialStorages());
-//            storages.addAll(myShipBoard.getStandardStorages());
-//
-//            if (storages.contains(myShipBoard.getComponentAt(coords)))
-//                return (server, nickname) -> {
-//                    try {
-//                        server.playerChoseStorage(nickname, coords);
-//                    } catch (IOException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                };
-//            else
-//                showMessage("The selected coordinates are not related to any storage, try again", STANDARD);
-//        }
-//
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showHandleCubesMalusMenu() {
-//
-//        while (true){
-//            Coordinates coords = readCoordinatesFromUserInput("Choose the coordinates (row column) of the storage where you would like to remove one cargo cube: ");
-//            ShipBoardClient myShipBoard = getMyShipBoard();
-//
-//            List<Component> storages = new ArrayList<>();
-//            storages.addAll(myShipBoard.getStandardStorages());
-//            storages.addAll(myShipBoard.getSpecialStorages());
-//
-//            if (storages.contains(myShipBoard.getComponentAt(coords)))
-//                return (server, nickname) -> {
-//                    try {
-//                        server.playerChoseStorage(nickname, coords);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                };
-//            else
-//                showMessage("The selected coordinates are not related to any storage, try again", STANDARD);
-//        }
-//
-//    }
-//
-//    @Override
-//    public BiConsumer<CallableOnGameController, String> showVisitLocationMenu() {
-//
-//        while (true) {
-//            String input = askForInput("", "Do you want to visit the card location? [Y/n] ");
-//            if (input.equalsIgnoreCase("Y") || input.isEmpty()) {
-//                return (server, nickname) -> {
-//                    try {
-//                        server.playerWantsToVisitLocation(nickname, true);
-//                    } catch (IOException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                };
-//
-//            } else if (input.equalsIgnoreCase("N")) {
-//                return (server, nickname) -> {
-//                    try {
-//                        server.playerWantsToVisitLocation(nickname, false);
-//                    } catch (IOException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                };
-//
-//            } else {
-//                showMessage("Invalid input. Please enter Y or N.", STANDARD);
-//            }
-//        }
-//
-//    }
-
-
 
     public void showCurrentRanking() {
         StringBuilder output = new StringBuilder();
@@ -2536,9 +2162,11 @@ public class ClientCLIView implements ClientView {
             BatteryBox batteryBox = (BatteryBox) component;
 
             //se quel box non contiene batterie non posso selezionarlo
+            //TODO bisognerebbe diversificare nel caso in cui si stiano scegliendo batterie al posto di cubi ma non ho voglia
+            // quindi ho fatto che se premi cancel non succede un cazzo
             if(batteryBox.getRemainingBatteries()==0){
                 showMessage("This batteryBox is empty!", ERROR);
-                showMessage("Please select another one or 'cancel' to cancel the choise", ASK);
+                showMessage("Please select another one or 'cancel' to cancel the last choise", ASK);
                 return;
             }
 
@@ -2550,23 +2178,41 @@ public class ClientCLIView implements ClientView {
                 }
             }
 
+            //TODO stessa cosa qua
             if(batteryBox.getRemainingBatteries()==frequency){
                 showMessage("This battery box is empty", ERROR);
-                showMessage("Please select another one or 'cancel' to cancel the choise", ASK);
+                showMessage("Please select another one or 'cancel' to cancel the last choise", ASK);
                 return;
             }
 
             // Aggiungi la batteria e torna alla selezione del motore
             selectedBatteries.add(coords);
 
+
             if(clientState==CHOOSE_ENGINES_SELECT_BATTERY){
-                showMessage("Engine and battery selected. Enter another engine or 'done' to finish: ", ASK);
+                showEngineWithColor();
+                showMessage("Engine and battery selected", STANDARD);
+                if(selectedEngines.size()==clientModel.getShipboardOf(clientModel.getMyNickname()).getDoubleEngines().size()){
+                    setClientState(WAIT_PLAYER);
+                    showMessage("You have selected all the engines", STANDARD);
+                    clientController.playerChoseDoubleEngines(clientModel.getMyNickname(),selectedEngines,selectedBatteries);
+                    return;
+                }
+                showMessage("Choose another engine or 'done' to finish: ", ASK);
                 setClientState(CHOOSE_ENGINES_MENU);
                 return;
             }
 
             if(clientState==CHOOSE_CANNONS_SELECT_BATTERY){
-                showMessage("Cannon and battery selected. Enter another cannon or 'done' to finish: ", ASK);
+                showCannonWithColor();
+                showMessage("Cannon and battery selected", STANDARD);
+                if(selectedCannons.size()==clientModel.getShipboardOf(clientModel.getMyNickname()).getDoubleCannons().size()){
+                    setClientState(WAIT_PLAYER);
+                    showMessage("You have selected all the cannons", STANDARD);
+                    clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+                    return;
+                }
+                showMessage("Choose another cannons or 'done' to finish: ", ASK);
                 setClientState(CHOOSE_CANNONS_MENU);
                 return;
             }
@@ -2586,6 +2232,25 @@ public class ClientCLIView implements ClientView {
                 clientController.playerHandleBigMeteorite(clientController.getNickname(), selectedCannons, selectedBatteries);
                 selectedCannons.clear();
                 selectedBatteries.clear();
+            }
+
+            if(clientState == CHOOSE_BATTERY_CUBES) {
+
+                if (selectedBatteries.size() + selectedStorage.size() == cubeMalus
+                        || clientModel.getShipboardOf(clientModel.getMyNickname()).getTotalAvailableBattery()==selectedBatteries.size()) {
+                    showMessage(" All cargo cubes and batteries has been selected", STANDARD);
+                    setClientState(WAIT_PLAYER);
+                    clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStorage, selectedBatteries);
+                    selectedBatteries.clear();
+                    selectedStorage.clear();
+                    mostPreciousCube.clear();
+                }else{
+                    showBatteryBoxesWithColor();
+                    showMessage("You still need to remove " + (cubeMalus- selectedStorage.size()- selectedBatteries.size()) +" battery (s). Enter another battery box coordinate: ", STANDARD);
+                    showMessage("Battery box selected. Enter another battery box. ", ASK);
+                    setClientState(CHOOSE_BATTERY_CUBES);
+                }
+
             }
 
         } catch (Exception e) {
@@ -2654,7 +2319,7 @@ public class ClientCLIView implements ClientView {
         }
     }
 
-    private void handleStorageSelection(String input) {
+    private void handleStorageSelectionForReward(String input) {
         //TODO OPTIONAL: aggiugnere possibilità di rifare da capo le scelte. Per esempio in caso un client sbagliasse a posizionare un cubo
         if (input.equalsIgnoreCase("done")) {
             // Se l'utente ha finito ma non ha selezionato tutti gli storage possibili
@@ -2807,6 +2472,28 @@ public class ClientCLIView implements ClientView {
         }
     }
 
+    private void handleStorageSelectionForMalus(String input){
+        try {
+            Coordinates coords = parseCoordinates(input);
+            if (coords == null) return;
+
+            ShipBoardClient shipBoard = clientModel.getShipboardOf(clientModel.getMyNickname());
+            Component component = shipBoard.getComponentAt(coords);
+
+            if (component == null || !shipBoard.getStorages().contains(component)) {
+                showMessage("No storage at these coordinates.", ERROR);
+                showStorageWithColor();
+                showMessage("Please try again or 'done' to confirm.", ASK);
+                return;
+            }
+
+            selectedStorage.add(coords);
+
+        } catch (Exception e) {
+            showMessage("Error processing coordinates: " + e.getMessage(), ERROR);
+        }
+    }
+
     private Coordinates parseCoordinates(String input) {
         try {
             String[] parts = input.trim().split("\\s+");
@@ -2843,7 +2530,7 @@ public class ClientCLIView implements ClientView {
                     }
                 }
             } else {
-                if(card.getCrewMalus() - selectedCabins.size() == 0) {
+                if(card.getCrewMalus() - selectedCabins.size() == 0 || selectedCabins.size()==clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size()) {
                     showMessage("You cannot select more cabin. Please press done: ", ASK);
                     return;
                 }
@@ -2870,8 +2557,8 @@ public class ClientCLIView implements ClientView {
                     showMessage("No occupied cabin at these coordinates.", ERROR);
                 }
             }
-            if((card.getCrewMalus() - selectedCabins.size()) == 0)
-                showMessage("You have completed your choices, please press done: ", ASK);
+            if ((card.getCrewMalus() - selectedCabins.size()) == 0 || selectedCabins.size() == clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size())
+               showMessage("You have completed your choices, please press done: ", ASK);
             else
                 showMessage("You still need to remove " + (card.getCrewMalus() - selectedCabins.size()) +" crew member(s). Enter another cabin coordinate: ", ASK);
         } catch (NumberFormatException e) {
@@ -3047,8 +2734,19 @@ public class ClientCLIView implements ClientView {
             }
             clientController.showShipBoard(input.trim().split("\\s+")[1]);
             return;
+        }
+        else if (input.trim().split("\\s+")[0].equals("cube")) {
+            if (input.trim().split("\\s+").length != 2) {
+                showMessage("Invalid cubes command", ERROR);
+                return;
+            }
+            clientController.showCubes(input.trim().split("\\s+")[1]);
+            return;
         } else if (input.equals("rank")) {
             showCurrentRanking();
+            return;
+        } else if (input.equals("land")){
+            clientController.land();
             return;
         }
 
@@ -3380,11 +3078,16 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case CREW_PLACEMENT_MENU:
+                    setClientState(WAITING_FOR_SERVER);
                     handleCrewPlacementInput(input);
                     break;
 
                 case NO_CREW_TO_PLACE:
+                    setClientState(WAITING_FOR_SERVER);
                     clientController.submitCrewChoices(new HashMap<>());
+                    break;
+
+                case WAITING_FOR_SERVER:
                     break;
 
                 case VISIT_LOCATION_MENU:
@@ -3501,7 +3204,7 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case HANDLE_CUBES_REWARD_MENU:
-                    handleStorageSelection(input); // false = reward
+                    handleStorageSelectionForReward(input); // false = reward
                     break;
 
                 case CANNOT_ACCEPT_CUBES_REWARDS:
@@ -3511,11 +3214,16 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case HANDLE_CUBES_MALUS_MENU:
-                    handleStorageSelection(input); // true = malus
+                    handleStorageSelectionForMalus(input); // true = malus
                     break;
 
                 case CANNOT_VISIT_LOCATION:
                     clientController.playerWantsToAcceptTheReward(clientController.getNickname(), false);
+                    break;
+
+                case END_GAME_PHASE:
+                    //TODO controllare che il metodo corretto da chiamare sia leaveGame
+                    clientController.leaveGame();
                     break;
 
                 case CHOOSE_CANNONS_MENU:
@@ -3586,11 +3294,63 @@ public class ClientCLIView implements ClientView {
                         handleBatterySelection(input);
                     }
                     break;
+
+                case CHOOSE_BATTERY_CUBES:
+
+                    if (input.equalsIgnoreCase("cancel")) {
+                        showBatteryBoxesWithColor();
+                        showMessage("Please choose another box: ", ASK);
+                    } else {
+                        handleBatterySelection(input);
+                    }
+                    break;
+
+                case EVALUATE_CREW_MEMBERS_MENU:
+                    clientController.evaluatedCrewMembers();
+                    break;
                 case WAIT_PLAYER:
                     showMessage("This isn't your turn. Wait for other player, they are so sloooooow. Please wait...", STANDARD);
                     break;
 
                 case CHECK_SHIPBOARD_AFTER_ATTACK:
+                    break;
+
+                case CHOOSE_STORAGE_FOR_CUBEMALUS:
+                        try{
+                            Coordinates coords = parseCoordinates(input);
+
+                            if(mostPreciousCube.contains(coords)){
+                                mostPreciousCube.remove(coords);
+                                selectedStorage.add(coords);
+                                showMessage("Storage selected.", STANDARD);
+                                if(!mostPreciousCube.isEmpty()){
+                                    showStorageWithColor();
+                                    showMessage("You still need to remove " + mostPreciousCube.size() +" cube (s). Enter another storage coordinate: ", ASK);
+                                }
+                                else{
+                                    if(selectedStorage.size() == cubeMalus){
+                                        setClientState(WAIT_PLAYER);
+                                        clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStorage, selectedBatteries);
+                                        selectedStorage.clear();
+                                        selectedBatteries.clear();
+                                        mostPreciousCube.clear();
+                                    }
+                                    else{
+                                        setClientState(CHOOSE_BATTERY_CUBES);
+                                        showBatteryBoxesWithColor();
+                                        showMessage("You still need to remove " + (cubeMalus- selectedStorage.size()) +" battery (s). Enter a battery box coordinate: ", ASK);
+                                        handleBatterySelection(input);
+                                    }
+                                }
+                            } else{
+                                showStorageWithColor();
+                                showMessage("ATTENTION! There are a more precious cube on the ship!", STANDARD);
+                                showMessage("You must remove them. Please enter storage coordinate: ", ASK);
+                            }
+
+                        } catch (NumberFormatException e) {
+                            showMessage("Invalid input. Please enter valid numbers for row and column.", ERROR);
+                        }
                     break;
 
                 default:
@@ -3668,5 +3428,22 @@ public class ClientCLIView implements ClientView {
 
         showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
     }
+
+    public void showStorageWithColor(){
+        Map<String, Set<Coordinates>> colorMap = new HashMap<>();
+
+        List<SpecialStorage> availableSpecialStorages = clientModel.getShipboardOf(clientModel.getMyNickname()).getSpecialStorages();
+        availableSpecialStorages.removeAll(selectedStorage);
+        Set<Coordinates> availableSpecialStoragesCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableSpecialStorages);
+        colorMap.put(ANSI_GREEN, availableSpecialStoragesCoords);
+
+        List<StandardStorage> availableStandardStorages = clientModel.getShipboardOf(clientModel.getMyNickname()).getStandardStorages();
+        availableStandardStorages.removeAll(selectedStorage);
+        Set<Coordinates> availableStandardStoragesCoords = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesOfComponents(availableStandardStorages);
+        colorMap.put(ANSI_BLUE, availableStandardStoragesCoords);
+
+        showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+    }
+
 }
 

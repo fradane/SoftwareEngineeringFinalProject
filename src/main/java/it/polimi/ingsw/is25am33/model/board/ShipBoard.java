@@ -1,14 +1,12 @@
 package it.polimi.ingsw.is25am33.model.board;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.*;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
-import javafx.application.Platform;
 
 import java.io.Serializable;
 import java.util.*;
@@ -109,7 +107,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return incorrectlyPositionedComponentsCoordinates;
     }
 
-    public void setGameContext(GameClientNotifier gameClientNotifier) {
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
     }
 
@@ -188,6 +186,27 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
         // No proper (non-EMPTY) connections found
         return false;
+    }
+
+    @Override
+    public List<CargoCube> getCargoCubes(){
+        List<CargoCube> cargoCubes = new ArrayList<>();
+
+        for(Storage storage: this.getStorages()){
+            for(CargoCube cube: storage.getStockedCubes()){
+                cargoCubes.add(cube);
+            }
+        }
+        return cargoCubes;
+    }
+
+    @Override
+    public int getTotalAvailableBattery(){
+        int result = 0;
+        for(BatteryBox batteryBox: this.getBatteryBoxes()){
+            result= result + batteryBox.getRemainingBatteries();
+        }
+        return result;
     }
 
     // throws an exception if is not allowed to place the component in that position
@@ -722,8 +741,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      *
      * @return A set of cabins that meet the adjacency criterion.
      */
-    public Set<Cabin> cabinWithNeighbors() {
-        Set<Cabin> cabinsWithNeighbors = new HashSet<>();
+    public Set<Coordinates> getCabinCoordinatesWithNeighbors() {
+        Set<Coordinates> cabinsCoordinatesWithNeighbors = new HashSet<>();
 
         for (int i = 0; i < BOARD_DIMENSION; i++) {
             for (int j = 0; j < BOARD_DIMENSION; j++) {
@@ -740,7 +759,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
                         Component neighborComponent = shipMatrix[newX][newY];
                         if (neighborComponent instanceof Cabin && ((Cabin) neighborComponent).hasInhabitants()) {
-                            cabinsWithNeighbors.add((Cabin) currentCabin);
+                            cabinsCoordinatesWithNeighbors.add(new Coordinates(i, j));
                             break;
                         }
                     }
@@ -748,7 +767,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             }
         }
 
-        return cabinsWithNeighbors;
+        return cabinsCoordinatesWithNeighbors;
     }
 
     /**
@@ -806,13 +825,13 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @return The total firepower.
      */
     public double countTotalFirePower(List<Cannon> cannonsToCountFirePower) {
-        Stream<Cannon> singleCannons = cannonsToCountFirePower.stream().filter(cannon -> !(cannon instanceof DoubleCannon));
+        Stream<Cannon> singleCannons = this.getSingleCannons().stream().filter(cannon -> !(cannon instanceof DoubleCannon));
         Stream<DoubleCannon> doubleCannons = cannonsToCountFirePower.stream().filter(cannon -> cannon instanceof DoubleCannon).map(cannon -> (DoubleCannon) cannon);
 
         double singleCannonsFirePower = singleCannons.mapToDouble(cannon -> cannon.getFireDirection() == NORTH ? 1 : 0.5).sum();
         double doubleCannonsFirePower = doubleCannons.mapToDouble(cannon -> cannon.getFireDirection() == NORTH ? 2 : 1).sum();
 
-        return singleCannonsFirePower + doubleCannonsFirePower;
+        return singleCannonsFirePower + doubleCannonsFirePower + getPurpleAlien()*2;
     }
 
     /**
@@ -860,13 +879,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @return The total engine power.
      */
     public int countTotalEnginePower(List<Engine> enginesToCountEnginePower) {
-            return enginesToCountEnginePower.size()*2+getSingleEngines().size();
-//        Stream<Engine> singleEngines = getSingleEngines().stream().filter(engine -> !(engine instanceof DoubleEngine));
-//        Stream<DoubleEngine> doubleEngines = enginesToCountEnginePower.stream().filter(engine -> engine instanceof DoubleEngine).map(engine -> (DoubleEngine) engine);
-//
-//        int totalEnginePower = (int) (singleEngines.count() + 2 * doubleEngines.count());
-//
-//        return totalEnginePower;
+            return enginesToCountEnginePower.size()*2+getSingleEngines().size()+getPurpleAlien()*2;
     }
 
     /**
@@ -1306,6 +1319,22 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
 
         return false; // Non è un alieno
+    }
+
+    public int getPurpleAlien(){
+        for(CrewMember crewMember: getCrewMembers()){
+            if(crewMember == CrewMember.PURPLE_ALIEN)
+                return 1;
+        }
+        return 0;
+    }
+
+    public int getBrownAlien(){
+        for(CrewMember crewMember: getCrewMembers()){
+            if(crewMember == CrewMember.BROWN_ALIEN)
+                return 1;
+        }
+        return 0;
     }
 
     public MainCabin getMainCabin(){

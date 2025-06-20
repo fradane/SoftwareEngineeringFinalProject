@@ -1,11 +1,10 @@
 package it.polimi.ingsw.is25am33.client.model;
 
-import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
@@ -64,7 +63,7 @@ public interface ShipBoardClient {
      *
      * @param gameClientNotifier The game context to set
      */
-    void setGameContext(GameClientNotifier gameClientNotifier);
+    void setGameClientNotifier(GameClientNotifier gameClientNotifier);
 
     /**
      * Sets the focused component
@@ -243,7 +242,7 @@ public interface ShipBoardClient {
      *
      * @return A set of cabins that meet the adjacency criterion
      */
-    Set<Cabin> cabinWithNeighbors();
+    Set<Coordinates> getCabinCoordinatesWithNeighbors();
 
     /**
      * Checks whether there are no incorrectly placed components on the ship
@@ -436,6 +435,8 @@ public interface ShipBoardClient {
      */
     Component releaseFocusedComponent();
 
+    int getTotalAvailableBattery();
+
     void checkPosition(int x, int y);
 
     void setComponentsPerType(Map<Class<?>, List<Component>> componentsPerType);
@@ -463,5 +464,7 @@ public interface ShipBoardClient {
     Set<Coordinates> getCoordinatesOfComponents(List<? extends Component> components);
 
     Map<Class<?>, List<Component>> getComponentsPerType();
+
+    List<CargoCube> getCargoCubes();
 
 }

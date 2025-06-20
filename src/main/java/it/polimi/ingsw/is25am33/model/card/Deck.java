@@ -33,7 +33,7 @@ public class Deck {
     private GameClientNotifier gameClientNotifier;
     private final List<Boolean> isLittleDeckFree = new ArrayList<>(List.of(true, true, true));
 
-    public void setGameContext(GameClientNotifier gameClientNotifier){
+    public void setGameClientNotifier(GameClientNotifier gameClientNotifier){
         this.gameClientNotifier = gameClientNotifier;
     }
 
@@ -92,8 +92,13 @@ public class Deck {
         Collections.shuffle(level1Cards);
         Collections.shuffle(level2Cards);
 
-        littleVisibleDecks.forEach(littleDeck -> composeLittleDecks(level1Cards, level2Cards, littleDeck));
-        composeLittleDecks(level1Cards, level2Cards, littleNotVisibleDeck);
+        try {
+            littleVisibleDecks.forEach(littleDeck -> composeLittleDecks(level1Cards, level2Cards, littleDeck));
+            composeLittleDecks(level1Cards, level2Cards, littleNotVisibleDeck);
+        } catch (NoSuchElementException e) {
+            System.out.println("Not enough cards");
+            throw new NoSuchElementException();
+        }
 
         mapLittleDecksToString();
 
@@ -150,61 +155,38 @@ public class Deck {
 //        cards.addAll(Deck.loadAbandonedStationFromJson());
 //        cards.addAll(Deck.loadFreeSpaceFromJson());
 //        cards.addAll(Deck.loadPiratesFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
+//        cards.addAll(Deck.loadPlanetsFromJson());
+//        cards.addAll(Deck.loadPlanetsFromJson());
+//        cards.addAll(Deck.loadPlanetsFromJson());
+//        cards.addAll(Deck.loadPlanetsFromJson());
+//        cards.addAll(Deck.loadPlanetsFromJson());
+//        cards.addAll(Deck.loadPlanetsFromJson());
+//        cards.addAll(Deck.loadPlanetsFromJson());
 //        cards.addAll(Deck.loadSlaveTradersFromJson());
 //        cards.addAll(Deck.loadSmugglersFromJson());
 //        cards.addAll(Deck.loadStardustFromJson());
 //        cards.addAll(Deck.loadWarFieldFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadStardustFromJson());
-
-
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
 
 
         if (isTestFlight)
             allCards.addAll(cards.stream().filter(AdventureCard::isTestFlightCard).toList());
         else
             allCards.addAll(cards);
-
     }
 
     /**
@@ -248,6 +230,10 @@ public class Deck {
      */
     private static List<AbandonedShip> loadAbandonedShipFromJson() {
         return loadFromJson("AbandonedShip.json", AbandonedShip.class);
+    }
+
+    private static List<Epidemic> loadEpidemicFromJson() {
+        return loadFromJson("Epidemy.json", Epidemic.class);
     }
 
     /**

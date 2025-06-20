@@ -16,6 +16,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -154,6 +155,26 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public void showCurrentRanking() {
         //TODO
+    }
+
+    @Override
+    public void showCrewMembersInfo() {
+
+    }
+
+    @Override
+    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
+
+    }
+
+    @Override
+    public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
+
+    }
+
+    @Override
+    public void showCubes(ShipBoardClient shipboardOf, String nickname) {
+
     }
 
     @Override

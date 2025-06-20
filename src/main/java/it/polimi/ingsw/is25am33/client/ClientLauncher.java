@@ -4,8 +4,21 @@ import java.rmi.RemoteException;
 
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.model.card.ClientPlanets;
+import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
+import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.card.Planet;
+import it.polimi.ingsw.is25am33.model.card.Planets;
+import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
+import it.polimi.ingsw.is25am33.model.component.Cannon;
+import it.polimi.ingsw.is25am33.model.component.Component;
+import it.polimi.ingsw.is25am33.model.component.Shield;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
+import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
+import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 

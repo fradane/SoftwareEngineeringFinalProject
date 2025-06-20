@@ -37,6 +37,10 @@ public class Cabin extends Component{
         inhabitants = new ArrayList<>();
     }
 
+    public String getComponentName() {
+        return "Cabin";
+    }
+
     @Override
     @JsonIgnore
     @NotNull
@@ -44,32 +48,6 @@ public class Cabin extends Component{
         return inhabitants ==  null ?
                 Objects.hash(imageName, getRotation()) :
                 Objects.hash(imageName, inhabitants, getRotation());
-    }
-
-    @Override
-    public String toString() {
-        String north = getConnectors().get(Direction.NORTH) != null
-                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
-                : " ";
-        String south = getConnectors().get(Direction.SOUTH) != null
-                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
-                : " ";
-        String west  = getConnectors().get(Direction.WEST) != null
-                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
-                : " ";
-        String east  = getConnectors().get(Direction.EAST) != null
-                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
-                : " ";
-
-        return String.format("""
-            %s
-            Cabin
-            +---------+
-            |    %s    |
-            | %s     %s |
-            |    %s    |
-            +---------+
-            """, imageName, north, west, east, south);
     }
 
     /**

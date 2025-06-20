@@ -40,32 +40,8 @@ public class BatteryBox extends Component{
         this.remainingBatteries = maxBatteryCapacity;
     }
 
-
-    @Override
-    public String toString() {
-        String north = getConnectors().get(Direction.NORTH) != null
-                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
-                : " ";
-        String south = getConnectors().get(Direction.SOUTH) != null
-                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
-                : " ";
-        String west  = getConnectors().get(Direction.WEST) != null
-                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
-                : " ";
-        String east  = getConnectors().get(Direction.EAST) != null
-                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
-                : " ";
-
-        return String.format("""
-            %s
-            BatteryBox
-            +---------+
-            |    %s    |
-            | %s     %s |
-            |    %s    |
-            +---------+
-            maxBatteryCapacity: %d
-            """, imageName, north, west, east, south,maxBatteryCapacity);
+    public String getComponentName() {
+        return "BatteryBox";
     }
 
     /**

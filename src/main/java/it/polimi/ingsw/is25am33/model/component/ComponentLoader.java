@@ -106,7 +106,7 @@ public class ComponentLoader {
 
 
 
-        //TODO capire se va uncommentato
+        //TODO capire se va uncommentato. Direi di no, ho sempre usato tutte le carte senza uncommentare
         //components.addAll(ComponentLoader.loadMainCabin());
 
         return components;
