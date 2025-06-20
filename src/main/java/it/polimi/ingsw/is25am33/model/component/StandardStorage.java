@@ -30,64 +30,15 @@ public class StandardStorage extends Storage {
         super(connectors, maxCapacity);
     }
 
-    @Override
-    public String toString() {
-        String north = getConnectors().get(Direction.NORTH) != null
-                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
-                : " ";
-        String south = getConnectors().get(Direction.SOUTH) != null
-                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
-                : " ";
-        String west  = getConnectors().get(Direction.WEST) != null
-                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
-                : " ";
-        String east  = getConnectors().get(Direction.EAST) != null
-                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
-                : " ";
-
-        return String.format("""
-            %s
-            StandardStorage
-            +---------+
-            |    %s    |
-            | %s     %s |
-            |    %s    |
-            +---------+
-            MaxCapacity: %d
-            """,imageName, north, west, east, south, getMaxCapacity());
+    public String getComponentName() {
+        return "StandardStorage";
     }
 
-    /**
-     * Adds a {@code CargoCube} to the storage ensuring that only non-red cubes are added. If the storage is full,
-     * it will replace the least valuable cube regardless of value comparison.
-     *
-     * @param cube the {@code CargoCube} to add
-     * @return the {@code CargoCube} that was removed to make space, or null if storage wasn't full
-     *  @throws IllegalArgumentException if the cube is red, as red cubes cannot be stored in standard storage
-     */
-    public CargoCube addCube(CargoCube cube) throws IllegalArgumentException {
+    // Questo metodo permette alle sottoclassi di aggiungere controlli
+    protected void validateCube(CargoCube cube) {
         if (cube == CargoCube.RED) {
             throw new IllegalArgumentException("Red cube in StandardStorage");
         }
-
-        // Se lo storage non è pieno, aggiungi semplicemente il cubo
-        if (!isFull()) {
-            getStockedCubes().add(cube);
-            return null;
-        }
-
-        // Se lo storage è pieno, trova e rimuovi il cubo di valore minore
-        CargoCube leastValuableCube = findLeastValuableCube();
-
-        if (leastValuableCube != null) {
-            getStockedCubes().remove(leastValuableCube);
-            getStockedCubes().add(cube);
-            return leastValuableCube;
-        }
-
-        // Caso teoricamente impossibile se isFull() è true
-        getStockedCubes().add(cube);
-        return null;
     }
 
     @Override

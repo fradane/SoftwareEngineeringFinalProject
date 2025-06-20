@@ -31,31 +31,8 @@ public class DoubleCannon extends Cannon implements Activable {
         super(connectors);
     }
 
-    @Override
-    public String toString() {
-        String north = getConnectors().get(Direction.NORTH) != null
-                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
-                : " ";
-        String south = getConnectors().get(Direction.SOUTH) != null
-                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
-                : " ";
-        String west = getConnectors().get(Direction.WEST) != null
-                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
-                : " ";
-        String east = getConnectors().get(Direction.EAST) != null
-                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
-                : " ";
-
-        return String.format("""
-                %s
-                DoubleCannon
-                +---------+
-                |    %s    |
-                | %s     %s |
-                |    %s    |
-                +---------+
-                fireDirection: %s
-                """,imageName, north, west, east, south, getFireDirection());
+    public String getComponentName() {
+        return "DoubleCannon";
     }
 
     @Override

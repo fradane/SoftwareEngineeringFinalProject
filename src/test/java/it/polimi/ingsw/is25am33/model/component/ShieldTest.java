@@ -78,4 +78,15 @@ class ShieldTest {
 
     }
 
+    @Test
+    void getMainAttribute() {
+        assertEquals("NE", shield.getMainAttribute());
+        shield.rotate();
+        assertEquals("ES", shield.getMainAttribute());
+        shield.rotate();
+        assertEquals("SW", shield.getMainAttribute());
+        shield.rotate();
+        assertEquals("WN", shield.getMainAttribute());
+    }
+
 }

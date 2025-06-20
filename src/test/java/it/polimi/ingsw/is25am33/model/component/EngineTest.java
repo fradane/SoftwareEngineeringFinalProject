@@ -58,4 +58,15 @@ class EngineTest {
         assertEquals(fireDirectionExpected,engine.getFireDirection(), "Wrong FireDirection");
 
     }
+
+    @Test
+    void getMainAttribute() {
+        assertEquals("S", engine.getMainAttribute());
+        engine.rotate();
+        assertEquals("W", engine.getMainAttribute());
+        engine.rotate();
+        assertEquals("N", engine.getMainAttribute());
+        engine.rotate();
+        assertEquals("E", engine.getMainAttribute());
+    }
 }

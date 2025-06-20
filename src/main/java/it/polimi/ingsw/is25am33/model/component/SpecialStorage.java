@@ -29,31 +29,8 @@ public class SpecialStorage extends Storage {
         super(connectors, maxCapacity);
     }
 
-    @Override
-    public String toString() {
-        String north = getConnectors().get(Direction.NORTH) != null
-                ? String.valueOf(getConnectors().get(Direction.NORTH).fromConnectorTypeToValue())
-                : " ";
-        String south = getConnectors().get(Direction.SOUTH) != null
-                ? String.valueOf(getConnectors().get(Direction.SOUTH).fromConnectorTypeToValue())
-                : " ";
-        String west  = getConnectors().get(Direction.WEST) != null
-                ? String.valueOf(getConnectors().get(Direction.WEST).fromConnectorTypeToValue())
-                : " ";
-        String east  = getConnectors().get(Direction.EAST) != null
-                ? String.valueOf(getConnectors().get(Direction.EAST).fromConnectorTypeToValue())
-                : " ";
-
-        return String.format("""
-            %s
-            SpecialStorage
-            +---------+
-            |    %s    |
-            | %s     %s |
-            |    %s    |
-            +---------+
-            MaxCapacity: %d
-            """,imageName, north, west, east, south, getMaxCapacity());
+    public String getComponentName() {
+        return "SpecialStorage";
     }
 
     @Override

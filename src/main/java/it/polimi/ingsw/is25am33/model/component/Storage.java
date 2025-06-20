@@ -79,6 +79,7 @@ public abstract class Storage extends Component {
      */
 
     public CargoCube addCube(CargoCube cube) {
+        validateCube(cube);
         // Se lo storage non è pieno, aggiungi semplicemente il cubo
         if (!isFull()) {
             stockedCubes.add(cube);
@@ -142,4 +143,10 @@ public abstract class Storage extends Component {
     public String getMainAttribute() {
         return maxCapacity-stockedCubes.size()+"";
     }
+
+    // Questo metodo permette alle sottoclassi di aggiungere controlli
+    protected void validateCube(CargoCube cube) {
+        // Nessun controllo di default
+    }
+
 }
