@@ -38,7 +38,7 @@ public class StartViewController extends GuiController{
     }
 
     @Override
-    void showMessage(String message, boolean isPermanent) {
+    public void showMessage(String message, boolean isPermanent) {
 
     }
 

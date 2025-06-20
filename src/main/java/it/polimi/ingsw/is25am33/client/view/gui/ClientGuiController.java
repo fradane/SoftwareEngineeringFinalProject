@@ -22,7 +22,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -30,23 +30,34 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ClientGuiController extends Application implements ClientView {
 
     final ClientModel clientModel;
     final ClientController clientController;
     private static ClientGuiController instance;
-    private Stage primaryStage;
 
     private StartViewController startViewController;
     private MainMenuViewController mainMenuViewController;
     private BuildAndCheckShipBoardController buildAndCheckShipBoardController;
     private CardPhaseController cardPhaseController;
+
+    private final Object loaderLock = new Object();
+
+    // Task queue system for pending operations
+    private final Map<String, Queue<Runnable>> pendingTasks = new HashMap<>();
+    private final Set<String> loadingControllers = new HashSet<>();
+    private final Set<String> processingTasks = new HashSet<>();
+
+    // Controller type constants
+    private static final String START_CONTROLLER = "StartViewController";
+    private static final String MAIN_MENU_CONTROLLER = "MainMenuViewController";
+    private static final String BUILD_SHIPBOARD_CONTROLLER = "BuildAndCheckShipBoardController";
+    private static final String CARD_PHASE_CONTROLLER = "CardPhaseController";
 
     public static ClientGuiController getInstance() {
         return instance;
@@ -55,10 +66,12 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public void start(Stage primaryStage) throws Exception {
         instance = this;
-        this.primaryStage = primaryStage;
+
+        // Initialize task queues
+        initializeTaskQueues();
 
         // Icona per barra del titolo
-        primaryStage.getIcons().add(new javafx.scene.image.Image(
+        primaryStage.getIcons().add(new Image(
                 Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/galaxy_trucker_icon.png"))
         ));
 
@@ -86,6 +99,7 @@ public class ClientGuiController extends Application implements ClientView {
         primaryStage.setScene(scene);
         primaryStage.show();
         primaryStage.setFullScreen(true);
+        primaryStage.setFullScreenExitHint("");
 
         // Carica la schermata iniziale
         loadStartView();
@@ -128,19 +142,8 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public void showPickedComponentAndMenu() {
-        buildAndCheckShipBoardController.showFocusComponent();
-    }
-
-    @Override
     public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
         return null;
-    }
-
-    @Override
-    public void showFirstToEnter() {
-        if (buildAndCheckShipBoardController != null)
-            buildAndCheckShipBoardController.showFirstToEnterButton();
     }
 
     @Override
@@ -154,24 +157,6 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public void showCrewPlacementMenu() {
-        if (buildAndCheckShipBoardController != null)
-            buildAndCheckShipBoardController.showCrewPlacementMenu(false);
-    }
-
-    @Override
-    public void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips) {
-        if (buildAndCheckShipBoardController != null)
-            buildAndCheckShipBoardController.showPrefabShipBoards(prefabShips);
-    }
-
-    @Override
-    public void showInvalidShipBoardMenu() {
-        if (buildAndCheckShipBoardController != null)
-            buildAndCheckShipBoardController.showInvalidComponents();
-    }
-
-    @Override
     public void showValidShipBoardMenu() {
         //TODO
     }
@@ -182,40 +167,29 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {
-        if (buildAndCheckShipBoardController != null)
-            buildAndCheckShipBoardController.showShipParts(shipParts);
-    }
-
-    @Override
     public void showVisitLocationMenu() {
         //TODO
         if (cardPhaseController != null) {
             if (clientModel.getCurrAdventureCard() instanceof ClientAbandonedShip) {
-                cardPhaseController.showAbandonedShipMenu();
+                executeWithController(
+                        CARD_PHASE_CONTROLLER,
+                        () -> cardPhaseController.showAbandonedShipMenu()
+                );
             } else
                 System.err.println("Not AbandonedShip card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
         }
     }
 
     @Override
-    public void showThrowDicesMenu() {
-        //TODO
-    }
-
-    @Override
-    public void showChoosePlanetMenu() {
-        if (cardPhaseController != null)
-            cardPhaseController.showChoosePlanetMenu();
-    }
-
-    @Override
     public void showChooseEnginesMenu() {
         // TODO controllare come viene gestito per altre carte
         if (cardPhaseController != null) {
-            if (clientModel.getCurrAdventureCard() instanceof ClientFreeSpace)
-                cardPhaseController.showFreeSpaceMenu();
-            else
+            if (clientModel.getCurrAdventureCard() instanceof ClientFreeSpace) {
+                executeWithController(
+                        CARD_PHASE_CONTROLLER,
+                        () -> cardPhaseController.showFreeSpaceMenu()
+                );
+            } else
                 System.err.println("Not FreeSpace card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
         }
     }
@@ -225,8 +199,12 @@ public class ClientGuiController extends Application implements ClientView {
         if(cardPhaseController != null) {
             ClientCard card = clientModel.getCurrAdventureCard();
             if (card.hasReward()) {
-                if (card instanceof ClientPirates)
-                    cardPhaseController.showRewardMenu();
+                if (card instanceof ClientPirates) {
+                    executeWithController(
+                            CARD_PHASE_CONTROLLER,
+                            () -> cardPhaseController.showRewardMenu()
+                    );
+                }
             }
         }
 
@@ -237,9 +215,11 @@ public class ClientGuiController extends Application implements ClientView {
         //TODO
         if (cardPhaseController != null) {
             if (clientModel.getCurrAdventureCard() instanceof ClientPirates) {
-                cardPhaseController.showPiratesMenu();
-            }
-            else
+                executeWithController(
+                        CARD_PHASE_CONTROLLER,
+                        () -> cardPhaseController.showPiratesMenu()
+                );
+            } else
                 System.err.println("Not PiratesCard: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
         }
     }
@@ -278,9 +258,12 @@ public class ClientGuiController extends Application implements ClientView {
     public void showStardustMenu() {
         // TODO controllare poi le altre carte
         if (cardPhaseController != null) {
-            if (clientModel.getCurrAdventureCard() instanceof ClientStarDust)
-                cardPhaseController.showStardustMenu();
-            else
+            if (clientModel.getCurrAdventureCard() instanceof ClientStarDust) {
+                executeWithController(
+                        CARD_PHASE_CONTROLLER,
+                        () -> cardPhaseController.showStardustMenu()
+                );
+            } else
                 System.err.println("Not Stardust card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
         }
     }
@@ -300,11 +283,6 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public ClientController getClientController() {
-        return clientController;
-    }
-
-    @Override
     public void showWaitingForPlayers() {}
 
     @Override
@@ -317,23 +295,6 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void cancelInputWaiting() {
-
-    }
-
-    @Override
-    public void showMessage(String message, MessageType type) {
-
-        if (clientModel.getGameState() == null)
-            return;
-
-        switch (clientModel.getGameState()) {
-
-            case BUILD_SHIPBOARD, CHECK_SHIPBOARD:
-                if (buildAndCheckShipBoardController != null) {
-                    buildAndCheckShipBoardController.showMessage(message.split("\n")[0], false);
-                }
-
-        }
 
     }
 
@@ -454,11 +415,6 @@ public class ClientGuiController extends Application implements ClientView {
 
     }
 
-    @Override
-    public ClientModel getClientModel() {
-        return clientModel;
-    }
-
     // TODO
 //    @Override
 //    public void showBuildShipBoardMenu() {
@@ -484,13 +440,10 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showBuildShipBoardMenu() {
-        // if not the first time return
-        if (buildAndCheckShipBoardController != null) return;
-
-        String fxmlPath = "/gui/BuildAndCheckShipBoardView.fxml";
-        Platform.runLater(() ->
-                buildAndCheckShipBoardController = loadView(fxmlPath)
-        );
+        // Only load if not already loaded
+        if (buildAndCheckShipBoardController == null) {
+            Platform.runLater(() -> loadView("/gui/BuildAndCheckShipBoardView.fxml", BUILD_SHIPBOARD_CONTROLLER));
+        }
     }
 
     @Override
@@ -553,108 +506,304 @@ public class ClientGuiController extends Application implements ClientView {
     private Parent currentView;
     private GuiController currentController;
 
-
     public ClientGuiController() throws RemoteException {
         clientModel = new ClientModel();
         clientController = new ClientController(clientModel, new ClientPingPongManager());
     }
 
     /**
-     * Carica una nuova vista nel container principale
-     * @param fxmlPath il percorso del file FXML da caricare
-     * @return il controller della vista caricata
+     * Initialize task queues for all controller types
      */
-    private <T extends GuiController> T loadView(String fxmlPath) {
-        try {
-            // Carica la nuova vista
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent newView = loader.load();
-            T controller = loader.getController();
+    private void initializeTaskQueues() {
+        pendingTasks.put(START_CONTROLLER, new ConcurrentLinkedQueue<>());
+        pendingTasks.put(MAIN_MENU_CONTROLLER, new ConcurrentLinkedQueue<>());
+        pendingTasks.put(BUILD_SHIPBOARD_CONTROLLER, new ConcurrentLinkedQueue<>());
+        pendingTasks.put(CARD_PHASE_CONTROLLER, new ConcurrentLinkedQueue<>());
+    }
 
-            // Sostituisci la vista corrente
-            Platform.runLater(() -> {
-                // Verifica che mainContainer non sia null
+    /**
+     * Loads a view and handles task execution
+     */
+    private <T extends GuiController> void loadView(String fxmlPath, String controllerType) {
+        synchronized (loaderLock) {
+            // Check if already loading this controller
+            if (loadingControllers.contains(controllerType)) {
+                return; // Will be handled by pending tasks
+            }
+
+            // Check if the controller already exists and is the correct type
+            T existingController = getCurrentControllerByType(controllerType);
+            if (existingController != null) {
+                return;
+            }
+
+            // Mark as loading
+            loadingControllers.add(controllerType);
+
+            try {
+                // Load the new view
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+                Parent newView = loader.load();
+                T controller = loader.getController();
+
+                // Verify mainContainer is not null
                 if (mainContainer == null) {
                     System.err.println("Error: mainContainer is null. Cannot load view: " + fxmlPath);
+                    loadingControllers.remove(controllerType);
                     return;
                 }
 
-                // Rimuovi la vista precedente
+                // Remove previous view
                 if (currentView != null) {
                     mainContainer.getChildren().remove(currentView);
                 }
 
-                // Aggiungi la nuova vista
+                // Add new view
                 mainContainer.getChildren().add(newView);
                 currentView = newView;
                 currentController = controller;
-            });
 
-            return controller;
-        } catch (IOException e) {
-            System.err.println("Error loading view: " + fxmlPath);
-            e.printStackTrace();
-            return null;
+                // Update specific controller references
+                updateControllerReference(controller, controllerType);
+
+                // Mark as loaded and process pending tasks
+                loadingControllers.remove(controllerType);
+                processPendingTasks(controllerType);
+
+            } catch (IOException e) {
+                System.err.println("Error loading view: " + fxmlPath);
+                e.printStackTrace();
+                loadingControllers.remove(controllerType);
+            }
         }
     }
 
     /**
-     * Carica la schermata iniziale
+     * Updates the specific controller reference based on type
      */
-    private void loadStartView() {
-        startViewController = loadView("/gui/StartView.fxml");
+    private <T extends GuiController> void updateControllerReference(T controller, String controllerType) {
+        switch (controllerType) {
+            case START_CONTROLLER:
+                startViewController = (StartViewController) controller;
+                break;
+            case MAIN_MENU_CONTROLLER:
+                mainMenuViewController = (MainMenuViewController) controller;
+                break;
+            case BUILD_SHIPBOARD_CONTROLLER:
+                buildAndCheckShipBoardController = (BuildAndCheckShipBoardController) controller;
+                break;
+            case CARD_PHASE_CONTROLLER:
+                cardPhaseController = (CardPhaseController) controller;
+                break;
+        }
     }
 
-    // Metodi per caricare le diverse viste
+    /**
+     * Gets current controller by type
+     */
+    @SuppressWarnings("unchecked")
+    private <T extends GuiController> T getCurrentControllerByType(String controllerType) {
+        return switch (controllerType) {
+            case START_CONTROLLER -> (T) startViewController;
+            case MAIN_MENU_CONTROLLER -> (T) mainMenuViewController;
+            case BUILD_SHIPBOARD_CONTROLLER -> (T) buildAndCheckShipBoardController;
+            case CARD_PHASE_CONTROLLER -> (T) cardPhaseController;
+            default -> null;
+        };
+    }
+
+    /**
+     * Processes all pending tasks for a specific controller type
+     */
+    private void processPendingTasks(String controllerType) {
+        // Mark as processing to prevent new tasks from jumping the queue
+        processingTasks.add(controllerType);
+
+        Queue<Runnable> tasks = pendingTasks.get(controllerType);
+        if (tasks != null) {
+            if (Platform.isFxApplicationThread()) {
+                // Execute tasks sequentially on FX thread
+                Runnable task;
+                while ((task = tasks.poll()) != null) {
+                    try {
+                        task.run();
+                    } catch (Exception e) {
+                        System.err.println("Error executing pending task: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+                // Mark as done processing
+                processingTasks.remove(controllerType);
+            } else {
+                // Not on FX thread, schedule sequential processing
+                Platform.runLater(() -> {
+                    Runnable task;
+                    while ((task = tasks.poll()) != null) {
+                        try {
+                            task.run();
+                        } catch (Exception e) {
+                            System.err.println("Error executing pending task: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                    // Mark as done processing
+                    processingTasks.remove(controllerType);
+                });
+            }
+        } else {
+            // No tasks to process
+            processingTasks.remove(controllerType);
+        }
+    }
+
+    /**
+     * Checks if a controller is ready and not processing pending tasks
+     */
+    private boolean isControllerReadyForImmediateExecution(String controllerType) {
+        return getCurrentControllerByType(controllerType) != null &&
+                !processingTasks.contains(controllerType) &&
+                !loadingControllers.contains(controllerType);
+    }
+
+    /**
+     * Executes a task with a specific controller, queueing if necessary
+     */
+    private void executeWithController(String controllerType, Runnable task) {
+
+        String fxmlPath = "";
+
+        switch (controllerType) {
+            case START_CONTROLLER -> fxmlPath = "/gui/StartView.fxml";
+            case MAIN_MENU_CONTROLLER -> fxmlPath = "/gui/MainMenuView.fxml";
+            case BUILD_SHIPBOARD_CONTROLLER -> fxmlPath = "/gui/BuildShipBoardView.fxml";
+            case CARD_PHASE_CONTROLLER ->  fxmlPath = "/gui/CardPhaseView.fxml";
+        }
+
+        synchronized (loaderLock) {
+            // Check if the controller is ready for immediate execution
+            if (isControllerReadyForImmediateExecution(controllerType)) {
+                // Controller exists and no pending operations, execute immediately
+                if (Platform.isFxApplicationThread()) {
+                    task.run();
+                } else {
+                    Platform.runLater(task);
+                }
+                return;
+            }
+
+            // Controller doesn't exist, OR we're processing pending tasks, queue the task
+            Queue<Runnable> tasks = pendingTasks.get(controllerType);
+            if (tasks != null) {
+                tasks.offer(task);
+            }
+
+            // Start loading if not already loading
+            if (!loadingControllers.contains(controllerType)) {
+                if (Platform.isFxApplicationThread()) {
+                    loadView(fxmlPath, controllerType);
+                } else {
+                    String finalFxmlPath = fxmlPath;
+                    Platform.runLater(() -> loadView(finalFxmlPath, controllerType));
+                }
+            }
+        }
+    }
+
+    // Updated methods using the task queue system
+
+    @Override
+    public void showCrewPlacementMenu() {
+        executeWithController(
+                BUILD_SHIPBOARD_CONTROLLER,
+                () -> buildAndCheckShipBoardController.showCrewPlacementMenu(false)
+        );
+    }
+
+    @Override
+    public void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips) {
+        executeWithController(
+                BUILD_SHIPBOARD_CONTROLLER,
+                () -> buildAndCheckShipBoardController.showPrefabShipBoards(prefabShips)
+        );
+    }
+
+    @Override
+    public void showInvalidShipBoardMenu() {
+        executeWithController(
+                BUILD_SHIPBOARD_CONTROLLER,
+                () -> buildAndCheckShipBoardController.showInvalidComponents()
+        );
+    }
+
+    @Override
+    public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {
+        executeWithController(
+                BUILD_SHIPBOARD_CONTROLLER,
+                () -> buildAndCheckShipBoardController.showShipParts(shipParts)
+        );
+    }
+
+    @Override
+    public void showThrowDicesMenu() {
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.showThrowDicesMenu()
+        );
+    }
+
+    @Override
+    public void showChoosePlanetMenu() {
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.showChoosePlanetMenu()
+        );
+    }
+
+    @Override
+    public void showPickedComponentAndMenu() {
+        if (buildAndCheckShipBoardController != null) {
+            buildAndCheckShipBoardController.showFocusComponent();
+        } else {
+            executeWithController(
+                    BUILD_SHIPBOARD_CONTROLLER,
+                    () -> buildAndCheckShipBoardController.showFocusComponent()
+            );
+        }
+    }
+
+    @Override
+    public void showFirstToEnter() {
+        if (buildAndCheckShipBoardController != null) {
+            buildAndCheckShipBoardController.showFirstToEnterButton();
+        } else {
+            executeWithController(
+                    BUILD_SHIPBOARD_CONTROLLER,
+                    () -> buildAndCheckShipBoardController.showFirstToEnterButton()
+            );
+        }
+    }
 
     @Override
     public void showMainMenu() {
-        Platform.runLater(() -> {
-            mainMenuViewController = loadView("/gui/MainMenuView.fxml");
-            if (mainMenuViewController != null) {
-                mainMenuViewController.setAvailableGames();
-            }
-        });
+        executeWithController(
+                MAIN_MENU_CONTROLLER,
+                () -> mainMenuViewController.setAvailableGames()
+        );
     }
 
     @Override
     public void showNewGameState() {
         if (clientModel.getGameState() == GameState.CREATE_DECK) {
-            // Prepara la transizione se necessario
-            if (buildAndCheckShipBoardController != null) {
-                buildAndCheckShipBoardController.prepareForPhaseTransition();
-            }
-
-            Platform.runLater(() -> {
-                cardPhaseController = loadView("/gui/CardPhaseView.fxml");
-
-                // Imposta fullscreen dopo aver caricato la vista
-                primaryStage.setFullScreen(true);
-                primaryStage.setMaximized(true);
-            });
+            Platform.runLater(() -> loadView("/gui/CardPhaseView.fxml", CARD_PHASE_CONTROLLER));
         }
     }
 
     @Override
     public void askNickname() {
-        if (startViewController != null) {
-            startViewController.askNickname();
-        } else {
-            loadStartView();
-            startViewController.askNickname();
-        }
-    }
-
-    // Un nuovo metodo per accedere al ModelFxAdapter tra i controller
-    public ModelFxAdapter getSharedModelFxAdapter() {
-        if (buildAndCheckShipBoardController != null && buildAndCheckShipBoardController.getModelFxAdapter() != null) {
-            return buildAndCheckShipBoardController.getModelFxAdapter();
-        } else if (cardPhaseController != null && cardPhaseController.getModelFxAdapter() != null) {
-            return cardPhaseController.getModelFxAdapter();
-        }
-
-        // Se non esiste, creane uno nuovo
-        return new ModelFxAdapter(clientModel);
+        executeWithController(
+                START_CONTROLLER,
+                () -> startViewController.askNickname()
+        );
     }
 
     @Override
@@ -663,22 +812,59 @@ public class ClientGuiController extends Application implements ClientView {
             case "Color already in use", "GameModel already started":
                 if (mainMenuViewController != null) {
                     mainMenuViewController.showMessage(errorMessage, false);
+                } else {
+                    executeWithController(
+                            MAIN_MENU_CONTROLLER,
+                            () -> mainMenuViewController.showMessage(errorMessage, false)
+                    );
                 }
                 break;
             default:
                 if (startViewController != null) {
                     startViewController.showServerError(errorMessage);
                 } else {
-                    // Fallback: mostra un alert generico
-                    Platform.runLater(() -> {
-                        Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setTitle("Error");
-                        alert.setHeaderText(null);
-                        alert.setContentText(errorMessage);
-                        alert.showAndWait();
-                    });
+                    executeWithController(
+                            START_CONTROLLER,
+                            () -> startViewController.showServerError(errorMessage)
+                    );
                 }
         }
+    }
+
+    @Override
+    public void showMessage(String message, MessageType type) {
+        if (clientModel.getGameState() == null)
+            return;
+
+        switch (clientModel.getGameState()) {
+            case BUILD_SHIPBOARD, CHECK_SHIPBOARD:
+                if (buildAndCheckShipBoardController != null) {
+                    buildAndCheckShipBoardController.showMessage(message.split("\n")[0], false);
+                } else {
+                    executeWithController(
+                            BUILD_SHIPBOARD_CONTROLLER,
+                            () -> buildAndCheckShipBoardController.showMessage(message.split("\n")[0], false)
+                    );
+                }
+                break;
+        }
+    }
+
+    /**
+     * Load the start view
+     */
+    private void loadStartView() {
+        Platform.runLater(() -> loadView("/gui/StartView.fxml", START_CONTROLLER));
+    }
+
+    @Override
+    public ClientController getClientController() {
+        return clientController;
+    }
+
+    @Override
+    public ClientModel getClientModel() {
+        return clientModel;
     }
 
 }

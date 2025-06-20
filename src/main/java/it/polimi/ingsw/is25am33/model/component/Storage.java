@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a storage component, extending the {@code Component} class.
@@ -76,7 +78,6 @@ public abstract class Storage extends Component {
      * @param cube the {@code CargoCube} to add
      * @return the {@code CargoCube} that was removed to make space, or null if storage wasn't full
      */
-
     public CargoCube addCube(CargoCube cube) {
         // Se lo storage non è pieno, aggiungi semplicemente il cubo
         if (!isFull()) {
@@ -112,7 +113,7 @@ public abstract class Storage extends Component {
         // Ordina i cubi per valore e prendi il primo (meno prezioso)
         List<CargoCube> sortedCubes = new ArrayList<>(stockedCubes);
         sortedCubes.sort(CargoCube.byValue);
-        return sortedCubes.get(0);
+        return sortedCubes.getFirst();
     }
 
     /**
@@ -187,5 +188,14 @@ public abstract class Storage extends Component {
     @JsonIgnore
     public String getMainAttribute() {
         return Integer.toString(maxCapacity - stockedCubes.size());
+    }
+
+    @Override
+    @JsonIgnore
+    @NotNull
+    public Integer getGuiHash() {
+        return stockedCubes == null ?
+                Objects.hash(imageName, getRotation()) :
+                Objects.hash(imageName, stockedCubes, getRotation());
     }
 }

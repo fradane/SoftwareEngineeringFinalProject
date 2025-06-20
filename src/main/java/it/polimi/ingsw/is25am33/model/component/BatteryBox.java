@@ -3,9 +3,11 @@ package it.polimi.ingsw.is25am33.model.component;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -123,4 +125,10 @@ public class BatteryBox extends Component{
         return Integer.toString(remainingBatteries);
     }
 
+    @Override
+    @NotNull
+    @JsonIgnore
+    public Integer getGuiHash() {
+        return Objects.hash(imageName, remainingBatteries, getRotation());
+    }
 }

@@ -4,7 +4,6 @@ import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -12,6 +11,9 @@ import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.Timer;
+import java.util.TimerTask;
+import javafx.application.Platform;
 
 public class ClientModel {
 
@@ -28,14 +30,20 @@ public class ClientModel {
     private Hourglass hourglass;
     private ModelFxAdapter modelFxAdapter;
     private List<PrefabShipInfo> availablePrefabShips = new ArrayList<>();
+    private final Object modelFxAdapterLock = new Object();
 
     public void setModelFxAdapter(ModelFxAdapter modelFxAdapter) {
-        this.modelFxAdapter = modelFxAdapter;
+        synchronized (modelFxAdapterLock) {
+            this.modelFxAdapter = modelFxAdapter;
+            modelFxAdapterLock.notifyAll();
+        }
     }
 
     public void refreshShipBoardOf(String nickname) {
-        if (modelFxAdapter != null)
-            modelFxAdapter.refreshShipBoardOf(nickname);
+        synchronized (modelFxAdapterLock) {
+            if (modelFxAdapter != null)
+                modelFxAdapter.refreshShipBoardOf(nickname);
+        }
     }
 
     public List<PrefabShipInfo> getAvailablePrefabShips() {
@@ -90,10 +98,44 @@ public class ClientModel {
         this.gameState = gameState;
     }
 
+    /**
+     * Sets the current adventure card for the client model.
+     * If the GUI adapter (modelFxAdapter) is available and ready (i.e., isCardAdapter returns true),
+     * it schedules an asynchronous check using a Timer to update the GUI once the adapter is ready.
+     * <p>
+     *     This ensures that the GUI update is non-blocking and runs only when the adapter is in the correct state.
+     * </p>
+     *
+     * @param currAdventureCard the new current adventure card to be set
+     */
     public void setCurrAdventureCard(ClientCard currAdventureCard) {
         this.currAdventureCard = currAdventureCard;
-        if (modelFxAdapter != null)
-            modelFxAdapter.refreshCurrAdventureCard();
+        //System.err.println("Setting current Adventure Card: " + currAdventureCard);
+
+        // Synchronize on the lock to ensure thread-safe access to modelFxAdapter
+        synchronized (modelFxAdapterLock) {
+            if (modelFxAdapter != null) {
+                //System.err.println("ModelFxAdapter not null");
+
+                // Create a Timer to periodically check if the adapter is ready
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        synchronized (modelFxAdapterLock) {
+                            // When the adapter becomes ready, update the GUI and cancel the timer
+                            if (modelFxAdapter != null && modelFxAdapter.isCardAdapter()) {
+                                Platform.runLater(() -> {
+                                    modelFxAdapter.refreshCurrAdventureCard();
+                                    //System.err.println("refreshing current Adventure Card");
+                                });
+                                timer.cancel();
+                            }
+                        }
+                    }
+                }, 0, 100); // Check every 100 ms
+            }
+        }
     }
 
     public ClientCard getCurrAdventureCard() {
@@ -205,12 +247,16 @@ public class ClientModel {
     }
 
     public void refreshVisibleComponents() {
-        if (modelFxAdapter != null)
-            modelFxAdapter.refreshVisibleComponents();
+        synchronized (modelFxAdapterLock) {
+            if (modelFxAdapter != null)
+                modelFxAdapter.refreshVisibleComponents();
+        }
     }
 
     public void refreshRanking() {
-        if (modelFxAdapter != null)
-            modelFxAdapter.refreshRanking();
+        synchronized (modelFxAdapterLock) {
+            if (modelFxAdapter != null)
+                modelFxAdapter.refreshRanking();
+        }
     }
 }

@@ -17,7 +17,7 @@ public abstract class GuiController {
         GuiController.clientModel = clientModel;
     }
 
-    abstract void showMessage(String message, boolean isPermanent);
+    public abstract void showMessage(String message, boolean isPermanent);
 
     public void showPermanentMessage(String message, Label messageLabel) {
         messageLabel.getTransforms().clear();

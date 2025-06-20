@@ -165,8 +165,9 @@ public abstract class Component implements Serializable {
      * @return the hash code of the attribute that might have changed or -1 by default
      */
     @NotNull
+    @JsonIgnore
     public Integer getGuiHash() {
-        return -1;
+        return Objects.hash(imageName, rotation);
     }
 
     @JsonIgnore

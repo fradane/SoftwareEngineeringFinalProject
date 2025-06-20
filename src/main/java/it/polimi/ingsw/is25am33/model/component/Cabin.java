@@ -38,8 +38,12 @@ public class Cabin extends Component{
     }
 
     @Override
-    public @NotNull Integer getGuiHash() {
-        return inhabitants ==  null ? -1 : Objects.hash(inhabitants);
+    @JsonIgnore
+    @NotNull
+    public Integer getGuiHash() {
+        return inhabitants ==  null ?
+                Objects.hash(imageName, getRotation()) :
+                Objects.hash(imageName, inhabitants, getRotation());
     }
 
     @Override

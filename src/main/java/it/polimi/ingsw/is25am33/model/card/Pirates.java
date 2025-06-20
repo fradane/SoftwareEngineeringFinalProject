@@ -137,7 +137,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
     }
 
     private void currPlayerChoseCannonsToActivate(List<Coordinates> chosenDoubleCannonsCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
-        Player currentPlayer=gameModel.getCurrPlayer();
+        Player currentPlayer = gameModel.getCurrPlayer();
         List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
         List<Cannon> chosenDoubleCannons = new ArrayList<>();
 

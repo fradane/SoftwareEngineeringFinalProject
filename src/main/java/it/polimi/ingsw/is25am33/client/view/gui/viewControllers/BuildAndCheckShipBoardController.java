@@ -459,8 +459,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     public void showCrewPlacementMenu(boolean isPurpleSubmitted) {
 
-        confirmCrewMemberButton.setVisible(true);
-        confirmCrewMemberButton.setManaged(true);
+        Platform.runLater(() -> {
+            confirmCrewMemberButton.setVisible(true);
+            confirmCrewMemberButton.setManaged(true);
+        });
 
         ShipBoardClient shipBoard = clientModel.getMyShipboard();
         this.cabinsWithLifeSupport.putAll(shipBoard.getCabinsWithLifeSupport());
@@ -583,14 +585,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             System.err.println("Error loading boards: " + e.getMessage());
         }
 
-        // Prova a utilizzare un ModelFxAdapter condiviso
-        ClientGuiController guiController = ClientGuiController.getInstance();
-        if (guiController != null) {
-            modelFxAdapter = guiController.getSharedModelFxAdapter();
-        } else {
-            // Fallback: crea un nuovo adapter
-            modelFxAdapter = new ModelFxAdapter(clientModel);
-        }
+        modelFxAdapter = new ModelFxAdapter(clientModel, false);
 
         // Binding e setup
         this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
@@ -653,8 +648,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             }
 
             // Mostra il menu
-            prefabShipsMenu.setVisible(true);
-            prefabShipsMenu.setManaged(true);
+            Platform.runLater(() -> {
+                prefabShipsMenu.setVisible(true);
+                prefabShipsMenu.setManaged(true);
+            });
         });
     }
 
@@ -670,31 +667,31 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         });
     }
 
-    public void prepareForPhaseTransition() {
-        // Pulisci eventuali effetti o evidenziazioni
-        if (this.boardsController != null) {
-            this.boardsController.removeHighlightColor();
-        }
-
-        // Nascondi elementi dell'interfaccia che sono specifici di questa fase
-        Platform.runLater(() -> {
-            if (visibleComponentsPanel != null) visibleComponentsPanel.setVisible(false);
-            if (componentsBoxV != null) componentsBoxV.setVisible(false);
-            if (componentsBoxH != null) componentsBoxH.setVisible(false);
-            if (componentControlsPanel != null) componentControlsPanel.setVisible(false);
-            if (littleDeckFlowPane != null) {
-                littleDeckFlowPane.setVisible(false);
-                littleDeckFlowPane.setManaged(false);
-            }
-            if (pawnButtonPane != null) {
-                pawnButtonPane.setVisible(false);
-                pawnButtonPane.setManaged(false);
-            }
-            if (prefabShipsMenu != null) {
-                prefabShipsMenu.setVisible(false);
-                prefabShipsMenu.setManaged(false);
-            }
-            if (bottomBox != null) bottomBox.setVisible(false);
-        });
-    }
+//    public void prepareForPhaseTransition() {
+//        // Pulisci eventuali effetti o evidenziazioni
+//        if (this.boardsController != null) {
+//            this.boardsController.removeHighlightColor();
+//        }
+//
+//        // Nascondi elementi dell'interfaccia che sono specifici di questa fase
+//        Platform.runLater(() -> {
+//            if (visibleComponentsPanel != null) visibleComponentsPanel.setVisible(false);
+//            if (componentsBoxV != null) componentsBoxV.setVisible(false);
+//            if (componentsBoxH != null) componentsBoxH.setVisible(false);
+//            if (componentControlsPanel != null) componentControlsPanel.setVisible(false);
+//            if (littleDeckFlowPane != null) {
+//                littleDeckFlowPane.setVisible(false);
+//                littleDeckFlowPane.setManaged(false);
+//            }
+//            if (pawnButtonPane != null) {
+//                pawnButtonPane.setVisible(false);
+//                pawnButtonPane.setManaged(false);
+//            }
+//            if (prefabShipsMenu != null) {
+//                prefabShipsMenu.setVisible(false);
+//                prefabShipsMenu.setManaged(false);
+//            }
+//            if (bottomBox != null) bottomBox.setVisible(false);
+//        });
+//    }
 }
