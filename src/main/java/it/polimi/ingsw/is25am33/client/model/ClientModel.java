@@ -4,7 +4,6 @@ import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
@@ -55,7 +54,7 @@ public class ClientModel {
     }
 
     public void eliminatePlayer(String nickname) {
-        playerClientData.get(nickname).setOut(true);
+        playerClientData.get(nickname).setLanded(true);
     }
 
     public void setMyNickname(String myNickname) {
@@ -125,7 +124,7 @@ public class ClientModel {
 
         playerClientData.keySet()
                 .stream()
-                .filter(player -> !playerClientData.get(player).isOut())
+                .filter(player -> !playerClientData.get(player).isLanded())
                 .forEach(nickname -> ranking.put(
                         playerClientData.get(nickname).getColor(),
                         playerClientData.get(nickname).getFlyingBoardPosition()
@@ -135,18 +134,36 @@ public class ClientModel {
     }
 
     /**
-     * Retrieves a sorted list of player nicknames based on their flying board position in ascending order,
-     * with the list then being reversed to get a descending order ranking.
+     * Retrieves a sorted list of player nicknames based on their flying board position.
+     * Players still flying are sorted in descending order by position.
+     * Landed players are placed at the end of the list.
      *
-     * @return a list of player nicknames representing the sorted ranking in descending order of their flying board position.
+     * @return a list of all player nicknames with flying players first (sorted by position)
+     *         and landed players last
      */
     public List<String> getSortedRanking() {
-        return playerClientData.keySet()
+        // Separate players into two groups
+        List<String> flyingPlayers = playerClientData.keySet()
                 .stream()
-                .filter(player -> !playerClientData.get(player).isOut())
-                .sorted((a, b) -> Integer.compare(playerClientData.get(a).getFlyingBoardPosition(), playerClientData.get(b).getFlyingBoardPosition()))
+                .filter(player -> !playerClientData.get(player).isLanded())
+                .sorted((a, b) -> Integer.compare(
+                        playerClientData.get(a).getFlyingBoardPosition(),
+                        playerClientData.get(b).getFlyingBoardPosition()
+                ))
                 .toList()
                 .reversed();
+
+        List<String> landedPlayers = playerClientData.keySet()
+                .stream()
+                .filter(player -> playerClientData.get(player).isLanded())
+                .toList();
+
+        // Combine the lists: flying players first, then landed players
+        List<String> combinedRanking = new ArrayList<>();
+        combinedRanking.addAll(flyingPlayers);
+        combinedRanking.addAll(landedPlayers);
+
+        return combinedRanking;
     }
 
     public void setCurrCardState(CardState currCardState) {
@@ -196,7 +213,7 @@ public class ClientModel {
     public Set<String> getEliminatedPlayers() {
         return playerClientData.keySet()
                 .stream()
-                .filter(player -> playerClientData.get(player).isOut())
+                .filter(player -> playerClientData.get(player).isLanded())
                 .collect(Collectors.toSet());
     }
 

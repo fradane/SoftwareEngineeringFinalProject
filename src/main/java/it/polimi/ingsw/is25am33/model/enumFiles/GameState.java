@@ -107,7 +107,7 @@ public enum GameState implements Serializable {
 
             // check if there are any human members alive
             gameModel.getPlayers().forEach((_, player) -> {
-                if (gameModel.getCurrPlayer().getPersonalBoard()
+                if (player.getPersonalBoard()
                         .getCrewMembers()
                         .stream()
                         .noneMatch(crewMember -> crewMember.equals(CrewMember.HUMAN))
@@ -115,6 +115,8 @@ public enum GameState implements Serializable {
                     gameModel.getFlyingBoard().addOutPlayer(player, false);
                 }
             });
+            //TODO forse bisogna aggiungere il fatto che se non ci sono più engine si esce dal gioco
+            //TODO aggiungere il controllo che se tutti i giocatori sono stati rimossi allora bisogna passare alla fine del gioco
 
         }
 

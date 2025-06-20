@@ -281,6 +281,9 @@ public class GameModel {
             x.put(player, player.getPersonalBoard().countExposed());
         });
 
+        if(x.isEmpty()) // tutti i giocatori hanno fatto early landing
+            return Collections.emptyList();
+
         Integer minValue = Collections.min(x.values());
 
         return x.keySet().stream().filter(player -> x.get(player).equals(minValue)).toList();
@@ -288,48 +291,66 @@ public class GameModel {
     }
 
     public void calculatePlayersCredits() {
+        System.out.println("=== INIZIO CALCOLO CREDITI GIOCATORI ===");
 
         players.values().forEach(player -> {
+            System.out.println("\n--- Calcolo crediti per: " + player.getNickname() + " ---");
 
             int credits = player.getOwnedCredits();
+            System.out.println("Crediti iniziali: " + credits);
 
             // gestisce già il fatto che un player potrebbe essere earlyLanded
-            credits += flyingBoard.getCreditsForPosition(player);
+            int positionCredits = flyingBoard.getCreditsForPosition(player);
+            credits += positionCredits;
+            System.out.println("Crediti da posizione: +" + positionCredits + " (totale: " + credits + ")");
 
             // gestisce già il fatto che un player potrebbe essere earlyLanded
-            if (getPlayerWithPrettiestShip().contains(player))
-                credits += flyingBoard.getPrettiestShipReward();
+            List<Player> prettiestShipPlayers = getPlayerWithPrettiestShip();
+            boolean hasPrettiestShip = prettiestShipPlayers.contains(player);
+            if (hasPrettiestShip) {
+                int prettiestShipReward = flyingBoard.getPrettiestShipReward();
+                credits += prettiestShipReward;
+                System.out.println("Crediti nave più bella: +" + prettiestShipReward + " (totale: " + credits + ")");
+            } else {
+                System.out.println("Crediti nave più bella: +0 (non ha la nave più bella)");
+            }
 
             int creditsForStockedCubes = player.getPersonalBoard().getStorages()
                     .stream()
                     .flatMap(storage -> storage.getStockedCubes().stream())
                     .mapToInt(stockedCube -> {
-                        switch (stockedCube) {
-                            case BLUE -> {
-                                return 1;
-                            }
-                            case GREEN -> {
-                                return 2;
-                            }
-                            case YELLOW -> {
-                                return 3;
-                            }
-                            case RED -> {
-                                return 4;
-                            }
-                            default -> {
-                                return 0;
-                            }
-                        }
+                        int cubeValue = switch (stockedCube) {
+                            case BLUE -> 1;
+                            case GREEN -> 2;
+                            case YELLOW -> 3;
+                            case RED -> 4;
+                            default -> 0;
+                        };
+                        System.out.println("  Cubo " + stockedCube + ": " + cubeValue + " crediti");
+                        return cubeValue;
                     }).sum();
 
-            credits += player.isEarlyLanded() ? creditsForStockedCubes/2 : creditsForStockedCubes;
+            System.out.println("Crediti totali da cubi stockati: " + creditsForStockedCubes);
 
-            credits -= player.getPersonalBoard().getNotActiveComponents().size();
+            boolean isEarlyLanded = player.isEarlyLanded();
+            int finalCubeCredits = isEarlyLanded ? (int) Math.ceil(creditsForStockedCubes/2.0) : creditsForStockedCubes;
+            credits += finalCubeCredits;
+
+            if (isEarlyLanded) {
+                System.out.println("Player è early landed - crediti cubi dimezzati: " + finalCubeCredits + " (totale: " + credits + ")");
+            } else {
+                System.out.println("Crediti da cubi: +" + finalCubeCredits + " (totale: " + credits + ")");
+            }
+
+            int notActiveComponentsPenalty = player.getPersonalBoard().getNotActiveComponents().size();
+            credits -= notActiveComponentsPenalty;
+            System.out.println("Penalità componenti non attivi: -" + notActiveComponentsPenalty + " (totale: " + credits + ")");
 
             player.setOwnedCredits(credits);
+            System.out.println("CREDITI FINALI per " + player.getNickname() + ": " + credits);
         });
 
+        System.out.println("\n=== FINE CALCOLO CREDITI GIOCATORI ===");
     }
 
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController){
@@ -549,12 +570,12 @@ public class GameModel {
     public List<PlayerFinalData> getRankingWithPlayerFinalData() {
 
 
-        List<PlayerFinalData> finalRankingWithPlayerFinalData = currRanking.stream().map(player -> {
+        List<PlayerFinalData> finalRankingWithPlayerFinalData = players.values().stream().map(player -> {
             int credits = player.getOwnedCredits();
             boolean isEarlyLanded = player.isEarlyLanded();
             List<CargoCube> allOwnedCubes = player.getPersonalBoard().getStorages().stream().flatMap(storage -> storage.getStockedCubes().stream()).collect(Collectors.toList());
             int lostComponents = player.getPersonalBoard().getNotActiveComponents().size();
-            return new PlayerFinalData(credits, isEarlyLanded, allOwnedCubes, lostComponents);
+            return new PlayerFinalData(player.getNickname(), credits, isEarlyLanded, allOwnedCubes, lostComponents);
         }).collect(Collectors.toList());
 
         return finalRankingWithPlayerFinalData;

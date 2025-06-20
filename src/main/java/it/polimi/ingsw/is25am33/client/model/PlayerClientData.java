@@ -19,7 +19,7 @@ public class PlayerClientData {
 
     private String nickname;
     private int credits;
-    private boolean isOut;
+    private boolean isLanded;
     private int flyingBoardPosition;
     private ShipBoardClient shipBoard;
     private PlayerColor color;
@@ -73,12 +73,12 @@ public class PlayerClientData {
         this.shipBoard = shipBoard;
     }
 
-    public void setOut(boolean isOut) {
-        this.isOut = isOut;
+    public void setLanded(boolean isLanded) {
+        this.isLanded = isLanded;
     }
 
-    public boolean isOut() {
-        return isOut;
+    public boolean isLanded() {
+        return isLanded;
     }
 
 }

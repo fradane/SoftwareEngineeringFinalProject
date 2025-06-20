@@ -118,12 +118,11 @@ public class ShipBoardTest {
         // La posizione sarebbe cabinX-1, cabinY (sopra la cabina)
         shipBoard.placeComponentWithFocus(cabinX-1, cabinY);
 
+        shipBoard.checkShipBoard();
+
         // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
         Set<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
         assertTrue(incorrectCoords.contains(new Coordinates(cabinX-1, cabinY)));
-
-        // Inoltre, verifico che sia marcato come errato per la direzione sbagliata
-        assertTrue(shipBoard.isEngineDirectionWrong(engine));
     }
 
     @Test
@@ -141,7 +140,7 @@ public class ShipBoardTest {
                 () -> shipBoard.placeComponentWithFocus(cabinX-1, cabinY));
 
         // Verifico che l'eccezione sia quella prevista per connettori incompatibili
-        assertEquals("Not connected to the ship", exception.getMessage());
+        assertEquals("Not connected to the ship or connected only via empty connector", exception.getMessage());
     }
 
     @Test
@@ -174,6 +173,8 @@ public class ShipBoardTest {
 
         // La posizione sarebbe cabinX-1, cabinY
         shipBoard.placeComponentWithFocus(cabinX-1, cabinY);
+
+        shipBoard.checkShipBoard();
 
         // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
         Set<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
@@ -253,12 +254,12 @@ public class ShipBoardTest {
     void testIsEngineDirectionWrong() {
         // Notice: Engine constructor sets fireDirection= SOUTH by default
         Engine eng = new Engine(createSimpleConnectors());
-        assertTrue(shipBoard.isEngineDirectionWrong(eng)); // because it's SOUTH
+        assertFalse(shipBoard.isEngineDirectionWrong(eng)); // because it's SOUTH
 
         eng.rotate();
         eng.rotate();
         //eng.rotateFireDirection();
-        assertFalse(shipBoard.isEngineDirectionWrong(eng));
+        assertTrue(shipBoard.isEngineDirectionWrong(eng));
     }
 
     @Test
@@ -740,7 +741,12 @@ public class ShipBoardTest {
         Engine e = new Engine(createSimpleConnectors());             // single => +1
         DoubleEngine de = new DoubleEngine(createSimpleConnectors()); // double => +2
 
-        int total = shipBoard.countTotalEnginePower(List.of(e, de));
+        shipBoard.focusedComponent = e;
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
+        shipBoard.focusedComponent = de;
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
+
+        int total = shipBoard.countTotalEnginePower(List.of(de));
         assertEquals(3, total);
     }
 
@@ -749,6 +755,11 @@ public class ShipBoardTest {
     void testCountSingleEnginePower() {
         Engine e = new Engine(createSimpleConnectors());
         DoubleEngine de = new DoubleEngine(createSimpleConnectors());
+
+        shipBoard.focusedComponent = e;
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
+        shipBoard.focusedComponent = de;
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
 
         // We'll pass all engines
         int count = shipBoard.countSingleEnginePower(List.of(e, de));
@@ -924,6 +935,8 @@ public class ShipBoardTest {
         // Il posizionamento dovrebbe essere possibile ma il componente sarà marcato come errato
         shipBoard.placeComponentWithFocus(adjacentX, adjacentY + 1);
 
+        shipBoard.checkShipBoard();
+
         // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
         Set<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
         assertTrue(incorrectCoords.contains(new Coordinates(adjacentX, adjacentY + 1)));
@@ -951,6 +964,8 @@ public class ShipBoardTest {
         // Il posizionamento dovrebbe essere possibile ma il componente sarà marcato come errato
         shipBoard.placeComponentWithFocus(adjacentX - 1, adjacentY);
 
+        shipBoard.checkShipBoard();
+
         // Verifico che il posizionamento sia avvenuto ma che sia marcato come errato
         Set<Coordinates> incorrectCoords = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
         assertTrue(incorrectCoords.contains(new Coordinates(adjacentX - 1, adjacentY)));
@@ -976,7 +991,7 @@ public class ShipBoardTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> shipBoard.placeComponentWithFocus(farX, farY));
 
-        assertEquals("Not connected to the ship", exception.getMessage());
+        assertEquals("Not connected to the ship or connected only via empty connector", exception.getMessage());
     }
 
     @Test

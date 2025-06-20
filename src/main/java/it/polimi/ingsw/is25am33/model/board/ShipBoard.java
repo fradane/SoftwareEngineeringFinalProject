@@ -738,6 +738,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
                         if (!isValidPosition(newX, newY)) continue;
 
+                        //TODO controllare che le cabine siano collegate da almeno un connettore
+
                         Component neighborComponent = shipMatrix[newX][newY];
                         if (neighborComponent instanceof Cabin && ((Cabin) neighborComponent).hasInhabitants()) {
                             cabinsCoordinatesWithNeighbors.add(new Coordinates(i, j));
@@ -859,8 +861,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @param enginesToCountEnginePower The list of engines to consider.
      * @return The total engine power.
      */
-    public int countTotalEnginePower(List<Engine> enginesToCountEnginePower) {
-            return enginesToCountEnginePower.size()*2+getSingleEngines().size();
+    public int countTotalEnginePower(List<Engine> activatedDoubleEngines) {
+            return activatedDoubleEngines.size()*2 + getSingleEngines().size();
 //        Stream<Engine> singleEngines = getSingleEngines().stream().filter(engine -> !(engine instanceof DoubleEngine));
 //        Stream<DoubleEngine> doubleEngines = enginesToCountEnginePower.stream().filter(engine -> engine instanceof DoubleEngine).map(engine -> (DoubleEngine) engine);
 //

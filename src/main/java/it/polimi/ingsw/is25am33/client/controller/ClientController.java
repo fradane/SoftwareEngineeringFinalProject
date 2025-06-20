@@ -2,7 +2,6 @@ package it.polimi.ingsw.is25am33.client.controller;
 
 import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
-import it.polimi.ingsw.is25am33.client.ClientPingPongManager;
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
@@ -15,13 +14,13 @@ import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.*;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.client.model.Hourglass;
+import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
@@ -33,7 +32,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.text.NumberFormat;
 import java.util.*;
 
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
@@ -1251,6 +1249,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
+        clientModel.eliminatePlayer(nickname);
         view.showPlayerEarlyEnded(nickname);
     }
 
@@ -1265,7 +1264,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void skipToLastCard() {
         try {
             serverController.debugSkipToLastCard();
-            view.showMessage("Successfully skipped to last card!", STANDARD);
+            view.showMessage("Successfully skipped to last card!", NOTIFICATION_INFO);
         } catch (IOException e) {
             view.showMessage("Failed to skip cards: " + e.getMessage(), ERROR);
         }

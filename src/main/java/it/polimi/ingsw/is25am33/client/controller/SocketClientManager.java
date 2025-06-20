@@ -9,7 +9,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
-import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.serializationLayer.client.ClientDeserializer;
 import it.polimi.ingsw.is25am33.serializationLayer.client.ClientSerializer;
 import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;

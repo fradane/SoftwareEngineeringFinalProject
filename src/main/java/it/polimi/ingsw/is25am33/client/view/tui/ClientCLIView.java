@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.client.view.tui;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.PlayerClientData;
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
@@ -1277,16 +1278,37 @@ public class ClientCLIView implements ClientView {
         // Get the current player's nickname
         String myNickname = clientModel.getMyNickname();
 
-        // Find current player's position in ranking (1-based index)
-        int myPosition = -1;
+        // Find current player's data directly from finalRanking
         PlayerFinalData myData = null;
+        for (PlayerFinalData data : finalRanking) {
+            if (data.getNickname().equals(myNickname)) {
+                myData = data;
+                break;
+            }
+        }
+
+        // Create a map for easy lookup of PlayerFinalData by nickname
+        Map<String, PlayerFinalData> nicknameToData = new HashMap<>();
+        for (PlayerFinalData data : finalRanking) {
+            nicknameToData.put(data.getNickname(), data);
+        }
+
+        // Get sorted nicknames for display order
         List<String> sortedNicknames = clientModel.getSortedRanking();
 
-        for (int i = 0; i < sortedNicknames.size(); i++) {
-            if (sortedNicknames.get(i).equals(myNickname)) {
-                myPosition = i + 1;
-                myData = finalRanking.get(i);
-                break;
+        // Find current player's position (only counting non-landed players)
+        int myPosition = -1;
+        if (myData != null && !myData.isEarlyLanded()) {
+            int positionCounter = 1;
+            for (String nickname : sortedNicknames) {
+                PlayerFinalData data = nicknameToData.get(nickname);
+                if (data != null && !data.isEarlyLanded()) {
+                    if (nickname.equals(myNickname)) {
+                        myPosition = positionCounter;
+                        break;
+                    }
+                    positionCounter++;
+                }
             }
         }
 
@@ -1294,119 +1316,137 @@ public class ClientCLIView implements ClientView {
         StringBuilder output = new StringBuilder();
 
         // Header
-        output.append("\n╔═══════════════════════════════════════════════════════════════════════╗\n");
+        output.append("\n\n");
         if (myData != null && myData.isEarlyLanded()) {
-            output.append("║                        🛬 FINE DEL VIAGGIO 🛬                         ║\n");
+            output.append("                        🛬 FINE DEL VIAGGIO 🛬\n");
         } else {
-            output.append("║                        🚀 FINE DEL VIAGGIO 🚀                         ║\n");
+            output.append("                        🚀 FINE DEL VIAGGIO 🚀\n");
         }
-        output.append("╠═══════════════════════════════════════════════════════════════════════╣\n");
-        output.append("║                                                                       ║\n");
-        output.append("║ CLASSIFICA FINALE:                                                    ║\n");
-        output.append("║                                                                       ║\n");
+        output.append("═══════════════════════════════════════════════════════════════════════\n\n");
+
+        output.append("🏆 CLASSIFICA FINALE\n");
+        output.append("─────────────────────────────────────────────────────────────────────\n\n");
 
         // Show final ranking
         String[] medals = {"🥇", "🥈", "🥉"};
-        int maxCredits = finalRanking.get(0).getTotalCredits();
 
+        // Find the maximum credits among all players
+        int maxCredits = finalRanking.stream()
+                .mapToInt(PlayerFinalData::getTotalCredits)
+                .max()
+                .orElse(0);
+
+        // Display players in sorted order
+        int displayPosition = 1;
         for (int i = 0; i < sortedNicknames.size(); i++) {
             String nickname = sortedNicknames.get(i);
-            PlayerFinalData data = finalRanking.get(i);
+            PlayerFinalData data = nicknameToData.get(nickname);
+
+            // Skip if we don't have data for this player (shouldn't happen)
+            if (data == null) continue;
 
             // Build player line with dynamic formatting
-            String medal = i < 3 ? medals[i] : "💥";
-            String positionStr = String.format("%d°", i + 1);
+            String medal;
+            String positionStr;
+
+            if (data.isEarlyLanded()) {
+                // Landed players don't get medals or positions
+                medal = "🛬";
+                positionStr = " - ";
+            } else {
+                // Only non-landed players get medals and positions
+                medal = displayPosition <= 3 ? medals[displayPosition - 1] : "  ";
+                positionStr = String.format("%d°", displayPosition);
+                displayPosition++;
+            }
+
             String playerName = nickname.equals(myNickname) ? "TU (" + nickname + ")" : nickname;
 
-            // Format the main player info with proper spacing
-            String baseInfo = String.format("%s %s %-15s - %3d crediti cosmici",
-                    medal, positionStr, playerName, data.getTotalCredits());
+            // Format the main player info
+            output.append(String.format("%s %3s  %-20s  %3d crediti cosmici",
+                    medal, positionStr, playerName, data.getTotalCredits()));
 
             // Add winner/early landing info
-            String extraInfo = "";
-            if (i == 0 && data.getTotalCredits() > 0) {
-                extraInfo = "[VINCITORE!]";
-            } else if (nickname.equals(myNickname) && data.getTotalCredits() > 0 && !data.isEarlyLanded()) {
-                extraInfo = "[Sei tra i vincitori!]";
-            }
             if (data.isEarlyLanded()) {
-                extraInfo += extraInfo.isEmpty() ? "[Atterraggio anticipato]" : " [Atterraggio anticipato]";
+                output.append("  [ATTERRATO ANTICIPATAMENTE]");
+            } else if (data.getTotalCredits() == maxCredits && data.getTotalCredits() > 0) {
+                output.append("  🎉 VINCITORE ASSOLUTO!");
+            } else if (nickname.equals(myNickname) && data.getTotalCredits() > 0) {
+                output.append("  ✨ Sei tra i vincitori!");
             }
 
-            // Calculate padding to align everything properly
-            String fullLine = baseInfo + "  " + extraInfo;
-            output.append(String.format("║ %-69s ║\n", fullLine));
+            output.append("\n");
         }
 
         // Show detailed breakdown for current player
         if (myData != null) {
-            output.append("║                                                                       ║\n");
-            output.append("║ ═══════════════════════════════════════════════════════════════════  ║\n");
-            output.append("║                                                                       ║\n");
+            output.append("\n═══════════════════════════════════════════════════════════════════════\n\n");
 
             if (myData.isEarlyLanded()) {
-                output.append("║ IL TUO RIEPILOGO (Atterraggio anticipato):                           ║\n");
+                output.append("📊 IL TUO RIEPILOGO (Atterrato Anticipatamente)\n");
             } else {
-                output.append("║ IL TUO RIEPILOGO:                                                     ║\n");
+                output.append("📊 IL TUO RIEPILOGO\n");
             }
-            output.append("║                                                                       ║\n");
+            output.append("─────────────────────────────────────────────────────────────────────\n\n");
 
             // Calculate initial credits by subtracting bonuses/penalties
             int initialCredits = calculateInitialCredits(myData, myPosition, playersNicknamesWithPrettiestShip.contains(myNickname));
 
-            output.append(String.format("║ Crediti iniziali: %45d 💰   ║\n", initialCredits));
+            output.append(String.format("   💰 Crediti iniziali: %d\n\n", initialCredits));
 
             // Show bonuses and penalties
             if (!myData.isEarlyLanded()) {
                 // Normal player gets full bonuses
                 int positionBonus = getPositionBonus(myPosition);
-                String positionLine = String.format("+ Ricompensa arrivo (%d° posto):", myPosition);
-                output.append(String.format("║ %-40s %+3d 💰   ║\n", positionLine, positionBonus));
+                output.append(String.format("   ✅ Ricompensa arrivo (%d° posto): +%d 💰\n", myPosition, positionBonus));
 
                 int cubesValue = calculateCubesValue(myData.getAllOwnedCubes(), false);
-                String cubesLine = String.format("+ Vendita merci (%s):", formatCubes(myData.getAllOwnedCubes()));
-                output.append(String.format("║ %-40s %+3d 💰   ║\n", cubesLine, cubesValue));
+                output.append(String.format("   ✅ Vendita merci %s: +%d 💰\n", formatCubes(myData.getAllOwnedCubes()), cubesValue));
 
                 if (playersNicknamesWithPrettiestShip.contains(myNickname)) {
                     int prettiestBonus = getPrettiestShipBonus();
-                    output.append(String.format("║ %-40s %+3d 💰   ║\n", "+ Nave più bella:", prettiestBonus));
+                    output.append(String.format("   ✅ Nave più bella: +%d 💰\n", prettiestBonus));
                 }
             } else {
                 // Early landed player
-                output.append("║ ❌ Ricompensa arrivo:                          -- (non applicabile)   ║\n");
-                output.append("║ + Vendita merci (DIMEZZATA):                                         ║\n");
+                output.append("   ❌ Ricompensa arrivo: -- (atterrato anticipatamente)\n");
 
                 int cubesValue = calculateCubesValue(myData.getAllOwnedCubes(), true);
-                String cubesLine = String.format("  (%s) a metà prezzo:", formatCubes(myData.getAllOwnedCubes()));
-                output.append(String.format("║ %-40s %+3d 💰   ║\n", cubesLine, cubesValue));
+                output.append(String.format("   ⚠️  Vendita merci %s (DIMEZZATA): +%d 💰\n",
+                        formatCubes(myData.getAllOwnedCubes()), cubesValue));
 
-                output.append("║ ❌ Nave più bella:                             -- (non applicabile)   ║\n");
+                output.append("   ❌ Nave più bella: -- (atterrato anticipatamente)\n");
             }
 
             // Lost components penalty (always applied)
             if (myData.getLostComponents() > 0) {
-                String penaltyLine = String.format("- Componenti persi (%d):", myData.getLostComponents());
-                output.append(String.format("║ %-40s %3d 💰   ║\n", penaltyLine, -myData.getLostComponents()));
+                output.append(String.format("   ❌ Componenti persi (%d): -%d 💰\n",
+                        myData.getLostComponents(), myData.getLostComponents()));
             }
 
-            output.append("║ ─────────────────────────────────────────────────────────────────────║\n");
-            output.append(String.format("║ TOTALE FINALE: %48d 💰   ║\n", myData.getTotalCredits()));
-            output.append("║                                                                       ║\n");
+            output.append("\n   ─────────────────────────────────────────\n");
+            output.append(String.format("   💎 TOTALE FINALE: %d 💰\n", myData.getTotalCredits()));
+            output.append("\n═══════════════════════════════════════════════════════════════════════\n\n");
 
             // Final message
-            if (myPosition == 1 && myData.getTotalCredits() > 0) {
-                output.append("║ 🏆 Complimenti! Sei il vincitore assoluto!                           ║\n");
-            } else if (myData.getTotalCredits() > 0 && myData.isEarlyLanded()) {
-                output.append("║ ⚠️  Hai abbandonato la corsa, ma sei comunque tra i vincitori!       ║\n");
+            if (myData.isEarlyLanded()) {
+                if (myData.getTotalCredits() > 0) {
+                    output.append("   🛬 Hai abbandonato la corsa anticipatamente, ma hai comunque dei crediti!\n");
+                    output.append("   🏆 Complimenti! Sei il vincitore assoluto! 🎊\n");
+                } else {
+                    output.append("   🛬 Hai abbandonato la corsa anticipatamente e non hai guadagnato crediti.\n");
+                    output.append("   😔 Purtroppo non sei tra i vincitori questa volta...\n");
+                }
+            } else if (myData.getTotalCredits() == maxCredits && myData.getTotalCredits() > 0) {
+                output.append("   🏆 Complimenti! Sei il vincitore assoluto! 🎊\n");
             } else if (myData.getTotalCredits() > 0) {
-                output.append("║ 🏆 Complimenti! Sei tra i vincitori!                                 ║\n");
+                output.append("   🎉 Complimenti! Sei tra i vincitori!\n");
             } else {
-                output.append("║ 😔 Purtroppo non hai vinto questa volta...                           ║\n");
+                output.append("   😔 Purtroppo non sei tra i vincitori questa volta...\n");
             }
         }
 
-        output.append("║                                                                       ║\n");
-        output.append("╚═══════════════════════════════════════════════════════════════════════╝\n\n");
+        output.append("\n");
 
         showMessage(output.toString(), STANDARD);
         showMessage("Press any key to leave the game", ASK);
@@ -1501,23 +1541,24 @@ public class ClientCLIView implements ClientView {
         if (nickname.equals(clientModel.getMyNickname())) {
             // Current player has landed early
             StringBuilder output = new StringBuilder();
-            output.append("\n╔═══════════════════════════════════════════════════════════════════════╗\n");
+            output.append("\n");
+            output.append("╔═══════════════════════════════════════════════════════════════════════╗\n");
             output.append("║                    🛬 ATTERRAGGIO ANTICIPATO 🛬                       ║\n");
             output.append("╠═══════════════════════════════════════════════════════════════════════╣\n");
             output.append("║                                                                       ║\n");
-            output.append("║ Il tuo razzo segna-rotta è stato rimosso dalla plancia di volo!      ║\n");
+            output.append("║ Il tuo razzo segna-rotta è stato rimosso dalla plancia di volo!       ║\n");
             output.append("║                                                                       ║\n");
-            output.append("║ Hai abbandonato la corsa spaziale e sei atterrato in sicurezza.      ║\n");
-            output.append("║ D'ora in poi sarai solo uno spettatore per il resto del viaggio.     ║\n");
+            output.append("║ Hai abbandonato la corsa spaziale e sei atterrato in sicurezza.       ║\n");
+            output.append("║ A partire dalla prossima carta sarai solo uno spettatore.             ║\n");
             output.append("║                                                                       ║\n");
             output.append("║ ⚠️  RICORDA:                                                          ║\n");
-            output.append("║ • Nessuna carta avrà più effetto su di te                            ║\n");
-            output.append("║ • Non riceverai ricompense per l'ordine di arrivo                    ║\n");
-            output.append("║ • Non potrai competere per la nave più bella                         ║\n");
-            output.append("║ • Le tue merci saranno vendute a metà prezzo                         ║\n");
-            output.append("║ • Pagherai comunque le penalità per i componenti persi               ║\n");
+            output.append("║ • Nessuna carta avrà più effetto su di te                             ║\n");
+            output.append("║ • Non riceverai ricompense per l'ordine di arrivo                     ║\n");
+            output.append("║ • Non potrai competere per la nave più bella                          ║\n");
+            output.append("║ • Le tue merci saranno vendute a metà prezzo                          ║\n");
+            output.append("║ • Pagherai comunque le penalità per i componenti persi                ║\n");
             output.append("║                                                                       ║\n");
-            output.append("║ Potrai ancora vincere se avrai accumulato abbastanza crediti!        ║\n");
+            output.append("║ Potrai ancora vincere se avrai accumulato abbastanza crediti!         ║\n");
             output.append("║                                                                       ║\n");
             output.append("╚═══════════════════════════════════════════════════════════════════════╝\n");
 
@@ -1525,7 +1566,8 @@ public class ClientCLIView implements ClientView {
         } else {
             // Another player has landed early - dynamic formatting for name
             StringBuilder output = new StringBuilder();
-            output.append("\n╔═══════════════════════════════════════════════════════════════════════╗\n");
+            output.append("\n");
+            output.append("╔═══════════════════════════════════════════════════════════════════════╗\n");
             output.append("║                        📢 ANNUNCIO DI VOLO 📢                         ║\n");
             output.append("╠═══════════════════════════════════════════════════════════════════════╣\n");
             output.append("║                                                                       ║\n");
@@ -1537,8 +1579,8 @@ public class ClientCLIView implements ClientView {
             output.append(String.format("║%-69s║\n", paddedAnnouncement));
 
             output.append("║                                                                       ║\n");
-            output.append("║ Il suo razzo ha effettuato un atterraggio anticipato.                ║\n");
-            output.append("║ Non parteciperà più alle prossime avventure.                          ║\n");
+            output.append("║ Il suo razzo ha effettuato un atterraggio anticipato.                 ║\n");
+            output.append("║ Dalla prossima carta non parteciperà più alle avventure.              ║\n");
             output.append("║                                                                       ║\n");
             output.append("╚═══════════════════════════════════════════════════════════════════════╝\n");
 
@@ -2640,10 +2682,16 @@ public class ClientCLIView implements ClientView {
 //        }
 
         for (int i = 0; i < sortedRanking.size(); i++) {
-            String player = sortedRanking.get(i);
-            int playerScore = clientModel.getPlayerClientData().get(player).getFlyingBoardPosition();
-            int diff = topScore - playerScore;
-            output.append(String.format("%d. %-20s | %-2d %s\n", i + 1, player, playerScore, (diff == 0 ? "" : "(" + (-diff) + ")")));
+            String playerNickname = sortedRanking.get(i);
+            PlayerClientData playerData = clientModel.getPlayerClientData().get(playerNickname);
+
+            if(playerData.isLanded())
+                output.append(String.format("-  %-20s | [EARLY LANDED]\n", playerNickname));
+            else{
+                int playerScore = playerData.getFlyingBoardPosition();
+                int diff = topScore - playerScore;
+                output.append(String.format("%d. %-20s | %-2d %s\n", i + 1, playerNickname, playerScore, (diff == 0 ? "" : "(" + (-diff) + ")")));
+            }
         }
 
         output.append("===============================\n");
