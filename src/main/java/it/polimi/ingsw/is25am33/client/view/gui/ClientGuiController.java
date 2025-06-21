@@ -203,16 +203,19 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showChooseEnginesMenu() {
-        // TODO controllare come viene gestito per altre carte
-        if (cardPhaseController != null) {
-            if (clientModel.getCurrAdventureCard() instanceof ClientFreeSpace) {
-                executeWithController(
-                        CARD_PHASE_CONTROLLER,
-                        () -> cardPhaseController.showFreeSpaceMenu()
-                );
-            } else
-                System.err.println("Not FreeSpace card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
-        }
+
+        ClientCard currentCard = clientModel.getCurrAdventureCard();
+        System.out.println("Current card: " + currentCard.getClass().getSimpleName());
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> {
+                    if (cardPhaseController != null) {
+                        cardPhaseController.showFreeSpaceMenu();
+                    } else {
+                        System.err.println("cardPhaseController è NULL!");
+                    }
+                }
+        );
     }
 
     @Override
@@ -277,7 +280,7 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showStardustMenu() {
-        // TODO controllare poi le altre carte
+        ClientCard currentCard = clientModel.getCurrAdventureCard();
         if (cardPhaseController != null) {
             if (clientModel.getCurrAdventureCard() instanceof ClientStarDust) {
                 executeWithController(

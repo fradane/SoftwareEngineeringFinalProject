@@ -2795,7 +2795,7 @@ public class ClientCLIView implements ClientView {
                         boolean isTestFlight = Objects.requireNonNull(stringQueue.poll()).equalsIgnoreCase("y");
                         PlayerColor playerColor = PlayerColor.getPlayerColor(Integer.parseInt(Objects.requireNonNull(stringQueue.poll())));
                         clientController.handleCreateGameMenu(numPlayers, isTestFlight, playerColor);
-                    } catch(NumberFormatException | NullPointerException e) {
+                    } catch (NumberFormatException | NullPointerException e) {
                         showMessage("\nOne or more values were incorrect. Please try again.\n", ERROR);
                         clientState = CREATE_GAME_CHOOSE_NUM_PLAYERS;
                         stringQueue.clear();
@@ -2921,10 +2921,10 @@ public class ClientCLIView implements ClientView {
                 case BUILDING_SHIPBOARD_WAITING:
                     showMessage("Invalid command", STANDARD);
                     showMessage("""
-                    Your ship is ready, now wait for other player to finish theirs, they are so sloooooow.
-                    Anyway use show command as before to see any shipboard or "rank" to see the current ranking.
-                    You could also exit but it's not recommended.
-                    >\s""", ASK);
+                            Your ship is ready, now wait for other player to finish theirs, they are so sloooooow.
+                            Anyway use show command as before to see any shipboard or "rank" to see the current ranking.
+                            You could also exit but it's not recommended.
+                            >\s""", ASK);
                     break;
 
                 case PLACE_PLACEHOLDER:
@@ -3006,7 +3006,12 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case WATCH_LITTLE_DECK:
-                    showLittleDeck(Integer.parseInt(input));
+                    int littleDeckIndex = Integer.parseInt(input);
+                    if (littleDeckIndex <= 0 || littleDeckIndex > 3) {
+                        showMessage("Invalid little deck index. Please select 1-3.\n> ", STANDARD);
+                        break;
+                    }
+                    showLittleDeck(littleDeckIndex);
                     showBuildShipBoardMenu();
                     break;
 

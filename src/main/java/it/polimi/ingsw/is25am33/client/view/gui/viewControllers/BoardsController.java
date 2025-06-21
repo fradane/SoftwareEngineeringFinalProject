@@ -47,6 +47,7 @@ public abstract class BoardsController {
     private final Set<Button> navButtons = new HashSet<>();
     protected final Map<String, Button> buttonMap = new HashMap<>();
     private final Set<Button> shadowedButtons = new HashSet<>();
+    private final Object highlightLock = new Object();
 
     abstract void bindBoards(ModelFxAdapter modelFxAdapter, BoardsEventHandler boardsEventHandler, ClientModel clientModel);
 
@@ -55,27 +56,53 @@ public abstract class BoardsController {
     protected abstract Map<Integer, Point2D> getFlyingBoardRelativePositions();
 
     public void removeHighlightColor() {
-        shadowedButtons.forEach(button -> {
-            shadowedButtons.remove(button);
-            Platform.runLater(() -> {
-                button.setEffect(null);
-                button.getStyleClass().remove("no-hover");
-            });
-        });
+        synchronized (highlightLock) {
+            Set<Button> buttonsToClear = new HashSet<>(shadowedButtons);
+            shadowedButtons.clear();
+
+            buttonsToClear.forEach(button ->
+                Platform.runLater(() -> {
+                    button.setEffect(null);
+                    button.getStyleClass().remove("no-hover");
+                })
+            );
+        }
     }
+
 
     private String fromCoordsToButtonId(Coordinates coords) {
         return coords.getX() + "_" + coords.getY();
     }
 
-    public void applyHighlightEffect(Coordinates coordinates, Color color) {
+//    public void applyHighlightEffect(Coordinates coordinates, Color color) {
+//
+//        String buttonId = fromCoordsToButtonId(coordinates);
+//        Button button = buttonMap.get(buttonId);
+//        shadowedButtons.add(button);
+//
+//        Platform.runLater(() -> {
+//
+//            DropShadow shadow = new DropShadow();
+//            shadow.setColor(color);
+//            shadow.setRadius(10);
+//            shadow.setSpread(0.5);
+//            button.setEffect(shadow);
+//
+//            if (!button.getStyleClass().contains("no-hover")) {
+//                button.getStyleClass().add("no-hover");
+//            }
+//        });
+//    }
 
+    public void applyHighlightEffect(Coordinates coordinates, Color color) {
         String buttonId = fromCoordsToButtonId(coordinates);
         Button button = buttonMap.get(buttonId);
-        shadowedButtons.add(button);
+
+        synchronized (highlightLock) {
+            shadowedButtons.add(button);
+        }
 
         Platform.runLater(() -> {
-
             DropShadow shadow = new DropShadow();
             shadow.setColor(color);
             shadow.setRadius(10);

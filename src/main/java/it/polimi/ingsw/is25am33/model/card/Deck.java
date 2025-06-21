@@ -167,20 +167,15 @@ public class Deck {
 //        cards.addAll(Deck.loadStardustFromJson());
 //        cards.addAll(Deck.loadWarFieldFromJson());
         cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
-        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+
+
 
 
         if (isTestFlight)

@@ -63,6 +63,15 @@ public class PrefabShipFactory {
                 false
         ));
 
+        PREFAB_SHIPS.put("engine_batterybox_ship", new PrefabShipInfo(
+                "engine_batterybox_ship",
+                "Nave Con Engine e Battery Box",
+                "ship with engine and battery box",
+                false
+        ));
+
+
+
     }
 
     /**
@@ -92,6 +101,7 @@ public class PrefabShipFactory {
             case "basic_gui_shipboard" -> applyGuiBasicShip(shipBoard);
             case "ship_for_meteorites" -> applyMeteoriteShip(shipBoard);
             case "storage_ship" -> applyStorageShip(shipBoard);
+            case "engine_batterybox_ship" -> applyEngineShip(shipBoard);
 
             default -> false;
         };
@@ -148,6 +158,33 @@ public class PrefabShipFactory {
                         case "GT-new_tiles_16_for_web51.jpg" -> addComponent(shipBoard, component, 7, 9);
                         case "GT-new_tiles_16_for_web47.jpg" -> addComponent(shipBoard, component, 7, 6);
                         case "GT-new_tiles_16_for_web141.jpg" -> addComponent(shipBoard, component, 7, 5);
+                    }
+                });
+
+        return true;
+    }
+
+    private static boolean applyEngineShip(ShipBoard shipBoard) {
+
+        clearShipBoard(shipBoard);
+
+        ComponentLoader.loadComponents()
+                .stream()
+                .filter(component -> switch (component.getImageName()) {
+                    case "GT-new_tiles_16_for_web95.jpg",
+                         "GT-new_tiles_16_for_web5.jpg",
+                         "GT-new_tiles_16_for_web81.jpg",
+                         "GT-new_tiles_16_for_web4.jpg" -> true;
+                    default -> false;
+                })
+                .forEach(component -> {
+                    String imageName = component.getImageName();
+                    System.out.println(imageName);
+                    switch (imageName) {
+                        case "GT-new_tiles_16_for_web95.jpg" -> addComponent(shipBoard, component, 8, 7);
+                        case "GT-new_tiles_16_for_web5.jpg" -> addComponent(shipBoard, component, 8, 8);
+                        case "GT-new_tiles_16_for_web81.jpg" -> addComponent(shipBoard, component, 7, 6);
+                        case "GT-new_tiles_16_for_web4.jpg" -> addComponent(shipBoard, component, 6, 6);
                     }
                 });
 

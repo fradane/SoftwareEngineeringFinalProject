@@ -191,6 +191,13 @@ public class ClientModel {
                 .reversed();
     }
 
+    public List<String> getOutPlayers() {
+        return playerClientData.keySet()
+                .stream()
+                .filter(player -> playerClientData.get(player).isOut())
+                .toList();
+    }
+
     public void setCurrCardState(CardState currCardState) {
         this.currCardState = currCardState;
     }
