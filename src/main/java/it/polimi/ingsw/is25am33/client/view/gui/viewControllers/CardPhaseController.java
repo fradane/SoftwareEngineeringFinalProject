@@ -5,14 +5,15 @@ import it.polimi.ingsw.is25am33.client.model.card.*;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
+import it.polimi.ingsw.is25am33.client.view.tui.StorageSelectionManager;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.Pirates;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
 import it.polimi.ingsw.is25am33.model.card.Planet;
-import it.polimi.ingsw.is25am33.model.component.BatteryBox;
-import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
-import it.polimi.ingsw.is25am33.model.component.DoubleEngine;
+import it.polimi.ingsw.is25am33.model.card.Planets;
+import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -29,6 +30,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
+import javax.smartcardio.Card;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,11 +52,14 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     @FXML
     public HBox bottomHBox;
 
+    // TODO fare per il livello 1
     private Level2BoardsController boardsController;
     private ModelFxAdapter modelFxAdapter;
     private final List<Coordinates> selectedDoubleEngines = new ArrayList<>();
     private final List<Coordinates> selectedDoubleCannons = new ArrayList<>();
     private final List<Coordinates> selectedBatteryBoxes = new ArrayList<>();
+    private StorageSelectionManager storageManager;
+    private int planetChoice;
     private boolean hasChosenDoubleEngine = false;
     private boolean hasChosenDoubleCannon = false;
 
@@ -87,16 +92,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             System.err.println("Error loading boards: " + e.getMessage());
         }
 
-        // Prova a utilizzare un ModelFxAdapter condiviso
-//        ClientGuiController guiController = ClientGuiController.getInstance();
-//        if (guiController != null) {
-//            modelFxAdapter = guiController.getSharedModelFxAdapter();
-//        } else {
-//            // Fallback: crea un nuovo adapter
-//            modelFxAdapter = new ModelFxAdapter(clientModel);
-//        }
-
-        modelFxAdapter = new ModelFxAdapter(clientModel, true);
+        modelFxAdapter = new ModelFxAdapter(clientModel, true, boardsController);
 
         // Binding e setup
         this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
@@ -137,8 +133,8 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     //-------------------- PLANET ----------------------
     public void showChoosePlanetMenu() {
 
-        ClientCard card = clientModel.getCurrAdventureCard();
-        if (!(card instanceof ClientPlanets planets)) {
+        ClientCard modelCard = clientModel.getCurrAdventureCard();
+        if (!(modelCard instanceof ClientPlanets planets)) {
             showMessage("Error: Expected Planets card", false);
             return;
         }
@@ -147,7 +143,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         // Add button for each available planet
         for (int i = 0; i < planets.getAvailablePlanets().size(); i++) {
+
             Planet planet = planets.getAvailablePlanets().get(i);
+
+            System.err.println("Setting button for planet: " + i);
             if (!planet.isBusy()) {
                 Button planetButton = new Button();
                 planetButton.setText("Planet " + (i + 1));
@@ -156,15 +155,19 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 // Set button action
                 final int planetIndex = i + 1; // Store planet index (1-based)
                 planetButton.setOnAction(_ -> {
+                    planetChoice = planetIndex;
                     try {
-                        Platform.runLater(() -> bottomHBox.getChildren().clear());
+                        Platform.runLater(() -> {
+                            showMessage("Planet " + planetIndex + " selected", false);
+                            bottomHBox.getChildren().clear();
+                        });
                         clientController.playerWantsToVisitPlanet(clientController.getNickname(), planetIndex);
                     } catch (Exception e) {
                         showMessage("Error selecting planet: " + e.getMessage(), false);
                     }
                 });
 
-                bottomHBox.getChildren().add(planetButton);
+                Platform.runLater(() -> bottomHBox.getChildren().add(planetButton));
             }
         }
 
@@ -172,6 +175,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         Button skipButton = new Button("Skip (don't land on any planet)");
         skipButton.getStyleClass().add("action-button");
         skipButton.setOnAction(_ -> {
+            Platform.runLater(() -> {
+                showMessage("You won't land on any planet", false);
+                bottomHBox.getChildren().clear();
+            });
             clientController.playerWantsToVisitPlanet(clientController.getNickname(), 0);
         });
 
@@ -191,7 +198,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         showMessage("Stardust has been detected in your flight path!", true);
         int exposedConnector = clientModel.getMyShipboard().countExposed();
-        if (exposedConnector > 0){
+        if (exposedConnector > 0) {
             informationalPopUp(String.format("""
                            Your shipboard wasn't well built.
                            You will lose %d flight days.
@@ -279,7 +286,8 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                     No battery boxes available so you can't activate double cannon
                     You can use only single cannon
                     """, pirates);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());            return;
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
+            return;
         }
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
@@ -522,6 +530,13 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 .forEach(coordinates -> boardsController.applyHighlightEffect(coordinates, Color.GREEN));
     }
 
+    private void highlightAvailableStorages() {
+
+        Set<Coordinates> selectableStoragesCoords = storageManager.getSelectableCoordinates();
+
+        selectableStoragesCoords.forEach(coords -> boardsController.applyHighlightEffect(coords, Color.GREEN));
+    }
+
     private void handleDoubleEngineSelection(Coordinates coordinates) {
         ShipBoardClient shipboard = clientModel.getMyShipboard();
         Set<Coordinates> doubleEngineCoordinates = shipboard.getCoordinatesOfComponents(shipboard.getDoubleEngines());
@@ -617,6 +632,9 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 else
                     handleBatteryBoxSelection(coordinates);
             }
+            case HANDLE_CUBES_REWARD ->
+                handleChooseStorageSelection(coordinates);
+
 
             // TODO aggiungere stati
 
@@ -624,5 +642,103 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
 
     }
+
+    private void handleChooseStorageSelection(Coordinates coordinates) {
+
+        Set<Coordinates> selectableStoragesCoords = storageManager.getSelectableCoordinates();
+
+        if (!selectableStoragesCoords.contains(coordinates)) {
+            showMessage("Your selection is not correct, select another one or skip the current reward.", false);
+            return;
+        }
+
+        storageManager.addStorageSelectionWithCopy(coordinates);
+        clientModel.refreshShipBoardOf(clientController.getNickname());
+        boardsController.removeHighlightColor();
+        Platform.runLater(() -> bottomHBox.getChildren().clear());
+
+        showMessage("", true);
+
+        storageSelectionPhase();
+    }
+
+    public void showHandleCubesRewardMenu() {
+
+        List<CargoCube> cubesReward = null;
+
+        try {
+            cubesReward = clientModel.extractCubeRewardsFromCurrentCard();
+        } catch (IllegalStateException e) {
+            showMessage(e.getMessage(), false);
+            // TODO che si fa?
+        }
+
+        // Initialize the storage manager with the cube rewards
+        storageManager = new StorageSelectionManager(cubesReward, 0, clientModel.getMyShipboard());
+
+        // Check if the player has any storage available
+        if (!storageManager.hasAnyStorage()) {
+            showMessage("No available storages on your ship. You cannot accept any reward.", false);
+            // TODO aggiungere il popup di ali con il bottone per confermare
+            List<Coordinates> emptyList = new ArrayList<>();
+            clientController.playerChoseStorage(clientController.getNickname(), emptyList);
+            return;
+        }
+
+        // display reward info
+        ClientCard currCard = clientModel.getCurrAdventureCard();
+        if (currCard instanceof ClientPlanets)
+            showMessage("You have chosen planet " + planetChoice + " look at your rewards!!!", true);
+        else
+            showMessage("You have accepted the reward, look at it!!!", true);
+
+        storageSelectionPhase();
+
+    }
+
+    private void storageSelectionPhase() {
+
+        CargoCube currentCube = storageManager.getCurrentCube();
+
+        // if every cube has been handled
+        if (currentCube == null) {
+            showMessage("You have placed every cube, enjoy your richness.", false);
+            clientController.playerChoseStorage(clientModel.getMyNickname(), storageManager.getSelectedStorageCoordinates());
+            return;
+        }
+
+        // if you cannot accept the red cube
+        if (!storageManager.canAcceptCurrentCube()) {
+            showMessage("Skipping storage selection for " + currentCube + " cube, you are not provided with advanced technology yet", false);
+            if (!storageManager.skipCurrentCube())
+                clientController.playerChoseStorage(clientModel.getMyNickname(), storageManager.getSelectedStorageCoordinates());
+            else
+                storageSelectionPhase();
+            return;
+        }
+
+        Button skipCubeButton = new Button("Skip " + currentCube + " cube");
+        skipCubeButton.getStyleClass().add("action-button");
+        skipCubeButton.setOnAction(_ -> {
+            bottomHBox.getChildren().clear();
+            boardsController.removeHighlightColor();
+            if (!storageManager.skipCurrentCube())
+                clientController.playerChoseStorage(clientModel.getMyNickname(), storageManager.getSelectedStorageCoordinates());
+            else
+                storageSelectionPhase();
+        });
+
+        Platform.runLater(() -> {
+            bottomHBox.getChildren().clear();
+            bottomHBox.getChildren().add(skipCubeButton);
+        });
+
+        highlightAvailableStorages();
+
+        showMessage("Now selecting a storage for the " + currentCube + " cube. " +
+                "If a storage is full, the least valuable cube will be removed", true);
+
+    }
+
 
 }

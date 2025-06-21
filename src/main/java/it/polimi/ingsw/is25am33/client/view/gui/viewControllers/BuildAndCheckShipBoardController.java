@@ -585,7 +585,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             System.err.println("Error loading boards: " + e.getMessage());
         }
 
-        modelFxAdapter = new ModelFxAdapter(clientModel, false);
+        modelFxAdapter = new ModelFxAdapter(clientModel, false, boardsController);
 
         // Binding e setup
         this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
@@ -615,6 +615,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
             // Crea un elemento per ogni nave prefabbricata
             for (PrefabShipInfo shipInfo : prefabShips) {
+
+                if (!shipInfo.isForGui())
+                    continue;
+
                 // Crea un VBox per contenere nome, descrizione e pulsante
                 VBox shipCard = new VBox();
                 shipCard.setAlignment(javafx.geometry.Pos.CENTER_LEFT);

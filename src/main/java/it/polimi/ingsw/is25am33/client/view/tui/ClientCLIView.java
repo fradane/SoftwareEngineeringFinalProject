@@ -1619,7 +1619,13 @@ public class ClientCLIView implements ClientView {
         setClientState(ClientState.HANDLE_CUBES_REWARD_MENU);
 
         // Get cube rewards directly from the current card
-        List<CargoCube> rewardCubes = extractCubeRewardsFromCurrentCard();
+        List<CargoCube> rewardCubes = null;
+        try {
+            rewardCubes = clientModel.extractCubeRewardsFromCurrentCard();
+        } catch (IllegalStateException e) {
+            showMessage("ERROR: " + e.getMessage(), ERROR);
+            // TODO che si fa?
+        }
 
         // Initialize the storage manager with the cube rewards
         storageManager = new StorageSelectionManager(rewardCubes, 0, getMyShipBoard());
@@ -1693,23 +1699,12 @@ public class ClientCLIView implements ClientView {
                     // Format each cube with its color
                     List<String> formattedCubes = new ArrayList<>();
                     for (CargoCube cube : storedCubes) {
-                        String cubeColor = "";
-                        switch (cube) {
-                            case RED:
-                                cubeColor = ANSI_RED;
-                                break;
-                            case YELLOW:
-                                cubeColor = ANSI_YELLOW;
-                                break;
-                            case GREEN:
-                                cubeColor = ANSI_GREEN;
-                                break;
-                            case BLUE:
-                                cubeColor = ANSI_BLUE;
-                                break;
-                            default:
-                                cubeColor = "";
-                        }
+                        String cubeColor = switch (cube) {
+                            case RED -> ANSI_RED;
+                            case YELLOW -> ANSI_YELLOW;
+                            case GREEN -> ANSI_GREEN;
+                            case BLUE -> ANSI_BLUE;
+                        };
                         formattedCubes.add(cubeColor + cube.name() + ANSI_RESET);
                     }
                     storageInfo.append(String.join(", ", formattedCubes));
@@ -1775,43 +1770,6 @@ public class ClientCLIView implements ClientView {
             List<Coordinates> selectedCoordinates = storageManager.getSelectedStorageCoordinates();
             clientController.playerChoseStorage(clientController.getNickname(), selectedCoordinates);
         }
-    }
-
-    /**
-     * Extracts the information about cube rewards from the current card.
-     * Uses the ClientCard object properties directly instead of string parsing.
-     *
-     * @return List of CargoCube that represent the rewards of the current card
-     */
-    private List<CargoCube> extractCubeRewardsFromCurrentCard() {
-        List<CargoCube> cubes = new ArrayList<>();
-        ClientCard card = clientModel.getCurrAdventureCard();
-
-        if (card == null) {
-            showMessage("No active card available.", ERROR);
-            return cubes;
-        }
-
-        // Extract rewards based on card type
-        if (card instanceof ClientPlanets) {
-            ClientPlanets planets = (ClientPlanets) card;
-            return planets.getPlayerReward(clientModel.getMyNickname());
-        }
-        else if (card instanceof ClientAbandonedStation) {
-            // AbandonedStation has a direct list of rewards
-            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
-        }
-        else if (card instanceof ClientSmugglers) {
-            // Smugglers have a direct list of rewards
-            return new ArrayList<>(((ClientSmugglers) card).getReward());
-        }
-
-        // If no rewards were found or the card type doesn't have rewards
-        if (cubes.isEmpty() && clientModel.getCurrCardState() == CardState.HANDLE_CUBES_REWARD) {
-            showMessage("Could not determine cube rewards for this card type.", ERROR);
-        }
-
-        return cubes;
     }
 
     /**

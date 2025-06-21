@@ -2,24 +2,13 @@ package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.component.Component;
-import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 
 import java.util.*;
 
@@ -68,7 +57,7 @@ public class Level1BoardsController extends BoardsController {
         setupFlyingBoardBinding();
         setupShipBoardNavigationBarAndBoards();
         setupGridBindings(modelFxAdapter.getMyObservableMatrix());
-        setupChangedAttributesBinding();
+        //setupChangedAttributesBinding();
     }
 
     public void initialize() {

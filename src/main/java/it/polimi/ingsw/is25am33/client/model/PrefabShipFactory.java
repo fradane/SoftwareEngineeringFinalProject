@@ -23,6 +23,7 @@ public class PrefabShipFactory {
                 "storage_ship",
                 "storage_ship",
                 "Ship for testing cube malus",
+                false,
                 false
         ));
 
@@ -30,29 +31,40 @@ public class PrefabShipFactory {
                 "basic_ship",
                 "Basic Ship",
                 "A simple ship with essential components",
+                false,
                 false
+        ));
+
+        PREFAB_SHIPS.put("cargo_ship", new PrefabShipInfo(
+                "cargo_ship",
+                "cargo ship",
+                "ship which can only store cargo cubes",
+                false,
+                true
         ));
 
         PREFAB_SHIPS.put("basic_gui_shipboard", new PrefabShipInfo(
                 "basic_gui_shipboard",
                 "GUI ship",
                 "A simple ship, but GUI friendly",
-                false
+                false,
+                true
         ));
 
         PREFAB_SHIPS.put("ship_for_meteorites", new PrefabShipInfo(
                 "ship_for_meteorites",
                 "ship_for_meteorites",
                 "A ship with cannon, double cannon and shield",
+                false,
                 false
         ));
-
 
 
         PREFAB_SHIPS.put("cargo_hauler", new PrefabShipInfo(
                 "cargo_hauler",
                 "Cargo Hauler",
                 "A mid-sized cargo ship with 3 crew cabins and 2 storage units, perfect for freight missions",
+                false,
                 false
         ));
 
@@ -60,6 +72,7 @@ public class PrefabShipFactory {
                 "nave_scorretta",
                 "Nave Scorretta",
                 "nave scorretta per fare controlli sulla nave",
+                false,
                 false
         ));
 
@@ -87,6 +100,7 @@ public class PrefabShipFactory {
     public static boolean applyPrefabShip(ShipBoard shipBoard, String prefabShipId) {
         return switch (prefabShipId) {
             case "basic_ship" -> applyBasicShip(shipBoard);
+            case "cargo_ship" -> applyCargoShip(shipBoard);
             case "cargo_hauler" -> applyCargoHauler(shipBoard);
             case "nave_scorretta" -> applyNaveScorretta(shipBoard);
             case "basic_gui_shipboard" -> applyGuiBasicShip(shipBoard);
@@ -95,6 +109,35 @@ public class PrefabShipFactory {
 
             default -> false;
         };
+    }
+
+    private static boolean applyCargoShip(ShipBoard shipBoard) {
+
+        clearShipBoard(shipBoard);
+
+        ComponentLoader.loadComponents()
+                .stream()
+                .filter(component -> switch (component.getImageName()) {
+                    case //"GT-new_tiles_16_for_web62.jpg",
+                         "GT-new_tiles_16_for_web31.jpg",
+                         //"GT-new_tiles_16_for_web64.jpg",
+                         "GT-new_tiles_16_for_web18.jpg" -> true;
+                    default -> false;
+                })
+                .forEach(component -> {
+                    String imageName = component.getImageName();
+                    System.out.println(imageName);
+                    switch (imageName) {
+                        //case "GT-new_tiles_16_for_web62.jpg" -> addComponent(shipBoard, component, 7, 6);
+                        case "GT-new_tiles_16_for_web31.jpg" -> addComponent(shipBoard, component, 8, 6);
+                        //case "GT-new_tiles_16_for_web64.jpg" -> addComponent(shipBoard, component, 6, 7);
+                        case "GT-new_tiles_16_for_web18.jpg" -> addComponent(shipBoard, component, 8, 7);
+                    }
+                });
+
+        return true;
+
+
     }
 
     private static boolean applyStorageShip(ShipBoard shipBoard) {

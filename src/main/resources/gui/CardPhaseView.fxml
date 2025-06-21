@@ -22,7 +22,7 @@
             <Label styleClass="screen-title" text="Galaxy Truckers" />
 
             <StackPane>
-                <Label fx:id="messageLabel" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 5px 0 0 0;" />
+                <Label fx:id="messageLabel" styleClass="timer-label" />
             </StackPane>
 
         </VBox>

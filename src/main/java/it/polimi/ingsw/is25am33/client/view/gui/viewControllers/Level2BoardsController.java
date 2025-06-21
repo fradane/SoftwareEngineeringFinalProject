@@ -66,7 +66,7 @@ public class Level2BoardsController extends BoardsController {
         setupShipBoardNavigationBarAndBoards();
         setupMyBookedComponentsBinding();
         setupGridBindings(modelFxAdapter.getMyObservableMatrix());
-        setupChangedAttributesBinding();
+        //setupChangedAttributesBinding();
 
         clientModel.getPlayerClientData().forEach((nickname, _) -> clientModel.refreshShipBoardOf(nickname));
     }

@@ -47,6 +47,7 @@ public abstract class BoardsController {
     private final Set<Button> navButtons = new HashSet<>();
     protected final Map<String, Button> buttonMap = new HashMap<>();
     private final Set<Button> shadowedButtons = new HashSet<>();
+    private final Object highlightLock = new Object();
 
     abstract void bindBoards(ModelFxAdapter modelFxAdapter, BoardsEventHandler boardsEventHandler, ClientModel clientModel);
 
@@ -55,13 +56,22 @@ public abstract class BoardsController {
     protected abstract Map<Integer, Point2D> getFlyingBoardRelativePositions();
 
     public void removeHighlightColor() {
-        shadowedButtons.forEach(button -> {
-            shadowedButtons.remove(button);
+        Set<Button> buttonsToRemove;
+
+        // Crea una copia del set per evitare ConcurrentModificationException
+        synchronized (highlightLock) {
+            buttonsToRemove = new HashSet<>(shadowedButtons);
+            shadowedButtons.clear(); // Pulisci il set originale
+        }
+
+        // Processa i button fuori dalla sincronizzazione
+        buttonsToRemove.forEach(button ->
             Platform.runLater(() -> {
+                // Non serve più sincronizzazione qui poiché abbiamo già pulito il set
                 button.setEffect(null);
                 button.getStyleClass().remove("no-hover");
-            });
-        });
+            })
+        );
     }
 
     private String fromCoordsToButtonId(Coordinates coords) {
@@ -69,13 +79,20 @@ public abstract class BoardsController {
     }
 
     public void applyHighlightEffect(Coordinates coordinates, Color color) {
-
         String buttonId = fromCoordsToButtonId(coordinates);
         Button button = buttonMap.get(buttonId);
-        shadowedButtons.add(button);
 
+        if (button == null) {
+            return; // Controllo di sicurezza
+        }
+
+        // Aggiungi al set in modo thread-safe
+        synchronized (highlightLock) {
+            shadowedButtons.add(button);
+        }
+
+        // Applica l'effetto sul JavaFX thread
         Platform.runLater(() -> {
-
             DropShadow shadow = new DropShadow();
             shadow.setColor(color);
             shadow.setRadius(10);
@@ -254,6 +271,17 @@ public abstract class BoardsController {
         boardsEventHandler.onGridButtonClick(row, column);
     }
 
+    public void updateShipBoards(String nickname, int row, int column, Component newComponent) {
+        if (nickname.equals(clientModel.getMyNickname())) {
+            String buttonId = fromCoordsToButtonId(new Coordinates(row, column));
+            Button button = buttonMap.get(buttonId);
+            Platform.runLater(() -> updateButtonAppearance(button, newComponent));
+        } else {
+            StackPane playerStackPane = otherPlayersShipBoards.get(nickname);
+            Platform.runLater(() -> updateOtherShipBoardsAppearance(playerStackPane, newComponent, row, column));
+        }
+    }
+
     private void updateOtherShipBoardsAppearance(StackPane playerStackPane, Component newVal, int row, int column) {
         try {
             StackPane cellStackPane = getNodeFromGridPane(((GridPane) playerStackPane.getChildren().get(1)), row - 4, column - 3);
@@ -424,6 +452,7 @@ public abstract class BoardsController {
 
     private StackPane getBatteryBoxStackPane(ImageView batteryImageView, BatteryBox batteryBox) {
 
+        final int BATTERY_BOX_WIDTH = 30;
         int remainingBatteries = batteryBox.getRemainingBatteries();
 
         ImageView featureImageView = new ImageView();
@@ -437,8 +466,8 @@ public abstract class BoardsController {
         dropShadow.setRadius(15);
 
         featureImageView.setEffect(dropShadow);
-        featureImageView.setFitWidth(40);
-        featureImageView.setFitHeight(40);
+        featureImageView.setFitWidth(BATTERY_BOX_WIDTH);
+        featureImageView.setFitHeight(BATTERY_BOX_WIDTH);
         featureImageView.setPreserveRatio(true);
 
         featureImage = new Image(Objects.requireNonNull(getClass()
@@ -453,8 +482,8 @@ public abstract class BoardsController {
             ImageView featureImageView1 = new ImageView();
 
             featureImageView1.setEffect(dropShadow);
-            featureImageView1.setFitWidth(40);
-            featureImageView1.setFitHeight(40);
+            featureImageView1.setFitWidth(BATTERY_BOX_WIDTH);
+            featureImageView1.setFitHeight(BATTERY_BOX_WIDTH);
             featureImageView1.setPreserveRatio(true);
 
             featureImageView1.setImage(featureImage);
@@ -469,12 +498,12 @@ public abstract class BoardsController {
             ImageView featureImageView2 = new ImageView();
 
             featureImageView1.setEffect(dropShadow);
-            featureImageView1.setFitWidth(40);
-            featureImageView1.setFitHeight(40);
+            featureImageView1.setFitWidth(BATTERY_BOX_WIDTH);
+            featureImageView1.setFitHeight(BATTERY_BOX_WIDTH);
             featureImageView1.setPreserveRatio(true);
             featureImageView2.setEffect(dropShadow);
-            featureImageView2.setFitWidth(40);
-            featureImageView2.setFitHeight(40);
+            featureImageView2.setFitWidth(BATTERY_BOX_WIDTH);
+            featureImageView2.setFitHeight(BATTERY_BOX_WIDTH);
             featureImageView2.setPreserveRatio(true);
 
             featureImageView2.setImage(featureImage);
@@ -514,8 +543,8 @@ public abstract class BoardsController {
                     dropShadow.setRadius(15);
 
                     featureImageView.setEffect(dropShadow);
-                    featureImageView.setFitWidth(40);
-                    featureImageView.setFitHeight(40);
+                    featureImageView.setFitWidth(20);
+                    featureImageView.setFitHeight(20);
                     featureImageView.setPreserveRatio(true);
 
                     switch (cargoCubes.get(i - 1)) {
@@ -529,6 +558,20 @@ public abstract class BoardsController {
                                 .getResourceAsStream("/gui/graphics/componentFeature/yellow_cargo_cube.png")));
                     }
 
+                    switch (i) {
+                        case 1:
+                            featureImageView.setTranslateX(10);
+                            featureImageView.setTranslateY(-5);
+                            break;
+                        case 2:
+                            featureImageView.setTranslateX(-10);
+                            featureImageView.setTranslateY(-5);
+                            break;
+                        case 3:
+                            featureImageView.setTranslateY(5);
+                            break;
+                    }
+
                     featureImageView.setImage(featureImage);
                     storageStackPane.getChildren().add(featureImageView);
                 });
@@ -536,22 +579,22 @@ public abstract class BoardsController {
         return storageStackPane;
     }
 
-    protected void setupChangedAttributesBinding() {
-        modelFxAdapter.getObservableChangedAttributesProperty()
-                .addListener((_, _, newValue) -> {
-                    String nickname = newValue.getKey();
-                    Coordinates coords = newValue.getValue();
-                    Component updatedComponent = clientModel.getShipboardOf(nickname).getShipMatrix()[coords.getX()][coords.getY()];
-
-                    if (nickname.equals(clientModel.getMyNickname())) {
-                        Button button = buttonMap.get(fromCoordsToButtonId(coords));
-                        Platform.runLater(() -> updateButtonAppearance(button, updatedComponent));
-                    } else {
-                        StackPane playerStackPane = otherPlayersShipBoards.get(nickname);
-                        Platform.runLater(() -> updateOtherShipBoardsAppearance(playerStackPane, updatedComponent, coords.getX(), coords.getY()));
-                    }
-                });
-    }
+//    protected void setupChangedAttributesBinding() {
+//        modelFxAdapter.getObservableChangedAttributesProperty()
+//                .addListener((_, _, newValue) -> {
+//                    String nickname = newValue.getKey();
+//                    Coordinates coords = newValue.getValue();
+//                    Component updatedComponent = clientModel.getShipboardOf(nickname).getShipMatrix()[coords.getX()][coords.getY()];
+//
+//                    if (nickname.equals(clientModel.getMyNickname())) {
+//                        Button button = buttonMap.get(fromCoordsToButtonId(coords));
+//                        Platform.runLater(() -> updateButtonAppearance(button, updatedComponent));
+//                    } else {
+//                        StackPane playerStackPane = otherPlayersShipBoards.get(nickname);
+//                        Platform.runLater(() -> updateOtherShipBoardsAppearance(playerStackPane, updatedComponent, coords.getX(), coords.getY()));
+//                    }
+//                });
+//    }
 
 
 }
