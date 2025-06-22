@@ -170,7 +170,7 @@ public class GameModel {
     }
 
     public static int throwDices() {
-        return (int) (Math.random() * 11) + 1;
+        return (int) (Math.random() * 11) + 1; // TODO sostituire
     }
 
     public DangerousObj getCurrDangerousObj() {
@@ -488,7 +488,7 @@ public class GameModel {
             return;
         }
         shipBoard.getIncorrectlyPositionedComponentsCoordinates().add(new Coordinates(hitCoordinates[0], hitCoordinates[1]));
-        gameClientNotifier.notifyClients(Set.of(currPlayer.getNickname()),(nicknameToNotify, clientController) -> {
+        gameClientNotifier.notifyClients(Set.of(currPlayer.getNickname()), (nicknameToNotify, clientController) -> {
             clientController.notifyCoordinateOfComponentHit(nicknameToNotify,currPlayer.getNickname(),new Coordinates(hitCoordinates[0], hitCoordinates[1]));
         });
         currAdventureCard.setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);

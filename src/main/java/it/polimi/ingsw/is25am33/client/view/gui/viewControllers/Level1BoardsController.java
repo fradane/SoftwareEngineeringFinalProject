@@ -2,24 +2,14 @@ package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.component.Component;
-import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
+import javafx.util.Pair;
 
 import java.util.*;
 
@@ -36,26 +26,14 @@ public class Level1BoardsController extends BoardsController {
     @FXML private Button button07_03, button07_04, button07_05, button07_06, button07_07, button07_08, button07_09;
     @FXML private Button button08_03, button08_04, button08_05, button08_06, button08_07, button08_08, button08_09;
 
-    private static final Map<Integer, Point2D> flyingBoardRelativePositions = Map.ofEntries(
-            Map.entry(0, new Point2D(149.0, 189.0)),
-            Map.entry(1, new Point2D(192.0, 171.0)),
-            Map.entry(2, new Point2D(238.0, 160.0)),
-            Map.entry(3, new Point2D(282.0, 154.0)),
-            Map.entry(4, new Point2D(327.0, 155.0)),
-            Map.entry(5, new Point2D(371.0, 160.0)),
-            Map.entry(6, new Point2D(415.0, 173.0)),
-            Map.entry(7, new Point2D(458.0, 191.0)),
-            Map.entry(8, new Point2D(497.0, 219.0)),
-            Map.entry(9, new Point2D(524.0, 261.0)),
-            Map.entry(10, new Point2D(517.0, 313.0)),
-            Map.entry(11, new Point2D(493.0, 352.0)),
-            Map.entry(12, new Point2D(452.0, 377.0)),
-            Map.entry(13, new Point2D(409.0, 393.0))
+    @FXML public GridPane player2Grid, player3Grid, player4Grid;
+
+    private static final Map<Integer, Pair<Integer, Integer>> flyingBoardRelativePositions = Map.ofEntries(
             // TODO finire le posizioni
     );
 
     @Override
-    protected Map<Integer, Point2D> getFlyingBoardRelativePositions() {
+    protected Map<Integer, Pair<Integer, Integer>> getFlyingBoardRelativePositions() {
         return flyingBoardRelativePositions;
     }
 
@@ -68,7 +46,7 @@ public class Level1BoardsController extends BoardsController {
         setupFlyingBoardBinding();
         setupShipBoardNavigationBarAndBoards();
         setupGridBindings(modelFxAdapter.getMyObservableMatrix());
-        setupChangedAttributesBinding();
+        //setupChangedAttributesBinding();
     }
 
     public void initialize() {

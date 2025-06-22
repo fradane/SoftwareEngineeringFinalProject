@@ -23,6 +23,7 @@ public class PrefabShipFactory {
                 "storage_ship",
                 "storage_ship",
                 "Ship for testing cube malus",
+                false,
                 false
         ));
 
@@ -30,29 +31,48 @@ public class PrefabShipFactory {
                 "basic_ship",
                 "Basic Ship",
                 "A simple ship with essential components",
+                false,
                 false
+        ));
+
+        PREFAB_SHIPS.put("cargo_ship", new PrefabShipInfo(
+                "cargo_ship",
+                "cargo ship",
+                "ship which can only store cargo cubes",
+                false,
+                true
         ));
 
         PREFAB_SHIPS.put("basic_gui_shipboard", new PrefabShipInfo(
                 "basic_gui_shipboard",
                 "GUI ship",
                 "A simple ship, but GUI friendly",
-                false
+                false,
+                true
+        ));
+
+        PREFAB_SHIPS.put("gui_shipboard_meteorite", new PrefabShipInfo(
+                "gui_shipboard_meteorite",
+                "meteorite_GUI",
+                "ship with shields and battery box",
+                false,
+                true
         ));
 
         PREFAB_SHIPS.put("ship_for_meteorites", new PrefabShipInfo(
                 "ship_for_meteorites",
                 "ship_for_meteorites",
                 "A ship with cannon, double cannon and shield",
+                false,
                 false
         ));
-
 
 
         PREFAB_SHIPS.put("cargo_hauler", new PrefabShipInfo(
                 "cargo_hauler",
                 "Cargo Hauler",
                 "A mid-sized cargo ship with 3 crew cabins and 2 storage units, perfect for freight missions",
+                false,
                 false
         ));
 
@@ -60,6 +80,7 @@ public class PrefabShipFactory {
                 "nave_scorretta",
                 "Nave Scorretta",
                 "nave scorretta per fare controlli sulla nave",
+                false,
                 false
         ));
 
@@ -67,7 +88,8 @@ public class PrefabShipFactory {
                 "engine_batterybox_ship",
                 "Nave Con Engine e Battery Box",
                 "ship with engine and battery box",
-                false
+                false,
+                true
         ));
 
 
@@ -96,15 +118,84 @@ public class PrefabShipFactory {
     public static boolean applyPrefabShip(ShipBoard shipBoard, String prefabShipId) {
         return switch (prefabShipId) {
             case "basic_ship" -> applyBasicShip(shipBoard);
+            case "cargo_ship" -> applyCargoShip(shipBoard);
             case "cargo_hauler" -> applyCargoHauler(shipBoard);
             case "nave_scorretta" -> applyNaveScorretta(shipBoard);
             case "basic_gui_shipboard" -> applyGuiBasicShip(shipBoard);
             case "ship_for_meteorites" -> applyMeteoriteShip(shipBoard);
             case "storage_ship" -> applyStorageShip(shipBoard);
+            case "gui_shipboard_meteorite" -> applyGuiMeteoriteShip(shipBoard);
             case "engine_batterybox_ship" -> applyEngineShip(shipBoard);
 
             default -> false;
         };
+    }
+
+    private static boolean applyGuiMeteoriteShip(ShipBoard shipBoard) {
+
+        clearShipBoard(shipBoard);
+
+        ComponentLoader.loadComponents()
+                .stream()
+                .filter(component -> switch (component.getImageName()) {
+                    case "GT-new_tiles_16_for_web7.jpg",
+                         "GT-new_tiles_16_for_web10.jpg",
+                         "GT-new_tiles_16_for_web156.jpg",
+                         "GT-new_tiles_16_for_web151.jpg",
+                         "GT-new_tiles_16_for_web119.jpg",
+                         "GT-new_tiles_16_for_web136.jpg",
+                         "GT-new_tiles_16_for_web149.jpg" -> true;
+                    default -> false;
+                })
+                .forEach(component -> {
+                    String imageName = component.getImageName();
+                    System.out.println(imageName);
+                    switch (imageName) {
+                        case "GT-new_tiles_16_for_web7.jpg" -> addComponent(shipBoard, component, 7, 8);
+                        case "GT-new_tiles_16_for_web10.jpg" -> addComponent(shipBoard, component, 7, 6);
+                        case "GT-new_tiles_16_for_web156.jpg" -> addComponent(shipBoard, component, 7, 9);
+                        case "GT-new_tiles_16_for_web151.jpg" -> {
+                            component.rotate();
+                            component.rotate();
+                            addComponent(shipBoard, component, 8, 7);
+                        }
+                        case "GT-new_tiles_16_for_web136.jpg" -> {
+                            component.rotate();
+                            addComponent(shipBoard, component, 8, 8);
+                        }
+                        case "GT-new_tiles_16_for_web119.jpg" -> addComponent(shipBoard, component, 6, 8);
+                        case "GT-new_tiles_16_for_web149.jpg" -> addComponent(shipBoard, component, 6, 7);
+                    }
+                });
+
+        return true;
+    }
+
+    private static boolean applyCargoShip(ShipBoard shipBoard) {
+
+        clearShipBoard(shipBoard);
+
+        ComponentLoader.loadComponents()
+                .stream()
+                .filter(component -> switch (component.getImageName()) {
+                    case "GT-new_tiles_16_for_web62.jpg",
+                         "GT-new_tiles_16_for_web31.jpg",
+                         "GT-new_tiles_16_for_web64.jpg",
+                         "GT-new_tiles_16_for_web18.jpg" -> true;
+                    default -> false;
+                })
+                .forEach(component -> {
+                    String imageName = component.getImageName();
+                    System.out.println(imageName);
+                    switch (imageName) {
+                        case "GT-new_tiles_16_for_web62.jpg" -> addComponent(shipBoard, component, 7, 6);
+                        case "GT-new_tiles_16_for_web31.jpg" -> addComponent(shipBoard, component, 8, 6);
+                        case "GT-new_tiles_16_for_web64.jpg" -> addComponent(shipBoard, component, 6, 7);
+                        case "GT-new_tiles_16_for_web18.jpg" -> addComponent(shipBoard, component, 8, 7);
+                    }
+                });
+
+        return true;
     }
 
     private static boolean applyStorageShip(ShipBoard shipBoard) {

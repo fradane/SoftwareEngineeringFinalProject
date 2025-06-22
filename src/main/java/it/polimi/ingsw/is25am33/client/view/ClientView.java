@@ -10,6 +10,7 @@ import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -235,7 +236,7 @@ public interface ClientView {
             case THROW_DICES:
                 return ClientState.THROW_DICES_MENU;
             case DANGEROUS_ATTACK:
-                // Determine specific type based on dangerous object
+                // Determine specific type based on the dangerous object
                 ClientDangerousObject obj = clientModel.getCurrDangerousObj();
                 if (obj != null) {
                     String type = obj.getType();

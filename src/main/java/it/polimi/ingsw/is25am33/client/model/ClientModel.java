@@ -1,10 +1,10 @@
 package it.polimi.ingsw.is25am33.client.model;
 
+import it.polimi.ingsw.is25am33.client.model.card.*;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
-import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
-import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 
@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import java.util.Timer;
 import java.util.TimerTask;
 import javafx.application.Platform;
+
+import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.ERROR;
 
 public class ClientModel {
 
@@ -109,8 +111,15 @@ public class ClientModel {
      * @param currAdventureCard the new current adventure card to be set
      */
     public void setCurrAdventureCard(ClientCard currAdventureCard) {
+
+        System.out.println(currAdventureCard.getImageName());
+
+        if (this.currAdventureCard != null && this.currAdventureCard.getImageName().equals(currAdventureCard.getImageName())) {
+            this.currAdventureCard = currAdventureCard;
+            return;
+        }
+
         this.currAdventureCard = currAdventureCard;
-        //System.err.println("Setting current Adventure Card: " + currAdventureCard);
 
         // Synchronize on the lock to ensure thread-safe access to modelFxAdapter
         synchronized (modelFxAdapterLock) {
@@ -283,6 +292,39 @@ public class ClientModel {
                 modelFxAdapter.refreshCosmicCredits();
             }
         }
+    }
+
+    /**
+     * Extracts the information about cube rewards from the current card.
+     * Uses the ClientCard object properties directly instead of string parsing.
+     *
+     * @return List of CargoCube that represent the rewards of the current card
+     */
+    public List<CargoCube> extractCubeRewardsFromCurrentCard() throws IllegalStateException {
+        List<CargoCube> cubes = new ArrayList<>();
+        ClientCard card = currAdventureCard;
+
+        if (card == null)
+            throw new IllegalStateException("No active card available.");
+
+        // Extract rewards based on a card type
+        if (card instanceof ClientPlanets planets) {
+            return planets.getPlayerReward(myNickname);
+        }
+        else if (card instanceof ClientAbandonedStation) {
+            // AbandonedStation has a direct list of rewards
+            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
+        }
+        else if (card instanceof ClientSmugglers) {
+            // Smugglers have a direct list of rewards
+            return new ArrayList<>(((ClientSmugglers) card).getReward());
+        }
+
+        // If no rewards were found or the card type doesn't have rewards
+        if (currCardState == CardState.HANDLE_CUBES_REWARD)
+            throw new IllegalStateException("Could not determine cube rewards for this card type.");
+
+        return cubes;
     }
 
 }

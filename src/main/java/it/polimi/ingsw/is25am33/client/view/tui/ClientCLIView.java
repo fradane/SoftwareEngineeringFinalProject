@@ -55,20 +55,20 @@ public class ClientCLIView implements ClientView {
 
     // Class-level variables to track selection state
     Map<String, Set<Coordinates>> coloredCoordinates = new HashMap<>();
-    private List<Coordinates> selectedEngines = new ArrayList<>();
-    private List<Coordinates> selectedCabins = new ArrayList<>();
-    private List<Coordinates> selectedCannons = new ArrayList<>();
-    private List<Coordinates> selectedBatteries = new ArrayList<>();
-    private List<Coordinates> selectedShields = new ArrayList<>();
+    private final List<Coordinates> selectedEngines = new ArrayList<>();
+    private final List<Coordinates> selectedCabins = new ArrayList<>();
+    private final List<Coordinates> selectedCannons = new ArrayList<>();
+    private final List<Coordinates> selectedBatteries = new ArrayList<>();
+    private final List<Coordinates> selectedShields = new ArrayList<>();
     private Coordinates currentSelection = null;
     private Coordinates hitComponent = null;
     private boolean waitingForBatterySelection = false;
     private StorageSelectionManager storageManager = null;
-    private Map<Integer, Coordinates> crewPlacementCoordinatesMap = new HashMap<>();
-    private Map<Coordinates, CrewMember> crewChoices = new HashMap<>();
+    private final Map<Integer, Coordinates> crewPlacementCoordinatesMap = new HashMap<>();
+    private final Map<Coordinates, CrewMember> crewChoices = new HashMap<>();
     private int cubeMalus;
     private List<Coordinates> mostPreciousCube;
-    private List<Coordinates> selectedStorage = new ArrayList<>();
+    private final List<Coordinates> selectedStorage = new ArrayList<>();
 
     // Definizione dei colori ANSI (funziona nei terminali che supportano i colori ANSI).
     private static final String ANSI_RED = "\u001B[31m";
@@ -608,7 +608,7 @@ public class ClientCLIView implements ClientView {
         }
     }
 
-    public void showComponentHitInfo(Coordinates coordinates){
+    public void showComponentHitInfo(Coordinates coordinates) {
             showMessage("The component at coordinates " + coordinates.getX() + "-"+ coordinates.getY() + " has been hit", STANDARD);
             hitComponent = coordinates;
     }
@@ -617,7 +617,7 @@ public class ClientCLIView implements ClientView {
         showMessage("You have " + clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size() + " crew members", STANDARD);
         for(String player: clientModel.getSortedRanking()) {
             if(!player.equals(clientModel.getMyNickname()))
-            showMessage(player + "has" + clientModel.getShipboardOf(player).getCrewMembers().size() + " crew members", STANDARD);
+                showMessage(player + "has" + clientModel.getShipboardOf(player).getCrewMembers().size() + " crew members", STANDARD);
         }
         if(clientModel.isMyTurn()){
             showMessage("Press enter to start this phase", ASK);
@@ -838,14 +838,13 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void checkShipBoardAfterAttackMenu() {
-        if(hitComponent!=null) {
+        if (hitComponent != null) {
             clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
-            hitComponent=null;
-        }
-        else {
+            hitComponent = null;
+        } else {
             showMessage("GOOD JOB! You are save!", STANDARD);
             setClientState(WAIT_PLAYER);
-            clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(),hitComponent);
+            clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
         }
     }
 
@@ -1484,7 +1483,7 @@ public class ClientCLIView implements ClientView {
 
         showShieldWithColor();
 
-        if(clientModel.getShipboardOf(clientController.getNickname()).getShields().isEmpty() ) {
+        if (clientModel.getShipboardOf(clientController.getNickname()).getShields().isEmpty() ) {
             showMessage("No shield available.", STANDARD);
             showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
             setClientState(WAIT_PLAYER);
@@ -1501,7 +1500,7 @@ public class ClientCLIView implements ClientView {
         }
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare nessuno scudo
-        if(!isThereAvailableBattery()) {
+        if (!isThereAvailableBattery()) {
             showMessage("Hai finito le batterie coglione so you can't activate shield.", STANDARD);
             showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
             setClientState(WAIT_PLAYER);
@@ -1619,7 +1618,13 @@ public class ClientCLIView implements ClientView {
         setClientState(ClientState.HANDLE_CUBES_REWARD_MENU);
 
         // Get cube rewards directly from the current card
-        List<CargoCube> rewardCubes = extractCubeRewardsFromCurrentCard();
+        List<CargoCube> rewardCubes = null;
+        try {
+            rewardCubes = clientModel.extractCubeRewardsFromCurrentCard();
+        } catch (IllegalStateException e) {
+            showMessage("ERROR: " + e.getMessage(), ERROR);
+            // TODO che si fa?
+        }
 
         // Initialize the storage manager with the cube rewards
         storageManager = new StorageSelectionManager(rewardCubes, 0, getMyShipBoard());
@@ -1693,23 +1698,12 @@ public class ClientCLIView implements ClientView {
                     // Format each cube with its color
                     List<String> formattedCubes = new ArrayList<>();
                     for (CargoCube cube : storedCubes) {
-                        String cubeColor = "";
-                        switch (cube) {
-                            case RED:
-                                cubeColor = ANSI_RED;
-                                break;
-                            case YELLOW:
-                                cubeColor = ANSI_YELLOW;
-                                break;
-                            case GREEN:
-                                cubeColor = ANSI_GREEN;
-                                break;
-                            case BLUE:
-                                cubeColor = ANSI_BLUE;
-                                break;
-                            default:
-                                cubeColor = "";
-                        }
+                        String cubeColor = switch (cube) {
+                            case RED -> ANSI_RED;
+                            case YELLOW -> ANSI_YELLOW;
+                            case GREEN -> ANSI_GREEN;
+                            case BLUE -> ANSI_BLUE;
+                        };
                         formattedCubes.add(cubeColor + cube.name() + ANSI_RESET);
                     }
                     storageInfo.append(String.join(", ", formattedCubes));
@@ -1775,43 +1769,6 @@ public class ClientCLIView implements ClientView {
             List<Coordinates> selectedCoordinates = storageManager.getSelectedStorageCoordinates();
             clientController.playerChoseStorage(clientController.getNickname(), selectedCoordinates);
         }
-    }
-
-    /**
-     * Extracts the information about cube rewards from the current card.
-     * Uses the ClientCard object properties directly instead of string parsing.
-     *
-     * @return List of CargoCube that represent the rewards of the current card
-     */
-    private List<CargoCube> extractCubeRewardsFromCurrentCard() {
-        List<CargoCube> cubes = new ArrayList<>();
-        ClientCard card = clientModel.getCurrAdventureCard();
-
-        if (card == null) {
-            showMessage("No active card available.", ERROR);
-            return cubes;
-        }
-
-        // Extract rewards based on card type
-        if (card instanceof ClientPlanets) {
-            ClientPlanets planets = (ClientPlanets) card;
-            return planets.getPlayerReward(clientModel.getMyNickname());
-        }
-        else if (card instanceof ClientAbandonedStation) {
-            // AbandonedStation has a direct list of rewards
-            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
-        }
-        else if (card instanceof ClientSmugglers) {
-            // Smugglers have a direct list of rewards
-            return new ArrayList<>(((ClientSmugglers) card).getReward());
-        }
-
-        // If no rewards were found or the card type doesn't have rewards
-        if (cubes.isEmpty() && clientModel.getCurrCardState() == CardState.HANDLE_CUBES_REWARD) {
-            showMessage("Could not determine cube rewards for this card type.", ERROR);
-        }
-
-        return cubes;
     }
 
     /**
@@ -2217,7 +2174,7 @@ public class ClientCLIView implements ClientView {
                 return;
             }
 
-            if(clientState==HANDLE_SMALL_DANGEROUS_SELECT_BATTERY) {
+            if (clientState == HANDLE_SMALL_DANGEROUS_SELECT_BATTERY) {
                 showMessage("Shield and battery selected", STANDARD);
                 setClientState(WAIT_PLAYER);
                 clientController.playerHandleSmallDanObj(clientController.getNickname(), selectedShields, selectedBatteries);
@@ -2226,7 +2183,7 @@ public class ClientCLIView implements ClientView {
                 return;
             }
 
-            if(clientState== CHOOSE_CANNONS_SELECT_BATTERY_BIGMETEORITE){
+            if (clientState == CHOOSE_CANNONS_SELECT_BATTERY_BIGMETEORITE) {
                 showMessage("Double Cannon and battery selected", STANDARD);
                 setClientState(WAIT_PLAYER);
                 clientController.playerHandleBigMeteorite(clientController.getNickname(), selectedCannons, selectedBatteries);
@@ -2234,7 +2191,7 @@ public class ClientCLIView implements ClientView {
                 selectedBatteries.clear();
             }
 
-            if(clientState == CHOOSE_BATTERY_CUBES) {
+            if (clientState == CHOOSE_BATTERY_CUBES) {
 
                 if (selectedBatteries.size() + selectedStorage.size() == cubeMalus
                         || clientModel.getShipboardOf(clientModel.getMyNickname()).getTotalAvailableBattery()==selectedBatteries.size()) {
@@ -2283,10 +2240,9 @@ public class ClientCLIView implements ClientView {
             showBatteryBoxesWithColor();
             showMessage("Now select a battery box for this cannon (row column): ", ASK);
 
-            if(clientState==ClientState.HANDLE_BIG_METEORITE_MENU){
+            if (clientState == ClientState.HANDLE_BIG_METEORITE_MENU) {
                 setClientState(CHOOSE_CANNONS_SELECT_BATTERY_BIGMETEORITE);
-            }
-            else if(clientState == CHOOSE_CANNONS_MENU){
+            } else if (clientState == CHOOSE_CANNONS_MENU) {
                 setClientState(CHOOSE_CANNONS_SELECT_BATTERY);
             }
 
@@ -3180,14 +3136,13 @@ public class ClientCLIView implements ClientView {
                     if (input.equalsIgnoreCase("done")){
 
                         if(selectedCannons.isEmpty()){
-                            showMessage("You didn't select any cannon. The meteorite hits your ship", STANDARD);
+                            showMessage("You didn't select any cannon. The meteorite won't be stopped", STANDARD);
                         }
                         setClientState(WAIT_PLAYER);
                         clientController.playerHandleBigMeteorite(clientController.getNickname(), selectedCannons, selectedBatteries);
                         selectedCannons.clear();
                         selectedBatteries.clear();
-                    }
-                    else {
+                    } else {
                         showCannonWithColor();
                         handleCannonSelection(input);
                     }

@@ -1,15 +1,15 @@
 package it.polimi.ingsw.is25am33.client.view.tui;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
+import it.polimi.ingsw.is25am33.model.component.StandardStorage;
 import it.polimi.ingsw.is25am33.model.component.Storage;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Classe utilitaria per la gestione delle scelte di storage durante la fase di reward.
@@ -42,6 +42,10 @@ public class StorageSelectionManager {
 
         // Costruisce la mappa di compatibilità tra cubi e storage
         buildCompatibilityMap();
+    }
+
+    public Map<CargoCube, List<Storage>> getCompatibleStoragesMap() {
+        return compatibleStoragesMap;
     }
 
     /**
@@ -92,34 +96,6 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Ottiene una mappa che indica quanti cubi di ogni tipo il giocatore non può accettare.
-     *
-     * @return Una mappa con il tipo di cubo e il numero di cubi che non possono essere accettati
-     */
-    public Map<CargoCube, Integer> getUnacceptableCubesCount() {
-        Map<CargoCube, Integer> cubeCount = new HashMap<>();
-        Map<CargoCube, Integer> unacceptableCubes = new HashMap<>();
-
-        // Conta quanti cubi di ogni tipo ci sono nei reward
-        for (CargoCube cube : cubeRewards) {
-            cubeCount.put(cube, cubeCount.getOrDefault(cube, 0) + 1);
-        }
-
-        // Verifica quanti cubi di ogni tipo non possono essere accettati
-        for (Map.Entry<CargoCube, Integer> entry : cubeCount.entrySet()) {
-            CargoCube cubeType = entry.getKey();
-            int requiredCount = entry.getValue();
-            int availableCount = compatibleStoragesMap.getOrDefault(cubeType, new ArrayList<>()).size();
-
-            if (availableCount < requiredCount) {
-                unacceptableCubes.put(cubeType, requiredCount - availableCount);
-            }
-        }
-
-        return unacceptableCubes;
-    }
-
-    /**
      * Aggiunge uno storage alla selezione per il cubo corrente.
      *
      * @param storageCoords Le coordinate dello storage selezionato
@@ -157,7 +133,7 @@ public class StorageSelectionManager {
             if (!storedCubes.isEmpty()) {
                 // Ordina i cubi per valore (il meno prezioso per primo)
                 storedCubes.sort(CargoCube.byValue);
-                CargoCube leastValuableCube = storedCubes.get(0);
+                CargoCube leastValuableCube = storedCubes.getFirst();
 
                 // Se il cubo meno prezioso ha un valore maggiore del cubo corrente, avvisa l'utente
                 if (leastValuableCube.getValue() > currentCube.getValue()) {
@@ -235,21 +211,7 @@ public class StorageSelectionManager {
         }
 
         // Verifica se ci sono storage compatibili
-        return compatibleStoragesMap.getOrDefault(currentCube, new ArrayList<>()).size() > 0;
-    }
-
-    /**
-     * Rimuove l'ultima selezione di storage.
-     *
-     * @return true se una selezione è stata rimossa, false se la lista era già vuota
-     */
-    public boolean removeLastSelection() {
-        if (selectedStorages.isEmpty()) {
-            return false;
-        }
-
-        selectedStorages.remove(selectedStorages.size() - 1);
-        return true;
+        return !compatibleStoragesMap.getOrDefault(currentCube, new ArrayList<>()).isEmpty();
     }
 
     /**
@@ -268,15 +230,6 @@ public class StorageSelectionManager {
      */
     public List<Coordinates> getSelectedStorageCoordinates() {
         return new ArrayList<>(selectedStorages);
-    }
-
-    /**
-     * Restituisce il numero di storage ancora da selezionare.
-     *
-     * @return Il numero di storage ancora da selezionare
-     */
-    public int getRemainingSelectionsCount() {
-        return cubeRewards.size() - selectedStorages.size();
     }
 
     /**
@@ -348,30 +301,6 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Genera una stringa che descrive quali cubi possono essere accettati e quali no.
-     *
-     * @return Una stringa informativa sulla compatibilità dei cubi
-     */
-    public String getStorageCompatibilityInfo() {
-        if (!hasAnyStorage()) {
-            return "Non hai storage disponibili. Non puoi accettare nessun cubo.";
-        }
-
-        Map<CargoCube, Integer> unacceptableCubes = getUnacceptableCubesCount();
-        if (unacceptableCubes.isEmpty()) {
-            return "Hai storage sufficienti per accettare tutti i cubi reward.";
-        }
-
-        StringBuilder info = new StringBuilder("Non hai abbastanza storage per accettare tutti i cubi:\n");
-        for (Map.Entry<CargoCube, Integer> entry : unacceptableCubes.entrySet()) {
-            info.append("- ").append(entry.getValue()).append(" cubi ").append(entry.getKey())
-                    .append(" non possono essere accettati.\n");
-        }
-
-        return info.toString();
-    }
-
-    /**
      * Restituisce il numero totale di cubi reward da gestire.
      *
      * @return Il numero totale di cubi reward
@@ -380,107 +309,7 @@ public class StorageSelectionManager {
         return cubeRewards.size();
     }
 
-    /**
-     * Restituisce il numero di cubi che possono effettivamente essere accettati
-     * dal giocatore considerando i suoi storage disponibili.
-     *
-     * @return Il numero di cubi che possono essere accettati
-     */
-    public int getAcceptableCubesCount() {
-        Map<CargoCube, Integer> cubeCount = new HashMap<>();
-
-        // Conta quanti cubi di ogni tipo ci sono nei reward
-        for (CargoCube cube : cubeRewards) {
-            cubeCount.put(cube, cubeCount.getOrDefault(cube, 0) + 1);
-        }
-
-        int acceptableCount = 0;
-
-        // Per ogni tipo di cubo, calcola quanti possono essere accettati
-        for (Map.Entry<CargoCube, Integer> entry : cubeCount.entrySet()) {
-            CargoCube cubeType = entry.getKey();
-            int requiredCount = entry.getValue();
-            int availableStorageCount = compatibleStoragesMap.getOrDefault(cubeType, new ArrayList<>()).size();
-
-            // Il numero accettabile è il minimo tra richiesto e disponibile
-            acceptableCount += Math.min(requiredCount, availableStorageCount);
-        }
-
-        return acceptableCount;
-    }
-
-    /**
-     * Restituisce una descrizione dettagliata di quali cubi possono essere accettati.
-     *
-     * @return Una stringa che descrive lo stato di accettazione dei cubi
-     */
-    public String getDetailedAcceptabilityStatus() {
-        if (!hasAnyStorage()) {
-            return "Nessuno storage disponibile. Non puoi accettare nessun cubo.";
-        }
-
-        Map<CargoCube, Integer> cubeCount = new HashMap<>();
-        for (CargoCube cube : cubeRewards) {
-            cubeCount.put(cube, cubeCount.getOrDefault(cube, 0) + 1);
-        }
-
-        StringBuilder status = new StringBuilder("Stato accettazione cubi:\n");
-
-        for (Map.Entry<CargoCube, Integer> entry : cubeCount.entrySet()) {
-            CargoCube cubeType = entry.getKey();
-            int requiredCount = entry.getValue();
-            int availableStorageCount = compatibleStoragesMap.getOrDefault(cubeType, new ArrayList<>()).size();
-            int acceptableCount = Math.min(requiredCount, availableStorageCount);
-
-            status.append("- ").append(cubeType).append(": ")
-                    .append(acceptableCount).append("/").append(requiredCount)
-                    .append(" (").append(availableStorageCount).append(" storage compatibili)")
-                    .append("\n");
-        }
-
-        return status.toString();
-    }
-
-    /**
-     * Verifica se almeno un cubo può essere accettato dal giocatore.
-     *
-     * @return true se almeno un cubo può essere accettato, false altrimenti
-     */
-    public boolean canAcceptAnyCube() {
-        return getAcceptableCubesCount() > 0;
-    }
-
-    /**
-     * Aggiunge una selezione di storage anche se le coordinate sono invalide.
-     * Questo permette di gestire il caso in cui un cubo non può essere salvato.
-     *
-     * @param storageCoords Le coordinate dello storage selezionato (possono essere invalide)
-     * @return true se la selezione è stata registrata, false altrimenti
-     */
-    public boolean addStorageSelectionAllowInvalid(Coordinates storageCoords) {
-        // Verifico se abbiamo già selezionato tutti gli storage necessari
-        if (selectedStorages.size() >= cubeRewards.size()) {
-            return false;
-        }
-
-        // Se le coordinate sono invalide, le aggiungiamo comunque per indicare
-        // che questo cubo viene scartato
-        if (storageCoords.isCoordinateInvalid()) {
-            selectedStorages.add(storageCoords);
-            return true;
-        }
-
-        // Altrimenti usiamo la logica normale
-        return addStorageSelection(storageCoords);
-    }
-    /**
-     * Resetta tutte le selezioni.
-     */
-    public void reset() {
-        selectedStorages.clear();
-    }
-
-    public Map<CargoCube,List<Coordinates>> whereAreCube() {
+    public Map<CargoCube, List<Coordinates>> whereAreCube() {
 
         //ottengo una lista degli storage che contengono un cubo di quel colore con ripetizioni
 
@@ -533,6 +362,146 @@ public class StorageSelectionManager {
             }
 
         return mostPrecious;
+    }
+
+    public Set<Coordinates> getSelectableCoordinates() {
+        CargoCube currentCube = getCurrentCube();
+        List<Storage> selectableStorages = compatibleStoragesMap.get(currentCube);
+
+        return shipBoard.getCoordinatesOfComponents(selectableStorages);
+    }
+
+    /**
+     * Adds a storage to the selection for the current cube by creating a copy of the storage.
+     * This solves the ObservableProperty issue that doesn't detect internal changes.
+     *
+     * @param storageCoords The coordinates of the selected storage
+     * @return true if the storage was successfully added, false otherwise
+     */
+    public boolean addStorageSelectionWithCopy(Coordinates storageCoords) {
+        // Check if we have already selected all necessary storages
+        if (selectedStorages.size() >= cubeRewards.size()) {
+            return false;
+        }
+
+        // The player doesn't want to save this cube
+        if (storageCoords.isCoordinateInvalid()) {
+            selectedStorages.add(storageCoords);
+            return true;
+        }
+
+        // Get the component at the specified coordinates
+        Storage originalStorage = getStorageAtCoordinates(storageCoords);
+        if (originalStorage == null) {
+            return false;
+        }
+
+        // Check if the current cube is red and the storage is standard type
+        int currentCubeIndex = selectedStorages.size();
+        CargoCube currentCube = cubeRewards.get(currentCubeIndex);
+
+        if (currentCube == CargoCube.RED && !(originalStorage instanceof SpecialStorage)) {
+            return false;  // Red cubes can only be placed in special storages
+        }
+
+        // Create a copy of the storage
+        Storage storageClone = cloneStorage(originalStorage);
+
+        // Add the cube to the copy
+        CargoCube removedCube = storageClone.addCube(currentCube);
+
+        // If a cube was removed, inform the user
+        if (removedCube != null) {
+            // TODO: use showMessage
+            System.out.println("The cube " + removedCube + " was removed to make room for the new cube " + currentCube);
+        }
+
+        // Replace the storage in the shipboard
+        replaceStorageInShipBoard(storageCoords, originalStorage, storageClone);
+
+        // Add the coordinates to the selection list
+        selectedStorages.add(storageCoords);
+
+        return true;
+    }
+
+    /**
+     * Creates a deep copy of the storage maintaining the correct type.
+     *
+     * @param original The original storage to clone
+     * @return A new instance of the storage with the same attributes
+     */
+    private Storage cloneStorage(Storage original) {
+        Storage clone = getClonedStorage(original);
+
+        // Copy common attributes from Component
+        clone.setCurrState(original.getCurrState());
+        clone.setImageName(original.getImageName());
+        for (int i = 0; i < original.getRotation(); i++)
+            clone.rotate();
+
+        // Copy existing cubes
+        for (CargoCube cube : original.getStockedCubes()) {
+            clone.addCube(cube);
+        }
+
+        return clone;
+    }
+
+    private static @NotNull Storage getClonedStorage(Storage original) {
+        Storage clone;
+
+        // Create the correct instance based on type
+        if (original instanceof SpecialStorage) {
+            clone = new SpecialStorage(new EnumMap<>(original.getConnectors()), original.getMaxCapacity());
+        } else if (original instanceof StandardStorage) {
+            clone = new StandardStorage(new EnumMap<>(original.getConnectors()), original.getMaxCapacity());
+        } else {
+            throw new IllegalArgumentException("Unknown storage type: " + original.getClass());
+        }
+
+        return clone;
+    }
+
+    /**
+     * Replaces the storage in the shipboard and updates the componentsPerType map.
+     *
+     * @param coords The coordinates of the storage
+     * @param oldStorage The original storage to replace
+     * @param newStorage The new storage that replaces the old one
+     */
+    private void replaceStorageInShipBoard(Coordinates coords, Storage oldStorage, Storage newStorage) {
+        // Replace it in the matrix
+        Component[][] shipMatrix = shipBoard.getShipMatrix();
+        shipMatrix[coords.getX()][coords.getY()] = newStorage;
+
+        // Update the componentsPerType map
+        Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
+
+        // Remove the old storage from its type list
+        Class<?> storageClass = oldStorage.getClass();
+        List<Component> storageList = componentsPerType.get(storageClass);
+        if (storageList != null) {
+            storageList.remove(oldStorage);
+            storageList.add(newStorage);
+        }
+
+        updateCompatibilityMapAfterReplacement(oldStorage, newStorage);
+    }
+
+    /**
+     * Updates compatibility map after replacing the new storage
+     */
+    private void updateCompatibilityMapAfterReplacement(Storage oldStorage, Storage newStorage) {
+        for (Map.Entry<CargoCube, List<Storage>> entry : compatibleStoragesMap.entrySet()) {
+            List<Storage> storageList = entry.getValue();
+
+            // Trova e sostituisci il vecchio storage con il nuovo
+            int index = storageList.indexOf(oldStorage);
+            if (index != -1) {
+                storageList.set(index, newStorage);
+            }
+        }
     }
 
 }

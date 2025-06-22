@@ -1,9 +1,6 @@
 package it.polimi.ingsw.is25am33.model.component;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
@@ -51,14 +48,13 @@ public abstract class Component implements Serializable {
      */
     private Map<Direction, ConnectorType> connectors;
 
-    @com.fasterxml.jackson.annotation.JsonProperty("type")
+    @JsonProperty("type")
     protected String type;
 
     /**
      * Default constructor for {@code Component}.
      */
-    public Component() {
-    }
+    public Component() {}
 
     /**
      * Constructs a Component with specified directional connectors.

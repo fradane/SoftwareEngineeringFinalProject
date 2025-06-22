@@ -1,6 +1,5 @@
 package it.polimi.ingsw.is25am33.client.model.card;
 
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
 import java.io.Serializable;
@@ -46,11 +45,11 @@ public class ClientDangerousObject implements Serializable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("A "+type+" from "+direction).toString();
-        if(direction==Direction.EAST||direction==Direction.WEST)
-            builder.append(" on the row number "+(coordinate+1));
+        builder.append("A ").append(type).append(" from ").append(direction);
+        if (direction == Direction.EAST || direction == Direction.WEST)
+            builder.append(" on the row number ").append(coordinate + 1);
         else
-            builder.append(" on the column number "+(coordinate+1));
+            builder.append(" on the column number ").append(coordinate + 1);
         return builder.toString();
     }
 }

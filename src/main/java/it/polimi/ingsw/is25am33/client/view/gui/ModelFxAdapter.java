@@ -2,9 +2,11 @@ package it.polimi.ingsw.is25am33.client.view.gui;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
+import it.polimi.ingsw.is25am33.client.view.gui.viewControllers.BoardsController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -25,14 +27,14 @@ public class ModelFxAdapter {
     private final Map<String, Pair<ObjectProperty<Component>, ObjectProperty<Component>>> observableBookedComponents;
     private final Map<PlayerColor, ObjectProperty<Integer>> observableColorRanking;
     private final ObjectProperty<ClientCard> observableCurrAdventureCard;
-    private final ObjectProperty<Pair<String, Coordinates>> observableChangedAttributes;
+    private final BoardsController boardsController;
     private final Boolean isCardAdapter;
     private final Object rankingLock = new Object();
     private final Object visibleComponentsLock  = new Object();
     private final ObjectProperty<Integer> observableCosmicCredits;
 
     @SuppressWarnings("unchecked")
-    public ModelFxAdapter(ClientModel clientModel, Boolean isCardAdapter) {
+    public ModelFxAdapter(ClientModel clientModel, Boolean isCardAdapter, BoardsController boardsController) {
         this.clientModel = clientModel;
         clientModel.setModelFxAdapter(this);
 
@@ -44,8 +46,8 @@ public class ModelFxAdapter {
         this.observableColorRanking = new ConcurrentHashMap<>();
         this.observableBookedComponents = new ConcurrentHashMap<>();
         this.observableCurrAdventureCard = new SimpleObjectProperty<>();
-        this.observableChangedAttributes = new SimpleObjectProperty<>();
         this.observableCosmicCredits = new SimpleObjectProperty<>(0);
+        this.boardsController = boardsController;
         this.isCardAdapter = isCardAdapter;
 
 
@@ -111,10 +113,6 @@ public class ModelFxAdapter {
         }
     }
 
-    public ObjectProperty<Pair<String, Coordinates>> getObservableChangedAttributesProperty() {
-        return observableChangedAttributes;
-    }
-
     public ObjectProperty<Integer> getObservableCosmicCredits() {
         return observableCosmicCredits;
     }
@@ -165,9 +163,7 @@ public class ModelFxAdapter {
                             continue;
                         getObservableShipBoardOf(nickname)[i][j].set(newComponent);
                     } else if (!oldComponent.getGuiHash().equals(newComponent.getGuiHash())) {
-                        synchronized (observableChangedAttributes) {
-                            observableChangedAttributes.set(new Pair<>(nickname, new Coordinates(i, j)));
-                        }
+                        boardsController.updateShipBoards(nickname, i, j, newComponent);
                     }
 
                 }
