@@ -1,35 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.image.*?>
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12"
             fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.StartViewController"
             prefWidth="600" prefHeight="400"
-            style="-fx-background-color: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);">
+            styleClass="game-background"
+            stylesheets="@/galaxy-truckers.css">
 
-    <VBox alignment="CENTER" spacing="20.0" prefWidth="600" prefHeight="400" layoutX="0" layoutY="0"
-          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+    <!-- Container principale centrato -->
+    <VBox alignment="CENTER" spacing="30.0" prefWidth="600" prefHeight="400"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+          AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+          styleClass="start-screen-container">
 
-        <!-- Titolo centrato e ben visibile -->
-        <Label text="Galaxy Trucker" textAlignment="CENTER"
-               style="-fx-text-fill: white; -fx-font-weight: bold;">
-            <font>
-                <Font name="Arial" size="36"/>
-            </font>
-        </Label>
+        <padding>
+            <Insets top="40.0" right="40.0" bottom="40.0" left="40.0" />
+        </padding>
 
-        <!-- Campo inserimento nickname -->
-        <TextField fx:id="nicknameField" promptText="Inserisci il tuo nickname"
-                   onAction="#handleSubmit" maxWidth="250" visible="false"/>
+        <!-- Sezione titolo -->
+        <VBox alignment="CENTER" spacing="12.0" styleClass="title-section">
+            <!-- Titolo diviso su due righe centrate -->
+            <VBox alignment="CENTER" spacing="-10.0">
+                <Label styleClass="game-title" text="GALAXY" alignment="CENTER" />
+                <Label styleClass="game-title" text="TRUCKERS" alignment="CENTER" />
+            </VBox>
 
-        <!-- Pulsante submit -->
-        <Button fx:id="startButton"  onAction="#handleSubmit" text="Submit" maxWidth="100" visible="false"/>
+            <Label styleClass="game-subtitle" text="Build • Explore • Survive" />
+        </VBox>
 
-        <!-- Label per eventuali errori -->
-        <Label fx:id="errorLabel" textFill="red" visible="false"/>
+        <!-- Sezione input nickname -->
+        <VBox alignment="CENTER" spacing="15.0" styleClass="input-section">
+            <Label styleClass="input-label" text="Enter your pilot nickname:" />
+
+            <!-- TextField con container proprio -->
+            <TextField fx:id="nicknameField"
+                       styleClass="space-text-field-with-border"
+                       promptText="Minimum 3 characters"
+                       maxWidth="280.0"
+                       onAction="#handleSubmit" />
+
+            <!-- Label per errori (separata, senza container) -->
+            <Label fx:id="errorLabel"
+                   styleClass="error-label"
+                   visible="false"
+                   wrapText="true"
+                   maxWidth="280.0" />
+        </VBox>
+
+        <!-- Sezione bottone -->
+        <VBox alignment="CENTER" spacing="10.0" styleClass="button-section">
+            <Button fx:id="startButton"
+                    styleClass="start-button"
+                    text="START MISSION"
+                    onAction="#handleSubmit"
+                    prefWidth="180.0" />
+        </VBox>
+
+        <!-- Footer -->
+        <VBox alignment="CENTER" spacing="5.0" styleClass="footer-section">
+            <Label styleClass="version-label" text="v1.0.0" />
+            <Label styleClass="credits-label" text="Prepare for interstellar adventure" />
+        </VBox>
 
     </VBox>
 </AnchorPane>

@@ -42,6 +42,9 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     public ImageView cardImageView;
     @FXML
     public HBox bottomHBox;
+    @FXML
+    public Label cosmicCreditsLabel;
+
 
     private Level2BoardsController boardsController;
     private ModelFxAdapter modelFxAdapter;
@@ -94,13 +97,29 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         // Binding e setup
         this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
         this.bindCurrAdventureCard();
+        this.initializeCosmicCredits();
 
         // Refresh iniziale
         modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
         clientModel.getPlayerClientData().keySet().forEach(nickname ->
                 modelFxAdapter.refreshShipBoardOf(nickname));
         modelFxAdapter.refreshRanking();
+        modelFxAdapter.refreshCosmicCredits();
 
+    }
+
+
+    public void updateCosmicCredits(int credits) {
+        Platform.runLater(() -> {
+            cosmicCreditsLabel.setText(String.valueOf(credits));
+
+            cosmicCreditsLabel.getParent().getStyleClass().add("cosmic-credits-updated");
+
+            PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
+            delay.setOnFinished(e ->
+                    cosmicCreditsLabel.getParent().getStyleClass().remove("cosmic-credits-updated"));
+            delay.play();
+        });
     }
 
     private void bindCurrAdventureCard() {
@@ -123,6 +142,20 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
                         }));
 
+    }
+
+    private void bindCosmicCredits() {
+        modelFxAdapter.getObservableCosmicCredits()
+                .addListener((_, _, newCredits) -> {
+                    if (newCredits != null) {
+                        updateCosmicCredits(newCredits.intValue());
+                    }
+                });
+    }
+
+    private void initializeCosmicCredits() {
+        modelFxAdapter.refreshCosmicCredits();
+        bindCosmicCredits();
     }
 
     // ------------------ CARD PHASE MENU ------------------

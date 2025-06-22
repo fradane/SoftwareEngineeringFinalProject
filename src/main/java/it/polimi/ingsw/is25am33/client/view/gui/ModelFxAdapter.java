@@ -29,6 +29,7 @@ public class ModelFxAdapter {
     private final Boolean isCardAdapter;
     private final Object rankingLock = new Object();
     private final Object visibleComponentsLock  = new Object();
+    private final ObjectProperty<Integer> observableCosmicCredits;
 
     @SuppressWarnings("unchecked")
     public ModelFxAdapter(ClientModel clientModel, Boolean isCardAdapter) {
@@ -44,7 +45,9 @@ public class ModelFxAdapter {
         this.observableBookedComponents = new ConcurrentHashMap<>();
         this.observableCurrAdventureCard = new SimpleObjectProperty<>();
         this.observableChangedAttributes = new SimpleObjectProperty<>();
+        this.observableCosmicCredits = new SimpleObjectProperty<>(0);
         this.isCardAdapter = isCardAdapter;
+
 
         // initialize shipboards
         clientModel.getPlayerClientData()
@@ -110,6 +113,10 @@ public class ModelFxAdapter {
 
     public ObjectProperty<Pair<String, Coordinates>> getObservableChangedAttributesProperty() {
         return observableChangedAttributes;
+    }
+
+    public ObjectProperty<Integer> getObservableCosmicCredits() {
+        return observableCosmicCredits;
     }
 
     public Boolean isCardAdapter() {
@@ -199,4 +206,11 @@ public class ModelFxAdapter {
         observableCurrAdventureCard.set(clientModel.getCurrAdventureCard());
     }
 
+    public void refreshCosmicCredits() {
+        if (clientModel.getMyNickname() != null) {
+            int currentCredits = clientModel.getMyCosmicCredits();
+            observableCosmicCredits.set(currentCredits);
+            System.err.println("Refreshed cosmic credits: " + currentCredits); // Debug
+        }
+    }
 }

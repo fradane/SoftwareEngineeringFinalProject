@@ -176,6 +176,13 @@ public class ClientModel {
         return ranking;
     }
 
+    public int getMyCosmicCredits() {
+        if (myNickname != null && playerClientData.containsKey(myNickname)) {
+            return playerClientData.get(myNickname).getCredits();
+        }
+        return 0;
+    }
+
     /**
      * Retrieves a sorted list of player nicknames based on their flying board position in ascending order,
      * with the list then being reversed to get a descending order ranking.
@@ -224,6 +231,9 @@ public class ClientModel {
 
     public void updatePlayerCredits(String nickname, int newOwnedCredits) {
         playerClientData.get(nickname).setCredits(newOwnedCredits);
+        if (nickname.equals(myNickname)) {
+            refreshCosmicCredits();
+        }
     }
 
     public void updatePlayerPosition(String nickname, int newPosition) {
@@ -266,4 +276,13 @@ public class ClientModel {
                 modelFxAdapter.refreshRanking();
         }
     }
+
+    public void refreshCosmicCredits() {
+        synchronized (modelFxAdapterLock) {
+            if (modelFxAdapter != null) {
+                modelFxAdapter.refreshCosmicCredits();
+            }
+        }
+    }
+
 }

@@ -1,6 +1,6 @@
-/* galaxy-truckers.css */
+/* galaxy-truckers.css - File CSS Completo */
 
-/* Colori principali */
+/* ===== COLORI PRINCIPALI ===== */
 * {
     -fx-space-dark: #1c1c1c;
     -fx-space-darker: #0e0e0e;
@@ -13,30 +13,305 @@
     -fx-space-gray: #6c757d;
 }
 
-/* Stile di base per l'intero gioco */
+/* ===== STILE DI BASE PER L'INTERO GIOCO ===== */
 .game-background {
     -fx-background-color: -fx-space-dark;
     /* -fx-background-image: url("stars-bg.png");  Aggiungi un'immagine stelle se disponibile */
     -fx-text-fill: white;
 }
 
-/* Header e titolo */
+/* ===== STILI PER LA SCHERMATA INIZIALE ===== */
+
+/* Container principale della schermata iniziale */
+.start-screen-container {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-background-radius: 20px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 20px;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 20, 0, 0, 5);
+}
+
+/* ===== SEZIONE TITOLO ===== */
+
+/* Logo del gioco */
+.game-logo {
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 10, 0, 0, 0);
+}
+
+/* Titolo principale */
+.game-title {
+    -fx-font-size: 64px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0, 0, 3);
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+}
+
+/* Sottotitolo */
+.game-subtitle {
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 3, 0, 0, 1);
+}
+
+/* ===== SEZIONE INPUT ===== */
+
+/* Etichetta per l'input */
+.input-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 3, 0, 0, 1);
+}
+
+/* Container dell'input */
+.input-container {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(255, 179, 0, 0.3);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-padding: 12px;
+}
+
+/* Campo di testo personalizzato con bordo proprio */
+.space-text-field-with-border {
+    -fx-background-color: rgba(30, 50, 83, 0.8);
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 2px;
+    -fx-padding: 10px 12px;
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.6);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 4, 0, 0, 2);
+}
+
+.space-text-field-with-border:focused {
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 6, 0, 0, 0);
+    -fx-background-color: rgba(42, 78, 139, 0.9);
+}
+
+/* Campo di testo personalizzato originale (senza bordo extra) */
+.space-text-field {
+    -fx-background-color: rgba(30, 50, 83, 0.8);
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 2px;
+    -fx-padding: 10px 12px;
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.6);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 4, 0, 0, 2);
+}
+
+.space-text-field:focused {
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 6, 0, 0, 0);
+    -fx-background-color: rgba(42, 78, 139, 0.9);
+}
+
+/* ===== SEZIONE BOTTONI ===== */
+
+/* Bottone principale START */
+.start-button {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+    -fx-padding: 12px 25px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 8, 0, 0, 2);
+}
+
+.start-button:hover {
+    -fx-background-color: -fx-space-accent-hover;
+    -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.8), 12, 0, 0, 2);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.start-button:pressed {
+    -fx-background-color: derive(-fx-space-accent-hover, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.9), 6, 0, 0, 1);
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+/* Bottoni secondari */
+.secondary-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 4, 0, 0, 1);
+}
+
+.secondary-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 6, 0, 0, 1);
+}
+
+.secondary-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+}
+
+/* ===== MESSAGGI DI ERRORE ===== */
+
+/* Etichetta di errore */
+.error-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: -fx-space-red;
+    -fx-text-alignment: center;
+    -fx-background-color: rgba(220, 53, 69, 0.1);
+    -fx-background-radius: 6px;
+    -fx-border-color: -fx-space-red;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-padding: 6px 10px;
+    -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.4), 4, 0, 0, 1);
+}
+
+/* ===== SEZIONE FOOTER ===== */
+
+/* Etichetta versione */
+.version-label {
+    -fx-font-size: 9px;
+    -fx-text-fill: rgba(255, 255, 255, 0.4);
+    -fx-text-alignment: center;
+}
+
+/* Etichetta crediti */
+.credits-label {
+    -fx-font-size: 10px;
+    -fx-text-fill: rgba(255, 255, 255, 0.6);
+    -fx-text-alignment: center;
+    -fx-font-style: italic;
+}
+
+/* ===== HEADER E TITOLO ===== */
 .top-container {
     -fx-background-color: -fx-space-darker;
-    -fx-padding: 10px;
-    -fx-spacing: 10px;
+    -fx-padding: 15px;
+    -fx-spacing: 12px;
     -fx-border-color: derive(-fx-space-blue, 20%);
-    -fx-border-width: 0 0 1px 0;
+    -fx-border-width: 0 0 2px 0;
 }
 
 .screen-title {
-    -fx-font-size: 24px;
+    -fx-font-size: 26px;
     -fx-font-weight: bold;
     -fx-text-fill: -fx-space-accent;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 5, 0, 0, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 6, 0, 0, 2);
 }
 
-/* Container del timer */
+/* ===== STILI PER I CREDITI COSMICI ===== */
+
+/* Container principale dei crediti cosmici */
+.cosmic-credits-container {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-accent;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-padding: 12px 16px;
+    -fx-spacing: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 5, 0, 0, 2);
+    -fx-min-width: 140px;
+}
+
+/* Etichetta "Crediti Cosmici" */
+.cosmic-credits-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 2, 0, 0, 1);
+}
+
+/* Valore numerico dei crediti */
+.cosmic-credits-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 3, 0, 0, 0);
+    -fx-min-width: 40px;
+}
+
+/* Animazioni opzionali per i crediti */
+.cosmic-credits-container:hover {
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 8, 0, 0, 2);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* Effetto quando i crediti cambiano (puoi applicarlo via codice) */
+.cosmic-credits-updated {
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.8), 10, 0, 0, 0);
+}
+
+.cosmic-credits-updated .cosmic-credits-value {
+    -fx-text-fill: -fx-space-green;
+}
+
+/* ===== STILI PER LA NUOVA SEZIONE CARTA ===== */
+
+/* Sezione principale di visualizzazione carta */
+.card-display-section {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 15px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 15px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 3);
+}
+
+/* Titolo della sezione carta */
+.card-section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0, 0, 1);
+}
+
+/* Frame principale della carta senza bordo bianco */
+.card-display-frame {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 0px;
+    -fx-border-width: 0px;
+    -fx-padding: 0px;
+    -fx-effect: none;
+    -fx-min-height: 420px;
+    -fx-max-height: 420px;
+    -fx-pref-height: 420px;
+}
+
+/* Immagine della carta ingrandita */
+.card-image-large {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 0, 2);
+    -fx-background-radius: 0px;
+}
+
+/* ===== CONTAINER DEL TIMER ===== */
 .timer-container {
     -fx-background-color: rgba(0, 0, 0, 0.4);
     -fx-background-radius: 8px;
@@ -48,7 +323,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
 }
 
-/* Stili Timer */
+/* ===== STILI TIMER ===== */
 .timer-label {
     -fx-font-size: 20px;
     -fx-font-weight: bold;
@@ -63,7 +338,7 @@
     -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.8), 5, 0, 0, 0);
 }
 
-/* Stili Hourglass Button */
+/* ===== STILI HOURGLASS BUTTON ===== */
 .hourglass-button {
     -fx-background-color: -fx-space-blue;
     -fx-text-fill: white;
@@ -105,7 +380,7 @@
     -fx-effect: none;
 }
 
-/* Bottone navigazione "Go Back" */
+/* ===== BOTTONE NAVIGAZIONE "GO BACK" ===== */
 .nav-button {
     -fx-background-color: -fx-space-blue;
     -fx-text-fill: white;
@@ -127,7 +402,7 @@
     -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 3, 0, 0, 0);
 }
 
-/* Container componenti */
+/* ===== CONTAINER COMPONENTI ===== */
 .component-display {
     -fx-background-color: rgba(0, 0, 0, 0.3);
     -fx-background-radius: 10px;
@@ -136,13 +411,13 @@
     -fx-border-width: 1px;
 }
 
-/* Container della plancia */
+/* ===== CONTAINER DELLA PLANCIA ===== */
 .board-container {
     -fx-background-color: rgba(0, 0, 0, 0.2);
     -fx-padding: 10px;
 }
 
-/* Controlli componente */
+/* ===== CONTROLLI COMPONENTE ===== */
 .component-controls {
     -fx-background-color: rgba(0, 0, 0, 0.7);
     -fx-background-radius: 10px;
@@ -182,7 +457,7 @@
     -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 3, 0, 0, 0);
 }
 
-/* Navigazione tra navi */
+/* ===== NAVIGAZIONE TRA NAVI ===== */
 .ship-navigation {
     -fx-padding: 5px;
     -fx-background-color: rgba(0, 0, 0, 0.5);
@@ -212,7 +487,7 @@
     -fx-background-color: transparent;
 }
 
-/* Bottoni celle griglia */
+/* ===== BOTTONI CELLE GRIGLIA ===== */
 .cell-button {
     -fx-background-color: transparent;
     -fx-border-width: 1px;
@@ -235,7 +510,7 @@
     -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.7), 10, 0, 0, 0);
 }
 
-/* Little Deck */
+/* ===== LITTLE DECK ===== */
 .little-deck-container {
     -fx-background-color: rgba(0, 0, 0, 0.8);
     -fx-background-radius: 10px;
@@ -244,16 +519,19 @@
     -fx-border-width: 2px;
 }
 
-/* Barra delle azioni in basso */
+/* ===== BARRA DELLE AZIONI IN BASSO - ALTEZZA FISSA ===== */
 .action-bar {
     -fx-background-color: -fx-space-darker;
     -fx-padding: 15px;
     -fx-spacing: 15px;
     -fx-border-color: derive(-fx-space-blue, 20%);
     -fx-border-width: 1px 0 0 0;
+    -fx-min-height: 80px;
+    -fx-max-height: 80px;
+    -fx-pref-height: 80px;
 }
 
-/* Stile bottoni azione */
+/* ===== STILE BOTTONI AZIONE ===== */
 .action-button {
     -fx-background-color: -fx-space-blue;
     -fx-text-fill: white;
@@ -272,7 +550,7 @@
     -fx-background-color: derive(-fx-space-blue-light, -10%);
 }
 
-/* ComboBox styling */
+/* ===== COMBOBOX STYLING ===== */
 .game-combo-box {
     -fx-background-color: -fx-space-blue;
     -fx-text-fill: white;
@@ -304,7 +582,7 @@
     -fx-background-color: -fx-space-blue-light;
 }
 
-/* ===== SEZIONE VISIBLE COMPONENTS - AGGIORNATA ===== */
+/* ===== SEZIONE VISIBLE COMPONENTS ===== */
 
 /* Pannello principale dei componenti visibili */
 .visible-components-panel {
@@ -335,7 +613,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 5, 0, 0, 1);
 }
 
-/* ScrollPane per i componenti - tema scuro completo */
+/* ===== SCROLLPANE PER I COMPONENTI - TEMA SCURO COMPLETO ===== */
 .components-scroll-pane {
     -fx-background-color: -fx-space-dark;
     -fx-background-radius: 8px;
@@ -396,7 +674,7 @@
     -fx-background-color: -fx-space-dark;
 }
 
-/* Container principale dei componenti (VBox) */
+/* ===== CONTAINER PRINCIPALE DEI COMPONENTI (VBOX) ===== */
 .components-container {
     -fx-background-color: -fx-space-dark;
     -fx-spacing: 8px;
@@ -404,7 +682,7 @@
     -fx-background-radius: 6px;
 }
 
-/* Stili per i bottoni dei componenti individuali */
+/* ===== STILI PER I BOTTONI DEI COMPONENTI INDIVIDUALI ===== */
 .component-item {
     -fx-background-color: rgba(30, 50, 83, 0.8);
     -fx-text-fill: white;
@@ -447,7 +725,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 2, 0, 0, 1);
 }
 
-/* Stile per i bottoni dentro il container (fallback) */
+/* ===== STILE PER I BOTTONI DENTRO IL CONTAINER (FALLBACK) ===== */
 .components-container .button {
     -fx-background-color: rgba(30, 50, 83, 0.8);
     -fx-text-fill: white;
@@ -477,7 +755,7 @@
     -fx-scale-y: 0.98;
 }
 
-/* Stile per container vuoto */
+/* ===== STILE PER CONTAINER VUOTO ===== */
 .components-container:empty {
     -fx-background-color: rgba(0, 0, 0, 0.2);
     -fx-border-color: rgba(108, 117, 125, 0.3);
@@ -517,7 +795,7 @@
     -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 4, 0, 0, 1);
 }
 
-/* Card Display Panel - Pannello laterale per visualizzazione carte */
+/* ===== CARD DISPLAY PANEL - PANNELLO LATERALE PER VISUALIZZAZIONE CARTE ===== */
 .card-display-panel {
     -fx-background-color: rgba(0, 0, 0, 0.4);
     -fx-background-radius: 10px;
@@ -527,7 +805,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
 }
 
-/* Card Image Container - Container per l'immagine della carta con bordo blu */
+/* ===== CARD IMAGE CONTAINER - CONTAINER PER L'IMMAGINE DELLA CARTA CON BORDO BLU ===== */
 .card-image-container {
     -fx-background-color: rgba(0, 0, 0, 0.2);
     -fx-background-radius: 8px;
@@ -634,4 +912,1159 @@
     -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.7), 4, 0, 0, 0);
     -fx-scale-x: 0.95;
     -fx-scale-y: 0.95;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+/* Per schermi più piccoli */
+@media screen and (max-width: 1024px) {
+    .card-display-frame {
+        -fx-min-height: 350px;
+        -fx-max-height: 350px;
+        -fx-pref-height: 350px;
+    }
+
+    .card-image-large {
+        -fx-fit-width: 300px;
+        -fx-fit-height: 350px;
+    }
+
+    .cosmic-credits-container {
+        -fx-min-width: 120px;
+        -fx-padding: 10px 12px;
+    }
+
+    .cosmic-credits-value {
+        -fx-font-size: 16px;
+    }
+
+    .screen-title {
+        -fx-font-size: 22px;
+    }
+
+    .card-section-title {
+        -fx-font-size: 14px;
+    }
+
+    .action-bar {
+        -fx-min-height: 70px;
+        -fx-max-height: 70px;
+        -fx-pref-height: 70px;
+    }
+}
+
+/* Per schermi ancora più piccoli (schermata start) */
+@media screen and (max-width: 800px) {
+    .game-title {
+        -fx-font-size: 48px;
+    }
+
+    .start-screen-container {
+        -fx-max-width: 400px;
+        -fx-padding: 25px;
+    }
+
+    .space-text-field {
+        -fx-max-width: 220px;
+    }
+
+    .start-button {
+        -fx-pref-width: 140px;
+        -fx-font-size: 12px;
+    }
+}/* galaxy-truckers.css - File CSS Completo */
+
+/* ===== COLORI PRINCIPALI ===== */
+* {
+    -fx-space-dark: #1c1c1c;
+    -fx-space-darker: #0e0e0e;
+    -fx-space-blue: #1e3253;
+    -fx-space-blue-light: #2a4e8b;
+    -fx-space-accent: #ffb300;
+    -fx-space-accent-hover: #ffc233;
+    -fx-space-green: #28a745;
+    -fx-space-red: #dc3545;
+    -fx-space-gray: #6c757d;
+}
+
+/* ===== STILE DI BASE PER L'INTERO GIOCO ===== */
+.game-background {
+    -fx-background-color: -fx-space-dark;
+    /* -fx-background-image: url("stars-bg.png");  Aggiungi un'immagine stelle se disponibile */
+    -fx-text-fill: white;
+}
+
+/* ===== HEADER E TITOLO ===== */
+.top-container {
+    -fx-background-color: -fx-space-darker;
+    -fx-padding: 15px;
+    -fx-spacing: 12px;
+    -fx-border-color: derive(-fx-space-blue, 20%);
+    -fx-border-width: 0 0 2px 0;
+}
+
+.screen-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 6, 0, 0, 2);
+}
+
+/* ===== STILI PER I CREDITI COSMICI ===== */
+
+/* Container principale dei crediti cosmici */
+.cosmic-credits-container {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-accent;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-padding: 12px 16px;
+    -fx-spacing: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 5, 0, 0, 2);
+    -fx-min-width: 140px;
+}
+
+/* Etichetta "Crediti Cosmici" */
+.cosmic-credits-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 2, 0, 0, 1);
+}
+
+/* Valore numerico dei crediti */
+.cosmic-credits-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 3, 0, 0, 0);
+    -fx-min-width: 40px;
+}
+
+/* Animazioni opzionali per i crediti */
+.cosmic-credits-container:hover {
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 8, 0, 0, 2);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* Effetto quando i crediti cambiano (puoi applicarlo via codice) */
+.cosmic-credits-updated {
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.8), 10, 0, 0, 0);
+}
+
+.cosmic-credits-updated .cosmic-credits-value {
+    -fx-text-fill: -fx-space-green;
+}
+
+/* ===== STILI PER LA NUOVA SEZIONE CARTA ===== */
+
+/* Sezione principale di visualizzazione carta */
+.card-display-section {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 15px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 15px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 3);
+}
+
+/* Titolo della sezione carta */
+.card-section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0, 0, 1);
+}
+
+/* Frame principale della carta senza bordo bianco */
+.card-display-frame {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 0px;
+    -fx-border-width: 0px;
+    -fx-padding: 0px;
+    -fx-effect: none;
+    -fx-min-height: 420px;
+    -fx-max-height: 420px;
+    -fx-pref-height: 420px;
+}
+
+/* Immagine della carta ingrandita */
+.card-image-large {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 0, 2);
+    -fx-background-radius: 0px;
+}
+
+/* ===== CONTAINER DEL TIMER ===== */
+.timer-container {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-spacing: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+/* ===== STILI TIMER ===== */
+.timer-label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0, 0, 1);
+    -fx-min-width: 50px;
+}
+
+.timer-warning {
+    -fx-text-fill: -fx-space-red;
+    -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.8), 5, 0, 0, 0);
+}
+
+/* ===== STILI HOURGLASS BUTTON ===== */
+.hourglass-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 6px 10px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-font-size: 11px;
+    -fx-min-width: 110px;
+}
+
+.hourglass-button.hourglass-enabled {
+    -fx-background-color: -fx-space-green;
+}
+
+.hourglass-button.hourglass-enabled:hover {
+    -fx-background-color: derive(-fx-space-green, 15%);
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.5), 5, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.hourglass-button.hourglass-enabled:pressed {
+    -fx-background-color: derive(-fx-space-green, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.7), 3, 0, 0, 0);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.hourglass-button.hourglass-disabled {
+    -fx-background-color: -fx-space-gray;
+    -fx-cursor: default;
+    -fx-opacity: 0.6;
+}
+
+.hourglass-button.hourglass-disabled:hover {
+    -fx-background-color: -fx-space-gray;
+    -fx-effect: none;
+}
+
+/* ===== BOTTONE NAVIGAZIONE "GO BACK" ===== */
+.nav-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-font-size: 12px;
+}
+
+.nav-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 5, 0, 0, 0);
+}
+
+.nav-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 3, 0, 0, 0);
+}
+
+/* ===== CONTAINER COMPONENTI ===== */
+.component-display {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+
+/* ===== CONTAINER DELLA PLANCIA ===== */
+.board-container {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-padding: 10px;
+}
+
+/* ===== CONTROLLI COMPONENTE ===== */
+.component-controls {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-min-width: 150px;
+    -fx-max-width: 180px;
+}
+
+.controls-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+}
+
+.component-control-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-min-width: 120px;
+    -fx-font-size: 11px;
+}
+
+.component-control-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 5, 0, 0, 0);
+}
+
+.component-control-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 3, 0, 0, 0);
+}
+
+/* ===== NAVIGAZIONE TRA NAVI ===== */
+.ship-navigation {
+    -fx-padding: 5px;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-radius: 15px;
+}
+
+.ship-nav-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 15px;
+    -fx-padding: 8px 15px;
+    -fx-border-radius: 15px;
+    -fx-cursor: hand;
+}
+
+.ship-nav-button:hover {
+    -fx-background-color: derive(-fx-space-blue, 20%);
+}
+
+.ship-nav-button.active {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+}
+
+.not-available-cell-button {
+    -fx-background-color: transparent;
+}
+
+/* ===== BOTTONI CELLE GRIGLIA ===== */
+.cell-button {
+    -fx-background-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-cursor: hand;
+}
+
+.cell-button:hover {
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 5, 0, 0, 0);
+}
+
+.cell-button.no-hover:hover {
+    -fx-border-color: inherit;
+    -fx-effect: none;
+}
+
+.cell-button:pressed {
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.7), 10, 0, 0, 0);
+}
+
+/* ===== LITTLE DECK ===== */
+.little-deck-container {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-accent;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+}
+
+/* ===== BARRA DELLE AZIONI IN BASSO - ALTEZZA FISSA ===== */
+.action-bar {
+    -fx-background-color: -fx-space-darker;
+    -fx-padding: 15px;
+    -fx-spacing: 15px;
+    -fx-border-color: derive(-fx-space-blue, 20%);
+    -fx-border-width: 1px 0 0 0;
+    -fx-min-height: 80px;
+    -fx-max-height: 80px;
+    -fx-pref-height: 80px;
+}
+
+/* ===== STILE BOTTONI AZIONE ===== */
+.action-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}
+
+.action-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+.action-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+}
+
+/* ===== COMBOBOX STYLING ===== */
+.game-combo-box {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}
+
+.game-combo-box:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+.game-combo-box .arrow {
+    -fx-background-color: white;
+}
+
+.game-combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.game-combo-box .list-cell {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+}
+
+.game-combo-box .list-cell:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+/* ===== SEZIONE VISIBLE COMPONENTS ===== */
+
+/* Pannello principale dei componenti visibili */
+.visible-components-panel {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+/* Header del pannello componenti */
+.panel-header {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+.panel-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 5, 0, 0, 1);
+}
+
+/* ===== SCROLLPANE PER I COMPONENTI - TEMA SCURO COMPLETO ===== */
+.components-scroll-pane {
+    -fx-background-color: -fx-space-dark;
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+/* Viewport dello ScrollPane */
+.components-scroll-pane .viewport {
+    -fx-background-color: -fx-space-dark;
+    -fx-background-radius: 6px;
+}
+
+/* Contenuto dello ScrollPane */
+.components-scroll-pane .content {
+    -fx-background-color: -fx-space-dark;
+    -fx-background-radius: 6px;
+}
+
+/* Scrollbar verticale */
+.components-scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+    -fx-opacity: 0.7;
+}
+
+.components-scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 4px;
+}
+
+.components-scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: -fx-space-blue;
+    -fx-background-radius: 4px;
+    -fx-background-insets: 1px;
+}
+
+.components-scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -fx-space-blue-light;
+}
+
+.components-scroll-pane .scroll-bar:vertical .thumb:pressed {
+    -fx-background-color: -fx-space-accent;
+}
+
+/* Bottoni di incremento/decremento dello scrollbar */
+.components-scroll-pane .scroll-bar .increment-button,
+.components-scroll-pane .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-pref-height: 0;
+    -fx-pref-width: 0;
+}
+
+/* Corner dello ScrollPane */
+.components-scroll-pane .corner {
+    -fx-background-color: -fx-space-dark;
+}
+
+/* ===== CONTAINER PRINCIPALE DEI COMPONENTI (VBOX) ===== */
+.components-container {
+    -fx-background-color: -fx-space-dark;
+    -fx-spacing: 8px;
+    -fx-padding: 5px;
+    -fx-background-radius: 6px;
+}
+
+/* ===== STILI PER I BOTTONI DEI COMPONENTI INDIVIDUALI ===== */
+.component-item {
+    -fx-background-color: rgba(30, 50, 83, 0.8);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-font-size: 11px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+}
+
+.component-item:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-border-color: rgba(255, 179, 0, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.4), 5, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.component-item:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 3, 0, 0, 0);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.component-item.selected {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+    -fx-border-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.8), 8, 0, 0, 0);
+}
+
+/* Immagini dei componenti all'interno dei bottoni */
+.component-item .image-view {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 2, 0, 0, 1);
+}
+
+/* ===== STILE PER I BOTTONI DENTRO IL CONTAINER (FALLBACK) ===== */
+.components-container .button {
+    -fx-background-color: rgba(30, 50, 83, 0.8);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+}
+
+.components-container .button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-border-color: rgba(255, 179, 0, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.4), 5, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.components-container .button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-border-color: -fx-space-accent;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 3, 0, 0, 0);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+/* ===== STILE PER CONTAINER VUOTO ===== */
+.components-container:empty {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-border-color: rgba(108, 117, 125, 0.3);
+    -fx-border-style: dashed;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-min-height: 100px;
+}
+
+/* Etichetta per stato vuoto */
+.empty-components-label {
+    -fx-text-fill: -fx-space-gray;
+    -fx-font-style: italic;
+    -fx-font-size: 12px;
+    -fx-alignment: center;
+}
+
+.place-pawn-button {
+    -fx-background-color: -fx-space-blue;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 14px 24px;
+    -fx-font-size: 14px;
+    -fx-min-width: 180px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+.place-pawn-button:hover {
+    -fx-background-color: -fx-space-blue-light;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.3), 6, 0, 0, 1);
+}
+
+.place-pawn-button:pressed {
+    -fx-background-color: derive(-fx-space-blue-light, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 4, 0, 0, 1);
+}
+
+/* ===== CARD DISPLAY PANEL - PANNELLO LATERALE PER VISUALIZZAZIONE CARTE ===== */
+.card-display-panel {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 2);
+}
+
+/* ===== CARD IMAGE CONTAINER - CONTAINER PER L'IMMAGINE DELLA CARTA CON BORDO BLU ===== */
+.card-image-container {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 3, 0, 0, 1);
+    -fx-min-height: 220px;
+    -fx-max-height: 220px;
+    -fx-pref-height: 220px;
+}
+
+.card-image {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,255,0.4), 5, 0.5, 0, 0); /* opzionale: effetto luce */
+    -fx-border-color: #007bff; /* blu fine */
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px; /* margine interno */
+}
+
+.custom-popup-button {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-background-radius: 6px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 5, 0, 0, 1);
+}
+
+.custom-popup-button:hover {
+    -fx-background-color: -fx-space-accent-hover;
+    -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.5), 6, 0, 0, 1);
+}
+
+.custom-popup-button:pressed {
+    -fx-background-color: derive(-fx-space-accent-hover, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.6), 4, 0, 0, 0);
+}
+
+/* ===== POPUP OVERLAY SECTION ===== */
+
+/* Overlay di sfondo semi-trasparente */
+.popup-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.75);
+}
+
+/* Container principale del popup */
+.popup-container {
+    -fx-background-color: -fx-space-darker;
+    -fx-background-radius: 15px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-width: 2px;
+    -fx-border-radius: 15px;
+    -fx-padding: 30px;
+    -fx-spacing: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 15, 0, 0, 5);
+    -fx-max-width: 450px;
+    -fx-alignment: center;
+}
+
+/* Titolo del popup */
+.popup-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0, 0, 1);
+}
+
+/* Messaggio del popup */
+.popup-message {
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+    -fx-line-spacing: 4px;
+}
+
+/* Bottone del popup - usa lo stile esistente custom-popup-button e lo migliora */
+.popup-button {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 24px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 5, 0, 0, 1);
+    -fx-min-width: 100px;
+}
+
+.popup-button:hover {
+    -fx-background-color: -fx-space-accent-hover;
+    -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.6), 6, 0, 0, 1);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.popup-button:pressed {
+    -fx-background-color: derive(-fx-space-accent-hover, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.7), 4, 0, 0, 0);
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+/* Per schermi più piccoli, riduci le dimensioni */
+@media screen and (max-width: 1024px) {
+    .card-display-frame {
+        -fx-min-height: 350px;
+        -fx-max-height: 350px;
+        -fx-pref-height: 350px;
+    }
+
+    .card-image-large {
+        -fx-fit-width: 300px;
+        -fx-fit-height: 350px;
+    }
+
+    .cosmic-credits-container {
+        -fx-min-width: 120px;
+        -fx-padding: 10px 12px;
+    }
+
+    .cosmic-credits-value {
+        -fx-font-size: 16px;
+    }
+
+    .screen-title {
+        -fx-font-size: 22px;
+    }
+
+    .card-section-title {
+        -fx-font-size: 14px;
+    }
+
+    .action-bar {
+        -fx-min-height: 70px;
+        -fx-max-height: 70px;
+        -fx-pref-height: 70px;
+    }
+
+    /* Container principale del menu */
+    .menu-container {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-background-radius: 20px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-radius: 20px;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 20, 0, 0, 5);
+}
+
+    /* Titolo del menu principale */
+    .menu-title {
+        -fx-font-size: 42px;
+        -fx-font-weight: bold;
+        -fx-text-fill: -fx-space-accent;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 8, 0, 0, 2);
+        -fx-text-alignment: center;
+    }
+
+    /* Sottotitolo del menu */
+    .menu-subtitle {
+        -fx-font-size: 14px;
+        -fx-font-style: italic;
+        -fx-text-fill: rgba(255, 255, 255, 0.8);
+        -fx-text-alignment: center;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 3, 0, 0, 1);
+    }
+
+    /* Bottoni principali del menu */
+    .menu-button-primary {
+        -fx-background-color: -fx-space-accent;
+        -fx-text-fill: -fx-space-dark;
+        -fx-font-size: 16px;
+        -fx-font-weight: bold;
+        -fx-background-radius: 10px;
+        -fx-padding: 15px 40px;
+        -fx-cursor: hand;
+        -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 8, 0, 0, 2);
+        -fx-min-width: 200px;
+    }
+
+    .menu-button-primary:hover {
+        -fx-background-color: -fx-space-accent-hover;
+        -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.8), 12, 0, 0, 2);
+        -fx-scale-x: 1.05;
+        -fx-scale-y: 1.05;
+    }
+
+    .menu-button-primary:pressed {
+        -fx-background-color: derive(-fx-space-accent-hover, -10%);
+        -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.9), 6, 0, 0, 1);
+        -fx-scale-x: 0.95;
+        -fx-scale-y: 0.95;
+    }
+
+    /* Bottone secondario (Exit) */
+    .menu-button-secondary {
+        -fx-background-color: -fx-space-red;
+        -fx-text-fill: white;
+        -fx-font-size: 14px;
+        -fx-font-weight: bold;
+        -fx-background-radius: 8px;
+        -fx-padding: 12px 30px;
+        -fx-cursor: hand;
+        -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.6), 6, 0, 0, 2);
+        -fx-min-width: 150px;
+    }
+
+    .menu-button-secondary:hover {
+        -fx-background-color: derive(-fx-space-red, 15%);
+        -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.8), 8, 0, 0, 2);
+        -fx-scale-x: 1.02;
+        -fx-scale-y: 1.02;
+    }
+
+    .menu-button-secondary:pressed {
+        -fx-background-color: derive(-fx-space-red, -10%);
+        -fx-scale-x: 0.98;
+        -fx-scale-y: 0.98;
+    }
+
+    /* ===== STILI PER I FORM ===== */
+
+    /* Container dei form */
+    .form-container {
+        -fx-background-color: rgba(0, 0, 0, 0.8);
+        -fx-background-radius: 15px;
+        -fx-border-color: -fx-space-blue;
+        -fx-border-radius: 15px;
+        -fx-border-width: 2px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 15, 0, 0, 4);
+        -fx-max-width: 450px;
+    }
+
+    /* Titolo dei form */
+    .form-title {
+        -fx-font-size: 24px;
+        -fx-font-weight: bold;
+        -fx-text-fill: -fx-space-accent;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 5, 0, 0, 2);
+        -fx-text-alignment: center;
+    }
+
+    /* Sottotitolo dei form */
+    .form-subtitle {
+        -fx-font-size: 14px;
+        -fx-text-fill: rgba(255, 255, 255, 0.9);
+        -fx-text-alignment: center;
+    }
+
+    /* Contenuto dei form */
+    .form-content {
+        -fx-background-color: rgba(0, 0, 0, 0.3);
+        -fx-background-radius: 10px;
+        -fx-border-color: rgba(255, 179, 0, 0.2);
+        -fx-border-radius: 10px;
+        -fx-border-width: 1px;
+        -fx-padding: 20px;
+    }
+
+    /* Label dei form */
+    .form-label {
+        -fx-font-size: 14px;
+        -fx-font-weight: bold;
+        -fx-text-fill: white;
+        -fx-text-alignment: center;
+    }
+
+    /* ComboBox spaziali */
+    .space-combo-box {
+        -fx-background-color: rgba(30, 50, 83, 0.8);
+        -fx-text-fill: white;
+        -fx-font-weight: bold;
+        -fx-background-radius: 8px;
+        -fx-border-color: -fx-space-blue;
+        -fx-border-radius: 8px;
+        -fx-border-width: 2px;
+        -fx-padding: 8px 12px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 4, 0, 0, 2);
+        -fx-min-width: 180px;
+    }
+
+    .space-combo-box:focused {
+        -fx-border-color: -fx-space-accent;
+        -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 6, 0, 0, 0);
+    }
+
+    .space-combo-box .arrow {
+        -fx-background-color: white;
+    }
+
+    .space-combo-box .arrow-button {
+        -fx-background-color: transparent;
+    }
+
+    .space-combo-box .list-cell {
+        -fx-background-color: -fx-space-blue;
+        -fx-text-fill: white;
+    }
+
+    .space-combo-box .list-cell:hover {
+        -fx-background-color: -fx-space-blue-light;
+    }
+
+    /* CheckBox spaziali */
+    .space-checkbox {
+        -fx-text-fill: white;
+        -fx-font-weight: bold;
+        -fx-font-size: 14px;
+    }
+
+    .space-checkbox .box {
+        -fx-background-color: rgba(30, 50, 83, 0.8);
+        -fx-border-color: -fx-space-blue;
+        -fx-border-width: 2px;
+        -fx-border-radius: 4px;
+        -fx-background-radius: 4px;
+    }
+
+    .space-checkbox:selected .box {
+        -fx-background-color: -fx-space-accent;
+        -fx-border-color: -fx-space-accent;
+    }
+
+    .space-checkbox .mark {
+        -fx-background-color: -fx-space-dark;
+    }
+
+    /* ListView spaziali */
+    .space-list-view {
+        -fx-background-color: rgba(30, 50, 83, 0.8);
+        -fx-border-color: -fx-space-blue;
+        -fx-border-width: 2px;
+        -fx-border-radius: 8px;
+        -fx-background-radius: 8px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 4, 0, 0, 2);
+    }
+
+    .space-list-view .list-cell {
+        -fx-background-color: transparent;
+        -fx-text-fill: white;
+        -fx-font-weight: bold;
+        -fx-padding: 8px 12px;
+        -fx-border-color: transparent;
+    }
+
+    .space-list-view .list-cell:selected {
+        -fx-background-color: -fx-space-accent;
+        -fx-text-fill: -fx-space-dark;
+    }
+
+    .space-list-view .list-cell:hover {
+        -fx-background-color: rgba(255, 179, 0, 0.2);
+    }
+
+    /* Bottoni dei form - Primari */
+    .form-button-primary {
+        -fx-background-color: -fx-space-accent;
+        -fx-text-fill: -fx-space-dark;
+        -fx-font-size: 14px;
+        -fx-font-weight: bold;
+        -fx-background-radius: 8px;
+        -fx-padding: 12px 24px;
+        -fx-cursor: hand;
+        -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 6, 0, 0, 2);
+        -fx-min-width: 100px;
+    }
+
+    .form-button-primary:hover {
+        -fx-background-color: -fx-space-accent-hover;
+        -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.8), 8, 0, 0, 2);
+        -fx-scale-x: 1.03;
+        -fx-scale-y: 1.03;
+    }
+
+    .form-button-primary:pressed {
+        -fx-background-color: derive(-fx-space-accent-hover, -10%);
+        -fx-scale-x: 0.97;
+        -fx-scale-y: 0.97;
+    }
+
+    /* Bottoni dei form - Secondari */
+    .form-button-secondary {
+        -fx-background-color: -fx-space-gray;
+        -fx-text-fill: white;
+        -fx-font-size: 12px;
+        -fx-font-weight: bold;
+        -fx-background-radius: 6px;
+        -fx-padding: 10px 20px;
+        -fx-cursor: hand;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 4, 0, 0, 1);
+        -fx-min-width: 80px;
+    }
+
+    .form-button-secondary:hover {
+        -fx-background-color: derive(-fx-space-gray, 20%);
+        -fx-effect: dropshadow(gaussian, rgba(108, 117, 125, 0.6), 6, 0, 0, 1);
+    }
+
+    .form-button-secondary:pressed {
+        -fx-background-color: derive(-fx-space-gray, -10%);
+    }
+
+    /* ===== STILI PER LE SCHERMATE DI ATTESA ===== */
+
+    /* Container delle schermate di attesa */
+    .waiting-container {
+        -fx-background-color: rgba(0, 0, 0, 0.7);
+        -fx-background-radius: 20px;
+        -fx-border-color: -fx-space-green;
+        -fx-border-radius: 20px;
+        -fx-border-width: 2px;
+        -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.4), 15, 0, 0, 4);
+    }
+
+    /* Titolo delle schermate di attesa */
+    .waiting-title {
+        -fx-font-size: 28px;
+        -fx-font-weight: bold;
+        -fx-text-fill: -fx-space-green;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 6, 0, 0, 2);
+        -fx-text-alignment: center;
+    }
+
+    /* Messaggio delle schermate di attesa */
+    .waiting-message {
+        -fx-font-size: 16px;
+        -fx-text-fill: white;
+        -fx-text-alignment: center;
+        -fx-wrap-text: true;
+        -fx-line-spacing: 4px;
+    }
+
+    /* Progress indicator spaziale */
+    .space-progress {
+        -fx-progress-color: -fx-space-accent;
+        -fx-accent: -fx-space-accent;
+    }
+
+    .space-progress .percentage {
+        -fx-fill: transparent;
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+
+    @media screen and (max-width: 800px) {
+        .menu-title {
+            -fx-font-size: 32px;
+        }
+
+        .form-title {
+            -fx-font-size: 20px;
+        }
+
+        .menu-button-primary {
+            -fx-min-width: 160px;
+            -fx-font-size: 14px;
+        }
+
+        .space-list-view {
+            -fx-pref-width: 300px;
+            -fx-pref-height: 250px;
+        }
+    }
 }
