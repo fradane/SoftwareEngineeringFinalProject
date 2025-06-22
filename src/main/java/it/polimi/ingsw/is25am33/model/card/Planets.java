@@ -56,6 +56,7 @@ public class Planets extends AdventureCard implements PlayerMover {
 
     @Override
     public void play(PlayerChoicesDataStructure playerChoices) throws UnknownStateException {
+        //TODO aggiustare Planets con Socket. Attulmente non funziona, ricontrollare dopo merge con Luca
 
         switch (currState) {
             case CHOOSE_PLANET:

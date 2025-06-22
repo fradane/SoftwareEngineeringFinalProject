@@ -17,6 +17,7 @@ import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.WEST;
 public class PrefabShipFactory {
     private static final Map<String, PrefabShipInfo> PREFAB_SHIPS = new HashMap<>();
 
+    //TODO aggiungere una nave prefabbricata per i testing durante l'esame. Quindi una nave completa per giocare e poter sfruttare tutte le carte e una scorretta per mostrare il controllo della shipboard
     static {
         // Inizializza le navi prefabbricate disponibili
         PREFAB_SHIPS.put("basic_ship", new PrefabShipInfo(
