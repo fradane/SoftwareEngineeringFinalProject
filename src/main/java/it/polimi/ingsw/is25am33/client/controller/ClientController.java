@@ -1071,11 +1071,15 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .setChosenCabins(cabinCoords)
                 .build();
 
-        try{
-            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
-        }catch (IOException e){
-            handleRemoteException(e);
-        }
+
+        new Thread(() -> {
+            try {
+                serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+            } catch (IOException e) {
+                handleRemoteException(e);
+            }
+        }).start();
+
         return true;
     }
 
