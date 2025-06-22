@@ -10,6 +10,7 @@ import it.polimi.ingsw.is25am33.model.card.Pirates;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
 import it.polimi.ingsw.is25am33.model.card.Planet;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
+import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
 import it.polimi.ingsw.is25am33.model.component.DoubleEngine;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -55,6 +56,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     private final List<Coordinates> selectedDoubleEngines = new ArrayList<>();
     private final List<Coordinates> selectedDoubleCannons = new ArrayList<>();
     private final List<Coordinates> selectedBatteryBoxes = new ArrayList<>();
+    private final List<Coordinates> selectedCabins = new ArrayList<>();
     private boolean hasChosenDoubleCannon = false;
 
 
@@ -207,6 +209,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
 
         showInfoPopup(warningMessage, starDust);
+        clientController.stardustEvent(clientController.getNickname());
 
     }
 
@@ -223,7 +226,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         int totalCrew = clientModel.getMyShipboard().getCrewMembers().size();
         if (totalCrew < abandonedShip.getCrewMalus()) {
-            showMessage(String.format("WARNING: You only have %d crew members, you cannot accept the reward", totalCrew), false);
+            showMessage("WARNING: You only have" + totalCrew + "crew members, you cannot accept the reward", false);
             showCannotVisitLocationMenu();
         } else {
             showCanVisitLocationMenu();
@@ -240,22 +243,100 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         Platform.runLater(() -> bottomHBox.getChildren().add(continueButton));
     }
 
-    private void showCanVisitLocationMenu(){
+    public void showCanVisitLocationMenu(){
         showMessage("Do you want to visit the abandoned ship?", true);
         Button continueButton = new Button("Continue");
         Button skipButton = new Button("Skip");
         continueButton.getStyleClass().add("action-button");
         skipButton.getStyleClass().add("action-button");
+
         continueButton.setOnAction(_ -> {
             clientController.playerWantsToVisitLocation(clientController.getNickname(), true);
-            // TODO finire con la rimozione dei crew member
         });
         skipButton.setOnAction(_ -> {
             clientController.playerWantsToVisitLocation(clientController.getNickname(), false);
         });
 
+        Platform.runLater(() -> {
+            bottomHBox.getChildren().add(continueButton);
+            bottomHBox.getChildren().add(skipButton);
+        });
+
 
     }
+
+    public void showChooseCabinMenu() {
+        CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
+
+        showMessage("Choose cabins to remove crew from!", true);
+
+        Button confirmChoiceButton  = new Button("Confirm");
+        confirmChoiceButton.getStyleClass().add("action-button");
+
+        Platform.runLater(() -> {
+            bottomHBox.getChildren().add(confirmChoiceButton);
+        });
+
+        confirmChoiceButton.setOnAction(_ -> {
+            int malus = card.getCrewMalus();
+            int selectedCount = selectedCabins.size();
+            int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
+
+            if (selectedCount == 0) {
+                showMessage("You must select at least one cabin", false);
+                return;
+            }
+
+            if (selectedCount > malus) {
+                showMessage("You have selected too many cabins. Select at most " + malus + " crew members.", false);
+                return;
+            }
+
+            if(malus - selectedCount != 0){
+                showMessage("You still need to remove " + (malus - selectedCount) + " crew member(s). Select other cabins.", false);
+                return;
+            }
+
+            boolean success = clientController.playerChoseCabins(clientController.getNickname(), selectedCabins);
+            if (success) {
+                selectedCabins.clear();
+            } else {
+                selectedCabins.clear();
+                showMessage("Invalid choices. Start again with your selection.", false);
+            }
+        });
+
+        highlightCabin();
+    }
+
+    private void handleCabinSelection(Coordinates coordinates) {
+
+        showMessage("Select cabin to remove crew!", true);
+
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+        Set<Coordinates> cabinCoordinates = shipboard.getCoordinatesOfComponents(shipboard.getCabin());
+
+        if(!cabinCoordinates.contains(coordinates)) {
+            showMessage("You did not select a cabin!", false);
+            return;
+        }
+
+        Cabin cabin = (Cabin) shipboard.getComponentAt(coordinates);
+        int timesAlreadySelected = Collections.frequency(cabinCoordinates, selectedCabins);
+        if(cabin.getInhabitants().size() <= timesAlreadySelected) {
+            showMessage("This cabin has no more crew member. Select another one.", false);
+            return;
+        }
+
+        if(!cabin.hasInhabitants()){
+            showMessage("You don't have any crew member. Select another one.", false);
+        }
+
+        selectedCabins.add(coordinates);
+        boardsController.removeHighlightColor();
+
+    }
+
 
     //-------------------- PIRATES ----------------------
 
@@ -681,13 +762,18 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                     handleBatteryBoxSelection(coordinates);
                 }
             }
-            case CardState.STARDUST ->{
+            case CardState.VISIT_LOCATION ->
+                showCanVisitLocationMenu();
+
+            case CardState.REMOVE_CREW_MEMBERS ->
+                handleCabinSelection(coordinates);
+
+            case CardState.STARDUST ->
                 showStardustMenu();
-            }
+
             default -> System.err.println("Unknown card state: " + clientModel.getCurrCardState());
         }
     }
-
 
     private void showOverlayPopup(String title, String message, Runnable onClose) {
         // Overlay di sfondo
@@ -769,6 +855,26 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                     return currBatteryBox.getRemainingBatteries() > Collections.frequency(selectedBatteryBoxes, coords);
                 })
                 .forEach(coordinates -> boardsController.applyHighlightEffect(coordinates, Color.GREEN));
+    }
+
+    private void highlightCabin() {
+
+        List<Cabin> CabinWithCrew = clientModel.getMyShipboard()
+                .getCabin()
+                .stream()
+                .filter(cabin -> !cabin.getInhabitants().isEmpty())
+                .collect(Collectors.toList());
+
+        clientModel.getMyShipboard()
+                .getCoordinatesOfComponents(CabinWithCrew)
+                .stream()
+                .filter(coords -> {
+                    Cabin cabin = ((Cabin) clientModel.getMyShipboard().getComponentAt(coords));
+                    return !cabin.getInhabitants().isEmpty();
+                })
+                .forEach(coordinates -> boardsController.applyHighlightEffect(coordinates, Color.RED));
+
+
     }
 
     private void highlightDoubleEngines() {
