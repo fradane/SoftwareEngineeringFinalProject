@@ -21,7 +21,6 @@ import java.util.*;
 
 public class Level2BoardsController extends BoardsController {
 
-    @FXML public Pane pawnsPane;
     @FXML public StackPane boardsPane;
     @FXML private Button button04_03, button04_04, button04_05, button04_07, button04_08, button04_09;
     @FXML private Button button05_04, button05_05, button05_06, button05_07, button05_08;
@@ -33,26 +32,36 @@ public class Level2BoardsController extends BoardsController {
 
     private final int FIXED_BOOKED_COMPONENT_HEIGHT = 55;
 
-    private static final Map<Integer, Point2D> flyingBoardRelativePositions = Map.ofEntries(
-            Map.entry(0, new Point2D(0.248, 0.315)), // 149/600, 189/600
-            Map.entry(1, new Point2D(0.32, 0.285)),  // 192/600, 171/600
-            Map.entry(2, new Point2D(0.397, 0.267)), // 238/600, 160/600
-            Map.entry(3, new Point2D(0.47, 0.257)),  // 282/600, 154/600
-            Map.entry(4, new Point2D(0.545, 0.258)), // 327/600, 155/600
-            Map.entry(5, new Point2D(0.618, 0.267)), // 371/600, 160/600
-            Map.entry(6, new Point2D(0.692, 0.288)), // 415/600, 173/600
-            Map.entry(7, new Point2D(0.763, 0.318)), // 458/600, 191/600
-            Map.entry(8, new Point2D(0.828, 0.365)), // 497/600, 219/600
-            Map.entry(9, new Point2D(0.873, 0.435)), // 524/600, 261/600
-            Map.entry(10, new Point2D(0.862, 0.522)), // 517/600, 313/600
-            Map.entry(11, new Point2D(0.822, 0.587)), // 493/600, 352/600
-            Map.entry(12, new Point2D(0.753, 0.628)), // 452/600, 377/600
-            Map.entry(13, new Point2D(0.682, 0.655)) // 409/600, 393/600
-            // Converti le altre posizioni in percentuali
+    private static final Map<Integer, Pair<Integer, Integer>> flyingBoardRelativePositions = Map.ofEntries(
+            Map.entry(Integer.MIN_VALUE, new Pair<>(8, 6)),
+            Map.entry(0, new Pair<>(0, 12)),
+            Map.entry(1, new Pair<>(8, 16)),
+            Map.entry(2, new Pair<>(7, 21)),
+            Map.entry(3, new Pair<>(6, 25)),
+            Map.entry(4, new Pair<>(6, 30)),
+            Map.entry(5, new Pair<>(7, 34)),
+            Map.entry(6, new Pair<>(8, 39)),
+            Map.entry(7, new Pair<>(10, 43)),
+            Map.entry(8, new Pair<>(12, 47)),
+            Map.entry(9, new Pair<>(16, 50)),
+            Map.entry(10, new Pair<>(21, 49)),
+            Map.entry(11, new Pair<>(25, 46)),
+            Map.entry(12, new Pair<>(28, 42)),
+            Map.entry(13, new Pair<>(30, 38)),
+            Map.entry(14, new Pair<>(31, 34)),
+            Map.entry(15, new Pair<>(31, 29)),
+            Map.entry(16, new Pair<>(32, 25)),
+            Map.entry(17, new Pair<>(32, 20)),
+            Map.entry(18, new Pair<>(31, 16)),
+            Map.entry(19, new Pair<>(9, 11)),
+            Map.entry(20, new Pair<>(26, 7)),
+            Map.entry(21, new Pair<>(21, 4)),
+            Map.entry(22, new Pair<>(16, 5)),
+            Map.entry(23, new Pair<>(12, 8))
     );
 
     @Override
-    protected Map<Integer, Point2D> getFlyingBoardRelativePositions() {
+    protected Map<Integer, Pair<Integer, Integer>> getFlyingBoardRelativePositions() {
         return flyingBoardRelativePositions;
     }
 

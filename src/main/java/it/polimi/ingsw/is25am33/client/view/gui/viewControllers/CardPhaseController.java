@@ -56,7 +56,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     public HBox bottomHBox;
 
     // TODO fare per il livello 1
-    private Level2BoardsController boardsController;
+    private BoardsController boardsController;
     private ModelFxAdapter modelFxAdapter;
     private final List<Coordinates> selectedDoubleEngines = new ArrayList<>();
     private final List<Coordinates> selectedDoubleCannons = new ArrayList<>();
@@ -90,10 +90,14 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     public void initialize() {
         // Caricamento delle board
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level2Boards.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                    clientController.getCurrentGameInfo().isTestFlight() ?
+                            "/gui/Level1Boards.fxml" :
+                            "/gui/Level2Boards.fxml")
+            );
             VBox mainBoardBox = loader.load();
-            centerStackPane.getChildren().addFirst(mainBoardBox);
             this.boardsController = loader.getController();
+            Platform.runLater(() -> centerStackPane.getChildren().addFirst(mainBoardBox));
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error loading boards: " + e.getMessage());
@@ -104,13 +108,13 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         // Binding e setup
         this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
         this.bindCurrAdventureCard();
+        this.boardsController.createPaws();
 
         // Refresh iniziale
         modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
         clientModel.getPlayerClientData().keySet().forEach(nickname ->
                 modelFxAdapter.refreshShipBoardOf(nickname));
         modelFxAdapter.refreshRanking();
-
     }
 
     private void bindCurrAdventureCard() {

@@ -560,7 +560,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     public void initialize() {
         // Caricamento delle board
         try {
-            if(clientController.getCurrentGameInfo().isTestFlight()) {
+            if (clientController.getCurrentGameInfo().isTestFlight()) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level1Boards.fxml"));
                 VBox mainBoardBox = loader.load();
                 this.boardsController = loader.getController();
@@ -589,6 +589,8 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
         // Binding e setup
         this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
+
+        this.boardsController.createPaws();
 
         // Altri setup specifici del controller
         setupFocusedComponentBinding();

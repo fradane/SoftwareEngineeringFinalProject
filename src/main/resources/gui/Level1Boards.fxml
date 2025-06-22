@@ -123,51 +123,120 @@
                     <RowConstraints percentHeight="20" />
                 </rowConstraints>
 
-                <!-- We use ImageViews for other players' boards -->
                 <!-- First row -->
-                <ImageView fx:id="p2_img04_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img04_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img04_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img04_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img04_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img04_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img04_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img04_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img04_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img04_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img04_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img04_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img04_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img04_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Second row -->
-                <ImageView fx:id="p2_img05_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img05_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img05_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img05_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img05_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img05_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img05_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img05_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img05_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img05_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img05_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img05_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img05_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img05_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Third row -->
-                <ImageView fx:id="p2_img06_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img06_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img06_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img06_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img06_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img06_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img06_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img06_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img06_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img06_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img06_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img06_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img06_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img06_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Fourth row -->
-                <ImageView fx:id="p2_img07_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img07_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img07_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img07_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img07_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img07_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img07_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img07_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img07_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img07_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img07_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img07_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img07_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img07_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Fifth row -->
-                <ImageView fx:id="p2_img08_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img08_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img08_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img08_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img08_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img08_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p2_img08_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img08_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img08_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img08_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img08_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img08_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img08_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p2_img08_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <StackPane.margin>
                     <Insets bottom="103.0" left="1.0" right="1.0" top="103.0" />
@@ -203,49 +272,119 @@
                 </rowConstraints>
 
                 <!-- First row -->
-                <ImageView fx:id="p3_img04_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img04_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img04_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img04_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img04_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img04_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img04_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img04_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img04_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img04_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img04_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img04_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img04_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img04_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Second row -->
-                <ImageView fx:id="p3_img05_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img05_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img05_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img05_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img05_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img05_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img05_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img05_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img05_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img05_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img05_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img05_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img05_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img05_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Third row -->
-                <ImageView fx:id="p3_img06_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img06_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img06_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img06_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img06_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img06_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img06_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img06_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img06_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img06_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img06_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img06_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img06_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img06_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Fourth row -->
-                <ImageView fx:id="p3_img07_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img07_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img07_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img07_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img07_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img07_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img07_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img07_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img07_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img07_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img07_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img07_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img07_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img07_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Fifth row -->
-                <ImageView fx:id="p3_img08_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img08_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img08_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img08_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img08_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img08_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p3_img08_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img08_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img08_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img08_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img08_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img08_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img08_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p3_img08_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <StackPane.margin>
                     <Insets bottom="103.0" left="1.0" right="1.0" top="103.0" />
@@ -281,49 +420,119 @@
                 </rowConstraints>
 
                 <!-- First row -->
-                <ImageView fx:id="p4_img04_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img04_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img04_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img04_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img04_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img04_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img04_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img04_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img04_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img04_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img04_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img04_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img04_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img04_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Second row -->
-                <ImageView fx:id="p4_img05_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img05_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img05_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img05_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img05_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img05_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img05_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img05_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img05_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img05_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img05_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img05_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img05_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img05_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Third row -->
-                <ImageView fx:id="p4_img06_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img06_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img06_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img06_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img06_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img06_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img06_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img06_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img06_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img06_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img06_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img06_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img06_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img06_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Fourth row -->
-                <ImageView fx:id="p4_img07_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img07_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img07_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img07_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img07_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img07_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img07_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img07_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img07_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img07_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img07_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img07_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img07_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img07_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <!-- Fifth row -->
-                <ImageView fx:id="p4_img08_03" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img08_04" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img08_05" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img08_06" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img08_07" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img08_08" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                <ImageView fx:id="p4_img08_09" fitHeight="70" fitWidth="70" preserveRatio="true" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
+                <StackPane GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img08_03" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img08_04" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img08_05" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img08_06" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img08_07" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img08_08" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+                <StackPane GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                    <ImageView fx:id="p4_img08_09" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
 
                 <StackPane.margin>
                     <Insets bottom="103.0" left="1.0" right="1.0" top="103.0" />

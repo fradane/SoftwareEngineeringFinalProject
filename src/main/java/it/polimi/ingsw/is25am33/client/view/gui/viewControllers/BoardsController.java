@@ -1,17 +1,20 @@
 package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
+import it.polimi.ingsw.is25am33.client.model.PlayerClientData;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Point2D;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.effect.DropShadow;
@@ -31,13 +34,15 @@ public abstract class BoardsController {
     @FXML public Button myShipButton, showFlyingBoardButton;
     @FXML public HBox shipNavigationBar;
     @FXML private StackPane flyingBoard;
+    @FXML public GridPane flyingBoardGrid;
     @FXML private StackPane mainPlayerShipBoard, player2ShipBoard, player3ShipBoard, player4ShipBoard;
     @FXML public GridPane myShipBoardGrid;
-    @FXML private ImageView redPawn, greenPawn, bluePawn, yellowPawn;
+    private ImageView redPawn, greenPawn, bluePawn, yellowPawn;
 
     @FXML private ImageView p2_img04_08, p2_img04_09;
     @FXML private ImageView p3_img04_08, p3_img04_09;
     @FXML private ImageView p4_img04_08, p4_img04_09;
+    final int FIXED_COMPONENT_LENGTH = 70;
 
     protected ModelFxAdapter modelFxAdapter;
     protected BoardsEventHandler boardsEventHandler;
@@ -53,7 +58,7 @@ public abstract class BoardsController {
 
     protected abstract void initializeButtonMap();
 
-    protected abstract Map<Integer, Point2D> getFlyingBoardRelativePositions();
+    protected abstract Map<Integer, Pair<Integer, Integer>> getFlyingBoardRelativePositions();
 
     public void removeHighlightColor() {
         Set<Button> buttonsToRemove;
@@ -118,6 +123,58 @@ public abstract class BoardsController {
         return null; // Nessun nodo trovato in quella posizione
     }
 
+    protected void createPaws() {
+        final int PAWNS_WIDTH = 30;
+        Map<String, PlayerClientData> playersData = clientModel.getPlayerClientData();
+        playersData.keySet()
+                .forEach(player -> {
+
+                    PlayerColor color = playersData.get(player).getColor();
+                    switch (color) {
+                        case RED:
+                            redPawn = new ImageView(new Image(Objects.requireNonNull(getClass()
+                                    .getResourceAsStream("/gui/graphics/pawns/shuttle-red.png"))));
+                            redPawn.setFitWidth(PAWNS_WIDTH);
+                            redPawn.setPreserveRatio(true);
+                            applyShadowEffect(redPawn);
+                            break;
+                        case GREEN:
+                            greenPawn = new ImageView(new Image(Objects.requireNonNull(getClass()
+                                    .getResourceAsStream("/gui/graphics/pawns/shuttle-green.png"))));
+                            greenPawn.setFitWidth(PAWNS_WIDTH);
+                            greenPawn.setPreserveRatio(true);
+                            applyShadowEffect(greenPawn);
+                            break;
+                        case YELLOW:
+                            yellowPawn = new ImageView(new Image(Objects.requireNonNull(getClass()
+                                    .getResourceAsStream("/gui/graphics/pawns/shuttle-yellow.png"))));
+                            yellowPawn.setFitWidth(PAWNS_WIDTH);
+                            yellowPawn.setPreserveRatio(true);
+                            applyShadowEffect(yellowPawn);
+                            break;
+                        case BLUE:
+                            bluePawn = new ImageView(new Image(Objects.requireNonNull(getClass()
+                                    .getResourceAsStream("/gui/graphics/pawns/shuttle-blue.png"))));
+                            bluePawn.setFitWidth(PAWNS_WIDTH);
+                            bluePawn.setPreserveRatio(true);
+                            applyShadowEffect(bluePawn);
+                            break;
+                    }
+                });
+    }
+
+    private void applyShadowEffect(ImageView image) {
+        DropShadow dropShadow = new DropShadow();
+
+        dropShadow.setColor(Color.BLACK);
+        dropShadow.setOffsetX(3.0);
+        dropShadow.setOffsetY(3.0);
+        dropShadow.setSpread(0.6);
+        dropShadow.setRadius(15);
+
+        image.setEffect(dropShadow);
+    }
+
     @FXML
     protected void handleShowFlyingBoardButton() {
         Platform.runLater(() -> {
@@ -135,40 +192,60 @@ public abstract class BoardsController {
 
         clientModel.getColorRanking()
                 .forEach((playerColor, position) -> {
-                    modelFxAdapter.getObservableColorRanking().put(playerColor, new SimpleObjectProperty<>(position));
+                    modelFxAdapter.getObservableColorRanking().put(playerColor, new SimpleObjectProperty<>());
                 });
 
         // Positioning of the spaceships on the flying board
         modelFxAdapter.getObservableColorRanking()
                 .forEach((color, position) -> {
                     position.addListener((_, _, newVal) -> Platform.runLater(() -> {
-                        double x = getFlyingBoardRelativePositions().get(newVal).getX();
-                        double y = getFlyingBoardRelativePositions().get(newVal).getY();
+                        int newValueMod = newVal % 24;
+                        int x = getFlyingBoardRelativePositions().get(newValueMod).getValue();
+                        int y = getFlyingBoardRelativePositions().get(newValueMod).getKey();
 
                         switch (color) {
                             case RED:
-                                redPawn.setLayoutX(x);
-                                redPawn.setLayoutY(y);
-                                redPawn.setVisible(true);
+                                updatePawnPositions(redPawn, x, y);
                                 break;
                             case GREEN:
-                                greenPawn.setLayoutX(x);
-                                greenPawn.setLayoutY(y);
-                                greenPawn.setVisible(true);
+                                updatePawnPositions(greenPawn, x, y);
                                 break;
                             case BLUE:
-                                bluePawn.setLayoutX(x);
-                                bluePawn.setLayoutY(y);
-                                bluePawn.setVisible(true);
+                                updatePawnPositions(bluePawn, x, y);
                                 break;
                             case YELLOW:
-                                yellowPawn.setLayoutX(x);
-                                yellowPawn.setLayoutY(y);
-                                yellowPawn.setVisible(true);
+                                updatePawnPositions(yellowPawn, x, y);
                                 break;
                         }
+                        printGridPaneContent(flyingBoardGrid);
                     }));
                 });
+    }
+
+    private void updatePawnPositions(ImageView pawn, int newX, int newY) {
+        flyingBoardGrid.add(pawn, newX, newY);
+        GridPane.setHalignment(pawn, HPos.CENTER);
+        GridPane.setValignment(pawn, VPos.CENTER);
+        pawn.setVisible(true);
+    }
+
+    private void printGridPaneContent(GridPane gridPane) {
+        System.out.println("Contenuto del GridPane:");
+
+        if (gridPane.getChildren().isEmpty()) {
+            System.out.println("  GridPane vuoto");
+            return;
+        }
+
+        for (Node child : gridPane.getChildren()) {
+            int row = GridPane.getRowIndex(child) != null ? GridPane.getRowIndex(child) : 0;
+            int col = GridPane.getColumnIndex(child) != null ? GridPane.getColumnIndex(child) : 0;
+            int rowSpan = GridPane.getRowSpan(child) != null ? GridPane.getRowSpan(child) : 1;
+            int colSpan = GridPane.getColumnSpan(child) != null ? GridPane.getColumnSpan(child) : 1;
+
+            System.out.printf("  Cella (%d,%d) span(%d,%d): %s%n",
+                    row, col, rowSpan, colSpan, child.getClass().getSimpleName());
+        }
     }
 
     protected void setupShipBoardNavigationBarAndBoards() {
@@ -301,6 +378,10 @@ public abstract class BoardsController {
                 imageView.setImage(image);
                 imageView.setRotate(newVal.getRotation() * 90);
 
+                imageView.setFitWidth(FIXED_COMPONENT_LENGTH);
+                imageView.setFitHeight(FIXED_COMPONENT_LENGTH);
+                imageView.setPreserveRatio(true);
+
                 // Create updated StackPane with all necessary images (component + features)
                 StackPane newStackPane = getUpdatedStackPaneWithImages(imageView, newVal);
 
@@ -319,7 +400,6 @@ public abstract class BoardsController {
     }
 
     private void updateButtonAppearance(Button button, Component component) {
-        final int FIXED_COMPONENT_LENGTH = 70;
 
         if (component != null) {
             try {
@@ -395,15 +475,7 @@ public abstract class BoardsController {
 
         ImageView featureImageView = new ImageView();
         Image featureImage;
-        DropShadow dropShadow = new DropShadow();
-
-        dropShadow.setColor(Color.BLACK);
-        dropShadow.setOffsetX(3.0);
-        dropShadow.setOffsetY(3.0);
-        dropShadow.setSpread(0.6);
-        dropShadow.setRadius(15);
-
-        featureImageView.setEffect(dropShadow);
+        applyShadowEffect(featureImageView);
         featureImageView.setFitWidth(40);
         featureImageView.setFitHeight(40);
         featureImageView.setPreserveRatio(true);
@@ -430,7 +502,7 @@ public abstract class BoardsController {
             ImageView featureImageView1 = new ImageView();
             Image featureImage1;
 
-            featureImageView1.setEffect(dropShadow);
+            applyShadowEffect(featureImageView1);
             featureImageView1.setFitWidth(40);
             featureImageView1.setFitHeight(40);
             featureImageView1.setPreserveRatio(true);
@@ -458,15 +530,7 @@ public abstract class BoardsController {
 
         ImageView featureImageView = new ImageView();
         Image featureImage;
-        DropShadow dropShadow = new DropShadow();
-
-        dropShadow.setColor(Color.BLACK);
-        dropShadow.setOffsetX(3.0);
-        dropShadow.setOffsetY(3.0);
-        dropShadow.setSpread(0.6);
-        dropShadow.setRadius(15);
-
-        featureImageView.setEffect(dropShadow);
+        applyShadowEffect(featureImageView);
         featureImageView.setFitWidth(BATTERY_BOX_WIDTH);
         featureImageView.setFitHeight(BATTERY_BOX_WIDTH);
         featureImageView.setPreserveRatio(true);
@@ -482,7 +546,7 @@ public abstract class BoardsController {
         } else if (remainingBatteries == 2) {
             ImageView featureImageView1 = new ImageView();
 
-            featureImageView1.setEffect(dropShadow);
+            applyShadowEffect(featureImageView1);
             featureImageView1.setFitWidth(BATTERY_BOX_WIDTH);
             featureImageView1.setFitHeight(BATTERY_BOX_WIDTH);
             featureImageView1.setPreserveRatio(true);
@@ -498,11 +562,11 @@ public abstract class BoardsController {
             ImageView featureImageView1 = new ImageView();
             ImageView featureImageView2 = new ImageView();
 
-            featureImageView1.setEffect(dropShadow);
+            applyShadowEffect(featureImageView1);
             featureImageView1.setFitWidth(BATTERY_BOX_WIDTH);
             featureImageView1.setFitHeight(BATTERY_BOX_WIDTH);
             featureImageView1.setPreserveRatio(true);
-            featureImageView2.setEffect(dropShadow);
+            applyShadowEffect(featureImageView2);
             featureImageView2.setFitWidth(BATTERY_BOX_WIDTH);
             featureImageView2.setFitHeight(BATTERY_BOX_WIDTH);
             featureImageView2.setPreserveRatio(true);
@@ -532,15 +596,7 @@ public abstract class BoardsController {
 
                     ImageView featureImageView = new ImageView();
                     Image featureImage = null;
-                    DropShadow dropShadow = new DropShadow();
-
-                    dropShadow.setColor(Color.BLACK);
-                    dropShadow.setOffsetX(3.0);
-                    dropShadow.setOffsetY(3.0);
-                    dropShadow.setSpread(0.6);
-                    dropShadow.setRadius(15);
-
-                    featureImageView.setEffect(dropShadow);
+                    applyShadowEffect(featureImageView);
                     featureImageView.setFitWidth(20);
                     featureImageView.setFitHeight(20);
                     featureImageView.setPreserveRatio(true);
