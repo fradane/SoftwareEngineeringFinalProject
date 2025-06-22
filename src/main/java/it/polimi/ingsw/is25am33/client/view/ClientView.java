@@ -236,7 +236,7 @@ public interface ClientView {
             case THROW_DICES:
                 return ClientState.THROW_DICES_MENU;
             case DANGEROUS_ATTACK:
-                // Determine specific type based on dangerous object
+                // Determine specific type based on the dangerous object
                 ClientDangerousObject obj = clientModel.getCurrDangerousObj();
                 if (obj != null) {
                     String type = obj.getType();

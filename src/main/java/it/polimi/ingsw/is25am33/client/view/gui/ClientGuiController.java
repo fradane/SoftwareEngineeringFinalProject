@@ -150,7 +150,10 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void checkShipBoardAfterAttackMenu() {
-
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.checkShipBoardAfterAttackMenu()
+        );
     }
 
     @Override
@@ -248,12 +251,18 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showSmallDanObjMenu() {
-        //TODO
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.showHandleSmallDanObjMenu()
+        );
     }
 
     @Override
     public void showBigMeteoriteMenu() {
-        //TODO
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.showBigMeteoriteMenu()
+        );
     }
 
     @Override
@@ -493,7 +502,10 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showComponentHitInfo(Coordinates coordinates){
-
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.showComponentHitInfo(coordinates)
+        );
     }
 
     @Override
@@ -754,18 +766,31 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showInvalidShipBoardMenu() {
-        executeWithController(
-                BUILD_SHIPBOARD_CONTROLLER,
-                () -> buildAndCheckShipBoardController.showInvalidComponents()
-        );
+
+        if (clientModel.getCurrAdventureCard() == null)
+            executeWithController(
+                    BUILD_SHIPBOARD_CONTROLLER,
+                    () -> buildAndCheckShipBoardController.showInvalidComponents()
+            );
+        else
+            executeWithController(
+                    CARD_PHASE_CONTROLLER,
+                    () -> cardPhaseController.showInvalidComponents()
+            );
     }
 
     @Override
     public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {
-        executeWithController(
-                BUILD_SHIPBOARD_CONTROLLER,
-                () -> buildAndCheckShipBoardController.showShipParts(shipParts)
-        );
+        if (clientModel.getCurrAdventureCard() == null)
+            executeWithController(
+                    BUILD_SHIPBOARD_CONTROLLER,
+                    () -> buildAndCheckShipBoardController.showShipParts(shipParts)
+            );
+        else
+            executeWithController(
+                    CARD_PHASE_CONTROLLER,
+                    () -> cardPhaseController.showShipParts(shipParts)
+            );
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
@@ -66,6 +67,10 @@ public class Deck {
      */
     public AdventureCard drawCard() throws EmptyStackException {
         AdventureCard card = gameDeck.pop();
+
+//        if (!((MeteoriteStorm) card).getMeteorites().getFirst().getDangerousObjType().equals("bigMeteorite"))
+//            card = drawCard();
+
         card.setCurrState(CardState.START_CARD);
         return card;
     }
@@ -181,6 +186,14 @@ public class Deck {
 //        cards.addAll(Deck.loadFreeSpaceFromJson());
 //        cards.addAll(Deck.loadFreeSpaceFromJson());
 //        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
 
 
         if (isTestFlight)

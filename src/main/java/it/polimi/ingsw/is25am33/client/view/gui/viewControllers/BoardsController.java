@@ -284,37 +284,34 @@ public abstract class BoardsController {
 
     private void updateOtherShipBoardsAppearance(StackPane playerStackPane, Component newVal, int row, int column) {
         try {
-            StackPane cellStackPane = getNodeFromGridPane(((GridPane) playerStackPane.getChildren().get(1)), row - 4, column - 3);
+            GridPane gridPane = (GridPane) playerStackPane.getChildren().get(1);
 
-            if (cellStackPane != null && !cellStackPane.getChildren().isEmpty()) {
-                // Ottieni la prima ImageView dallo StackPane (quella di default)
-                ImageView imageView = (ImageView) cellStackPane.getChildren().getFirst();
-
-                if (newVal != null) {
-                    String componentFile = newVal.toString().split("\\n")[0];
-                    Image image = new Image(Objects.requireNonNull(getClass()
-                            .getResourceAsStream("/gui/graphics/component/" + componentFile)));
-                    imageView.setImage(image);
-                    imageView.setRotate(newVal.getRotation() * 90);
-
-                    StackPane newStackPane = getUpdatedStackPaneWithImages(imageView, newVal);
-                    GridPane gridPane = (GridPane) playerStackPane.getChildren().get(1);
-
-                    // Rimuovi il nodo esistente, se presente
-                    Node existingNode = getNodeFromGridPane(gridPane, row - 4, column - 3);
-                    if (existingNode != null) {
-                        gridPane.getChildren().remove(existingNode);
-                    }
-
-                    // Imposta posizione e aggiungi il nuovo StackPane
-                    GridPane.setRowIndex(newStackPane, row - 4);
-                    GridPane.setColumnIndex(newStackPane, column - 3);
-                    gridPane.getChildren().add(newStackPane);
-                } else {
-                    imageView.setImage(null);
-                    imageView.setRotate(0);
-                }
+            // Remove existing node first to avoid accumulation of old components
+            Node existingNode = getNodeFromGridPane(gridPane, row - 4, column - 3);
+            if (existingNode != null) {
+                gridPane.getChildren().remove(existingNode);
             }
+
+            if (newVal != null) {
+                // Create new ImageView for the component
+                ImageView imageView = new ImageView();
+                String componentFile = newVal.toString().split("\\n")[0];
+                Image image = new Image(Objects.requireNonNull(getClass()
+                        .getResourceAsStream("/gui/graphics/component/" + componentFile)));
+                imageView.setImage(image);
+                imageView.setRotate(newVal.getRotation() * 90);
+
+                // Create updated StackPane with all necessary images (component + features)
+                StackPane newStackPane = getUpdatedStackPaneWithImages(imageView, newVal);
+
+                // Set position and add the new StackPane
+                GridPane.setRowIndex(newStackPane, row - 4);
+                GridPane.setColumnIndex(newStackPane, column - 3);
+                gridPane.getChildren().add(newStackPane);
+            }
+            // If newVal is null, we've already removed the existing node above,
+            // so the cell will be empty (which is correct)
+
         } catch (Exception e) {
             System.err.println("Error updating component appearance: " + e.getMessage());
             e.printStackTrace();
@@ -340,12 +337,16 @@ public abstract class BoardsController {
                 button.setGraphic(stackPane);
             } catch (Exception e) {
                 System.err.println("Error updating button appearance: " + e.getMessage());
-                // Fallback: mostra almeno un indicatore visivo
+                // Fallback: show at least a visual indicator
                 button.setStyle("-fx-background-color: yellow;");
             }
         } else {
+            // FIXED: Completely clear the button when component is null
             button.setGraphic(null);
             button.setStyle("-fx-background-color: transparent;");
+            // Ensure button is still visible and managed for potential future components
+            button.setVisible(true);
+            button.setManaged(true);
         }
     }
 
@@ -523,14 +524,11 @@ public abstract class BoardsController {
     private StackPane getStorageStackPane(ImageView storageImageView, Storage storage) {
 
         List<CargoCube> cargoCubes = storage.getStockedCubes();
-
         StackPane storageStackPane = new StackPane(storageImageView);
 
-        IntStream.range(1, 3)
+        // FIXED RANGE: from 1 to list size (inclusive)
+        IntStream.range(1, cargoCubes.size() + 1)
                 .forEach(i -> {
-
-                    if (cargoCubes.size() < i)
-                        return;
 
                     ImageView featureImageView = new ImageView();
                     Image featureImage = null;
@@ -547,28 +545,52 @@ public abstract class BoardsController {
                     featureImageView.setFitHeight(20);
                     featureImageView.setPreserveRatio(true);
 
+                    // Load image based on a cube type
                     switch (cargoCubes.get(i - 1)) {
-                        case RED ->  featureImage = new Image(Objects.requireNonNull(getClass()
+                        case RED -> featureImage = new Image(Objects.requireNonNull(getClass()
                                 .getResourceAsStream("/gui/graphics/componentFeature/red_cargo_cube.png")));
-                        case GREEN ->  featureImage = new Image(Objects.requireNonNull(getClass()
+                        case GREEN -> featureImage = new Image(Objects.requireNonNull(getClass()
                                 .getResourceAsStream("/gui/graphics/componentFeature/green_cargo_cube.png")));
-                        case BLUE ->  featureImage = new Image(Objects.requireNonNull(getClass()
+                        case BLUE -> featureImage = new Image(Objects.requireNonNull(getClass()
                                 .getResourceAsStream("/gui/graphics/componentFeature/blue_cargo_cube.png")));
-                        case YELLOW ->  featureImage = new Image(Objects.requireNonNull(getClass()
+                        case YELLOW -> featureImage = new Image(Objects.requireNonNull(getClass()
                                 .getResourceAsStream("/gui/graphics/componentFeature/yellow_cargo_cube.png")));
                     }
 
-                    switch (i) {
+                    // POSITIONING LOGIC BASED ON TOTAL CUBE COUNT
+                    switch (cargoCubes.size()) {
                         case 1:
-                            featureImageView.setTranslateX(10);
-                            featureImageView.setTranslateY(-5);
+                            // Single cube: no translation (centered)
                             break;
                         case 2:
-                            featureImageView.setTranslateX(-10);
-                            featureImageView.setTranslateY(-5);
+                            // Two cubes: one left, one right
+                            switch (i) {
+                                case 1:
+                                    featureImageView.setTranslateX(-10);
+                                    featureImageView.setTranslateY(0);
+                                    break;
+                                case 2:
+                                    featureImageView.setTranslateX(10);
+                                    featureImageView.setTranslateY(0);
+                                    break;
+                            }
                             break;
                         case 3:
-                            featureImageView.setTranslateY(5);
+                            // Three cubes: triangular layout
+                            switch (i) {
+                                case 1:
+                                    featureImageView.setTranslateX(-10);
+                                    featureImageView.setTranslateY(-5);
+                                    break;
+                                case 2:
+                                    featureImageView.setTranslateX(10);
+                                    featureImageView.setTranslateY(-5);
+                                    break;
+                                case 3:
+                                    featureImageView.setTranslateX(0);
+                                    featureImageView.setTranslateY(5);
+                                    break;
+                            }
                             break;
                     }
 

@@ -570,3 +570,68 @@
     -fx-background-color: derive(-fx-space-accent-hover, -10%);
     -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.6), 4, 0, 0, 0);
 }
+
+/* ===== POPUP OVERLAY SECTION ===== */
+
+/* Overlay di sfondo semi-trasparente */
+.popup-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.75);
+}
+
+/* Container principale del popup */
+.popup-container {
+    -fx-background-color: -fx-space-darker;
+    -fx-background-radius: 15px;
+    -fx-border-color: -fx-space-blue;
+    -fx-border-width: 2px;
+    -fx-border-radius: 15px;
+    -fx-padding: 30px;
+    -fx-spacing: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 15, 0, 0, 5);
+    -fx-max-width: 450px;
+    -fx-alignment: center;
+}
+
+/* Titolo del popup */
+.popup-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-space-accent;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 3, 0, 0, 1);
+}
+
+/* Messaggio del popup */
+.popup-message {
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+    -fx-line-spacing: 4px;
+}
+
+/* Bottone del popup - usa lo stile esistente custom-popup-button e lo migliora */
+.popup-button {
+    -fx-background-color: -fx-space-accent;
+    -fx-text-fill: -fx-space-dark;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 24px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.5), 5, 0, 0, 1);
+    -fx-min-width: 100px;
+}
+
+.popup-button:hover {
+    -fx-background-color: -fx-space-accent-hover;
+    -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.6), 6, 0, 0, 1);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.popup-button:pressed {
+    -fx-background-color: derive(-fx-space-accent-hover, -10%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 194, 51, 0.7), 4, 0, 0, 0);
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}

@@ -649,10 +649,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.showMessage(nicknameAndMotivations, STANDARD);
     }
 
-    public void evaluatedCrewMembers(){
-        try{
+    public void evaluatedCrewMembers() {
+        try {
             serverController.evaluatedCrewMembers(nickname);
-        }catch (IOException e){
+        } catch (IOException e) {
             handleRemoteException(e);
         }
     }
@@ -1120,9 +1120,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .setChosenShield(shieldCoords)
                 .build();
 
-        try{
+        try {
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);
-        }catch (IOException e){
+        } catch (IOException e){
             handleRemoteException(e);
         }
     }
@@ -1230,10 +1230,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void startCheckShipBoardAfterAttack(String nickname, Coordinates coordinates){
-        try{
+    public void startCheckShipBoardAfterAttack(String nickname, Coordinates coordinates) {
+        try {
             serverController.startCheckShipBoardAfterAttack(nickname);
-        }catch (IOException e){
+        } catch (IOException e){
             handleRemoteException(e);
         }
     }

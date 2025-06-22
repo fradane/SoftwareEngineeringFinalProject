@@ -275,7 +275,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     }
 
     private void handleShipParts(int row, int column) {
-        IntStream.range(0, shipParts.size() - 1)
+        IntStream.range(0, shipParts.size())
                 .filter(i -> shipParts.get(i).contains(new Coordinates(row, column)))
                 .findFirst()
                 .ifPresentOrElse(

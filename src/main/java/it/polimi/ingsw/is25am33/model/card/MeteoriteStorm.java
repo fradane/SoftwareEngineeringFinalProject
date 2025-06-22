@@ -78,7 +78,6 @@ public class MeteoriteStorm extends AdventureCard {
     }
 
     public void convertIdsToMeteorites() {
-
         meteorites = meteoriteIDs.stream()
                 .map(id -> {
                     try {
@@ -91,12 +90,10 @@ public class MeteoriteStorm extends AdventureCard {
     }
 
     private void throwDices() {
-
         Meteorite currMeteorite = meteoriteIterator.next();
         currMeteorite.setCoordinates(GameModel.throwDices());
         gameModel.setCurrDangerousObj(currMeteorite);
         setCurrState(CardState.DANGEROUS_ATTACK);
-
     }
 
     public void setMeteoriteID(List<String> meteoriteID) {
@@ -108,15 +105,14 @@ public class MeteoriteStorm extends AdventureCard {
         this.meteoriteIterator = meteorites.iterator();
     }
 
-    public void checkShipBoardAfterAttack(){
+    private void checkShipBoardAfterAttack() {
         gameModel.notifyInvalidShipBoards();
-        if(gameModel.areAllShipsCorrect()) {
+        if (gameModel.areAllShipsCorrect()) {
 
             if (gameModel.hasNextPlayer()) {
                 gameModel.nextPlayer();
                 setCurrState(CardState.DANGEROUS_ATTACK);
-            }
-            else if (meteoriteIterator.hasNext()) {
+            } else if (meteoriteIterator.hasNext()) {
                 gameModel.resetPlayerIterator();
                 setCurrState(CardState.THROW_DICES);
             } else {
@@ -162,10 +158,9 @@ public class MeteoriteStorm extends AdventureCard {
                 gameModel.updateShipBoardAfterBeenHit();
             }
 
-        }
-        else{
+        } else {
 
-            if(chosenShield != null && chosenBatteryBox != null){
+            if (chosenShield != null && chosenBatteryBox != null){
                 chosenBatteryBox.useBattery();
                 gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
@@ -183,7 +178,7 @@ public class MeteoriteStorm extends AdventureCard {
         ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
         DangerousObj currMeteorite = gameModel.getCurrDangerousObj();
 
-        if(!chosenDoubleCannonsCoords.isEmpty() && !chosenBatteryBoxesCoords.isEmpty()) {
+        if (!chosenDoubleCannonsCoords.isEmpty() && !chosenBatteryBoxesCoords.isEmpty()) {
             chosenDoubleCannon = (Cannon) personalBoard.getComponentAt(chosenDoubleCannonsCoords.getFirst());
             chosenBatteryBox = (BatteryBox) personalBoard.getComponentAt(chosenBatteryBoxesCoords.getFirst());
         }
