@@ -49,7 +49,7 @@ public class Level1FlyingBoard extends FlyingBoard {
     @Override
     public int getCreditsForPosition(Player player) {
         int index = getCurrentRanking().indexOf(player);
-        return credits.get(index);
+        return index >= 0 ? credits.get(index) : 0;
     }
 
     @Override

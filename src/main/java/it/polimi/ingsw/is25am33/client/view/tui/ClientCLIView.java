@@ -3262,6 +3262,7 @@ public class ClientCLIView implements ClientView {
         } catch (NumberFormatException e) {
             showMessage("Invalid coordinates. Please enter numbers.", ERROR);
         } catch (Exception e) {
+            e.printStackTrace();
             showMessage("Error processing coordinates: " + e.getMessage(), ERROR);
             showMessage("Error: " + e.getMessage(), ERROR);
         }

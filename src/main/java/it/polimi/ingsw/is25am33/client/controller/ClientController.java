@@ -1030,8 +1030,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .map(Cabin.class::cast)
                 .toList();
 
-        for (Cabin cabin : cabins.stream().distinct().toList()) {
-            if (Collections.frequency(cabins, cabin) > cabin.getInhabitants().size()) {
+        for (Cabin uniqueCabin : cabins.stream().distinct().toList()) {
+            long count = cabins.stream()
+                    .filter(c -> c == uniqueCabin)
+                    .count();
+
+            if (count > uniqueCabin.getInhabitants().size()) {
                 view.showMessage("You have selected a cabin more times than its actual crewMember occupancy", ERROR);
                 return false;
             }
