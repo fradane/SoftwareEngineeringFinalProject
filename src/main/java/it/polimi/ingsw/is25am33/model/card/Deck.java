@@ -167,21 +167,22 @@ public class Deck {
 //        cards.addAll(Deck.loadStardustFromJson());
 //        cards.addAll(Deck.loadWarFieldFromJson());
         cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-        cards.addAll(Deck.loadAbandonedShipFromJson());
-
-
-
-
-
-
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
 
 
         if (isTestFlight)

@@ -2,9 +2,7 @@ package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.*;
-import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
-import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.Planet;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
@@ -16,7 +14,6 @@ import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -33,6 +30,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.STANDARD;
+
 
 public class CardPhaseController extends GuiController implements BoardsEventHandler {
 
@@ -130,6 +128,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     // ------------------ CARD PHASE MENU ------------------
 
     //-------------------- PLANET ----------------------
+
     public void showChoosePlanetMenu() {
 
         ClientCard card = clientModel.getCurrAdventureCard();
@@ -199,136 +198,20 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             warningMessage = String.format(
                     """
                     GOOD JOB, your shipboard was built excently.
-                    You won't lose any flight days""", starDust);
+                    You won't lose any flight days""");
         }
 
-        showInfoPopup(warningMessage, starDust);
-        clientController.stardustEvent(clientController.getNickname());
+        showInfoPopupWithCallback(warningMessage, starDust, () ->{
+                Button continueButton = new Button("Continue");
+                continueButton.getStyleClass().add("action-button");
+                continueButton.setOnAction(_ -> {
+                    Platform.runLater(() -> bottomHBox.getChildren().clear());
+                    clientController.spreadEpidemic(clientModel.getMyNickname());
+                });
+            Platform.runLater(() -> bottomHBox.getChildren().add(continueButton));
+        });
 
     }
-
-//    public void showAbandonedShipMenu() {
-//        ClientCard card = clientModel.getCurrAdventureCard();
-//        if (!(card instanceof ClientAbandonedShip abandonedShip)) {
-//            showMessage("Error: Expected AbandonedShip card", false);
-//            return;
-//        }
-//
-//        initializeBeforeCard();
-//        showMessage("You've found an abandoned ship!", true);
-//
-//        int totalCrew = clientModel.getMyShipboard().getCrewMembers().size();
-//        if (totalCrew < abandonedShip.getCrewMalus()) {
-//            showMessage("WARNING: You only have" + totalCrew + "crew members, you cannot accept the reward", false);
-//            showCannotVisitLocationMenu();
-//        } else {
-//            showCanVisitLocationMenu();
-//        }
-//    }
-//
-//    private void showCannotVisitLocationMenu(){
-//        showMessage("You cannot visit this location!", true);
-//        Button continueButton = new Button("Continue");
-//        continueButton.getStyleClass().add("action-button");
-//        continueButton.setOnAction(_ -> {
-//            clientController.playerWantsToVisitLocation(clientController.getNickname(), false);
-//        });
-//        Platform.runLater(() -> bottomHBox.getChildren().add(continueButton));
-//    }
-//
-//    public void showCanVisitLocationMenu(){
-//        showMessage("Do you want to visit the abandoned ship?", true);
-//        Button continueButton = new Button("Continue");
-//        Button skipButton = new Button("Skip");
-//        continueButton.getStyleClass().add("action-button");
-//        skipButton.getStyleClass().add("action-button");
-//
-//        continueButton.setOnAction(_ -> {
-//            clientController.playerWantsToVisitLocation(clientController.getNickname(), true);
-//        });
-//        skipButton.setOnAction(_ -> {
-//            clientController.playerWantsToVisitLocation(clientController.getNickname(), false);
-//        });
-//
-//        Platform.runLater(() -> {
-//            bottomHBox.getChildren().add(continueButton);
-//            bottomHBox.getChildren().add(skipButton);
-//        });
-//
-//
-//    }
-
-//    public void showChooseCabinMenu() {
-//        CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
-//
-//        showMessage("Choose cabins to remove crew from!", true);
-//
-//        Button confirmChoiceButton  = new Button("Confirm");
-//        confirmChoiceButton.getStyleClass().add("action-button");
-//
-//        Platform.runLater(() -> {
-//            bottomHBox.getChildren().add(confirmChoiceButton);
-//        });
-//
-//        confirmChoiceButton.setOnAction(_ -> {
-//            int malus = card.getCrewMalus();
-//            int selectedCount = selectedCabins.size();
-//            int totalCrew = clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size();
-//
-//            if (selectedCount == 0) {
-//                showMessage("You must select at least one cabin", false);
-//                return;
-//            }
-//
-//            if (selectedCount > malus) {
-//                showMessage("You have selected too many cabins. Select at most " + malus + " crew members.", false);
-//                return;
-//            }
-//
-//            if(malus - selectedCount != 0){
-//                showMessage("You still need to remove " + (malus - selectedCount) + " crew member(s). Select other cabins.", false);
-//                return;
-//            }
-//
-//            boolean success = clientController.playerChoseCabins(clientController.getNickname(), selectedCabins);
-//            if (success) {
-//                selectedCabins.clear();
-//            } else {
-//                selectedCabins.clear();
-//                showMessage("Invalid choices. Start again with your selection.", false);
-//            }
-//        });
-//
-//        highlightCabin();
-//    }
-
-//    private void handleCabinSelection(Coordinates coordinates) {
-//
-//        showMessage("Select cabin to remove crew!", true);
-//
-//        ShipBoardClient shipboard = clientModel.getMyShipboard();
-//        Set<Coordinates> cabinCoordinates = shipboard.getCoordinatesOfComponents(shipboard.getCabin());
-//
-//        if(!cabinCoordinates.contains(coordinates)) {
-//            showMessage("You did not select a cabin!", false);
-//            return;
-//        }
-//
-//        Cabin cabin = (Cabin) shipboard.getComponentAt(coordinates);
-//        int timesAlreadySelected = Collections.frequency(cabinCoordinates, selectedCabins);
-//        if(cabin.getInhabitants().size() <= timesAlreadySelected) {
-//            showMessage("This cabin has no more crew member. Select another one.", false);
-//            return;
-//        }
-//
-//        if(!cabin.hasInhabitants()){
-//            showMessage("You don't have any crew member. Select another one.", false);
-//        }
-//
-//        selectedCabins.add(coordinates);
-//        boardsController.removeHighlightColor();
-//
-//    }
 
     //-------------------- ABANDONED SHIP ----------------------
 
@@ -398,7 +281,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         selectedCrewPerCabin.clear();
 
-        showMessage("You need to remove " + crewToRemove + " crew member(s).", true);
+        showMessage("You need to remove " + crewToRemove + " crew member(s). Warning: if you run out of humans, you'll be eliminated.", true);
 
         Map<Coordinates, Cabin> cabinsWithCrew = clientModel.getMyShipboard().getCoordinatesAndCabinsWithCrew();
 
@@ -436,7 +319,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         ShipBoardClient shipboard = clientModel.getMyShipboard();
         Map<Coordinates, Cabin> cabinsWithCrew = shipboard.getCoordinatesAndCabinsWithCrew();
 
-        // Verifica che sia una cabina valida con crew
         if (!cabinsWithCrew.containsKey(coordinates)) {
             showMessage("You did not select a cabin with crew members!", false);
             return;
@@ -446,7 +328,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         int maxCrewInCabin = cabin.getInhabitants().size();
         int currentlySelected = selectedCrewPerCabin.getOrDefault(coordinates, 0);
 
-        // Logica ciclica: 0 -> 1 -> 2 -> ... -> max -> 0
         int newSelection;
         if (currentlySelected >= maxCrewInCabin) {
             newSelection = 0; // Reset to 0 when at maximum
@@ -456,7 +337,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             selectedCrewPerCabin.put(coordinates, newSelection);
         }
 
-        // Feedback all'utente
         if (newSelection == 0) {
             showMessage("Cabin deselected. No crew members selected from this cabin.", false);
         } else {
@@ -464,7 +344,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                     newSelection, maxCrewInCabin), false);
         }
 
-        // Aggiorna la visualizzazione
         CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
         updateCabinSelectionMessage(card.getCrewMalus());
         highlightCabinsWithSelection();
@@ -584,25 +463,14 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
     }
 
-    public void showAbandonedShipReward() {
+    private void showAbandonedShipReward() {
         ClientAbandonedShip abandonedShip = (ClientAbandonedShip) clientModel.getCurrAdventureCard();
 
-        showMessage("Great! You've successfully explored the abandoned ship and received " +
-                abandonedShip.getReward() + " credits!", true);
+        String message = "Great! You've successfully explored the abandoned ship and received " +
+                abandonedShip.getReward() + " credits!";
+        showInfoPopup(message, abandonedShip);
 
-        Button continueButton = new Button("Continue");
-        continueButton.getStyleClass().add("action-button");
-        continueButton.setOnAction(_ -> {
-            Platform.runLater(() -> bottomHBox.getChildren().clear());
-            showWaitingMessage();
-        });
-
-        Platform.runLater(() -> bottomHBox.getChildren().add(continueButton));
     }
-
-
-
-
 
     //-------------------- PIRATES ----------------------
 
@@ -618,7 +486,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         showMessage("Pirates has been detected!", true);
 
         if (clientModel.getMyShipboard().getDoubleCannons().isEmpty())  {
-            informationalPopUp("""
+            showInfoPopup("""
                     No double cannons available.
                     You can use only single engine.
                     """, pirates);
@@ -627,7 +495,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
 
         if (clientModel.getMyShipboard().getBatteryBoxes().isEmpty()){
-            informationalPopUp("""
+            showInfoPopup("""
                     No battery boxes available so you can't activate double cannon
                     You can use only single cannon
                     """, pirates);
@@ -636,7 +504,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
         if(!isThereAvailableBattery()) {
-            informationalPopUp("""
+            showInfoPopup("""
                     You ran out of batteries so you can't activate double cannons.
                     You can use only single cannon.
                     """, pirates);
@@ -968,6 +836,28 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         highlightAvailableComponents();
     }
 
+    // -------------------- EPIDEMIC ----------------------
+    public void showEpidemicMenu(){
+        ClientCard card = clientModel.getCurrAdventureCard();
+        if (!(card instanceof ClientEpidemic epidemic)) {
+            showMessage("Error: Expected Epidemic card", false);
+            return;
+        }
+
+        showMessage("An epidemic is spreading throughout the fleet!", true);
+        showInfoPopupWithCallback("Each occupied cabin connected to another occupied cabin will lose one crew member. " +
+                "Press confirm to see how epidemic is going to spread", epidemic , () -> {
+                    Button continueButton = new Button("Continue");
+                    continueButton.getStyleClass().add("action-button");
+                    continueButton.setOnAction(_ -> {
+                        Platform.runLater(() -> bottomHBox.getChildren().clear());
+                        clientController.spreadEpidemic(clientModel.getMyNickname());
+                    });
+                    Platform.runLater(() -> bottomHBox.getChildren().add(continueButton));
+                });
+
+    }
+
     // ------------------------------------------
 
     private void initializeBeforeCard() {
@@ -979,20 +869,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             boardsController.removeHighlightColor();
         }
         Platform.runLater(() -> bottomHBox.getChildren().clear());
-    }
-
-    private void informationalPopUp(String message, ClientCard card) {
-//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//        alert.setTitle(card.getCardType());
-//        alert.setContentText(message);
-//
-//        alert.show();
-//
-//        // close after 2 seconds
-//        PauseTransition delay = new PauseTransition(Duration.seconds(2));
-//        delay.setOnFinished(_ -> alert.close());
-//        delay.play();
-        return;
     }
 
     private boolean isThereAvailableBattery() {
@@ -1033,6 +909,9 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
             case CardState.STARDUST ->
                 showStardustMenu();
+
+            case CardState.EPIDEMIC ->
+                showEpidemicMenu();
 
             default -> System.err.println("Unknown card state: " + clientModel.getCurrCardState());
         }

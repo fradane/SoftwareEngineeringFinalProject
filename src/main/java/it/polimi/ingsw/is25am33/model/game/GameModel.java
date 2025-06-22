@@ -263,6 +263,10 @@ public class GameModel {
         setCurrRanking(flyingBoard.getCurrentRanking());
         currAdventureCard.setGame(this);
         playerIterator = currRanking.iterator();
+        if (!playerIterator.hasNext()) {    // TODO sistemare per andare alla fase finale
+            System.err.println("NON CI SONO PIù GIOCATORI VIVI");
+            return;
+        }
         setCurrPlayer(playerIterator.next());
         currAdventureCard.setCurrState(currAdventureCard.getFirstState());
 

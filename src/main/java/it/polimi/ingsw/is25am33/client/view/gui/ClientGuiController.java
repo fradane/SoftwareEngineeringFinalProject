@@ -292,7 +292,19 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showEpidemicMenu() {
-        //TODO
+        ClientCard currentCard = clientModel.getCurrAdventureCard();
+        System.out.println("Current card: " + currentCard.getClass().getSimpleName());
+
+        if (clientModel.getCurrAdventureCard() instanceof ClientEpidemic) {
+            if (cardPhaseController != null) {
+                executeWithController(
+                        CARD_PHASE_CONTROLLER,
+                        () -> cardPhaseController.showEpidemicMenu()
+                );
+            }
+        }
+        else
+            System.err.println("Not EpidemicCard: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
     }
 
     @Override
