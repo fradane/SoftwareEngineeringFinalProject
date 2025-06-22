@@ -211,6 +211,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * checks used during component placement to identify incorrectly positioned components.
      */
     public void checkShipBoard() {
+        // Index to count component's number
+        int componentsCounter = 0;
+
         // Clear the current set of incorrectly positioned components
         incorrectlyPositionedComponentsCoordinates.clear();
 
@@ -223,6 +226,8 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                 if (component == null || !isValidPosition(i, j)) {
                     continue;
                 }
+
+                componentsCounter++;
 
                 // Check if this position is properly connected to the ship
                 if (!(component instanceof MainCabin) && !isPositionConnectedToShip(component, i, j)) {
@@ -248,6 +253,10 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                 }
             }
         }
+
+        if(componentsCounter <= 1) // client has only one component and it is automatically correct
+            incorrectlyPositionedComponentsCoordinates.clear();
+
     }
 
 

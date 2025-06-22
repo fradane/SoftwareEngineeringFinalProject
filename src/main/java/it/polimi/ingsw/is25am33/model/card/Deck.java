@@ -81,6 +81,7 @@ public class Deck {
 
         if (gameModel.isTestFlight()) {
             loadCards(true);
+            allCards.forEach(adventureCard -> adventureCard.setGame(gameModel));
             return;
         }
 

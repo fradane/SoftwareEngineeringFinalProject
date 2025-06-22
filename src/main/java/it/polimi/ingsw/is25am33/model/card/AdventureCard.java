@@ -92,9 +92,13 @@ public abstract class AdventureCard {
     public void setCurrState(CardState currState)  {
         this.currState = currState;
 
-        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyCardState(nicknameToNotify, currState);
-        });
+        try {
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyCardState(nicknameToNotify, currState);
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @JsonIgnore

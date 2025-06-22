@@ -3,6 +3,7 @@ package it.polimi.ingsw.is25am33.client.model;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
+import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.EMPTY;
 import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.SINGLE;
+import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.DOUBLE;
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.WEST;
 
@@ -99,6 +101,20 @@ public class PrefabShipFactory {
                 false
         ));
 
+        PREFAB_SHIPS.put("nave_completa", new PrefabShipInfo(
+                "nave_completa",
+                "Nave Completa da Gioco",
+                "Una nave completa con tutti i tipi di componenti per testare il gioco",
+                false
+        ));
+
+        PREFAB_SHIPS.put("nave_test_errori", new PrefabShipInfo(
+                "nave_test_errori",
+                "Nave Test Errori",
+                "Una nave con tutti i tipi di errori per testare la validazione",
+                false
+        ));
+
     }
 
     /**
@@ -133,6 +149,8 @@ public class PrefabShipFactory {
             case "test_many_lost" -> applyTestManyLost(shipBoard);
             case "test_no_engines" -> applyTestNoEngines(shipBoard);
             case "test_no_humans" -> applyTestNoHumans(shipBoard);
+            case "nave_completa" -> applyNaveCompleta(shipBoard);
+            case "nave_test_errori" -> applyNaveTestErrori(shipBoard);
             default -> false;
         };
     }
@@ -414,6 +432,132 @@ public class PrefabShipFactory {
         Component[][] matrix = shipBoard.getShipMatrix();
         matrix[x_0_based][y_0_based] = component;
         component.insertInComponentsMap(shipBoard.getComponentsPerType());
+    }
+
+    /**
+     * Applica una nave completa con tutti i tipi di componenti per testare il gioco
+     */
+    private static boolean applyNaveCompleta(ShipBoard shipBoard) {
+        clearShipBoard(shipBoard);
+
+        // Cabine con LifeSupport - posizionate intorno alla MainCabin
+        // Cabina 1 (comunicante con cabina 2) - con LifeSupport PURPLE
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 8);
+        addComponent(shipBoard, new LifeSupport(createSimpleConnectors(), ColorLifeSupport.PURPLE), 7, 9);
+        
+        // Cabina 2 (comunicante con cabina 1) - con LifeSupport BROWN
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 8, 8);
+        addComponent(shipBoard, new LifeSupport(createSimpleConnectors(), ColorLifeSupport.BROWN), 9, 8);
+        
+        // Cabina 3 - senza LifeSupport (per equipaggio umano)
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 6);
+        
+        // Cabina 4 - senza LifeSupport (per equipaggio umano)
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 6, 7);
+
+        // Motori - devono puntare SOUTH (verso il basso) e non verso altri componenti
+        // Engine singolo - posizionato in basso a sinistra
+        addComponent(shipBoard, new Engine(createCustomConnectors(SINGLE, EMPTY, SINGLE, EMPTY)), 5, 9);
+        
+        // DoubleEngine - posizionato in basso a destra
+        addComponent(shipBoard, new DoubleEngine(createCustomConnectors(SINGLE, EMPTY, EMPTY, SINGLE)), 9, 9);
+
+        // Cannoni - non devono puntare verso altri componenti
+        // Cannon singolo - punta verso NORTH (verso l'alto, zona libera)
+        addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, SINGLE, SINGLE, SINGLE)), 6, 5);
+        
+        // DoubleCannon - punta verso WEST (sinistra, zona libera)
+        addComponent(shipBoard, new DoubleCannon(createCustomConnectors(SINGLE, SINGLE, SINGLE, EMPTY)), 4, 7);
+
+        // Scudi - per protezione
+        addComponent(shipBoard, new Shield(createSimpleConnectors()), 8, 6);
+        addComponent(shipBoard, new Shield(createSimpleConnectors()), 5, 7);
+
+        // BatteryBox - per energia
+        addComponent(shipBoard, new BatteryBox(createSimpleConnectors(), 3), 8, 5);
+        addComponent(shipBoard, new BatteryBox(createSimpleConnectors(), 2), 5, 6);
+
+        // Storage - per cargo
+        StandardStorage storage1 = new StandardStorage(createSimpleConnectors(), 4);
+        storage1.addCube(CargoCube.YELLOW);
+        storage1.addCube(CargoCube.BLUE);
+        addComponent(shipBoard, storage1, 9, 7);
+
+        SpecialStorage storage2 = new SpecialStorage(createSimpleConnectors(), 3);
+        storage2.addCube(CargoCube.RED);
+        storage2.addCube(CargoCube.GREEN);
+        addComponent(shipBoard, storage2, 6, 6);
+
+        // StructuralModules - per supporto strutturale
+        addComponent(shipBoard, new StructuralModules(createSimpleConnectors()), 5, 8);
+        addComponent(shipBoard, new StructuralModules(createSimpleConnectors()), 6, 9);
+
+        // Verifica la correttezza della nave
+        shipBoard.checkShipBoard();
+        return true;
+    }
+
+    /**
+     * Applica una nave completamente scorretta con tutti i tipi di errori per testare la validazione
+     */
+    private static boolean applyNaveTestErrori(ShipBoard shipBoard) {
+        clearShipBoard(shipBoard);
+
+        // ERRORE 1: Connettori mal accoppiati (SINGLE vs DOUBLE)
+        // Cabina con connettore SINGLE a NORTH che si collega a componente con DOUBLE a SOUTH
+        addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE)), 7, 8);
+        addComponent(shipBoard, new BatteryBox(createCustomConnectors(DOUBLE, SINGLE, SINGLE, SINGLE), 2), 7, 9);
+
+        // ERRORE 2: Connettori EMPTY mal posizionati  
+        // Cabina con EMPTY a WEST che non si accoppia con EMPTY del vicino
+        addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, SINGLE, EMPTY)), 6, 7);
+        addComponent(shipBoard, new StandardStorage(createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE), 2), 5, 7);
+
+        // ERRORE 3: Engine che non punta SOUTH (punta NORTH)
+        Engine wrongEngine = new Engine(createCustomConnectors(SINGLE, SINGLE, EMPTY, SINGLE));
+        // Ruoto l'engine per farlo puntare NORTH invece di SOUTH
+        wrongEngine.rotate();
+        wrongEngine.rotate();
+        addComponent(shipBoard, wrongEngine, 8, 7);
+
+        // ERRORE 4: Cannon che punta verso un altro componente
+        // Cannon che punta NORTH verso la cabina in 7,8
+        addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, SINGLE, SINGLE, SINGLE)), 7, 6);
+
+        // ERRORE 5: Engine che punta verso un altro componente
+        // Engine che punta NORTH verso il cannon in 7,6  
+        Engine engineAimingComponent = new Engine(createCustomConnectors(SINGLE, SINGLE, SINGLE, EMPTY));
+        engineAimingComponent.rotate();
+        engineAimingComponent.rotate();
+        addComponent(shipBoard, engineAimingComponent, 7, 5);
+
+        // COMPONENTI PONTE: Creano un "ponte" che se rimosso divide la nave in due parti
+        // Cabina ponte che collega due sezioni della nave
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 8, 8);
+        
+        // Sezione 1 della nave (collegata tramite il ponte)
+        addComponent(shipBoard, new Shield(createSimpleConnectors()), 9, 8);
+        addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 1), 10, 8);
+        
+        // Sezione 2 della nave (collegata tramite il ponte)  
+        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 8, 9);
+        addComponent(shipBoard, new BatteryBox(createSimpleConnectors(), 1), 8, 10);
+
+        // ERRORE 6: DoubleCannon che punta verso componente
+        // DoubleCannon che punta EAST verso la sezione 1
+        addComponent(shipBoard, new DoubleCannon(createCustomConnectors(SINGLE, SINGLE, EMPTY, SINGLE)), 6, 8);
+
+        // ERRORE 7: Più errori di connettori
+        // DoubleEngine con connettore DOUBLE che si collega a componente con SINGLE
+        addComponent(shipBoard, new DoubleEngine(createCustomConnectors(SINGLE, SINGLE, DOUBLE, SINGLE)), 5, 8);
+
+        // Componenti aggiuntivi per mantenere la connessione
+        addComponent(shipBoard, new StructuralModules(createSimpleConnectors()), 6, 6);
+        addComponent(shipBoard, new LifeSupport(createSimpleConnectors(), ColorLifeSupport.PURPLE), 5, 6);
+
+        // Verifica la correttezza della nave (dovrebbe trovare molti errori!)
+        shipBoard.checkShipBoard();
+        return true;
     }
 
     // Metodi per creare i vari tipi di componenti...
