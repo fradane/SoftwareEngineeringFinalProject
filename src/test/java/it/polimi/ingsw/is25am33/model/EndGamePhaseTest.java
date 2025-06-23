@@ -622,14 +622,16 @@ public class EndGamePhaseTest {
         // Nessuno dovrebbe ricevere bonus posizione o nave più bella
         gameModel.calculatePlayersCredits();
 
-        // Verifica che nessuno abbia vinto il premio nave più bella
+        // Verifica che entrambi abbiano vinto il premio nave più bella
         List<Player> prettiestShips = gameModel.getPlayerWithPrettiestShip();
         assertTrue(prettiestShips.isEmpty());
 
         // Verifica PlayerFinalData
         List<PlayerFinalData> finalData = gameModel.getRankingWithPlayerFinalData();
-        assertTrue(finalData.get(0).isEarlyLanded());
-        assertTrue(finalData.get(1).isEarlyLanded());
+        PlayerFinalData AlicesFinalData = finalData.stream().filter(e -> e.getNickname().equals("Alice")).findFirst().get();
+        PlayerFinalData BobsFinalData = finalData.stream().filter(e -> e.getNickname().equals("Bob")).findFirst().get();
+        assertTrue(AlicesFinalData.isEarlyLanded());
+        assertTrue(BobsFinalData.isEarlyLanded());
     }
 
     @Test
@@ -645,7 +647,7 @@ public class EndGamePhaseTest {
 
         gameModel.createGameClientNotifier(clientControllers);
 
-        Player player1 = createPlayerWithShip("Alice", PlayerColor.RED, false, "test_cargo_full", gameModel);
+        Player player1 = createPlayerWithShip("Alice", PlayerColor.RED, false, "test_no_exposed", gameModel);
         Player player2 = createPlayerWithShip("Bob", PlayerColor.BLUE, false, "basic_ship", gameModel);
         Player player3 = createPlayerWithShip("Charlie", PlayerColor.GREEN, false, "basic_ship", gameModel);
 

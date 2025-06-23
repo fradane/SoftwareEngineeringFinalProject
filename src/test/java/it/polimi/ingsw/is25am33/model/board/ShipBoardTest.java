@@ -77,8 +77,12 @@ public class ShipBoardTest {
         storage1.addCube(CargoCube.GREEN);
         storage1.addCube(CargoCube.BLUE);
         storage2.addCube(CargoCube.YELLOW);
-        shipBoard.getShipMatrix()[6][7] = storage1;
-        shipBoard.getShipMatrix()[7][6] = storage2;
+
+        shipBoard.setFocusedComponent(storage1);
+        shipBoard.placeComponentWithFocus(6, 7);
+        shipBoard.setFocusedComponent(storage2);
+        shipBoard.placeComponentWithFocus(7, 6);
+
         assertTrue(shipBoard.getCargoCubes().containsAll(storage1.getStockedCubes()));
         assertTrue(shipBoard.getCargoCubes().containsAll(storage2.getStockedCubes()));
     }
@@ -87,8 +91,10 @@ public class ShipBoardTest {
     void testGetTotalAvailableBattery(){
         BatteryBox battery1 = new BatteryBox(createSimpleConnectors(),2);
         BatteryBox battery2 = new BatteryBox(createSimpleConnectors(), 3);
-        shipBoard.getShipMatrix()[6][7] = battery2;
-        shipBoard.getShipMatrix()[7][6] = battery1;
+        shipBoard.setFocusedComponent(battery1);
+        shipBoard.placeComponentWithFocus(6, 7);
+        shipBoard.setFocusedComponent(battery2);
+        shipBoard.placeComponentWithFocus(7, 6);
         assertEquals(5,shipBoard.getTotalAvailableBattery());
     }
 

@@ -163,7 +163,7 @@ public class Player implements Serializable {
      * @param earlyLanded a boolean indicating whether the player has landed early
      */
     public void setEarlyLanded(boolean isEarlyLanded) {
-        isEarlyLanded = isEarlyLanded;
+        this.isEarlyLanded = isEarlyLanded;
     }
 }
 
