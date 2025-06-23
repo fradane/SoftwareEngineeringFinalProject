@@ -538,9 +538,9 @@ public class ClientCLIView implements ClientView {
             case "Epidemic":
                 displayEpidemicInfo((ClientEpidemic) card, output);
                 break;
-//            case "SMUGGLERS":
-//                displaySmugglersInfo((ClientSmugglers) card, output);
-//                break;
+            case "SMUGGLERS":
+                displaySmugglersInfo((ClientSmugglers) card, output);
+                break;
             case "MeteoriteStorm":
                 displayMeteoriteStormInfo((ClientMeteoriteStorm) card, output);
                 break;
@@ -649,15 +649,14 @@ public class ClientCLIView implements ClientView {
         output.append("Steps Back: ").append(slaveTraders.getStepsBack()).append("\n");
     }
 
-    //TODO uncommentare quando si inizia ad implementare questa carta
-//    private void displaySmugglersInfo(ClientSmugglers smugglers, StringBuilder output) {
-//        output.append("Fire Power Required: ").append(smugglers.getRequiredFirePower()).append("\n");
-//        output.append("Cube Malus: ").append(smugglers.getCubeMalus()).append("\n");
-//        output.append("Steps Back: ").append(smugglers.getStepsBack()).append("\n");
-//        output.append("Rewards: ");
-//        smugglers.getReward().forEach(cube -> output.append(cube.name()).append(" "));
-//        output.append("\n");
-//    }
+    private void displaySmugglersInfo(ClientSmugglers smugglers, StringBuilder output) {
+        output.append("Fire Power Required: ").append(smugglers.getRequiredFirePower()).append("\n");
+        output.append("Cube Malus: ").append(smugglers.getCubeMalus()).append("\n");
+        output.append("Steps Back: ").append(smugglers.getStepsBack()).append("\n");
+        output.append("Rewards: ");
+        smugglers.getReward().forEach(cube -> output.append(cube.name()).append(" "));
+        output.append("\n");
+    }
 
     private void displayMeteoriteStormInfo(ClientMeteoriteStorm storm, StringBuilder output) {
         output.append("ATTENTION! There are ").append(storm.getDangerousObjCount()).append(" meteorites.").append("\n");
@@ -1738,14 +1737,14 @@ public class ClientCLIView implements ClientView {
             message.append("\nEnemy firepower: " ).append(((ClientPirates) card).getRequiredFirePower());
             message.append("\n You can choose double cannons to defeat pirates");
             message.append("\n REMEMBER! If you don't defeat, you will be attacked by shots!");
-
         } else if (card instanceof ClientSlaveTraders) {
             message.append("\nEnemy firepower: " ).append(((ClientSlaveTraders) card).getRequiredFirePower());
             message.append("\n You can choose double cannons to defeat slave traders");
             message.append("\n REMEMBER! If you don't defeat, you will lose crew members!");
-        //}
-//        else if (card instanceof ClientSmugglers) {
-//            strengthStr = String.valueOf(((ClientSmugglers) card).getRequiredFirePower());
+        } else if (card instanceof ClientSmugglers) {
+            message.append("\nEnemy firepower: " ).append(((ClientSmugglers) card).getRequiredFirePower());
+            message.append("\n You can choose double cannons to defeat slave traders");
+            message.append("\n REMEMBER! If you don't defeat, you will lose cargo cubes!");
         }
 
         showCannonWithColor();
@@ -2179,6 +2178,13 @@ public class ClientCLIView implements ClientView {
             ClientWarField card = (ClientWarField) clientModel.getCurrAdventureCard();
             cubeMalus=card.getCubeMalus();
 
+            storageManager = new StorageSelectionManager(new ArrayList<>(), cubeMalus, clientModel.getShipboardOf(clientModel.getMyNickname()));
+            // Mostra la nave per visualizzare i depositi
+            this.showStorageWithColor();
+            showMessage("\nYou must remove " +cubeMalus +" cargo cubes!", STANDARD);
+        } else if(clientModel.getCurrAdventureCard().getCardName().equals("Smugglers")) {
+            ClientSmugglers card = (ClientSmugglers) clientModel.getCurrAdventureCard();
+            cubeMalus=card.getCubeMalus();
             storageManager = new StorageSelectionManager(new ArrayList<>(), cubeMalus, clientModel.getShipboardOf(clientModel.getMyNickname()));
             // Mostra la nave per visualizzare i depositi
             this.showStorageWithColor();
