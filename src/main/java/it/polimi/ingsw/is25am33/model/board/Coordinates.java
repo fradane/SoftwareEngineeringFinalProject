@@ -75,20 +75,23 @@ public class Coordinates implements Serializable {
     }
 
     /**
-     * Checks if both X and Y coordinates are non-negative.
+     * Returns a string representation of the Coordinates object in the format "{x = X, y = Y}",
+     * where X is the value of the X coordinate and Y is the value of the Y coordinate.
      *
-     * @return true if both coordinates are greater than or equal to 0; false otherwise
+     * @return a string representation of the coordinates
      */
-    @JsonIgnore
-    public boolean isPositive() {
-        return getX() >= 0 && getY() >= 0;
-    }
-
     @Override
     public String toString() {
         return "{x = " + getX() + ", y = " + getY() + "}";
     }
 
+    /**
+     * Compares the specified object with this Coordinates object for equality.
+     * Two Coordinates objects are considered equal if their X and Y values are the same.
+     *
+     * @param obj the object to be compared for equality with this Coordinates object
+     * @return true if the specified object is equal to this Coordinates object; false otherwise
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Coordinates) {
@@ -98,12 +101,23 @@ public class Coordinates implements Serializable {
         return false;
     }
 
+    /**
+     * Checks if the coordinates are invalid. Coordinates are considered invalid
+     * if both the X and Y values are set to -1.
+     *
+     * @return true if the coordinates are invalid, false otherwise
+     */
     @JsonIgnore
     public boolean isCoordinateInvalid() {
         return coordinates.getFirst() == -1 && coordinates.getLast() == -1;
     }
 
 
+    /**
+     * Computes the hash code for this Coordinates object using the X and Y coordinates.
+     *
+     * @return the hash code value for this Coordinates object
+     */
     @Override
     public int hashCode() {
         return Objects.hash(getX(), getY());

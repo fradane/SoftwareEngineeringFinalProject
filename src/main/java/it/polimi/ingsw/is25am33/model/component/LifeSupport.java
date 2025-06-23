@@ -36,6 +36,8 @@ public class LifeSupport extends Component {
         this.lifeSupportColor = color;
     }
 
+    @Override
+    @JsonIgnore
     public String getComponentName() {
         return "LifeSupport";
     }
@@ -58,12 +60,26 @@ public class LifeSupport extends Component {
         this.lifeSupportColor = color;
     }
 
+    /**
+     * Retrieves the label associated with the component.
+     * This label is a short string identifier used to represent the specific type of component.
+     *
+     * @return the label of the component as a string
+     */
     @Override
     @JsonIgnore
     public String getLabel() {
         return "LSP";
     }
 
+    /**
+     * Retrieves a string representation of the main attribute for the life support component.
+     * The main attribute is determined based on the color of the life support system:
+     * - "P" for PURPLE.
+     * - "B" for BROWN.
+     *
+     * @return a string representing the main attribute of the life support component
+     */
     @Override
     @JsonIgnore
     public String getMainAttribute() {

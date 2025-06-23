@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,19 +20,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class DeckTest {
 
     private Deck deck;
-    private GameModel dummyGameModel;
-    private GameClientNotifier dummyGameClientNotifier;
+    private GameModel gameModel = new GameModel("1234", 2, false);
+    private GameClientNotifier gameClientNotifier = new GameClientNotifier(gameModel, new ConcurrentHashMap<>()) {};
 
     @BeforeEach
     void setUp() {
         deck = new Deck();
-        dummyGameModel = new GameModel(null, 2, false);
-        dummyGameClientNotifier = new GameClientNotifier(null, null) {
-            @Override
-            public void notifyAllClients(ThrowingBiConsumer<String, CallableOnClientController, IOException> consumer) {}
-        };
-        deck.setGameClientNotifier(dummyGameClientNotifier);
-        dummyGameModel.setGameClientNotifier(dummyGameClientNotifier);
+        deck.setGameClientNotifier(gameClientNotifier);
+        gameModel.setGameClientNotifier(gameClientNotifier);
     }
 
     @Test
@@ -85,7 +81,7 @@ class DeckTest {
     void testSetUpLittleDecksInitializesDecksCorrectly() {
 
         // Execute method to test
-        deck.setUpLittleDecks(dummyGameModel);
+        deck.setUpLittleDecks(gameModel);
 
         // Check that all littleVisibleDecks contain 3 cards
         assertEquals(3, deck.getLittleVisibleDecks().size());
@@ -116,7 +112,7 @@ class DeckTest {
     void testMergeIntoGameDeckShufflesAndCombinesCards() {
 
         // Prepare the decks
-        deck.setUpLittleDecks(dummyGameModel);
+        deck.setUpLittleDecks(gameModel);
 
         int expectedTotalCards = 3 * 4; // 3 visible decks and 1 non-visible deck, each with 3 cards
 
@@ -146,7 +142,7 @@ class DeckTest {
     void testDrawCardFromGameDeck() {
 
         // Prepare the decks
-        deck.setUpLittleDecks(dummyGameModel);
+        deck.setUpLittleDecks(gameModel);
         deck.createGameDeck(false);
 
         // Draw a card
@@ -174,7 +170,7 @@ class DeckTest {
     void testDrawCardThrowsExceptionWhenDeckIsEmpty() {
 
         // Prepare the decks and empty the game deck manually
-        deck.setUpLittleDecks(dummyGameModel);
+        deck.setUpLittleDecks(gameModel);
         deck.createGameDeck(false);
 
         // Draw all cards
@@ -231,7 +227,7 @@ class DeckTest {
     @Test
     void testCreateGameDeckWithTestFlightAddsAllCards() {
         GameModel testFlightGameModel = new GameModel(null, 2, true); // isTestFlight = true
-        deck.setGameClientNotifier(dummyGameModel.getGameClientNotifier());
+        deck.setGameClientNotifier(gameModel.getGameClientNotifier());
         deck.setUpLittleDecks(testFlightGameModel);
         deck.createGameDeck(true); // Force add all loaded cards
 

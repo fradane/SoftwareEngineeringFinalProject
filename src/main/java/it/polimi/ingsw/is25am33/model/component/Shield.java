@@ -38,6 +38,11 @@ public class Shield extends Component implements Activable, Rotatable {
         super(connectors);
     }
 
+    /**
+     * Retrieves the name of the component.
+     *
+     * @return the name of the component as a string
+     */
     public String getComponentName() {
         return "Shield";
     }
@@ -51,8 +56,13 @@ public class Shield extends Component implements Activable, Rotatable {
         return directions;
     }
 
+
     /**
-     * Changes the shield's orientation and updates its active directions accordingly.
+     * Rotates the shield component by 90 degrees clockwise.
+     *
+     * This method updates the shield's active directions by using {@link #shiftDirection(Direction)}
+     * to compute the new directions after rotation. It also invokes the base implementation
+     * of {@code rotate} in the {@code Component} class to adjust the orientation of connectors.
      */
     @Override
     public void rotate() {
@@ -60,12 +70,30 @@ public class Shield extends Component implements Activable, Rotatable {
         directions.replaceAll(this::shiftDirection);
     }
 
+    /**
+     * Retrieves the label associated with the shield component.
+     * The label is a short string identifier used to represent the component type.
+     *
+     * @return the label of the shield component as a string ("SLD")
+     */
     @Override
     @JsonIgnore
     public String getLabel() {
         return "SLD";
     }
 
+    /**
+     * Retrieves a string representation of the main attribute for the shield component.
+     * The main attribute corresponds to a shorthand notation of the active directions,
+     * concatenated together. Each direction is represented as:
+     * - "N" for NORTH
+     * - "S" for SOUTH
+     * - "W" for WEST
+     * - "E" for EAST
+     *
+     * @return a string representing the main attribute of the shield,
+     *         concatenating all active directions' shorthand notations.
+     */
     @Override
     @JsonIgnore
     public String getMainAttribute() {

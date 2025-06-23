@@ -27,11 +27,6 @@ public class Planets extends AdventureCard implements PlayerMover {
     private static final List<CardState> cardStates = List.of(CardState.CHOOSE_PLANET, CardState.HANDLE_CUBES_REWARD);
     private Planet currentPlanet;
 
-    public Planets(List<Planet> availablePlanets, int stepsBack) {
-        this.availablePlanets = availablePlanets;
-        this.stepsBack = stepsBack;
-    }
-
     public Planets() {
         this.cardName = this.getClass().getSimpleName();
     }
@@ -46,6 +41,10 @@ public class Planets extends AdventureCard implements PlayerMover {
 
     public Map<String, Planet> getPlayerPlanet() {
         return playerPlanet;
+    }
+
+    public void setCurrPlanet(Planet planet) {
+        this.currentPlanet= planet;
     }
 
     @JsonIgnore
@@ -236,35 +235,6 @@ public class Planets extends AdventureCard implements PlayerMover {
         // Procedi con il prossimo giocatore o termina la carta
         proceedToNextPlayerOrEndCard();
 
-
-//        if (chosenStorage.size() != currentPlanet.getReward().size())
-//            throw new IllegalArgumentException("Incorrect number of storages");
-//
-//        IntStream.range(0, chosenStorage.size()).forEach(i -> {
-//            if (!(chosenStorage.get(i) instanceof SpecialStorage) && currentPlanet.getReward().get(i) == CargoCube.RED)
-//                throw new IllegalArgumentException("Trying to store a RED cube in a non-special storage");
-//        });
-//
-//        chosenStorage.forEach(storage -> {
-//            if(storage.isFull()) {
-//                List<CargoCube> sortedStorage = storage.getStockedCubes();
-//                sortedStorage.sort(CargoCube.byValue);
-//                CargoCube lessValuableCargoCube = sortedStorage.getFirst();
-//                storage.removeCube(lessValuableCargoCube);
-//            }
-//            storage.addCube(currentPlanet.getReward().removeFirst());
-//        });
-//
-//        movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
-//
-//
-//        if (gameModel.hasNextPlayer()) {
-//            gameModel.nextPlayer();
-//            setCurrState(CardState.CHOOSE_PLANET);
-//        } else {
-//            setCurrState(CardState.END_OF_CARD);
-//        }
-
     }
 
     /**
@@ -279,39 +249,6 @@ public class Planets extends AdventureCard implements PlayerMover {
             gameModel.resetPlayerIterator();
             gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
-    }
-
-
-    @Override
-    public String toString() {
-        String firstString = String.format("""
-           %s
-           ┌────────────────────────────┐
-           │          Planets           │
-           ├────────────────────────────┤
-           │ Planets:           x%-2d     │
-           │ Steps Back:        %-2d      │
-           └────────────────────────────┘
-           """, imageName,
-                availablePlanets != null ? availablePlanets.size() : 0,
-                stepsBack);
-
-        StringBuilder secondString = new StringBuilder("   ");
-        if (availablePlanets != null && !availablePlanets.isEmpty()) {
-            secondString.append("Planet Rewards:\n");
-            for (int i = 0; i < availablePlanets.size(); i++) {
-                List<CargoCube> reward = availablePlanets.get(i).getReward();
-                String cubes = reward
-                        .stream()
-                        .map(Enum::name)
-                        .toList()
-                        .toString()
-                        .replaceAll("[\\[\\]]", "");
-                secondString.append(String.format("   Planet %d: %s%n", i + 1, cubes));
-            }
-        }
-
-        return firstString + secondString;
     }
 
     public ClientCard toClientCard() {

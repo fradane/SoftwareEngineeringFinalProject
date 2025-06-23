@@ -1,81 +1,82 @@
-//package it.polimi.ingsw.is25am33.model.board;
-//
-//import it.polimi.ingsw.is25am33.model.game.Player;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//
-//import java.util.List;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//class Level2FlyingBoardTest {
-//    private FlyingBoard board;
-//    private Player player1, player2, player3, player4;
-//
-//    @BeforeEach
-//    void setUp() {
-//        board = new Level2FlyingBoard();
-//        player1 = new Player("Alice", new Level1ShipBoard(null));
-//        player2 = new Player("Luca", new Level1ShipBoard(null));
-//        player3 = new Player("Marco", new Level1ShipBoard(null));
-//
-//        board.insertPlayer(player1);
-//        board.insertPlayer(player2);
-//        board.insertPlayer(player3);
-//    }
-//
-//    @Test
-//    void TestInsertPlayer() {
-//        Player player5 = new Player("Luigi", new Level1ShipBoard(null));
-//        board.insertPlayer(player5);
-//        assertTrue(board.getCurrentRanking().contains(player5));
-//    }
-//
-//    @Test
-//    void TestAddOutPlayer() {
-//        board.addOutPlayer(player1);
-//        assertFalse(board.getCurrentRanking().contains(player1));
-//        assertTrue(board.getOutPlayers().contains(player1));
-//    }
-//
-//    @Test
-//    void TestGetDoubledPlayer() {
-//        List<Player> doubledPlayers = board.getDoubledPlayers();
-//
-//        assertEquals(2, doubledPlayers.size());
-//        assertTrue(doubledPlayers.contains(player4));
-//
-//        assertFalse(board.getCurrentRanking().contains(player4));
-//        assertTrue(board.getOutPlayers().contains(player4));
-//    }
-//
-//    @Test
-//    void TestMovePlayerPositiveOffset() {
-//        board.movePlayer(player1, 3);
-//        assertEquals(28, board.getPlayerPosition(player1));
-//    }
-//
-//    @Test
-//    void TestMovePlayerNegativeOffset() {
-//        board.movePlayer(player1, -3);
-//        assertEquals(22, board.getPlayerPosition(player1));
-//    }
-//
-//    @Test
-//    void TestMovePlayerOccupiedPosition(){
-//        board.movePlayer(player4, 3);
-//        board.movePlayer(player1, -10);
-//
-//        assertEquals(9, board.getPlayerPosition(player4));
-//        assertEquals(14, board.getPlayerPosition(player1));
-//    }
-//
-//    @Test
-//    void TestGetCurrentRanking(){
-//        List<Player> currentRanking = board.getCurrentRanking();
-//        assertEquals(4, currentRanking.size());
-//        assertTrue(board.getCurrentRanking().contains(player4));
-//        assertEquals(board.getCurrentRanking().get(0), player1);
-//        assertEquals(board.getCurrentRanking().get(2), player4);
-//    }
-//}
+package it.polimi.ingsw.is25am33.model.board;
+
+import it.polimi.ingsw.is25am33.model.GameClientNotifier;
+import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
+import it.polimi.ingsw.is25am33.model.game.Player;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class Level2FlyingBoardTest {
+    private GameModel gameModel = new GameModel("1234", 2, false);
+    private FlyingBoard board = new Level2FlyingBoard();
+    private Player player1, player2;
+    private GameClientNotifier gameClientNotifier= new GameClientNotifier(gameModel, new ConcurrentHashMap<>());
+
+    @BeforeEach
+    void setUp() {
+        board.setGameClientNotifier(gameClientNotifier);
+        player1 = new Player("Alice", new Level2ShipBoard(PlayerColor.RED, gameClientNotifier,false), PlayerColor.RED );
+        player2 = new Player("Luca", new Level2ShipBoard(PlayerColor.YELLOW, gameClientNotifier,false), PlayerColor.YELLOW );
+
+    }
+
+    @Test
+    void TestInsertPlayer(){
+        board.insertPlayer(player1);
+        board.insertPlayer(player2);
+        assertTrue(board.getCurrentRanking().contains(player1));
+        assertTrue(board.getCurrentRanking().contains(player2));
+    }
+
+    @Test
+    void TestAddOutPlayer() {
+        board.insertPlayer(player1);
+        board.insertPlayer(player2);
+        board.addOutPlayer(player1,false);
+        assertFalse(board.getCurrentRanking().contains(player1));
+        assertTrue(board.getOutPlayers().contains(player1));
+    }
+
+    @Test
+    void TestGetDoubledPlayer() {
+        board.insertPlayer(player1);
+        board.insertPlayer(player2);
+        board.movePlayer(player1, 30);
+        board.getDoubledPlayers();
+        assertFalse(board.getCurrentRanking().contains(player2));
+        assertTrue(board.getOutPlayers().contains(player2));
+    }
+
+    @Test
+    void TestMovePlayerPositiveOffset() {
+        board.insertPlayer(player1);
+        board.insertPlayer(player2);
+        board.movePlayer(player1, 3);
+        assertEquals(9, board.getPlayerPosition(player1));
+    }
+
+    @Test
+    void TestMovePlayerNegativeOffset() {
+        board.insertPlayer(player1);
+        board.insertPlayer(player2);
+        board.movePlayer(player1, -3);
+        assertEquals(2, board.getPlayerPosition(player1));
+    }
+
+    @Test
+    void TestMovePlayerOccupiedPosition(){
+        board.insertPlayer(player1);
+        board.insertPlayer(player2);
+        board.movePlayer(player2, 3);
+
+        assertEquals(6, board.getPlayerPosition(player1));
+        assertEquals(7, board.getPlayerPosition(player2));
+    }
+
+}

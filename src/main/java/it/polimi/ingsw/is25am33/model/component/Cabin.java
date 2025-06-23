@@ -41,6 +41,13 @@ public class Cabin extends Component{
         return "Cabin";
     }
 
+    /**
+     * Generates a hash code for the GUI representation of the cabin.
+     * The hash code is computed based on the cabin's image name, rotation,
+     * and its list of inhabitants (if not null).
+     *
+     * @return the hash code used for GUI representation
+     */
     @Override
     @JsonIgnore
     @NotNull
@@ -71,13 +78,16 @@ public class Cabin extends Component{
         } else {
             inhabitants.add(member);
         }
-//        notifyObservers(new ComponentEvent(this, "inhabitants", inhabitants ));
     }
 
     /**
-     * Removes the first crew member from the cabin's inhabitants list.
+     * Removes the first member from the list of inhabitants currently in the cabin.
      *
-     * @throws java.util.NoSuchElementException if the cabin has no inhabitants
+     * This method checks if the list of inhabitants is empty before attempting to
+     * remove a member. If the list is empty, a {@code NoSuchElementException} is thrown
+     * to indicate that no members can be removed.
+     *
+     * @throws NoSuchElementException if the cabin has no inhabitants
      */
     public void removeMember() throws NoSuchElementException {
 
@@ -85,7 +95,6 @@ public class Cabin extends Component{
             throw new NoSuchElementException("Empty cabin");
 
         inhabitants.removeFirst();
-//        notifyObservers(new ComponentEvent(this, "inhabitants", inhabitants ));
     }
 
     /**
@@ -103,6 +112,15 @@ public class Cabin extends Component{
         return "CAB";
     }
 
+    /**
+     * Retrieves a string representation of the main attribute for the cabin component.
+     * The main attribute represents the inhabitants of the cabin.
+     * If the cabin is empty, the method returns "--".
+     * Otherwise, it concatenates a mapping of crew member types defined as:
+     * HUMAN -> "H", PURPLE_ALIEN -> "P", BROWN_ALIEN -> "B".
+     *
+     * @return a string representing the main attribute of the cabin
+     */
     @Override
     @JsonIgnore
     public String getMainAttribute() {

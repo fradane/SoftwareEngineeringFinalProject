@@ -35,6 +35,13 @@ public class Engine extends Component implements Rotatable, Serializable {
         super(connectors);
     }
 
+    /**
+     * Retrieves the name of this component.
+     *
+     * @return a string representing the name of the component
+     */
+    @Override
+    @JsonIgnore
     public String getComponentName() {
         return "Engine";
     }
@@ -48,17 +55,15 @@ public class Engine extends Component implements Rotatable, Serializable {
         return fireDirection;
     }
 
-    /**
-     * Rotates the power direction based on the engine's rotation.
-     */
-   /*public void rotateFireDirection() {
-        for (int i = 0; i < getRotation() % 4; i++) {
-            this.fireDirection = shiftDirection(this.fireDirection);
-        }
-    }*/
 
     /**
-     * Changes the engine's orientation and updates the power direction accordingly.
+     * Rotates the engine component and updates its firing direction.
+     *
+     * This method overrides the {@code rotate} method in the parent class to provide
+     * additional functionality specific to the {@code Engine} component. It performs the following:
+     * 1. Calls the parent class's {@code rotate} method to adjust the orientation of connectors.
+     * 2. Updates the firing direction of the engine by shifting it 90 degrees clockwise
+     *    using the {@code shiftDirection} utility method.
      */
     @Override
     public void rotate() {
@@ -66,12 +71,29 @@ public class Engine extends Component implements Rotatable, Serializable {
         fireDirection = shiftDirection(fireDirection);
     }
 
+    /**
+     * Retrieves the label associated with the component.
+     * The label is a short string identifier used to represent the component type.
+     *
+     * @return a string representing the component type label
+     */
     @Override
     @JsonIgnore
     public String getLabel() {
         return "ENG";
     }
 
+    /**
+     * Retrieves a string representation of the main attribute for the component.
+     * The main attribute corresponds to the current firing direction of the engine.
+     * It returns a shorthand notation of the direction as follows:
+     * - "N" for NORTH
+     * - "S" for SOUTH
+     * - "W" for WEST
+     * - "E" for EAST
+     *
+     * @return a string representing the main attribute, which corresponds to the current firing direction
+     */
     @Override
     @JsonIgnore
     public String getMainAttribute() {

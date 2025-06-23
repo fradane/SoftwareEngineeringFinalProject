@@ -17,9 +17,35 @@ public class Level1FlyingBoard extends FlyingBoard {
      * A fixed list of credits awarded to players based on their final ranking.
      */
     private static final List<Integer> credits = List.of(4, 3, 2, 1);
+    /**
+     * Represents the fixed number of credits awarded to the player whose
+     * ship is voted as the "prettiest" in the {@code Level1FlyingBoard}.
+     * This reward is included as part of the scoring mechanism in the first-level
+     * flying board gameplay.
+     */
     private static final int prettiestShipReward = 2;
 
+    /**
+     * An iterator over a predefined list of initial positions used for assigning
+     * positions to players when they are inserted into the ranking of a Level 1
+     * flying board.
+     *
+     * This variable is initialized in the constructor with an iterator created from
+     * {@code initialPositions}, a fixed list of integers. It is used to ensure that
+     * players are assigned positions consistently and sequentially from the predefined
+     * list of initial values.
+     *
+     * This iterator is primarily utilized in the {@code insertPlayer} method to determine
+     * the initial position of a new player being added to the board's ranking.
+     */
     private final Iterator<Integer> initialPositionIterator;
+    /**
+     * A fixed list of starting positions for players in the ranking.
+     * This list determines the initial placement of players in the game
+     * ranking when they are first added to the board. The order of the
+     * integers in the list represents predefined positions, with each
+     * value corresponding to a specific rank.
+     */
     private final static List<Integer> initialPositions = List.of(4, 2, 1, 0);
 
     /**
@@ -34,6 +60,13 @@ public class Level1FlyingBoard extends FlyingBoard {
         initialPositionIterator = initialPositions.iterator();
     }
 
+    /**
+     * Returns the reward value associated with the prettiest ship in the game.
+     * This value represents the amount of credits assigned to the player
+     * who achieves the prettiest ship recognition.
+     *
+     * @return the reward value for the prettiest ship as an integer
+     */
     @Override
     public int getPrettiestShipReward() {
         return prettiestShipReward;
@@ -52,6 +85,15 @@ public class Level1FlyingBoard extends FlyingBoard {
         return credits.get(index);
     }
 
+    /**
+     * Inserts a player into the ranking system, assigns an initial position to the player,
+     * notifies all connected clients about the ranking update, and returns the updated
+     * size of the ranking. This method is synchronized on the ranking object to ensure
+     * thread safety while modifying the ranking.
+     *
+     * @param player the player to be inserted into the ranking system
+     * @return the updated size of the ranking after the player is inserted
+     */
     @Override
     public int insertPlayer(Player player) {
 

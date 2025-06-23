@@ -5,15 +5,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.client.model.card.ClientWarField;
+import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
-import it.polimi.ingsw.is25am33.model.card.interfaces.CrewMemberRemover;
-import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
-import it.polimi.ingsw.is25am33.model.card.interfaces.ShotSenderCard;
+import it.polimi.ingsw.is25am33.model.card.interfaces.*;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
@@ -23,7 +21,7 @@ import javafx.util.Pair;
 
 import java.util.*;
 
-public class WarField extends AdventureCard implements PlayerMover, DoubleCannonActivator, CrewMemberRemover, ShotSenderCard {
+public class WarField extends AdventureCard implements PlayerMover, DoubleCannonActivator, CrewMemberRemover, HowToDefend {
 
     private int cubeMalus;
     private int stepsBack;
@@ -45,6 +43,11 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
     public CardState getFirstState() {
         phasesIterator = categories.keySet().iterator();
         return phasesIterator.next();
+    }
+
+    @Override
+    public GameModel getGameModel() {
+        return gameModel;
     }
 
     @Override
@@ -76,7 +79,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
                 this.checkShipBoardAfterAttack();
                 break;
             default:
-                throw new IllegalStateException("Unknown current state");
+                throw new UnknownStateException("Unknown current state");
         }
 
     }
@@ -149,11 +152,6 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
     public void setShots(List<Shot> shots) {
         this.shots = shots;
-    }
-
-    public void initilizeCardIterator() {
-        phasesIterator = categories.keySet().iterator();
-        shotIterator = shots.iterator();
     }
 
     public void checkShipBoardAfterAttack(){
@@ -230,6 +228,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
         }
 
         chosenBatteryBoxes.forEach(BatteryBox::useBattery);
+
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
         });
@@ -372,74 +371,5 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
         }
 
     }
-
-    @Override
-    public void playerDecidedHowToDefendTheirSelvesFromSmallShot(List<Coordinates> chosenShieldsCoords, List<Coordinates> chosenBatteryBoxesCoords) {
-        Player currentPlayer=gameModel.getCurrPlayer();
-        ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
-        Shield chosenShield = null;
-        BatteryBox chosenBatteryBox = null;
-        DangerousObj currShot = gameModel.getCurrDangerousObj();
-
-        if(!chosenShieldsCoords.isEmpty() && !chosenBatteryBoxesCoords.isEmpty()) {
-            chosenShield = (Shield) personalBoard.getComponentAt(chosenShieldsCoords.getFirst());
-            chosenBatteryBox = (BatteryBox) personalBoard.getComponentAt(chosenBatteryBoxesCoords.getFirst());
-        }
-
-        if (personalBoard.isItGoingToHitTheShip(currShot)) {
-
-            if (chosenShield != null && chosenBatteryBox != null) {
-
-                if (chosenBatteryBox.getRemainingBatteries() == 0)
-                    throw new IllegalStateException("Not enough batteries");
-
-                chosenBatteryBox.useBattery();
-                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
-                });
-
-                if (chosenShield.getDirections().stream().noneMatch(d -> d == currShot.getDirection())){
-                    gameModel.updateShipBoardAfterBeenHit();
-                }else{
-                    setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
-                }
-
-            } else {
-                gameModel.updateShipBoardAfterBeenHit();
-            }
-
-        }else{
-            if(chosenShield != null && chosenBatteryBox != null) {
-                chosenBatteryBox.useBattery();
-                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
-                });
-            }
-            setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
-        }
-
-    }
-
-    @Override
-    public void playerIsAttackedByABigShot() {
-
-        ShipBoard personalBoard = gameModel.getCurrPlayer().getPersonalBoard();
-        DangerousObj currShot = gameModel.getCurrDangerousObj();
-
-        if (!personalBoard.isItGoingToHitTheShip(currShot)) {
-            setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
-        }
-        else{
-            gameModel.updateShipBoardAfterBeenHit();
-        }
-
-    }
-
-    // TODO
-    @Override
-    public String toString() {
-        return "WarField";
-    }
-
 
 }

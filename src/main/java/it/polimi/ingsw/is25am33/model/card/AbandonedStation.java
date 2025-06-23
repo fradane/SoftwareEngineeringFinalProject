@@ -19,16 +19,54 @@ import java.util.List;
 
 public class AbandonedStation extends AdventureCard implements PlayerMover {
 
+    /**
+     * Represents the number of steps a player must move back when interacting with the "AbandonedStation" card.
+     * This variable determines specific movement penalties or effects applied during gameplay.
+     */
     private int stepsBack;
+    /**
+     * Represents the number of crew members required to interact with the abandoned station card.
+     * This variable determines the minimum crew size needed to proceed with actions or effects
+     * associated with this card.
+     */
     private int requiredCrewMembers;
+    /**
+     * Represents the list of CargoCube rewards that can be obtained
+     * when encountering and resolving this specific AbandonedStation card.
+     * The reward may vary and typically depends on the game's state or player actions.
+     */
     private List<CargoCube> reward;
+    /**
+     * Represents a predefined sequence of states specific to an abandoned station card.
+     * These states determine the flow of operations and interactions available during the gameplay.
+     * The list is immutable and includes the following states:
+     * - VISIT_LOCATION: Represents the action or phase where a player can choose to visit the abandoned station.
+     * - HANDLE_CUBES_REWARD: Represents the phase where a player interacts with reward-related cargo cubes.
+     */
     private static final List<CardState> cardStates = List.of(CardState.VISIT_LOCATION, CardState.HANDLE_CUBES_REWARD);
 
+    /**
+     * Retrieves the first state from the list of card states.
+     *
+     * @return the first CardState in the cardStates list
+     */
     @Override
     public CardState getFirstState() {
         return cardStates.getFirst();
     }
 
+    /**
+     * Executes the logic of the gameplay interaction based on the current state
+     * and the player's choices provided in the input.
+     *
+     * @param playerChoices the choices made by the player, encapsulated in a
+     *                      PlayerChoicesDataStructure object. Provides information
+     *                      about the actions the player intends to take, such as
+     *                      whether to visit a location or where to store reward cubes.
+     * @throws UnknownStateException if the current state of the game does not match
+     *                               any known or expected states, preventing proper
+     *                               execution of the method.
+     */
     @Override
     public void play(PlayerChoicesDataStructure playerChoices) throws UnknownStateException {
 
@@ -52,118 +90,156 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
 
     }
 
+    /**
+     * Converts this AbandonedStation instance into its client-facing representation as a
+     * ClientAbandonedStation object. The returned ClientAbandonedStation will contain all
+     * relevant information, including card name, image name, required crew members, reward,
+     * and steps back.
+     *
+     * @return a ClientAbandonedStation object containing the client-side representation of this card.
+     */
     @Override
     public ClientCard toClientCard() {
         return new ClientAbandonedStation(cardName, imageName, requiredCrewMembers, reward, stepsBack);
     }
 
+    /**
+     * Sets the level of the AbandonedStation.
+     *
+     * @param level the level to be set
+     */
     @Override
     public void setLevel(int level) {
         this.level = level;
     }
 
+    /**
+     * Sets the number of crew members required for the abandoned station.
+     *
+     * @param requiredCrewMembers the number of crew members needed
+     *                            to interact with the abandoned station
+     */
     public void setRequiredCrewMembers(int requiredCrewMembers) {
         this.requiredCrewMembers = requiredCrewMembers;
     }
 
+    /**
+     * Sets the reward for the abandoned station.
+     *
+     * @param reward the list of CargoCube objects representing the reward.
+     */
     public void setReward(List<CargoCube> reward) {
         this.reward = reward;
     }
 
+    /**
+     * Sets the number of steps to move back on the board.
+     *
+     * @param stepsBack the number of steps to move back
+     */
     public void setStepsBack(int stepsBack) {
         this.stepsBack = stepsBack;
     }
 
+    /**
+     * Retrieves the number of steps back assigned to this AbandonedStation instance.
+     *
+     * @return the number of steps back as an integer
+     */
     public int getStepsBack() {
         return stepsBack;
     }
 
+    /**
+     * Retrieves the number of crew members required for this AbandonedStation.
+     *
+     * @return the required number of crew members.
+     */
     public int getRequiredCrewMembers() {
         return requiredCrewMembers;
     }
 
+    /**
+     * Retrieves the list of cargo cubes that constitute the reward.
+     *
+     * @return a List of CargoCube objects representing the reward.
+     */
     public List<CargoCube> getReward() {
         return reward;
     }
 
-    public AbandonedStation(int stepsBack, int requiredCrewMembers, List<CargoCube> reward) {
-        this.stepsBack = stepsBack;
-        this.requiredCrewMembers = requiredCrewMembers;
-        this.reward = reward;
-    }
-
+    /**
+     * Default constructor for the AbandonedStation class.
+     * Initializes the card name to the class's simple name.
+     */
     public AbandonedStation() {
         this.cardName = this.getClass().getSimpleName();
     }
 
+    /**
+     * Handles the current player's decision whether to visit a specific location.
+     * Depending on the player's decision and game state, this method validates
+     * the choice, updates the game state, and determines the next actions.
+     *
+     * @param wantsToVisit a boolean indicating the current player's decision:
+     *                     true if the player wants to visit the location, false otherwise
+     * @throws IllegalDecisionException if the*/
     private void currPlayerWantsToVisit(boolean wantsToVisit) throws IllegalDecisionException {
-        try {
-            if (wantsToVisit) {
-                if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < requiredCrewMembers)
-                    throw new IllegalDecisionException("Player has not enough crew members");
-                setCurrState(CardState.HANDLE_CUBES_REWARD);
-            } else if (gameModel.hasNextPlayer()) {
-                gameModel.nextPlayer();
-                setCurrState(CardState.VISIT_LOCATION);
-            } else {
-                setCurrState(CardState.END_OF_CARD);
-                gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
-            }
-        } catch (Exception e) {
-            System.err.println("Error in currPlayerWantsToVisit: " + e.getMessage());
-            e.printStackTrace();
+        if (wantsToVisit) {
+            if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < requiredCrewMembers)
+                throw new IllegalDecisionException("Player has not enough crew members");
+            setCurrState(CardState.HANDLE_CUBES_REWARD);
+        } else if (gameModel.hasNextPlayer()) {
+            gameModel.nextPlayer();
+            setCurrState(CardState.VISIT_LOCATION);
+        } else {
+            setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
     }
 
+    /**
+     * Handles the selection of storage locations by the current player for storing cargo cubes.
+     * The chosen storage locations are validated and updated with the assigned rewards if possible.
+     *
+     * @param chosenStorageCoords a list of coordinates representing the storages chosen by the player.
+     *                            Each coordinate corresponds to a potential storage location on the player's ship board.
+     *                            Invalid coordinates or non-storage components will result in null being added to the internal list of storages.
+     */
     private void currPlayerChoseCargoCubeStorage(List<Coordinates> chosenStorageCoords) {
         List<CargoCube> stationRewards = new ArrayList<>(reward);
 
-        //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
         List<Storage> chosenStorages = new ArrayList();
         for (Coordinates coords : chosenStorageCoords) {
             if (coords.isCoordinateInvalid()) {
-                // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
                 chosenStorages.add(null);
             } else {
                 Component component = shipBoard.getComponentAt(coords);
                 if (component instanceof Storage) {
                     chosenStorages.add((Storage) component);
                 } else {
-                    // Se le coordinate non puntano a uno storage, aggiungi null
                     chosenStorages.add(null);
                 }
             }
         }
 
-        // Caso 1: Il giocatore non ha scelto nessuno storage
         if (chosenStorages.isEmpty()) {
-            System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
-                    " cannot accept any rewards due to lack of storage space");
             proceedToNextPlayerOrEndCard();
             return;
         }
 
-        // Caso 2: Il giocatore ha scelto meno storage dei reward disponibili
         if (chosenStorages.size() < stationRewards.size()) {
             List<CargoCube> rewardsToProcess = stationRewards.subList(0, chosenStorages.size());
             List<CargoCube> discardedRewards = stationRewards.subList(chosenStorages.size(), stationRewards.size());
-
-            System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
-                    " can only accept " + chosenStorages.size() +
-                    " out of " + stationRewards.size() + " rewards");
-            System.out.println("Discarded rewards: " + discardedRewards);
-
             stationRewards = rewardsToProcess;
         }
 
-        // Caso 3: Il giocatore ha scelto più storage dei reward
         if (chosenStorages.size() > stationRewards.size()) {
             chosenStorages = chosenStorages.subList(0, stationRewards.size());
         }
 
-        // Validazione: controlla che i cubi RED vadano solo in SpecialStorage
         for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
             Storage storage = chosenStorages.get(i);
             CargoCube cube = stationRewards.get(i);
@@ -177,46 +253,47 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
             }
         }
 
-        // Processa i cubi effettivamente posizionabili
         for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
             Storage storage = chosenStorages.get(i);
             CargoCube cube = stationRewards.get(i);
 
             if (storage == null) {
-                System.out.println("Cube " + cube + " discarded - no valid storage selected");
                 continue;
             }
 
-            // Se lo storage è pieno, rimuovi il cubo meno prezioso
             if (storage.isFull()) {
                 List<CargoCube> sortedStorage = new ArrayList<>(storage.getStockedCubes());
                 sortedStorage.sort(CargoCube.byValue);
                 CargoCube lessValuableCargoCube = sortedStorage.get(0);
                 storage.removeCube(lessValuableCargoCube);
-                System.out.println("Removed " + lessValuableCargoCube + " to make space for " + cube);
             }
 
             storage.addCube(cube);
-            System.out.println("Added " + cube + " to storage");
         }
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
         });
 
-        // Muovi il giocatore indietro
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
-//        gameModel.getGameContext().notifyAllClients((nicknameToNotify, clientController) -> {
-//            clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
-//        });
-
-        // Termina la carta
         setCurrState(CardState.END_OF_CARD);
         gameModel.resetPlayerIterator();
         gameModel.setCurrGameState(GameState.DRAW_CARD);
     }
 
+    /**
+     * Determines the next step in the game's progression based on the availability of additional players.
+     * This method either moves the game to the next player or concludes the current card's execution
+     * if there are no more players remaining in the sequence.
+     *
+     * If there is another player available, it advances the iterator to the next player,
+     * sets the card state to {@code VISIT_LOCATION}, and continues processing for the current card.
+     *
+     * If no additional players are available:
+     * - The card state is updated to {@code END_OF_CARD}, marking the conclusion
+     *   of the card's activities.
+     * - The player iterator is reset to*/
     private void proceedToNextPlayerOrEndCard() {
         if (gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
@@ -226,20 +303,6 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
             gameModel.resetPlayerIterator();
             gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("""
-           %s
-           ┌────────────────────────────┐
-           │     Abandoned Station      │
-           ├────────────────────────────┤
-           │ Crew Required:     x%-2d     │
-           │ Reward Cubes:      x%-2d     │
-           │ Steps Back:        %-2d      │
-           └────────────────────────────┘
-           """, imageName, requiredCrewMembers, reward != null ? reward.size() : 0, stepsBack);
     }
 
 }

@@ -30,17 +30,36 @@ public class StandardStorage extends Storage {
         super(connectors, maxCapacity);
     }
 
+    /**
+     * Retrieves the name of this component.
+     *
+     * @return the name of the component as a string
+     */
+    @Override
+    @JsonIgnore
     public String getComponentName() {
         return "StandardStorage";
     }
 
-    // Questo metodo permette alle sottoclassi di aggiungere controlli
+    /**
+     * Validates the specified CargoCube and ensures it adheres to the restrictions
+     * of the StandardStorage. Throws an exception if the cube is not allowed.
+     *
+     * @param cube the CargoCube to be validated
+     * @throws IllegalArgumentException if the cube is RED, as it is not permitted in StandardStorage
+     */
     protected void validateCube(CargoCube cube) {
         if (cube == CargoCube.RED) {
             throw new IllegalArgumentException("Red cube in StandardStorage");
         }
     }
 
+    /**
+     * Retrieves the label associated with the component.
+     * The label is a short, unique string designed to represent the specific type of component.
+     *
+     * @return the label of the component as a string
+     */
     @Override
     @JsonIgnore
     public String getLabel() {

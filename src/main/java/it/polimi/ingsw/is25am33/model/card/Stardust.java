@@ -41,16 +41,6 @@ public class Stardust extends AdventureCard implements PlayerMover {
         return new ClientStarDust(cardName,imageName);
     }
 
-    @Override
-    public String toString() {
-        return String.format( """
-           %s
-           ┌────────────────────────┐
-           │       Stardust         │
-           └────────────────────────┘
-           """, imageName);
-    }
-
     private void moveNotCorrectlyAssembledShips() {
 
         gameModel.getCurrRanking()

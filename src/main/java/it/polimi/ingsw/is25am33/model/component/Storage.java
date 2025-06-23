@@ -72,22 +72,24 @@ public abstract class Storage extends Component {
         this.maxCapacity = maxCapacity;
     }
 
+
     /**
-     * Adds a {@code CargoCube} to the storage. If the storage is full,
-     * it will replace the least valuable cube regardless of value comparison.
+     * Adds a cargo cube to the storage. If the storage is not full, the cube is added directly.
+     * If the storage is full, the least valuable cube is removed to make space for the new cube,
+     * and the removed cube is returned. If no cube is removed, the new cube is simply added.
      *
-     * @param cube the {@code CargoCube} to add
-     * @return the {@code CargoCube} that was removed to make space, or null if storage wasn't full
+     * @param cube the {@code CargoCube} to add to the storage
+     * @return the removed {@code CargoCube} if the storage was full and a cube was replaced,
+     *         or {@code null} if the cube was added without replacement
      */
     public CargoCube addCube(CargoCube cube) {
         validateCube(cube);
-        // Se lo storage non è pieno, aggiungi semplicemente il cubo
+
         if (!isFull()) {
             stockedCubes.add(cube);
             return null;
         }
 
-        // Se lo storage è pieno, trova e rimuovi il cubo di valore minore
         CargoCube leastValuableCube = findLeastValuableCube();
 
         if (leastValuableCube != null) {
@@ -96,15 +98,17 @@ public abstract class Storage extends Component {
             return leastValuableCube;
         }
 
-        // Caso teoricamente impossibile se isFull() è true
         stockedCubes.add(cube);
         return null;
     }
 
+
     /**
-     * Finds the least valuable cube in the storage.
+     * Identifies and retrieves the least valuable {@code CargoCube} from the storage.
+     * If the storage is empty, the method returns {@code null}.
+     * The cubes are sorted based on their value, and the one with the lowest value is selected.
      *
-     * @return the least valuable {@code CargoCube}, or null if storage is empty
+     * @return the least valuable {@code CargoCube}, or {@code null} if storage is empty
      */
     @JsonIgnore
     protected CargoCube findLeastValuableCube() {
@@ -139,17 +143,38 @@ public abstract class Storage extends Component {
         return stockedCubes.size() == maxCapacity;
     }
 
+    /**
+     * Retrieves the main attribute of the storage.
+     * The main attribute is calculated as the difference between the maximum capacity
+     * and the size of the stocked cubes, represented as a string.
+     *
+     * @return a string representing the calculated main attribute of the storage
+     */
     @Override
     @JsonIgnore
     public String getMainAttribute() {
         return maxCapacity - stockedCubes.size() + "";
     }
 
-    // Questo metodo permette alle sottoclassi di aggiungere controlli
-    protected void validateCube(CargoCube cube) {
-        // Nessun controllo di default
-    }
+    /**
+     * Validates the given {@code CargoCube}.
+     * This method ensures that the specified cargo cube meets the necessary
+     * conditions or constraints for storage, such as value validation or compatibility
+     * with the storage requirements.
+     *
+     * @param cube the {@code CargoCube} to be validated
+     *             This parameter represents the cargo cube that needs to be checked
+     *             for validity before processing or adding to the storage.
+     */
+    protected void validateCube(CargoCube cube) {}
 
+    /**
+     * Generates a hash code for the GUI representation of the storage component.
+     * The hash code is computed based on the storage's image name, rotation,
+     * and its list of stocked cargo cubes (if not null).
+     *
+     * @return the hash code used for GUI representation
+     */
     @Override
     @JsonIgnore
     @NotNull

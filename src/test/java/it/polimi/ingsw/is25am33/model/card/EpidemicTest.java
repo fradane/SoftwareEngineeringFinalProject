@@ -1,112 +1,86 @@
 package it.polimi.ingsw.is25am33.model.card;
 
-import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import it.polimi.ingsw.is25am33.model.UnknownStateException;
-import it.polimi.ingsw.is25am33.model.board.FlyingBoard;
-import it.polimi.ingsw.is25am33.model.component.Cabin;
-import it.polimi.ingsw.is25am33.model.game.GameModel;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import it.polimi.ingsw.is25am33.model.*;
+import it.polimi.ingsw.is25am33.model.card.*;
+import it.polimi.ingsw.is25am33.model.board.*;
+import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.enumFiles.*;
+import it.polimi.ingsw.is25am33.model.game.*;
+import it.polimi.ingsw.is25am33.client.model.card.*;
+import it.polimi.ingsw.is25am33.model.UnknownStateException;
 
 class EpidemicTest {
 
     private GameModel gameModel;
-    private AdventureCard card;
-    private FlyingBoard flyingBoard;
-    private Cabin cabin12, cabin11;
-    private Cabin cabin21, cabin22;
+    private AdventureCard epidemic;
+    private GameClientNotifier gameClientNotifier;
 
     @BeforeEach
-//    void setUp() {
-//
-//        cabin11 = new Cabin(null);
-//        cabin12 = new Cabin(null);
-//
-//        cabin11.fillCabin(CrewMember.HUMAN);
-//        cabin12.fillCabin(CrewMember.BROWN_ALIEN);
-//
-//        cabin21 = new Cabin(null);
-//        cabin22 = new Cabin(null);
-//
-//        cabin21.fillCabin(CrewMember.PURPLE_ALIEN);
-//        cabin22.fillCabin(CrewMember.BROWN_ALIEN);
-//
-//        ShipBoard shipBoard = new Level2ShipBoard(null) {
-//
-//            public Set<Cabin> cabinWithNeighbors() {
-//                return new HashSet<>();
-//            }
-//
-//        };
-//
-//        ShipBoard shipBoard1 = new Level2ShipBoard(null) {
-//
-//            public Set<Cabin> cabinWithNeighbors() {
-//                return new HashSet<>(Set.of(cabin11, cabin12));
-//            }
-//
-//        };
-//
-//        ShipBoard shipBoard2 = new Level2ShipBoard(null) {
-//            public Set<Cabin> cabinWithNeighbors() {
-//                return new HashSet<>(Set.of(cabin21, cabin22));
-//            }
-//        };
-//
-//
-//        List<Player> players = new ArrayList<>(List.of(new Player("fra", shipBoard),
-//                new Player("ali", shipBoard),
-//                new Player("luc", shipBoard2),
-//                new Player("mar", shipBoard1)));
-//
-//        gameModel = new GameModel(flyingBoard, players);
-//
-//        card = new Epidemic();
-//
-//        gameModel.setCurrAdventureCard(card);
-//        gameModel.setCurrRanking(players);
-//
-//        card.setCurrState(CardState.START_CARD);
-//        gameModel.startCard();
-//
-//    }
+    void setUp() {
+        // Inizializzazione base
+        gameModel = new GameModel("1234", 2, false){
+            @Override
+            public void setCurrGameState(GameState gameState){
+            }
+        };
+        gameClientNotifier = new GameClientNotifier(gameModel,new ConcurrentHashMap<>());
+        gameModel.setGameClientNotifier(gameClientNotifier);
+        epidemic = new Epidemic();
+        epidemic.setGame(gameModel);
 
-    @Test
-    void TestToCheckIfTheMethodEndsProperly() {
+        // Aggiungiamo un giocatore
+        Player player = new Player("luca", new Level2ShipBoard(PlayerColor.YELLOW, gameClientNotifier, false), PlayerColor.YELLOW);
+        gameModel.getPlayers().put("luca", player);
+        gameModel.setCurrPlayer(player);
 
-        card.play(null);
-        assertEquals(CardState.END_OF_CARD, card.getCurrState());
-
+        gameModel.getFlyingBoard().setGameClientNotifier(gameClientNotifier);
+        gameModel.getFlyingBoard().insertPlayer(player);
     }
 
     @Test
-    void TestToCheckIfTheMethodRemovesCrewMembersCorrectly() {
-
-        card.play(null);
-
-        assertEquals(1, cabin11.getInhabitants().size());
-        assertEquals(0, cabin12.getInhabitants().size());
-
-        assertEquals(0, cabin21.getInhabitants().size());
-        assertEquals(0, cabin22.getInhabitants().size());
-
-        assertEquals(CardState.END_OF_CARD, card.getCurrState());
-
+    void testGetFirstState() {
+        assertEquals(CardState.EPIDEMIC, epidemic.getFirstState());
     }
 
     @Test
-    void TestToCheckIfTheUnknownStateExceptionIsThrown() {
+    void testPlayEpidemicMovesToNextPlayer() {
+        epidemic.setCurrState(CardState.EPIDEMIC);
+        Player secondPlayer = new Player("francesco", new Level2ShipBoard(PlayerColor.GREEN, gameClientNotifier, false), PlayerColor.GREEN);
+        gameModel.getPlayers().put("francesco", secondPlayer);
+        gameModel.setCurrRanking(gameModel.getPlayers().values().stream().toList());
+        gameModel.resetPlayerIterator();
+        epidemic.play(new PlayerChoicesDataStructure());
 
-        card.setCurrState(CardState.END_OF_CARD);
+        assertEquals(CardState.EPIDEMIC, epidemic.getCurrState());
+    }
 
-        Exception e = assertThrows(UnknownStateException.class, () -> {
-            card.play(null);
-        });
+    @Test
+    void testPlayEpidemicEndsWithLastPlayer() {
+        gameModel.setCurrRanking(gameModel.getPlayers().values().stream().toList());
+        gameModel.resetPlayerIterator();
+        epidemic.setCurrState(CardState.EPIDEMIC);
+        // Nessun secondo giocatore
+        epidemic.play(new PlayerChoicesDataStructure());
 
-        assertEquals("Unknown current state", e.getMessage());
+        assertEquals(CardState.END_OF_CARD, epidemic.getCurrState());
+    }
 
+    @Test
+    void testPlayUnknownStateException() {
+        epidemic.setCurrState(CardState.WAIT_FOR_CONFIRM_REMOVAL_HANDLED);
+        assertThrows(UnknownStateException.class, () -> epidemic.play(new PlayerChoicesDataStructure()));
+    }
+
+    @Test
+    void testToClientCard() {
+        ClientCard clientCard = epidemic.toClientCard();
+        assertTrue(clientCard instanceof ClientEpidemic);
+        assertEquals("Epidemic", clientCard.getCardName());
     }
 
 }

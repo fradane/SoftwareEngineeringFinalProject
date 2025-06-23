@@ -270,42 +270,6 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     }
 
 
-    /**
-     * Attempts to place the focused component at the specified coordinates,
-     * performing various validity and connectivity checks.
-     * If the placed component does not violate an essential rule it is simply added to list of incorrectyle Positioned Components.
-     *
-     * @param x The x-coordinate.
-     * @param y The y-coordinate.
-     * @throws IllegalArgumentException If the position is invalid or violates placement rules.
-     */
-//    public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
-//        synchronized (shipMatrix) {
-//            //TODO uncommentare la checkPosition, serve solo per debugging checkShipboardPhase
-//            //checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
-//            if (//TODO aggiungere controllo che se sto aggiungendo un cannone che punta verso un component già piazzato
-//                    !areConnectorsWellConnected(focusedComponent, x, y)
-//                            || !areEmptyConnectorsWellConnected(focusedComponent, x, y) //TODO da controllare se effettivamente va messo qui questo controllo oppure all'interno di checkPosition
-//                            || isComponentInFireDirection(focusedComponent, x, y)
-//                            || isComponentInEngineDirection(focusedComponent, x, y)
-//                            || isEngineDirectionWrong(focusedComponent)
-//                            || isAimingAComponent(focusedComponent, x, y)
-//            ) {
-//                incorrectlyPositionedComponentsCoordinates.add(new Coordinates(x, y));
-//            }
-//            shipMatrix[x][y] = focusedComponent;
-//
-//            focusedComponent.insertInComponentsMap(componentsPerType);
-//
-//                gameContext.notifyAllClients((nicknameToNotify, clientController) -> {
-//                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-//                });
-//
-//            focusedComponent = null;
-//
-//        }
-//
-//    }
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
         synchronized (shipMatrix) {
 

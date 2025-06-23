@@ -34,6 +34,13 @@ import java.util.*;
 })
 public abstract class Component implements Serializable {
 
+    /**
+     * The name of the image associated with this component.
+     *
+     * This variable holds a string representing the identifier or file name of the
+     * image used to visually represent this component. It can be set or retrieved
+     * using the appropriate getter and setter methods.
+     */
     protected String imageName;
 
     /**
@@ -71,10 +78,20 @@ public abstract class Component implements Serializable {
         this.connectors = connectors;
     }
 
+    /**
+     * Retrieves the name of the image associated with this component.
+     *
+     * @return a string representing the image name
+     */
     public String getImageName() {
         return imageName;
     }
 
+    /**
+     * Sets the name of the image associated with this component.
+     *
+     * @param imageName the name of the image to associate with this component
+     */
     public void setImageName(String imageName) {
         this.imageName = imageName;
     }
@@ -115,6 +132,12 @@ public abstract class Component implements Serializable {
         return connectors;
     }
 
+    /**
+     * Updates the map of directional connectors for this component.
+     *
+     * @param connectors a map associating {@code Direction} enums to {@code ConnectorType} enums
+     *                   representing the new configuration of connectors for the component
+     */
     public void setConnectors(Map<Direction, ConnectorType> connectors) {
         this.connectors = connectors;
     }
@@ -149,16 +172,40 @@ public abstract class Component implements Serializable {
         map.computeIfAbsent(this.getClass(), k -> new ArrayList<>()).add(this);
     }
 
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//        Component component = (Component) o;
-//        return Objects.equals(imageName, component.imageName);
-//    }
+    /**
+     * Compares this Component to the specified object for equality.
+     * The comparison is based on the `imageName` field.
+     *
+     * @param o the object to compare with this Component
+     * @return {@code true} if the specified object is equal to this Component;
+     *         {@code false} otherwise
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Component component = (Component) o;
+        return Objects.equals(imageName, component.imageName);
+    }
 
+    /**
+     * Retrieves the name of the component.
+     * This method must be implemented by subclasses of the {@code Component} class.
+     *
+     * @return a string representing the name of the component
+     */
     protected abstract String getComponentName();
 
+    /**
+     * Provides a string representation of the component, detailing its visual layout,
+     * directional connectors, associated image name, and component name.
+     *
+     * The format includes a representation of the connectors in the north, south,
+     * west, and east directions, as well as the component's visual details.
+     *
+     * @return a string representation of the component including the image name,
+     *         component name, and details about the directional connectors
+     */
     @Override
     public String toString() {
         String north = getConnectors().get(Direction.NORTH) != null
@@ -198,9 +245,20 @@ public abstract class Component implements Serializable {
         return Objects.hash(imageName, rotation);
     }
 
+    /**
+     * Provides a label identifier for the component.
+     *
+     * @return a string representing the label of the component
+     */
     @JsonIgnore
     public abstract String getLabel();
 
+    /**
+     * Retrieves the main attribute of the component.
+     * The exact meaning of the main attribute may vary depending on the specific implementation in a subclass.
+     *
+     * @return the main attribute of the component as a String
+     */
     @JsonIgnore
     public abstract String getMainAttribute();
 

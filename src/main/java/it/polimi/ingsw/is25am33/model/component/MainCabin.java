@@ -25,11 +25,14 @@ public class MainCabin extends Cabin implements Serializable {
         type = "MainCabin";
     }
 
+
     /**
-     * Constructor that allows initializing the main cabin with specified connectors and player color.
+     * Constructs a {@code MainCabin} with specified connectors and a player color.
      *
-     * @param connectors a map associating a {@code Direction} with a {@code ConnectorType}
-     * @param color the {@code PlayerColor} associated with this main cabin
+     * The image name of the cabin is set based on the provided player color.
+     *
+     * @param connectors a map associating directions with connector types
+     * @param color the player's color associated with this main cabin
      */
     public MainCabin(Map<Direction, ConnectorType> connectors, PlayerColor color) {
         super(connectors);

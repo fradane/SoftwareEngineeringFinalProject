@@ -63,12 +63,6 @@ public class BatteryBox extends Component{
     }
 
     /**
-     * Consumes one unit of battery from the battery box.
-     *
-     * @throws IllegalStateException if no battery units are available
-     */
-
-    /**
      * Sets the maximum battery capacity.
      *
      * @param maxBatteryCapacity the maximum capacity of the battery

@@ -27,7 +27,6 @@ public abstract class Enemies extends AdventureCard {
 
     @Override
     public ClientCard toClientCard() {
-        //TODO
         return null;
     }
 }

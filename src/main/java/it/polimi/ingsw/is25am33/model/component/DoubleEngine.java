@@ -30,10 +30,21 @@ public class DoubleEngine extends Engine implements Activable {
         super(connectors);
     }
 
+    /**
+     * Retrieves the name of the component.
+     *
+     * @return the name of the component as a string
+     */
     public String getComponentName() {
         return "DoubleEngine";
     }
 
+    /**
+     * Retrieves the label associated with this component.
+     * The label is a short identifier used to represent the component.
+     *
+     * @return the label of the component as a string
+     */
     @Override
     @JsonIgnore
     public String getLabel() {

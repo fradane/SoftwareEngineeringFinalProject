@@ -31,10 +31,21 @@ public class DoubleCannon extends Cannon implements Activable {
         super(connectors);
     }
 
+    /**
+     * Retrieves the name of the component.
+     *
+     * @return the name of the component as a string
+     */
     public String getComponentName() {
         return "DoubleCannon";
     }
 
+    /**
+     * Retrieves the label associated with the component.
+     * The label is a concise identifier representing the component type.
+     *
+     * @return the label of the component as a string
+     */
     @Override
     @JsonIgnore
     public String getLabel() {

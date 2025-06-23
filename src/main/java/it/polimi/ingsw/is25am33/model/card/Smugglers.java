@@ -18,29 +18,82 @@ import java.util.stream.IntStream;
 
 public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActivator {
 
+    /**
+     * Represents the penalty in terms of cargo cubes that the player incurs when interacting with this card.
+     *
+     * This variable typically holds the number of cargo cubes deducted or affected
+     * during specific gameplay mechanics as determined by the player's decisions or card effects.
+     */
     private int cubeMalus;
+    /**
+     * Represents the reward for a player consisting of a list of CargoCubes.
+     * Each CargoCube in the list has a specific value tied to its color.
+     * The reward is determined by the game logic and can be used for various gameplay decisions.
+     */
     private List<CargoCube> reward;
-    private int stepsBack;
-    private int requiredFirePower;
+    /**
+     * A constant, unmodifiable list of predefined {@link CardState} values representing
+     * the sequential states of the "Smugglers" card's lifecycle during a game.
+     * This list defines the following states:
+     *
+     * 1. {@link CardState#CHOOSE_CANNONS} - Requires the player to select cannons to activate.
+     * 2. {@link CardState#ACCEPT_THE_REWARD} - Allows the player to accept or decline a reward.
+     * 3. {@link CardState#HANDLE_CUBES_REWARD} - Requires the player to manage cubes obtained as a reward.
+     * 4. {@link CardState#HANDLE_CUBES_MALUS} - Requires the player to handle penalties involving cubes.
+     *
+     * This variable encapsulates the transition logic for these specific states and ensures the
+     * states are processed in a predefined order. It is intended to guide the sequence of actions
+     * and menus presented to the player for this particular card.
+     */
     private static final List<CardState> cardStates = List.of(CardState.CHOOSE_CANNONS, CardState.ACCEPT_THE_REWARD, CardState.HANDLE_CUBES_REWARD, CardState.HANDLE_CUBES_MALUS);
 
+    /**
+     * Constructs a new instance of the Smugglers card.
+     * This constructor sets the card's name to the simple name of its class.
+     */
     public Smugglers() {
         this.cardName = this.getClass().getSimpleName();
     }
 
+    /**
+     * Sets the malus value for the cube.
+     *
+     * @param cubeMalus the malus value to set for the cube
+     */
     public void setCubeMalus(int cubeMalus) {
         this.cubeMalus = cubeMalus;
     }
 
+    /**
+     * Sets the reward for the smuggler, represented as a list of CargoCube objects.
+     *
+     * @param reward the list of CargoCube objects to be set as the smuggler's reward
+     */
     public void setReward(List<CargoCube> reward) {
         this.reward = reward;
     }
 
+    /**
+     * Returns the initial state of the card.
+     *
+     * @return the first {@code CardState}, which is {@code CHOOSE_CANNONS}.
+     */
     @Override
     public CardState getFirstState() {
         return CardState.CHOOSE_CANNONS;
     }
 
+    /**
+     * Executes the appropriate action based on the current state of the game
+     * and the player's choices.
+     *
+     * @param playerChoices an instance of PlayerChoicesDataStructure containing
+     *        the player's decisions such as chosen cannons, storage locations,
+     *        and reward acceptance.
+     * @throws UnknownStateException if the current state is not recognized.
+     * @throws IllegalArgumentException if required choices within playerChoices
+     *         are not provided for specific states.
+     */
     @Override
     public void play(PlayerChoicesDataStructure playerChoices) {
         switch (currState) {
@@ -61,11 +114,28 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         }
     }
 
+    /**
+     * Converts the current instance of the Smugglers card into a corresponding ClientSmugglers object.
+     *
+     * @return an instance of ClientSmugglers, containing the properties of the current Smugglers card,
+     * including card name, image name, required firepower, reward, steps back, and cube malus.
+     */
     @Override
     public ClientCard toClientCard() {
         return new ClientSmugglers(cardName, imageName, requiredFirePower, reward, stepsBack, cubeMalus );
     }
 
+    /**
+     * Processes the current player's selection of cannons and battery boxes to activate,
+     * determines the resulting cannon power, and updates the game state accordingly.
+     *
+     * @param chosenDoubleCannonsCoords a list of coordinates representing the double cannons
+     *                                  chosen by the current player to activate.
+     * @param chosenBatteryBoxesCoords  a list of coordinates representing the battery boxes
+     *                                  chosen by the current player to activate.
+     * @throws IllegalArgumentException if any of the provided coordinates are invalid or refer
+     *                                  to components that cannot be activated.
+     */
     private void currPlayerChoseCannonsToActivate(List<Coordinates> chosenDoubleCannonsCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
         Player currentPlayer=gameModel.getCurrPlayer();
         List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
@@ -100,6 +170,13 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
 
     }
 
+    /**
+     * Handles the decision of the current player regarding whether they accept the reward.
+     * If the player accepts the reward, the game transitions to the state for handling cube rewards.
+     * Otherwise, it ends the card phase and resets the player iterator, setting the game state to draw a new card.
+     *
+     * @param hasPlayerAcceptedTheReward true if the player decided to accept the reward, false otherwise
+     */
     private void currPlayerDecidedToGetTheReward(boolean hasPlayerAcceptedTheReward) {
         if (hasPlayerAcceptedTheReward)
             setCurrState(CardState.HANDLE_CUBES_REWARD);
@@ -110,54 +187,49 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         }
     }
 
+    /**
+     * Handles the action where the current player chooses storage locations for cargo cubes.
+     * Validates the chosen storage locations and updates the storage with the rewarded cargo cubes.
+     * Handles cases where storage is full or invalid, and appropriately discards or replaces lower value cargo cubes.
+     *
+     * @param chosenStorageCoords a list of {@code Coordinates} representing the storage locations
+     *                            selected by the current player for the cargo cubes.
+     *                            The validity of these coordinates will be checked,
+     *                            and any invalid coordinates will be ignored or handled.
+     */
     private void currPlayerChoseCargoCubeStorage(List<Coordinates> chosenStorageCoords) {
         List<CargoCube> stationRewards = new ArrayList<>(reward);
 
-        //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
         List<Storage> chosenStorages = new ArrayList();
         for (Coordinates coords : chosenStorageCoords) {
             if (coords.isCoordinateInvalid()) {
-                // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
                 chosenStorages.add(null);
             } else {
                 Component component = shipBoard.getComponentAt(coords);
                 if (component instanceof Storage) {
                     chosenStorages.add((Storage) component);
                 } else {
-                    // Se le coordinate non puntano a uno storage, aggiungi null
                     chosenStorages.add(null);
                 }
             }
         }
 
-        // Caso 1: Il giocatore non ha scelto nessuno storage
         if (chosenStorages.isEmpty()) {
-            System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
-                    " cannot accept any rewards due to lack of storage space");
             proceedToNextPlayerOrEndCard();
             return;
         }
 
-        // Caso 2: Il giocatore ha scelto meno storage dei reward disponibili
         if (chosenStorages.size() < stationRewards.size()) {
             List<CargoCube> rewardsToProcess = stationRewards.subList(0, chosenStorages.size());
             List<CargoCube> discardedRewards = stationRewards.subList(chosenStorages.size(), stationRewards.size());
-
-            System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
-                    " can only accept " + chosenStorages.size() +
-                    " out of " + stationRewards.size() + " rewards");
-            System.out.println("Discarded rewards: " + discardedRewards);
-
             stationRewards = rewardsToProcess;
         }
 
-        // Caso 3: Il giocatore ha scelto più storage dei reward
         if (chosenStorages.size() > stationRewards.size()) {
             chosenStorages = chosenStorages.subList(0, stationRewards.size());
         }
 
-        // Validazione: controlla che i cubi RED vadano solo in SpecialStorage
         for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
             Storage storage = chosenStorages.get(i);
             CargoCube cube = stationRewards.get(i);
@@ -171,7 +243,6 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             }
         }
 
-        // Processa i cubi effettivamente posizionabili
         for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
             Storage storage = chosenStorages.get(i);
             CargoCube cube = stationRewards.get(i);
@@ -181,36 +252,41 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
                 continue;
             }
 
-            // Se lo storage è pieno, rimuovi il cubo meno prezioso
             if (storage.isFull()) {
                 List<CargoCube> sortedStorage = new ArrayList<>(storage.getStockedCubes());
                 sortedStorage.sort(CargoCube.byValue);
                 CargoCube lessValuableCargoCube = sortedStorage.get(0);
                 storage.removeCube(lessValuableCargoCube);
-                System.out.println("Removed " + lessValuableCargoCube + " to make space for " + cube);
             }
-
             storage.addCube(cube);
-            System.out.println("Added " + cube + " to storage");
         }
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
         });
 
-        // Muovi il giocatore indietro
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
-        // Termina la carta
         setCurrState(CardState.END_OF_CARD);
         gameModel.resetPlayerIterator();
         gameModel.setCurrGameState(GameState.DRAW_CARD);
     }
 
+    /**
+     * Handles the transition to the next player's turn or concludes the current card process if no more players remain in the sequence.
+     *
+     * The method first checks if there is another player available in the queue by invoking {@code gameModel.hasNextPlayer}.
+     * If a next player exists, the current player is updated using {@code gameModel.nextPlayer()} and the card state
+     * transitions to {@code CardState.VISIT_LOCATION}, enabling the next player to take their turn.
+     *
+     * If no next player is available, the card process is finalized by setting the card state to {@code CardState.END_OF_CARD}.
+     * Additionally, the player iterator is reset using {@code gameModel.resetPlayerIterator()}, and the game state transitions
+     * to {@code GameState.DRAW_CARD} to set up the next game round or activity.
+     */
     private void proceedToNextPlayerOrEndCard() {
         if (gameModel.hasNextPlayer()) {
             gameModel.nextPlayer();
-            setCurrState(CardState.VISIT_LOCATION);
+            setCurrState(CardState.CHOOSE_CANNONS);
         } else {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
@@ -218,9 +294,20 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         }
     }
 
+    /**
+     * Processes the removal of the most valuable CargoCube from chosen storages or activates
+     * the chosen BatteryBoxes by the current player. It also moves the game to the next
+     * player or updates the game to the next state if all players have completed their actions.
+     *
+     * @param chosenStorageCoords the list of coordinates indicating the storages selected
+     *        by the current player from which to remove the most valuable CargoCubes
+     * @param chosenBatteryBoxesCoords the list of coordinates indicating the battery boxes
+     *        selected by the current player to be activated
+     * @throws IllegalArgumentException if any of the provided coordinates are invalid or
+     *         do not refer to existing components
+     */
     private void currPlayerChoseStorageToRemove(List<Coordinates> chosenStorageCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
 
-        //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
         Player currentPlayer=gameModel.getCurrPlayer();
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
         List<Storage> chosenStorages = new ArrayList();
@@ -261,18 +348,5 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         }
 
     }
-
-    //TODO
-    @Override
-    public String toString() {
-        return """
-        %s
-        ┌────────────────────────────┐
-        │     Smugglers               │
-        ├────────────────────────────┤
-        │ Cube Malus:     x%-2d     │
-        """;
-    }
-
 
 }

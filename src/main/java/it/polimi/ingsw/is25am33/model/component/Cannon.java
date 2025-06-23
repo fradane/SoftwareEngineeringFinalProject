@@ -45,8 +45,16 @@ public class Cannon extends Component implements Rotatable {
         return fireDirection;
     }
 
+
     /**
-     * Changes the cannon's orientation and updates the power direction accordingly.
+     * Rotates the cannon's orientation and adjusts its firing direction accordingly.
+     *
+     * This method first invokes the {@link Component#rotate()} method to adjust the connectors
+     * based on the component's new rotation. Then, it shifts the cannon's firing direction
+     * 90 degrees clockwise using the {@link #shiftDirection(Direction)} method.
+     *
+     * The {@code fireDirection} field is updated to reflect the new angular orientation
+     * after the rotation.
      */
     @Override
     public void rotate() {
@@ -54,12 +62,29 @@ public class Cannon extends Component implements Rotatable {
         fireDirection = shiftDirection(fireDirection);
     }
 
+    /**
+     * Retrieves the label associated with the component.
+     * The label is a short string identifier used to represent the component type.
+     *
+     * @return the label of the component as a string
+     */
     @Override
     @JsonIgnore
     public String getLabel() {
         return "CNN";
     }
 
+    /**
+     * Retrieves a string representation of the main attribute for the component.
+     * For this component, it returns the shorthand notation of the current
+     * firing direction as follows:
+     * - "N" for NORTH
+     * - "S" for SOUTH
+     * - "W" for WEST
+     * - "E" for EAST
+     *
+     * @return a string representing the main attribute, which corresponds to the current firing direction
+     */
     @Override
     @JsonIgnore
     public String getMainAttribute() {

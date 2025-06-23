@@ -29,16 +29,35 @@ public class StructuralModules extends Component {
         super(connectors);
     }
 
+    /**
+     * Retrieves the name of this structural module component.
+     *
+     * @return the name of the component as a string, which is "StructuralModules"
+     */
+    @Override
+    @JsonIgnore
     public String getComponentName() {
         return "StructuralModules";
     }
 
+    /**
+     * Retrieves the label associated with the component.
+     * The label is a short string identifier used to represent the component type.
+     *
+     * @return the label of the component as a string
+     */
     @Override
     @JsonIgnore
     public String getLabel() {
         return "STR";
     }
 
+    /**
+     * Retrieves a string representation of the main attribute for a structural module component.
+     * For this component, the main attribute is represented as a blank space.
+     *
+     * @return a string representing the main attribute, which is a blank space
+     */
     @Override
     @JsonIgnore
     public String getMainAttribute() {

@@ -20,6 +20,14 @@ public class Level2FlyingBoard extends FlyingBoard {
      */
     private int hourglassPosition;
 
+    /**
+     * The constant reward value assigned for having the "prettiest ship" in the game.
+     * This value is used in determining additional credits or perks for players
+     * based on aesthetic judgment criteria.
+     *
+     * It signifies a fixed reward amount of 4, emphasizing consistency across all
+     * evaluations related to this designation.
+     */
     private static final int prettiestShipReward = 4;
 
     /**
@@ -28,7 +36,19 @@ public class Level2FlyingBoard extends FlyingBoard {
      */
     private final static List<Integer> credits = List.of(12, 9, 6, 3);
 
+    /**
+     * An iterator over the initial positions for the {@code Level2FlyingBoard}.
+     * Used to provide sequential access to predefined starting positions
+     * for players or other components in the game.
+     * This iterator ensures controlled and ordered traversal,
+     * adhering to the board's initial configuration setup.
+     */
     private final Iterator<Integer> initialPositionIterator;
+    /**
+     * A fixed list of initial positions that are used to set up certain game elements
+     * or players at the start of the game in the {@code Level2FlyingBoard}.
+     * The list contains predefined integer values representing specific starting positions.
+     */
     private final static List<Integer> initialPositions = List.of(6, 3, 1, 0);
 
     /**
@@ -45,6 +65,11 @@ public class Level2FlyingBoard extends FlyingBoard {
         this.initialPositionIterator = initialPositions.iterator();
     }
 
+    /**
+     * Retrieves the reward value for the prettiest ship in the game.
+     *
+     * @return the reward value as an integer for the prettiest ship.
+     */
     @JsonIgnore
     @Override
     public int getPrettiestShipReward() {
@@ -65,6 +90,13 @@ public class Level2FlyingBoard extends FlyingBoard {
         return index >= 0 ? credits.get(index) : 0;
     }
 
+    /**
+     * Inserts a player into the ranking system and assigns them an initial position.
+     * Notifies all connected game clients about the updated ranking.
+     *
+     * @param player the {@code Player} object to be inserted into the ranking
+     * @return the current size of the ranking after the player is added
+     */
     @Override
     public int insertPlayer(Player player) {
 

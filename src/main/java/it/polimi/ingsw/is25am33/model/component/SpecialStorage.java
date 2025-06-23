@@ -29,10 +29,21 @@ public class SpecialStorage extends Storage {
         super(connectors, maxCapacity);
     }
 
+    /**
+     * Retrieves the name of the component.
+     *
+     * @return the name of the component as a string
+     */
     public String getComponentName() {
         return "SpecialStorage";
     }
 
+    /**
+     * Retrieves the label associated with this component.
+     * The label is a short string identifier that represents the type of this component.
+     *
+     * @return the label of the component as a string
+     */
     @Override
     @JsonIgnore
     public String getLabel() {

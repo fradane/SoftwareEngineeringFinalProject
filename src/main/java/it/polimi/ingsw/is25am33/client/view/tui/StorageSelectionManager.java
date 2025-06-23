@@ -92,34 +92,6 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Ottiene una mappa che indica quanti cubi di ogni tipo il giocatore non può accettare.
-     *
-     * @return Una mappa con il tipo di cubo e il numero di cubi che non possono essere accettati
-     */
-    public Map<CargoCube, Integer> getUnacceptableCubesCount() {
-        Map<CargoCube, Integer> cubeCount = new HashMap<>();
-        Map<CargoCube, Integer> unacceptableCubes = new HashMap<>();
-
-        // Conta quanti cubi di ogni tipo ci sono nei reward
-        for (CargoCube cube : cubeRewards) {
-            cubeCount.put(cube, cubeCount.getOrDefault(cube, 0) + 1);
-        }
-
-        // Verifica quanti cubi di ogni tipo non possono essere accettati
-        for (Map.Entry<CargoCube, Integer> entry : cubeCount.entrySet()) {
-            CargoCube cubeType = entry.getKey();
-            int requiredCount = entry.getValue();
-            int availableCount = compatibleStoragesMap.getOrDefault(cubeType, new ArrayList<>()).size();
-
-            if (availableCount < requiredCount) {
-                unacceptableCubes.put(cubeType, requiredCount - availableCount);
-            }
-        }
-
-        return unacceptableCubes;
-    }
-
-    /**
      * Aggiunge uno storage alla selezione per il cubo corrente.
      *
      * @param storageCoords Le coordinate dello storage selezionato
@@ -239,20 +211,6 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Rimuove l'ultima selezione di storage.
-     *
-     * @return true se una selezione è stata rimossa, false se la lista era già vuota
-     */
-    public boolean removeLastSelection() {
-        if (selectedStorages.isEmpty()) {
-            return false;
-        }
-
-        selectedStorages.remove(selectedStorages.size() - 1);
-        return true;
-    }
-
-    /**
      * Verifica se sono stati selezionati tutti gli storage necessari.
      *
      * @return true se tutti i cubi hanno uno storage assegnato, false altrimenti
@@ -348,30 +306,6 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Genera una stringa che descrive quali cubi possono essere accettati e quali no.
-     *
-     * @return Una stringa informativa sulla compatibilità dei cubi
-     */
-    public String getStorageCompatibilityInfo() {
-        if (!hasAnyStorage()) {
-            return "Non hai storage disponibili. Non puoi accettare nessun cubo.";
-        }
-
-        Map<CargoCube, Integer> unacceptableCubes = getUnacceptableCubesCount();
-        if (unacceptableCubes.isEmpty()) {
-            return "Hai storage sufficienti per accettare tutti i cubi reward.";
-        }
-
-        StringBuilder info = new StringBuilder("Non hai abbastanza storage per accettare tutti i cubi:\n");
-        for (Map.Entry<CargoCube, Integer> entry : unacceptableCubes.entrySet()) {
-            info.append("- ").append(entry.getValue()).append(" cubi ").append(entry.getKey())
-                    .append(" non possono essere accettati.\n");
-        }
-
-        return info.toString();
-    }
-
-    /**
      * Restituisce il numero totale di cubi reward da gestire.
      *
      * @return Il numero totale di cubi reward
@@ -380,99 +314,6 @@ public class StorageSelectionManager {
         return cubeRewards.size();
     }
 
-    /**
-     * Restituisce il numero di cubi che possono effettivamente essere accettati
-     * dal giocatore considerando i suoi storage disponibili.
-     *
-     * @return Il numero di cubi che possono essere accettati
-     */
-    public int getAcceptableCubesCount() {
-        Map<CargoCube, Integer> cubeCount = new HashMap<>();
-
-        // Conta quanti cubi di ogni tipo ci sono nei reward
-        for (CargoCube cube : cubeRewards) {
-            cubeCount.put(cube, cubeCount.getOrDefault(cube, 0) + 1);
-        }
-
-        int acceptableCount = 0;
-
-        // Per ogni tipo di cubo, calcola quanti possono essere accettati
-        for (Map.Entry<CargoCube, Integer> entry : cubeCount.entrySet()) {
-            CargoCube cubeType = entry.getKey();
-            int requiredCount = entry.getValue();
-            int availableStorageCount = compatibleStoragesMap.getOrDefault(cubeType, new ArrayList<>()).size();
-
-            // Il numero accettabile è il minimo tra richiesto e disponibile
-            acceptableCount += Math.min(requiredCount, availableStorageCount);
-        }
-
-        return acceptableCount;
-    }
-
-    /**
-     * Restituisce una descrizione dettagliata di quali cubi possono essere accettati.
-     *
-     * @return Una stringa che descrive lo stato di accettazione dei cubi
-     */
-    public String getDetailedAcceptabilityStatus() {
-        if (!hasAnyStorage()) {
-            return "Nessuno storage disponibile. Non puoi accettare nessun cubo.";
-        }
-
-        Map<CargoCube, Integer> cubeCount = new HashMap<>();
-        for (CargoCube cube : cubeRewards) {
-            cubeCount.put(cube, cubeCount.getOrDefault(cube, 0) + 1);
-        }
-
-        StringBuilder status = new StringBuilder("Stato accettazione cubi:\n");
-
-        for (Map.Entry<CargoCube, Integer> entry : cubeCount.entrySet()) {
-            CargoCube cubeType = entry.getKey();
-            int requiredCount = entry.getValue();
-            int availableStorageCount = compatibleStoragesMap.getOrDefault(cubeType, new ArrayList<>()).size();
-            int acceptableCount = Math.min(requiredCount, availableStorageCount);
-
-            status.append("- ").append(cubeType).append(": ")
-                    .append(acceptableCount).append("/").append(requiredCount)
-                    .append(" (").append(availableStorageCount).append(" storage compatibili)")
-                    .append("\n");
-        }
-
-        return status.toString();
-    }
-
-    /**
-     * Verifica se almeno un cubo può essere accettato dal giocatore.
-     *
-     * @return true se almeno un cubo può essere accettato, false altrimenti
-     */
-    public boolean canAcceptAnyCube() {
-        return getAcceptableCubesCount() > 0;
-    }
-
-    /**
-     * Aggiunge una selezione di storage anche se le coordinate sono invalide.
-     * Questo permette di gestire il caso in cui un cubo non può essere salvato.
-     *
-     * @param storageCoords Le coordinate dello storage selezionato (possono essere invalide)
-     * @return true se la selezione è stata registrata, false altrimenti
-     */
-    public boolean addStorageSelectionAllowInvalid(Coordinates storageCoords) {
-        // Verifico se abbiamo già selezionato tutti gli storage necessari
-        if (selectedStorages.size() >= cubeRewards.size()) {
-            return false;
-        }
-
-        // Se le coordinate sono invalide, le aggiungiamo comunque per indicare
-        // che questo cubo viene scartato
-        if (storageCoords.isCoordinateInvalid()) {
-            selectedStorages.add(storageCoords);
-            return true;
-        }
-
-        // Altrimenti usiamo la logica normale
-        return addStorageSelection(storageCoords);
-    }
     /**
      * Resetta tutte le selezioni.
      */
