@@ -163,7 +163,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             }else{
                 setCurrState(CardState.END_OF_CARD);
                 gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             }
         }else
             setCurrState(CardState.HANDLE_CUBES_MALUS);
@@ -183,7 +183,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         else{
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
     }
 
@@ -269,7 +269,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
 
         setCurrState(CardState.END_OF_CARD);
         gameModel.resetPlayerIterator();
-        gameModel.setCurrGameState(GameState.DRAW_CARD);
+        gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
     }
 
     /**
@@ -281,7 +281,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
      *
      * If no next player is available, the card process is finalized by setting the card state to {@code CardState.END_OF_CARD}.
      * Additionally, the player iterator is reset using {@code gameModel.resetPlayerIterator()}, and the game state transitions
-     * to {@code GameState.DRAW_CARD} to set up the next game round or activity.
+     * to {@code GameState.CHECK_PlAYERS} to set up the next game round or activity.
      */
     private void proceedToNextPlayerOrEndCard() {
         if (gameModel.hasNextPlayer()) {
@@ -290,7 +290,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         } else {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
     }
 
@@ -344,7 +344,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         } else {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
 
     }

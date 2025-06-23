@@ -608,6 +608,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) {
         clientModel.eliminatePlayer(nickname);
         view.showMessage(nickname + " was eliminated.", STANDARD);
+        view.showPlayerEarlyLanded(nickname);
     }
 
     @Override
@@ -1059,8 +1060,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .map(Cabin.class::cast)
                 .toList();
 
-        for (Cabin cabin : cabins.stream().distinct().toList()) {
-            if (Collections.frequency(cabins, cabin) > cabin.getInhabitants().size()) {
+        for (Cabin uniqueCabin : cabins.stream().distinct().toList()) {
+            long count = cabins.stream()
+                    .filter(c -> c == uniqueCabin)
+                    .count();
+
+            if (count > uniqueCabin.getInhabitants().size()) {
                 view.showMessage("You have selected a cabin more times than its actual crewMember occupancy", ERROR);
                 return false;
             }
@@ -1296,7 +1301,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
-        //TODO
+        clientModel.eliminatePlayer(nickname);
+        view.showPlayerEarlyLanded(nickname);
     }
 
     public void land() {
@@ -1304,6 +1310,15 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             serverController.playerWantsToLand(nickname);
         }catch (IOException e){
             handleRemoteException(e);
+        }
+    }
+
+    public void skipToLastCard() {
+        try {
+            serverController.debugSkipToLastCard();
+            view.showMessage("Successfully skipped to last card!", NOTIFICATION_INFO);
+        } catch (IOException e) {
+            view.showMessage("Failed to skip cards: " + e.getMessage(), ERROR);
         }
     }
 }

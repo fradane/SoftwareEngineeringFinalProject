@@ -6,13 +6,12 @@ import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Component;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
+import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import it.polimi.ingsw.is25am33.network.DNS;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
@@ -434,12 +433,17 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     @Override
     public void notifyPlayersFinalData(String nicknameToNotify, List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) throws IOException {
-        //TODO
+        SocketMessage outMessage = new SocketMessage("server", "notifyPlayersFinalData");
+        outMessage.setParamPlayerFinalDataRanking(finalRanking);
+        outMessage.setParamStringList(playersNicknamesWithPrettiestShip);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override
     public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
-        //TODO
+        SocketMessage outMessage = new SocketMessage("server", "notifyPlayerEarlyLanded");
+        outMessage.setParamString(nickname);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override

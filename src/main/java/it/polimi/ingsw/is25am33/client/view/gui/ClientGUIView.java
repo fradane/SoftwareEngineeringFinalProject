@@ -42,4 +42,9 @@ public abstract class ClientGUIView implements ClientView {
         //TODO
     }
 
+    @Override
+    public void showPlayerEarlyLanded(String nickname) {
+        //TODO
+    }
+
 }

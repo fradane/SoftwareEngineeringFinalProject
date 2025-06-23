@@ -191,17 +191,23 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
      *                                  to meet the required condition.
      */
     private void currPlayerWantsToVisit(boolean wantsToVisit) throws IllegalDecisionException {
-        if (wantsToVisit) {
-            if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)
-                throw new IllegalDecisionException("Player has not enough crew members");
-            setCurrState(CardState.REMOVE_CREW_MEMBERS);
-        } else if (gameModel.hasNextPlayer()) {
-            gameModel.nextPlayer();
-            setCurrState(CardState.VISIT_LOCATION);
-        } else {
-            setCurrState(CardState.END_OF_CARD);
-            gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+        try {
+            if (wantsToVisit) {
+                if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < crewMalus)
+                    //TODO bisogna gestire questo genere di eccezioni, teoricamente già controllate lato client, però boh
+                    throw new IllegalDecisionException("Player has not enough crew members");
+                setCurrState(CardState.REMOVE_CREW_MEMBERS);
+            } else if (gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
+                setCurrState(CardState.VISIT_LOCATION);
+            } else {
+                setCurrState(CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
+            }
+        } catch (Exception e) {
+            System.err.println("Error in currPlayerWantsToVisit: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -236,7 +242,7 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
         setCurrState(CardState.END_OF_CARD);
-        gameModel.setCurrGameState(GameState.DRAW_CARD);
+        gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
 
     }
 

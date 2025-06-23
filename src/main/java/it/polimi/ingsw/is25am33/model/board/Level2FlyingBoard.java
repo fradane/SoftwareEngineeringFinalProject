@@ -34,7 +34,7 @@ public class Level2FlyingBoard extends FlyingBoard {
      * A fixed list of credits awarded to players based on their final ranking.
      * The first player receives the first value, the second receives the second, and so on.
      */
-    private final static List<Integer> credits = List.of(12, 9, 6, 3);
+    private final static List<Integer> credits = List.of(8, 6, 4, 2);
 
     /**
      * An iterator over the initial positions for the {@code Level2FlyingBoard}.

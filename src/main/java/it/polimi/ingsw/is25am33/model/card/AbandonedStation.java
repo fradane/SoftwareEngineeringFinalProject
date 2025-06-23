@@ -185,17 +185,22 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
      *                     true if the player wants to visit the location, false otherwise
      * @throws IllegalDecisionException if the*/
     private void currPlayerWantsToVisit(boolean wantsToVisit) throws IllegalDecisionException {
-        if (wantsToVisit) {
-            if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < requiredCrewMembers)
-                throw new IllegalDecisionException("Player has not enough crew members");
-            setCurrState(CardState.HANDLE_CUBES_REWARD);
-        } else if (gameModel.hasNextPlayer()) {
-            gameModel.nextPlayer();
-            setCurrState(CardState.VISIT_LOCATION);
-        } else {
-            setCurrState(CardState.END_OF_CARD);
-            gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+        try {
+            if (wantsToVisit) {
+                if (gameModel.getCurrPlayer().getPersonalBoard().getCrewMembers().size() < requiredCrewMembers)
+                    throw new IllegalDecisionException("Player has not enough crew members");
+                setCurrState(CardState.HANDLE_CUBES_REWARD);
+            } else if (gameModel.hasNextPlayer()) {
+                gameModel.nextPlayer();
+                setCurrState(CardState.VISIT_LOCATION);
+            } else {
+                setCurrState(CardState.END_OF_CARD);
+                gameModel.resetPlayerIterator();
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
+            }
+        } catch (Exception e) {
+            System.err.println("Error in currPlayerWantsToVisit: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -279,7 +284,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
 
         setCurrState(CardState.END_OF_CARD);
         gameModel.resetPlayerIterator();
-        gameModel.setCurrGameState(GameState.DRAW_CARD);
+        gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
     }
 
     /**
@@ -301,7 +306,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
         } else {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
     }
 

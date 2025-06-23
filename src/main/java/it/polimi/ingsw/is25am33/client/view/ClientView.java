@@ -327,5 +327,7 @@ public interface ClientView {
 
     void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip);
 
+    void showPlayerEarlyLanded(String nickname);
+
     void showCubes(ShipBoardClient shipboardOf, String nickname);
 }

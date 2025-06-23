@@ -83,5 +83,7 @@ public interface CallableOnGameController extends Remote {
 
     void startCheckShipBoardAfterAttack(String nickname) throws IOException;
 
+    void debugSkipToLastCard() throws IOException;
+
     void evaluatedCrewMembers(String nickname) throws IOException;
 }

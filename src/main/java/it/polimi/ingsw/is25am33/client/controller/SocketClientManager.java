@@ -9,7 +9,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
-import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.serializationLayer.client.ClientDeserializer;
 import it.polimi.ingsw.is25am33.serializationLayer.client.ClientSerializer;
 import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
@@ -530,6 +529,18 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                         clientController.notifyLeastResourcedPlayer(nickname, notification.getParamString());
                     }
                     break;
+
+                case "notifyPlayersFinalData":
+                    if (clientController != null) {
+                        clientController.notifyPlayersFinalData(nickname, notification.getParamPlayerFinalDataRanking(), notification.getParamStringList());
+                    }
+                    break;
+
+                case "notifyPlayerEarlyLanded":
+                    if (clientController != null) {
+                        clientController.notifyPlayerEarlyLanded(nickname, notification.getParamString());
+                    }
+                    break;
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
@@ -784,5 +795,10 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     public void startCheckShipBoardAfterAttack(String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "startCheckShipBoardAfterAttack");
         out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void debugSkipToLastCard() throws IOException {
+        //TODO
     }
 }

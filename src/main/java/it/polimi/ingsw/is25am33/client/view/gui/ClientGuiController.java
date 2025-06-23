@@ -173,6 +173,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showPlayerEarlyLanded(String nickname) {
+        //TODO
+    }
+
+    @Override
     public void showCubes(ShipBoardClient shipboardOf, String nickname) {
 
     }

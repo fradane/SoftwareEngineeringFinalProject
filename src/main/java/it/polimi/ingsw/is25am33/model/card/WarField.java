@@ -167,7 +167,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
             else {
                 setCurrState(CardState.END_OF_CARD);
                 gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             }
         }
     }
@@ -278,7 +278,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
             } else {
                 setCurrState(CardState.END_OF_CARD);
                 gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             }
         } else {
             gameModel.setCurrPlayer(leastResourcedPlayer.getKey());
@@ -312,7 +312,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
         } else {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
 
     }
@@ -367,7 +367,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
         } else {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
 
     }

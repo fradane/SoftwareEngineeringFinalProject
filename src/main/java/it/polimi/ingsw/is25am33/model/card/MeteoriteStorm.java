@@ -252,7 +252,7 @@ public class MeteoriteStorm extends AdventureCard implements HowToDefend {
      *    - If there are no more players with remaining turns but the meteorite iterator has subsequent entries,
      *      resets the player iterator and changes the card state to THROW_DICES.
      *    - If no players or meteorites are remaining, transitions the game to the END_OF_CARD state, resets the
-     *      player iterator, and sets the game state to DRAW_CARD.
+     *      player iterator, and sets the game state to CHECK_PLAYERS.
      */
     private void checkShipBoardAfterAttack(){
         gameModel.notifyInvalidShipBoards();
@@ -268,7 +268,7 @@ public class MeteoriteStorm extends AdventureCard implements HowToDefend {
             } else {
                 setCurrState(CardState.END_OF_CARD);
                 gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             }
         }
     }

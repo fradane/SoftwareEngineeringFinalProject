@@ -150,7 +150,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
             } else {
                 setCurrState( CardState.END_OF_CARD);
                 gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             }
 
         } else {
@@ -176,7 +176,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         setCurrState(CardState.END_OF_CARD);
         gameModel.resetPlayerIterator();
-        gameModel.setCurrGameState(GameState.DRAW_CARD);
+        gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
 
     }
 
@@ -213,7 +213,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
         } else {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
 
     }

@@ -81,6 +81,7 @@ public class Deck {
 
         if (gameModel.isTestFlight()) {
             loadCards(true);
+            allCards.forEach(adventureCard -> adventureCard.setGame(gameModel));
             return;
         }
 
@@ -160,6 +161,19 @@ public class Deck {
         cards.addAll(Deck.loadStardustFromJson());
         cards.addAll(Deck.loadWarFieldFromJson());
         cards.addAll(Deck.loadMeteoriteStormFromJson());
+
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
+//        cards.addAll(Deck.loadAbandonedStationFromJson());
 
 
         if (isTestFlight)
@@ -331,5 +345,18 @@ public class Deck {
 
     public List<List<String>> getLittleVisibleDecksString() {
         return littleVisibleDecksString;
+    }
+
+    public void skipToLastCard() {
+        if (gameDeck.size() <= 1) {
+            throw new IllegalStateException("Cannot skip cards: only one or no cards remaining in deck");
+        }
+        AdventureCard lastCard = gameDeck.pop();
+        gameDeck.clear();
+        gameDeck.push(lastCard);
+    }
+
+    public boolean hasFinishedCards(){
+        return gameDeck.isEmpty();
     }
 }

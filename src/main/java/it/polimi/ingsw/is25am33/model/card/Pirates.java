@@ -267,7 +267,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
                 setCurrState(CardState.END_OF_CARD);
                 defeatedPlayers.clear();
                 gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             }
         }
     }
@@ -312,7 +312,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
                 if (defeatedPlayers.isEmpty()) {
                     setCurrState(CardState.END_OF_CARD);
                     gameModel.resetPlayerIterator();
-                    gameModel.setCurrGameState(GameState.DRAW_CARD);
+                    gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
                 } else {
                     defeatedPlayerIterator =defeatedPlayers.iterator();
                     currDefeatedPlayer= defeatedPlayerIterator.next();
@@ -328,7 +328,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
             else{
                 setCurrState(CardState.END_OF_CARD);
                 gameModel.resetPlayerIterator();
-                gameModel.setCurrGameState(GameState.DRAW_CARD);
+                gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             }
         }
 
@@ -374,7 +374,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
         if (defeatedPlayers.isEmpty()) {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         } else {
             defeatedPlayerIterator = defeatedPlayers.iterator();
             currDefeatedPlayer= defeatedPlayerIterator.next();

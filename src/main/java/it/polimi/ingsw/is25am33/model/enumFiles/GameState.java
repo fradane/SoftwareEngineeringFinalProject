@@ -71,6 +71,12 @@ public enum GameState implements Serializable {
         @Override
         public void run(GameModel gameModel) {
             try {
+                if(gameModel.getDeck().hasFinishedCards()){
+                    gameModel.setCurrGameState(GameState.END_GAME);
+                    return;
+                }
+
+
                 gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard());
                 gameModel.setCurrGameState(GameState.PLAY_CARD);
             } catch (EmptyStackException e) {
@@ -96,20 +102,30 @@ public enum GameState implements Serializable {
 
         @Override
         public void run(GameModel gameModel) {
+            if(gameModel.getFlyingBoard().getRanking().isEmpty()) { // tutti i giocatori sono stati eliminati, per esempio con freeSpace in caso nessuno avesse motori
+                gameModel.setCurrGameState(GameState.END_GAME);
+                return;
+            }
+
             // check doubled players
             gameModel.getFlyingBoard().getDoubledPlayers();
 
             // check if there are any human members alive
             gameModel.getPlayers().forEach((_, player) -> {
-                if (gameModel.getCurrPlayer().getPersonalBoard()
+                if (player.getPersonalBoard()
                         .getCrewMembers()
                         .stream()
                         .noneMatch(crewMember -> crewMember.equals(CrewMember.HUMAN))
                 ) {
                     gameModel.getFlyingBoard().addOutPlayer(player, false);
+                    gameModel.resetPlayerIterator();
                 }
             });
 
+            if(gameModel.getFlyingBoard().getRanking().isEmpty()) // potrebbe essere stato eliminato qualche nuovo giocatore durante la check_players
+                gameModel.setCurrGameState(GameState.END_GAME);
+            else
+                gameModel.setCurrGameState(GameState.DRAW_CARD);
         }
 
     },

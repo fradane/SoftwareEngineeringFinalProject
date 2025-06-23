@@ -10,7 +10,11 @@ public interface CrewMemberRemover {
     default void removeMemberProcess(List<Cabin> chosenCabins, int crewMalus) throws IllegalArgumentException {
 
         chosenCabins.stream().distinct().forEach(cabin -> {
-            if (Collections.frequency(chosenCabins, cabin) > cabin.getInhabitants().size())
+            long count = chosenCabins.stream()
+                    .filter(c -> c == cabin)
+                    .count();
+
+            if (count > cabin.getInhabitants().size())
                 throw new IllegalArgumentException("The number of required crew members is not enough");
         });
         chosenCabins.forEach(Cabin::removeMember);

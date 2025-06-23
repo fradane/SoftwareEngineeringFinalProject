@@ -2,9 +2,11 @@ package it.polimi.ingsw.is25am33.model.game;
 
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class PlayerFinalData {
+public class PlayerFinalData implements Serializable {
+    private final String nickname;
     /**
      * Represents the total credits earned by the player at the end of the game.
      * This value is finalized when the game concludes and includes any bonuses or penalties
@@ -36,7 +38,6 @@ public class PlayerFinalData {
      */
     private final int lostComponents;
 
-
     /**
      * Constructs a PlayerFinalData object with the specified total credits, early landing status,
      * owned cargo cubes, and number of lost components.
@@ -46,7 +47,8 @@ public class PlayerFinalData {
      * @param allOwnedCubes the list of cargo cubes owned by the player
      * @param lostComponents the number of ship components lost by the player
      */
-    public PlayerFinalData (int totalCredits, boolean isEarlyLanded, List<CargoCube> allOwnedCubes, int lostComponents) {
+    public PlayerFinalData (String nickname, int totalCredits, boolean isEarlyLanded, List<CargoCube> allOwnedCubes, int lostComponents) {
+        this.nickname = nickname;
         this.totalCredits = totalCredits;
         this.isEarlyLanded = isEarlyLanded;
         this.allOwnedCubes = allOwnedCubes;
@@ -89,5 +91,7 @@ public class PlayerFinalData {
         return totalCredits;
     }
 
-
+    public String getNickname() {
+        return nickname;
+    }
 }
