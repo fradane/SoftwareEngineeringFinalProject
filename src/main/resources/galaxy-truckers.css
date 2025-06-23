@@ -20,6 +20,14 @@
     -fx-text-fill: white;
 }
 
+.game-background {
+    -fx-background-color: -fx-space-dark;
+    -fx-text-fill: white;
+    -fx-min-width: 1024px;
+    -fx-min-height: 768px;
+}
+
+
 /* ===== STILI PER LA SCHERMATA INIZIALE ===== */
 
 /* Container principale della schermata iniziale */
@@ -1745,13 +1753,13 @@
 
     /* Container principale del menu */
     .menu-container {
-    -fx-background-color: rgba(0, 0, 0, 0.7);
-    -fx-background-radius: 20px;
-    -fx-border-color: -fx-space-blue;
-    -fx-border-radius: 20px;
-    -fx-border-width: 2px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 20, 0, 0, 5);
-}
+        -fx-background-color: rgba(0, 0, 0, 0.7);
+        -fx-background-radius: 20px;
+        -fx-border-color: -fx-space-blue;
+        -fx-border-radius: 20px;
+        -fx-border-width: 2px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 20, 0, 0, 5);
+    }
 
     /* Titolo del menu principale */
     .menu-title {
@@ -2066,5 +2074,16 @@
             -fx-pref-width: 300px;
             -fx-pref-height: 250px;
         }
+    }
+
+    .menu-container {
+        -fx-background-color: rgba(0, 0, 0, 0.7);
+        -fx-background-radius: 20px;
+        -fx-border-color: -fx-space-blue;
+        -fx-border-radius: 20px;
+        -fx-border-width: 2px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 20, 0, 0, 5);
+        -fx-max-width: 600px;
+        -fx-pref-width: 500px;
     }
 }
