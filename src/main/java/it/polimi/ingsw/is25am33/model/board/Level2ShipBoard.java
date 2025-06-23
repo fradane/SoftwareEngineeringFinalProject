@@ -44,6 +44,7 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
     public void book () {
 
         //TODO aggiungere il fatto che non si possono prenotare più di due componenti
+        //TODO quando un componente riservato diventa focused non lo puoi rilasciare
 
         notActiveComponents.add(focusedComponent);
         focusedComponent.setCurrState(ComponentState.BOOKED);
