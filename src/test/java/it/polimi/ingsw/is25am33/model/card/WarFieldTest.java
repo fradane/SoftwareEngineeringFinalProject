@@ -2,8 +2,7 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
-import it.polimi.ingsw.is25am33.model.dangerousObj.SmallShot;
+import it.polimi.ingsw.is25am33.model.dangerousObj.*;
 import org.junit.jupiter.api.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,11 +43,6 @@ public class WarFieldTest {
 
         warField = new WarField();
         warField.setGame(gameModel);
-        Map<CardState,CardState> categories = new ConcurrentHashMap<>();
-        categories.put(CardState.EVALUATE_CREW_MEMBERS, CardState.STEPS_BACK);
-        categories.put(CardState.CHOOSE_ENGINES, CardState.REMOVE_CREW_MEMBERS);
-        categories.put(CardState.CHOOSE_CANNONS, CardState.DANGEROUS_ATTACK);
-        warField.setCategories(categories);
         warField.setShots(new ArrayList<>(List.of(new SmallShot(Direction.NORTH))));
         gameModel.setCurrAdventureCard(warField);
     }
@@ -69,6 +63,10 @@ public class WarFieldTest {
 
     @Test
     void testCurrPlayerChoseEnginesToActivate() {
+        Map<CardState,CardState> nextStates = new HashMap<>();
+        nextStates.put(CardState.CHOOSE_ENGINES,CardState.HANDLE_CUBES_MALUS);
+        warField.setCategories(nextStates);
+        warField.getFirstState();
         warField.setCurrState(CardState.CHOOSE_ENGINES);
         // Setup dei componenti sulla ShipBoard
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
@@ -87,9 +85,6 @@ public class WarFieldTest {
         shipBoard.getShipMatrix()[6][7] = engine;
         shipBoard.getShipMatrix()[7][6] = batteryBox;
 
-
-        int prevPosition = gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer());
-
         PlayerChoicesDataStructure playerChoicesDataStructure = new PlayerChoicesDataStructure
                 .Builder()
                 .setChosenBatteryBoxes(List.of(batteryCoord))
@@ -100,11 +95,15 @@ public class WarFieldTest {
 
         // Verifiche
         assertEquals(1,batteryBox.getRemainingBatteries());
-        assertEquals(CardState.REMOVE_CREW_MEMBERS, warField.getCurrState());
+        assertEquals(CardState.HANDLE_CUBES_MALUS, warField.getCurrState());
     }
 
     @Test
     void testCurrPlayerChoseCannonToActivate() {
+        Map<CardState,CardState> nextStates = new HashMap<>();
+        nextStates.put(CardState.CHOOSE_CANNONS,CardState.REMOVE_CREW_MEMBERS);
+        warField.setCategories(nextStates);
+        warField.getFirstState();
         warField.setCurrState(CardState.CHOOSE_CANNONS);
         // Setup dei componenti sulla ShipBoard
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
@@ -136,11 +135,14 @@ public class WarFieldTest {
 
         // Verifiche
         assertEquals(1,batteryBox.getRemainingBatteries());
-        assertEquals(CardState.THROW_DICES, warField.getCurrState());
+        assertEquals(CardState.REMOVE_CREW_MEMBERS, warField.getCurrState());
     }
 
     @Test
     void testEvaluatedCrewMembers (){
+        Map<CardState,CardState> nextStates = new HashMap<>();
+        nextStates.put(CardState.EVALUATE_CREW_MEMBERS,CardState.STEPS_BACK);
+        warField.setCategories(nextStates);
         warField.setStepsBack(-4);
         warField.getFirstState();
         warField.setCurrState(CardState.EVALUATE_CREW_MEMBERS);
@@ -164,8 +166,11 @@ public class WarFieldTest {
 
     @Test
     void testHandleCrewMalusFlow() {
-        warField.getFirstState();
+        Map<CardState,CardState> nextStates = new HashMap<>();
+        nextStates.put(CardState.CHOOSE_CANNONS,CardState.REMOVE_CREW_MEMBERS);
+        warField.setCategories(nextStates);
         warField.setCurrState(CardState.REMOVE_CREW_MEMBERS);
+        warField.getFirstState();
 
         ShipBoard shipBoard = player1.getPersonalBoard();
         Map<Direction, ConnectorType> connectors = new ConcurrentHashMap<>();
@@ -196,8 +201,11 @@ public class WarFieldTest {
 
     @Test
     void testHandleCubesMalusFlow() {
-        warField.getFirstState();
+        Map<CardState,CardState> nextStates = new HashMap<>();
+        nextStates.put(CardState.CHOOSE_ENGINES,CardState.HANDLE_CUBES_MALUS);
+        warField.setCategories(nextStates);
         warField.setCurrState(CardState.HANDLE_CUBES_MALUS);
+        warField.getFirstState();
 
         ShipBoard shipBoard = player1.getPersonalBoard();
         Map<Direction, ConnectorType> connectors = new ConcurrentHashMap<>();
@@ -230,5 +238,193 @@ public class WarFieldTest {
         assertEquals(1, storage1.getStockedCubes().size(), "Lo storage dovrebbe contenere un solo cubo dopo la rimozione");
         assertEquals(2, batteryBox.getRemainingBatteries(), "La battery box dovrebbe risultare usata");
 
+    }
+
+    @Test
+    void testCheckShipBoardAfterAttackHasNextShot() {
+        warField.setCategories(new HashMap<>());
+        warField.setShotIDs(new ArrayList<>(List.of("small_south", "big_south")));
+        warField.convertIdsToShots();
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        Map<Direction, ConnectorType> connectors = new ConcurrentHashMap<>();
+        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
+        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
+        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
+        connectors.put(Direction.WEST,ConnectorType.SINGLE);
+
+        Cannon cannon = new DoubleCannon(connectors);
+        shipBoard.getShipMatrix()[6][7] = cannon;
+        BatteryBox batteryBox = new BatteryBox(connectors,2);
+        shipBoard.getShipMatrix()[7][6] = batteryBox;
+
+        warField.setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
+        warField.setShots(List.of(new SmallShot(Direction.NORTH), new BigShot(Direction.NORTH)));
+        gameModel.resetPlayerIterator();
+        gameModel.setCurrAdventureCard(warField);
+        warField.play(new PlayerChoicesDataStructure());
+
+        assertEquals(CardState.THROW_DICES, warField.getCurrState());
+    }
+
+    @Test
+    void testCheckShipBoardAfterAttackEndedCard() {
+        Map<CardState,CardState> nextStates = new HashMap<>();
+        nextStates.put(CardState.EVALUATE_CREW_MEMBERS,CardState.STEPS_BACK);
+        warField.setCategories(nextStates);
+        warField.setShotIDs(new ArrayList<>(List.of()));
+        warField.convertIdsToShots();
+        warField.getFirstState();
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+
+        Map<Direction, ConnectorType> connectors = new ConcurrentHashMap<>();
+        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
+        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
+        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
+        connectors.put(Direction.WEST,ConnectorType.SINGLE);
+
+        Cannon cannon = new DoubleCannon(connectors);
+        shipBoard.getShipMatrix()[6][7] = cannon;
+        BatteryBox batteryBox = new BatteryBox(connectors,2);
+        shipBoard.getShipMatrix()[7][6] = batteryBox;
+
+        warField.setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);
+        warField.setShots(new ArrayList<>());
+        gameModel.resetPlayerIterator();
+        gameModel.setCurrAdventureCard(warField);
+        warField.play(new PlayerChoicesDataStructure());
+
+        assertEquals(CardState.END_OF_CARD, warField.getCurrState());
+    }
+
+    @Test
+    void testPlayerDecidedHowToDefendTheirSelvesFromSmallShotDestroysIfNotProtected() {
+
+        // Lanciamo un meteorite sulla ShipBoard e NON mettiamo scudo
+        warField.setCurrState(CardState.DANGEROUS_ATTACK);
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+
+        Map<Direction,ConnectorType> connectors = new ConcurrentHashMap<>();
+        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
+        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
+        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
+        connectors.put(Direction.WEST,ConnectorType.SINGLE);
+
+        Engine engine = new Engine(connectors);
+        shipBoard.getShipMatrix()[6][7] = engine;
+
+        // Simuliamo un meteorite sulla coordinata
+        DangerousObj shot = new SmallShot(Direction.NORTH);
+        shot.setCoordinates(7);
+        gameModel.setCurrDangerousObj(shot);
+
+        PlayerChoicesDataStructure playerChoicesDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenBatteryBoxes(List.of())
+                .setChosenShield(List.of())
+                .build();
+
+        warField.play(playerChoicesDataStructure);
+
+        // Verifichiamo che la casella sulla ShipBoard NON contenga più l'engine
+        assertTrue(shipBoard.getIncorrectlyPositionedComponentsCoordinates().contains(new Coordinates(6, 7)));
+    }
+
+    @Test
+    void testPlayerDecidedHowToDefendTheirSelvesFromSmallShotUsesShieldAndBattery() {
+        warField.setCurrState(CardState.DANGEROUS_ATTACK);
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        Coordinates shieldCoord = new Coordinates(6, 7);
+        Coordinates batteryCoord = new Coordinates(7, 6);
+
+        Map<Direction,ConnectorType> connectors = new ConcurrentHashMap<>();
+        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
+        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
+        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
+        connectors.put(Direction.WEST,ConnectorType.SINGLE);
+
+        Shield shield = new Shield(connectors);
+        BatteryBox batteryBox = new BatteryBox(connectors,2);
+        shipBoard.getShipMatrix()[6][7] = shield;
+        shipBoard.getShipMatrix()[7][6] = batteryBox;
+
+        DangerousObj shot = new SmallShot(Direction.NORTH);
+        shot.setCoordinates(7);
+        gameModel.setCurrDangerousObj(shot);
+
+        PlayerChoicesDataStructure playerChoicesDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenBatteryBoxes(List.of(batteryCoord))
+                .setChosenShield(List.of(shieldCoord))
+                .build();
+
+        warField.play(playerChoicesDataStructure);
+
+        // Verifica che la batteria si sia scaricata
+        assertEquals(1, ((BatteryBox) shipBoard.getShipMatrix()[7][6]).getRemainingBatteries());
+
+        assertNotEquals(CardState.END_OF_CARD, warField.getCurrState());
+    }
+
+    @Test
+    void testSmallMeteoriteDontHitTheshipIfShieldIsUsedAndBatteryIsUsed() {
+        warField.setCurrState(CardState.DANGEROUS_ATTACK);
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+        Coordinates shieldCoord = new Coordinates(6, 7);
+        Coordinates batteryCoord = new Coordinates(7, 6);
+
+        Map<Direction,ConnectorType> connectors = new ConcurrentHashMap<>();
+        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
+        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
+        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
+        connectors.put(Direction.WEST,ConnectorType.SINGLE);
+
+        Shield shield = new Shield(connectors);
+        BatteryBox batteryBox = new BatteryBox(connectors,2);
+        shipBoard.getShipMatrix()[6][7] = shield;
+        shipBoard.getShipMatrix()[7][6] = batteryBox;
+
+        DangerousObj smallShot = new SmallShot(Direction.NORTH);
+        smallShot.setCoordinates(9);
+        gameModel.setCurrDangerousObj(smallShot);
+
+        PlayerChoicesDataStructure playerChoicesDataStructure = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenBatteryBoxes(List.of(batteryCoord))
+                .setChosenShield(List.of(shieldCoord))
+                .build();
+
+        warField.play(playerChoicesDataStructure);
+
+        // Verifica che la batteria si sia scaricata
+        assertEquals(1, ((BatteryBox) shipBoard.getShipMatrix()[7][6]).getRemainingBatteries());
+
+        // Verifica che la carta NON si chiuda prematuramente
+        assertNotEquals(CardState.END_OF_CARD, warField.getCurrState());
+    }
+
+    @Test
+    void testPlayerHasBeenHitByBigShotDestroysIfNotProtected() {
+        // Posizioniamo un meteorite sulla ShipBoard e NON mettiamo cannoni
+        warField.setCurrState(CardState.DANGEROUS_ATTACK);
+        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
+
+        Map<Direction,ConnectorType> connectors = new ConcurrentHashMap<>();
+        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
+        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
+        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
+        connectors.put(Direction.WEST,ConnectorType.SINGLE);
+
+        Engine engine = new Engine(connectors);
+        shipBoard.getShipMatrix()[6][7] = engine;
+
+        // Simuliamo un meteorite sulla coordinata
+        DangerousObj bigShot = new BigShot(Direction.NORTH);
+        bigShot.setCoordinates(7);
+        gameModel.setCurrDangerousObj(bigShot);
+
+        warField.play(new PlayerChoicesDataStructure());
+
+        // Verifichiamo che la casella sulla ShipBoard NON contenga più l'engine
+        assertTrue(shipBoard.getIncorrectlyPositionedComponentsCoordinates().contains(new Coordinates(6, 7)));
     }
 }

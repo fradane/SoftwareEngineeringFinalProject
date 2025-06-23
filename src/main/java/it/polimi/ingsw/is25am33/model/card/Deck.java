@@ -161,8 +161,8 @@ public class Deck {
         cards.addAll(Deck.loadStardustFromJson());
         cards.addAll(Deck.loadWarFieldFromJson());
         cards.addAll(Deck.loadMeteoriteStormFromJson());
-
-
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
 
 
 

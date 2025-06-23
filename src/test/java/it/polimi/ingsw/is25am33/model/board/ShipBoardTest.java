@@ -71,6 +71,80 @@ public class ShipBoardTest {
     }
 
     @Test
+    void testGetCargoCube(){
+        Storage storage1 = new StandardStorage(createSimpleConnectors(),2);
+        Storage storage2 = new StandardStorage(createSimpleConnectors(), 3);
+        storage1.addCube(CargoCube.GREEN);
+        storage1.addCube(CargoCube.BLUE);
+        storage2.addCube(CargoCube.YELLOW);
+        shipBoard.getShipMatrix()[6][7] = storage1;
+        shipBoard.getShipMatrix()[7][6] = storage2;
+        assertTrue(shipBoard.getCargoCubes().containsAll(storage1.getStockedCubes()));
+        assertTrue(shipBoard.getCargoCubes().containsAll(storage2.getStockedCubes()));
+    }
+
+    @Test
+    void testGetTotalAvailableBattery(){
+        BatteryBox battery1 = new BatteryBox(createSimpleConnectors(),2);
+        BatteryBox battery2 = new BatteryBox(createSimpleConnectors(), 3);
+        shipBoard.getShipMatrix()[6][7] = battery2;
+        shipBoard.getShipMatrix()[7][6] = battery1;
+        assertEquals(5,shipBoard.getTotalAvailableBattery());
+    }
+
+    @Test
+    void testGetCoordinateAndStorage(){
+        Storage storage1 = new StandardStorage(createSimpleConnectors(),2);
+        Storage storage2 = new StandardStorage(createSimpleConnectors(), 3);
+        storage1.addCube(CargoCube.GREEN);
+        storage1.addCube(CargoCube.BLUE);
+        storage2.addCube(CargoCube.YELLOW);
+        shipBoard.getShipMatrix()[6][7] = storage1;
+        shipBoard.getShipMatrix()[7][6] = storage2;
+        assertTrue(shipBoard.getCoordinatesAndStorages().containsKey(new Coordinates(6,7)));
+        assertTrue(shipBoard.getCoordinatesAndStorages().containsKey(new Coordinates(7,6)));
+        assertTrue(shipBoard.getCoordinatesAndStorages().containsValue(storage1));
+        assertTrue(shipBoard.getCoordinatesAndStorages().containsValue(storage2));
+        assertEquals(storage1,shipBoard.getCoordinatesAndStorages().get(new Coordinates(6,7)));
+        assertEquals(storage2,shipBoard.getCoordinatesAndStorages().get(new Coordinates(7,6)));
+    }
+
+    @Test
+    void testGetCoordinateAndCabinWithCrew(){
+        Cabin cabin1 = new Cabin(createSimpleConnectors());
+        cabin1.fillCabin(CrewMember.HUMAN);
+        Cabin cabin2 = new Cabin(createSimpleConnectors());
+        shipBoard.getShipMatrix()[6][7] = cabin1;
+        shipBoard.getShipMatrix()[7][6] = cabin2;
+        assertEquals(cabin1,shipBoard.getCoordinatesAndCabinsWithCrew().get(new Coordinates(6,7)));
+        assertFalse(shipBoard.getCoordinatesAndCabinsWithCrew().containsKey(new Coordinates(7,6)));
+    }
+
+    @Test
+    void testGetCabinWithLifeSupport(){
+        Cabin cabin1 = new Cabin(createSimpleConnectors());
+        Cabin cabin2 = new Cabin(createSimpleConnectors());
+        LifeSupport lifeSupport = new LifeSupport(createSimpleConnectors(),ColorLifeSupport.PURPLE);
+        shipBoard.getShipMatrix()[6][7] = cabin1;
+        shipBoard.getShipMatrix()[6][8] = lifeSupport;
+        shipBoard.getShipMatrix()[7][6] = cabin2;
+        assertTrue(shipBoard.getCabinsWithLifeSupport().get(new Coordinates(6,7)).contains(ColorLifeSupport.PURPLE));
+        assertFalse(shipBoard.getCoordinatesAndCabinsWithCrew().containsKey(new Coordinates(7,6)));
+    }
+
+    @Test
+    void testGetCoordinateOfComponents(){
+        Cabin cabin1 = new Cabin(createSimpleConnectors());
+        Cabin cabin2 = new Cabin(createSimpleConnectors());
+        LifeSupport lifeSupport = new LifeSupport(createSimpleConnectors(),ColorLifeSupport.PURPLE);
+        shipBoard.getShipMatrix()[6][7] = cabin1;
+        shipBoard.getShipMatrix()[6][8] = lifeSupport;
+        shipBoard.getShipMatrix()[7][6] = cabin2;
+        assertTrue(shipBoard.getCoordinatesOfComponents(new ArrayList<>(List.of(cabin1,cabin2))).containsAll(new ArrayList<>(List.of(new Coordinates(6,7),new Coordinates(7,6)))));
+    }
+
+
+    @Test
     @DisplayName("Test: isValidPosition returns false OOB, true in-bounds")
     void testIsValidPosition() {
         assertFalse(shipBoard.isValidPosition(-1, 0));
