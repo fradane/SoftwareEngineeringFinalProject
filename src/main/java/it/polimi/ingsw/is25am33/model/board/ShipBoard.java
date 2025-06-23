@@ -1282,7 +1282,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     }
 
     public Set<Coordinates> getCoordinatesOfComponents(List<? extends Component> components) {
-        Set<Coordinates> coordinatesOfComponents= new HashSet<>();
+        Set<Coordinates> coordinatesOfComponents = new HashSet<>();
 
         for (int i = 0; i < BOARD_DIMENSION; i++) {
             for (int j = 0; j < BOARD_DIMENSION; j++) {

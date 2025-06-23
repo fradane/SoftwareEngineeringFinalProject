@@ -662,9 +662,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void evaluatedCrewMembers(){
-        try{
+        try {
             serverController.evaluatedCrewMembers(nickname);
-        }catch (IOException e){
+        } catch (IOException e) {
             handleRemoteException(e);
         }
     }
@@ -1096,11 +1096,15 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .setChosenCabins(cabinCoords)
                 .build();
 
-        try{
-            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
-        }catch (IOException e){
-            handleRemoteException(e);
-        }
+
+        new Thread(() -> {
+            try {
+                serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+            } catch (IOException e) {
+                handleRemoteException(e);
+            }
+        }).start();
+
         return true;
     }
 
@@ -1145,9 +1149,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .setChosenShield(shieldCoords)
                 .build();
 
-        try{
+        try {
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);
-        }catch (IOException e){
+        } catch (IOException e){
             handleRemoteException(e);
         }
     }
@@ -1255,10 +1259,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void startCheckShipBoardAfterAttack(String nickname, Coordinates coordinates){
-        try{
+    public void startCheckShipBoardAfterAttack(String nickname, Coordinates coordinates) {
+        try {
             serverController.startCheckShipBoardAfterAttack(nickname);
-        }catch (IOException e){
+        } catch (IOException e){
             handleRemoteException(e);
         }
     }

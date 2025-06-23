@@ -154,7 +154,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
             }
 
         } else {
-            setCurrState( CardState.REMOVE_CREW_MEMBERS );
+            setCurrState(CardState.REMOVE_CREW_MEMBERS);
         }
 
     }
@@ -176,9 +176,9 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         setCurrState(CardState.END_OF_CARD);
         gameModel.resetPlayerIterator();
-        gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
-
+        gameModel.setCurrGameState(GameState.DRAW_CARD);
     }
+
 
     /**
      * Handles the process where the current player selects crew members to be removed from

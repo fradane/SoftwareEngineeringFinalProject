@@ -14,6 +14,7 @@ module it.polimi.ingsw.is25am33 {
     requires com.fasterxml.jackson.databind;
     requires java.logging;
     requires java.desktop;
+    requires jdk.compiler;
 
     // JavaFX Configuration
     // Allows JavaFX to access the main package for FXML loading

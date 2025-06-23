@@ -1,25 +1,29 @@
 package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
+import com.sun.tools.javac.Main;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.*;
-import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
-import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
+import it.polimi.ingsw.is25am33.client.view.tui.StorageSelectionManager;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.card.FreeSpace;
 import it.polimi.ingsw.is25am33.model.card.Pirates;
-import it.polimi.ingsw.is25am33.client.view.tui.ClientState;
 import it.polimi.ingsw.is25am33.model.card.Planet;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
+import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
 import it.polimi.ingsw.is25am33.model.component.DoubleEngine;
+import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import javafx.animation.PauseTransition;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.*;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -32,12 +36,9 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import static it.polimi.ingsw.is25am33.client.view.tui.ClientState.WAIT_PLAYER;
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
-import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.STANDARD;
-import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.ASK;
-import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.STANDARD;
 
 public class CardPhaseController extends GuiController implements BoardsEventHandler {
 
@@ -49,15 +50,36 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     public ImageView cardImageView;
     @FXML
     public HBox bottomHBox;
+    @FXML
+    public Label cosmicCreditsLabel;
 
-    private Level2BoardsController boardsController;
+    // TODO fare per il livello 1
+    private BoardsController boardsController;
     private ModelFxAdapter modelFxAdapter;
     private final List<Coordinates> selectedDoubleEngines = new ArrayList<>();
     private final List<Coordinates> selectedDoubleCannons = new ArrayList<>();
     private final List<Coordinates> selectedBatteryBoxes = new ArrayList<>();
+    private final List<Coordinates> selectedShield = new ArrayList<>();
+    private Coordinates hitComponent = null;
+    private StorageSelectionManager storageManager;
+    private int planetChoice;
     private boolean hasChosenDoubleEngine = false;
+    private final Map<Coordinates, Integer> selectedCrewPerCabin = new HashMap<>();
     private boolean hasChosenDoubleCannon = false;
+    private boolean hasChosenShield = false;
+    private final List<Set<Coordinates>> shipParts = new ArrayList<>();
 
+    /**
+     * Helper method to create styled buttons and add them to bottomHBox
+     * @param buttonText The text to display on the button
+     * @param action The action to perform when button is clicked
+     */
+    private void createAndAddButton(String buttonText, Runnable action) {
+        Button button = new Button(buttonText);
+        button.getStyleClass().add("action-button");
+        button.setOnAction(_ -> action.run());
+        Platform.runLater(() -> bottomHBox.getChildren().add(button));
+    }
 
     @Override
     public void showMessage(String message, boolean isPermanent) {
@@ -78,36 +100,47 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     public void initialize() {
         // Caricamento delle board
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level2Boards.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                    clientController.getCurrentGameInfo().isTestFlight() ?
+                            "/gui/Level1Boards.fxml" :
+                            "/gui/Level2Boards.fxml")
+            );
             VBox mainBoardBox = loader.load();
-            centerStackPane.getChildren().addFirst(mainBoardBox);
             this.boardsController = loader.getController();
+            Platform.runLater(() -> centerStackPane.getChildren().addFirst(mainBoardBox));
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error loading boards: " + e.getMessage());
         }
 
-        // Prova a utilizzare un ModelFxAdapter condiviso
-//        ClientGuiController guiController = ClientGuiController.getInstance();
-//        if (guiController != null) {
-//            modelFxAdapter = guiController.getSharedModelFxAdapter();
-//        } else {
-//            // Fallback: crea un nuovo adapter
-//            modelFxAdapter = new ModelFxAdapter(clientModel);
-//        }
-
-        modelFxAdapter = new ModelFxAdapter(clientModel, true);
+        modelFxAdapter = new ModelFxAdapter(clientModel, true, boardsController);
 
         // Binding e setup
         this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
         this.bindCurrAdventureCard();
+        this.initializeCosmicCredits();
+        this.boardsController.createPaws();
 
         // Refresh iniziale
         modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
         clientModel.getPlayerClientData().keySet().forEach(nickname ->
                 modelFxAdapter.refreshShipBoardOf(nickname));
         modelFxAdapter.refreshRanking();
+        modelFxAdapter.refreshCosmicCredits();
 
+    }
+
+    public void updateCosmicCredits(int credits) {
+        Platform.runLater(() -> {
+            cosmicCreditsLabel.setText(String.valueOf(credits));
+
+            cosmicCreditsLabel.getParent().getStyleClass().add("cosmic-credits-updated");
+
+            PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
+            delay.setOnFinished(e ->
+                    cosmicCreditsLabel.getParent().getStyleClass().remove("cosmic-credits-updated"));
+            delay.play();
+        });
     }
 
     private void bindCurrAdventureCard() {
@@ -121,7 +154,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                             if (newVal != null) {
                                 String imagePath = newVal.getImageName();
                                 Image cardImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagePath)));
-                                cardImageView.setImage(cardImage);
+
+                                // Applica l'animazione di caduta dalla profondità (asse Z)
+                                animateCardFall(cardImage);
+
                             } else {
                                 cardImageView.setImage(null);
                             }
@@ -129,16 +165,72 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                             System.err.println("Updated: " + cardImageView.getImage());
 
                         }));
+    }
 
+    private void animateCardFall(Image cardImage) {
+        // Timeline per l'animazione completa
+        Timeline cardFallAnimation = new Timeline();
+
+        // Stato iniziale: carta piccola e lontana (simula profondità)
+        cardImageView.setScaleX(0.3);
+        cardImageView.setScaleY(0.3);
+        cardImageView.setOpacity(0.7);
+        cardImageView.setRotate(-10); // Leggera rotazione per effetto dinamico
+
+        // Imposta l'immagine
+        cardImageView.setImage(cardImage);
+
+        // Keyframe per la crescita (avvicinamento dall'asse Z)
+        KeyFrame scaleUp = new KeyFrame(Duration.millis(400),
+                new KeyValue(cardImageView.scaleXProperty(), 1.05, Interpolator.EASE_OUT),
+                new KeyValue(cardImageView.scaleYProperty(), 1.05, Interpolator.EASE_OUT),
+                new KeyValue(cardImageView.opacityProperty(), 1.0, Interpolator.EASE_OUT),
+                new KeyValue(cardImageView.rotateProperty(), 5, Interpolator.EASE_OUT)
+        );
+
+        // Keyframe per il rimbalzo (simulazione dell'atterraggio)
+        KeyFrame bounce = new KeyFrame(Duration.millis(600),
+                new KeyValue(cardImageView.scaleXProperty(), 0.95, Interpolator.EASE_IN),
+                new KeyValue(cardImageView.scaleYProperty(), 0.95, Interpolator.EASE_IN),
+                new KeyValue(cardImageView.rotateProperty(), -2, Interpolator.EASE_IN)
+        );
+
+        // Keyframe finale: carta in posizione normale
+        KeyFrame settle = new KeyFrame(Duration.millis(800),
+                new KeyValue(cardImageView.scaleXProperty(), 1.0, Interpolator.EASE_OUT),
+                new KeyValue(cardImageView.scaleYProperty(), 1.0, Interpolator.EASE_OUT),
+                new KeyValue(cardImageView.rotateProperty(), 0, Interpolator.EASE_OUT)
+        );
+
+        // Aggiungi i keyframes alla timeline
+        cardFallAnimation.getKeyFrames().addAll(scaleUp, bounce, settle);
+
+        // Avvia l'animazione
+        cardFallAnimation.play();
+    }
+
+    private void bindCosmicCredits() {
+        modelFxAdapter.getObservableCosmicCredits()
+                .addListener((_, _, newCredits) -> {
+                    if (newCredits != null) {
+                        updateCosmicCredits(newCredits.intValue());
+                    }
+                });
+    }
+
+    private void initializeCosmicCredits() {
+        modelFxAdapter.refreshCosmicCredits();
+        bindCosmicCredits();
     }
 
     // ------------------ CARD PHASE MENU ------------------
 
     //-------------------- PLANET ----------------------
+
     public void showChoosePlanetMenu() {
 
-        ClientCard card = clientModel.getCurrAdventureCard();
-        if (!(card instanceof ClientPlanets planets)) {
+        ClientCard modelCard = clientModel.getCurrAdventureCard();
+        if (!(modelCard instanceof ClientPlanets planets)) {
             showMessage("Error: Expected Planets card", false);
             return;
         }
@@ -147,35 +239,35 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         // Add button for each available planet
         for (int i = 0; i < planets.getAvailablePlanets().size(); i++) {
-            Planet planet = planets.getAvailablePlanets().get(i);
-            if (!planet.isBusy()) {
-                Button planetButton = new Button();
-                planetButton.setText("Planet " + (i + 1));
-                planetButton.getStyleClass().add("action-button");
 
-                // Set button action
+            Planet planet = planets.getAvailablePlanets().get(i);
+
+            System.err.println("Setting button for planet: " + i);
+            if (!planet.isBusy()) {
                 final int planetIndex = i + 1; // Store planet index (1-based)
-                planetButton.setOnAction(_ -> {
+                createAndAddButton("Planet " + planetIndex, () -> {
+                    planetChoice = planetIndex;
                     try {
-                        Platform.runLater(() -> bottomHBox.getChildren().clear());
+                        Platform.runLater(() -> {
+                            showMessage("Planet " + planetIndex + " selected", false);
+                            bottomHBox.getChildren().clear();
+                        });
                         clientController.playerWantsToVisitPlanet(clientController.getNickname(), planetIndex);
                     } catch (Exception e) {
                         showMessage("Error selecting planet: " + e.getMessage(), false);
                     }
                 });
-
-                bottomHBox.getChildren().add(planetButton);
             }
         }
 
         // Add skip button
-        Button skipButton = new Button("Skip (don't land on any planet)");
-        skipButton.getStyleClass().add("action-button");
-        skipButton.setOnAction(_ -> {
+        createAndAddButton("Skip (don't land on any planet)", () -> {
+            Platform.runLater(() -> {
+                showMessage("You won't land on any planet", false);
+                bottomHBox.getChildren().clear();
+            });
             clientController.playerWantsToVisitPlanet(clientController.getNickname(), 0);
         });
-
-        Platform.runLater(() -> bottomHBox.getChildren().add(skipButton));
     }
 
     //-------------------- STARDUST ----------------------
@@ -188,23 +280,36 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
 
         initializeBeforeCard();
+        String warningMessage = null;
 
         showMessage("Stardust has been detected in your flight path!", true);
+
         int exposedConnector = clientModel.getMyShipboard().countExposed();
         if (exposedConnector > 0){
-            informationalPopUp(String.format("""
-                           Your shipboard wasn't well built.
-                           You will lose %d flight days.
-                           """,exposedConnector ), starDust);
+            warningMessage = String.format(
+                    """
+                    Your shipboard wasn't well built.
+                    You will lose %d flight days.
+                    """,exposedConnector);
         }
         else {
-            informationalPopUp("""
+            warningMessage = String.format(
+                    """
                     GOOD JOB, your shipboard was built excently.
-                    You won't lose any flight days""", starDust);
+                    You won't lose any flight days""");
         }
+
+        showInfoPopupWithCallback(warningMessage, starDust, () -> {
+            createAndAddButton("Continue", () -> {
+                Platform.runLater(() -> bottomHBox.getChildren().clear());
+                clientController.spreadEpidemic(clientModel.getMyNickname());
+            });
+        });
+
     }
 
     //-------------------- ABANDONED SHIP ----------------------
+
     public void showAbandonedShipMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
         if (!(card instanceof ClientAbandonedShip abandonedShip)) {
@@ -213,44 +318,293 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
 
         initializeBeforeCard();
-        showMessage("You've found an abandoned ship!", true);
 
         int totalCrew = clientModel.getMyShipboard().getCrewMembers().size();
-        if (totalCrew < abandonedShip.getCrewMalus()) {
-            showMessage(String.format("WARNING: You only have %d crew members, you cannot accept the reward", totalCrew), false);
+        int requiredCrew = abandonedShip.getCrewMalus();
+
+        if (totalCrew < requiredCrew) {
+            showMessage("WARNING: You only have " + totalCrew + " crew members, but you need at least " +
+                    requiredCrew + " to visit this ship. You cannot accept the reward.", false);
             showCannotVisitLocationMenu();
         } else {
             showCanVisitLocationMenu();
         }
     }
 
-    private void showCannotVisitLocationMenu(){
+    private void showCannotVisitLocationMenu() {
         showMessage("You cannot visit this location!", true);
-        Button continueButton = new Button("Continue");
-        continueButton.getStyleClass().add("action-button");
-        continueButton.setOnAction(_ -> {
+
+        createAndAddButton("Continue", () -> {
+            Platform.runLater(() -> bottomHBox.getChildren().clear());
             clientController.playerWantsToVisitLocation(clientController.getNickname(), false);
+            showWaitingMessage();
         });
-        Platform.runLater(() -> bottomHBox.getChildren().add(continueButton));
     }
 
+    private void showCanVisitLocationMenu() {
+        showMessage("Do you want to visit the location?", true);
 
-    private void showCanVisitLocationMenu(){
-        showMessage("Do you want to visit the abandoned ship?", true);
-        Button continueButton = new Button("Continue");
-        Button skipButton = new Button("Skip");
-        continueButton.getStyleClass().add("action-button");
-        skipButton.getStyleClass().add("action-button");
-        continueButton.setOnAction(_ -> {
+        createAndAddButton("Visit Ship", () -> {
+            Platform.runLater(() -> bottomHBox.getChildren().clear());
             clientController.playerWantsToVisitLocation(clientController.getNickname(), true);
-            // TODO finire con la rimozione dei crew member
-        });
-        skipButton.setOnAction(_ -> {
-            clientController.playerWantsToVisitLocation(clientController.getNickname(), false);
         });
 
+        createAndAddButton("Skip", () -> {
+            Platform.runLater(() -> bottomHBox.getChildren().clear());
+            clientController.playerWantsToVisitLocation(clientController.getNickname(), false);
+            showWaitingMessage();
+        });
+    }
+
+    public void showChooseCabinMenu() {
+        CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
+        int crewToRemove = card.getCrewMalus();
+
+        if (card.getCrewMalus() >= clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size()) {
+
+            ShipBoardClient shipBoardClient = clientModel.getMyShipboard();
+            List<Cabin> cabinsWithCrew = new ArrayList<>(shipBoardClient.getCabin()
+                    .stream()
+                    .filter(Cabin::hasInhabitants)
+                    .toList());
+
+            MainCabin mainCabin = shipBoardClient.getMainCabin();
+            if (mainCabin != null && mainCabin.hasInhabitants())
+                cabinsWithCrew.add(mainCabin);
+
+            List<Coordinates> selectedCabinsCoords = new ArrayList<>();
+
+            for (Cabin cabin : cabinsWithCrew) {
+                Set<Coordinates> cabinCoords = shipBoardClient.getCoordinatesOfComponents(new ArrayList<>(List.of(cabin)));
+                Coordinates coords = cabinCoords.iterator().next();
+
+                for (int i = 0; i < cabin.getInhabitants().size(); i++) {
+                    selectedCabinsCoords.add(coords);
+                }
+            }
+
+            showInfoPopupWithCallback("""
+                    You have not enough crew members. You must sacrifice all of them.
+                    ATTENTION! you will be eliminated""",
+                    (ClientCard) card,
+                    () -> {
+                        boolean success = clientController.playerChoseCabins(clientModel.getMyNickname(), selectedCabinsCoords);
+                        if (!success)
+                            showChooseCabinMenu();
+                    });
+
+            return;
+        }
+
+        selectedCrewPerCabin.clear();
+
+        showMessage("You need to remove " + crewToRemove + " crew member(s). Warning: if you run out of humans, you'll be eliminated.", true);
+
+        Map<Coordinates, Cabin> cabinsWithCrew = clientModel.getMyShipboard().getCoordinatesAndCabinsWithCrew();
+
+        // Non si dovrebbe mai arrivare qui
+        if (cabinsWithCrew.isEmpty()) {
+            showMessage("ILLEGAL STATE: You have no occupied cabins. You cannot sacrifice crew members.", false);
+            return;
+        }
+
+        createAndAddButton("Confirm Selection", () -> handleCabinConfirmation(crewToRemove));
+
+        createAndAddButton("Reset All", () -> {
+            selectedCrewPerCabin.clear();
+            updateCabinSelectionMessage(crewToRemove);
+            highlightCabinsWithSelection();
+            showMessage("Selection reset. Start selecting crew members again.", false);
+        });
+
+        updateCabinSelectionMessage(crewToRemove);
+        boardsController.removeHighlightColor();
+        highlightCabinsWithSelection();
+    }
+
+    private void handleCabinSelection(Coordinates coordinates) {
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+        Map<Coordinates, Cabin> cabinsWithCrew = shipboard.getCoordinatesAndCabinsWithCrew();
+
+        if (!cabinsWithCrew.containsKey(coordinates)) {
+            showMessage("You did not select a cabin with crew members!", false);
+            return;
+        }
+
+        Cabin cabin = cabinsWithCrew.get(coordinates);
+        int maxCrewInCabin = cabin.getInhabitants().size();
+        int currentlySelected = selectedCrewPerCabin.getOrDefault(coordinates, 0);
+
+        int newSelection;
+        if (currentlySelected >= maxCrewInCabin) {
+            newSelection = 0; // Reset to 0 when at maximum
+            selectedCrewPerCabin.remove(coordinates);
+        } else {
+            newSelection = currentlySelected + 1;
+            selectedCrewPerCabin.put(coordinates, newSelection);
+        }
+
+        if (newSelection == 0) {
+            showMessage("Cabin deselected. No crew members selected from this cabin.", false);
+        } else {
+            showMessage(String.format("Selected %d/%d crew members from this cabin.",
+                    newSelection, maxCrewInCabin), false);
+        }
+
+        CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
+        updateCabinSelectionMessage(card.getCrewMalus());
+        highlightCabinsWithSelection();
+    }
+
+    private void handleCabinConfirmation(int requiredCrewToRemove) {
+        int totalSelectedCrew = selectedCrewPerCabin.values().stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+
+        if (totalSelectedCrew == 0) {
+            showMessage("You must select at least one crew member.", false);
+            return;
+        }
+
+        if (totalSelectedCrew != requiredCrewToRemove) {
+            if (totalSelectedCrew < requiredCrewToRemove) {
+                showMessage(String.format("You need to select exactly %d crew members. Currently selected: %d.",
+                        requiredCrewToRemove, totalSelectedCrew), false);
+            } else {
+                showMessage(String.format("You selected too many crew members. Need exactly %d, selected %d.",
+                        requiredCrewToRemove, totalSelectedCrew), false);
+            }
+            return;
+        }
+
+        // Converti la selezione nel formato richiesto dal server
+        List<Coordinates> cabinSelectionForServer = convertSelectionForServer();
+
+        // Invia la selezione al server
+        boolean success = clientController.playerChoseCabins(
+                clientController.getNickname(),
+                cabinSelectionForServer
+        );
+
+        if (success) {
+            Platform.runLater(() -> bottomHBox.getChildren().clear());
+            boardsController.removeHighlightColor();
+            selectedCrewPerCabin.clear();
+            showMessage("Crew members removed successfully!", true);
+            showWaitingMessage();
+            showAbandonedShipReward();
+        } else {
+            selectedCrewPerCabin.clear();
+            boardsController.removeHighlightColor();
+            showMessage("Invalid selection. Please try again.", false);
+            updateCabinSelectionMessage(requiredCrewToRemove);
+            highlightCabinsWithSelection();
+        }
+    }
+
+    private List<Coordinates> convertSelectionForServer() {
+        List<Coordinates> serverFormat = new ArrayList<>();
+
+        for (Map.Entry<Coordinates, Integer> entry : selectedCrewPerCabin.entrySet()) {
+            Coordinates cabinCoords = entry.getKey();
+            int selectedCrewCount = entry.getValue();
+
+            // Aggiungi le coordinate tante volte quanti crew members sono selezionati
+            for (int i = 0; i < selectedCrewCount; i++) {
+                serverFormat.add(cabinCoords);
+            }
+        }
+
+        return serverFormat;
+    }
+
+    private void updateCabinSelectionMessage(int requiredCrewToRemove) {
+        int totalSelectedCrew = selectedCrewPerCabin.values().stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+
+        String message;
+        if (totalSelectedCrew == 0) {
+            message = String.format("Select %d crew members to remove. Click on cabins to select individual crew members.",
+                    requiredCrewToRemove);
+        } else if (totalSelectedCrew < requiredCrewToRemove) {
+            int stillNeeded = requiredCrewToRemove - totalSelectedCrew;
+            message = String.format("Selected %d/%d crew members. Need %d more crew members.",
+                    totalSelectedCrew, requiredCrewToRemove, stillNeeded);
+        } else if (totalSelectedCrew == requiredCrewToRemove) {
+            message = String.format("Perfect! Selected exactly %d crew members. Ready to confirm.",
+                    totalSelectedCrew);
+        } else {
+            int excess = totalSelectedCrew - requiredCrewToRemove;
+            message = String.format("Selected %d crew members (%d too many). Deselect %d crew members.",
+                    totalSelectedCrew, excess, excess);
+        }
+
+        showMessage(message, true);
+    }
+
+    private void highlightCabinsWithSelection() {
+        boardsController.removeHighlightColor();
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+        Map<Coordinates, Cabin> cabinsWithCrew = shipboard.getCoordinatesAndCabinsWithCrew();
+
+        for (Map.Entry<Coordinates, Cabin> entry : cabinsWithCrew.entrySet()) {
+            Coordinates coords = entry.getKey();
+            Cabin cabin = entry.getValue();
+            int maxCrew = cabin.getInhabitants().size();
+            int selectedCrew = selectedCrewPerCabin.getOrDefault(coords, 0);
+
+            Color highlightColor;
+            if (selectedCrew == 0) {
+                // Cabina non selezionata - evidenzia in giallo (selezionabile)
+                highlightColor = Color.YELLOW;
+            } else if (selectedCrew == maxCrew) {
+                // Tutti i crew members selezionati - evidenzia in rosso (prossimo click deseleziona)
+                highlightColor = Color.RED;
+            } else {
+                // Parzialmente selezionata - evidenzia in verde (prossimo click aggiunge)
+                highlightColor = Color.GREEN;
+            }
+
+            boardsController.applyHighlightEffect(coords, highlightColor);
+        }
+    }
+
+    private void showAbandonedShipReward() {
+        ClientAbandonedShip abandonedShip = (ClientAbandonedShip) clientModel.getCurrAdventureCard();
+
+        String message = "Great! You've successfully explored the abandoned ship and received " +
+                abandonedShip.getReward() + " credits!";
+        showInfoPopup(message, abandonedShip);
 
     }
+
+    //-------------------- ABANDONED STATION ----------------------
+
+    public void showAbandonedStationMenu(){
+        ClientCard card = clientModel.getCurrAdventureCard();
+        if (!(card instanceof ClientAbandonedStation abandonedStation)) {
+            showMessage("Error: Expected AbandonedStation card", false);
+            return;
+        }
+
+        initializeBeforeCard();
+
+        showMessage("You've found an abandoned station.", true);
+
+        int totalCrew = clientModel.getMyShipboard().getCrewMembers().size();
+        int requiredCrew = abandonedStation.getCrewMalus();
+
+        if (totalCrew < requiredCrew) {
+            showMessage("WARNING: You only have " + totalCrew + " crew members, but you need at least " +
+                    requiredCrew + " to visit this cargo. You cannot accept the reward.", false);
+            showCannotVisitLocationMenu();
+        } else {
+            showCanVisitLocationMenu();
+        }
+    }
+
+
 
     //-------------------- PIRATES ----------------------
 
@@ -266,29 +620,32 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         showMessage("Pirates has been detected!", true);
 
         if (clientModel.getMyShipboard().getDoubleCannons().isEmpty())  {
-            informationalPopUp("""
+            showInfoPopupWithCallback("""
                     No double cannons available.
-                    You can use only single engine.
-                    """, pirates);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
+                    You can use only single cannons.
+                    """,
+                    pirates,
+                    () -> clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes)
+            );
             return;
         }
 
         if (clientModel.getMyShipboard().getBatteryBoxes().isEmpty()){
-            informationalPopUp("""
-                    No battery boxes available so you can't activate double cannon
-                    You can use only single cannon
+            showInfoPopup("""
+                    No battery boxes available so you can't activate double cannons.
+                    You can use only single cannons.
                     """, pirates);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());            return;
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+            return;
         }
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
         if(!isThereAvailableBattery()) {
-            informationalPopUp("""
+            showInfoPopup("""
                     You ran out of batteries so you can't activate double cannons.
-                    You can use only single cannon.
+                    You can use only single cannons.
                     """, pirates);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
             return;
         }
 
@@ -297,31 +654,25 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     private void showChooseDoubleCannonsMenu() {
 
-        showMessage("You can activate double cannons, each double cannon will require a battery", true);
+        showInfoPopup("You can activate double cannons, each double cannon will require a battery", clientModel.getCurrAdventureCard());
 
-        Button skipButton = new Button("Skip");
-        Button confirmChoiceButton  = new Button("Confirm");
-        skipButton.getStyleClass().add("action-button");
-        confirmChoiceButton.getStyleClass().add("action-button");
-
-        Platform.runLater(() -> {
-            bottomHBox.getChildren().add(confirmChoiceButton);
-            bottomHBox.getChildren().add(skipButton);
-        });
-
-        highlightDoubleCannon();
-
-        skipButton.setOnAction(_ ->
-                clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>())
-        );
-
-        confirmChoiceButton.setOnAction(_ -> {
+        createAndAddButton("Confirm", () -> {
             if (selectedDoubleCannons.size() != selectedBatteryBoxes.size()) {
                 showMessage("Please select a battery before confirming", false);
                 return;
             }
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+            boardsController.removeHighlightColor();
+            bottomHBox.getChildren().clear();
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
         });
+
+        createAndAddButton("Skip", () -> {
+            boardsController.removeHighlightColor();
+            bottomHBox.getChildren().clear();
+            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
+        });
+
+        highlightDoubleCannon();
 
         hasChosenDoubleCannon = false;
     }
@@ -329,16 +680,20 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     public void showThrowDicesMenu() {
 
         ClientCard card = clientModel.getCurrAdventureCard();
-        if (card.getCardType().equals("Pirates") ||card.getCardType().equals("SlaveTraders")) {
+        if (card.getCardType().equals("Pirates") || card.getCardType().equals("SlaveTraders")) {
             showMessage("\nThe enemies are firing at you!", false);
         } else if (card.getCardType().equals("MeteoriteStorm")) {
             showMessage("\nMeteors are heading your way!", false);
+        } else {
+            System.err.println("Invalid card type!");
         }
 
-
         if (clientModel.isMyTurn()) {
-            showMessage("Press Enter to throw dice and see where they hit...", true);
-            Platform.runLater(this::showThrowDicePopUp);
+            showInfoPopupWithCallback("""
+                    Throw the dice to see where the meteorite will hit""",
+                    card,
+                    () -> clientController.playerWantsToThrowDices(clientModel.getMyNickname()));
+
         } else
             showMessage("The first player is throwing dices, wait...", true);
 
@@ -374,42 +729,71 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     private void handleDoubleCannonSelection(Coordinates coordinates) {
-        ShipBoardClient shipboard = clientModel.getMyShipboard();
-        Set<Coordinates> doubleCannonCoordinates = shipboard.getCoordinatesOfComponents(shipboard.getDoubleCannons());
+        if (!isSelectingDoubleCannon()) {
+            showMessage("You must first select a battery for the previous engine.", false);
+            return;
+        }
 
-        if (!doubleCannonCoordinates.contains(coordinates)) {
-            showMessage("You did not select a double engine.", false);
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+        Set<Coordinates> doubleCannonsCoordinates = shipboard.getCoordinatesOfComponents(shipboard.getDoubleCannons());
+
+        if (!doubleCannonsCoordinates.contains(coordinates)) {
+            showMessage("You did not select a double cannon.", false);
             return;
         }
 
         if (selectedDoubleCannons.contains(coordinates)) {
-            showMessage("Engine already selected, select another one", false);
+            showMessage("This cannon is already selected.", false);
             return;
         }
 
-        selectedDoubleEngines.add(coordinates);
-        boardsController.removeHighlightColor();
-        hasChosenDoubleEngine = true;
-        showChooseBatteryBoxMenu();
+        selectedDoubleCannons.add(coordinates);
+
+        showMessage("Double cannon selected. Now select a battery to activate this cannon.", true);
+        updateSelectionMessage();
+        highlightAvailableDoubleCannon();
     }
 
-    public void showRewardMenu(){
+    public void showRewardMenu() {
         showMessage("Well done, you beat them!", true);
 
         ClientCard card = clientModel.getCurrAdventureCard();
-        // TODO finire
 
+        int stepsBack = 0;
+        int reward = 0;
+
+        // Extract reward and steps information based on card type
+        if (card.hasReward()) {
+            if (card instanceof ClientPirates piratesCard) {
+                reward = piratesCard.getReward();
+                stepsBack = piratesCard.getStepsBack();
+            } else if (card instanceof ClientSlaveTraders slaveTraders) {
+                reward = slaveTraders.getReward();
+                stepsBack = slaveTraders.getStepsBack();
+            }
+        }
+
+        if (stepsBack != 0 && reward != 0) {
+            showMessage("You can get " + reward + " credits but will lose " + (stepsBack * -1) + " flight days. Do you accept?", true);
+        } else {
+            showMessage("You can get the reward, but if you do, you will lose flight days. Do you accept?", true);
+        }
+
+        createAndAddButton("Accept", () -> {
+            bottomHBox.getChildren().clear();
+            clientController.playerWantsToAcceptTheReward(clientModel.getMyNickname(), true);
+        });
+
+        createAndAddButton("Reject", () -> {
+            bottomHBox.getChildren().clear();
+            clientController.playerWantsToAcceptTheReward(clientModel.getMyNickname(), false);
+        });
 
     }
 
-
-
-
-
-    //-------------------- FREE SPACE ----------------------
+    // -------------------- FREE SPACE ----------------------
 
     public void showFreeSpaceMenu() {
-
         ClientCard card = clientModel.getCurrAdventureCard();
         if (!(card instanceof ClientFreeSpace freeSpace)) {
             showMessage("Error: Expected FreeSpace card", false);
@@ -418,81 +802,573 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         initializeBeforeCard();
 
+        boolean canActivateDoubleEngines = true;
+        String warningMessage = null;
+
         if (clientModel.getShipboardOf(clientController.getNickname()).getDoubleEngines().isEmpty()) {
-            informationalPopUp("""
-                    No double engines available.
-                    You can use only single engine.
-                    ATTENTION! If your ship doesn't have engine power, you will be eliminated!""", freeSpace);
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
-            return;
+            canActivateDoubleEngines = false;
+            warningMessage = """
+                No double engines available.
+                You can use only single engine.
+                ⚠️ ATTENTION! If your ship doesn't have engine power, you will be eliminated!""";
+        } else if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()) {
+            canActivateDoubleEngines = false;
+            warningMessage = """
+                No battery boxes available so you can't activate double engine.
+                You can use only single engine.
+                ⚠️ ATTENTION! If your ship doesn't have engine power, you will be eliminated!""";
+        } else if (!isThereAvailableBattery()) {
+            canActivateDoubleEngines = false;
+            warningMessage = """
+                You ran out of batteries so you can't activate double engine.
+                You can use only single engine.
+                ⚠️ ATTENTION! If your ship doesn't have engine power, you will be eliminated!""";
         }
 
-        if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()) {
-            informationalPopUp("""
-                    No battery boxes available so you can't activate double engine.
-                    You can use only single engine.
-                    ATTENTION! If your ship doesn't have engine power, you will be eliminated!""",  freeSpace);
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
-            return;
+        if (!canActivateDoubleEngines) {
+            if (!clientModel.getOutPlayers().contains(clientController.getNickname())) {
+                showInfoPopupWithCallback(warningMessage, freeSpace, () -> {
+                    createAndAddButton("Continue", () -> {
+                        Platform.runLater(() -> bottomHBox.getChildren().clear());
+                        clientController.playerChoseDoubleEngines(
+                                clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
+                    });
+                });
+            }
+            else
+                showMessage("You don't have engine power, you've been eliminated!", true);
+        } else {
+            showChooseDoubleEngineMenu();
         }
-
-        if (!isThereAvailableBattery()) {
-            informationalPopUp("""
-                    You ran out of batteries so you can't activate double engine.
-                    You can use only single engine.
-                    ATTENTION! If your ship doesn't have engine power, you will be eliminated!""",  freeSpace);
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
-            return;
-        }
-
-        showChooseDoubleEngineMenu();
     }
 
     public void showChooseDoubleEngineMenu() {
+        updateSelectionMessage();
+        setupControlButtons();
+        highlightAvailableDoubleEngine();
+    }
 
-        showMessage("You can activate double engines, each double engine will require a battery", true);
-
-        Button skipButton = new Button("Skip");
-        Button confirmChoiceButton  = new Button("Confirm");
-        skipButton.getStyleClass().add("action-button");
-        confirmChoiceButton.getStyleClass().add("action-button");
-
+    private void setupControlButtons() {
         Platform.runLater(() -> {
-            bottomHBox.getChildren().add(confirmChoiceButton);
-            bottomHBox.getChildren().add(skipButton);
+            bottomHBox.getChildren().clear();
+
+            createAndAddButton("Confirm Selection", this::handleConfirmSelection);
+
+            createAndAddButton("Reset Selection", () -> {
+                selectedDoubleEngines.clear();
+                selectedBatteryBoxes.clear();
+                boardsController.removeHighlightColor();
+                updateSelectionMessage();
+                highlightAvailableDoubleEngine();
+            });
+
+            createAndAddButton("Skip All", () -> {
+                selectedDoubleEngines.clear();
+                selectedBatteryBoxes.clear();
+                clientController.playerChoseDoubleEngines(
+                        clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
+
+                Platform.runLater(() -> bottomHBox.getChildren().clear());
+                boardsController.removeHighlightColor();
+
+                showWaitingMessage();
+            });
         });
+    }
 
-        highlightDoubleEngines();
+    private void handleConfirmSelection() {
+        if (selectedDoubleEngines.isEmpty()) {
+            showMessage("No double engines selected. Use 'Skip All' if you don't want to activate any engines.", false);
+            return;
+        }
 
-        skipButton.setOnAction(_ ->
-                clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>())
-        );
+        if (selectedDoubleEngines.size() != selectedBatteryBoxes.size()) {
+            showMessage("Each double engine needs exactly one battery. Selected: " +
+                    selectedDoubleEngines.size() + " engines, " +
+                    selectedBatteryBoxes.size() + " batteries.", false);
+            return;
+        }
 
-        confirmChoiceButton.setOnAction(_ -> {
-            if (selectedDoubleEngines.size() != selectedBatteryBoxes.size()) {
-                showMessage("Please select a battery before confirming", false);
-                return;
+        if (!areSelectedBatteriesValid()) {
+            showMessage("Some selected batteries are no longer available. Please review your selection.", false);
+            return;
+        }
+
+        clientController.playerChoseDoubleEngines(
+                clientModel.getMyNickname(),
+                new ArrayList<>(selectedDoubleEngines),
+                new ArrayList<>(selectedBatteryBoxes));
+
+        Platform.runLater(() -> bottomHBox.getChildren().clear());
+        boardsController.removeHighlightColor();
+
+        String currentPlayer = clientModel.getCurrentPlayer();
+        if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
+            showMessage("It's " + currentPlayer + "'s turn. Please wait...", true);
+        } else {
+            showMessage("Waiting for other players...", true);
+        }
+    }
+
+    private boolean areSelectedBatteriesValid() {
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+
+        for (Coordinates coords : selectedBatteryBoxes) {
+            BatteryBox batteryBox = (BatteryBox) shipboard.getComponentAt(coords);
+            int timesSelected = Collections.frequency(selectedBatteryBoxes, coords);
+
+            if (batteryBox.getRemainingBatteries() < timesSelected) {
+                return false;
             }
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedDoubleEngines, selectedBatteryBoxes);
-        });
+        }
 
-        hasChosenDoubleEngine = false;
-
+        return true;
     }
 
-    private void showChooseBatteryBoxMenu() {
-        showMessage("You need to select a battery to activate your double engine.", true);
-        highlightBatteryBoxes();
+    private boolean isSelectingDoubleEngine() {
+        return selectedDoubleEngines.size() == selectedBatteryBoxes.size();
     }
 
-    private void highlightDoubleEngines() {
-        List<DoubleEngine> availableDoubleEngines = clientModel.getMyShipboard().getDoubleEngines();
+    private boolean isSelectingBattery() {
+        return selectedDoubleEngines.size() > selectedBatteryBoxes.size() || selectedDoubleCannons.size() > selectedBatteryBoxes.size();
+    }
+
+    private boolean isSelectingDoubleCannon() {
+        return selectedBatteryBoxes.size() == selectedDoubleCannons.size();
+    }
+
+    private void updateSelectionMessage() {
+        String message;
+        if (isSelectingDoubleEngine()) {
+            if (selectedDoubleEngines.isEmpty()) {
+                message = "Select a double engine to activate (or skip all to use single engines only).";
+            } else {
+                message = "Selection complete! " + selectedDoubleEngines.size() + " engines paired with " +
+                        selectedBatteryBoxes.size() + " batteries. Select another engine or confirm.";
+            }
+        } else if (isSelectingDoubleCannon()) {
+            if (selectedDoubleCannons.isEmpty()) {
+                message = "Select a double cannon to activate (or skip all to use single cannons only).";
+            } else {
+                message = "Selection complete! " + selectedDoubleCannons.size() + " cannons paired with " +
+                        selectedBatteryBoxes.size() + " batteries. Select another cannon or confirm.";
+            }
+        } else if (isSelectingBattery()) {
+            message = "Select a battery to activate the ship component you just chose.";
+        } else {
+            message = "Select components to activate double engines.";
+        }
+
+        showMessage(message, true);
+    }
+
+    private void highlightAvailableDoubleEngine() {
+        boardsController.removeHighlightColor();
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+
+        for (Coordinates coords : selectedDoubleEngines) {
+            boardsController.applyHighlightEffect(coords, Color.BLUE);
+        }
+
+        for (Coordinates coords : selectedBatteryBoxes) {
+            boardsController.applyHighlightEffect(coords, Color.BLUE);
+        }
+
+        if (isSelectingDoubleEngine()) {
+            Set<Coordinates> doubleEngineCoords = shipboard.getCoordinatesOfComponents(shipboard.getDoubleEngines());
+            for (Coordinates coords : doubleEngineCoords) {
+                if (!selectedDoubleEngines.contains(coords)) {
+                    boardsController.applyHighlightEffect(coords, Color.YELLOW);
+                }
+            }
+        } else if (isSelectingBattery()) {
+            Set<Coordinates> batteryBoxCoords = shipboard.getCoordinatesOfComponents(shipboard.getBatteryBoxes());
+            for (Coordinates coords : batteryBoxCoords) {
+                BatteryBox batteryBox = (BatteryBox) shipboard.getComponentAt(coords);
+                int timesSelected = Collections.frequency(selectedBatteryBoxes, coords);
+
+                if (batteryBox.getRemainingBatteries() > timesSelected) {
+                    boardsController.applyHighlightEffect(coords, Color.GREEN);
+                }
+            }
+        }
+    }
+
+    private void highlightAvailableDoubleCannon() {
+        boardsController.removeHighlightColor();
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+
+        for (Coordinates coords : selectedDoubleCannons) {
+            boardsController.applyHighlightEffect(coords, Color.BLUE);
+        }
+
+        for (Coordinates coords : selectedBatteryBoxes) {
+            boardsController.applyHighlightEffect(coords, Color.BLUE);
+        }
+
+        if (isSelectingDoubleCannon()) {
+            Set<Coordinates> doubleCannonCoords = shipboard.getCoordinatesOfComponents(shipboard.getDoubleCannons());
+            for (Coordinates coords : doubleCannonCoords) {
+                if (!selectedDoubleCannons.contains(coords)) {
+                    boardsController.applyHighlightEffect(coords, Color.YELLOW);
+                }
+            }
+        } else if (isSelectingBattery()) {
+            Set<Coordinates> batteryBoxCoords = shipboard.getCoordinatesOfComponents(shipboard.getBatteryBoxes());
+            for (Coordinates coords : batteryBoxCoords) {
+                BatteryBox batteryBox = (BatteryBox) shipboard.getComponentAt(coords);
+                int timesSelected = Collections.frequency(selectedBatteryBoxes, coords);
+
+                if (batteryBox.getRemainingBatteries() > timesSelected) {
+                    boardsController.applyHighlightEffect(coords, Color.GREEN);
+                }
+            }
+        }
+    }
+
+    private void highlightShields() {
+        List<Shield> availableShields = clientModel.getMyShipboard().getShields();
 
         clientModel.getMyShipboard()
-                .getCoordinatesOfComponents(availableDoubleEngines)
+                .getCoordinatesOfComponents(availableShields)
                 .stream()
-                .filter(coords -> !selectedDoubleEngines.contains(coords))
+                .filter(coords -> !selectedShield.contains(coords))
                 .forEach(coordinates -> boardsController.applyHighlightEffect(coordinates, Color.GREEN));
+    }
+
+    private void highlightAvailableStorages() {
+
+        Set<Coordinates> selectableStoragesCoords = storageManager.getSelectableCoordinates();
+
+        selectableStoragesCoords.forEach(coords -> boardsController.applyHighlightEffect(coords, Color.GREEN));
+    }
+
+    private void handleDoubleEngineSelection(Coordinates coordinates) {
+        if (!isSelectingDoubleEngine()) {
+            showMessage("You must first select a battery for the previous engine.", false);
+            return;
+        }
+
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+        Set<Coordinates> doubleEngineCoordinates = shipboard.getCoordinatesOfComponents(shipboard.getDoubleEngines());
+
+        if (!doubleEngineCoordinates.contains(coordinates)) {
+            showMessage("You did not select a double engine.", false);
+            return;
+        }
+
+        if (selectedDoubleEngines.contains(coordinates)) {
+            showMessage("This engine is already selected.", false);
+            return;
+        }
+
+        selectedDoubleEngines.add(coordinates);
+
+        showMessage("Double engine selected. Now select a battery to activate this engine.", true);
+        updateSelectionMessage();
+        highlightAvailableDoubleEngine();
+    }
+
+    private void handleBatteryBoxSelection(Coordinates coordinates) {
+
+        ClientCard card = clientModel.getCurrAdventureCard();
+        String componentToActivate;
+
+        if (card instanceof ClientPirates) {
+            componentToActivate = "cannon";
+        } else if (card instanceof ClientFreeSpace) {
+            componentToActivate = "engine";
+        } else {
+            componentToActivate = "component";
+        }
+
+        if (!isSelectingBattery()) {
+            showMessage("You must first select a double " + componentToActivate + ".", false);
+            return;
+        }
+
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+        Set<Coordinates> batteryBoxesCoordinates = shipboard.getCoordinatesOfComponents(shipboard.getBatteryBoxes());
+
+        if (!batteryBoxesCoordinates.contains(coordinates)) {
+            showMessage("You did not select a battery box.", false);
+            return;
+        }
+
+        BatteryBox batteryBox = (BatteryBox) shipboard.getComponentAt(coordinates);
+        int timesAlreadySelected = Collections.frequency(selectedBatteryBoxes, coordinates);
+
+        if (batteryBox.getRemainingBatteries() <= timesAlreadySelected) {
+            showMessage("This battery box has no more available batteries. Select another one.", false);
+            return;
+        }
+
+        selectedBatteryBoxes.add(coordinates);
+
+        showMessage("Battery selected! You can activate more " + componentToActivate + " or confirm your selection.", true);
+        updateSelectionMessage();
+
+        if (componentToActivate.equals("cannon"))
+            highlightAvailableDoubleCannon();
+        else  if (componentToActivate.equals("engine"))
+            highlightAvailableDoubleEngine();
+        else
+            System.err.println("Do not know what to activate " + componentToActivate);
+    }
+
+    // -------------------- EPIDEMIC ----------------------
+    public void showEpidemicMenu(){
+        ClientCard card = clientModel.getCurrAdventureCard();
+        if (!(card instanceof ClientEpidemic epidemic)) {
+            showMessage("Error: Expected Epidemic card", false);
+            return;
+        }
+
+        showMessage("An epidemic is spreading throughout the fleet!", true);
+        showInfoPopupWithCallback("Each occupied cabin connected to another occupied cabin will lose one crew member. " +
+                "Press confirm to see how epidemic is going to spread", epidemic , () -> {
+            createAndAddButton("Continue", () -> {
+                Platform.runLater(() -> bottomHBox.getChildren().clear());
+                clientController.spreadEpidemic(clientModel.getMyNickname());
+            });
+        });
+
+    }
+
+    // ------------------------------------------
+
+    private void initializeBeforeCard() {
+        this.selectedDoubleEngines.clear();
+        this.selectedBatteryBoxes.clear();
+        this.selectedDoubleCannons.clear();
+        this.selectedShield.clear();
+        this.selectedCrewPerCabin.clear();
+        hasChosenDoubleCannon = false;
+        hasChosenDoubleEngine = false;
+        hasChosenShield = false;
+        if (boardsController != null) {
+            boardsController.removeHighlightColor();
+        }
+        Platform.runLater(() -> bottomHBox.getChildren().clear());
+    }
+
+    private boolean isThereAvailableBattery() {
+        List<BatteryBox> batteryBoxes = clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes();
+        for (BatteryBox batteryBox : batteryBoxes) {
+            if (batteryBox.getRemainingBatteries() >= 1) {
+                return true;
+            }
+        }
+        return false ;
+    }
+
+//    @Override
+//    public void onGridButtonClick(int row, int column) {
+//        Coordinates coordinates = new Coordinates(row, column);
+//        switch (clientModel.getCurrCardState()) {
+//            case CardState.CHOOSE_ENGINES -> {
+//
+//                if (isSelectingEngine()) {
+//                    handleDoubleEngineSelection(coordinates);
+//                } else if (isSelectingBattery()) {
+//                    handleBatteryBoxSelection(coordinates);
+//                }
+//            }
+//            case CardState.CHOOSE_CANNONS -> {
+//                // Mantieni la vecchia logica per i cannoni (da correggere in futuro)
+//                if (hasChosenDoubleCannon) {
+//                    handleDoubleCannonSelection(coordinates);
+//                } else {
+//                    handleBatteryBoxSelection(coordinates);
+//                }
+//            }
+//            case CardState.HANDLE_CUBES_REWARD ->
+//                handleChooseStorageSelection(coordinates);
+//
+//            case CardState.DANGEROUS_ATTACK -> {
+//                ClientDangerousObject dangerousObj = clientModel.getCurrDangerousObj();
+//                if (dangerousObj != null) {
+//                    String type = dangerousObj.getType();
+//                    if (hasChosenDoubleCannon || hasChosenShield)
+//                        handleSingleBatteryBox(coordinates);
+//                    else if (type.contains("small"))
+//                        handleSmallDanObj(coordinates);
+//                    else if (type.contains("bigMeteorite"))
+//                        handleBigMeteorite(coordinates);
+//                    else if (type.contains("bigShot"))
+//                        handleBigShot(coordinates);
+//                }
+//            }
+//            case CardState.CHECK_SHIPBOARD_AFTER_ATTACK -> {
+//                if (shipParts.isEmpty())
+//                    handeRepairShipboard(coordinates);
+//                else
+//                    handleShipParts(coordinates);
+//            }
+//            case CardState.VISIT_LOCATION ->
+//                showCanVisitLocationMenu();
+//
+//            case CardState.REMOVE_CREW_MEMBERS ->
+//                    handleCabinSelection(coordinates);
+//
+//            case CardState.STARDUST ->
+//                showStardustMenu();
+//
+//            case CardState.EPIDEMIC ->
+//                showEpidemicMenu();
+//
+//            default -> System.err.println("Unknown card state: " + clientModel.getCurrCardState());
+//        }
+//    }
+
+    @Override
+    public void onGridButtonClick(int row, int column) {
+        // Controllo se è il turno del giocatore corrente
+        if (!isPlayerTurnActive()) {
+            showTurnMessage();
+            return; // Blocca l'esecuzione se non è il turno del giocatore
+        }
+
+        Coordinates coordinates = new Coordinates(row, column);
+        switch (clientModel.getCurrCardState()) {
+            case CardState.CHOOSE_ENGINES -> {
+                if (isSelectingDoubleEngine()) {
+                    handleDoubleEngineSelection(coordinates);
+                } else if (isSelectingBattery()) {
+                    handleBatteryBoxSelection(coordinates);
+                }
+            }
+            case CardState.CHOOSE_CANNONS -> {
+                // Mantieni la vecchia logica per i cannoni (da correggere in futuro)
+                if (isSelectingDoubleCannon()) {
+                    handleDoubleCannonSelection(coordinates);
+                } else {
+                    handleBatteryBoxSelection(coordinates);
+                }
+            }
+            case CardState.HANDLE_CUBES_REWARD ->
+                    handleChooseStorageSelection(coordinates);
+
+            case CardState.DANGEROUS_ATTACK -> {
+                ClientDangerousObject dangerousObj = clientModel.getCurrDangerousObj();
+                if (dangerousObj != null) {
+                    String type = dangerousObj.getType();
+                    if (hasChosenDoubleCannon || hasChosenShield)
+                        handleSingleBatteryBox(coordinates);
+                    else if (type.contains("small"))
+                        handleSmallDanObj(coordinates);
+                    else if (type.contains("bigMeteorite"))
+                        handleBigMeteorite(coordinates);
+                    else if (type.contains("bigShot"))
+                        handleBigShot(coordinates);
+                }
+            }
+            case CardState.CHECK_SHIPBOARD_AFTER_ATTACK -> {
+                if (shipParts.isEmpty())
+                    handeRepairShipboard(coordinates);
+                else
+                    handleShipParts(coordinates);
+            }
+            case CardState.VISIT_LOCATION ->
+                    showCanVisitLocationMenu();
+
+            case CardState.REMOVE_CREW_MEMBERS ->
+                    handleCabinSelection(coordinates);
+
+            case CardState.STARDUST ->
+                    showStardustMenu();
+
+            case CardState.EPIDEMIC ->
+                    showEpidemicMenu();
+
+            default -> System.err.println("Unknown card state: " + clientModel.getCurrCardState());
+        }
+    }
+
+    /**
+     * Verifica se è il turno attivo del giocatore corrente basandosi sui controlli
+     * implementati nel ClientController per mantenere coerenza logica.
+     *
+     * @return true se il giocatore può interagire, false altrimenti
+     */
+    private boolean isPlayerTurnActive() {
+        // Controllo base: è il mio turno?
+        if (!clientModel.isMyTurn()) {
+            return false;
+        }
+
+        CardState currentState = clientModel.getCurrCardState();
+
+        // Utilizza la stessa logica del ClientController per determinare
+        // se lo stato richiede che sia specificamente il turno del giocatore
+        if (isStateRegardingCurrentPlayerOnly(currentState)) {
+            // Per questi stati, se isMyTurn() è true, il giocatore può agire
+            return true;
+        }
+
+        // Per stati che potrebbero permettere azioni simultanee o avere logica speciale
+        switch (currentState) {
+            case CardState.START_CARD:
+            case CardState.END_OF_CARD:
+                // Stati informativi, generalmente non richiedono interazione
+                return false;
+
+            default:
+                // Per altri stati non specificati, segui la logica base del turno
+                return true;
+        }
+    }
+
+    private boolean isStateRegardingCurrentPlayerOnly(CardState cardState) {
+        return cardState == CardState.HANDLE_CUBES_REWARD
+                || cardState == CardState.CHOOSE_PLANET
+                || cardState == CardState.VISIT_LOCATION
+                || cardState == CardState.REMOVE_CREW_MEMBERS
+                || cardState == CardState.CHOOSE_ENGINES
+                || cardState == CardState.DANGEROUS_ATTACK
+                || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK
+                || cardState == CardState.ACCEPT_THE_REWARD
+                || cardState == CardState.CHOOSE_CANNONS
+                || cardState == CardState.EPIDEMIC;
+    }
+
+    /**
+     * Mostra un messaggio appropriato quando non è il turno del giocatore,
+     * utilizzando la stessa logica di messaggistica del ClientController
+     */
+    private void showTurnMessage() {
+        CardState currentState = clientModel.getCurrCardState();
+        String currentPlayer = clientModel.getCurrentPlayer();
+
+        // Replica i messaggi dal ClientController per coerenza
+        if (isStateRegardingCurrentPlayerOnly(currentState)) {
+            if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
+                showMessage(currentPlayer + " is currently playing. Soon will be your turn", false);
+            } else {
+                showMessage("Wait for " + currentPlayer + " to make his choice", false);
+            }
+        } else {
+            // Per stati generali, messaggio semplice
+            if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
+                showMessage("È il turno di " + currentPlayer + ". Attendi il tuo turno.", false);
+            } else {
+                showMessage("Non è il tuo turno. Attendi prima di effettuare azioni.", false);
+            }
+        }
+    }
+
+
+    private void showWaitingMessage() {
+        String currentPlayer = clientModel.getCurrentPlayer();
+        if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
+            showMessage("It's " + currentPlayer + "'s turn. Please wait...", true);
+        } else {
+            showMessage("Waiting for other players...", true);
+        }
+    }
+
+    private void showInfoPopup(String message, ClientCard card) {
+        showOverlayPopup(card.getCardType(), message, null);
     }
 
     private void highlightBatteryBoxes() {
@@ -512,6 +1388,36 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 .forEach(coordinates -> boardsController.applyHighlightEffect(coordinates, Color.GREEN));
     }
 
+    private void highlightCabin() {
+
+        List<Cabin> CabinWithCrew = clientModel.getMyShipboard()
+                .getCabin()
+                .stream()
+                .filter(cabin -> !cabin.getInhabitants().isEmpty())
+                .collect(Collectors.toList());
+
+        clientModel.getMyShipboard()
+                .getCoordinatesOfComponents(CabinWithCrew)
+                .stream()
+                .filter(coords -> {
+                    Cabin cabin = ((Cabin) clientModel.getMyShipboard().getComponentAt(coords));
+                    return !cabin.getInhabitants().isEmpty();
+                })
+                .forEach(coordinates -> boardsController.applyHighlightEffect(coordinates, Color.RED));
+
+
+    }
+
+    private void highlightDoubleEngines() {
+        List<DoubleEngine> availableDoubleEngines = clientModel.getMyShipboard().getDoubleEngines();
+
+        clientModel.getMyShipboard()
+                .getCoordinatesOfComponents(availableDoubleEngines)
+                .stream()
+                .filter(coords -> !selectedDoubleEngines.contains(coords))
+                .forEach(coordinates -> boardsController.applyHighlightEffect(coordinates, Color.GREEN));
+    }
+
     private void highlightDoubleCannon() {
         List<DoubleCannon> availableDoubleCannons = clientModel.getMyShipboard().getDoubleCannons();
 
@@ -522,107 +1428,424 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 .forEach(coordinates -> boardsController.applyHighlightEffect(coordinates, Color.GREEN));
     }
 
-    private void handleDoubleEngineSelection(Coordinates coordinates) {
-        ShipBoardClient shipboard = clientModel.getMyShipboard();
-        Set<Coordinates> doubleEngineCoordinates = shipboard.getCoordinatesOfComponents(shipboard.getDoubleEngines());
-
-        if (!doubleEngineCoordinates.contains(coordinates)) {
-            showMessage("You did not select a double engine.", false);
-            return;
-        }
-
-        if (selectedDoubleEngines.contains(coordinates)) {
-            showMessage("Engine already selected, select another one", false);
-            return;
-        }
-
-        selectedDoubleEngines.add(coordinates);
-        boardsController.removeHighlightColor();
-        hasChosenDoubleEngine = true;
-        showChooseBatteryBoxMenu();
+    private void handleShipParts(Coordinates coordinates) {
+        IntStream.range(0, shipParts.size())
+                .filter(i -> shipParts.get(i).contains(coordinates))
+                .findFirst()
+                .ifPresentOrElse(
+                        i -> {
+                            shipParts.clear();
+                            this.boardsController.removeHighlightColor();
+                            clientController.handleShipPartSelection(i + 1);
+                        },
+                        () -> showMessage("Invalid selection, try again", false)
+                );
     }
 
-    private void handleBatteryBoxSelection(Coordinates coordinates) {
-        ShipBoardClient shipboard = clientModel.getMyShipboard();
-        Set<Coordinates> batteryBoxesCoordinates = shipboard.getCoordinatesOfComponents(shipboard.getBatteryBoxes());
+    private void handeRepairShipboard(Coordinates coordinates) {
+        if (clientModel.getMyShipboard().getIncorrectlyPositionedComponentsCoordinates().contains(coordinates)) {
+            this.boardsController.removeHighlightColor();
+            clientController.removeComponent(coordinates.getX(), coordinates.getY());
+        } else
+            showMessage("Remove one of the wrongly placed components", true);
+    }
 
-        // se a quelle coordinate non c'è un batterybox
-        if (!batteryBoxesCoordinates.contains(coordinates)) {
-            showMessage("You did not select a battery box.", false);
+    private void handleSingleBatteryBox(Coordinates coordinates) {
+
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(clientModel.getMyNickname());
+        Component component = shipBoard.getComponentAt(coordinates);
+
+        System.out.println(coordinates);
+
+        if (component == null || !shipBoard.getBatteryBoxes().contains(component)) {
+            showMessage("You did not select a battery box", false);
             return;
         }
 
-        BatteryBox batteryBox = (BatteryBox) shipboard.getComponentAt(coordinates);
+        //se quel box non contiene batterie non posso selezionarlo
+        BatteryBox batteryBox = (BatteryBox) component;
+        if (batteryBox.getRemainingBatteries() == 0) {
+            showMessage("The selected battery box does not have enough batteries", false);
+            return;
+        }
 
-        // se il batterybox selezionato non ha più batterie disponibili
-        if (batteryBox.getRemainingBatteries() <= 0)
-            showMessage("This batteryBox is empty, select another one.", false);
-
-        // se il batterybox selezionato è gia stato selezionato altre volte e non ha più batterie disponibili
-        int frequency = Collections.frequency(batteryBoxesCoordinates, coordinates);
-
-        if (batteryBox.getRemainingBatteries() == frequency)
-            showMessage("This battery box is empty, select another one.", false);
+        if (!selectedBatteryBoxes.isEmpty()) {
+            showMessage("Battery box already selected", false);
+            return;
+        }
 
         selectedBatteryBoxes.add(coordinates);
         boardsController.removeHighlightColor();
-        hasChosenDoubleEngine = false;
-        showChooseDoubleEngineMenu();
+
+        if (hasChosenShield) {
+            showMessage("Defend method sent to server", false);
+            clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes);
+        } else if (hasChosenDoubleCannon)
+            clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
     }
 
+    private void handleBigShot(Coordinates coordinates) {
+        // TODO
+    }
 
-    private void initializeBeforeCard() {
-        this.selectedDoubleEngines.clear();
-        this.selectedBatteryBoxes.clear();
-        this.selectedDoubleCannons.clear();
+    private void handleBigMeteorite(Coordinates coordinates) {
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(clientModel.getMyNickname());
+        Component component = shipBoard.getComponentAt(coordinates);
+
+        if (component == null || !shipBoard.getDoubleCannons().contains(component)) {
+            showMessage("You did not select a double cannon", false);
+            return;
+        }
+
+        hasChosenDoubleCannon = true;
+        boardsController.removeHighlightColor();
+        highlightBatteryBoxes();
         Platform.runLater(() -> bottomHBox.getChildren().clear());
+        selectedDoubleCannons.add(coordinates);
+        showMessage("Now select a battery box for the double cannon you selected", true);
     }
 
-    private void informationalPopUp(String message, ClientCard card) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(card.getCardType());
-        alert.setContentText(message);
+    private void handleSmallDanObj(Coordinates coordinates) {
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(clientModel.getMyNickname());
+        Component component = shipBoard.getComponentAt(coordinates);
 
-        alert.show();
-
-        // close after 2 seconds
-        PauseTransition delay = new PauseTransition(Duration.seconds(2));
-        delay.setOnFinished(_ -> alert.close());
-        delay.play();
-    }
-
-    private boolean isThereAvailableBattery() {
-        List<BatteryBox> batteryBoxes = clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes();
-        for (BatteryBox batteryBox : batteryBoxes) {
-            if (batteryBox.getRemainingBatteries() >= 1) {
-                return true;
-            }
-        }
-        return false ;
-    }
-
-    @Override
-    public void onGridButtonClick(int row, int column) {
-        Coordinates coordinates = new Coordinates(row, column);
-        switch (clientModel.getCurrCardState()) {
-            case CardState.CHOOSE_ENGINES -> {
-                if (hasChosenDoubleEngine)
-                    handleDoubleEngineSelection(coordinates);
-                else
-                    handleBatteryBoxSelection(coordinates);
-            }
-            case CardState.CHOOSE_CANNONS -> {
-                if (hasChosenDoubleCannon)
-                    handleDoubleCannonSelection(coordinates);
-                else
-                    handleBatteryBoxSelection(coordinates);
-            }
-
-            // TODO aggiungere stati
-
-            default -> System.err.println("Unknown card state: " + clientModel.getCurrCardState());
+        if (component == null || !shipBoard.getShields().contains(component)) {
+            showMessage("You did not select a shield", false);
+            return;
         }
 
+        hasChosenShield = true;
+        boardsController.removeHighlightColor();
+        highlightBatteryBoxes();
+        Platform.runLater(() -> bottomHBox.getChildren().clear());
+        selectedShield.add(coordinates);
+        showMessage("Now select a battery box for the shield you selected", true);
     }
 
+    private void handleChooseStorageSelection(Coordinates coordinates) {
+
+        Set<Coordinates> selectableStoragesCoords = storageManager.getSelectableCoordinates();
+
+        if (!selectableStoragesCoords.contains(coordinates)) {
+            showMessage("Your selection is not correct, select another one or skip the current reward.", false);
+            return;
+        }
+
+        storageManager.addStorageSelectionWithCopy(coordinates);
+        clientModel.refreshShipBoardOf(clientController.getNickname());
+        boardsController.removeHighlightColor();
+        Platform.runLater(() -> bottomHBox.getChildren().clear());
+
+        showMessage("", true);
+
+        storageSelectionPhase();
+    }
+
+    public void showHandleCubesRewardMenu() {
+
+        List<CargoCube> cubesReward = null;
+
+        try {
+            cubesReward = clientModel.extractCubeRewardsFromCurrentCard();
+        } catch (IllegalStateException e) {
+            showMessage(e.getMessage(), false);
+            // TODO che si fa?
+        }
+
+        // Initialize the storage manager with the cube rewards
+        storageManager = new StorageSelectionManager(cubesReward, 0, clientModel.getMyShipboard());
+
+        // Check if the player has any storage available
+        if (!storageManager.hasAnyStorage()) {
+//            showMessage("No available storages on your ship. You cannot accept any reward.", false);
+            showInfoPopupWithCallback("No available storages on your ship. You cannot accept any reward.", clientModel.getCurrAdventureCard(),
+                    () -> createAndAddButton("Continue", () -> {
+                        Platform.runLater(() -> bottomHBox.getChildren().clear());
+                        List<Coordinates> emptyList = new ArrayList<>();
+                        clientController.playerChoseStorage(clientController.getNickname(), emptyList);
+                    }));
+            return;
+        }
+
+        // display reward info
+        ClientCard currCard = clientModel.getCurrAdventureCard();
+        if (currCard instanceof ClientPlanets)
+            showMessage("You have chosen planet " + planetChoice + " look at your rewards!!!", true);
+
+        else if(currCard instanceof ClientAbandonedStation)
+            showMessage("You’ve landed on the cargo. Enjoy your rewards!!!", true);
+        else
+            showMessage("You have accepted the reward, look at it!!!", true);
+
+        storageSelectionPhase();
+
+    }
+
+    private void storageSelectionPhase() {
+
+        CargoCube currentCube = storageManager.getCurrentCube();
+
+        // if every cube has been handled
+        if (currentCube == null) {
+            showMessage("You have placed every cube, enjoy your richness.", false);
+            clientController.playerChoseStorage(clientModel.getMyNickname(), storageManager.getSelectedStorageCoordinates());
+            return;
+        }
+
+        // if you cannot accept the red cube
+        if (!storageManager.canAcceptCurrentCube()) {
+            showMessage("Skipping storage selection for " + currentCube + " cube, you are not provided with advanced technology yet", false);
+            if (!storageManager.skipCurrentCube())
+                clientController.playerChoseStorage(clientModel.getMyNickname(), storageManager.getSelectedStorageCoordinates());
+            else
+                storageSelectionPhase();
+            return;
+        }
+
+        createAndAddButton("Skip " + currentCube + " cube", () -> {
+            bottomHBox.getChildren().clear();
+            boardsController.removeHighlightColor();
+            if (!storageManager.skipCurrentCube())
+                clientController.playerChoseStorage(clientModel.getMyNickname(), storageManager.getSelectedStorageCoordinates());
+            else
+                storageSelectionPhase();
+        });
+
+        highlightAvailableStorages();
+
+        showMessage("Now selecting a storage for the " + currentCube + " cube. " +
+                "If a storage is full, the least valuable cube will be removed", true);
+
+    }
+
+
+    public void showHandleSmallDanObjMenu() {
+
+        initializeBeforeCard();
+
+        ClientDangerousObject smallObject = clientModel.getCurrDangerousObj();
+        showInfoPopupWithCallback("SMALL OBJECT INCOMING FROM " + smallObject.getDirection() + " AT " + (smallObject.getCoordinate() + 1),
+                clientModel.getCurrAdventureCard(),
+                () -> {
+                    if (clientModel.getShipboardOf(clientController.getNickname()).getShields().isEmpty() ) {
+                        showInfoPopup("You have no available shields on your ship, you cannot defend", clientModel.getCurrAdventureCard());
+                        clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes);
+                        return;
+                    }
+
+                    if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()) {
+                        showInfoPopup("No batteries available, you will only defend your ship with single ones...", clientModel.getCurrAdventureCard());
+                        clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes);
+                        return;
+                    }
+
+                    //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
+                    if (!isThereAvailableBattery()) {
+                        showInfoPopup("No batteries available, you will only defend your ship with single ones...", clientModel.getCurrAdventureCard());
+                        clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes);
+                        return;
+                    }
+
+                    showMessage("You can activate a shield or let the object hit your ship (reminder " + smallObject.getDirection() + " " + (smallObject.getCoordinate() + 1) + ")", true);
+                    highlightShields();
+                    createAndAddButton("Skip shield selection", () -> {
+                        bottomHBox.getChildren().clear();
+                        clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes);
+                    });
+                });
+
+    }
+
+    public void showBigMeteoriteMenu() {
+
+        initializeBeforeCard();
+
+        ClientDangerousObject bigMeteorite = clientModel.getCurrDangerousObj();
+        showInfoPopupWithCallback("BIG METEORITE INCOMING FROM " + bigMeteorite.getDirection() + " AT " + (bigMeteorite.getCoordinate() + 1),
+                clientModel.getCurrAdventureCard(),
+                () -> {
+                    if (clientModel.getShipboardOf(clientController.getNickname()).getDoubleCannons().isEmpty()) {
+                        showInfoPopup("No double cannons available, you will only defend your ship with single ones...", clientModel.getCurrAdventureCard());
+                        clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+                        return;
+                    }
+
+                    if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()) {
+                        showInfoPopup("No batteries available, you will only defend your ship with single ones...", clientModel.getCurrAdventureCard());
+                        clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+                        return;
+                    }
+
+                    //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
+                    if (!isThereAvailableBattery()) {
+                        showInfoPopup("No batteries available, you will only defend your ship with single ones...", clientModel.getCurrAdventureCard());
+                        clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+                        return;
+                    }
+
+                    showMessage("You can use a double or single cannon to destroy it or let it hit your ship (reminder " + bigMeteorite.getDirection() + " " + (bigMeteorite.getCoordinate() + 1) + ")", true);
+
+                    highlightDoubleCannon();
+                    createAndAddButton("Skip double engine selection",
+                            () -> {
+                        bottomHBox.getChildren().clear();
+                        clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+                    });
+                });
+    }
+
+    private void showOverlayPopup(String title, String message, Runnable onClose) {
+        // Overlay di sfondo
+        StackPane overlay = new StackPane();
+        overlay.getStyleClass().add("popup-overlay");
+
+        // Container del popup
+        VBox popupContent = new VBox();
+        popupContent.getStyleClass().add("popup-container");
+
+        // Titolo
+        Label titleLabel = new Label(title);
+        titleLabel.getStyleClass().add("popup-title");
+        titleLabel.setWrapText(true);
+
+        // Messaggio
+        Label messageLabel = new Label(message);
+        messageLabel.getStyleClass().add("popup-message");
+        messageLabel.setWrapText(true);
+
+        // Bottone OK
+        Button okButton = new Button("OK");
+        okButton.getStyleClass().add("popup-button");
+        okButton.setOnAction(_ -> {
+            centerStackPane.getChildren().remove(overlay);
+            if (onClose != null) {
+                onClose.run();
+            }
+        });
+
+        // Assembla il popup
+        popupContent.getChildren().addAll(titleLabel, messageLabel, okButton);
+        overlay.getChildren().add(popupContent);
+
+        // Chiudi cliccando fuori dal popup
+        overlay.setOnMouseClicked(e -> {
+            if (e.getTarget() == overlay) {
+                centerStackPane.getChildren().remove(overlay);
+                if (onClose != null) {
+                    onClose.run();
+                }
+            }
+        });
+
+        // Aggiungi l'overlay
+        Platform.runLater(() -> {
+            centerStackPane.getChildren().add(overlay);
+            overlay.toFront();
+//            if (onClose == null) {
+//                PauseTransition delay = new PauseTransition(Duration.seconds(2));
+//                delay.setOnFinished(_ -> {
+//                    centerStackPane.getChildren().remove(overlay);
+//                });
+//                delay.play();
+//            }
+        });
+    }
+
+    private void showInfoPopupWithCallback(String message, ClientCard card, Runnable onClose) {
+        showOverlayPopup(card.getCardType(), message, onClose);
+    }
+
+    public void checkShipBoardAfterAttackMenu() {
+        if (hitComponent != null) {
+            clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
+            hitComponent = null;
+        } else {
+            showMessage("Your ship was not hit, now wait for the others to repair their ship", true);
+            clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
+        }
+    }
+
+    public void showComponentHitInfo(Coordinates coordinates) {
+        this.hitComponent = coordinates;
+        boardsController.removeHighlightColor();
+        showInfoPopup("""
+                YOUR SHIP WAS HIT!!!
+                REPAIR IT SO YOU CAN CONTINUE YOUR FLIGHT.""",
+                clientModel.getCurrAdventureCard());
+    }
+
+    public void showInvalidComponents() {
+        ShipBoardClient shipBoard = clientModel.getMyShipboard();
+        shipBoard.getIncorrectlyPositionedComponentsCoordinates()
+                .forEach(coordinate -> this.boardsController.applyHighlightEffect(coordinate, Color.RED));
+    }
+
+    public void showShipParts(List<Set<Coordinates>> shipParts) {
+        List<Color> colors = List.of(Color.RED, Color.ORANGE, Color.BLUE, Color.YELLOW);
+        Map<Color, Set<Coordinates>> shipPartsMap = new HashMap<>();
+        this.shipParts.addAll(shipParts);
+
+        for (int i = 0; i < shipParts.size(); i++) {
+            shipPartsMap.put(colors.get(i), shipParts.get(i));
+        }
+
+        shipPartsMap.forEach((color, coordinates) ->
+                coordinates.forEach(coordinate ->
+                        this.boardsController.applyHighlightEffect(coordinate, color)
+                )
+        );
+    }
+
+    public void showBigShotMenu() {
+        ClientDangerousObject dangerousObj = clientModel.getCurrDangerousObj();
+        showInfoPopupWithCallback(String.format("""
+                Big Shot incoming! Nothing can stop this...
+                Ballistic info: %s %d""", dangerousObj.getDirection(), dangerousObj.getCoordinate() + 1),
+                clientModel.getCurrAdventureCard(),
+                () -> clientController.playerHandleBigShot(clientModel.getMyNickname()));
+    }
+
+    public void showSlaveTradersMenu() {
+        ClientCard card = clientModel.getCurrAdventureCard();
+        if (!(card instanceof ClientSlaveTraders slaveTraders)){
+            showMessage("Error: Expected slaveTraders card", false);
+            return;
+        }
+
+        initializeBeforeCard();
+
+        showMessage("Slave Traders have been detected!", true);
+
+        if (clientModel.getMyShipboard().getDoubleCannons().isEmpty())  {
+            showInfoPopupWithCallback("""
+                    No double cannons available.
+                    You can use only single cannons.
+                    """,
+                    slaveTraders,
+                    () -> clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes)
+            );
+            return;
+        }
+
+        if (clientModel.getMyShipboard().getBatteryBoxes().isEmpty()){
+            showInfoPopup("""
+                    No battery boxes available so you can't activate double cannons.
+                    You can use only single cannons.
+                    """, slaveTraders);
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+            return;
+        }
+
+        //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
+        if(!isThereAvailableBattery()) {
+            showInfoPopup("""
+                    You ran out of batteries so you can't activate double cannons.
+                    You can use only single cannons.
+                    """, slaveTraders);
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+            return;
+        }
+
+        showChooseDoubleCannonsMenu();
+    }
 }

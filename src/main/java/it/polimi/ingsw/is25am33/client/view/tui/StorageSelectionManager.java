@@ -1,15 +1,15 @@
 package it.polimi.ingsw.is25am33.client.view.tui;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
+import it.polimi.ingsw.is25am33.model.component.StandardStorage;
 import it.polimi.ingsw.is25am33.model.component.Storage;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Classe utilitaria per la gestione delle scelte di storage durante la fase di reward.
@@ -42,6 +42,10 @@ public class StorageSelectionManager {
 
         // Costruisce la mappa di compatibilità tra cubi e storage
         buildCompatibilityMap();
+    }
+
+    public Map<CargoCube, List<Storage>> getCompatibleStoragesMap() {
+        return compatibleStoragesMap;
     }
 
     /**
@@ -129,7 +133,7 @@ public class StorageSelectionManager {
             if (!storedCubes.isEmpty()) {
                 // Ordina i cubi per valore (il meno prezioso per primo)
                 storedCubes.sort(CargoCube.byValue);
-                CargoCube leastValuableCube = storedCubes.get(0);
+                CargoCube leastValuableCube = storedCubes.getFirst();
 
                 // Se il cubo meno prezioso ha un valore maggiore del cubo corrente, avvisa l'utente
                 if (leastValuableCube.getValue() > currentCube.getValue()) {
@@ -207,7 +211,7 @@ public class StorageSelectionManager {
         }
 
         // Verifica se ci sono storage compatibili
-        return compatibleStoragesMap.getOrDefault(currentCube, new ArrayList<>()).size() > 0;
+        return !compatibleStoragesMap.getOrDefault(currentCube, new ArrayList<>()).isEmpty();
     }
 
     /**
@@ -226,15 +230,6 @@ public class StorageSelectionManager {
      */
     public List<Coordinates> getSelectedStorageCoordinates() {
         return new ArrayList<>(selectedStorages);
-    }
-
-    /**
-     * Restituisce il numero di storage ancora da selezionare.
-     *
-     * @return Il numero di storage ancora da selezionare
-     */
-    public int getRemainingSelectionsCount() {
-        return cubeRewards.size() - selectedStorages.size();
     }
 
     /**
@@ -321,7 +316,7 @@ public class StorageSelectionManager {
         selectedStorages.clear();
     }
 
-    public Map<CargoCube,List<Coordinates>> whereAreCube() {
+    public Map<CargoCube, List<Coordinates>> whereAreCube() {
 
         //ottengo una lista degli storage che contengono un cubo di quel colore con ripetizioni
 
@@ -374,6 +369,146 @@ public class StorageSelectionManager {
             }
 
         return mostPrecious;
+    }
+
+    public Set<Coordinates> getSelectableCoordinates() {
+        CargoCube currentCube = getCurrentCube();
+        List<Storage> selectableStorages = compatibleStoragesMap.get(currentCube);
+
+        return shipBoard.getCoordinatesOfComponents(selectableStorages);
+    }
+
+    /**
+     * Adds a storage to the selection for the current cube by creating a copy of the storage.
+     * This solves the ObservableProperty issue that doesn't detect internal changes.
+     *
+     * @param storageCoords The coordinates of the selected storage
+     * @return true if the storage was successfully added, false otherwise
+     */
+    public boolean addStorageSelectionWithCopy(Coordinates storageCoords) {
+        // Check if we have already selected all necessary storages
+        if (selectedStorages.size() >= cubeRewards.size()) {
+            return false;
+        }
+
+        // The player doesn't want to save this cube
+        if (storageCoords.isCoordinateInvalid()) {
+            selectedStorages.add(storageCoords);
+            return true;
+        }
+
+        // Get the component at the specified coordinates
+        Storage originalStorage = getStorageAtCoordinates(storageCoords);
+        if (originalStorage == null) {
+            return false;
+        }
+
+        // Check if the current cube is red and the storage is standard type
+        int currentCubeIndex = selectedStorages.size();
+        CargoCube currentCube = cubeRewards.get(currentCubeIndex);
+
+        if (currentCube == CargoCube.RED && !(originalStorage instanceof SpecialStorage)) {
+            return false;  // Red cubes can only be placed in special storages
+        }
+
+        // Create a copy of the storage
+        Storage storageClone = cloneStorage(originalStorage);
+
+        // Add the cube to the copy
+        CargoCube removedCube = storageClone.addCube(currentCube);
+
+        // If a cube was removed, inform the user
+        if (removedCube != null) {
+            // TODO: use showMessage
+            System.out.println("The cube " + removedCube + " was removed to make room for the new cube " + currentCube);
+        }
+
+        // Replace the storage in the shipboard
+        replaceStorageInShipBoard(storageCoords, originalStorage, storageClone);
+
+        // Add the coordinates to the selection list
+        selectedStorages.add(storageCoords);
+
+        return true;
+    }
+
+    /**
+     * Creates a deep copy of the storage maintaining the correct type.
+     *
+     * @param original The original storage to clone
+     * @return A new instance of the storage with the same attributes
+     */
+    private Storage cloneStorage(Storage original) {
+        Storage clone = getClonedStorage(original);
+
+        // Copy common attributes from Component
+        clone.setCurrState(original.getCurrState());
+        clone.setImageName(original.getImageName());
+        for (int i = 0; i < original.getRotation(); i++)
+            clone.rotate();
+
+        // Copy existing cubes
+        for (CargoCube cube : original.getStockedCubes()) {
+            clone.addCube(cube);
+        }
+
+        return clone;
+    }
+
+    private static @NotNull Storage getClonedStorage(Storage original) {
+        Storage clone;
+
+        // Create the correct instance based on type
+        if (original instanceof SpecialStorage) {
+            clone = new SpecialStorage(new EnumMap<>(original.getConnectors()), original.getMaxCapacity());
+        } else if (original instanceof StandardStorage) {
+            clone = new StandardStorage(new EnumMap<>(original.getConnectors()), original.getMaxCapacity());
+        } else {
+            throw new IllegalArgumentException("Unknown storage type: " + original.getClass());
+        }
+
+        return clone;
+    }
+
+    /**
+     * Replaces the storage in the shipboard and updates the componentsPerType map.
+     *
+     * @param coords The coordinates of the storage
+     * @param oldStorage The original storage to replace
+     * @param newStorage The new storage that replaces the old one
+     */
+    private void replaceStorageInShipBoard(Coordinates coords, Storage oldStorage, Storage newStorage) {
+        // Replace it in the matrix
+        Component[][] shipMatrix = shipBoard.getShipMatrix();
+        shipMatrix[coords.getX()][coords.getY()] = newStorage;
+
+        // Update the componentsPerType map
+        Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
+
+        // Remove the old storage from its type list
+        Class<?> storageClass = oldStorage.getClass();
+        List<Component> storageList = componentsPerType.get(storageClass);
+        if (storageList != null) {
+            storageList.remove(oldStorage);
+            storageList.add(newStorage);
+        }
+
+        updateCompatibilityMapAfterReplacement(oldStorage, newStorage);
+    }
+
+    /**
+     * Updates compatibility map after replacing the new storage
+     */
+    private void updateCompatibilityMapAfterReplacement(Storage oldStorage, Storage newStorage) {
+        for (Map.Entry<CargoCube, List<Storage>> entry : compatibleStoragesMap.entrySet()) {
+            List<Storage> storageList = entry.getValue();
+
+            // Trova e sostituisci il vecchio storage con il nuovo
+            int index = storageList.indexOf(oldStorage);
+            if (index != -1) {
+                storageList.set(index, newStorage);
+            }
+        }
     }
 
 }

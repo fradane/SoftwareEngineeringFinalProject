@@ -237,6 +237,13 @@ public interface ShipBoardClient {
     List<Cabin> getCabin();
 
     /**
+     * Returns the main cabin
+     *
+     * @return The main cabin or null if not present
+     */
+    MainCabin getMainCabin();
+
+    /**
      * Finds all cabins occupied by at least one crew member
      * that are orthogonally adjacent to other occupied cabins
      *

@@ -28,7 +28,7 @@ public class ServerPingPongManager {
                System.out.println("DISCONNESSIONE: Nessun pong ricevuto da " + nickname + ".");
                 stop(nickname);
                 onTimeout.run();
-            }, 8000, TimeUnit.SECONDS); // TODO cambiare a MILLISECONDS
+            }, 8000, TimeUnit.MILLISECONDS); // TODO cambiare a MILLISECONDS
 
             pongTimeouts.put(nickname, pongFuture);
         }

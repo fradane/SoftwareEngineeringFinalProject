@@ -50,6 +50,11 @@ public class ClientPirates extends ClientCard implements Serializable {
         return stepsBack;
     }
 
+    @Override
+    public boolean hasReward() {
+        return true;
+    }
+
     public void setShots(List<ClientDangerousObject> shots) {
         this.shots = shots;
     }

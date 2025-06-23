@@ -23,6 +23,7 @@ public class PlayerClientData {
     private int flyingBoardPosition;
     private ShipBoardClient shipBoard;
     private PlayerColor color;
+    private boolean isOut;
 
     public PlayerClientData(String nickname, PlayerColor color, boolean isTestFlight, boolean isGui) {
         this.nickname = nickname;
@@ -30,7 +31,8 @@ public class PlayerClientData {
         this.color = color;
         this.shipBoard = isTestFlight ? new Level1ShipBoard(color, new GameClientNotifier(null, new ConcurrentHashMap<>()), isGui) : new Level2ShipBoard(color, new GameClientNotifier(null, new ConcurrentHashMap<>()), isGui);
         this.shipBoard.setPlayer(new Player(nickname, (ShipBoard) this.shipBoard, color));
-        this.flyingBoardPosition = 0;
+        this.flyingBoardPosition = Integer.MIN_VALUE;
+        this.isOut = false;
     }
 
     public PlayerColor getColor() {
@@ -81,4 +83,11 @@ public class PlayerClientData {
         return isLanded;
     }
 
+    public boolean isOut() {
+        return isOut;
+    }
+
+    public void setOut(boolean out) {
+        isOut = out;
+    }
 }

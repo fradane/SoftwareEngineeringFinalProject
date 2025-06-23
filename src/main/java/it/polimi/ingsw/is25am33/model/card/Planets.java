@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Planets extends AdventureCard implements PlayerMover {
     private List<Planet> availablePlanets;
-    private Map<String, Planet> playerPlanet = new ConcurrentHashMap<>();
+    private final Map<String, Planet> playerPlanet = new ConcurrentHashMap<>();
     private int stepsBack;
     private static final List<CardState> cardStates = List.of(CardState.CHOOSE_PLANET, CardState.HANDLE_CUBES_REWARD);
     private Planet currentPlanet;
@@ -101,7 +101,8 @@ public class Planets extends AdventureCard implements PlayerMover {
                 throw new IllegalIndexException("Planet has already been chosen");
 
             playerPlanet.put(gameModel.getCurrPlayer().getNickname(), currentPlanet);
-            availablePlanets.remove(chosenPlanetIndex-1);
+            //availablePlanets.remove(chosenPlanetIndex-1);
+            availablePlanets.get(chosenPlanetIndex - 1).setBusy(true);
 
             currentPlanet.setNoMoreAvailable();
 

@@ -275,7 +275,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     }
 
     private void handleShipParts(int row, int column) {
-        IntStream.range(0, shipParts.size() - 1)
+        IntStream.range(0, shipParts.size())
                 .filter(i -> shipParts.get(i).contains(new Coordinates(row, column)))
                 .findFirst()
                 .ifPresentOrElse(
@@ -560,7 +560,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     public void initialize() {
         // Caricamento delle board
         try {
-            if(clientController.getCurrentGameInfo().isTestFlight()) {
+            if (clientController.getCurrentGameInfo().isTestFlight()) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level1Boards.fxml"));
                 VBox mainBoardBox = loader.load();
                 this.boardsController = loader.getController();
@@ -585,10 +585,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             System.err.println("Error loading boards: " + e.getMessage());
         }
 
-        modelFxAdapter = new ModelFxAdapter(clientModel, false);
+        modelFxAdapter = new ModelFxAdapter(clientModel, false, boardsController);
 
         // Binding e setup
         this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
+
+        this.boardsController.createPaws();
 
         // Altri setup specifici del controller
         setupFocusedComponentBinding();
@@ -615,6 +617,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
             // Crea un elemento per ogni nave prefabbricata
             for (PrefabShipInfo shipInfo : prefabShips) {
+
+                if (!shipInfo.isForGui())
+                    continue;
+
                 // Crea un VBox per contenere nome, descrizione e pulsante
                 VBox shipCard = new VBox();
                 shipCard.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
