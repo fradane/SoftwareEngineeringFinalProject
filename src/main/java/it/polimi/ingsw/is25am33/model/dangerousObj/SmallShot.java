@@ -1,9 +1,6 @@
 package it.polimi.ingsw.is25am33.model.dangerousObj;
 
-import it.polimi.ingsw.is25am33.client.view.ClientView;
-import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.card.interfaces.HowToDefend;
-import it.polimi.ingsw.is25am33.model.card.interfaces.ShotSenderCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 

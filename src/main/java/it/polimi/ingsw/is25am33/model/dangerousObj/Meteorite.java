@@ -1,7 +1,6 @@
 package it.polimi.ingsw.is25am33.model.dangerousObj;
 
 import it.polimi.ingsw.is25am33.model.card.MeteoriteStorm;
-import it.polimi.ingsw.is25am33.model.card.interfaces.ShotSenderCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 
