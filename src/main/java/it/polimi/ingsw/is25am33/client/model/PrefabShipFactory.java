@@ -146,7 +146,7 @@ public class PrefabShipFactory {
                 "Nave Completa da Gioco",
                 "Una nave completa con tutti i tipi di componenti per testare il gioco",
                 false,
-                false
+                true
         ));
 
         PREFAB_SHIPS.put("nave_test_errori", new PrefabShipInfo(
@@ -639,13 +639,6 @@ public class PrefabShipFactory {
     private static boolean applyNaveCompleta(ShipBoard shipBoard) {
         clearShipBoard(shipBoard);
 
-
-        // Riga 5
-        Shield shield5 = new Shield(createCustomConnectors(EMPTY, SINGLE, EMPTY, UNIVERSAL));
-        shield5.rotate();
-        shield5.rotate();
-        shield5.rotate();
-        addComponent(shipBoard, shield5, 5, 7, "GT-new_tiles_16_for_web155.jpg");
 
         // Riga 6
         addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, EMPTY, DOUBLE, EMPTY)), 6, 6, "GT-new_tiles_16_for_web108.jpg");

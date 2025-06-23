@@ -173,7 +173,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         futureNicknames.forEach((future, clientNickname) -> {
             try {
                 //TODO riabbassare a 5 secondi
-                future.get(1000, TimeUnit.SECONDS);
+                future.get(5, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 System.err.println("Timeout nella notifica del client: " + clientNickname);
                 future.cancel(true);
@@ -204,7 +204,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         futureNicknames.forEach((future, clientNickname) -> {
             try {
                 //TODO riabbassare a 1 secondo
-                future.get(1000, TimeUnit.SECONDS);
+                future.get(1, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 System.err.println("Timeout nella notifica del client: " + clientNickname);
                 future.cancel(true);

@@ -158,9 +158,9 @@ public class Deck {
         cards.addAll(Deck.loadFreeSpaceFromJson());
         cards.addAll(Deck.loadPiratesFromJson());
         cards.addAll(Deck.loadSlaveTradersFromJson());
-        cards.addAll(Deck.loadSmugglersFromJson());
+        //cards.addAll(Deck.loadSmugglersFromJson());
         cards.addAll(Deck.loadStardustFromJson());
-        cards.addAll(Deck.loadWarFieldFromJson());
+        //cards.addAll(Deck.loadWarFieldFromJson());
         cards.addAll(Deck.loadMeteoriteStormFromJson());
         cards.addAll(Deck.loadEpidemicFromJson());
         cards.addAll(Deck.loadPlanetsFromJson());
