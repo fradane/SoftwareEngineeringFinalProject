@@ -384,8 +384,9 @@ public class EndGamePhaseTest {
         // Verifica PlayerFinalData
         List<PlayerFinalData> finalData = gameModel.getRankingWithPlayerFinalData();
         assertEquals(4, finalData.size());
-        assertFalse(finalData.get(0).isEarlyLanded());
-        assertEquals(30, finalData.get(0).getTotalCredits());
+        PlayerFinalData AlicesFinalData = finalData.stream().filter(f -> f.getNickname().equals("Alice")).findFirst().get();
+        assertFalse(AlicesFinalData.isEarlyLanded());
+        assertEquals(30, AlicesFinalData.getTotalCredits());
     }
 
     @Test
@@ -435,7 +436,8 @@ public class EndGamePhaseTest {
 
         // Verifica PlayerFinalData
         List<PlayerFinalData> finalData = gameModel.getRankingWithPlayerFinalData();
-        assertTrue(finalData.get(2).isEarlyLanded()); // Bob è ultimo nel ranking
+        PlayerFinalData BobsFinalData = finalData.stream().filter(f -> f.getNickname().equals("Bob")).findFirst().get();
+        assertTrue(BobsFinalData.isEarlyLanded()); // Bob è ultimo nel ranking
     }
 
     @Test
@@ -577,7 +579,8 @@ public class EndGamePhaseTest {
 
         // Verifica PlayerFinalData
         List<PlayerFinalData> finalData = gameModel.getRankingWithPlayerFinalData();
-        assertEquals(5, finalData.get(0).getLostComponents());
+        PlayerFinalData AlicesFinalData = finalData.stream().filter(f -> f.getNickname().equals("Alice")).findFirst().get();
+        assertEquals(5, AlicesFinalData.getLostComponents());
     }
 
     @Test
