@@ -342,7 +342,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     private void showCanVisitLocationMenu() {
-        showMessage("Do you want to visit the abandoned ship?", true);
+        showMessage("Do you want to visit the location?", true);
 
         createAndAddButton("Visit Ship", () -> {
             Platform.runLater(() -> bottomHBox.getChildren().clear());
@@ -578,6 +578,33 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         showInfoPopup(message, abandonedShip);
 
     }
+
+    //-------------------- ABANDONED STATION ----------------------
+
+    public void showAbandonedStationMenu(){
+        ClientCard card = clientModel.getCurrAdventureCard();
+        if (!(card instanceof ClientAbandonedStation abandonedStation)) {
+            showMessage("Error: Expected AbandonedStation card", false);
+            return;
+        }
+
+        initializeBeforeCard();
+
+        showMessage("You've found an abandoned station.", true);
+
+        int totalCrew = clientModel.getMyShipboard().getCrewMembers().size();
+        int requiredCrew = abandonedStation.getCrewMalus();
+
+        if (totalCrew < requiredCrew) {
+            showMessage("WARNING: You only have " + totalCrew + " crew members, but you need at least " +
+                    requiredCrew + " to visit this cargo. You cannot accept the reward.", false);
+            showCannotVisitLocationMenu();
+        } else {
+            showCanVisitLocationMenu();
+        }
+    }
+
+
 
     //-------------------- PIRATES ----------------------
 
@@ -1135,8 +1162,73 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         return false ;
     }
 
+//    @Override
+//    public void onGridButtonClick(int row, int column) {
+//        Coordinates coordinates = new Coordinates(row, column);
+//        switch (clientModel.getCurrCardState()) {
+//            case CardState.CHOOSE_ENGINES -> {
+//
+//                if (isSelectingEngine()) {
+//                    handleDoubleEngineSelection(coordinates);
+//                } else if (isSelectingBattery()) {
+//                    handleBatteryBoxSelection(coordinates);
+//                }
+//            }
+//            case CardState.CHOOSE_CANNONS -> {
+//                // Mantieni la vecchia logica per i cannoni (da correggere in futuro)
+//                if (hasChosenDoubleCannon) {
+//                    handleDoubleCannonSelection(coordinates);
+//                } else {
+//                    handleBatteryBoxSelection(coordinates);
+//                }
+//            }
+//            case CardState.HANDLE_CUBES_REWARD ->
+//                handleChooseStorageSelection(coordinates);
+//
+//            case CardState.DANGEROUS_ATTACK -> {
+//                ClientDangerousObject dangerousObj = clientModel.getCurrDangerousObj();
+//                if (dangerousObj != null) {
+//                    String type = dangerousObj.getType();
+//                    if (hasChosenDoubleCannon || hasChosenShield)
+//                        handleSingleBatteryBox(coordinates);
+//                    else if (type.contains("small"))
+//                        handleSmallDanObj(coordinates);
+//                    else if (type.contains("bigMeteorite"))
+//                        handleBigMeteorite(coordinates);
+//                    else if (type.contains("bigShot"))
+//                        handleBigShot(coordinates);
+//                }
+//            }
+//            case CardState.CHECK_SHIPBOARD_AFTER_ATTACK -> {
+//                if (shipParts.isEmpty())
+//                    handeRepairShipboard(coordinates);
+//                else
+//                    handleShipParts(coordinates);
+//            }
+//            case CardState.VISIT_LOCATION ->
+//                showCanVisitLocationMenu();
+//
+//            case CardState.REMOVE_CREW_MEMBERS ->
+//                    handleCabinSelection(coordinates);
+//
+//            case CardState.STARDUST ->
+//                showStardustMenu();
+//
+//            case CardState.EPIDEMIC ->
+//                showEpidemicMenu();
+//
+//            default -> System.err.println("Unknown card state: " + clientModel.getCurrCardState());
+//        }
+//    }
+
     @Override
     public void onGridButtonClick(int row, int column) {
+        // Controllo se è il turno del giocatore corrente
+        if (!isPlayerTurnActive()) {
+            showTurnMessage();
+            return; // Blocca l'esecuzione se non è il turno del giocatore
+        }
+
         Coordinates coordinates = new Coordinates(row, column);
         switch (clientModel.getCurrCardState()) {
             case CardState.CHOOSE_ENGINES -> {
@@ -1192,6 +1284,79 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             default -> System.err.println("Unknown card state: " + clientModel.getCurrCardState());
         }
     }
+
+    /**
+     * Verifica se è il turno attivo del giocatore corrente basandosi sui controlli
+     * implementati nel ClientController per mantenere coerenza logica.
+     *
+     * @return true se il giocatore può interagire, false altrimenti
+     */
+    private boolean isPlayerTurnActive() {
+        // Controllo base: è il mio turno?
+        if (!clientModel.isMyTurn()) {
+            return false;
+        }
+
+        CardState currentState = clientModel.getCurrCardState();
+
+        // Utilizza la stessa logica del ClientController per determinare
+        // se lo stato richiede che sia specificamente il turno del giocatore
+        if (isStateRegardingCurrentPlayerOnly(currentState)) {
+            // Per questi stati, se isMyTurn() è true, il giocatore può agire
+            return true;
+        }
+
+        // Per stati che potrebbero permettere azioni simultanee o avere logica speciale
+        switch (currentState) {
+            case CardState.START_CARD:
+            case CardState.END_OF_CARD:
+                // Stati informativi, generalmente non richiedono interazione
+                return false;
+
+            default:
+                // Per altri stati non specificati, segui la logica base del turno
+                return true;
+        }
+    }
+
+    private boolean isStateRegardingCurrentPlayerOnly(CardState cardState) {
+        return cardState == CardState.HANDLE_CUBES_REWARD
+                || cardState == CardState.CHOOSE_PLANET
+                || cardState == CardState.VISIT_LOCATION
+                || cardState == CardState.REMOVE_CREW_MEMBERS
+                || cardState == CardState.CHOOSE_ENGINES
+                || cardState == CardState.DANGEROUS_ATTACK
+                || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK
+                || cardState == CardState.ACCEPT_THE_REWARD
+                || cardState == CardState.CHOOSE_CANNONS
+                || cardState == CardState.EPIDEMIC;
+    }
+
+    /**
+     * Mostra un messaggio appropriato quando non è il turno del giocatore,
+     * utilizzando la stessa logica di messaggistica del ClientController
+     */
+    private void showTurnMessage() {
+        CardState currentState = clientModel.getCurrCardState();
+        String currentPlayer = clientModel.getCurrentPlayer();
+
+        // Replica i messaggi dal ClientController per coerenza
+        if (isStateRegardingCurrentPlayerOnly(currentState)) {
+            if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
+                showMessage(currentPlayer + " is currently playing. Soon will be your turn", false);
+            } else {
+                showMessage("Wait for " + currentPlayer + " to make his choice", false);
+            }
+        } else {
+            // Per stati generali, messaggio semplice
+            if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
+                showMessage("È il turno di " + currentPlayer + ". Attendi il tuo turno.", false);
+            } else {
+                showMessage("Non è il tuo turno. Attendi prima di effettuare azioni.", false);
+            }
+        }
+    }
+
 
     private void showWaitingMessage() {
         String currentPlayer = clientModel.getCurrentPlayer();
@@ -1392,10 +1557,13 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         // Check if the player has any storage available
         if (!storageManager.hasAnyStorage()) {
-            showMessage("No available storages on your ship. You cannot accept any reward.", false);
-            // TODO aggiungere il popup di ali con il bottone per confermare
-            List<Coordinates> emptyList = new ArrayList<>();
-            clientController.playerChoseStorage(clientController.getNickname(), emptyList);
+//            showMessage("No available storages on your ship. You cannot accept any reward.", false);
+            showInfoPopupWithCallback("No available storages on your ship. You cannot accept any reward.", clientModel.getCurrAdventureCard(),
+                    () -> createAndAddButton("Continue", () -> {
+                        Platform.runLater(() -> bottomHBox.getChildren().clear());
+                        List<Coordinates> emptyList = new ArrayList<>();
+                        clientController.playerChoseStorage(clientController.getNickname(), emptyList);
+                    }));
             return;
         }
 
@@ -1403,6 +1571,9 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         ClientCard currCard = clientModel.getCurrAdventureCard();
         if (currCard instanceof ClientPlanets)
             showMessage("You have chosen planet " + planetChoice + " look at your rewards!!!", true);
+
+        else if(currCard instanceof ClientAbandonedStation)
+            showMessage("You’ve landed on the cargo. Enjoy your rewards!!!", true);
         else
             showMessage("You have accepted the reward, look at it!!!", true);
 

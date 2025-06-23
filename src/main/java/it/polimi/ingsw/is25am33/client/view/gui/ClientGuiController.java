@@ -199,8 +199,14 @@ public class ClientGuiController extends Application implements ClientView {
             executeWithController(
                     CARD_PHASE_CONTROLLER,
                         () -> cardPhaseController.showAbandonedShipMenu());
-        } else
-            System.err.println("Not AbandonedShip card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
+        } else if (clientModel.getCurrAdventureCard() instanceof ClientAbandonedStation){
+            executeWithController(
+                    CARD_PHASE_CONTROLLER,
+                    () -> cardPhaseController.showAbandonedStationMenu());
+        }
+        else
+            System.err.println("Not an expective card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
+
     }
 
     @Override
@@ -230,6 +236,7 @@ public class ClientGuiController extends Application implements ClientView {
             }
         }
     }
+
 
     @Override
     public void showChooseCannonsMenu() {
@@ -301,9 +308,9 @@ public class ClientGuiController extends Application implements ClientView {
 
         if (clientModel.getCurrAdventureCard() instanceof ClientEpidemic) {
             executeWithController(
-                CARD_PHASE_CONTROLLER,
-                () -> cardPhaseController.showEpidemicMenu()
-            );
+                    CARD_PHASE_CONTROLLER,
+                    () -> cardPhaseController.showEpidemicMenu());
+
         }
         else
             System.err.println("Not EpidemicCard: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
@@ -353,22 +360,6 @@ public class ClientGuiController extends Application implements ClientView {
     public void cancelInputWaiting() {
 
     }
-
-//    @Override
-//    public void showError(String errorMessage) {
-//        switch (errorMessage) {
-//            case "Color already in use", "GameModel already started":
-//                mainMenuViewController.showError(errorMessage);
-//                break;
-//            default:
-//                startViewController.showServerError(errorMessage);
-//        }
-//    }
-
-//    @Override
-//    public void askNickname() {
-//        startViewController.askNickname();
-//    }
 
     @Override
     public int[] askCreateGame() {

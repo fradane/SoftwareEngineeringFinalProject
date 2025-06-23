@@ -26,8 +26,8 @@
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
-      "SOUTH": "EMPTY",
-      "WEST": "DOUBLE"
+      "SOUTH": "DOUBLE",
+      "WEST": "EMPTY"
     },
     "imageName": "GT-new_tiles_16_for_web103.jpg"
   },
@@ -37,8 +37,8 @@
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
-      "SOUTH": "EMPTY",
-      "WEST": "DOUBLE"
+      "SOUTH": "DOUBLE",
+      "WEST": "EMPTY"
     },
     "imageName": "GT-new_tiles_16_for_web104.jpg"
   },

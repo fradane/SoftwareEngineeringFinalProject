@@ -69,12 +69,10 @@ public class MainMenuViewController extends GuiController {
 
     @FXML
     public void initialize() {
-        // Inizializza ComboBox
         colorComboBox.getItems().setAll(PlayerColor.values());
         playerCountComboBox.getItems().setAll(2, 3, 4);
 
-        // Personalizza la visualizzazione delle GameInfo nella ListView
-        gameListView.setCellFactory(param -> new ListCell<>() {
+        gameListView.setCellFactory(_ -> new ListCell<>() {
             @Override
             protected void updateItem(GameInfo gameInfo, boolean empty) {
                 super.updateItem(gameInfo, empty);
@@ -88,8 +86,7 @@ public class MainMenuViewController extends GuiController {
             }
         });
 
-        // Personalizza la visualizzazione dei colori nella ListView
-        colorListView.setCellFactory(param -> new ListCell<>() {
+        colorListView.setCellFactory(_ -> new ListCell<>() {
             @Override
             protected void updateItem(PlayerColor color, boolean empty) {
                 super.updateItem(color, empty);
@@ -104,6 +101,7 @@ public class MainMenuViewController extends GuiController {
 
     @FXML
     private void handleCreateGame() {
+        hideErrorLabel();
         showForm(createGameForm);
     }
 
@@ -114,7 +112,7 @@ public class MainMenuViewController extends GuiController {
         PlayerColor chosenColor = colorComboBox.getValue();
 
         if (chosenColor == null || numPlayers == null) {
-            showError("Please fill all fields to create your mission.");
+            showErrorMessage("Please fill all fields to create your mission.");
             return;
         }
 
@@ -124,7 +122,6 @@ public class MainMenuViewController extends GuiController {
 
     @FXML
     private void handleExit() {
-        // Animazione di uscita opzionale
         FadeTransition fadeOut = new FadeTransition(Duration.millis(300), mainMenu);
         fadeOut.setToValue(0.0);
         fadeOut.setOnFinished(e -> System.exit(0));
@@ -133,6 +130,7 @@ public class MainMenuViewController extends GuiController {
 
     @FXML
     public void handleChooseGameForm() {
+        hideErrorLabel();
         showForm(chooseGameForm);
     }
 
@@ -140,14 +138,13 @@ public class MainMenuViewController extends GuiController {
     public void handleChooseGame() {
         GameInfo gameInfo = gameListView.getSelectionModel().getSelectedItem();
         if (gameInfo == null) {
-            showError("Select a mission from the list to join the adventure.");
+            showErrorMessage("Select a mission from the list to join the adventure.");
             return;
         }
 
         currGameId = gameInfo.getGameId();
         showForm(joinGameForm);
 
-        // Filtra i colori disponibili
         colorListView.setItems(FXCollections.observableArrayList(
                 colors.stream()
                         .filter(color -> !gameInfo.getConnectedPlayers().containsValue(color))
@@ -159,7 +156,7 @@ public class MainMenuViewController extends GuiController {
     public void handleSubmitJoinGame() {
         PlayerColor chosenColor = colorListView.getSelectionModel().getSelectedItem();
         if (chosenColor == null) {
-            showError("Select your pilot color to join the mission.");
+            showErrorMessage("Select your color to join the mission.");
             return;
         }
 
@@ -167,27 +164,24 @@ public class MainMenuViewController extends GuiController {
         showForm(joinOtherPlayersScreen);
     }
 
-    // Metodi di navigazione per i bottoni BACK
     @FXML
     private void backToMainMenu() {
+        hideErrorLabel();
         showForm(mainMenu);
     }
 
     @FXML
     private void backToChooseGame() {
+        hideErrorLabel();
         showForm(chooseGameForm);
     }
 
-    /**
-     * Mostra un form specifico nascondendo tutti gli altri
-     */
+
     private void showForm(VBox targetForm) {
         Platform.runLater(() -> {
-            // Lista di tutti i form
             VBox[] allForms = {mainMenu, createGameForm, chooseGameForm,
                     joinGameForm, gameCreatedScreen, joinOtherPlayersScreen};
 
-            // Nascondi tutti i form
             for (VBox form : allForms) {
                 form.setVisible(false);
                 form.setManaged(false);
@@ -205,31 +199,53 @@ public class MainMenuViewController extends GuiController {
         });
     }
 
-    /**
-     * Mostra un messaggio di errore senza popup (usando label o console)
-     */
-    private void showError(String message) {
-        // Per ora stampa in console, potresti aggiungere una label di errore nell'FXML
-        System.err.println("Error: " + message);
+    private void showErrorMessage(String message) {
+        Platform.runLater(() -> {
+            if (errorLabel != null) {
+                errorLabel.setText(message);
+                errorLabel.setVisible(true);
+                errorLabel.setManaged(true);
 
-        // Opzionale: potresti aggiungere una label di errore nell'interfaccia
-        // errorLabel.setText(message);
-        // errorLabel.setVisible(true);
+                errorLabel.setOpacity(0.0);
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(200), errorLabel);
+                fadeIn.setToValue(1.0);
+                fadeIn.play();
+
+                System.err.println("Error: " + message);
+            }
+        });
     }
 
-    /**
-     * Implementazione del metodo showMessage senza popup
-     */
+    private void hideErrorLabel() {
+        Platform.runLater(() -> {
+            if (errorLabel != null) {
+                errorLabel.setVisible(false);
+                errorLabel.setManaged(false);
+                errorLabel.setText("");
+            }
+        });
+    }
+
     @Override
     public void showMessage(String errorMessage, boolean isPermanent) {
         Platform.runLater(() -> {
-            // Gestione degli errori specifici
             if (errorMessage.equals("Color already in use")) {
                 showForm(joinGameForm);
-                showError("Color already taken by another pilot. Choose a different color.");
-            } else {
+                showErrorMessage("Color already taken. Choose a different color.");
+            } else if (errorMessage.equals("GameModel already started")) {
                 showForm(mainMenu);
-                showError(errorMessage);
+                showErrorMessage("This game has already started. Please choose another game.");
+            } else {
+                showErrorMessage(errorMessage);
+            }
+
+            if (!isPermanent) {
+                new java.util.Timer().schedule(new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        hideErrorLabel();
+                    }
+                }, 4000);
             }
         });
     }
