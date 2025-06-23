@@ -9,7 +9,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 
 import java.io.IOException;
@@ -59,7 +58,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) throws IOException;
 
-    void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws IOException;
+    void notifyVisibleDeck(String nickname, List<List<ClientCard>> littleVisibleDeck) throws IOException;
 
     void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws IOException;
 

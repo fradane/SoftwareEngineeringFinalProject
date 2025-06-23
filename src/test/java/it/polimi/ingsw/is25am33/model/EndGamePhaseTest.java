@@ -220,7 +220,7 @@ public class EndGamePhaseTest {
         }
 
         @Override
-        public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDecks) throws RemoteException {
+        public void notifyVisibleDeck(String nickname, List<List<ClientCard>> littleVisibleDecks) throws RemoteException {
             notifications.add("visibleDeck:" + nickname);
         }
 

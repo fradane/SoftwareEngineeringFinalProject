@@ -11,6 +11,7 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea
 *.iws
 *.iml
 *.ipr
@@ -39,3 +40,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Auto-generated MANIFEST files
+**/META-INF/MANIFEST.MF

@@ -11,7 +11,6 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
-import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import it.polimi.ingsw.is25am33.network.DNS;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
@@ -641,7 +640,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDeck) throws IOException {
+    public void notifyVisibleDeck(String nickname, List<List<ClientCard>> littleVisibleDeck) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyVisibleDeck");
         outMessage.setParamLittleVisibleDecks(littleVisibleDeck);
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
