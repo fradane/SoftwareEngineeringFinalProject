@@ -155,65 +155,17 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
         }
 
-        Map<Future<?>, String> futureNicknames = new HashMap<>();
-        List<GameInfo> availableGames = getAvailableGames();
-
-        clients.forEach((clientNickname, clientController) -> {
-            Future<?> future = executor.submit(() -> {
-                try {
-                    if(!clientGame.containsKey(clientNickname))
-                        clientController.notifyGameInfos(clientNickname, availableGames);
-                } catch (IOException e) {
-                    System.err.println("errore nella notifica di aggiunta a "+ clientNickname);
-                }
-            });
-            futureNicknames.put(future, clientNickname);
-        });
-
-        futureNicknames.forEach((future, clientNickname) -> {
-            try {
-                //TODO riabbassare a 5 secondi
-                future.get(5, TimeUnit.SECONDS);
-            } catch (TimeoutException e) {
-                System.err.println("Timeout nella notifica del client: " + clientNickname);
-                future.cancel(true);
-            } catch (InterruptedException | ExecutionException e) {
-                System.err.println("Errore nella notifica del client: " + clientNickname);
-                e.printStackTrace();
-            }
-        });
+        // Notifica tutti i client in attesa che è stata creata una nuova partita
+        notifyAvailableGamesToWaitingClients();
 
         return newGameController.getGameInfo();
     }
 
     public void removeGame(String gameId) {
         gameControllers.remove(gameId);
-        Map<Future<?>, String> futureNicknames = new HashMap<>();
-        List<GameInfo> availableGames = getAvailableGames();
 
-        clients.forEach((clientNickname, clientController) -> {
-                    Future<?> future = executor.submit(() -> {
-                        try {
-                            if(!clientGame.containsKey(clientNickname))
-                                clientController.notifyGameInfos(clientNickname, availableGames);
-                        } catch (IOException e) {}
-                    });
-                    futureNicknames.put(future, clientNickname);
-                });
-
-        futureNicknames.forEach((future, clientNickname) -> {
-            try {
-                //TODO riabbassare a 1 secondo
-                future.get(1, TimeUnit.SECONDS);
-            } catch (TimeoutException e) {
-                System.err.println("Timeout nella notifica del client: " + clientNickname);
-                future.cancel(true);
-            } catch (InterruptedException | ExecutionException e) {
-                System.err.println("Errore nella notifica del client: " + clientNickname);
-                e.printStackTrace();
-            }
-        });
-
+        // Notifica tutti i client in attesa che una partita è stata rimossa
+        notifyAvailableGamesToWaitingClients();
     }
 
     public void pingToClientFromServer(String nickname) throws IOException{
@@ -278,6 +230,9 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
             controller.notifyNewPlayerJoined(gameId, nickname, color).start();
 
+            // Notifica tutti i client in attesa che la lista partite è cambiata
+            notifyAvailableGamesToWaitingClients();
+
             System.out.println("[" + gameId + "] " + nickname + " joined game with color " + color);
 
             // if the game is completed, it starts automatically
@@ -287,6 +242,37 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
             return true;
         }
+    }
+
+    /**
+     * Notifica tutti i client non in partita della lista aggiornata dei giochi disponibili
+     */
+    private void notifyAvailableGamesToWaitingClients() {
+        Map<Future<?>, String> futureNicknames = new HashMap<>();
+        List<GameInfo> availableGames = getAvailableGames();
+
+        clients.forEach((clientNickname, clientController) -> {
+            Future<?> future = executor.submit(() -> {
+                try {
+                    if(!clientGame.containsKey(clientNickname))
+                        clientController.notifyGameInfos(clientNickname, availableGames);
+                } catch (IOException e) {
+                    System.err.println("errore nella notifica di aggiornamento a "+ clientNickname);
+                }
+            });
+            futureNicknames.put(future, clientNickname);
+        });
+
+        futureNicknames.forEach((future, clientNickname) -> {
+            try {
+                future.get(3, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                System.err.println("Timeout nella notifica del client: " + clientNickname);
+                future.cancel(true);
+            } catch (InterruptedException | ExecutionException e) {
+                System.err.println("Errore nella notifica del client: " + clientNickname);
+            }
+        });
     }
 
     private String generateUniqueGameId() {

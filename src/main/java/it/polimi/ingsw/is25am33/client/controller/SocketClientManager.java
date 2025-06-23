@@ -663,7 +663,8 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     @Override
     public void playerWantsToLand(String nickname) throws IOException {
-        //TODO
+        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToLand");
+        out.println(ClientSerializer.serialize(outMessage));
     }
 
     @Override

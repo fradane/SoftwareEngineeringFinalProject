@@ -175,8 +175,9 @@ public class PlanetsTest {
 
         planets.play(choices);
 
-        // Verifica che il pianea viene tolto
-        assertFalse(planets.getAvailablePlanets().contains(planet1));
+        // Verifica che il pianeta viene tolto
+        assertTrue(planets.getAvailablePlanets().get(0).isBusy());
+        assertFalse(planets.getAvailablePlanets().get(1).isBusy());
         assertEquals(CardState.HANDLE_CUBES_REWARD, planets.getCurrState());
 
     }

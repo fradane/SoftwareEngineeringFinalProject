@@ -639,7 +639,6 @@ public class PrefabShipFactory {
     private static boolean applyNaveCompleta(ShipBoard shipBoard) {
         clearShipBoard(shipBoard);
 
-
         // Riga 6
         addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, EMPTY, DOUBLE, EMPTY)), 6, 6, "GT-new_tiles_16_for_web108.jpg");
         addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, EMPTY, UNIVERSAL)), 6, 7, "GT-new_tiles_16_for_web48.jpg");

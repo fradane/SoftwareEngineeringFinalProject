@@ -308,6 +308,10 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).debugSkipToLastCard();
                 break;
 
+            case "playerWantsToLand":
+                gameControllers.get(nickname).playerWantsToLand(nickname);
+                break;
+
             default:
                 System.err.println("Invalid action: " + action);
                 throw new RemoteException("Not properly formatted json");

@@ -6,6 +6,7 @@ import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
+import it.polimi.ingsw.is25am33.client.model.card.ClientPlanets;
 import it.polimi.ingsw.is25am33.client.model.card.CrewMalusCard;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;

@@ -3052,7 +3052,7 @@ public class ClientCLIView implements ClientView {
 
                         case 2:
                             clientState = JOIN_GAME_CHOOSE_GAME_ID;
-                            showAvailableGames(clientController.getGames());
+                            showAvailableGames(clientController.getObservableGames());
                             break;
 
                         default:
@@ -3402,8 +3402,13 @@ public class ClientCLIView implements ClientView {
                 case CHOOSE_PLANET_MENU:
                     try {
                         int planetChoice = Integer.parseInt(input);
+
+                        ClientPlanets card = (ClientPlanets) clientModel.getCurrAdventureCard();
+                        if(planetChoice != 0 && (card.getAvailablePlanets().get(planetChoice-1)==null || card.getAvailablePlanets().get(planetChoice-1).isBusy()))
+                            throw new NumberFormatException();
+
                         clientController.playerWantsToVisitPlanet(clientController.getNickname(), planetChoice);
-                    } catch (NumberFormatException e) {
+                    } catch (NumberFormatException | IndexOutOfBoundsException e) {
                         showMessage("Please enter a valid planet number.", ERROR);
                     }
                     break;
