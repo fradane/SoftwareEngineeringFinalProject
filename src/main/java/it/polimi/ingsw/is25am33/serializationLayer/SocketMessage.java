@@ -56,6 +56,7 @@ public class SocketMessage {
     private List<PrefabShipInfo> paramPrefabShips;
     private List<PlayerFinalData> paramPlayerFinalDataRanking;
     private List<String> paramStringList;
+    private List<Component> paramComponentList;
 
     public SocketMessage(String senderNickname, String actions) {
         this.senderNickname = senderNickname;
@@ -347,4 +348,11 @@ public class SocketMessage {
         return messageAsMap;
     }
 
+    public List<Component> getParamComponentList() {
+        return paramComponentList;
+    }
+
+    public void setParamComponentList(List<Component> paramComponentList) {
+        this.paramComponentList = paramComponentList;
+    }
 }

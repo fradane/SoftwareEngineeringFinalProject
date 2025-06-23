@@ -1,5 +1,7 @@
 package it.polimi.ingsw.is25am33.model.game;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 
 import java.io.Serializable;
@@ -47,12 +49,19 @@ public class PlayerFinalData implements Serializable {
      * @param allOwnedCubes the list of cargo cubes owned by the player
      * @param lostComponents the number of ship components lost by the player
      */
-    public PlayerFinalData (String nickname, int totalCredits, boolean isEarlyLanded, List<CargoCube> allOwnedCubes, int lostComponents) {
+    @JsonCreator
+    public PlayerFinalData(
+            @JsonProperty("nickname") String nickname,
+            @JsonProperty("totalCredits") int totalCredits,
+            @JsonProperty("isEarlyLanded") boolean isEarlyLanded,
+            @JsonProperty("allOwnedCubes") List<CargoCube> allOwnedCubes,
+            @JsonProperty("lostComponents") int lostComponents
+    ) {
         this.nickname = nickname;
         this.totalCredits = totalCredits;
-        this.isEarlyLanded = isEarlyLanded;
         this.allOwnedCubes = allOwnedCubes;
         this.lostComponents = lostComponents;
+        this.isEarlyLanded = isEarlyLanded;
     }
 
     /**
@@ -60,6 +69,7 @@ public class PlayerFinalData implements Serializable {
      *
      * @return true if the player landed early, otherwise false.
      */
+    @JsonProperty("isEarlyLanded")
     public boolean isEarlyLanded() {
         return isEarlyLanded;
     }
@@ -94,4 +104,6 @@ public class PlayerFinalData implements Serializable {
     public String getNickname() {
         return nickname;
     }
+
+
 }

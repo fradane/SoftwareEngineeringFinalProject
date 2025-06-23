@@ -45,6 +45,13 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
 
         //TODO aggiungere il fatto che non si possono prenotare più di due componenti
         //TODO quando un componente riservato diventa focused non lo puoi rilasciare
+        if(notActiveComponents.size() >= 2) {
+            gameClientNotifier.notifyClients(Set.of(player.getNickname()), (nicknameToNotify, clientController) -> {
+                clientController.notifyErrorWhileBookingComponent(nicknameToNotify, player.getNickname(), focusedComponent);
+            });
+            releaseFocusedComponent();
+            return;
+        }
 
         notActiveComponents.add(focusedComponent);
         focusedComponent.setCurrState(ComponentState.BOOKED);
@@ -53,6 +60,7 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
             clientController.notifyBookedComponent(nicknameToNotify, player.getNickname(), focusedComponent);
         });
 
+        releaseFocusedComponent();
     }
 
     public int[] handleDangerousObject(DangerousObj obj){
@@ -76,7 +84,8 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
         if (choice < 0 || choice >= getBookedComponents().size())
             return;
 
-        Component reservedComponent = getBookedComponents().remove(choice);
+        //Component reservedComponent = getBookedComponents().remove(choice);
+        Component reservedComponent = getBookedComponents().get(choice);
         setFocusedComponent(reservedComponent);
     }
 

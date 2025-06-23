@@ -12,6 +12,7 @@ import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -650,6 +651,16 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.showMessage(nicknameAndMotivations, STANDARD);
     }
 
+    @Override
+    public void notifyErrorWhileBookingComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException {
+        view.showMessage("Cannot book more than 2 components", ERROR);
+    }
+
+    @Override
+    public void notifyNotActiveComponents(String nicknameToNotify, String nickname, List<Component> notActiveComponents) throws IOException {
+        clientModel.getShipboardOf(nickname).setNotActiveComponents(notActiveComponents);
+    }
+
     public void evaluatedCrewMembers(){
         try{
             serverController.evaluatedCrewMembers(nickname);
@@ -726,8 +737,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             // PS gli aggiornamenti sul modello di chi fa l'azione li gestiscono le notify o chi fa l'azione?
             // perche se io qua faccio book anche sul mio client model e poi mi arriva la notifica ne aggiungo due
             //((Level2ShipBoard) clientModel.getShipboardOf(nickname)).book();
-            serverController.playerWantsToReserveFocusedComponent(nickname);
-            view.showBuildShipBoardMenu();
+            if(clientModel.getShipboardOf(nickname).getBookedComponents().size() >= 2) {
+                view.showMessage("You cannot book more than 2 components", ERROR);
+                view.showPickedComponentAndMenu();
+            }
+            else {
+                serverController.playerWantsToReserveFocusedComponent(nickname);
+                view.showBuildShipBoardMenu();
+            }
         } catch (IOException e) {
             handleRemoteException(e);
         }
@@ -772,8 +789,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void placeFocusedComponent(int row, int column) {
         try {
-            clientModel.getShipboardOf(nickname).checkPosition(row, column);
-            serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column), clientModel.getShipboardOf(nickname).getFocusedComponent().getRotation());
+            ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
+            shipBoard.checkPosition(row, column);
+
+            serverController.playerWantsToPlaceFocusedComponent(nickname, new Coordinates(row, column), shipBoard.getFocusedComponent().getRotation());
             view.showBuildShipBoardMenu();
         } catch (IOException e) {
             handleRemoteException(e);
@@ -878,7 +897,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
 
         try {
-            Component component = clientModel.getShipboardOf(nickname).getBookedComponents().remove(choice);
+            //Component component = clientModel.getShipboardOf(nickname).getBookedComponents().remove(choice);
+            Component component = clientModel.getShipboardOf(nickname).getBookedComponents().get(choice);
             clientModel.getMyShipboard().setFocusedComponent(component);
             // TODO da sostituire: aggiungere il caso in cui non si possa piu riservare
             //((Level2ShipBoard) clientModel.getShipboardOf(nickname)).focusReservedComponent(choice);

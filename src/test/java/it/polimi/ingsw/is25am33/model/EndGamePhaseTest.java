@@ -284,6 +284,16 @@ public class EndGamePhaseTest {
             notifications.add("notifyLeastResourcedPlayer:" + nicknameAndMotivations);
         }
 
+        @Override
+        public void notifyErrorWhileBookingComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException {
+            notifications.add("notifyErrorWhileBookingComponent:" + nickname);
+        }
+
+        @Override
+        public void notifyNotActiveComponents(String nicknameToNotify, String nickname, List<Component> notActiveComponents) throws IOException {
+            notifications.add("notifyNotActiveComponents:" + nickname);
+        }
+
         public List<String> getNotifications() {
             return notifications;
         }

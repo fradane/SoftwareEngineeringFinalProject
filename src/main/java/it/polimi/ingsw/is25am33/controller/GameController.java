@@ -165,7 +165,8 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     public void playerWantsToReleaseFocusedComponent(String nickname) throws RemoteException {
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
         Component component = shipBoard.releaseFocusedComponent();
-        gameModel.getComponentTable().addVisibleComponent(component);
+        if(!shipBoard.getNotActiveComponents().contains(component))
+            gameModel.getComponentTable().addVisibleComponent(component);
     }
 
     @Override

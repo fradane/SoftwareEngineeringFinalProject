@@ -467,4 +467,6 @@ public interface ShipBoardClient {
 
     List<CargoCube> getCargoCubes();
 
+    void setNotActiveComponents(List<Component> notActiveComponents);
+
 }

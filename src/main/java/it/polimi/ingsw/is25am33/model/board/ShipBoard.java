@@ -318,19 +318,26 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
         synchronized (shipMatrix) {
 
-          checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
+            checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
 
             shipMatrix[x][y] = focusedComponent;
 
             focusedComponent.insertInComponentsMap(componentsPerType);
 
-                gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                        clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-                });
+            if(notActiveComponents.contains(focusedComponent))
+                notActiveComponents.remove(focusedComponent);
 
-                gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyComponentPerType(nicknameToNotify,player.getNickname(),componentsPerType);
-                });
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+            });
+
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyComponentPerType(nicknameToNotify,player.getNickname(),componentsPerType);
+            });
+
+            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyNotActiveComponents(nicknameToNotify,player.getNickname(),notActiveComponents);
+            });
 
             focusedComponent = null;
         }
@@ -1164,7 +1171,10 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     public Component releaseFocusedComponent() {
 
         Component component = getFocusedComponent();
-        component.setCurrState(ComponentState.VISIBLE);
+
+        if(!notActiveComponents.contains(focusedComponent))
+            component.setCurrState(ComponentState.VISIBLE);
+
         setFocusedComponent(null);
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
@@ -1176,7 +1186,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     }
 
 
-
+    public void setNotActiveComponents(List<Component> notActiveComponents) {
+        this.notActiveComponents = notActiveComponents;
+    }
 
     /**
      * Removes a component from the componentsPerType map

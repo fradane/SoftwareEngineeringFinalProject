@@ -2886,7 +2886,7 @@ public class ClientCLIView implements ClientView {
         }
     }
 
-    private void handleCrewPlacementInput(String input) {
+    private boolean handleCrewPlacementInput(String input) {
         if (input.equalsIgnoreCase("C")) {
             // Conferma le scelte
             ShipBoardClient shipBoard = clientModel.getShipboardOf(clientModel.getMyNickname());
@@ -2901,7 +2901,7 @@ public class ClientCLIView implements ClientView {
             showMessage(confirmMessage.toString(), STANDARD);
 
             clientController.submitCrewChoices(new HashMap<>(crewChoices));
-            return;
+            return true;
         }
 
         if (input.equalsIgnoreCase("R")) {
@@ -2909,7 +2909,7 @@ public class ClientCLIView implements ClientView {
             crewChoices.clear();
             showMessage("All choices have been reset.", STANDARD);
             showCrewPlacementMenu();
-            return;
+            return true;
         }
 
         try {
@@ -2920,7 +2920,7 @@ public class ClientCLIView implements ClientView {
                 if (!crewPlacementCoordinatesMap.containsKey(index)) {
                     showMessage("Invalid cabin index. Please select a number between 1 and " +
                             crewPlacementCoordinatesMap.size(), ERROR);
-                    return;
+                    return false;
                 }
 
                 Coordinates coords = crewPlacementCoordinatesMap.get(index);
@@ -2932,11 +2932,11 @@ public class ClientCLIView implements ClientView {
                     showMessage("Removed " + (removed == CrewMember.PURPLE_ALIEN ? "purple" : "brown") +
                             " alien from cabin. It will receive humans instead.", STANDARD);
                     showCrewPlacementMenu();
+                    return true;
                 } else {
                     showMessage("This cabin doesn't have an alien assigned yet. Use " + index + "P or " + index + "B to assign an alien.", STANDARD);
+                    return false;
                 }
-
-                return;
             }
 
             // Formato per assegnare direttamente un alieno: [index][P|B]
@@ -2947,7 +2947,7 @@ public class ClientCLIView implements ClientView {
                 if (!crewPlacementCoordinatesMap.containsKey(index)) {
                     showMessage("Invalid cabin index. Please select a number between 1 and " +
                             crewPlacementCoordinatesMap.size(), ERROR);
-                    return;
+                    return false;
                 }
 
                 Coordinates coords = crewPlacementCoordinatesMap.get(index);
@@ -2969,12 +2969,12 @@ public class ClientCLIView implements ClientView {
                         // Verifica se supporta Purple e se non è già stato selezionato
                         if (!supportedColors.contains(ColorLifeSupport.PURPLE)) {
                             showMessage("This cabin is not connected to a purple life support module", ERROR);
-                            return;
+                            return false;
                         }
 
                         if (purpleAlreadySelected) {
                             showMessage("You can only have 1 purple alien on your ship", ERROR);
-                            return;
+                            return false;
                         }
 
                         crewChoices.put(coords, CrewMember.PURPLE_ALIEN);
@@ -2985,12 +2985,12 @@ public class ClientCLIView implements ClientView {
                         // Verifica se supporta Brown e se non è già stato selezionato
                         if (!supportedColors.contains(ColorLifeSupport.BROWN)) {
                             showMessage("This cabin is not connected to a brown life support module", ERROR);
-                            return;
+                            return false;
                         }
 
                         if (brownAlreadySelected) {
                             showMessage("You can only have 1 brown alien on your ship", ERROR);
-                            return;
+                            return false;
                         }
 
                         crewChoices.put(coords, CrewMember.BROWN_ALIEN);
@@ -2999,7 +2999,7 @@ public class ClientCLIView implements ClientView {
 
                     default:
                         showMessage("Invalid choice. Use P for purple alien or B for brown alien", ERROR);
-                        return;
+                        return false;
                 }
 
                 // Mostra messaggio di feedback e aggiorna il menu
@@ -3009,11 +3009,15 @@ public class ClientCLIView implements ClientView {
 
                 // Aggiorna il menu per mostrare lo stato corrente
                 showCrewPlacementMenu();
+
+                return true;
             } else {
                 showMessage("Invalid input format. Use [number] to remove an alien, [number]P or [number]B to assign aliens, C to confirm, or R to reset", ERROR);
+                return false;
             }
         } catch (NumberFormatException e) {
-            showMessage("Invalid input format. Please enter a valid number.", ERROR);
+            showMessage("Invalid input format. Use [number] to remove an alien, [number]P or [number]B to assign aliens, C to confirm, or R to reset", ERROR);
+            return false;
         }
     }
 
@@ -3399,7 +3403,10 @@ public class ClientCLIView implements ClientView {
 
                 case CREW_PLACEMENT_MENU:
                     setClientState(WAITING_FOR_SERVER);
-                    handleCrewPlacementInput(input);
+                    boolean isInputValid = handleCrewPlacementInput(input);
+                    if(!isInputValid){
+                        setClientState(CREW_PLACEMENT_MENU);
+                    }
                     break;
 
                 case NO_CREW_TO_PLACE:

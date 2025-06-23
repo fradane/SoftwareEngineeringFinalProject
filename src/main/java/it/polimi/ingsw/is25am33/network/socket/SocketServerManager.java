@@ -304,6 +304,10 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                     gameControllers.get(nickname).startCheckShipBoardAfterAttack(nickname);
                 break;
 
+            case "debugSkipToLastCard":
+                gameControllers.get(nickname).debugSkipToLastCard();
+                break;
+
             default:
                 System.err.println("Invalid action: " + action);
                 throw new RemoteException("Not properly formatted json");
@@ -683,6 +687,22 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     public  void notifyLeastResourcedPlayer(String nicknameToNotify, String nicknameAndMotivations) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyLeastResourcedPlayer");
         outMessage.setParamString(nicknameAndMotivations);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyErrorWhileBookingComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyErrorWhileBookingComponent");
+        outMessage.setParamString(nickname);
+        outMessage.setParamComponent(focusedComponent);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyNotActiveComponents(String nicknameToNotify, String nickname, List<Component> notActiveComponents) throws IOException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyNotActiveComponents");
+        outMessage.setParamString(nickname);
+        outMessage.setParamComponentList(notActiveComponents);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 

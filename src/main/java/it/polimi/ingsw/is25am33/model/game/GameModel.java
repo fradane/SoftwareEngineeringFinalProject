@@ -1009,6 +1009,8 @@ public class GameModel {
                 }
             }
 
+            shipBoard.getMainCabin().fillCabin(CrewMember.HUMAN);
+
             gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyShipBoardUpdate(nicknameToNotify, player.getNickname(), shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
             });

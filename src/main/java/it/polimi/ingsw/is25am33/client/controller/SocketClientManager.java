@@ -541,6 +541,19 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                         clientController.notifyPlayerEarlyLanded(nickname, notification.getParamString());
                     }
                     break;
+
+                case "notifyErrorWhileBookingComponent":
+                    if (clientController != null) {
+                        clientController.notifyErrorWhileBookingComponent(nickname, notification.getParamString(), notification.getParamComponent());
+                    }
+                    break;
+
+                case "notifyNotActiveComponents":
+                    if (clientController != null) {
+                        clientController.notifyNotActiveComponents(nickname, notification.getParamString(), notification.getParamComponentList());
+                    }
+                    break;
+
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }
@@ -799,6 +812,7 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     @Override
     public void debugSkipToLastCard() throws IOException {
-        //TODO
+        SocketMessage outMessage = new SocketMessage(nickname, "debugSkipToLastCard");
+        out.println(ClientSerializer.serialize(outMessage));
     }
 }

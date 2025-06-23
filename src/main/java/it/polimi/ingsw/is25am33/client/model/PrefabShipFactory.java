@@ -11,9 +11,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.EMPTY;
-import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.SINGLE;
-import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.DOUBLE;
+import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.*;
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.WEST;
 
@@ -92,8 +90,6 @@ public class PrefabShipFactory {
                 "Ship without humans for elimination tests",
                 false
         ));
-
-
 
         PREFAB_SHIPS.put("cargo_hauler", new PrefabShipInfo(
                 "cargo_hauler",
@@ -475,63 +471,60 @@ public class PrefabShipFactory {
         component.insertInComponentsMap(shipBoard.getComponentsPerType());
     }
 
+    private static void addComponent(ShipBoard shipBoard, Component component, int x, int y, String imageName) {
+        // Passaggio da coordinate 1-based a 0-based
+        int x_0_based = x-1;
+        int y_0_based = y-1;
+
+        Component[][] matrix = shipBoard.getShipMatrix();
+        matrix[x_0_based][y_0_based] = component;
+        component.insertInComponentsMap(shipBoard.getComponentsPerType());
+        component.setImageName(imageName);
+    }
+
     /**
      * Applica una nave completa con tutti i tipi di componenti per testare il gioco
      */
     private static boolean applyNaveCompleta(ShipBoard shipBoard) {
         clearShipBoard(shipBoard);
 
-        // Cabine con LifeSupport - posizionate intorno alla MainCabin
-        // Cabina 1 (comunicante con cabina 2) - con LifeSupport PURPLE
-        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 8);
-        addComponent(shipBoard, new LifeSupport(createSimpleConnectors(), ColorLifeSupport.PURPLE), 7, 9);
 
-        // Cabina 2 (comunicante con cabina 1) - con LifeSupport BROWN
-        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 8, 8);
-        addComponent(shipBoard, new LifeSupport(createSimpleConnectors(), ColorLifeSupport.BROWN), 9, 8);
+        // Riga 5
+        Shield shield5 = new Shield(createCustomConnectors(EMPTY, SINGLE, EMPTY, UNIVERSAL));
+        shield5.rotate();
+        shield5.rotate();
+        shield5.rotate();
+        addComponent(shipBoard, shield5, 5, 7, "GT-new_tiles_16_for_web155.jpg");
 
-        // Cabina 3 - senza LifeSupport (per equipaggio umano)
-        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 6);
+        // Riga 6
+        addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, EMPTY, DOUBLE, EMPTY)), 6, 6, "GT-new_tiles_16_for_web108.jpg");
+        addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, EMPTY, UNIVERSAL)), 6, 7, "GT-new_tiles_16_for_web48.jpg");
+        addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, SINGLE, EMPTY, EMPTY)), 6, 8, "GT-new_tiles_16_for_web102.jpg");
 
-        // Cabina 4 - senza LifeSupport (per equipaggio umano)
-        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 6, 7);
+        // Riga 7
+        DoubleCannon doubleCannon7 = new DoubleCannon(createCustomConnectors(EMPTY, DOUBLE, SINGLE, SINGLE));
+        doubleCannon7.rotate();
+        doubleCannon7.rotate();
+        doubleCannon7.rotate();
+        addComponent(shipBoard, doubleCannon7, 7, 5, "GT-new_tiles_16_for_web131.jpg");
+        addComponent(shipBoard, new BatteryBox(createCustomConnectors(EMPTY, EMPTY, UNIVERSAL, UNIVERSAL), 2), 7, 6, "GT-new_tiles_16_for_web10.jpg");
+        addComponent(shipBoard, new SpecialStorage(createCustomConnectors(SINGLE, SINGLE, SINGLE, UNIVERSAL), 1), 7, 8, "GT-new_tiles_16_for_web64.jpg");
+        addComponent(shipBoard, new Shield(createCustomConnectors(SINGLE, SINGLE, EMPTY, SINGLE)), 7, 9, "GT-new_tiles_16_for_web150.jpg");
 
-        // Motori - devono puntare SOUTH (verso il basso) e non verso altri componenti
-        // Engine singolo - posizionato in basso a sinistra
-        addComponent(shipBoard, new Engine(createCustomConnectors(SINGLE, EMPTY, SINGLE, EMPTY)), 5, 9);
+        // Riga 8
+        addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, DOUBLE, SINGLE)), 8, 5, "GT-new_tiles_16_for_web36.jpg");
+        addComponent(shipBoard, new LifeSupport(createCustomConnectors(EMPTY, EMPTY, EMPTY, UNIVERSAL), ColorLifeSupport.PURPLE), 8, 6, "GT-new_tiles_16_for_web145.jpg");
+        addComponent(shipBoard, new DoubleEngine(createCustomConnectors(SINGLE, EMPTY, EMPTY, EMPTY)), 8, 7, "GT-new_tiles_16_for_web92.jpg");
+        addComponent(shipBoard, new BatteryBox(createCustomConnectors(SINGLE, DOUBLE, EMPTY, EMPTY), 3), 8, 8, "GT-new_tiles_16_for_web12.jpg");
+        Cannon cannon8 = new Cannon(createCustomConnectors(EMPTY, EMPTY, DOUBLE, UNIVERSAL));
+        cannon8.rotate();
+        addComponent(shipBoard, cannon8, 8, 9, "GT-new_tiles_16_for_web125.jpg");
 
-        // DoubleEngine - posizionato in basso a destra
-        addComponent(shipBoard, new DoubleEngine(createCustomConnectors(SINGLE, EMPTY, EMPTY, SINGLE)), 9, 9);
-
-        // Cannoni - non devono puntare verso altri componenti
-        // Cannon singolo - punta verso NORTH (verso l'alto, zona libera)
-        addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, SINGLE, SINGLE, SINGLE)), 6, 5);
-
-        // DoubleCannon - punta verso WEST (sinistra, zona libera)
-        addComponent(shipBoard, new DoubleCannon(createCustomConnectors(SINGLE, SINGLE, SINGLE, EMPTY)), 4, 7);
-
-        // Scudi - per protezione
-        addComponent(shipBoard, new Shield(createSimpleConnectors()), 8, 6);
-        addComponent(shipBoard, new Shield(createSimpleConnectors()), 5, 7);
-
-        // BatteryBox - per energia
-        addComponent(shipBoard, new BatteryBox(createSimpleConnectors(), 3), 8, 5);
-        addComponent(shipBoard, new BatteryBox(createSimpleConnectors(), 2), 5, 6);
-
-        // Storage - per cargo
-        StandardStorage storage1 = new StandardStorage(createSimpleConnectors(), 4);
-        storage1.addCube(CargoCube.YELLOW);
-        storage1.addCube(CargoCube.BLUE);
-        addComponent(shipBoard, storage1, 9, 7);
-
-        SpecialStorage storage2 = new SpecialStorage(createSimpleConnectors(), 3);
-        storage2.addCube(CargoCube.RED);
-        storage2.addCube(CargoCube.GREEN);
-        addComponent(shipBoard, storage2, 6, 6);
-
-        // StructuralModules - per supporto strutturale
-        addComponent(shipBoard, new StructuralModules(createSimpleConnectors()), 5, 8);
-        addComponent(shipBoard, new StructuralModules(createSimpleConnectors()), 6, 9);
+        // Riga 9
+        addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, DOUBLE, DOUBLE, SINGLE)), 9, 5, "GT-new_tiles_16_for_web37.jpg");
+        addComponent(shipBoard, new LifeSupport(createCustomConnectors(EMPTY, EMPTY, DOUBLE, DOUBLE), ColorLifeSupport.BROWN), 9, 6, "GT-new_tiles_16_for_web141.jpg");
+        addComponent(shipBoard, new Engine(createCustomConnectors(UNIVERSAL, EMPTY, DOUBLE, EMPTY)), 9, 8, "GT-new_tiles_16_for_web79.jpg");
+        addComponent(shipBoard, new StandardStorage(createCustomConnectors(DOUBLE, SINGLE, EMPTY, DOUBLE), 3), 9, 9, "GT-new_tiles_16_for_web32.jpg");
 
         // Verifica la correttezza della nave
         shipBoard.checkShipBoard();
