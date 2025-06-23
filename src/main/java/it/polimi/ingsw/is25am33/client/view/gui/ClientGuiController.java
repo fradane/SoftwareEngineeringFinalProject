@@ -198,13 +198,7 @@ public class ClientGuiController extends Application implements ClientView {
         if (clientModel.getCurrAdventureCard() instanceof ClientAbandonedShip) {
             executeWithController(
                     CARD_PHASE_CONTROLLER,
-                        () -> {
-                            if (cardPhaseController != null) {
-                                cardPhaseController.showAbandonedShipMenu();
-                            } else {
-                                System.err.println("cardPhaseController è NULL!");
-                            }
-                        });
+                        () -> cardPhaseController.showAbandonedShipMenu());
         } else
             System.err.println("Not AbandonedShip card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
     }
@@ -216,13 +210,7 @@ public class ClientGuiController extends Application implements ClientView {
         if (clientModel.getCurrAdventureCard() instanceof ClientFreeSpace) {
             executeWithController(
                     CARD_PHASE_CONTROLLER,
-                    () -> {
-                        if (cardPhaseController != null) {
-                            cardPhaseController.showFreeSpaceMenu();
-                        } else {
-                            System.err.println("cardPhaseController è NULL!");
-                        }
-                    }
+                    () -> cardPhaseController.showFreeSpaceMenu()
             );
         }
         else
@@ -231,34 +219,33 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showAcceptTheRewardMenu() {
+        ClientCard card = clientModel.getCurrAdventureCard();
 
-        if(cardPhaseController != null) {
-            ClientCard card = clientModel.getCurrAdventureCard();
-
-            if (card.hasReward()) {
-                if (card instanceof ClientPirates) {
-                    executeWithController(
-                            CARD_PHASE_CONTROLLER,
-                            () -> cardPhaseController.showRewardMenu()
-                    );
-                }
+        if (card.hasReward()) {
+            if (card instanceof ClientPirates) {
+                executeWithController(
+                        CARD_PHASE_CONTROLLER,
+                        () -> cardPhaseController.showRewardMenu()
+                );
             }
         }
-
     }
 
     @Override
     public void showChooseCannonsMenu() {
         //TODO
-        if (cardPhaseController != null) {
-            if (clientModel.getCurrAdventureCard() instanceof ClientPirates) {
-                executeWithController(
-                        CARD_PHASE_CONTROLLER,
-                        () -> cardPhaseController.showPiratesMenu()
-                );
-            } else
-                System.err.println("Not PiratesCard: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
-        }
+        if (clientModel.getCurrAdventureCard() instanceof ClientPirates) {
+            executeWithController(
+                    CARD_PHASE_CONTROLLER,
+                    () -> cardPhaseController.showPiratesMenu()
+            );
+        } else if (clientModel.getCurrAdventureCard() instanceof ClientSlaveTraders) {
+            executeWithController(
+                    CARD_PHASE_CONTROLLER,
+                    () -> cardPhaseController.showSlaveTradersMenu()
+            );
+        } else
+            System.err.println("Not PiratesCard: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
     }
 
     @Override
@@ -279,20 +266,24 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showBigShotMenu() {
-        //TODO
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.showBigShotMenu()
+        );
     }
 
     @Override
     public void showHandleRemoveCrewMembersMenu() {
-      if(cardPhaseController != null) {
-            if (clientModel.getCurrAdventureCard() instanceof ClientAbandonedShip) {
-                executeWithController(
-                       CARD_PHASE_CONTROLLER,
-                      () -> cardPhaseController.showChooseCabinMenu()
-               );
-            } else
-               System.err.println("Not AbandonedShipCard: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
-        }
+        if (
+                clientModel.getCurrAdventureCard() instanceof ClientAbandonedShip ||
+                clientModel.getCurrAdventureCard() instanceof ClientSlaveTraders
+        ) {
+            executeWithController(
+                   CARD_PHASE_CONTROLLER,
+                  () -> cardPhaseController.showChooseCabinMenu()
+           );
+        } else
+           System.err.println("Not AbandonedShipCard or SlaveTraders: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
    }
 
     @Override
@@ -309,12 +300,10 @@ public class ClientGuiController extends Application implements ClientView {
         System.out.println("Current card: " + currentCard.getClass().getSimpleName());
 
         if (clientModel.getCurrAdventureCard() instanceof ClientEpidemic) {
-            if (cardPhaseController != null) {
-                executeWithController(
-                        CARD_PHASE_CONTROLLER,
-                        () -> cardPhaseController.showEpidemicMenu()
-                );
-            }
+            executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.showEpidemicMenu()
+            );
         }
         else
             System.err.println("Not EpidemicCard: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
@@ -326,15 +315,13 @@ public class ClientGuiController extends Application implements ClientView {
         ClientCard currentCard = clientModel.getCurrAdventureCard();
         System.out.println("Current card: " + currentCard.getClass().getSimpleName());
 
-        if (cardPhaseController != null) {
-            if (clientModel.getCurrAdventureCard() instanceof ClientStarDust) {
-                executeWithController(
-                        CARD_PHASE_CONTROLLER,
-                        () -> cardPhaseController.showStardustMenu()
-                );
-            } else
-                System.err.println("Not Stardust card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
-        }
+        if (clientModel.getCurrAdventureCard() instanceof ClientStarDust) {
+            executeWithController(
+                    CARD_PHASE_CONTROLLER,
+                    () -> cardPhaseController.showStardustMenu()
+            );
+        } else
+            System.err.println("Not Stardust card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
     }
 
     @Override

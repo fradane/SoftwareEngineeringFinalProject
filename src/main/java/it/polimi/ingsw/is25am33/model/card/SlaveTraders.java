@@ -101,7 +101,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
             }
 
         } else {
-            setCurrState( CardState.REMOVE_CREW_MEMBERS );
+            setCurrState(CardState.REMOVE_CREW_MEMBERS);
         }
 
     }
@@ -112,12 +112,10 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
             gameModel.getCurrPlayer().addCredits(reward);
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
         }
-        else {
-            setCurrState(CardState.END_OF_CARD);
-            gameModel.resetPlayerIterator();
-            gameModel.setCurrGameState(GameState.DRAW_CARD);
-        }
 
+        setCurrState(CardState.END_OF_CARD);
+        gameModel.resetPlayerIterator();
+        gameModel.setCurrGameState(GameState.DRAW_CARD);
     }
 
     private void currPlayerChoseRemovableCrewMembers(List<Coordinates> chosenCabinsCoordinate) throws IllegalArgumentException{

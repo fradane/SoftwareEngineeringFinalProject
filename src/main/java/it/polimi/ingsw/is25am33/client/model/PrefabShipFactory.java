@@ -143,6 +143,9 @@ public class PrefabShipFactory {
                          "GT-new_tiles_16_for_web156.jpg",
                          "GT-new_tiles_16_for_web151.jpg",
                          "GT-new_tiles_16_for_web119.jpg",
+                         "GT-new_tiles_16_for_web135.jpg",
+                         "GT-new_tiles_16_for_web129.jpg",
+                         "GT-new_tiles_16_for_web133.jpg",
                          "GT-new_tiles_16_for_web136.jpg",
                          "GT-new_tiles_16_for_web149.jpg" -> true;
                     default -> false;
@@ -154,6 +157,8 @@ public class PrefabShipFactory {
                         case "GT-new_tiles_16_for_web7.jpg" -> addComponent(shipBoard, component, 7, 8);
                         case "GT-new_tiles_16_for_web10.jpg" -> addComponent(shipBoard, component, 7, 6);
                         case "GT-new_tiles_16_for_web156.jpg" -> addComponent(shipBoard, component, 7, 9);
+                        case "GT-new_tiles_16_for_web135.jpg" ->  addComponent(shipBoard, component, 7, 10);
+                        case "GT-new_tiles_16_for_web129.jpg" -> addComponent(shipBoard, component, 7, 5);
                         case "GT-new_tiles_16_for_web151.jpg" -> {
                             component.rotate();
                             component.rotate();
@@ -163,8 +168,19 @@ public class PrefabShipFactory {
                             component.rotate();
                             addComponent(shipBoard, component, 8, 8);
                         }
+                        case "GT-new_tiles_16_for_web133.jpg" -> {
+                            component.rotate();
+                            component.rotate();
+                            component.rotate();
+                            addComponent(shipBoard, component, 8, 6);
+                        }
                         case "GT-new_tiles_16_for_web119.jpg" -> addComponent(shipBoard, component, 6, 8);
-                        case "GT-new_tiles_16_for_web149.jpg" -> addComponent(shipBoard, component, 6, 7);
+                        case "GT-new_tiles_16_for_web149.jpg" -> {
+                            component.rotate();
+                            component.rotate();
+                            component.rotate();
+                            addComponent(shipBoard, component, 6, 7);
+                        }
                     }
                 });
 

@@ -1602,8 +1602,8 @@ public class ClientCLIView implements ClientView {
             }
         }
 
-        if(card.getCrewMalus()>=clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size()) {
-            cabinInfo.append("You have not member enough. You must sacrifice all crew members.\n");
+        if (card.getCrewMalus() >= clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size()) {
+            cabinInfo.append("You have not enough crew members. You must sacrifice all of them.\n");
             showMessage(cabinInfo.toString(), STANDARD);
             showMessage("ATTENTION! you will be eliminated", ERROR);
         }
