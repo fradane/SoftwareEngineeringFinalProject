@@ -42,4 +42,4 @@ build/
 .DS_Store
 
 # Auto-generated MANIFEST files
-**/META-INF/MANIFEST.MF
+src/main/resources/META-INF/
