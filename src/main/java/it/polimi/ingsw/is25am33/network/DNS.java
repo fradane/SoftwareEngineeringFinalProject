@@ -182,7 +182,6 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         clients.get(nickname).pongToClientFromServer(nickname);
     }
 
-
     public void leaveGameBeforeCreation(String nickname){
         clients.remove(nickname);
         System.out.println( nickname + " left the lobby");

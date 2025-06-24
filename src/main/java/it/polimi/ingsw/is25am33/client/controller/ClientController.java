@@ -321,7 +321,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void leaveGame() {
         try {
             if (currentGameInfo != null) {
-                serverController.leaveGameAfterCreation(nickname,true);
                 inGame = false;
                 gameStarted = false;
                 currentGameInfo = null;
@@ -1096,13 +1095,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .build();
 
 
-        new Thread(() -> {
+        //new Thread(() -> {
             try {
                 serverController.handleClientChoice(nickname, playerChoiceDataStructure);
             } catch (IOException e) {
                 handleRemoteException(e);
             }
-        }).start();
+        //}).start();
 
         return true;
     }

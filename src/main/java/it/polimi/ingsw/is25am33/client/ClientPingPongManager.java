@@ -11,7 +11,7 @@ public class ClientPingPongManager {
         pingTask = scheduler.scheduleAtFixedRate(() -> {
             sendPing.run(); // invia ping
             //TODO cambiare a MILLISECONDS
-        }, 1000, 7000, TimeUnit.MILLISECONDS);
+        }, 1000, 5000, TimeUnit.MILLISECONDS);
     }
 
     private void resetTimeout(Runnable onTimeout) {
@@ -22,7 +22,7 @@ public class ClientPingPongManager {
                System.out.println("DISCONNESIONE Nessun pong ricevuto dal server .");
                 stop();
                 onTimeout.run();
-            }, 8000, TimeUnit.MILLISECONDS); // TODO cambiare a MILLISECONDS
+            }, 10000, TimeUnit.MILLISECONDS); // TODO cambiare a MILLISECONDS
         }
 
     }
