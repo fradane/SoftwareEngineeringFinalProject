@@ -277,8 +277,11 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             return;
         }
 
+        if (!clientModel.isMyTurn())
+            return;
+
         initializeBeforeCard();
-        String warningMessage = null;
+        String warningMessage;
 
         showMessage("Stardust has been detected in your flight path!", true);
 
@@ -298,11 +301,9 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
 
         showInfoPopupWithCallback(warningMessage, starDust, () -> {
-            createAndAddButton("Continue", () -> {
                 Platform.runLater(() -> bottomHBox.getChildren().clear());
-                clientController.spreadEpidemic(clientModel.getMyNickname());
+                clientController.stardustEvent(clientModel.getMyNickname());
             });
-        });
 
     }
 
@@ -322,7 +323,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         if (totalCrew < requiredCrew) {
             showMessage("WARNING: You only have " + totalCrew + " crew members, but you need at least " +
-                    requiredCrew + " to visit this ship. You cannot accept the reward.", false);
+                    requiredCrew + " to visit this ship. You cannot accept the reward.", true);
             showCannotVisitLocationMenu();
         } else {
             showCanVisitLocationMenu();
@@ -573,7 +574,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         String message = "Great! You've successfully explored the abandoned ship and received " +
                 abandonedShip.getReward() + " credits!";
-        showInfoPopup(message, abandonedShip);
+        showMessage(message, false);
 
     }
 
@@ -595,7 +596,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         if (totalCrew < requiredCrew) {
             showMessage("WARNING: You only have " + totalCrew + " crew members, but you need at least " +
-                    requiredCrew + " to visit this cargo. You cannot accept the reward.", false);
+                    requiredCrew + " to visit this cargo. You cannot accept the reward.", true);
             showCannotVisitLocationMenu();
         } else {
             showCanVisitLocationMenu();
@@ -634,21 +635,21 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
 
         if (clientModel.getMyShipboard().getBatteryBoxes().isEmpty()){
-            showInfoPopup("""
+            showInfoPopupWithCallback("""
                     No battery boxes available so you can't activate double cannons.
                     You can use only single cannons.
-                    """, card);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+                    """, card,
+                    () -> clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes));
             return;
         }
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
-        if(!isThereAvailableBattery()) {
-            showInfoPopup("""
+        if (!isThereAvailableBattery()) {
+            showInfoPopupWithCallback("""
                     You ran out of batteries so you can't activate double cannons.
                     You can use only single cannons.
-                    """, card);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+                    """, card,
+                    () -> clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes));
             return;
         }
 
@@ -657,7 +658,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     private void showChooseDoubleCannonsMenu() {
 
-        showInfoPopup("You can activate double cannons, each double cannon will require a battery", clientModel.getCurrAdventureCard());
+        showMessage("You can activate double cannons, each double cannon will require a battery", true);
 
         createAndAddButton("Confirm", () -> {
             if (selectedDoubleCannons.size() != selectedBatteryBoxes.size()) {
@@ -1140,14 +1141,15 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             return;
         }
 
+        if (!clientModel.isMyTurn())
+            return;
+
         showMessage("An epidemic is spreading throughout the fleet!", true);
         showInfoPopupWithCallback("Each occupied cabin connected to another occupied cabin will lose one crew member. " +
-                "Press confirm to see how epidemic is going to spread", epidemic , () -> {
-            createAndAddButton("Continue", () -> {
-                Platform.runLater(() -> bottomHBox.getChildren().clear());
-                clientController.spreadEpidemic(clientModel.getMyNickname());
-            });
-        });
+                "Press confirm to see how epidemic is going to spread",
+                epidemic,
+                () -> clientController.spreadEpidemic(clientModel.getMyNickname())
+        );
 
     }
 
@@ -1320,7 +1322,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         // Utilizza la stessa logica del ClientController per determinare
         // se lo stato richiede che sia specificamente il turno del giocatore
-        if (isStateRegardingCurrentPlayerOnly(currentState)) {
+        if (clientController.isStateRegardingCurrentPlayerOnly(currentState)) {
             // Per questi stati, se isMyTurn() è true, il giocatore può agire
             return true;
         }
@@ -1338,19 +1340,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
     }
 
-    private boolean isStateRegardingCurrentPlayerOnly(CardState cardState) {
-        return cardState == CardState.HANDLE_CUBES_REWARD
-                || cardState == CardState.CHOOSE_PLANET
-                || cardState == CardState.VISIT_LOCATION
-                || cardState == CardState.REMOVE_CREW_MEMBERS
-                || cardState == CardState.CHOOSE_ENGINES
-                || cardState == CardState.DANGEROUS_ATTACK
-                || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK
-                || cardState == CardState.ACCEPT_THE_REWARD
-                || cardState == CardState.CHOOSE_CANNONS
-                || cardState == CardState.EPIDEMIC;
-    }
-
     /**
      * Mostra un messaggio appropriato quando non è il turno del giocatore,
      * utilizzando la stessa logica di messaggistica del ClientController
@@ -1360,7 +1349,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         String currentPlayer = clientModel.getCurrentPlayer();
 
         // Replica i messaggi dal ClientController per coerenza
-        if (isStateRegardingCurrentPlayerOnly(currentState)) {
+        if (clientController.isStateRegardingCurrentPlayerOnly(currentState)) {
             if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
                 showMessage(currentPlayer + " is currently playing. Soon will be your turn", false);
             } else {
@@ -1386,9 +1375,9 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
     }
 
-    private void showInfoPopup(String message, ClientCard card) {
-        showOverlayPopup(card.getCardType(), message, null);
-    }
+//    private void showInfoPopup(String message, ClientCard card) {
+//        showOverlayPopup(card.getCardType(), message, null);
+//    }
 
     private void highlightBatteryBoxes() {
         List<BatteryBox> availableBatteryBoxes = clientModel.getMyShipboard()
@@ -1646,21 +1635,24 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 clientModel.getCurrAdventureCard(),
                 () -> {
                     if (clientModel.getShipboardOf(clientController.getNickname()).getShields().isEmpty() ) {
-                        showInfoPopup("You have no available shields on your ship, you cannot defend", clientModel.getCurrAdventureCard());
-                        clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes);
+                        showInfoPopupWithCallback("You have no available shields on your ship, you cannot defend",
+                                clientModel.getCurrAdventureCard(),
+                                () -> clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes));
                         return;
                     }
 
                     if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()) {
-                        showInfoPopup("No batteries available, you will only defend your ship with single ones...", clientModel.getCurrAdventureCard());
-                        clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes);
+                        showInfoPopupWithCallback("No batteries available, you will only defend your ship with single ones...",
+                                clientModel.getCurrAdventureCard(),
+                                () -> clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes));
                         return;
                     }
 
                     //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
                     if (!isThereAvailableBattery()) {
-                        showInfoPopup("No batteries available, you will only defend your ship with single ones...", clientModel.getCurrAdventureCard());
-                        clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes);
+                        showInfoPopupWithCallback("No batteries available, you will only defend your ship with single ones...",
+                                clientModel.getCurrAdventureCard(),
+                                () -> clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes));
                         return;
                     }
 
@@ -1684,21 +1676,25 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 clientModel.getCurrAdventureCard(),
                 () -> {
                     if (clientModel.getShipboardOf(clientController.getNickname()).getDoubleCannons().isEmpty()) {
-                        showInfoPopup("No double cannons available, you will only defend your ship with single ones...", clientModel.getCurrAdventureCard());
-                        clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+                        showInfoPopupWithCallback("No double cannons available, you will only defend your ship with single ones...",
+                                clientModel.getCurrAdventureCard(),
+                                () -> clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes));
                         return;
                     }
 
                     if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()) {
-                        showInfoPopup("No batteries available, you will only defend your ship with single ones...", clientModel.getCurrAdventureCard());
-                        clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+                        showInfoPopupWithCallback("No batteries available, you will only defend your ship with single ones...",
+                                clientModel.getCurrAdventureCard(),
+                                () -> clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes));
+
                         return;
                     }
 
                     //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
                     if (!isThereAvailableBattery()) {
-                        showInfoPopup("No batteries available, you will only defend your ship with single ones...", clientModel.getCurrAdventureCard());
-                        clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
+                        showInfoPopupWithCallback("No batteries available, you will only defend your ship with single ones...",
+                                clientModel.getCurrAdventureCard(),
+                                () -> clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes));
                         return;
                     }
 
@@ -1780,18 +1776,22 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
             hitComponent = null;
         } else {
-            showMessage("Your ship was not hit, now wait for the others to repair their ship", true);
-            clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
+            showInfoPopupWithCallback("""
+                    Your ship was not hit, now wait for the others to repair their ship""",
+                    clientModel.getCurrAdventureCard(),
+                    () -> clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent)
+            );
         }
     }
 
     public void showComponentHitInfo(Coordinates coordinates) {
         this.hitComponent = coordinates;
         boardsController.removeHighlightColor();
-        showInfoPopup("""
+        showInfoPopupWithCallback("""
                 YOUR SHIP WAS HIT!!!
                 REPAIR IT SO YOU CAN CONTINUE YOUR FLIGHT.""",
-                clientModel.getCurrAdventureCard());
+                clientModel.getCurrAdventureCard(),
+                () -> {});
     }
 
     public void showInvalidComponents() {

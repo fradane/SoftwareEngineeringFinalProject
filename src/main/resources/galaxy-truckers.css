@@ -183,11 +183,11 @@
 /* Etichetta di errore */
 .error-label {
     -fx-font-size: 11px;
-    -fx-text-fill: -fx-space-red;
+    -fx-text-fill: #dc3545;  /* Rosso valido invece di -fx-space-red */
     -fx-text-alignment: center;
     -fx-background-color: rgba(220, 53, 69, 0.1);
     -fx-background-radius: 6px;
-    -fx-border-color: -fx-space-red;
+    -fx-border-color: #dc3545;  /* Rosso valido invece di -fx-space-red */
     -fx-border-radius: 6px;
     -fx-border-width: 1px;
     -fx-padding: 6px 10px;

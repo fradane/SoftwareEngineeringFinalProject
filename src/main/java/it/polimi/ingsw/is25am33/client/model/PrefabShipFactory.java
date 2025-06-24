@@ -640,7 +640,7 @@ public class PrefabShipFactory {
         clearShipBoard(shipBoard);
 
         // Riga 6
-        addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, EMPTY, DOUBLE, EMPTY)), 6, 6, "GT-new_tiles_16_for_web108.jpg");
+        addComponent(shipBoard, new LifeSupport(createCustomConnectors(DOUBLE, EMPTY, DOUBLE, DOUBLE), ColorLifeSupport.PURPLE), 6, 6, "GT-new_tiles_16_for_web144.jpg");
         addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, EMPTY, UNIVERSAL)), 6, 7, "GT-new_tiles_16_for_web48.jpg");
         addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, SINGLE, EMPTY, EMPTY)), 6, 8, "GT-new_tiles_16_for_web102.jpg");
         addComponent(shipBoard, new DoubleCannon(createCustomConnectors(EMPTY, SINGLE, EMPTY, EMPTY)), 6, 9, "GT-new_tiles_16_for_web126.jpg");
@@ -667,7 +667,7 @@ public class PrefabShipFactory {
 
         // Riga 9
         addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, DOUBLE, DOUBLE, SINGLE)), 9, 5, "GT-new_tiles_16_for_web37.jpg");
-        addComponent(shipBoard, new LifeSupport(createCustomConnectors(EMPTY, EMPTY, DOUBLE, DOUBLE), ColorLifeSupport.BROWN), 9, 6, "GT-new_tiles_16_for_web141.jpg");
+        addComponent(shipBoard, new LifeSupport(createCustomConnectors(EMPTY, DOUBLE, EMPTY, UNIVERSAL), ColorLifeSupport.PURPLE), 9, 6, "GT-new_tiles_16_for_web146.jpg");
         addComponent(shipBoard, new Engine(createCustomConnectors(UNIVERSAL, EMPTY, DOUBLE, EMPTY)), 9, 8, "GT-new_tiles_16_for_web79.jpg");
         addComponent(shipBoard, new StandardStorage(createCustomConnectors(DOUBLE, SINGLE, EMPTY, DOUBLE), 3), 9, 9, "GT-new_tiles_16_for_web32.jpg");
 

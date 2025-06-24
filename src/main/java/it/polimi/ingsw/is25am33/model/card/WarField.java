@@ -254,10 +254,13 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
     public void countCrewMembers() {
 
-        for(Player player : gameModel.getPlayers().values()) {
-            if(leastResourcedPlayer==null || leastResourcedPlayer.getValue()>player.getPersonalBoard().getCrewMembers().size() ||
-                    (leastResourcedPlayer.getValue()==player.getPersonalBoard().getCrewMembers().size() &&
-                            gameModel.getFlyingBoard().getPlayerPosition(leastResourcedPlayer.getKey())<gameModel.getFlyingBoard().getPlayerPosition(player)))
+        for (Player player : gameModel.getPlayers().values()) {
+            if (
+                    leastResourcedPlayer == null ||
+                    leastResourcedPlayer.getValue() > player.getPersonalBoard().getCrewMembers().size() ||
+                    (leastResourcedPlayer.getValue() == player.getPersonalBoard().getCrewMembers().size() &&
+                            gameModel.getFlyingBoard().getPlayerPosition(leastResourcedPlayer.getKey()) < gameModel.getFlyingBoard().getPlayerPosition(player))
+            )
                 leastResourcedPlayer = new Pair<>(player, (double) player.getPersonalBoard().getCrewMembers().size());
         }
 

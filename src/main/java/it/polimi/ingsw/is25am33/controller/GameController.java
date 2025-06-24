@@ -495,6 +495,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 try {
+                    shipBoard.ejectAliens();
                     Component[][] shipMatrix = shipBoard.getShipMatrix();
                     Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
                     Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();

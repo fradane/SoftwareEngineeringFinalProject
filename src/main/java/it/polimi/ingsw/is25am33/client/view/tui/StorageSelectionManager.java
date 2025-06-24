@@ -441,7 +441,6 @@ public class StorageSelectionManager {
         Storage clone = getClonedStorage(original);
 
         // Copy common attributes from Component
-        clone.setCurrState(original.getCurrState());
         clone.setImageName(original.getImageName());
         for (int i = 0; i < original.getRotation(); i++)
             clone.rotate();

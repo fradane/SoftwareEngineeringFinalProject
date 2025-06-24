@@ -331,4 +331,6 @@ public interface ClientView {
     void showPlayerEarlyLanded(String nickname);
 
     void showCubes(ShipBoardClient shipboardOf, String nickname);
+
+    void refreshGameInfos(List<GameInfo> gameInfos);
 }

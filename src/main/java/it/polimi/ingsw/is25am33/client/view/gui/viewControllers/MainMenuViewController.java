@@ -5,6 +5,7 @@ import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -17,6 +18,7 @@ public class MainMenuViewController extends GuiController {
 
     private final Set<PlayerColor> colors = new HashSet<>(Arrays.asList(PlayerColor.values()));
     private String currGameId;
+    private final ObservableList<GameInfo> gameInfoList = FXCollections.observableArrayList();
 
     @FXML
     public Button submitCreateGameButton;
@@ -64,7 +66,11 @@ public class MainMenuViewController extends GuiController {
     private Label errorLabel;
 
     public void setAvailableGames() {
-        Platform.runLater(() -> gameListView.setItems(clientController.getObservableGames()));
+        Platform.runLater(() -> {
+            synchronized (gameInfoList) {
+                gameListView.setItems(gameInfoList);
+            }
+        });
     }
 
     @FXML
@@ -160,8 +166,15 @@ public class MainMenuViewController extends GuiController {
             return;
         }
 
-        clientController.joinGame(currGameId, chosenColor);
-        showForm(joinOtherPlayersScreen);
+        try {
+            if (clientController.joinGame(currGameId, chosenColor))
+                showForm(joinOtherPlayersScreen);
+            else
+                showForm(mainMenu);
+        } catch (Exception e) {
+            showForm(mainMenu);
+            showErrorMessage(e.getMessage());
+        }
     }
 
     @FXML
@@ -206,10 +219,11 @@ public class MainMenuViewController extends GuiController {
                 errorLabel.setVisible(true);
                 errorLabel.setManaged(true);
 
-                errorLabel.setOpacity(0.0);
-                FadeTransition fadeIn = new FadeTransition(Duration.millis(200), errorLabel);
-                fadeIn.setToValue(1.0);
-                fadeIn.play();
+                errorLabel.setOpacity(1.0);
+//                errorLabel.setOpacity(0.0);
+//                FadeTransition fadeIn = new FadeTransition(Duration.millis(200), errorLabel);
+//                fadeIn.setToValue(1.0);
+//                fadeIn.play();
 
                 System.err.println("Error: " + message);
             }
@@ -248,5 +262,12 @@ public class MainMenuViewController extends GuiController {
                 }, 4000);
             }
         });
+    }
+
+    public void refreshGameInfos(List<GameInfo> gameInfos) {
+        synchronized (gameInfoList) {
+            gameInfoList.clear();
+            gameInfoList.addAll(gameInfos);
+        }
     }
 }

@@ -31,6 +31,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.time.Instant;
 import java.util.*;
 
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
@@ -45,7 +46,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     private String nickname;
     boolean gameStarted = false;
     private final ClientModel clientModel;
-    private final ObservableList<GameInfo> observableGames = FXCollections.observableArrayList();
+    private final List<GameInfo> observableGames = new ArrayList<>();
     private boolean isTestFlight;
     private final ClientPingPongManager clientPingPongManager;
 
@@ -65,7 +66,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         return new ArrayList<>(observableGames);
     }
 
-    public ObservableList<GameInfo> getObservableGames() {
+    public List<GameInfo> getObservableGames() {
         return observableGames;
     }
 
@@ -168,7 +169,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * @param chosenGameId the identifier of the game to join
      * @param chosenColor the color chosen by the player for the game
      */
-    public void joinGame(String chosenGameId, PlayerColor chosenColor) {
+    public boolean joinGame(String chosenGameId, PlayerColor chosenColor) {
 
         try {
 
@@ -177,7 +178,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             if (!success) {
                 view.showError("Error joining game");
                 view.showMainMenu();
-                return;
+                return false;
             }
 
             // if the dns was SocketClientManager (e.g., the client is socket), the serverController is the SocketClientManager used as a dns before
@@ -213,6 +214,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             view.showMainMenu();
         }
 
+        return true;
     }
 
     public void setView(ClientView view) {
@@ -321,12 +323,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void leaveGame() {
         try {
             if (currentGameInfo != null) {
-                serverController.leaveGameAfterCreation(nickname,true);
                 inGame = false;
                 gameStarted = false;
                 currentGameInfo = null;
-                serverController.leaveGameAfterCreation(nickname,true);
                 System.exit(0);
+                serverController.leaveGameAfterCreation(nickname,true);
             }
             else {
                 dns.leaveGameBeforeCreation(nickname);
@@ -346,6 +347,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException {
         observableGames.clear();
         observableGames.addAll(gameInfos);
+        view.refreshGameInfos(gameInfos);
     }
 
     @Override
@@ -615,7 +617,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyCardState(String nickname, CardState cardState) {
         if (isStateRegardingCurrentPlayerOnly(cardState)) {
             if (!clientModel.isMyTurn()) {
-                view.showMessage(clientModel.getCurrentPlayer() + " is currently playing. Soon will to be your turn\n", NOTIFICATION_INFO);
+                view.showMessage(clientModel.getCurrentPlayer() + " is currently playing. Soon will be your turn\n", NOTIFICATION_INFO);
                 return;
             }
         }
@@ -669,7 +671,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     //Insieme di stati che non vanno notificati a meno che tu non sia il player di turno
-    private boolean isStateRegardingCurrentPlayerOnly(CardState cardState){
+    public boolean isStateRegardingCurrentPlayerOnly(CardState cardState) {
         //TODO capire quali altri stati entrano in questa categoria e aggiungerli sotto. Probabilmente da togliere perchè tutti gli stati sono RegardingCurrentPlayerOnly
         return cardState == CardState.HANDLE_CUBES_REWARD
                 || cardState == CardState.CHOOSE_PLANET
@@ -680,7 +682,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK
                 || cardState == CardState.ACCEPT_THE_REWARD
                 || cardState == CardState.CHOOSE_CANNONS
-                || cardState == CardState.EPIDEMIC;
+                || cardState == CardState.EPIDEMIC
+                || cardState == CardState.STARDUST;
 
     }
 
@@ -934,6 +937,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void pongToClientFromServer(String nickname) throws IOException{
         //System.out.println("Pong dal server");
         clientPingPongManager.onPongReceived(this::handleDisconnection);
+        System.out.println(Instant.now());
     }
 
     //quando il server manda il ping al client

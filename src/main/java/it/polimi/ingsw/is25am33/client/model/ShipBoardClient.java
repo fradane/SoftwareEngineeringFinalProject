@@ -476,4 +476,6 @@ public interface ShipBoardClient {
 
     void setNotActiveComponents(List<Component> notActiveComponents);
 
+    long getNumberOfComponents();
+
 }

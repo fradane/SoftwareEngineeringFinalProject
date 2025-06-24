@@ -123,6 +123,11 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void refreshGameInfos(List<GameInfo> gameInfos) {
+
+    }
+
+    @Override
     public void initialize() {
         // Avvia il thread di input
         Thread inputThread = new Thread(() -> {
@@ -616,13 +621,12 @@ public class ClientCLIView implements ClientView {
 
     public void showCrewMembersInfo(){
         showMessage("You have " + clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size() + " crew members", STANDARD);
-        for(String player: clientModel.getSortedRanking()) {
-            if(!player.equals(clientModel.getMyNickname()))
+        for (String player: clientModel.getSortedRanking()) {
+            if (!player.equals(clientModel.getMyNickname()))
                 showMessage(player + "has" + clientModel.getShipboardOf(player).getCrewMembers().size() + " crew members", STANDARD);
         }
-        if(clientModel.isMyTurn()){
+        if (clientModel.isMyTurn())
             showMessage("Press enter to start this phase", ASK);
-        }
         else
             setClientState(WAIT_PLAYER);
     }
@@ -842,7 +846,7 @@ public class ClientCLIView implements ClientView {
             clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
             hitComponent = null;
         } else {
-            showMessage("GOOD JOB! You are save!", STANDARD);
+            showMessage("GOOD JOB! You are safe!", STANDARD);
             setClientState(WAIT_PLAYER);
             clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
         }
@@ -2111,9 +2115,7 @@ public class ClientCLIView implements ClientView {
         else
             showMessage("You will lose no flight days, GOOD JOB ;)", STANDARD);
 
-        if(clientModel.isMyTurn())
-            inputQueue.add("\n");
-//            showMessage("Press Enter to continue...", ASK);
+        showMessage("Press any key to see the effect of the card...", STANDARD);
     }
 
     @Override
@@ -3145,6 +3147,15 @@ public class ClientCLIView implements ClientView {
                                 showBuildShipBoardMenu();
                                 break;
                             }
+
+                            long componentInShipBoard = clientModel.getMyShipboard().getNumberOfComponents();
+                            if (componentInShipBoard == 1) {
+                                showMessage("""
+                                        You cannot watch a little deck before having placed any component""", STANDARD);
+                                showBuildShipBoardMenu();
+                                break;
+                            }
+
                             clientState = WATCH_LITTLE_DECK;
                             showMessage("""
                                     Which little deck would you like to watch?

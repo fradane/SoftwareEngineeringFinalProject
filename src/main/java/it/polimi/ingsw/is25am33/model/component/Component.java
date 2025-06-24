@@ -3,7 +3,6 @@ package it.polimi.ingsw.is25am33.model.component;
 import com.fasterxml.jackson.annotation.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
-import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -39,11 +38,6 @@ public abstract class Component implements Serializable {
      * using the appropriate getter and setter methods.
      */
     protected String imageName;
-
-    /**
-     * Current operational state of the component.
-     */
-    private ComponentState currState = ComponentState.HIDDEN;
 
     /**
      * Current rotation/orientation of the component.
@@ -90,24 +84,6 @@ public abstract class Component implements Serializable {
      */
     public void setImageName(String imageName) {
         this.imageName = imageName;
-    }
-
-    /**
-     * Retrieves the current operational state of this component.
-     *
-     * @return the current state
-     */
-    public ComponentState getCurrState() {
-        return currState;
-    }
-
-    /**
-     * Sets the operational state of this component.
-     *
-     * @param currState the new state to set
-     */
-    public void setCurrState(ComponentState currState) {
-        this.currState = currState;
     }
 
     /**
