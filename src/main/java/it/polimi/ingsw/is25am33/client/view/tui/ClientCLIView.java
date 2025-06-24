@@ -3125,6 +3125,7 @@ public class ClientCLIView implements ClientView {
                             if (isTestFlight) {
                                 showMessage("Invalid choice. Please select 1-3.\n> ", ASK);
                                 showBuildShipBoardMenu();
+                                break;
                             }
                             clientState = BUILDING_SHIPBOARD_PICK_RESERVED_COMPONENT;
                             showMyShipBoard();
@@ -3135,6 +3136,7 @@ public class ClientCLIView implements ClientView {
                             if (isTestFlight) {
                                 showMessage("Invalid choice. Please select 1-3.\n> ", ASK);
                                 showBuildShipBoardMenu();
+                                break;
                             }
                             clientController.restartHourglass();
                             break;

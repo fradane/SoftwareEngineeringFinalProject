@@ -54,7 +54,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
             e.printStackTrace();
             return;
         }
-        System.out.println("[Socket] Server Socket pronto");
+        System.out.println("[Socket] Server Socket ready on localhost:" + NetworkConfiguration.DEFAULT_SOCKET_SERVER_PORT);
         while (true) {
             try {
                 final Socket socket = serverSocket.accept();

@@ -321,7 +321,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void leaveGame() {
         try {
             if (currentGameInfo != null) {
-                serverController.leaveGameAfterCreation(nickname,true);
+                //serverController.leaveGameAfterCreation(nickname,true);
                 inGame = false;
                 gameStarted = false;
                 currentGameInfo = null;
