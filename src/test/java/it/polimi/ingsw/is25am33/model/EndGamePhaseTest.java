@@ -325,7 +325,8 @@ public class EndGamePhaseTest {
                 cabin.fillCabin(CrewMember.HUMAN);
             }
         }
-        shipBoard.getMainCabin().fillCabin(CrewMember.HUMAN);
+        if(shipBoard.getMainCabin()!=null)
+            shipBoard.getMainCabin().fillCabin(CrewMember.HUMAN);
 
         return player;
     }

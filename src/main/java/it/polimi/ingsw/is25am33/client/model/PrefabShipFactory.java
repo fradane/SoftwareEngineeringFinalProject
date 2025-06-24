@@ -154,7 +154,7 @@ public class PrefabShipFactory {
                 "Nave Test Errori",
                 "Una nave con tutti i tipi di errori per testare la validazione",
                 false,
-                false
+                true
         ));
 
     }
@@ -680,64 +680,31 @@ public class PrefabShipFactory {
     private static boolean applyNaveTestErrori(ShipBoard shipBoard) {
         clearShipBoard(shipBoard);
 
-        // ERRORE 1: Connettori mal accoppiati (SINGLE vs DOUBLE)
-        // Cabina con connettore SINGLE a NORTH che si collega a componente con DOUBLE a SOUTH
-        addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE)), 7, 8);
-        addComponent(shipBoard, new BatteryBox(createCustomConnectors(DOUBLE, SINGLE, SINGLE, SINGLE), 2), 7, 9);
+        // Riga 6
+        addComponent(shipBoard, new StructuralModules(createCustomConnectors(UNIVERSAL, DOUBLE, DOUBLE, UNIVERSAL)), 6, 6, "GT-new_tiles_16_for_web60.jpg");
+        addComponent(shipBoard, new StructuralModules(createCustomConnectors(UNIVERSAL, DOUBLE, DOUBLE, UNIVERSAL)), 6, 7, "GT-new_tiles_16_for_web60.jpg");
+        addComponent(shipBoard, new StructuralModules(createCustomConnectors(UNIVERSAL, DOUBLE, DOUBLE, UNIVERSAL)), 6, 8, "GT-new_tiles_16_for_web60.jpg");
 
-        // ERRORE 2: Connettori EMPTY mal posizionati
-        // Cabina con EMPTY a WEST che non si accoppia con EMPTY del vicino
-        addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, SINGLE, EMPTY)), 6, 7);
-        addComponent(shipBoard, new StandardStorage(createCustomConnectors(SINGLE, SINGLE, SINGLE, SINGLE), 2), 5, 7);
+        // Riga 7
+        addComponent(shipBoard, new StructuralModules(createCustomConnectors(UNIVERSAL, DOUBLE, DOUBLE, UNIVERSAL)), 7, 5, "GT-new_tiles_16_for_web60.jpg");
+        addComponent(shipBoard, new LifeSupport(createCustomConnectors(DOUBLE, EMPTY, EMPTY, UNIVERSAL), ColorLifeSupport.PURPLE), 7, 6, "GT-new_tiles_16_for_web148.jpg");
+        addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, DOUBLE, EMPTY, UNIVERSAL)), 7, 8, "GT-new_tiles_16_for_web124.jpg");
 
-        // ERRORE 3: Engine che non punta SOUTH (punta NORTH)
-        Engine wrongEngine = new Engine(createCustomConnectors(SINGLE, SINGLE, EMPTY, SINGLE));
-        // Ruoto l'engine per farlo puntare NORTH invece di SOUTH
-        wrongEngine.rotate();
-        wrongEngine.rotate();
-        addComponent(shipBoard, wrongEngine, 8, 7);
+        // Riga 8
+        addComponent(shipBoard, new StructuralModules(createCustomConnectors(UNIVERSAL, DOUBLE, DOUBLE, UNIVERSAL)), 8, 5, "GT-new_tiles_16_for_web60.jpg");
+        Engine engine8 = new Engine(createCustomConnectors(SINGLE, EMPTY, EMPTY, EMPTY));
+        engine8.rotate();
+        addComponent(shipBoard, engine8, 8, 6, "GT-new_tiles_16_for_web74.jpg");
+        addComponent(shipBoard, new StructuralModules(createCustomConnectors(UNIVERSAL, DOUBLE, DOUBLE, UNIVERSAL)), 8, 7, "GT-new_tiles_16_for_web60.jpg");
+        addComponent(shipBoard, new Shield(createCustomConnectors(EMPTY, UNIVERSAL, EMPTY, DOUBLE)), 8, 8, "GT-new_tiles_16_for_web152.jpg");
 
-        // ERRORE 4: Cannon che punta verso un altro componente
-        // Cannon che punta NORTH verso la cabina in 7,8
-        addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, SINGLE, SINGLE, SINGLE)), 7, 6);
-
-        // ERRORE 5: Engine che punta verso un altro componente
-        // Engine che punta NORTH verso il cannon in 7,6
-        Engine engineAimingComponent = new Engine(createCustomConnectors(SINGLE, SINGLE, SINGLE, EMPTY));
-        engineAimingComponent.rotate();
-        engineAimingComponent.rotate();
-        addComponent(shipBoard, engineAimingComponent, 7, 5);
-
-        // COMPONENTI PONTE: Creano un "ponte" che se rimosso divide la nave in due parti
-        // Cabina ponte che collega due sezioni della nave
-        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 8, 8);
-
-        // Sezione 1 della nave (collegata tramite il ponte)
-        addComponent(shipBoard, new Shield(createSimpleConnectors()), 9, 8);
-        addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 1), 10, 8);
-
-        // Sezione 2 della nave (collegata tramite il ponte)
-        addComponent(shipBoard, new Cabin(createSimpleConnectors()), 8, 9);
-        addComponent(shipBoard, new BatteryBox(createSimpleConnectors(), 1), 8, 10);
-
-        // ERRORE 6: DoubleCannon che punta verso componente
-        // DoubleCannon che punta EAST verso la sezione 1
-        addComponent(shipBoard, new DoubleCannon(createCustomConnectors(SINGLE, SINGLE, EMPTY, SINGLE)), 6, 8);
-
-        // ERRORE 7: Più errori di connettori
-        // DoubleEngine con connettore DOUBLE che si collega a componente con SINGLE
-        addComponent(shipBoard, new DoubleEngine(createCustomConnectors(SINGLE, SINGLE, DOUBLE, SINGLE)), 5, 8);
-
-        // Componenti aggiuntivi per mantenere la connessione
-        addComponent(shipBoard, new StructuralModules(createSimpleConnectors()), 6, 6);
-        addComponent(shipBoard, new LifeSupport(createSimpleConnectors(), ColorLifeSupport.PURPLE), 5, 6);
+        // Riga 9
+        addComponent(shipBoard, new StructuralModules(createCustomConnectors(UNIVERSAL, DOUBLE, DOUBLE, UNIVERSAL)), 9, 8, "GT-new_tiles_16_for_web60.jpg");
+        addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, EMPTY, EMPTY, SINGLE)), 9, 9, "GT-new_tiles_16_for_web112.jpg");
 
         // Verifica la correttezza della nave (dovrebbe trovare molti errori!)
         shipBoard.checkShipBoard();
         return true;
     }
-
-    // Metodi per creare i vari tipi di componenti...
-
 
 }
