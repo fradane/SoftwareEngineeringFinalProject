@@ -34,7 +34,7 @@ public class Level2BoardsController extends BoardsController {
 
     private static final Map<Integer, Pair<Integer, Integer>> flyingBoardRelativePositions = Map.ofEntries(
             Map.entry(Integer.MIN_VALUE, new Pair<>(8, 6)),
-            Map.entry(0, new Pair<>(0, 12)),
+            Map.entry(0, new Pair<>(10, 12)),
             Map.entry(1, new Pair<>(8, 16)),
             Map.entry(2, new Pair<>(7, 21)),
             Map.entry(3, new Pair<>(6, 25)),
@@ -53,7 +53,7 @@ public class Level2BoardsController extends BoardsController {
             Map.entry(16, new Pair<>(32, 25)),
             Map.entry(17, new Pair<>(32, 20)),
             Map.entry(18, new Pair<>(31, 16)),
-            Map.entry(19, new Pair<>(9, 11)),
+            Map.entry(19, new Pair<>(29, 11)),
             Map.entry(20, new Pair<>(26, 7)),
             Map.entry(21, new Pair<>(21, 4)),
             Map.entry(22, new Pair<>(16, 5)),

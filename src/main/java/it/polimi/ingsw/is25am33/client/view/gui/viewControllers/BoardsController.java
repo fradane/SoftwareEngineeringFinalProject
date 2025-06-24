@@ -37,7 +37,7 @@ public abstract class BoardsController {
     @FXML public GridPane flyingBoardGrid;
     @FXML private StackPane mainPlayerShipBoard, player2ShipBoard, player3ShipBoard, player4ShipBoard;
     @FXML public GridPane myShipBoardGrid;
-    private ImageView redPawn, greenPawn, bluePawn, yellowPawn;
+    public ImageView redPawn, greenPawn, bluePawn, yellowPawn;
 
     @FXML private ImageView p2_img04_08, p2_img04_09;
     @FXML private ImageView p3_img04_08, p3_img04_09;
