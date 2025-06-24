@@ -1,5 +1,6 @@
 package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import javafx.animation.KeyFrame;
@@ -11,10 +12,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Priority;
 import javafx.util.Duration;
 
 import java.net.URL;
@@ -24,16 +25,16 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
- * Controller semplificato per la gestione della schermata finale del gioco
+ * Simplified controller for managing the final game screen
  */
-public class EndGameController extends GuiController implements BoardsEventHandler {
+public class EndGameController extends GuiController implements Initializable {
 
     @FXML
     private StackPane centerStackPane;
 
     private boolean gameEnded = false;
 
-
+    @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (centerStackPane == null) {
             centerStackPane = new StackPane();
@@ -46,7 +47,7 @@ public class EndGameController extends GuiController implements BoardsEventHandl
     }
 
     /**
-     * Mostra le informazioni finali del gioco
+     * Shows the final game information
      */
     public void showEndGameInfoMenu(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
         Platform.runLater(() -> {
@@ -55,233 +56,123 @@ public class EndGameController extends GuiController implements BoardsEventHandl
         });
     }
 
-    /**
-     * Mostra il popup per l'atterraggio anticipato del giocatore corrente
-     */
-    public void showPlayerEarlyLanded() {
-        if (!gameEnded) {
-            Platform.runLater(() -> {
-                createEarlyLandingDisplay();
-            });
-        }
-    }
+//    public void showPlayerEarlyLanded() {
+//        if (!gameEnded) {
+//            Platform.runLater(() -> {
+//                createEarlyLandingDisplay();
+//            });
+//        }
+//    }
+
+//    /**
+//     * Notifies that another player has landed early
+//     */
+//    public void notifyOtherPlayerEarlyLanded(String nickname) {
+//        if (!gameEnded) {
+//            Platform.runLater(() -> {
+//                createOtherPlayerLandingNotification(nickname);
+//            });
+//        }
+//    }
 
     /**
-     * Notifica che un altro giocatore è atterrato anticipatamente
-     */
-    public void notifyOtherPlayerEarlyLanded(String nickname) {
-        if (!gameEnded) {
-            Platform.runLater(() -> {
-                createOtherPlayerLandingNotification(nickname);
-            });
-        }
-    }
-
-    /**
-     * Crea la visualizzazione principale dei risultati finali
+     * Creates the main end game results display - NO SCROLL
      */
     private void createEndGameDisplay(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
         centerStackPane.getChildren().clear();
 
-        // Overlay di sfondo
+        // Background overlay
         StackPane overlay = new StackPane();
         overlay.getStyleClass().add("endgame-overlay");
         overlay.setAlignment(Pos.CENTER);
 
-        // Container principale del popup
+        // Main container adapted to viewport
         VBox mainContainer = new VBox(20);
         mainContainer.getStyleClass().add("endgame-popup-container");
         mainContainer.setAlignment(Pos.CENTER);
-        mainContainer.setMaxWidth(800);
+        mainContainer.setMaxWidth(750);
+        mainContainer.setMaxHeight(650);
+        mainContainer.setPadding(new Insets(10));
 
-        // Ottieni dati del giocatore corrente
+        // Get current player data
         String myNickname = clientModel.getMyNickname();
         PlayerFinalData myData = findPlayerData(finalRanking, myNickname);
-
-        // Crea mappa per lookup veloce
         Map<String, PlayerFinalData> nicknameToData = createNicknameDataMap(finalRanking);
 
-        // Header con titolo
-        VBox headerSection = createHeaderSection(myData);
+        // Compact header
+        VBox headerSection = createCompactHeader(myData);
         mainContainer.getChildren().add(headerSection);
 
-        // Sezione classifica
-        VBox rankingSection = createRankingSection(finalRanking, nicknameToData, myNickname);
-        mainContainer.getChildren().add(rankingSection);
+        // Horizontal layout to optimize space
+        HBox contentLayout = new HBox(20);
+        contentLayout.setAlignment(Pos.TOP_CENTER);
 
-        // Sezione dettagli personali
+        // Ranking section (left column)
+        VBox rankingSection = createCompactRankingSection(finalRanking, nicknameToData, myNickname);
+        rankingSection.setPrefWidth(350);
+
+        // Personal details section (right column)
+        VBox personalSection = null;
         if (myData != null) {
-            VBox personalSection = createPersonalSection(myData, finalRanking, playersNicknamesWithPrettiestShip);
-            mainContainer.getChildren().add(personalSection);
+            personalSection = createCompactPersonalSection(myData, finalRanking, playersNicknamesWithPrettiestShip);
+            personalSection.setPrefWidth(350);
         }
 
-        // Bottone per uscire
-        Button exitButton = new Button("Esci dal Gioco");
+        contentLayout.getChildren().add(rankingSection);
+        if (personalSection != null) {
+            contentLayout.getChildren().add(personalSection);
+        }
+
+        // Set vertical growth for content
+        VBox.setVgrow(contentLayout, Priority.ALWAYS);
+        mainContainer.getChildren().add(contentLayout);
+
+        // Exit button
+        Button exitButton = new Button("Exit Game");
         exitButton.getStyleClass().add("popup-button");
         exitButton.setOnAction(e -> handleGameExit());
         mainContainer.getChildren().add(exitButton);
 
-        // ScrollPane per contenuto lungo con stile spaziale
-        ScrollPane scrollPane = new ScrollPane(mainContainer);
-        scrollPane.getStyleClass().add("endgame-scroll-pane");
-        scrollPane.setFitToWidth(true);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setMaxWidth(850);
-        scrollPane.setMaxHeight(600);
-
-        StackPane.setAlignment(scrollPane, Pos.CENTER);
-        overlay.getChildren().add(scrollPane);
-
+        overlay.getChildren().add(mainContainer);
         centerStackPane.getChildren().add(overlay);
         overlay.toFront();
     }
 
     /**
-     * Crea la visualizzazione per l'atterraggio anticipato
+     * Creates compact header
      */
-    private void createEarlyLandingDisplay() {
-        // Overlay di sfondo
-        StackPane overlay = new StackPane();
-        overlay.getStyleClass().add("popup-overlay");
-        overlay.setAlignment(Pos.CENTER);
-
-        // Container principale del popup
-        VBox container = new VBox(15);
-        container.getStyleClass().add("popup-container");
-        container.setAlignment(Pos.CENTER);
-        container.setMaxWidth(600);
-
-        // Titolo
-        Label titleLabel = new Label("🛬 ATTERRAGGIO ANTICIPATO 🛬");
-        titleLabel.getStyleClass().add("popup-title");
-
-        // Messaggio principale
-        Label mainMessage = new Label("Il tuo razzo segna-rotta è stato rimosso dalla plancia di volo!");
-        mainMessage.getStyleClass().add("popup-message");
-        mainMessage.setWrapText(true);
-
-        Label subMessage = new Label("Hai abbandonato la corsa spaziale e sei atterrato in sicurezza.\n" +
-                "A partire dalla prossima carta sarai solo uno spettatore.");
-        subMessage.getStyleClass().add("popup-message");
-        subMessage.setWrapText(true);
-
-        // Sezione avvertimenti
-        VBox warningBox = createWarningSection();
-
-        Label encouragement = new Label("Potrai ancora vincere se avrai accumulato abbastanza crediti!");
-        encouragement.getStyleClass().add("popup-message");
-        encouragement.setStyle("-fx-font-weight: bold; -fx-text-fill: #28a745;");
-        encouragement.setWrapText(true);
-
-        // Bottone OK
-        Button okButton = new Button("Ho capito");
-        okButton.getStyleClass().add("popup-button");
-        okButton.setOnAction(e -> centerStackPane.getChildren().remove(overlay));
-
-        container.getChildren().addAll(titleLabel, mainMessage, subMessage, warningBox, encouragement, okButton);
-
-        // ScrollPane per potenziale overflow
-        ScrollPane scrollPane = new ScrollPane(container);
-        scrollPane.getStyleClass().add("components-scroll-pane");
-        scrollPane.setFitToWidth(true);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setMaxWidth(650);
-        scrollPane.setMaxHeight(500);
-
-        StackPane.setAlignment(scrollPane, Pos.CENTER);
-        overlay.getChildren().add(scrollPane);
-
-        centerStackPane.getChildren().add(overlay);
-        overlay.toFront();
-    }
-
-    /**
-     * Crea notifica per l'atterraggio di un altro giocatore
-     */
-    private void createOtherPlayerLandingNotification(String nickname) {
-        // Overlay di sfondo (più trasparente)
-        StackPane overlay = new StackPane();
-        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
-        overlay.setAlignment(Pos.CENTER);
-
-        // Container della notifica
-        VBox container = new VBox(15);
-        container.getStyleClass().add("popup-container");
-        container.setAlignment(Pos.CENTER);
-        container.setMaxWidth(500);
-
-        Label titleLabel = new Label("📢 ANNUNCIO DI VOLO 📢");
-        titleLabel.getStyleClass().add("popup-title");
-
-        Label messageLabel = new Label(nickname + " ha abbandonato la corsa!");
-        messageLabel.getStyleClass().add("popup-message");
-        messageLabel.setStyle("-fx-font-weight: bold;");
-
-        Label subLabel = new Label("Il suo razzo ha effettuato un atterraggio anticipato.\n" +
-                "Dalla prossima carta non parteciperà più alle avventure.");
-        subLabel.getStyleClass().add("popup-message");
-        subLabel.setWrapText(true);
-
-        Button okButton = new Button("OK");
-        okButton.getStyleClass().add("popup-button");
-        okButton.setOnAction(e -> centerStackPane.getChildren().remove(overlay));
-
-        container.getChildren().addAll(titleLabel, messageLabel, subLabel, okButton);
-        overlay.getChildren().add(container);
-
-        centerStackPane.getChildren().add(overlay);
-        overlay.toFront();
-
-        // Auto-rimozione dopo 5 secondi
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
-            if (centerStackPane.getChildren().contains(overlay)) {
-                centerStackPane.getChildren().remove(overlay);
-            }
-        }));
-        timeline.play();
-    }
-
-    /**
-     * Crea l'header della schermata finale
-     */
-    private VBox createHeaderSection(PlayerFinalData myData) {
-        VBox headerBox = new VBox(10);
-        headerBox.getStyleClass().add("endgame-header");
+    private VBox createCompactHeader(PlayerFinalData myData) {
+        VBox headerBox = new VBox(8);
         headerBox.setAlignment(Pos.CENTER);
 
         Label titleLabel = new Label();
         if (myData != null && myData.isEarlyLanded()) {
-            titleLabel.setText("🛬 FINE DEL VIAGGIO 🛬");
+            titleLabel.setText("🛬 END OF JOURNEY 🛬");
         } else {
-            titleLabel.setText("🚀 FINE DEL VIAGGIO 🚀");
+            titleLabel.setText("🚀 END OF JOURNEY 🚀");
         }
         titleLabel.getStyleClass().add("endgame-title");
+        titleLabel.setStyle("-fx-font-size: 24px;"); // Reduced from 32px
 
-        // Separator ornamentale
-        VBox separatorBox = new VBox();
-        separatorBox.getStyleClass().add("endgame-separator");
-        separatorBox.setMaxWidth(400);
-
-        headerBox.getChildren().addAll(titleLabel, separatorBox);
+        headerBox.getChildren().add(titleLabel);
         return headerBox;
     }
 
     /**
-     * Crea la sezione della classifica
+     * Creates compact ranking section
      */
-    private VBox createRankingSection(List<PlayerFinalData> finalRanking,
-                                      Map<String, PlayerFinalData> nicknameToData,
-                                      String myNickname) {
-        VBox rankingBox = new VBox(15);
+    private VBox createCompactRankingSection(List<PlayerFinalData> finalRanking,
+                                             Map<String, PlayerFinalData> nicknameToData,
+                                             String myNickname) {
+        VBox rankingBox = new VBox(10);
         rankingBox.getStyleClass().add("endgame-ranking-section");
-        rankingBox.setAlignment(Pos.CENTER);
+        rankingBox.setAlignment(Pos.TOP_CENTER);
 
-        Label rankingTitle = new Label("🏆 CLASSIFICA FINALE");
+        Label rankingTitle = new Label("🏆 FINAL RANKING");
         rankingTitle.getStyleClass().add("endgame-section-title");
+        rankingTitle.setStyle("-fx-font-size: 16px;"); // Reduced
 
-        VBox playersBox = new VBox(8);
+        VBox playersBox = new VBox(5);
         playersBox.setAlignment(Pos.CENTER);
 
         int maxCredits = finalRanking.stream()
@@ -296,7 +187,7 @@ public class EndGameController extends GuiController implements BoardsEventHandl
             PlayerFinalData data = nicknameToData.get(nickname);
             if (data == null) continue;
 
-            HBox playerRow = createPlayerRow(data, nickname, myNickname, displayPosition, maxCredits, medals);
+            HBox playerRow = createCompactPlayerRow(data, nickname, myNickname, displayPosition, maxCredits, medals);
             playersBox.getChildren().add(playerRow);
 
             if (!data.isEarlyLanded()) {
@@ -309,177 +200,154 @@ public class EndGameController extends GuiController implements BoardsEventHandl
     }
 
     /**
-     * Crea una riga per un giocatore nella classifica
+     * Creates compact player row
      */
-    private HBox createPlayerRow(PlayerFinalData data, String nickname, String myNickname,
-                                 int displayPosition, int maxCredits, String[] medals) {
-        HBox playerRow = new HBox(15);
+    private HBox createCompactPlayerRow(PlayerFinalData data, String nickname, String myNickname,
+                                        int displayPosition, int maxCredits, String[] medals) {
+        HBox playerRow = new HBox(8);
         playerRow.getStyleClass().add("endgame-player-row");
         playerRow.setAlignment(Pos.CENTER_LEFT);
-        playerRow.setPadding(new Insets(8, 15, 8, 15));
+        playerRow.setPadding(new Insets(4, 8, 4, 8));
 
-        // Medal/Position
-        Label medalLabel = new Label();
-        medalLabel.getStyleClass().add("endgame-medal");
+        // Medal + Position in one label
         Label positionLabel = new Label();
-        positionLabel.getStyleClass().add("endgame-position");
-
         if (data.isEarlyLanded()) {
-            medalLabel.setText("🛬");
-            positionLabel.setText(" - ");
+            positionLabel.setText("🛬 -");
         } else {
-            String medal = displayPosition <= 3 ? medals[displayPosition - 1] : "  ";
-            medalLabel.setText(medal);
-            positionLabel.setText(displayPosition + "°");
+            String medal = displayPosition <= 3 ? medals[displayPosition - 1] : "";
+            positionLabel.setText(medal + " " + displayPosition + "°");
         }
+        positionLabel.getStyleClass().add("endgame-medal");
+        positionLabel.setMinWidth(50);
 
-        // Nome giocatore
-        String playerName = nickname.equals(myNickname) ? "TU (" + nickname + ")" : nickname;
+        // Player name
+        String playerName = nickname.equals(myNickname) ? "YOU (" + nickname + ")" : nickname;
         Label nameLabel = new Label(playerName);
         nameLabel.getStyleClass().add("endgame-player-name");
         if (nickname.equals(myNickname)) {
             nameLabel.getStyleClass().add("endgame-my-name");
         }
+        nameLabel.setPrefWidth(120);
 
-        // Crediti
-        Label creditsLabel = new Label(data.getTotalCredits() + " crediti cosmici");
+        // Credits
+        Label creditsLabel = new Label(data.getTotalCredits() + " 💰");
         creditsLabel.getStyleClass().add("endgame-credits");
+        creditsLabel.setMinWidth(60);
 
-        // Status
+        // Compact status
         Label statusLabel = new Label();
         if (data.isEarlyLanded()) {
-            statusLabel.setText("[ATTERRATO ANTICIPATAMENTE]");
+            statusLabel.setText("[EARLY LANDED]");
             statusLabel.getStyleClass().add("endgame-status-landed");
         } else if (data.getTotalCredits() == maxCredits && data.getTotalCredits() > 0) {
-            statusLabel.setText("🎉 VINCITORE ASSOLUTO!");
+            statusLabel.setText("🏆 WINNER!");
             statusLabel.getStyleClass().add("endgame-status-winner");
         } else if (nickname.equals(myNickname) && data.getTotalCredits() > 0) {
-            statusLabel.setText("✨ Tra i vincitori!");
+            statusLabel.setText("✨ Winner!");
             statusLabel.getStyleClass().add("endgame-status-winner");
         }
 
-        playerRow.getChildren().addAll(medalLabel, positionLabel, nameLabel, creditsLabel, statusLabel);
+        playerRow.getChildren().addAll(positionLabel, nameLabel, creditsLabel, statusLabel);
         return playerRow;
     }
 
     /**
-     * Crea la sezione dei dettagli personali
+     * Creates compact personal section
      */
-    private VBox createPersonalSection(PlayerFinalData myData,
-                                       List<PlayerFinalData> finalRanking,
-                                       List<String> playersNicknamesWithPrettiestShip) {
-        VBox personalBox = new VBox(15);
+    private VBox createCompactPersonalSection(PlayerFinalData myData,
+                                              List<PlayerFinalData> finalRanking,
+                                              List<String> playersNicknamesWithPrettiestShip) {
+        VBox personalBox = new VBox(10);
         personalBox.getStyleClass().add("endgame-personal-section");
-        personalBox.setAlignment(Pos.CENTER);
+        personalBox.setAlignment(Pos.TOP_CENTER);
 
-        Label sectionTitle = new Label();
-        if (myData.isEarlyLanded()) {
-            sectionTitle.setText("📊 IL TUO RIEPILOGO (Atterrato Anticipatamente)");
-        } else {
-            sectionTitle.setText("📊 IL TUO RIEPILOGO");
-        }
+        Label sectionTitle = new Label("📊 YOUR SUMMARY");
         sectionTitle.getStyleClass().add("endgame-section-title");
+        sectionTitle.setStyle("-fx-font-size: 16px;"); // Reduced
 
-        // Separator
-        VBox separatorBox = new VBox();
-        separatorBox.getStyleClass().add("endgame-detail-separator");
-        separatorBox.setMaxWidth(300);
+        VBox breakdownBox = createCompactBreakdown(myData, finalRanking, playersNicknamesWithPrettiestShip);
+        VBox finalMessageBox = createCompactFinalMessage(myData, finalRanking);
 
-        VBox breakdownBox = createBreakdownDetails(myData, finalRanking, playersNicknamesWithPrettiestShip);
-        VBox finalMessageBox = createFinalMessage(myData, finalRanking);
-
-        personalBox.getChildren().addAll(sectionTitle, separatorBox, breakdownBox, finalMessageBox);
+        personalBox.getChildren().addAll(sectionTitle, breakdownBox, finalMessageBox);
         return personalBox;
     }
 
     /**
-     * Crea i dettagli del breakdown
+     * Creates compact breakdown
      */
-    private VBox createBreakdownDetails(PlayerFinalData myData,
+    private VBox createCompactBreakdown(PlayerFinalData myData,
                                         List<PlayerFinalData> finalRanking,
                                         List<String> playersNicknamesWithPrettiestShip) {
-        VBox detailsBox = new VBox(8);
+        VBox detailsBox = new VBox(4);
         detailsBox.getStyleClass().add("endgame-breakdown");
 
         int myPosition = findPlayerPosition(myData, finalRanking);
         boolean hasPrettiestShip = playersNicknamesWithPrettiestShip.contains(clientModel.getMyNickname());
         int initialCredits = calculateInitialCredits(myData, myPosition, hasPrettiestShip);
 
-        // Crediti iniziali
-        Label initialLabel = new Label("💰 Crediti iniziali: " + initialCredits);
+        // Compact labels with reduced font
+        String smallFont = "-fx-font-size: 11px;";
+
+        Label initialLabel = new Label("💰 Initial credits: " + initialCredits);
         initialLabel.getStyleClass().add("endgame-detail-item");
+        initialLabel.setStyle(smallFont);
         detailsBox.getChildren().add(initialLabel);
 
-        // Bonus/Penalità
         if (!myData.isEarlyLanded()) {
-            addNormalPlayerBonuses(detailsBox, myData, myPosition, hasPrettiestShip);
+            int positionBonus = getPositionBonus(myPosition);
+            Label positionLabel = new Label("✅ Arrival (" + myPosition + "°): +" + positionBonus);
+            positionLabel.getStyleClass().add("endgame-detail-bonus");
+            positionLabel.setStyle(smallFont);
+            detailsBox.getChildren().add(positionLabel);
+
+            int cubesValue = calculateCubesValue(myData.getAllOwnedCubes(), false);
+            String cubesText = formatCubesCompact(myData.getAllOwnedCubes());
+            Label cubesLabel = new Label("✅ Cargo " + cubesText + ": +" + cubesValue);
+            cubesLabel.getStyleClass().add("endgame-detail-bonus");
+            cubesLabel.setStyle(smallFont);
+            detailsBox.getChildren().add(cubesLabel);
+
+            if (hasPrettiestShip) {
+                int prettiestBonus = getPrettiestShipBonus();
+                Label prettiestLabel = new Label("✅ Prettiest ship: +" + prettiestBonus);
+                prettiestLabel.getStyleClass().add("endgame-detail-bonus");
+                prettiestLabel.setStyle(smallFont);
+                detailsBox.getChildren().add(prettiestLabel);
+            }
         } else {
-            addEarlyLandedPlayerResults(detailsBox, myData);
+            Label noPositionLabel = new Label("❌ Arrival: -- (early landed)");
+            noPositionLabel.getStyleClass().add("endgame-detail-penalty");
+            noPositionLabel.setStyle(smallFont);
+            detailsBox.getChildren().add(noPositionLabel);
+
+            int cubesValue = calculateCubesValue(myData.getAllOwnedCubes(), true);
+            String cubesText = formatCubesCompact(myData.getAllOwnedCubes());
+            Label cubesLabel = new Label("⚠️ Cargo " + cubesText + " (½): +" + cubesValue);
+            cubesLabel.getStyleClass().add("endgame-detail-warning");
+            cubesLabel.setStyle(smallFont);
+            detailsBox.getChildren().add(cubesLabel);
         }
 
-        // Penalità componenti persi
         if (myData.getLostComponents() > 0) {
-            Label lostLabel = new Label("❌ Componenti persi (" + myData.getLostComponents() + "): -" +
-                    myData.getLostComponents() + " 💰");
+            Label lostLabel = new Label("❌ Lost components: -" + myData.getLostComponents());
             lostLabel.getStyleClass().add("endgame-detail-penalty");
+            lostLabel.setStyle(smallFont);
             detailsBox.getChildren().add(lostLabel);
         }
 
-        // Totale finale
-        Label totalLabel = new Label("💎 TOTALE FINALE: " + myData.getTotalCredits() + " 💰");
+        Label totalLabel = new Label("💎 TOTAL: " + myData.getTotalCredits() + " 💰");
         totalLabel.getStyleClass().add("endgame-total");
+        totalLabel.setStyle("-fx-font-size: 14px;"); // Reduced
         detailsBox.getChildren().add(totalLabel);
 
         return detailsBox;
     }
 
     /**
-     * Aggiunge i bonus per giocatori normali
+     * Compact final message
      */
-    private void addNormalPlayerBonuses(VBox detailsBox, PlayerFinalData myData, int myPosition, boolean hasPrettiestShip) {
-        int positionBonus = getPositionBonus(myPosition);
-        Label positionLabel = new Label("✅ Ricompensa arrivo (" + myPosition + "° posto): +" + positionBonus + " 💰");
-        positionLabel.getStyleClass().add("endgame-detail-bonus");
-        detailsBox.getChildren().add(positionLabel);
-
-        int cubesValue = calculateCubesValue(myData.getAllOwnedCubes(), false);
-        String cubesText = formatCubes(myData.getAllOwnedCubes());
-        Label cubesLabel = new Label("✅ Vendita merci " + cubesText + ": +" + cubesValue + " 💰");
-        cubesLabel.getStyleClass().add("endgame-detail-bonus");
-        detailsBox.getChildren().add(cubesLabel);
-
-        if (hasPrettiestShip) {
-            int prettiestBonus = getPrettiestShipBonus();
-            Label prettiestLabel = new Label("✅ Nave più bella: +" + prettiestBonus + " 💰");
-            prettiestLabel.getStyleClass().add("endgame-detail-bonus");
-            detailsBox.getChildren().add(prettiestLabel);
-        }
-    }
-
-    /**
-     * Aggiunge i risultati per giocatori atterrati anticipatamente
-     */
-    private void addEarlyLandedPlayerResults(VBox detailsBox, PlayerFinalData myData) {
-        Label noPositionLabel = new Label("❌ Ricompensa arrivo: -- (atterrato anticipatamente)");
-        noPositionLabel.getStyleClass().add("endgame-detail-penalty");
-        detailsBox.getChildren().add(noPositionLabel);
-
-        int cubesValue = calculateCubesValue(myData.getAllOwnedCubes(), true);
-        String cubesText = formatCubes(myData.getAllOwnedCubes());
-        Label cubesLabel = new Label("⚠️ Vendita merci " + cubesText + " (DIMEZZATA): +" + cubesValue + " 💰");
-        cubesLabel.getStyleClass().add("endgame-detail-warning");
-        detailsBox.getChildren().add(cubesLabel);
-
-        Label noPrettiestLabel = new Label("❌ Nave più bella: -- (atterrato anticipatamente)");
-        noPrettiestLabel.getStyleClass().add("endgame-detail-penalty");
-        detailsBox.getChildren().add(noPrettiestLabel);
-    }
-
-    /**
-     * Crea il messaggio finale
-     */
-    private VBox createFinalMessage(PlayerFinalData myData, List<PlayerFinalData> finalRanking) {
-        VBox messageBox = new VBox(10);
+    private VBox createCompactFinalMessage(PlayerFinalData myData, List<PlayerFinalData> finalRanking) {
+        VBox messageBox = new VBox(5);
         messageBox.getStyleClass().add("endgame-final-message");
         messageBox.setAlignment(Pos.CENTER);
 
@@ -488,63 +356,33 @@ public class EndGameController extends GuiController implements BoardsEventHandl
                 .max().orElse(0);
 
         Label messageLabel = new Label();
-        messageLabel.getStyleClass().add("popup-message");
+        messageLabel.setWrapText(true);
+        messageLabel.setStyle("-fx-font-size: 12px;");
 
         if (myData.isEarlyLanded()) {
             if (myData.getTotalCredits() > 0) {
-                messageLabel.setText("🛬 Hai abbandonato la corsa anticipatamente, ma hai comunque dei crediti!");
+                messageLabel.setText("🛬 You landed early, but you still have some credits!");
             } else {
-                messageLabel.setText("🛬 Hai abbandonato la corsa anticipatamente e non hai guadagnato crediti.");
+                messageLabel.setText("🛬 You landed early without any credits.");
             }
             messageLabel.getStyleClass().add("endgame-status-landed");
         } else if (myData.getTotalCredits() == maxCredits && myData.getTotalCredits() > 0) {
-            messageLabel.setText("🏆 Complimenti! Sei il vincitore assoluto! 🎊");
+            messageLabel.setText("🏆 Congratulations! You are the absolute winner! 🎊");
             messageLabel.getStyleClass().add("endgame-message-winner");
         } else if (myData.getTotalCredits() > 0) {
-            messageLabel.setText("🎉 Complimenti! Sei tra i vincitori!");
+            messageLabel.setText("🎉 Congratulations! You are among the winners!");
             messageLabel.getStyleClass().add("endgame-message-winner");
         } else {
-            messageLabel.setText("😔 Purtroppo non sei tra i vincitori questa volta...");
+            messageLabel.setText("😔 You are not among the winners this time...");
             messageLabel.getStyleClass().add("endgame-detail-penalty");
         }
 
-        messageLabel.setWrapText(true);
         messageBox.getChildren().add(messageLabel);
         return messageBox;
     }
 
     /**
-     * Crea la sezione degli avvertimenti
-     */
-    private VBox createWarningSection() {
-        VBox warningBox = new VBox(8);
-        warningBox.setPadding(new Insets(15));
-        warningBox.setStyle("-fx-background-color: rgba(220, 53, 69, 0.1); -fx-background-radius: 8px; -fx-border-color: #dc3545; -fx-border-radius: 8px; -fx-border-width: 1px;");
-
-        Label warningTitle = new Label("⚠️ RICORDA:");
-        warningTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #dc3545; -fx-font-size: 14px;");
-
-        String[] warningPoints = {
-                "• Nessuna carta avrà più effetto su di te",
-                "• Non riceverai ricompense per l'ordine di arrivo",
-                "• Non potrai competere per la nave più bella",
-                "• Le tue merci saranno vendute a metà prezzo",
-                "• Pagherai comunque le penalità per i componenti persi"
-        };
-
-        warningBox.getChildren().add(warningTitle);
-        for (String point : warningPoints) {
-            Label pointLabel = new Label(point);
-            pointLabel.getStyleClass().add("popup-message");
-            pointLabel.setStyle("-fx-font-size: 12px;");
-            warningBox.getChildren().add(pointLabel);
-        }
-
-        return warningBox;
-    }
-
-    /**
-     * Gestisce l'uscita dal gioco
+     * Handles game exit
      */
     private void handleGameExit() {
         try {
@@ -559,7 +397,21 @@ public class EndGameController extends GuiController implements BoardsEventHandl
         }
     }
 
-    // Metodi helper per i calcoli (copiati dalla CLI)
+    // Compact helper methods
+    private String formatCubesCompact(List<CargoCube> cubes) {
+        int red = 0, yellow = 0, green = 0, blue = 0;
+        for (CargoCube cube : cubes) {
+            switch (cube) {
+                case RED -> red++;
+                case YELLOW -> yellow++;
+                case GREEN -> green++;
+                case BLUE -> blue++;
+            }
+        }
+        return String.format("(%d 🟥%d 🟨%d 🟩%d 🟦)", red, yellow, green, blue);
+    }
+
+    // Helper methods for calculations (copied from CLI)
     private PlayerFinalData findPlayerData(List<PlayerFinalData> finalRanking, String nickname) {
         return finalRanking.stream()
                 .filter(data -> data.getNickname().equals(nickname))
@@ -613,12 +465,10 @@ public class EndGameController extends GuiController implements BoardsEventHandl
     }
 
     private int getPositionBonus(int position) {
-        // Controlla se è test flight usando il clientController se disponibile
         boolean isTestFlight = false;
         try {
             isTestFlight = clientController.getCurrentGameInfo().isTestFlight();
         } catch (Exception e) {
-            // Fallback - assume non sia test flight
             isTestFlight = false;
         }
 
@@ -642,12 +492,10 @@ public class EndGameController extends GuiController implements BoardsEventHandl
     }
 
     private int getPrettiestShipBonus() {
-        // Controlla se è test flight usando il clientController se disponibile
         boolean isTestFlight = false;
         try {
             isTestFlight = clientController.getCurrentGameInfo().isTestFlight();
         } catch (Exception e) {
-            // Fallback - assume non sia test flight
             isTestFlight = false;
         }
         return isTestFlight ? 2 : 4;
@@ -666,22 +514,80 @@ public class EndGameController extends GuiController implements BoardsEventHandl
         return isHalved ? total / 2 : total;
     }
 
-    private String formatCubes(List<CargoCube> cubes) {
-        int red = 0, yellow = 0, green = 0, blue = 0;
+    private void showOverlayPopup(String title, String message, Runnable onClose) {
+        // Overlay di sfondo
+        StackPane overlay = new StackPane();
+        overlay.getStyleClass().add("popup-overlay");
 
-        for (CargoCube cube : cubes) {
-            switch (cube) {
-                case RED -> red++;
-                case YELLOW -> yellow++;
-                case GREEN -> green++;
-                case BLUE -> blue++;
-            }
+        // Container del popup
+        VBox popupContent = new VBox();
+        popupContent.getStyleClass().add("popup-container");
+
+        // Titolo (solo se fornito)
+        if (title != null && !title.trim().isEmpty()) {
+            Label titleLabel = new Label(title);
+            titleLabel.getStyleClass().add("popup-title");
+            titleLabel.setWrapText(true);
+            popupContent.getChildren().add(titleLabel);
         }
 
-        return String.format("%d 🟥 %d 🟨 %d 🟩 %d 🟦", red, yellow, green, blue);
+        // Messaggio
+        Label messageLabel = new Label(message);
+        messageLabel.getStyleClass().add("popup-message");
+        messageLabel.setWrapText(true);
+        popupContent.getChildren().add(messageLabel);
+
+        // Container per i pulsanti
+        HBox buttonContainer = new HBox();
+        buttonContainer.setAlignment(javafx.geometry.Pos.CENTER);
+        buttonContainer.setSpacing(15);
+
+        // Pulsante Conferma
+        Button confirmButton = new Button("Confirm");
+        confirmButton.getStyleClass().addAll("popup-button", "confirm-button");
+        confirmButton.setOnAction(e -> {
+            centerStackPane.getChildren().remove(overlay);
+            if (onClose != null) {
+                onClose.run(); // ← Esegue l'azione solo se confermato
+            }
+        });
+
+        // Pulsante Annulla
+        Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().addAll("popup-button", "cancel-button");
+        cancelButton.setOnAction(e -> {
+            centerStackPane.getChildren().remove(overlay);
+            // Non esegue nessuna azione = annullamento
+            showMessage("Operation cancelled.", false); // Feedback opzionale
+        });
+
+        buttonContainer.getChildren().addAll(confirmButton, cancelButton);
+        popupContent.getChildren().add(buttonContainer);
+
+        // Assembla il popup
+        overlay.getChildren().add(popupContent);
+
+        // Chiudi cliccando fuori dal popup (comportamento di annullamento)
+        overlay.setOnMouseClicked(e -> {
+            if (e.getTarget() == overlay) {
+                centerStackPane.getChildren().remove(overlay);
+                showMessage("Operation cancelled.", false); // Feedback opzionale
+            }
+        });
+
+        // Aggiungi l'overlay
+        Platform.runLater(() -> {
+            centerStackPane.getChildren().add(overlay);
+            overlay.toFront();
+        });
     }
 
-    @Override
-    public void onGridButtonClick(int row, int column) {
+    private void showInfoPopupWithCallback(String message, ClientCard card, Runnable onClose) {
+        String title = null;
+        if (card != null) {
+            title = card.getCardType();
+        }
+        showOverlayPopup(title, message, onClose);
     }
+
 }

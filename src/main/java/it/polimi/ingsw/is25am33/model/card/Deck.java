@@ -166,15 +166,12 @@ public class Deck {
 //        cards.addAll(Deck.loadPlanetsFromJson());
 
         cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-
-
+        cards.addAll(Deck.loadEpidemicFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadAbandonedShipFromJson());
+        cards.addAll(Deck.loadAbandonedStationFromJson());
 
         if (isTestFlight)
             allCards.addAll(cards.stream().filter(AdventureCard::isTestFlightCard).toList());

@@ -89,19 +89,12 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     @FXML
-    private void handleLand() {
-        String confirmMessage = """
-                Are you sure you want to eliminate yourself from the race?
-                
-                You will no longer be able to actively participate in the current game,
-                but you can continue to watch as a spectator.
-                """;
+    public void handleLand() {
+        createEarlyLandingDisplay();
+    }
 
-        showOverlayPopup("confirm Landing", confirmMessage,
-                () -> {
-                    clientController.land();
-                    showMessage("You can keep watching the game", true);
-                });
+    public void notifyOtherPlayerEarlyLanded(String nickname) {
+        createOtherPlayersDisplay(nickname);
     }
 
     @FXML
@@ -364,7 +357,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         if (totalCrew < requiredCrew) {
             showMessage("WARNING: You only have " + totalCrew + " crew members, but you need at least " +
-                    requiredCrew + " to visit this ship. You cannot accept the reward.", false);
+                    requiredCrew + " to visit this ship. You cannot accept the reward.", true);
             showCannotVisitLocationMenu();
         } else {
             showCanVisitLocationMenu();
@@ -1897,4 +1890,29 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         showChooseDoubleCannonsMenu();
     }
 
+    private void createEarlyLandingDisplay() {
+        String warningMessage = ("""
+        🛬 EARLY LANDING 🛬
+        Your ship marker has been removed from the flight board!
+        You have abandoned the space race and landed safely.
+        You can continue to follow the game as a spectator until the end.
+        
+        You can still win if you have accumulated enough credits!
+        Continue watching the game and see how it ends!""");
+
+        showOverlayPopup("warning Message", warningMessage,
+                () -> createAndAddButton("ConfirmButton", () ->
+                    clientController.land()));
+    }
+
+    private void createOtherPlayersDisplay(String nickname) {
+        String warningMessage = String.format("""
+                📢 FLIGHT ANNOUNCEMENT 📢
+                %s has abandoned the race!
+                Their ship has made an early landing.
+                From the next card, they will no longer participate in adventures.
+                """, nickname);
+
+        showOverlayPopup("warning message", warningMessage, null);
+    }
 }

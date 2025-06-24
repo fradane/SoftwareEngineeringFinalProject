@@ -188,14 +188,14 @@ public class ClientGuiController extends Application implements ClientView {
         if (nickname.equals(clientModel.getMyNickname())) {
             // Il giocatore corrente è atterrato anticipatamente
             executeWithController(
-                    END_GAME_CONTROLLER,
-                    () -> endGameController.showPlayerEarlyLanded()
+                    CARD_PHASE_CONTROLLER,
+                    () -> cardPhaseController.handleLand()
             );
         } else {
             // Un altro giocatore è atterrato anticipatamente
             executeWithController(
-                    END_GAME_CONTROLLER,
-                    () -> endGameController.notifyOtherPlayerEarlyLanded(nickname)
+                    CARD_PHASE_CONTROLLER,
+                    () -> cardPhaseController.notifyOtherPlayerEarlyLanded(nickname)
             );
         }
     }
