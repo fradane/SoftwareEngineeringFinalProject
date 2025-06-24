@@ -62,4 +62,10 @@ public class ClientSmugglers extends ClientCard {
     public void setStepsBack(int stepsBack) {
         this.stepsBack = stepsBack;
     }
+
+    @Override
+    public boolean hasReward() {
+        return true;
+    }
+
 }

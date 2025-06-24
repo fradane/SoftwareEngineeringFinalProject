@@ -104,7 +104,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
                 this.currPlayerDecidedToGetTheReward(playerChoices.hasAcceptedTheReward());
                 break;
             case HANDLE_CUBES_MALUS:
-                this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow(),playerChoices.getChosenBatteryBoxes().orElseThrow());
+                this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
                 break;
             case HANDLE_CUBES_REWARD:
                 this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
