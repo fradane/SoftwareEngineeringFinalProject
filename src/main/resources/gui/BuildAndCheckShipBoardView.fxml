@@ -18,7 +18,15 @@
             <HBox alignment="CENTER_RIGHT" spacing="10">
                 <Label styleClass="screen-title" text="Galaxy Truckers" />
                 <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="goBackButton" onAction="#handleGoBackButton" styleClass="nav-button" text="Go Back" />
+                <!-- VBox per impilare i bottoni con larghezza uniforme -->
+                <VBox alignment="CENTER_RIGHT" spacing="5" minWidth="120">
+                    <Button fx:id="goBackButton" onAction="#handleGoBackButton"
+                            styleClass="nav-button" text="Go Back"
+                            prefWidth="120" maxWidth="120" />
+                    <Button fx:id="exitGameButton" onAction="#handleExitGame"
+                            styleClass="menu-button-secondary" text="EXIT GAME"
+                            prefWidth="120" maxWidth="120" />
+                </VBox>
             </HBox>
 
             <VBox alignment="CENTER_LEFT" spacing="5" styleClass="timer-container">

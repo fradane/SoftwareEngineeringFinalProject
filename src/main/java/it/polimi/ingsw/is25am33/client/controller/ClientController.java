@@ -1343,6 +1343,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             serverController.debugSkipToLastCard();
             view.showMessage("Successfully skipped to last card!", NOTIFICATION_INFO);
         } catch (IOException e) {
+            System.err.println(e.getMessage());
             view.showMessage("Failed to skip cards: " + e.getMessage(), ERROR);
         }
     }

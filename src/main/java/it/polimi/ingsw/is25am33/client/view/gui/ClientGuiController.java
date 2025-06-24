@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+
+
 public class ClientGuiController extends Application implements ClientView {
 
     final ClientModel clientModel;
@@ -47,6 +49,7 @@ public class ClientGuiController extends Application implements ClientView {
     private MainMenuViewController mainMenuViewController;
     private BuildAndCheckShipBoardController buildAndCheckShipBoardController;
     private CardPhaseController cardPhaseController;
+    private EndGameController endGameController;
 
     private final Object loaderLock = new Object();
 
@@ -60,6 +63,7 @@ public class ClientGuiController extends Application implements ClientView {
     private static final String MAIN_MENU_CONTROLLER = "MainMenuViewController";
     private static final String BUILD_SHIPBOARD_CONTROLLER = "BuildAndCheckShipBoardController";
     private static final String CARD_PHASE_CONTROLLER = "CardPhaseController";
+    private static final String END_GAME_CONTROLLER = "EndGameController";
 
     public static ClientGuiController getInstance() {
         return instance;
@@ -173,12 +177,27 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
-
+        executeWithController(
+                END_GAME_CONTROLLER,
+                () -> endGameController.showEndGameInfoMenu(finalRanking, playersNicknamesWithPrettiestShip)
+        );
     }
 
     @Override
     public void showPlayerEarlyLanded(String nickname) {
-        //TODO
+        if (nickname.equals(clientModel.getMyNickname())) {
+            // Il giocatore corrente è atterrato anticipatamente
+            executeWithController(
+                    END_GAME_CONTROLLER,
+                    () -> endGameController.showPlayerEarlyLanded()
+            );
+        } else {
+            // Un altro giocatore è atterrato anticipatamente
+            executeWithController(
+                    END_GAME_CONTROLLER,
+                    () -> endGameController.notifyOtherPlayerEarlyLanded(nickname)
+            );
+        }
     }
 
     @Override
@@ -574,6 +593,7 @@ public class ClientGuiController extends Application implements ClientView {
         pendingTasks.put(MAIN_MENU_CONTROLLER, new ConcurrentLinkedQueue<>());
         pendingTasks.put(BUILD_SHIPBOARD_CONTROLLER, new ConcurrentLinkedQueue<>());
         pendingTasks.put(CARD_PHASE_CONTROLLER, new ConcurrentLinkedQueue<>());
+        pendingTasks.put(END_GAME_CONTROLLER, new ConcurrentLinkedQueue<>());
     }
 
     /**
@@ -650,6 +670,9 @@ public class ClientGuiController extends Application implements ClientView {
             case CARD_PHASE_CONTROLLER:
                 cardPhaseController = (CardPhaseController) controller;
                 break;
+            case END_GAME_CONTROLLER:
+                endGameController = (EndGameController) controller;
+                break;
         }
     }
 
@@ -663,6 +686,7 @@ public class ClientGuiController extends Application implements ClientView {
             case MAIN_MENU_CONTROLLER -> (T) mainMenuViewController;
             case BUILD_SHIPBOARD_CONTROLLER -> (T) buildAndCheckShipBoardController;
             case CARD_PHASE_CONTROLLER -> (T) cardPhaseController;
+            case END_GAME_CONTROLLER -> (T) endGameController;
             default -> null;
         };
     }
@@ -732,6 +756,7 @@ public class ClientGuiController extends Application implements ClientView {
             case MAIN_MENU_CONTROLLER -> fxmlPath = "/gui/MainMenuView.fxml";
             case BUILD_SHIPBOARD_CONTROLLER -> fxmlPath = "/gui/BuildShipBoardView.fxml";
             case CARD_PHASE_CONTROLLER ->  fxmlPath = "/gui/CardPhaseView.fxml";
+            case END_GAME_CONTROLLER -> fxmlPath = "/gui/EndGameView.fxml";
         }
 
         synchronized (loaderLock) {
@@ -939,6 +964,37 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public ClientModel getClientModel() {
         return clientModel;
+    }
+
+    private void transitionToEndGame() {
+        Platform.runLater(() -> {
+            // Clear any existing views
+            if (mainContainer != null && currentView != null) {
+                mainContainer.getChildren().clear();
+            }
+
+            // Load the end game view
+            loadView("/gui/EndGameView.fxml", END_GAME_CONTROLLER);
+        });
+    }
+
+    public void handleGameExit() {
+        Platform.runLater(() -> {
+            try {
+                // Cleanup any resources
+                if (clientController != null) {
+                    clientController.leaveGame();
+                }
+
+                // Exit the application
+                Platform.exit();
+                System.exit(0);
+            } catch (Exception e) {
+                System.err.println("Error during game exit: " + e.getMessage());
+                // Force exit even if there's an error
+                System.exit(1);
+            }
+        });
     }
 
 }
