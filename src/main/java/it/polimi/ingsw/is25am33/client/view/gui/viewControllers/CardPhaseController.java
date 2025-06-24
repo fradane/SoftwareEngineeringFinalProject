@@ -1,13 +1,10 @@
 package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
-import com.sun.tools.javac.Main;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.*;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.client.view.tui.StorageSelectionManager;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
-import it.polimi.ingsw.is25am33.model.card.FreeSpace;
 import it.polimi.ingsw.is25am33.model.card.Pirates;
 import it.polimi.ingsw.is25am33.model.card.Planet;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
@@ -15,7 +12,6 @@ import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
 import it.polimi.ingsw.is25am33.model.component.DoubleEngine;
 import it.polimi.ingsw.is25am33.model.component.*;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import javafx.animation.*;
@@ -37,8 +33,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
 
 public class CardPhaseController extends GuiController implements BoardsEventHandler {
 
@@ -68,6 +62,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     private boolean hasChosenDoubleCannon = false;
     private boolean hasChosenShield = false;
     private final List<Set<Coordinates>> shipParts = new ArrayList<>();
+    private final List<Coordinates> selectedStorage = new ArrayList<>();
+    private final List<Coordinates> mostPreciousCube = new ArrayList<>();
+    private boolean isRemovingBatteries = false;
+    private int remainingCubesToRemove = 0;
 
     /**
      * Helper method to create styled buttons and add them to bottomHBox
@@ -608,23 +606,28 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     //-------------------- PIRATES ----------------------
 
-    public void showPiratesMenu(){
+    public void showChooseCannonsMenu(){
         ClientCard card = clientModel.getCurrAdventureCard();
-        if (!(card instanceof ClientPirates pirates)){
-            showMessage("Error: Expected Pirates card", false);
+        if (
+                !(card instanceof ClientPirates ||
+                card instanceof ClientSmugglers ||
+                card instanceof ClientSlaveTraders ||
+                card instanceof ClientWarField)
+        ) {
+            System.err.println("Error: Expected enemies card");
             return;
         }
 
         initializeBeforeCard();
 
-        showMessage("Pirates has been detected!", true);
+        showMessage(card.getCardType() + " have been detected!", true);
 
         if (clientModel.getMyShipboard().getDoubleCannons().isEmpty())  {
             showInfoPopupWithCallback("""
                     No double cannons available.
                     You can use only single cannons.
                     """,
-                    pirates,
+                    card,
                     () -> clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes)
             );
             return;
@@ -634,7 +637,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             showInfoPopup("""
                     No battery boxes available so you can't activate double cannons.
                     You can use only single cannons.
-                    """, pirates);
+                    """, card);
             clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
             return;
         }
@@ -644,7 +647,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             showInfoPopup("""
                     You ran out of batteries so you can't activate double cannons.
                     You can use only single cannons.
-                    """, pirates);
+                    """, card);
             clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
             return;
         }
@@ -669,7 +672,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         createAndAddButton("Skip", () -> {
             boardsController.removeHighlightColor();
             bottomHBox.getChildren().clear();
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
+            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
         });
 
         highlightDoubleCannon();
@@ -680,12 +683,14 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     public void showThrowDicesMenu() {
 
         ClientCard card = clientModel.getCurrAdventureCard();
-        if (card.getCardType().equals("Pirates") || card.getCardType().equals("SlaveTraders")) {
-            showMessage("\nThe enemies are firing at you!", false);
-        } else if (card.getCardType().equals("MeteoriteStorm")) {
-            showMessage("\nMeteors are heading your way!", false);
-        } else {
-            System.err.println("Invalid card type!");
+        switch (card) {
+            case ClientPirates clientPirates -> showMessage("\nThe enemies are firing at you!", true);
+            case ClientMeteoriteStorm clientMeteoriteStorm -> showMessage("\nMeteors are heading your way!", true);
+            case ClientWarField clientWarField -> showMessage("\nShots are heading your way!", true);
+            case null, default -> {
+                System.err.println("Invalid card type!");
+                return;
+            }
         }
 
         if (clientModel.isMyTurn()) {
@@ -764,16 +769,25 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         // Extract reward and steps information based on card type
         if (card.hasReward()) {
-            if (card instanceof ClientPirates piratesCard) {
-                reward = piratesCard.getReward();
-                stepsBack = piratesCard.getStepsBack();
-            } else if (card instanceof ClientSlaveTraders slaveTraders) {
-                reward = slaveTraders.getReward();
-                stepsBack = slaveTraders.getStepsBack();
+            switch (card) {
+                case ClientPirates piratesCard -> {
+                    reward = piratesCard.getReward();
+                    stepsBack = piratesCard.getStepsBack();
+                }
+                case ClientSlaveTraders slaveTraders -> {
+                    reward = slaveTraders.getReward();
+                    stepsBack = slaveTraders.getStepsBack();
+                }
+                case ClientSmugglers smugglers ->
+                    stepsBack = smugglers.getStepsBack();
+                default -> {
+                }
             }
         }
 
-        if (stepsBack != 0 && reward != 0) {
+        if (card instanceof ClientSmugglers) {
+            showMessage("You can get cargo cube reward but will lose " + (stepsBack * -1) + " flight days. Do you accept?", true);
+        } else if (stepsBack != 0 && reward != 0) {
             showMessage("You can get " + reward + " credits but will lose " + (stepsBack * -1) + " flight days. Do you accept?", true);
         } else {
             showMessage("You can get the reward, but if you do, you will lose flight days. Do you accept?", true);
@@ -795,47 +809,49 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     public void showFreeSpaceMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
-        if (!(card instanceof ClientFreeSpace freeSpace)) {
-            showMessage("Error: Expected FreeSpace card", false);
+        if (
+                !(card instanceof ClientFreeSpace ||
+                card instanceof ClientWarField)
+        ) {
+            showMessage("Error: Expected FreeSpace or Warfield card", false);
             return;
         }
 
         initializeBeforeCard();
 
         boolean canActivateDoubleEngines = true;
-        String warningMessage = null;
+        StringBuilder warningMessage = new StringBuilder();
 
         if (clientModel.getShipboardOf(clientController.getNickname()).getDoubleEngines().isEmpty()) {
             canActivateDoubleEngines = false;
-            warningMessage = """
+            warningMessage.append("""
                 No double engines available.
-                You can use only single engine.
-                ⚠️ ATTENTION! If your ship doesn't have engine power, you will be eliminated!""";
+                You can use only single engine.""");
+            if (card instanceof ClientFreeSpace) warningMessage.append("⚠️ ATTENTION! If your ship doesn't have engine power, you will be eliminated!");
         } else if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()) {
             canActivateDoubleEngines = false;
-            warningMessage = """
+            warningMessage.append("""
                 No battery boxes available so you can't activate double engine.
-                You can use only single engine.
-                ⚠️ ATTENTION! If your ship doesn't have engine power, you will be eliminated!""";
+                You can use only single engine.""");
+            if (card instanceof ClientFreeSpace) warningMessage.append("⚠️ ATTENTION! If your ship doesn't have engine power, you will be eliminated!");
         } else if (!isThereAvailableBattery()) {
             canActivateDoubleEngines = false;
-            warningMessage = """
+            warningMessage.append("""
                 You ran out of batteries so you can't activate double engine.
-                You can use only single engine.
-                ⚠️ ATTENTION! If your ship doesn't have engine power, you will be eliminated!""";
+                You can use only single engine.""");
+            if (card instanceof ClientFreeSpace) warningMessage.append("⚠️ ATTENTION! If your ship doesn't have engine power, you will be eliminated!");
         }
 
         if (!canActivateDoubleEngines) {
             if (!clientModel.getOutPlayers().contains(clientController.getNickname())) {
-                showInfoPopupWithCallback(warningMessage, freeSpace, () -> {
+                showInfoPopupWithCallback(warningMessage.toString(), card, () -> {
                     createAndAddButton("Continue", () -> {
                         Platform.runLater(() -> bottomHBox.getChildren().clear());
                         clientController.playerChoseDoubleEngines(
                                 clientModel.getMyNickname(), new ArrayList<>(), new ArrayList<>());
                     });
                 });
-            }
-            else
+            } else
                 showMessage("You don't have engine power, you've been eliminated!", true);
         } else {
             showChooseDoubleEngineMenu();
@@ -1247,7 +1263,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 }
             }
             case CardState.HANDLE_CUBES_REWARD ->
-                    handleChooseStorageSelection(coordinates);
+                handleChooseStorageSelection(coordinates);
+
+            case CardState.HANDLE_CUBES_MALUS ->
+                handleCubeMalusSelection(coordinates);
 
             case CardState.DANGEROUS_ATTACK -> {
                 ClientDangerousObject dangerousObj = clientModel.getCurrDangerousObj();
@@ -1618,7 +1637,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     }
 
-
     public void showHandleSmallDanObjMenu() {
 
         initializeBeforeCard();
@@ -1649,6 +1667,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                     showMessage("You can activate a shield or let the object hit your ship (reminder " + smallObject.getDirection() + " " + (smallObject.getCoordinate() + 1) + ")", true);
                     highlightShields();
                     createAndAddButton("Skip shield selection", () -> {
+                        boardsController.removeHighlightColor();
                         bottomHBox.getChildren().clear();
                         clientController.playerHandleSmallDanObj(clientModel.getMyNickname(), selectedShield, selectedBatteryBoxes);
                     });
@@ -1688,6 +1707,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                     highlightDoubleCannon();
                     createAndAddButton("Skip double engine selection",
                             () -> {
+                        boardsController.removeHighlightColor();
                         bottomHBox.getChildren().clear();
                         clientController.playerHandleBigMeteorite(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
                     });
@@ -1805,47 +1825,241 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 () -> clientController.playerHandleBigShot(clientModel.getMyNickname()));
     }
 
-    public void showSlaveTradersMenu() {
-        ClientCard card = clientModel.getCurrAdventureCard();
-        if (!(card instanceof ClientSlaveTraders slaveTraders)){
-            showMessage("Error: Expected slaveTraders card", false);
+    public void showHandleCubesMalusMenu() {
+
+        if (!clientModel.isMyTurn())
             return;
-        }
 
         initializeBeforeCard();
 
-        showMessage("Slave Traders have been detected!", true);
+        ClientCard currCard = clientModel.getCurrAdventureCard();
+        int cubeMalus;
 
-        if (clientModel.getMyShipboard().getDoubleCannons().isEmpty())  {
-            showInfoPopupWithCallback("""
-                    No double cannons available.
-                    You can use only single cannons.
-                    """,
-                    slaveTraders,
-                    () -> clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes)
-            );
+        // Estrai il malus dalla carta corrente
+        if (currCard.getCardName().equals("WarField")) {
+            ClientWarField card = (ClientWarField) currCard;
+            cubeMalus = card.getCubeMalus();
+        } else if (currCard.getCardName().equals("Smugglers")) {
+            ClientSmugglers card = (ClientSmugglers) currCard;
+            cubeMalus = card.getCubeMalus();
+        } else {
+            System.err.println("Unknown card type for cube malus");
             return;
         }
 
-        if (clientModel.getMyShipboard().getBatteryBoxes().isEmpty()){
-            showInfoPopup("""
-                    No battery boxes available so you can't activate double cannons.
-                    You can use only single cannons.
-                    """, slaveTraders);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
-            return;
-        }
+        // Inizializza il manager per la rimozione (lista vuota per reward, cubeMalus per malus)
+        storageManager = new StorageSelectionManager(new ArrayList<>(), cubeMalus, clientModel.getMyShipboard());
 
-        //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
-        if(!isThereAvailableBattery()) {
-            showInfoPopup("""
-                    You ran out of batteries so you can't activate double cannons.
-                    You can use only single cannons.
-                    """, slaveTraders);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(), selectedDoubleCannons, selectedBatteryBoxes);
-            return;
-        }
+        ShipBoardClient shipBoard = clientModel.getMyShipboard();
 
-        showChooseDoubleCannonsMenu();
+        // Controlla se ci sono abbastanza cubi da rimuovere
+        List<CargoCube> allCubes = shipBoard.getCargoCubes();
+        remainingCubesToRemove = cubeMalus;
+
+        if (allCubes.size() == cubeMalus) {
+            automaticCubeRemove(storageManager.mostPreciousCube(), 0);
+        } else if (allCubes.size() > cubeMalus) {
+            mostPreciousCube.addAll(storageManager.mostPreciousCube());
+            showMessage("You must remove " + cubeMalus + " cargo cubes! Removing the most precious ones first.", true);
+            highlightMostPreciousCubes();
+        } else {
+            automaticCubeRemove(storageManager.mostPreciousCube(), cubeMalus - allCubes.size());
+        }
     }
+
+    private void automaticCubeRemove(List<Coordinates> coordinates, int batteriesToRemove) {
+
+        int totalBatteries = clientModel.getMyShipboard()
+                .getBatteryBoxes()
+                .stream()
+                .mapToInt(BatteryBox::getRemainingBatteries)
+                .sum();
+
+        if (batteriesToRemove == 0)
+            showInfoPopupWithCallback("""
+                The number of cube you need to remove equals the number of cube you have.
+                You will give back every cube you own automatically""",
+                clientModel.getCurrAdventureCard(),
+                () -> clientController.playerChoseStorageAndBattery(clientController.getNickname(), coordinates, selectedBatteryBoxes));
+        else if (totalBatteries > batteriesToRemove)
+            showInfoPopupWithCallback("""
+                The number of cube you need to remove is less than the cubes you own.
+                You will give back every cube you have and you will choose the batteries to remove.""",
+                clientModel.getCurrAdventureCard(),
+                () -> {
+                    highlightBatteryBoxes();
+                    selectedStorage.addAll(coordinates);
+                    isRemovingBatteries = true;
+                });
+        else
+            showInfoPopupWithCallback("""
+                The number of cube and batteries you need to remove is less than the cubes and batteries you own.
+                You will lose every cube or battery you own.""",
+                clientModel.getCurrAdventureCard(),
+                () -> clientController.playerChoseStorageAndBattery(clientController.getNickname(), coordinates, getAllAvailableBatteriesCoordinates()));
+    }
+
+    private void handleCubeMalusSelection(Coordinates coordinates) {
+        if (isRemovingBatteries) {
+            handleBatteryRemovalSelection(coordinates);
+        } else {
+            handleCubeRemovalSelection(coordinates);
+        }
+    }
+
+    private void handleCubeRemovalSelection(Coordinates coordinates) {
+        // Verifica se le coordinate sono nella lista dei cubi più preziosi
+        if (!mostPreciousCube.contains(coordinates)) {
+            showMessage("You must select one of the highlighted storages containing the most precious cubes.", false);
+            return;
+        }
+
+        // Aggiungi alla selezione
+        selectedStorage.add(coordinates);
+        mostPreciousCube.remove(coordinates);
+        remainingCubesToRemove--;
+
+        showMessage("Cube removed. Remaining cubes to remove: " + remainingCubesToRemove, false);
+
+        // Aggiorna l'highlighting
+        boardsController.removeHighlightColor();
+
+        if (remainingCubesToRemove > 0) {
+            highlightMostPreciousCubes();
+        } else {
+            // Tutti i cubi richiesti sono stati rimossi
+            handleCubeMalusConfirmation();
+        }
+    }
+
+    private void handleBatteryRemovalSelection(Coordinates coordinates) {
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+        Component component = shipboard.getComponentAt(coordinates);
+
+        if (!(component instanceof BatteryBox batteryBox)) {
+            showMessage("You must select a battery box.", false);
+            return;
+        }
+
+        if (batteryBox.getRemainingBatteries() <= 0) {
+            showMessage("This battery box has no batteries left.", false);
+            return;
+        }
+
+        if (Collections.frequency(selectedBatteryBoxes, coordinates) == batteryBox.getRemainingBatteries()) {
+            showMessage("This battery box has no batteries left.", false);
+            return;
+        }
+
+        // Aggiungi la batteria alla selezione
+        selectedBatteryBoxes.add(coordinates);
+        remainingCubesToRemove--;
+
+        showMessage("Battery removed. Remaining batteries to remove: " + remainingCubesToRemove, false);
+
+        // Aggiorna l'highlighting
+        boardsController.removeHighlightColor();
+
+        if (remainingCubesToRemove > 0) {
+            highlightBatteryBoxes();
+        } else {
+            // Tutte le batterie richieste sono state rimosse
+            boardsController.removeHighlightColor();
+            Platform.runLater(() -> bottomHBox.getChildren().clear());
+            isRemovingBatteries = false;
+            clientController.playerChoseStorageAndBattery(clientModel.getMyNickname(), selectedStorage, selectedBatteryBoxes);
+            selectedStorage.clear();
+            selectedBatteryBoxes.clear();
+        }
+    }
+
+    private void handleCubeMalusConfirmation() {
+        if (remainingCubesToRemove > 0) {
+            showMessage("You still need to remove " + remainingCubesToRemove + " more items.", false);
+            return;
+        }
+
+        // Invia la selezione al server
+        Platform.runLater(() -> bottomHBox.getChildren().clear());
+        boardsController.removeHighlightColor();
+
+        clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStorage, selectedBatteryBoxes);
+
+        // Reset delle variabili
+        selectedStorage.clear();
+        mostPreciousCube.clear();
+        isRemovingBatteries = false;
+        remainingCubesToRemove = 0;
+
+        showMessage("Cube malus applied successfully!", false);
+    }
+
+    private void finalizeCubeMalusSelection() {
+        Platform.runLater(() -> bottomHBox.getChildren().clear());
+        boardsController.removeHighlightColor();
+
+        showMessage("Malus applied. All required items removed.", false);
+        clientController.playerChoseStorage(clientController.getNickname(), selectedStorage);
+
+        // Reset delle variabili
+        selectedStorage.clear();
+        mostPreciousCube.clear();
+        isRemovingBatteries = false;
+        remainingCubesToRemove = 0;
+    }
+
+    private void highlightMostPreciousCubes() {
+        boardsController.removeHighlightColor();
+
+        for (Coordinates coords : mostPreciousCube) {
+            boardsController.applyHighlightEffect(coords, Color.RED);
+        }
+    }
+
+    /**
+     * Mostra un overlay informativo con il contenuto di una batteria box colorata
+     */
+    private void showBatteryBoxesWithColor() {
+        boardsController.removeHighlightColor();
+
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+
+        for (BatteryBox batteryBox : shipboard.getBatteryBoxes()) {
+            if (batteryBox.getRemainingBatteries() > 0) {
+                Set<Coordinates> coords = shipboard.getCoordinatesOfComponents(List.of(batteryBox));
+                for (Coordinates coord : coords) {
+                    boardsController.applyHighlightEffect(coord, Color.PURPLE);
+                }
+            }
+        }
+
+        showMessage("Select a battery box to remove a battery from:", true);
+    }
+
+    /**
+     * Restituisce una lista con le coordinate delle battery box che hanno almeno una batteria.
+     * Ogni coordinata appare tante volte quante sono le batterie disponibili in quella battery box.
+     *
+     * @return Lista di coordinate con ripetizioni basate sul numero di batterie
+     */
+    private List<Coordinates> getAllAvailableBatteriesCoordinates() {
+        List<Coordinates> batteriesCoordinates = new ArrayList<>();
+        ShipBoardClient shipboard = clientModel.getMyShipboard();
+
+        for (BatteryBox batteryBox : shipboard.getBatteryBoxes()) {
+            if (batteryBox.getRemainingBatteries() > 0) {
+                Set<Coordinates> coords = shipboard.getCoordinatesOfComponents(new ArrayList<>(List.of(batteryBox)));
+
+                // Per ogni battery box, aggiungi le sue coordinate tante volte quante sono le batterie
+                for (Coordinates coord : coords) {
+                    for (int i = 0; i < batteryBox.getRemainingBatteries(); i++) {
+                        batteriesCoordinates.add(coord);
+                    }
+                }
+            }
+        }
+
+        return batteriesCoordinates;
+    }
+
 }

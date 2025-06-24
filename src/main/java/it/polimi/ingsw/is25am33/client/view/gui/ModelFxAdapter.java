@@ -162,7 +162,7 @@ public class ModelFxAdapter {
                         if (oldComponent == null && newComponent == null)
                             continue;
                         getObservableShipBoardOf(nickname)[i][j].set(newComponent);
-                    } else if (!oldComponent.getGuiHash().equals(newComponent.getGuiHash())) {
+                    } else { //if (!oldComponent.getGuiHash().equals(newComponent.getGuiHash())) {
                         boardsController.updateShipBoards(nickname, i, j, newComponent);
                     }
 

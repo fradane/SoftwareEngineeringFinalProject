@@ -13,7 +13,6 @@ import it.polimi.ingsw.is25am33.client.view.tui.MessageType;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
-import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -233,31 +232,38 @@ public class ClientGuiController extends Application implements ClientView {
         ClientCard card = clientModel.getCurrAdventureCard();
 
         if (card.hasReward()) {
-            if (card instanceof ClientPirates) {
+            if (
+                    card instanceof ClientPirates ||
+                    card instanceof ClientSmugglers ||
+                    card instanceof ClientSlaveTraders
+            ) {
                 executeWithController(
                         CARD_PHASE_CONTROLLER,
                         () -> cardPhaseController.showRewardMenu()
                 );
-            }
+            } else
+                System.err.println("Not an enemy card: " + card.getClass().getSimpleName());
         }
     }
 
 
     @Override
     public void showChooseCannonsMenu() {
-        //TODO
-        if (clientModel.getCurrAdventureCard() instanceof ClientPirates) {
+
+        ClientCard card = clientModel.getCurrAdventureCard();
+
+        if (
+                card instanceof ClientPirates ||
+                card instanceof ClientSlaveTraders ||
+                card instanceof ClientSmugglers ||
+                card instanceof ClientWarField
+        ) {
             executeWithController(
                     CARD_PHASE_CONTROLLER,
-                    () -> cardPhaseController.showPiratesMenu()
-            );
-        } else if (clientModel.getCurrAdventureCard() instanceof ClientSlaveTraders) {
-            executeWithController(
-                    CARD_PHASE_CONTROLLER,
-                    () -> cardPhaseController.showSlaveTradersMenu()
+                    () -> cardPhaseController.showChooseCannonsMenu()
             );
         } else
-            System.err.println("Not PiratesCard: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
+            System.err.println("Not enemies: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
     }
 
     @Override
@@ -288,14 +294,15 @@ public class ClientGuiController extends Application implements ClientView {
     public void showHandleRemoveCrewMembersMenu() {
         if (
                 clientModel.getCurrAdventureCard() instanceof ClientAbandonedShip ||
-                clientModel.getCurrAdventureCard() instanceof ClientSlaveTraders
+                clientModel.getCurrAdventureCard() instanceof ClientSlaveTraders ||
+                clientModel.getCurrAdventureCard() instanceof ClientWarField
         ) {
             executeWithController(
                    CARD_PHASE_CONTROLLER,
                   () -> cardPhaseController.showChooseCabinMenu()
            );
         } else
-           System.err.println("Not AbandonedShipCard or SlaveTraders: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
+           System.err.println("Not AbandonedShipCard or SlaveTraders or War field: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
    }
 
     @Override
@@ -338,7 +345,10 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showHandleCubesMalusMenu() {
-        //TODO
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.showHandleCubesMalusMenu()
+        );
     }
 
     @Override

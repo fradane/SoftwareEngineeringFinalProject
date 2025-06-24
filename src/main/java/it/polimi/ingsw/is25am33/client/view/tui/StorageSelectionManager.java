@@ -346,27 +346,26 @@ public class StorageSelectionManager {
         List<Coordinates> mostPrecious = new ArrayList<>();
         Map<CargoCube,List<Coordinates>> storageAndCubes = whereAreCube();
 
-
-            for(Coordinates coordinate: storageAndCubes.get(CargoCube.RED)){
-                mostPrecious.add(coordinate);
-                if(mostPrecious.size()==cubeMalus)
-                    return mostPrecious;
-            }
-            for(Coordinates coordinate: storageAndCubes.get(CargoCube.YELLOW)){
-                mostPrecious.add(coordinate);
-                if(mostPrecious.size()==cubeMalus)
-                    return mostPrecious;
-            }
-            for(Coordinates coordinate: storageAndCubes.get(CargoCube.GREEN)){
-                mostPrecious.add(coordinate);
-                if(mostPrecious.size()==cubeMalus)
-                    return mostPrecious;
-            }
-            for(Coordinates coordinate: storageAndCubes.get(CargoCube.BLUE)){
-                mostPrecious.add(coordinate);
-                if(mostPrecious.size()==cubeMalus)
-                    return mostPrecious;
-            }
+        for (Coordinates coordinate : storageAndCubes.get(CargoCube.RED)) {
+            mostPrecious.add(coordinate);
+            if (mostPrecious.size() == cubeMalus)
+                return mostPrecious;
+        }
+        for (Coordinates coordinate : storageAndCubes.get(CargoCube.YELLOW)) {
+            mostPrecious.add(coordinate);
+            if (mostPrecious.size() == cubeMalus)
+                return mostPrecious;
+        }
+        for (Coordinates coordinate : storageAndCubes.get(CargoCube.GREEN)) {
+            mostPrecious.add(coordinate);
+            if (mostPrecious.size() == cubeMalus)
+                return mostPrecious;
+        }
+        for (Coordinates coordinate : storageAndCubes.get(CargoCube.BLUE)) {
+            mostPrecious.add(coordinate);
+            if (mostPrecious.size() == cubeMalus)
+                return mostPrecious;
+        }
 
         return mostPrecious;
     }
