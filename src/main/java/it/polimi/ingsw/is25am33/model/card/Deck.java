@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -102,10 +103,16 @@ public class Deck {
             throw new NoSuchElementException();
         }
 
+        List<List<ClientCard>> littleVisibleClientCardsDecks = littleVisibleDecks.stream()
+                .map(innerList -> innerList.stream()
+                        .map(AdventureCard::toClientCard)
+                        .collect(Collectors.toList()))
+                .collect(Collectors.toList());
+
         mapLittleDecksToString();
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyVisibleDeck(nicknameToNotify, littleVisibleDecksString);
+            clientController.notifyVisibleDeck(nicknameToNotify, littleVisibleClientCardsDecks);
         });
 
     }

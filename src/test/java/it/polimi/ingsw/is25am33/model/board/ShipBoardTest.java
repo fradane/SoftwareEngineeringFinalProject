@@ -655,33 +655,41 @@ public class ShipBoardTest {
     @Test
     @DisplayName("Test: cabinWithNeighbors returns cabins with at least one adjacent cabin with inhabitants")
     void testCabinWithNeighbors() {
-        Cabin c1 = new Cabin(createSimpleConnectors());
+        Cabin c1 = new Cabin(createCustomConnectors(EMPTY, EMPTY, EMPTY, SINGLE));
         c1.getInhabitants().add(CrewMember.HUMAN);
 
-        Cabin c2 = new Cabin(createSimpleConnectors());
+        Cabin c2 = new Cabin(createCustomConnectors(EMPTY, EMPTY, EMPTY, SINGLE));
         c2.getInhabitants().add(CrewMember.HUMAN);
 
-        Cabin c3 = new Cabin(createSimpleConnectors());
+        Cabin c3 = new Cabin(createCustomConnectors(EMPTY, EMPTY, SINGLE, SINGLE));
+        Cabin c4 = new Cabin(createCustomConnectors(EMPTY, EMPTY, SINGLE, EMPTY));
+        c4.getInhabitants().add(CrewMember.HUMAN);
+
+        StructuralModules s1 = new StructuralModules(createCustomConnectors(UNIVERSAL, UNIVERSAL, UNIVERSAL, UNIVERSAL));
+        StructuralModules s2 = new StructuralModules(createCustomConnectors(UNIVERSAL, UNIVERSAL, UNIVERSAL, UNIVERSAL));
 
         // Place cabins at positions relative to MainCabin
-        shipBoard.focusedComponent = c1;
+        shipBoard.focusedComponent = s1;
         shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
-        shipBoard.focusedComponent = c2;
+        shipBoard.focusedComponent = s2;
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY + 1);
+        shipBoard.focusedComponent = c1;
         shipBoard.placeComponentWithFocus(cabinX, cabinY + 2);
+        shipBoard.focusedComponent = c2;
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY + 2);
         shipBoard.focusedComponent = c3;
-        shipBoard.placeComponentWithFocus(cabinX, cabinY + 3);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY - 1);
+        shipBoard.focusedComponent = c4;
+        shipBoard.placeComponentWithFocus(cabinX, cabinY - 2);
 
-//        Set<Cabin> neighbors = shipBoard.getCabinCoordinatesWithNeighbors();
-//        assertEquals(2, neighbors.size());
-//        assertTrue(neighbors.contains(c1));
-//        assertTrue(neighbors.contains(c2));
-//
-//        c3.getInhabitants().add(CrewMember.HUMAN);
-//        neighbors = shipBoard.getCabinCoordinatesWithNeighbors();
-//        assertEquals(3, neighbors.size());
-//        assertTrue(neighbors.contains(c1));
-//        assertTrue(neighbors.contains(c2));
-//        assertTrue(neighbors.contains(c3));
+        Set<Coordinates> neighbors = shipBoard.getCabinCoordinatesWithNeighbors();
+        assertTrue(neighbors.isEmpty());
+
+        c3.getInhabitants().add(CrewMember.HUMAN);
+        neighbors = shipBoard.getCabinCoordinatesWithNeighbors();
+        assertEquals(2, neighbors.size());
+        assertTrue(neighbors.contains(new Coordinates(cabinX, cabinY - 1)));
+        assertTrue(neighbors.contains(new Coordinates(cabinX, cabinY - 1)));
     }
 
     @Test

@@ -6,14 +6,12 @@ import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientDangerousObject;
-import it.polimi.ingsw.is25am33.client.model.card.ClientPlanets;
 import it.polimi.ingsw.is25am33.client.model.card.CrewMalusCard;
 import it.polimi.ingsw.is25am33.client.view.tui.ClientCLIView;
 import it.polimi.ingsw.is25am33.client.view.ClientView;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
@@ -687,7 +685,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDecks) {
+    public void notifyVisibleDeck(String nickname, List<List<ClientCard>> littleVisibleDecks) {
         clientModel.setLittleVisibleDeck(littleVisibleDecks);
     }
 

@@ -904,14 +904,7 @@ public class ClientCLIView implements ClientView {
     public void showLittleDeck(int littleDeckChoice) {
         StringBuilder littleDeck = new StringBuilder();
         littleDeck.append("\nHere is the little deck you chose:\n");
-        clientModel.getLittleVisibleDecks().get(littleDeckChoice - 1).forEach(
-                card -> {
-                    String[] cardLines = card.split("\\n");
-                    for (int i = 1; i < cardLines.length; i++) {
-                        littleDeck.append(cardLines[i]).append("\n");
-                    }
-                }
-        );
+        clientModel.getLittleVisibleDecks().get(littleDeckChoice - 1).forEach(card -> littleDeck.append(card.toString()).append("\n"));
         showMessage(littleDeck.toString(), STANDARD);
     }
 

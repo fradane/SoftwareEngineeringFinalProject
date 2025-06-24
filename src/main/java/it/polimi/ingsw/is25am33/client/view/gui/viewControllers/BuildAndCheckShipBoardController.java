@@ -292,7 +292,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         List<String> imagesName = clientModel.getLittleVisibleDecks()
                 .get(index - 1)
                 .stream()
-                .map(card -> card.split("\\n")[0])
+                .map(card -> card.getImageName())
                 .toList();
 
         Platform.runLater(() -> {

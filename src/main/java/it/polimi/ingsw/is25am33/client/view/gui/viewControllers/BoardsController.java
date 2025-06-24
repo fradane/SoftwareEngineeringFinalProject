@@ -220,7 +220,10 @@ public abstract class BoardsController {
         modelFxAdapter.getObservableColorRanking()
                 .forEach((color, position) -> {
                     position.addListener((_, _, newVal) -> Platform.runLater(() -> {
-                        int newValueMod = newVal % 24;
+                        int newValueMod = Math.floorMod(
+                                newVal,
+                                this instanceof Level2BoardsController ? 24 : 18
+                        );
                         int x = getFlyingBoardRelativePositions().get(newValueMod).getValue();
                         int y = getFlyingBoardRelativePositions().get(newValueMod).getKey();
 
@@ -244,6 +247,9 @@ public abstract class BoardsController {
     }
 
     private void updatePawnPositions(ImageView pawn, int newX, int newY) {
+        if (pawn.getParent() != null)
+            flyingBoardGrid.getChildren().remove(pawn);
+
         flyingBoardGrid.add(pawn, newX, newY);
         GridPane.setHalignment(pawn, HPos.CENTER);
         GridPane.setValignment(pawn, VPos.CENTER);

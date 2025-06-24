@@ -27,7 +27,7 @@ public class ClientModel {
     private ClientDangerousObject currDangerousObj;
     private String currentPlayer;
     private Map<Integer, Component> visibleComponents = new ConcurrentHashMap<>();
-    private List<List<String>> littleVisibleDecks = new ArrayList<>();
+    private List<List<ClientCard>> littleVisibleDecks = new ArrayList<>();
     private boolean isMyTurn;
     private Hourglass hourglass;
     private ModelFxAdapter modelFxAdapter;
@@ -248,11 +248,11 @@ public class ClientModel {
         return currDangerousObj;
     }
 
-    public List<List<String>> getLittleVisibleDecks() {
+    public List<List<ClientCard>> getLittleVisibleDecks() {
         return littleVisibleDecks;
     }
 
-    public void setLittleVisibleDeck(List<List<String>> littleVisibleDecks) {
+    public void setLittleVisibleDeck(List<List<ClientCard>> littleVisibleDecks) {
         this.littleVisibleDecks = littleVisibleDecks;
     }
 

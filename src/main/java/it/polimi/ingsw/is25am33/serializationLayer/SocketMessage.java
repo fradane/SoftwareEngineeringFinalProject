@@ -42,7 +42,7 @@ public class SocketMessage {
     private Component paramComponent;
     private Component[][] paramShipBoardAsMatrix;
     private ClientDangerousObject paramDangerousObj;
-    private List<List<String>> paramLittleVisibleDecks;
+    private List<List<ClientCard>> paramLittleVisibleDecks;
     private Map<Integer, Component> paramVisibleComponents;
     private Set<Coordinates> paramIncorrectlyPositionedCoordinates;
     private Set<Set<Coordinates>> paramShipParts;
@@ -279,11 +279,11 @@ public class SocketMessage {
         return paramDangerousObj;
     }
 
-    public List<List<String>> getParamLittleVisibleDecks() {
+    public List<List<ClientCard>> getParamLittleVisibleDecks() {
         return paramLittleVisibleDecks;
     }
 
-    public void setParamLittleVisibleDecks(List<List<String>> paramLittleVisibleDecks) {
+    public void setParamLittleVisibleDecks(List<List<ClientCard>> paramLittleVisibleDecks) {
         this.paramLittleVisibleDecks = paramLittleVisibleDecks;
     }
 

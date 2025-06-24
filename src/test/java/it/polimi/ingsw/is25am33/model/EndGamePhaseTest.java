@@ -220,7 +220,7 @@ public class EndGamePhaseTest {
         }
 
         @Override
-        public void notifyVisibleDeck(String nickname, List<List<String>> littleVisibleDecks) throws RemoteException {
+        public void notifyVisibleDeck(String nickname, List<List<ClientCard>> littleVisibleDecks) throws RemoteException {
             notifications.add("visibleDeck:" + nickname);
         }
 
@@ -325,7 +325,8 @@ public class EndGamePhaseTest {
                 cabin.fillCabin(CrewMember.HUMAN);
             }
         }
-        shipBoard.getMainCabin().fillCabin(CrewMember.HUMAN);
+        if(shipBoard.getMainCabin()!=null)
+            shipBoard.getMainCabin().fillCabin(CrewMember.HUMAN);
 
         return player;
     }
