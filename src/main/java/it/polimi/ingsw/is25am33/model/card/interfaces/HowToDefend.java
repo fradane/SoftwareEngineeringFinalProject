@@ -124,7 +124,7 @@ public interface HowToDefend {
                     clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
                 });
 
-                if (!personalBoard.isThereACannon(currMeteorite.getCoordinate(), currMeteorite.getDirection()) && !personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
+                if (!personalBoard.canDifendItselfWithSingleCannons(getGameModel().getCurrDangerousObj()) && !personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
                     getGameModel().updateShipBoardAfterBeenHit();
                 }
                 else if(doubleCannonDestroyMeteorite(chosenDoubleCannonsCoords.getFirst(),chosenDoubleCannon) || personalBoard.isThereACannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())){

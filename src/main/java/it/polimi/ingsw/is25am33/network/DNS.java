@@ -140,20 +140,13 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
         // creates a new controller for this gameModel
         GameController newGameController = new GameController(gameId, numPlayers, isTestFlight, this);
-
-        // TODO luca perche sincronizzi su una variabile locale?
-        synchronized (newGameController) {
-            gameControllers.put(gameId, newGameController);
-
-            System.out.println("GameModel created: " + gameId + " by " + nickname +
-                    " for " + numPlayers + " players" + (isTestFlight ? " (Test Flight)" : ""));
-
-            // Aggiungi il player alla partita
-            newGameController.addPlayer(nickname, color, clients.get(nickname));
-            clientGame.put(nickname,newGameController);
-            System.out.println("[" + gameId + "] " + nickname + " joined game with color " + color);
-
-        }
+        gameControllers.put(gameId, newGameController);
+        System.out.println("GameModel created: " + gameId + " by " + nickname +
+                " for " + numPlayers + " players" + (isTestFlight ? " (Test Flight)" : ""));
+        // Aggiungi il player alla partita
+        newGameController.addPlayer(nickname, color, clients.get(nickname));
+        clientGame.put(nickname,newGameController);
+        System.out.println("[" + gameId + "] " + nickname + " joined game with color " + color);
 
         // Notifica tutti i client in attesa che è stata creata una nuova partita
         notifyAvailableGamesToWaitingClients();
@@ -163,7 +156,6 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     public void removeGame(String gameId) {
         gameControllers.remove(gameId);
-
         // Notifica tutti i client in attesa che una partita è stata rimossa
         notifyAvailableGamesToWaitingClients();
     }
@@ -227,7 +219,9 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
             Set<String> players = gameInfo.getConnectedPlayersNicknames();
 
-            controller.notifyNewPlayerJoined(gameId, nickname, color).start();
+            controller.getGameModel().getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyNewPlayerJoined(nicknameToNotify, gameId, nickname, color);
+            });
 
             // Notifica tutti i client in attesa che la lista partite è cambiata
             notifyAvailableGamesToWaitingClients();

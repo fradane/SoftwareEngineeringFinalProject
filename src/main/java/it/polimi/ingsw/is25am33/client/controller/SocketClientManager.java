@@ -721,14 +721,6 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords) throws RemoteException{
-        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseCabins");
-        outMessage.setParamCabinCoordinates(cabinCoords);
-
-        out.println(ClientSerializer.serialize(outMessage));
-    }
-
-    @Override
     public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "playerHandleSmallMeteorite");
         outMessage.setParamActivableCoordinates(shieldCoords);

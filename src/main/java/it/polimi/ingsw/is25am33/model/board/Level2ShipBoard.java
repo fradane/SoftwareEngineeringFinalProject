@@ -43,8 +43,6 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
 
     public void book () {
 
-        //TODO aggiungere il fatto che non si possono prenotare più di due componenti
-        //TODO quando un componente riservato diventa focused non lo puoi rilasciare
         if(notActiveComponents.size() >= 2) {
             gameClientNotifier.notifyClients(Set.of(player.getNickname()), (nicknameToNotify, clientController) -> {
                 clientController.notifyErrorWhileBookingComponent(nicknameToNotify, player.getNickname(), focusedComponent);

@@ -149,6 +149,26 @@ public class ShipBoardTest {
         assertTrue(shipBoard.getCoordinatesOfComponents(new ArrayList<>(List.of(cabin1,cabin2))).containsAll(new ArrayList<>(List.of(new Coordinates(6,7),new Coordinates(7,6)))));
     }
 
+    @Test
+    void testCanAcceptAlien(){
+        Cabin cabin1 = new Cabin(createSimpleConnectors());
+        LifeSupport lifeSupport = new LifeSupport(createSimpleConnectors(),ColorLifeSupport.PURPLE);
+        shipBoard.getShipMatrix()[6][7] = cabin1;
+
+        assertFalse(shipBoard.canAcceptAlien(new Coordinates(6,7), CrewMember.PURPLE_ALIEN));
+
+        shipBoard.getShipMatrix()[6][8] = lifeSupport;
+
+        assertTrue(shipBoard.canAcceptAlien(new Coordinates(6,7), CrewMember.PURPLE_ALIEN));
+
+        LifeSupport lifeSupport1 = new LifeSupport(createSimpleConnectors(),ColorLifeSupport.BROWN);
+        shipBoard.getShipMatrix()[6][8] = lifeSupport1;
+        assertTrue(shipBoard.canAcceptAlien(new Coordinates(6,7), CrewMember.BROWN_ALIEN));
+
+
+
+    }
+
 
     @Test
     @DisplayName("Test: isValidPosition returns false OOB, true in-bounds")
@@ -808,21 +828,29 @@ public class ShipBoardTest {
         // Based on your snippet, single front=1, single side=0.5, double front=2, double side=1, etc.
         // But your code might do integer math => side single might become 0, etc.
         // Create a single front cannon, a single side cannon, a double front cannon
-        Cannon singleFront = new Cannon(createSimpleConnectors());
-        Cannon singleSide  = new Cannon(createSimpleConnectors());
-        singleSide.rotate();
-        singleSide.rotate();
-        //singleSide.rotateFireDirection();
-        DoubleCannon doubleFront = new DoubleCannon(createSimpleConnectors());
-
+        Cannon doubleCannon1 = new DoubleCannon(createSimpleConnectors());
+        Cannon cannon2 = new Cannon(createSimpleConnectors());
+        shipBoard.setFocusedComponent(cannon2);
+        shipBoard.placeComponentWithFocus(6, 7);
+        shipBoard.setFocusedComponent(doubleCannon1);
+        shipBoard.placeComponentWithFocus(6, 8);
         // Pretend we "activate" them all => pass them in a Stream
-        List<Cannon> all = List.of(singleFront, singleSide, doubleFront);
+        List<Cannon> all = List.of(doubleCannon1);
         double total = shipBoard.countTotalFirePower(all);
 
         // Adjust your expected value depending on how your code handles half-points
         // We'll just expect 3 if side single is truncated to 0.
         // If your code is floating, you might expect 3.5, in which case you'd have to do a float/double compare
-        assertEquals(2, total);
+        assertEquals(3, total);
+
+        Cabin c1 = new Cabin(createSimpleConnectors());
+        c1.fillCabin(CrewMember.PURPLE_ALIEN);
+        shipBoard.setFocusedComponent(c1);
+        shipBoard.placeComponentWithFocus(6, 9);
+
+        assertEquals(5, shipBoard.countTotalFirePower(all));
+
+
     }
 
     @Test
@@ -838,6 +866,14 @@ public class ShipBoardTest {
 
         int total = shipBoard.countTotalEnginePower(List.of(de));
         assertEquals(3, total);
+
+        Cabin c1 = new Cabin(createSimpleConnectors());
+        c1.fillCabin(CrewMember.BROWN_ALIEN);
+        shipBoard.setFocusedComponent(c1);
+        shipBoard.placeComponentWithFocus(6, 9);
+
+        assertEquals(5, shipBoard.countTotalEnginePower((List.of(de))));
+
     }
 
     @Test

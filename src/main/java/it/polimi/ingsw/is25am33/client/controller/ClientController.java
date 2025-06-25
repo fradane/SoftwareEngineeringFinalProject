@@ -337,11 +337,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
-    public void notifyShipCorrect(String nicknameToNotify) {
-        // TODO rimuovere
-    }
-
-    @Override
     public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException {
         observableGames.clear();
         observableGames.addAll(gameInfos);
@@ -374,16 +369,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             nickname = "you";
 
         clientModel.getHourglass().start(view, nickname);
-    }
-
-    @Override
-    public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) {
-
-    }
-
-    @Override
-    public void notifyRemovalResult(String nicknameToNotify, boolean success) {
-
     }
 
     @Override
@@ -1094,14 +1079,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .setChosenCabins(cabinCoords)
                 .build();
 
-
-        //new Thread(() -> {
-            try {
-                serverController.handleClientChoice(nickname, playerChoiceDataStructure);
-            } catch (IOException e) {
-                handleRemoteException(e);
-            }
-        //}).start();
+        try {
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
 
         return true;
     }

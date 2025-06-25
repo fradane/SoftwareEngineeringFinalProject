@@ -862,7 +862,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @return The total engine power.
      */
     public int countTotalEnginePower(List<Engine> enginesToCountEnginePower) {
-            return enginesToCountEnginePower.size()*2+getSingleEngines().size()+getPurpleAlien()*2;
+            return enginesToCountEnginePower.size()*2+getSingleEngines().size()+getBrownAlien()*2;
     }
 
     /**
@@ -1309,7 +1309,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return false; // Non è un alieno
     }
 
-    public int getPurpleAlien(){
+    private int getPurpleAlien(){
         for(CrewMember crewMember: getCrewMembers()){
             if(crewMember == CrewMember.PURPLE_ALIEN)
                 return 1;
@@ -1317,7 +1317,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return 0;
     }
 
-    public int getBrownAlien(){
+    private int getBrownAlien(){
         for(CrewMember crewMember: getCrewMembers()){
             if(crewMember == CrewMember.BROWN_ALIEN)
                 return 1;

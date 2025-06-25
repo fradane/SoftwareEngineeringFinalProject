@@ -85,7 +85,6 @@ public enum GameState implements Serializable {
                 gameModel.setCurrAdventureCard(null);
             }
         }
-
     },
 
     PLAY_CARD {
@@ -97,7 +96,6 @@ public enum GameState implements Serializable {
 
     },
 
-    // TODO aggiungere al gioco
     CHECK_PLAYERS {
 
         @Override

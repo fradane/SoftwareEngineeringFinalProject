@@ -2591,7 +2591,6 @@ public class ClientCLIView implements ClientView {
     }
 
     private void handleStorageSelectionForReward(String input) {
-        //TODO OPTIONAL: aggiugnere possibilità di rifare da capo le scelte. Per esempio in caso un client sbagliasse a posizionare un cubo
         if (input.equalsIgnoreCase("done")) {
             // Se l'utente ha finito ma non ha selezionato tutti gli storage possibili
             if (!storageManager.isSelectionComplete() && storageManager.canAcceptCurrentCube()) {
