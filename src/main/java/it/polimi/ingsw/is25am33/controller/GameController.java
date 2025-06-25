@@ -564,9 +564,9 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerWantsToLand(String nickname){
-        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD
+        if(!(gameModel.getCurrGameState()!=GameState.PLAY_CARD
                 || gameModel.getCurrGameState()!=GameState.CHECK_PLAYERS
-                || gameModel.getCurrGameState()!=GameState.DRAW_CARD)
+                || gameModel.getCurrGameState()!=GameState.DRAW_CARD))
             return;
 
         Player player = gameModel.getPlayers().get(nickname);
