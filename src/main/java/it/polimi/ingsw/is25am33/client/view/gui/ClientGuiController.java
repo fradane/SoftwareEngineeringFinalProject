@@ -71,13 +71,13 @@ public class ClientGuiController extends Application implements ClientView {
         // Initialize task queues
         initializeTaskQueues();
 
-        // Icona per barra del titolo
-        primaryStage.getIcons().add(new Image(
-                Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/galaxy_trucker_icon.png"))
-        ));
-
         // Icona per la taskbar/dock
         try {
+            // Icona per barra del titolo
+            primaryStage.getIcons().add(new Image(
+                    Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/galaxy_trucker_icon.png"))
+            ));
+
             if (Taskbar.isTaskbarSupported()) {
                 java.awt.Image dockIcon = ImageIO.read(Objects.requireNonNull(getClass().getResource("/gui/graphics/galaxy_trucker_icon.png")));
                 Taskbar.getTaskbar().setIconImage(dockIcon);

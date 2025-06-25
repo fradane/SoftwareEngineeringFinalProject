@@ -15,7 +15,6 @@
     </properties>
 
     <dependencies>
-        <!-- JavaFX Base Dependencies for IDE -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -26,114 +25,6 @@
             <artifactId>javafx-fxml</artifactId>
             <version>23.0.2</version>
         </dependency>
-
-        <!-- JavaFX Platform-Specific Dependencies for JAR Distribution -->
-        <!-- Windows -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-base</artifactId>
-            <version>23.0.2</version>
-            <classifier>win</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>23.0.2</version>
-            <classifier>win</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>23.0.2</version>
-            <classifier>win</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>23.0.2</version>
-            <classifier>win</classifier>
-        </dependency>
-
-        <!-- Linux -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-base</artifactId>
-            <version>23.0.2</version>
-            <classifier>linux</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>23.0.2</version>
-            <classifier>linux</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>23.0.2</version>
-            <classifier>linux</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>23.0.2</version>
-            <classifier>linux</classifier>
-        </dependency>
-
-        <!-- macOS - COMMENT/UNCOMMENT THESE TWO SECTIONS AS NEEDED -->
-        <!-- macOS Intel (x86_64) - CURRENTLY ACTIVE FOR INTEL BUILD -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-base</artifactId>
-            <version>23.0.2</version>
-            <classifier>mac</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>23.0.2</version>
-            <classifier>mac</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>23.0.2</version>
-            <classifier>mac</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>23.0.2</version>
-            <classifier>mac</classifier>
-        </dependency>
-
-        <!-- macOS Apple Silicon (ARM64) - CURRENTLY COMMENTED FOR INTEL BUILD -->
-        <!--
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-base</artifactId>
-            <version>23.0.2</version>
-            <classifier>mac-aarch64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>23.0.2</version>
-            <classifier>mac-aarch64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>23.0.2</version>
-            <classifier>mac-aarch64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>23.0.2</version>
-            <classifier>mac-aarch64</classifier>
-        </dependency>
-        -->
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -211,13 +102,9 @@
                 <includes>
                     <include>**/*.json</include>
                     <include>**/*.fxml</include>
-                    <include>**/**/*.css</include>
+                    <include>**/*.css</include>
                     <include>**/*.png</include>
                     <include>**/*.jpg</include>
-                    <include>**/**/*.jpg</include>
-                    <include>**/**/*.png</include>
-                    <include>**/**/**/*.jpg</include>
-                    <include>**/**/**/*.png</include>
                 </includes>
             </resource>
         </resources>
@@ -247,52 +134,6 @@
                             <noManPages>true</noManPages>
                             <stripDebug>true</stripDebug>
                             <noHeaderFiles>true</noHeaderFiles>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            
-            <!-- Maven Shade Plugin for creating executable JARs -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.1</version>
-                <executions>
-                    <!-- Client JAR -->
-                    <execution>
-                        <id>client</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>client-intel</shadedClassifierName>
-                            <!-- Change to 'client-arm64' when building for ARM64 -->
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>it.polimi.ingsw.is25am33.client.ClientLauncher</mainClass>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                    
-                    <!-- Server JAR -->
-                    <execution>
-                        <id>server</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>server-intel</shadedClassifierName>
-                            <!-- Change to 'server-arm64' when building for ARM64 -->
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>it.polimi.ingsw.is25am33.network.DNS</mainClass>
-                                </transformer>
-                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
