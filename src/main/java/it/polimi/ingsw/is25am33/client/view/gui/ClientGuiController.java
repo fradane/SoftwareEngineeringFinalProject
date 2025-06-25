@@ -217,6 +217,14 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showNoMoreHiddenComponents() {
+        executeWithController(
+                BUILD_SHIPBOARD_CONTROLLER,
+                () -> buildAndCheckShipBoardController.showNoMoreHiddenComponents()
+        );
+    }
+
+    @Override
     public void showValidShipBoardMenu() {
         //TODO
     }

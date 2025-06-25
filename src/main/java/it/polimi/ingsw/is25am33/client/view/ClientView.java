@@ -335,4 +335,6 @@ public interface ClientView {
     void refreshGameInfos(List<GameInfo> gameInfos);
 
     void showDisconnectMessage(String message);
+
+    void showNoMoreHiddenComponents();
 }

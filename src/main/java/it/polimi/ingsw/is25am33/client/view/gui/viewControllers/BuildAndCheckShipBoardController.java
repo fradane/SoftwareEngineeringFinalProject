@@ -2,6 +2,7 @@ package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
@@ -264,6 +265,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                 } else if (column == 9 && shipboard.getBookedComponents().get(1) != null) {
                     clientController.pickReservedComponent(2);
                 }
+                showMessage("The booked component you picked can be placed or booked again, you can't release it", true);
             } else
                 clientController.reserveFocusedComponent();
 
@@ -313,7 +315,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         List<String> imagesName = clientModel.getLittleVisibleDecks()
                 .get(index - 1)
                 .stream()
-                .map(card -> card.getImageName())
+                .map(ClientCard::getImageName)
                 .toList();
 
         Platform.runLater(() -> {
@@ -355,7 +357,8 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             littleDeckFlowPane.setManaged(false);
             goBackButton.setVisible(false);
             goBackButton.setManaged(false);
-            littleDeckComboBox.getSelectionModel().clearSelection();
+            littleDeckComboBox.setPromptText("Watch a little deck");
+            //littleDeckComboBox.getSelectionModel().clearSelection();
         });
     }
 
@@ -587,6 +590,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             showCrewPlacementMenu(true);
         else {
             Platform.runLater(() -> {
+                boardsController.removeHighlightColor();
                 confirmCrewMemberButton.setVisible(false);
                 confirmCrewMemberButton.setManaged(false);
             });
@@ -708,6 +712,11 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             prefabShipsMenu.setManaged(false);
             prefabShipsContainer.getChildren().clear();
         });
+    }
+
+    public void showNoMoreHiddenComponents() {
+        showMessage("""
+                Hidden components are no longer available, look among the visible ones...""", false);
     }
 
 //    public void prepareForPhaseTransition() {

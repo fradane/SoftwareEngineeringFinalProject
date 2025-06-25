@@ -606,6 +606,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) {
         clientModel.eliminatePlayer(nickname);
+        clientModel.refreshRanking();
         view.showMessage(nickname + " was eliminated.", STANDARD);
         view.showPlayerEarlyLanded(nickname);
     }
@@ -694,6 +695,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Component>> componentsPerType ){
         ShipBoardClient shipBoardClient = clientModel.getShipboardOf(playerNickname);
         shipBoardClient.setComponentsPerType(componentsPerType);
+    }
+
+    @Override
+    public void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException {
+        view.showNoMoreHiddenComponents();
     }
 
     @Override

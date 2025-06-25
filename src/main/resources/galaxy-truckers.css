@@ -827,6 +827,17 @@
     -fx-pref-height: 220px;
 }
 
+.not-active-components-button {
+    -fx-text-fill: #FF4444;
+    -fx-font-weight: bold;
+    -fx-font-size: 30px;
+    -fx-background-color: rgba(255, 68, 68, 0.1);
+    -fx-border-color: #FF4444;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+}
+
 .card-image {
     -fx-effect: dropshadow(gaussian, rgba(0,0,255,0.4), 5, 0.5, 0, 0); /* opzionale: effetto luce */
     -fx-border-color: #007bff; /* blu fine */

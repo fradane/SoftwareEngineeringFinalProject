@@ -1383,20 +1383,19 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         // Replica i messaggi dal ClientController per coerenza
         if (clientController.isStateRegardingCurrentPlayerOnly(currentState)) {
             if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
-                showMessage(currentPlayer + " is currently playing. Soon will be your turn", false);
+                showMessage(currentPlayer + " is currently playing. Soon will be your turn", true);
             } else {
-                showMessage("Wait for " + currentPlayer + " to make his choice", false);
+                showMessage("Wait for " + currentPlayer + " to make his choice", true);
             }
         } else {
             // Per stati generali, messaggio semplice
             if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
-                showMessage("È il turno di " + currentPlayer + ". Attendi il tuo turno.", false);
+                showMessage("It's " + currentPlayer + "'s turn.", true);
             } else {
-                showMessage("Non è il tuo turno. Attendi prima di effettuare azioni.", false);
+                showMessage("It's not your turn, wait before taking actions", true);
             }
         }
     }
-
 
     private void showWaitingMessage() {
         String currentPlayer = clientModel.getCurrentPlayer();
@@ -1406,10 +1405,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             showMessage("Waiting for other players...", true);
         }
     }
-
-//    private void showInfoPopup(String message, ClientCard card) {
-//        showOverlayPopup(card.getCardType(), message, null);
-//    }
 
     private void highlightBatteryBoxes() {
         List<BatteryBox> availableBatteryBoxes = clientModel.getMyShipboard()
@@ -1444,7 +1439,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                     return !cabin.getInhabitants().isEmpty();
                 })
                 .forEach(coordinates -> boardsController.applyHighlightEffect(coordinates, Color.RED));
-
 
     }
 

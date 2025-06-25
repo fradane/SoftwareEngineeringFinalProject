@@ -2123,6 +2123,12 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void showNoMoreHiddenComponents() {
+        showMessage("Hidden components are no longer available, look among the visible ones...", NOTIFICATION_INFO);
+        showBuildShipBoardMenu();
+    }
+
+    @Override
     public void showHandleCubesMalusMenu() {
 
         if(!clientModel.isMyTurn()){
@@ -2797,8 +2803,8 @@ public class ClientCLIView implements ClientView {
                 } else {
                     boolean success = clientController.checkCabinSelection(clientController.getNickname(), selectedCabins);
                     if(success) {
-                        selectedCabins.clear();
                         clientController.playerChoseCabins(clientModel.getMyNickname(), selectedCabins);
+                        selectedCabins.clear();
                         return;
                     }else{
                         selectedCabins.clear();

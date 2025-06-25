@@ -54,6 +54,8 @@ public abstract class BoardsController {
     private final Set<Button> shadowedButtons = new HashSet<>();
     private final Object highlightLock = new Object();
 
+    private int landedPlayers = 0;
+
     abstract void bindBoards(ModelFxAdapter modelFxAdapter, BoardsEventHandler boardsEventHandler, ClientModel clientModel);
 
     protected abstract void initializeButtonMap();
@@ -79,6 +81,17 @@ public abstract class BoardsController {
         );
     }
 
+    protected void updateMyNotActiveComponents(Integer newVal, Button button) {
+        Platform.runLater(() -> {
+            if (newVal != null) {
+                button.setText(String.valueOf(newVal));
+                button.getStyleClass().add("not-active-components-button");
+            } else {
+                button.setText("");
+                button.getStyleClass().remove("not-active-components-button");
+            }
+        });
+    }
 
     private String fromCoordsToButtonId(Coordinates coords) {
         return coords.getX() + "_" + coords.getY();
@@ -212,7 +225,7 @@ public abstract class BoardsController {
     protected void setupFlyingBoardBinding() {
 
         clientModel.getColorRanking()
-                .forEach((playerColor, position) -> {
+                .forEach((playerColor, _) -> {
                     modelFxAdapter.getObservableColorRanking().put(playerColor, new SimpleObjectProperty<>());
                 });
 
@@ -220,59 +233,51 @@ public abstract class BoardsController {
         modelFxAdapter.getObservableColorRanking()
                 .forEach((color, position) -> {
                     position.addListener((_, _, newVal) -> Platform.runLater(() -> {
-                        int newValueMod = Math.floorMod(
-                                newVal,
-                                this instanceof Level2BoardsController ? 24 : 18
-                        );
+                        int newValueMod;
+                        boolean isLanded = false;
+                        if (newVal == Integer.MIN_VALUE) {
+                            newValueMod = Integer.MIN_VALUE;
+                            isLanded = true;
+                        } else
+                            newValueMod = Math.floorMod(
+                                    newVal,
+                                    this instanceof Level2BoardsController ? 24 : 18
+                            );
+
                         int x = getFlyingBoardRelativePositions().get(newValueMod).getValue();
                         int y = getFlyingBoardRelativePositions().get(newValueMod).getKey();
 
                         switch (color) {
                             case RED:
-                                updatePawnPositions(redPawn, x, y);
+                                updatePawnPositions(redPawn, x, y, isLanded);
                                 break;
                             case GREEN:
-                                updatePawnPositions(greenPawn, x, y);
+                                updatePawnPositions(greenPawn, x, y, isLanded);
                                 break;
                             case BLUE:
-                                updatePawnPositions(bluePawn, x, y);
+                                updatePawnPositions(bluePawn, x, y, isLanded);
                                 break;
                             case YELLOW:
-                                updatePawnPositions(yellowPawn, x, y);
+                                updatePawnPositions(yellowPawn, x, y, isLanded);
                                 break;
                         }
-                        printGridPaneContent(flyingBoardGrid);
                     }));
                 });
     }
 
-    private void updatePawnPositions(ImageView pawn, int newX, int newY) {
+    private void updatePawnPositions(ImageView pawn, int newX, int newY, boolean isLanded) {
         if (pawn.getParent() != null)
             flyingBoardGrid.getChildren().remove(pawn);
 
-        flyingBoardGrid.add(pawn, newX, newY);
+        if (isLanded) {
+            flyingBoardGrid.add(pawn, newX + landedPlayers, newY + landedPlayers);
+            landedPlayers++;
+        } else
+            flyingBoardGrid.add(pawn, newX, newY);
+
         GridPane.setHalignment(pawn, HPos.CENTER);
         GridPane.setValignment(pawn, VPos.CENTER);
         pawn.setVisible(true);
-    }
-
-    private void printGridPaneContent(GridPane gridPane) {
-        System.out.println("Contenuto del GridPane:");
-
-        if (gridPane.getChildren().isEmpty()) {
-            System.out.println("  GridPane vuoto");
-            return;
-        }
-
-        for (Node child : gridPane.getChildren()) {
-            int row = GridPane.getRowIndex(child) != null ? GridPane.getRowIndex(child) : 0;
-            int col = GridPane.getColumnIndex(child) != null ? GridPane.getColumnIndex(child) : 0;
-            int rowSpan = GridPane.getRowSpan(child) != null ? GridPane.getRowSpan(child) : 1;
-            int colSpan = GridPane.getColumnSpan(child) != null ? GridPane.getColumnSpan(child) : 1;
-
-            System.out.printf("  Cella (%d,%d) span(%d,%d): %s%n",
-                    row, col, rowSpan, colSpan, child.getClass().getSimpleName());
-        }
     }
 
     protected void setupShipBoardNavigationBarAndBoards() {

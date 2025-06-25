@@ -459,6 +459,12 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
+    public void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyNoMoreHiddenComponents");
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
     public void notifyRemovalResult(String nicknameToNotify, boolean success) throws IOException {
 
     }

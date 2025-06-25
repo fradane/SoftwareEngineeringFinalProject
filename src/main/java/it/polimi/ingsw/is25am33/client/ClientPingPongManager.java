@@ -11,7 +11,7 @@ public class ClientPingPongManager {
         pingTask = scheduler.scheduleAtFixedRate(() -> {
             sendPing.run(); // invia ping
             //TODO cambiare a MILLISECONDS
-        }, 1000, 7000, TimeUnit.SECONDS);
+        }, 1000, 5000, TimeUnit.MILLISECONDS);
     }
 
     private void resetTimeout(Runnable onTimeout) {
@@ -21,7 +21,7 @@ public class ClientPingPongManager {
             pongTimeout = scheduler.schedule(() -> {
                 stop();
                 onTimeout.run();
-            }, 8000, TimeUnit.SECONDS); // TODO cambiare a MILLISECONDS
+            }, 9000, TimeUnit.MILLISECONDS); // TODO cambiare a MILLISECONDS
         }
 
     }

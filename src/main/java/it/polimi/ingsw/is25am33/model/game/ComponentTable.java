@@ -125,10 +125,9 @@ public class ComponentTable {
 
         Component pickedComponent = visibleComponents.remove(index);
 
-        if (pickedComponent == null) {
-            // TODO notifica al singolo giocatore che non è piu disponibile
+        // no more components available
+        if (pickedComponent == null)
             return null;
-        }
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyRemoveVisibleComponents(nicknameToNotify, index);

@@ -10,12 +10,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -73,7 +75,7 @@ public class Level2BoardsController extends BoardsController {
         initializeButtonMap();
         setupFlyingBoardBinding();
         setupShipBoardNavigationBarAndBoards();
-        setupMyBookedComponentsBinding();
+        setupMyBookedComponentsBinding(boardsEventHandler);
         setupGridBindings(modelFxAdapter.getMyObservableMatrix());
         //setupChangedAttributesBinding();
 
@@ -146,19 +148,29 @@ public class Level2BoardsController extends BoardsController {
 
     }
 
-    private void setupMyBookedComponentsBinding() {
+    private void setupMyBookedComponentsBinding(BoardsEventHandler boardsEventHandler) {
 
-        Pair<ObjectProperty<Component>, ObjectProperty<Component>> reservedComponents = modelFxAdapter.getObservableBookedComponentsOf(clientModel.getMyNickname());
+        if (boardsEventHandler instanceof BuildAndCheckShipBoardController) {
+            Pair<ObjectProperty<Component>, ObjectProperty<Component>> reservedComponents = modelFxAdapter.getObservableBookedComponentsOf(clientModel.getMyNickname());
 
-        reservedComponents.getKey()
-                .addListener((_, _, newVal) ->
-                        Platform.runLater(() -> updateMyBookedComponents(button04_08, newVal))
-                );
+            reservedComponents.getKey()
+                    .addListener((_, _, newVal) ->
+                            Platform.runLater(() -> updateMyBookedComponents(button04_08, newVal))
+                    );
 
-        reservedComponents.getValue()
-                .addListener((_, _, newVal) ->
-                        Platform.runLater(() -> updateMyBookedComponents(button04_09, newVal))
-                );
+            reservedComponents.getValue()
+                    .addListener((_, _, newVal) ->
+                            Platform.runLater(() -> updateMyBookedComponents(button04_09, newVal))
+                    );
+        } else if (boardsEventHandler instanceof CardPhaseController) {
+            modelFxAdapter.getObservableLostComponents()
+                    .get(clientModel.getMyNickname()).addListener(
+                            (_, _, newVal) -> updateMyNotActiveComponents(newVal, button04_09)
+                    );
+        } else {
+            System.err.println("Boards event handler is " + boardsEventHandler.getClass().getSimpleName());
+        }
+
     }
 
     protected void setupOthersBookedComponentBinding(String nickname, Pair<ImageView, ImageView> imageViewImageViewPair) {

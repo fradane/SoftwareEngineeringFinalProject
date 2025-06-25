@@ -279,7 +279,15 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) {
         Component chosenComponent = gameModel.getComponentTable().pickVisibleComponent(choice);
-        if (chosenComponent == null) return;
+        if (chosenComponent == null) {
+
+            gameModel.getGameClientNotifier()
+                    .notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
+                        clientController.notifyNoMoreHiddenComponents(nicknameToNotify);
+                    });
+
+            return;
+        }
         gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(chosenComponent);
     }
 

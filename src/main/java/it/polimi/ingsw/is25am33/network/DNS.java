@@ -185,7 +185,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     public void leaveGameBeforeCreation(String nickname){
         clients.remove(nickname);
-        System.out.println( nickname + " left the lobby");
+        System.out.println(nickname + " left the lobby");
     }
 
 

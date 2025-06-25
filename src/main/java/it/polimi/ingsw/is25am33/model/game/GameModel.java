@@ -389,8 +389,7 @@ public class GameModel {
      * @return the sum of the two dice faces, which is a random number between 2 and 12 inclusive.
      */
     public static int throwDices() {
-        return 5;
-        //return (int) (Math.random() * 11) + 1;
+        return (int) (Math.random() * 11) + 1;
     }
 
     /**
