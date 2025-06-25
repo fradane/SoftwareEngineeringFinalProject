@@ -13,13 +13,13 @@ import it.polimi.ingsw.is25am33.model.component.DoubleEngine;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
+import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -34,7 +34,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class CardPhaseController extends GuiController implements BoardsEventHandler {
-
+    @FXML
+    private Button exitGameButton;
+    @FXML
+    private Button landButton;
     @FXML
     public StackPane centerStackPane;
     @FXML
@@ -66,10 +69,41 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     private boolean isRemovingBatteries = false;
     private int remainingCubesToRemove = 0;
 
+    @FXML
+    private void handleExitGame() {
+        String confirmMessage = """
+                Are you sure you want to leave the game?
+                
+                Exiting the game will cause 
+                all your progress to be lost.
+                """;
+
+        showOverlayPopup("confirm Exit", confirmMessage,
+                () -> {
+                    clientController.leaveGame();
+                    javafx.application.Platform.exit();
+                });
+    }
+
+    @FXML
+    public void handleLand() {
+        createEarlyLandingDisplay();
+    }
+
+    public void notifyOtherPlayerEarlyLanded(String nickname) {
+        createOtherPlayersDisplay(nickname);
+    }
+
+    @FXML
+    private void handleSkipToLastCart() {
+        clientController.skipToLastCard();
+    }
+
     /**
      * Helper method to create styled buttons and add them to bottomHBox
+     *
      * @param buttonText The text to display on the button
-     * @param action The action to perform when button is clicked
+     * @param action     The action to perform when button is clicked
      */
     private void createAndAddButton(String buttonText, Runnable action) {
         Button button = new Button(buttonText);
@@ -269,9 +303,9 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     //-------------------- STARDUST ----------------------
 
-    public void showStardustMenu(){
+    public void showStardustMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
-        if (!(card instanceof ClientStarDust starDust)){
+        if (!(card instanceof ClientStarDust starDust)) {
             showMessage("Error: Expected StarDust card", false);
             return;
         }
@@ -285,18 +319,17 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         showMessage("Stardust has been detected in your flight path!", true);
 
         int exposedConnector = clientModel.getMyShipboard().countExposed();
-        if (exposedConnector > 0){
+        if (exposedConnector > 0) {
             warningMessage = String.format(
                     """
-                    Your shipboard wasn't well built.
-                    You will lose %d flight days.
-                    """,exposedConnector);
-        }
-        else {
+                            Your shipboard wasn't well built.
+                            You will lose %d flight days.
+                            """, exposedConnector);
+        } else {
             warningMessage = String.format(
                     """
-                    GOOD JOB, your shipboard was built excently.
-                    You won't lose any flight days""");
+                            GOOD JOB, your shipboard was built excently.
+                            You won't lose any flight days""");
         }
 
         showInfoPopupWithCallback(warningMessage, starDust, () -> {
@@ -382,8 +415,8 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             }
 
             showInfoPopupWithCallback("""
-                    You have not enough crew members. You must sacrifice all of them.
-                    ATTENTION! you will be eliminated""",
+                            You have not enough crew members. You must sacrifice all of them.
+                            ATTENTION! you will be eliminated""",
                     (ClientCard) card,
                     () -> {
                         boolean success = clientController.checkCabinSelection(clientModel.getMyNickname(), selectedCabinsCoords);
@@ -584,7 +617,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     //-------------------- ABANDONED STATION ----------------------
 
-    public void showAbandonedStationMenu(){
+    public void showAbandonedStationMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
         if (!(card instanceof ClientAbandonedStation abandonedStation)) {
             showMessage("Error: Expected AbandonedStation card", false);
@@ -608,7 +641,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
 
-
     //-------------------- PIRATES ----------------------
 
     public void showChooseCannonsMenu(){
@@ -627,7 +659,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         showMessage(card.getCardType() + " have been detected!", true);
 
-        if (clientModel.getMyShipboard().getDoubleCannons().isEmpty())  {
+        if (clientModel.getMyShipboard().getDoubleCannons().isEmpty()) {
             showInfoPopupWithCallback("""
                     No double cannons available.
                     You can use only single cannons.
@@ -700,7 +732,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         if (clientModel.isMyTurn()) {
             showInfoPopupWithCallback("""
-                    Throw the dice to see where the meteorite will hit""",
+                            Throw the dice to see where the meteorite will hit""",
                     card,
                     () -> clientController.playerWantsToThrowDices(clientModel.getMyNickname()));
 
@@ -1131,14 +1163,14 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         if (componentToActivate.equals("cannon"))
             highlightAvailableDoubleCannon();
-        else  if (componentToActivate.equals("engine"))
+        else if (componentToActivate.equals("engine"))
             highlightAvailableDoubleEngine();
         else
             System.err.println("Do not know what to activate " + componentToActivate);
     }
 
     // -------------------- EPIDEMIC ----------------------
-    public void showEpidemicMenu(){
+    public void showEpidemicMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
         if (!(card instanceof ClientEpidemic epidemic)) {
             showMessage("Error: Expected Epidemic card", false);
@@ -1181,7 +1213,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 return true;
             }
         }
-        return false ;
+        return false;
     }
 
 //    @Override
@@ -1294,17 +1326,13 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 else
                     handleShipParts(coordinates);
             }
-            case CardState.VISIT_LOCATION ->
-                    showCanVisitLocationMenu();
+            case CardState.VISIT_LOCATION -> showCanVisitLocationMenu();
 
-            case CardState.REMOVE_CREW_MEMBERS ->
-                    handleCabinSelection(coordinates);
+            case CardState.REMOVE_CREW_MEMBERS -> handleCabinSelection(coordinates);
 
-            case CardState.STARDUST ->
-                    showStardustMenu();
+            case CardState.STARDUST -> showStardustMenu();
 
-            case CardState.EPIDEMIC ->
-                    showEpidemicMenu();
+            case CardState.EPIDEMIC -> showEpidemicMenu();
 
             default -> System.err.println("Unknown card state: " + clientModel.getCurrCardState());
         }
@@ -1584,7 +1612,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         if (currCard instanceof ClientPlanets)
             showMessage("You have chosen planet " + planetChoice + " look at your rewards!!!", true);
 
-        else if(currCard instanceof ClientAbandonedStation)
+        else if (currCard instanceof ClientAbandonedStation)
             showMessage("You’ve landed on the cargo. Enjoy your rewards!!!", true);
         else
             showMessage("You have accepted the reward, look at it!!!", true);
@@ -1723,37 +1751,55 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         VBox popupContent = new VBox();
         popupContent.getStyleClass().add("popup-container");
 
-        // Titolo
-        Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("popup-title");
-        titleLabel.setWrapText(true);
+        // Titolo (solo se fornito)
+        if (title != null && !title.trim().isEmpty()) {
+            Label titleLabel = new Label(title);
+            titleLabel.getStyleClass().add("popup-title");
+            titleLabel.setWrapText(true);
+            popupContent.getChildren().add(titleLabel);
+        }
 
         // Messaggio
         Label messageLabel = new Label(message);
         messageLabel.getStyleClass().add("popup-message");
         messageLabel.setWrapText(true);
+        popupContent.getChildren().add(messageLabel);
 
-        // Bottone OK
-        Button okButton = new Button("OK");
-        okButton.getStyleClass().add("popup-button");
-        okButton.setOnAction(_ -> {
+        // Container per i pulsanti
+        HBox buttonContainer = new HBox();
+        buttonContainer.setAlignment(javafx.geometry.Pos.CENTER);
+        buttonContainer.setSpacing(15);
+
+        // Pulsante Conferma
+        Button confirmButton = new Button("Confirm");
+        confirmButton.getStyleClass().addAll("popup-button", "confirm-button");
+        confirmButton.setOnAction(e -> {
             centerStackPane.getChildren().remove(overlay);
             if (onClose != null) {
-                onClose.run();
+                onClose.run(); // ← Esegue l'azione solo se confermato
             }
         });
 
+        // Pulsante Annulla
+        Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().addAll("popup-button", "cancel-button");
+        cancelButton.setOnAction(e -> {
+            centerStackPane.getChildren().remove(overlay);
+            // Non esegue nessuna azione = annullamento
+            showMessage("Operation cancelled.", false); // Feedback opzionale
+        });
+
+        buttonContainer.getChildren().addAll(confirmButton, cancelButton);
+        popupContent.getChildren().add(buttonContainer);
+
         // Assembla il popup
-        popupContent.getChildren().addAll(titleLabel, messageLabel, okButton);
         overlay.getChildren().add(popupContent);
 
-        // Chiudi cliccando fuori dal popup
+        // Chiudi cliccando fuori dal popup (comportamento di annullamento)
         overlay.setOnMouseClicked(e -> {
             if (e.getTarget() == overlay) {
                 centerStackPane.getChildren().remove(overlay);
-                if (onClose != null) {
-                    onClose.run();
-                }
+                showMessage("Operation cancelled.", false); // Feedback opzionale
             }
         });
 
@@ -1761,18 +1807,15 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         Platform.runLater(() -> {
             centerStackPane.getChildren().add(overlay);
             overlay.toFront();
-//            if (onClose == null) {
-//                PauseTransition delay = new PauseTransition(Duration.seconds(2));
-//                delay.setOnFinished(_ -> {
-//                    centerStackPane.getChildren().remove(overlay);
-//                });
-//                delay.play();
-//            }
         });
     }
 
     private void showInfoPopupWithCallback(String message, ClientCard card, Runnable onClose) {
-        showOverlayPopup(card.getCardType(), message, onClose);
+        String title = null;
+        if (card != null) {
+            title = card.getCardType();
+        }
+        showOverlayPopup(title, message, onClose);
     }
 
     public void checkShipBoardAfterAttackMenu() {
@@ -1823,8 +1866,8 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     public void showBigShotMenu() {
         ClientDangerousObject dangerousObj = clientModel.getCurrDangerousObj();
         showInfoPopupWithCallback(String.format("""
-                Big Shot incoming! Nothing can stop this...
-                Ballistic info: %s %d""", dangerousObj.getDirection(), dangerousObj.getCoordinate() + 1),
+                        Big Shot incoming! Nothing can stop this...
+                        Ballistic info: %s %d""", dangerousObj.getDirection(), dangerousObj.getCoordinate() + 1),
                 clientModel.getCurrAdventureCard(),
                 () -> clientController.playerHandleBigShot(clientModel.getMyNickname()));
     }
@@ -2079,5 +2122,31 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         showInfoPopupWithCallback(message,
                 clientModel.getCurrAdventureCard(),
                 () -> System.exit(0));
+    }
+
+    private void createEarlyLandingDisplay() {
+        String warningMessage = ("""
+        🛬 EARLY LANDING 🛬
+        Your ship marker has been removed from the flight board!
+        You have abandoned the space race and landed safely.
+        You can continue to follow the game as a spectator until the end.
+        
+        You can still win if you have accumulated enough credits!
+        Continue watching the game and see how it ends!""");
+
+        showOverlayPopup("warning Message", warningMessage,
+                () -> createAndAddButton("ConfirmButton", () ->
+                    clientController.land()));
+    }
+
+    private void createOtherPlayersDisplay(String nickname) {
+        String warningMessage = String.format("""
+                📢 FLIGHT ANNOUNCEMENT 📢
+                %s has abandoned the race!
+                Their ship has made an early landing.
+                From the next card, they will no longer participate in adventures.
+                """, nickname);
+
+        showOverlayPopup("warning message", warningMessage, null);
     }
 }

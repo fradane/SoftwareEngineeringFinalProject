@@ -186,6 +186,7 @@ per fare in modo che il layout si adatti automaticamente alla dimensione della f
 
             <!-- Progress indicator opzionale -->
             <ProgressIndicator styleClass="space-progress" />
+
         </VBox>
 
     </StackPane>

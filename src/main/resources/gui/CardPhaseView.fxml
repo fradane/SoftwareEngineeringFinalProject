@@ -21,9 +21,28 @@
 
             <!-- Riga con titolo e crediti cosmici -->
             <HBox alignment="CENTER_LEFT" spacing="20.0">
-                <Label styleClass="screen-title" text="Galaxy Truckers" />
+                <!-- Sezione sinistra con titolo e pulsanti -->
+                <VBox spacing="10.0" alignment="TOP_LEFT">
+                    <Label styleClass="screen-title" text="Galaxy Truckers" />
 
-                <!-- Spacer per spingere i crediti a sinistra -->
+                    <!-- Pulsanti di controllo gioco affiancati -->
+                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <Button fx:id="exitGameButton"
+                                text="Exit Game"
+                                styleClass="control-button, exit-button"
+                                onAction="#handleExitGame"
+                                minWidth="90.0"
+                                maxWidth="90.0" />
+                        <Button fx:id="landButton"
+                                text="Land"
+                                styleClass="control-button, land-button"
+                                onAction="#handleLand"
+                                minWidth="90.0"
+                                maxWidth="90.0" />
+                    </HBox>
+                </VBox>
+
+                <!-- Spacer per spingere i crediti a destra -->
                 <Region HBox.hgrow="ALWAYS" />
 
                 <!-- Box crediti cosmici -->
@@ -77,9 +96,27 @@
     </center>
 
     <bottom>
-        <HBox fx:id="bottomHBox" alignment="CENTER" spacing="15.0" styleClass="action-bar">
-            <!-- dynamic buttons to make choices through card states -->
-        </HBox>
+        <BorderPane styleClass="action-bar">
+            <!-- Container principale per i pulsanti dinamici al centro -->
+            <center>
+                <HBox fx:id="bottomHBox" alignment="CENTER" spacing="15.0">
+                    <!-- dynamic buttons to make choices through card states -->
+                </HBox>
+            </center>
+
+            <!-- Pulsante Skip Last Card in basso a destra -->
+            <right>
+                <Button fx:id="skipToLastCardButton"
+                        text="Skip Last Card"
+                        styleClass="control-button, skip-card-button"
+                        onAction="#handleSkipToLastCart"
+                        visible="true">
+                    <BorderPane.margin>
+                        <Insets right="15.0" />
+                    </BorderPane.margin>
+                </Button>
+            </right>
+        </BorderPane>
     </bottom>
 
 </BorderPane>

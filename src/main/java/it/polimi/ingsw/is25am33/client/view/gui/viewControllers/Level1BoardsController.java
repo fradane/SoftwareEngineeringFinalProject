@@ -15,22 +15,52 @@ import java.util.*;
 
 public class Level1BoardsController extends BoardsController {
 
-    @FXML public Pane pawnsPane;
-    @FXML public StackPane boardsPane;
-    @FXML public Button myShipButton, showFlyingBoardButton;
-    @FXML public HBox shipNavigationBar;
-    @FXML public GridPane myShipBoardGrid;
-    @FXML private Button button04_03, button04_04, button04_05, button04_06, button04_07, button04_08, button04_09;
-    @FXML private Button button05_03, button05_04, button05_05, button05_06, button05_07, button05_08, button05_09;
-    @FXML private Button button06_03, button06_04, button06_05, button06_06, button06_07, button06_08, button06_09;
-    @FXML private Button button07_03, button07_04, button07_05, button07_06, button07_07, button07_08, button07_09;
-    @FXML private Button button08_03, button08_04, button08_05, button08_06, button08_07, button08_08, button08_09;
+    @FXML
+    public Pane pawnsPane;
+    @FXML
+    public StackPane boardsPane;
+    @FXML
+    public Button myShipButton, showFlyingBoardButton;
+    @FXML
+    public HBox shipNavigationBar;
+    @FXML
+    public GridPane myShipBoardGrid;
+    @FXML
+    private Button button04_03, button04_04, button04_05, button04_06, button04_07, button04_08, button04_09;
+    @FXML
+    private Button button05_03, button05_04, button05_05, button05_06, button05_07, button05_08, button05_09;
+    @FXML
+    private Button button06_03, button06_04, button06_05, button06_06, button06_07, button06_08, button06_09;
+    @FXML
+    private Button button07_03, button07_04, button07_05, button07_06, button07_07, button07_08, button07_09;
+    @FXML
+    private Button button08_03, button08_04, button08_05, button08_06, button08_07, button08_08, button08_09;
 
-    @FXML public GridPane player2Grid, player3Grid, player4Grid;
+    @FXML
+    public GridPane player2Grid, player3Grid, player4Grid;
 
     private static final Map<Integer, Pair<Integer, Integer>> flyingBoardRelativePositions = Map.ofEntries(
-            // TODO finire le posizioni
+            Map.entry(Integer.MIN_VALUE, new Pair<>(9, 7)),
+            Map.entry(0, new Pair<>(10, 14)),
+            Map.entry(1, new Pair<>(8, 20)),
+            Map.entry(2, new Pair<>(7, 25)),
+            Map.entry(3, new Pair<>(7, 31)),
+            Map.entry(4, new Pair<>(8, 37)),
+            Map.entry(5, new Pair<>(10, 43)),
+            Map.entry(6, new Pair<>(8, 39)),
+            Map.entry(7, new Pair<>(20, 50)),
+            Map.entry(8, new Pair<>(26, 47)),
+            Map.entry(9, new Pair<>(29, 42)),
+            Map.entry(10, new Pair<>(31, 36)),
+            Map.entry(11, new Pair<>(31, 31)),
+            Map.entry(12, new Pair<>(31, 25)),
+            Map.entry(13, new Pair<>(30, 19)),
+            Map.entry(14, new Pair<>(29, 14)),
+            Map.entry(15, new Pair<>(25, 9)),
+            Map.entry(16, new Pair<>(19, 6)),
+            Map.entry(17, new Pair<>(13, 9))
     );
+
 
     @Override
     protected Map<Integer, Pair<Integer, Integer>> getFlyingBoardRelativePositions() {

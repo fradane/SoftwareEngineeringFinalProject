@@ -1025,7 +1025,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords){
         //TODO fare controlli di validità dei valori inseriti
         if(doubleEnginesCoords.size()!=batteryBoxesCoords.size())
-            throw new IllegalArgumentException("il numero di motori non corrisponde al numero di batterie");
+            throw new IllegalArgumentException("the number of engines does not match the number of batteries");
 
         if(!clientModel.isMyTurn()) {
             view.showMessage("This is not your turn, please wait for others to chose ...", ERROR);
@@ -1340,6 +1340,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             serverController.debugSkipToLastCard();
             view.showMessage("Successfully skipped to last card!", NOTIFICATION_INFO);
         } catch (IOException e) {
+            System.err.println(e.getMessage());
             view.showMessage("Failed to skip cards: " + e.getMessage(), ERROR);
         }
     }

@@ -271,8 +271,9 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             }
         }
 
-        if(shipBoard.getMainCabin()!=null)
+        if (shipBoard.getMainCabin() != null) {
             shipBoard.getMainCabin().fillCabin(CrewMember.HUMAN);
+        }
     }
 
     @Override

@@ -137,6 +137,17 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 //        clientModel.getPlayerClientData().keySet().forEach(nickname -> modelFxAdapter.refreshShipBoardOf(nickname));
 //    }
 
+    @FXML
+    private void handleExitGame() {
+        try {
+            clientController.leaveGame();
+
+            Platform.runLater(() -> javafx.application.Platform.exit());
+
+        } catch (Exception e) {
+            showMessage("Error leaving the game: " + e.getMessage(), true);
+        }
+    }
     private void setupFocusedComponentBinding() {
         modelFxAdapter.getObservableFocusedComponent()
                 .addListener((_, _, newVal) -> Platform.runLater(() -> {
