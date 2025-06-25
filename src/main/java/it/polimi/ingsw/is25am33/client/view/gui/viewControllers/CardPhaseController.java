@@ -862,6 +862,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         initializeBeforeCard();
 
+
         boolean canActivateDoubleEngines = true;
         StringBuilder warningMessage = new StringBuilder();
 
