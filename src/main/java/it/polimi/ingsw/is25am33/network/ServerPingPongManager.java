@@ -26,7 +26,7 @@ public class ServerPingPongManager {
             if (pongTimeout != null) pongTimeout.cancel(false);
 
             ScheduledFuture<?> pongFuture = scheduler.schedule(() -> {
-               System.out.println("DISCONNESSIONE: Nessun pong ricevuto da " + nickname + ".");
+               System.out.println("DISCONNECTION: No pong received from " + nickname + ".");
                 stop(nickname);
                 onTimeout.run();
             }, 8000, TimeUnit.SECONDS); // TODO cambiare a MILLISECONDS

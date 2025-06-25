@@ -944,7 +944,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void handleDisconnection() {
-        view.showDisconnectMessage("DISCONNESIONE Nessun pong ricevuto dal server.");
+        view.showDisconnectMessage("DISCONNECTION: No pong received from server");
     }
 
     public void forcedDisconnection(String nicknameToNotify, String gameId) throws IOException {

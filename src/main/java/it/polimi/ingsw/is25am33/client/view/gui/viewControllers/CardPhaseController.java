@@ -27,6 +27,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
@@ -68,6 +69,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     private final List<Coordinates> mostPreciousCube = new ArrayList<>();
     private boolean isRemovingBatteries = false;
     private int remainingCubesToRemove = 0;
+    private final List<String> alreadyEliminated = new ArrayList<>();
 
     @FXML
     private void handleExitGame() {
@@ -87,11 +89,15 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     @FXML
     public void handleLand() {
+        Platform.runLater(() -> landButton.setVisible(false));
         createEarlyLandingDisplay();
     }
 
     public void notifyOtherPlayerEarlyLanded(String nickname) {
-        createOtherPlayersDisplay(nickname);
+        if (!alreadyEliminated.contains(nickname)) {
+            createOtherPlayersDisplay(nickname);
+            alreadyEliminated.add(nickname);
+        }
     }
 
     @FXML
@@ -1742,7 +1748,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 });
     }
 
-    private void showOverlayPopup(String title, String message, Runnable onClose) {
+    private void showOverlayPopup(String title, String message, @NotNull Runnable onClose) {
         // Overlay di sfondo
         StackPane overlay = new StackPane();
         overlay.getStyleClass().add("popup-overlay");
@@ -1775,21 +1781,20 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         confirmButton.getStyleClass().addAll("popup-button", "confirm-button");
         confirmButton.setOnAction(e -> {
             centerStackPane.getChildren().remove(overlay);
-            if (onClose != null) {
-                onClose.run(); // ← Esegue l'azione solo se confermato
-            }
+            onClose.run();
         });
 
-        // Pulsante Annulla
-        Button cancelButton = new Button("Cancel");
-        cancelButton.getStyleClass().addAll("popup-button", "cancel-button");
-        cancelButton.setOnAction(e -> {
-            centerStackPane.getChildren().remove(overlay);
-            // Non esegue nessuna azione = annullamento
-            showMessage("Operation cancelled.", false); // Feedback opzionale
-        });
+//        // Pulsante Annulla
+//        Button cancelButton = new Button("Cancel");
+//        cancelButton.getStyleClass().addAll("popup-button", "cancel-button");
+//        cancelButton.setOnAction(e -> {
+//            centerStackPane.getChildren().remove(overlay);
+//            // Non esegue nessuna azione = annullamento
+//            showMessage("Operation cancelled.", false); // Feedback opzionale
+//        });
 
-        buttonContainer.getChildren().addAll(confirmButton, cancelButton);
+//        buttonContainer.getChildren().addAll(confirmButton, cancelButton);
+        buttonContainer.getChildren().add(confirmButton);
         popupContent.getChildren().add(buttonContainer);
 
         // Assembla il popup
@@ -2119,8 +2124,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     public void showDisconnectMessage(String message) {
-        showInfoPopupWithCallback(message,
-                clientModel.getCurrAdventureCard(),
+        showOverlayPopup("warning message", message,
                 () -> System.exit(0));
     }
 
@@ -2134,9 +2138,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         You can still win if you have accumulated enough credits!
         Continue watching the game and see how it ends!""");
 
-        showOverlayPopup("warning Message", warningMessage,
-                () -> createAndAddButton("ConfirmButton", () ->
-                    clientController.land()));
+        showOverlayPopup("warning Message", warningMessage, () -> clientController.land());
     }
 
     private void createOtherPlayersDisplay(String nickname) {
@@ -2147,6 +2149,21 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 From the next card, they will no longer participate in adventures.
                 """, nickname);
 
-        showOverlayPopup("warning message", warningMessage, null);
+        showOverlayPopup("warning message", warningMessage, () -> {});
+    }
+
+    public void showPlayerLanded() {
+        String warningMessage = ("""
+        🛬 EARLY LANDING 🛬
+        Your ship marker has been removed from the flight board!
+        You have abandoned the space race and landed safely.
+        You can continue to follow the game as a spectator until the end.
+        
+        You can still win if you have accumulated enough credits!
+        Continue watching the game and see how it ends!""");
+
+        showOverlayPopup("warning Message", warningMessage, () ->
+                Platform.runLater(() -> landButton.setVisible(false))
+        );
     }
 }

@@ -200,7 +200,7 @@ public class ClientGuiController extends Application implements ClientView {
             // Il giocatore corrente è atterrato anticipatamente
             executeWithController(
                     CARD_PHASE_CONTROLLER,
-                    () -> cardPhaseController.handleLand()
+                    () -> cardPhaseController.showPlayerLanded()
             );
         } else {
             // Un altro giocatore è atterrato anticipatamente

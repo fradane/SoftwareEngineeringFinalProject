@@ -8,7 +8,7 @@
 Rimuovo le dimensioni fisse (prefHeight/prefWidth) e uso AnchorPane con ancoraggi
 per fare in modo che il layout si adatti automaticamente alla dimensione della finestra
 -->
-<AnchorPane styleClass="game-background"
+<AnchorPane styleClass="main-menu-background"
             stylesheets="@/galaxy-truckers.css"
             xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx/17.0.12"
@@ -34,13 +34,8 @@ per fare in modo che il layout si adatti automaticamente alla dimensione della f
             <Label styleClass="menu-subtitle" text="Choose your adventure" />
 
             <!-- Label per errori - SEMPRE PRESENTE nel main menu, inizialmente nascosta -->
-            <Label fx:id="errorLabel"
-                   styleClass="error-label"
-                   visible="false"
-                   managed="false"
-                   wrapText="true"
-                   maxWidth="500.0"
-                   alignment="CENTER" />
+            <Label fx:id="errorLabel" styleClass="error-label" visible="false" managed="false" wrapText="true"
+                   maxWidth="500.0" alignment="CENTER" />
 
             <!-- Bottoni principali -->
             <VBox alignment="CENTER" spacing="15">
