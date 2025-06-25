@@ -650,7 +650,7 @@ public class PrefabShipFactory {
             if (!MainCabin.class.equals(componentClass)) {
                 for (Component component : components) {
                     // Aggiungi il componente alla lista dei componenti non attivi
-                    shipBoard.getNotActiveComponents().add(component);
+                    //shipBoard.getNotActiveComponents().add(component);
                     // Rimuovi il componente dalla lista del suo tipo
                     componentsPerType.get(componentClass).remove(component);
                 }
