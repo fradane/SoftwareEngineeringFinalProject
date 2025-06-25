@@ -6,6 +6,7 @@ import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.LifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
@@ -348,6 +349,8 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     }
 
     public void handleReleaseComponentButton(){
+        if (clientModel.getMyShipboard().getFocusedComponent() == null)
+            return;
         clientController.releaseFocusedComponent();
     }
 
@@ -363,7 +366,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     }
 
     public void handleRotateComponentButton() {
-        clientModel.getMyShipboard().getFocusedComponent().rotate();
+
+        Component focusedComponent = clientModel.getMyShipboard().getFocusedComponent();
+        if (focusedComponent == null)
+            return;
+
+        focusedComponent.rotate();
         ImageView imgView = focusComponentImage;
         Image oldImage = imgView.getImage();
         if (oldImage != null) {
