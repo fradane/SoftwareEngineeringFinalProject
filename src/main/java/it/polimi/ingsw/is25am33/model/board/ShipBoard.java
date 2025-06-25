@@ -1125,7 +1125,10 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @param obj The dangerous object to handle.
      * @return
      */
-    public abstract int[] handleDangerousObject(DangerousObj obj);
+    public int[] handleDangerousObject(DangerousObj obj){
+        int[] hitCoordinate = findFirstComponentInDirection(obj.getCoordinate(), obj.getDirection());
+        return hitCoordinate;
+    }
 
     /**
      * Checks whether the ship can defend itself from a dangerous object using single cannons.

@@ -58,11 +58,6 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
         releaseFocusedComponent();
     }
 
-    public int[] handleDangerousObject(DangerousObj obj){
-        int[] hitCoordinate = findFirstComponentInDirection(obj.getCoordinate(), obj.getDirection());
-        return hitCoordinate;
-    }
-
     public boolean canDifendItselfWithSingleCannons(DangerousObj obj){
         if (obj.getDirection() == NORTH) {
             return isThereACannon(obj.getCoordinate(), obj.getDirection());

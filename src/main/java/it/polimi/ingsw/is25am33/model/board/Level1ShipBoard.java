@@ -35,12 +35,6 @@ public class Level1ShipBoard extends ShipBoard implements ShipBoardClient {
     }
 
     @Override
-    public int[] handleDangerousObject(DangerousObj obj) {
-        int[] a = new int[0];
-        return a;
-    }
-
-    @Override
     public boolean canDifendItselfWithSingleCannons(DangerousObj obj) {
         return false;
     }
