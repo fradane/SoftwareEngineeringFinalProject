@@ -14,6 +14,7 @@ import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
@@ -28,6 +29,8 @@ import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -1342,6 +1345,31 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             view.showMessage("Successfully skipped to last card!", NOTIFICATION_INFO);
         } catch (IOException e) {
             view.showMessage("Failed to skip cards: " + e.getMessage(), ERROR);
+        }
+    }
+
+    @Override
+    public void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException {
+        view.showError("Errore selezione storage: " + errorMessage);
+        // Torna alla fase di selezione storage per il retry
+        view.showMessage("Riprova con una configurazione valida.", STANDARD);
+    }
+
+    /**
+     * Invia gli aggiornamenti degli storage al server usando la nuova struttura dati.
+     * 
+     * @param storageUpdates mappa degli aggiornamenti degli storage
+     */
+    public void sendStorageUpdates(Map<Coordinates, List<CargoCube>> storageUpdates) {
+        try {
+            PlayerChoicesDataStructure choices = new PlayerChoicesDataStructure.Builder()
+                    .setStorageUpdates(storageUpdates)
+                    .build();
+                    
+            serverController.handleClientChoice(nickname, choices);
+        } catch (IOException e) {
+            view.showError("Errore durante l'invio al server: " + e.getMessage());
+            view.showMessage("Riprova con 'c' per confermare", STANDARD);
         }
     }
 }

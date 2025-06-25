@@ -2,12 +2,16 @@ package it.polimi.ingsw.is25am33.model.card;
 
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import it.polimi.ingsw.is25am33.model.component.*;
+import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
+import it.polimi.ingsw.is25am33.serializationLayer.server.ServerDeserializer;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -28,6 +32,8 @@ public class PlayerChoicesDataStructure implements Serializable {
     private final boolean hasAcceptedTheReward;
     private final List<Coordinates> chosenShields;
     private final List<Coordinates> chosenDoubleCannons;
+    @JsonDeserialize(keyUsing = ServerDeserializer.class)
+    private final Map<Coordinates, List<CargoCube>> storageUpdates;
 
     public PlayerChoicesDataStructure() {
         this.chosenDoubleEngines = new ArrayList<>();
@@ -39,6 +45,7 @@ public class PlayerChoicesDataStructure implements Serializable {
         this.hasAcceptedTheReward = false;
         this.chosenDoubleCannons = new ArrayList<>();
         this.chosenShields = new ArrayList<>();
+        this.storageUpdates = new HashMap<>();
     }
 
     private PlayerChoicesDataStructure(Builder builder) {
@@ -51,6 +58,7 @@ public class PlayerChoicesDataStructure implements Serializable {
         this.hasAcceptedTheReward = builder.hasAcceptedTheReward;
         this.chosenShields = builder.chosenShields;
         this.chosenDoubleCannons = builder.chosenDoubleCannons;
+        this.storageUpdates = builder.storageUpdates;
     }
 
     /**
@@ -116,7 +124,7 @@ public class PlayerChoicesDataStructure implements Serializable {
      *
      * @return {@code true} if the player has accepted the reward; {@code false} otherwise.
      */
-    public boolean hasAcceptedTheReward() {
+    public boolean isHasAcceptedTheReward() {
         return hasAcceptedTheReward;
     }
 
@@ -160,6 +168,26 @@ public class PlayerChoicesDataStructure implements Serializable {
         return chosenShields;
     }
 
+    /**
+     * Returns the storage updates map selected by the player, if any.
+     *
+     * @return an {@link Optional} containing the map of storage updates, or empty if not set.
+     */
+    @JsonIgnore
+    public Optional<Map<Coordinates, List<CargoCube>>> getStorageUpdates() {
+        return Optional.ofNullable(storageUpdates);
+    }
+
+    /**
+     * Returns the storage updates map for JSON serialization.
+     *
+     * @return the storage updates map.
+     */
+    @JsonDeserialize(keyUsing = ServerDeserializer.class)
+    public Map<Coordinates, List<CargoCube>> getStorageUpdatesMap() {
+        return storageUpdates;
+    }
+
 
     /**
      * Builder class for constructing instances of {@link PlayerChoicesDataStructure}.
@@ -175,6 +203,7 @@ public class PlayerChoicesDataStructure implements Serializable {
         private boolean hasAcceptedTheReward;
         private List<Coordinates> chosenShields;
         private List<Coordinates> chosenDoubleCannons;
+        private Map<Coordinates, List<CargoCube>> storageUpdates;
         /**
          * Sets the list of double engines selected by the player.
          *
@@ -297,6 +326,17 @@ public class PlayerChoicesDataStructure implements Serializable {
         }
 
         /**
+         * Sets the storage updates map for cube redistribution.
+         *
+         * @param storageUpdates the map of storage coordinates to cube lists.
+         * @return this builder instance for method chaining.
+         */
+        public Builder setStorageUpdates(Map<Coordinates, List<CargoCube>> storageUpdates) {
+            this.storageUpdates = storageUpdates;
+            return this;
+        }
+
+        /**
          * Builds and returns a new instance of {@link PlayerChoicesDataStructure}
          * using the values set in this builder.
          *
@@ -309,6 +349,8 @@ public class PlayerChoicesDataStructure implements Serializable {
             if (chosenCabins == null) chosenCabins = new ArrayList<>();
             if (chosenStorage == null) chosenStorage = new ArrayList<>();
             if (chosenDoubleCannons == null) chosenDoubleCannons = new ArrayList<>();
+            if (chosenShields == null) chosenShields = new ArrayList<>();
+            if (storageUpdates == null) storageUpdates = new HashMap<>();
 
             return new PlayerChoicesDataStructure(this);
         }

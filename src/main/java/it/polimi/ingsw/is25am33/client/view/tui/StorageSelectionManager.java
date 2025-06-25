@@ -24,6 +24,12 @@ public class StorageSelectionManager {
     private final List<Storage> availableStorages;
     private final Map<CargoCube, List<Storage>> compatibleStoragesMap;
 
+    // Nuovi campi per la ridistribuzione
+    private List<CargoCube> availableCubes = new ArrayList<>();
+    private Map<Coordinates, List<CargoCube>> finalUpdates = new HashMap<>();
+    private boolean redistributionMode = false;
+    private int selectedCubeIndex = -1;
+
     /**
      * Costruttore per il gestore delle selezioni di storage.
      *
@@ -508,6 +514,210 @@ public class StorageSelectionManager {
                 storageList.set(index, newStorage);
             }
         }
+    }
+
+    // ======== METODI PER LA RIDISTRIBUZIONE ========
+
+    /**
+     * Inizializza la modalità ridistribuzione con i cubi bonus.
+     * 
+     * @param newCubes cubi bonus da aggiungere
+     */
+    public void startRedistribution(List<CargoCube> newCubes) {
+        this.redistributionMode = true;
+        this.availableCubes.addAll(newCubes);
+        this.finalUpdates.clear();
+        this.selectedCubeIndex = -1;
+        
+        // Inizializza finalUpdates con lo stato attuale degli storage
+        initializeFinalUpdatesWithCurrentState();
+    }
+
+    /**
+     * Inizializza la mappa degli aggiornamenti con lo stato attuale degli storage.
+     * Include TUTTI gli storage nella mappa, anche quelli vuoti, per garantire
+     * che il server riceva lo stato completo.
+     */
+    private void initializeFinalUpdatesWithCurrentState() {
+        Map<Coordinates, Storage> coordsAndStorages = shipBoard.getCoordinatesAndStorages();
+        for (Map.Entry<Coordinates, Storage> entry : coordsAndStorages.entrySet()) {
+            Storage storage = entry.getValue();
+            // SEMPRE aggiungi tutti gli storage, anche se vuoti
+            finalUpdates.put(entry.getKey(), new ArrayList<>(storage.getStockedCubes()));
+        }
+    }
+
+    /**
+     * Seleziona un cubo tramite indice.
+     * 
+     * @param index indice del cubo da selezionare
+     * @return true se la selezione è avvenuta con successo
+     */
+    public boolean selectCubeByIndex(int index) {
+        if (index >= 0 && index < availableCubes.size()) {
+            selectedCubeIndex = index;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Ottiene il cubo attualmente selezionato.
+     * 
+     * @return il cubo selezionato o null se nessuno è selezionato
+     */
+    public CargoCube getSelectedCube() {
+        if (selectedCubeIndex >= 0 && selectedCubeIndex < availableCubes.size()) {
+            return availableCubes.get(selectedCubeIndex);
+        }
+        return null;
+    }
+
+    /**
+     * Ottiene la lista dei cubi disponibili.
+     * 
+     * @return copia della lista dei cubi disponibili
+     */
+    public List<CargoCube> getAvailableCubes() {
+        return new ArrayList<>(availableCubes);
+    }
+
+    /**
+     * Ottiene l'indice del cubo selezionato.
+     * 
+     * @return indice del cubo selezionato o -1 se nessuno è selezionato
+     */
+    public int getSelectedCubeIndex() {
+        return selectedCubeIndex;
+    }
+
+    /**
+     * Aggiunge il cubo selezionato allo storage specificato.
+     * 
+     * @param coord coordinate dello storage
+     * @return true se l'operazione è riuscita
+     */
+    public boolean addSelectedCubeToStorage(Coordinates coord) {
+        if (selectedCubeIndex < 0 || selectedCubeIndex >= availableCubes.size()) {
+            return false;
+        }
+
+        CargoCube selectedCube = availableCubes.get(selectedCubeIndex);
+        Storage storage = getStorageAt(coord);
+        
+        if (storage == null) {
+            return false;
+        }
+
+        // Validazione cubo rosso
+        if (selectedCube == CargoCube.RED && !(storage instanceof SpecialStorage)) {
+            return false;
+        }
+
+        // Aggiorna visivamente usando la logica esistente
+        Storage clone = cloneStorage(storage);
+        CargoCube displacedCube = clone.addCube(selectedCube);
+        replaceStorageInShipBoard(coord, storage, clone);
+
+        // Se un cubo è stato espulso, riaggiungilo agli availableCubes
+        if (displacedCube != null) {
+            availableCubes.add(displacedCube);
+        }
+
+        // Rimuovi dai disponibili
+        availableCubes.remove(selectedCubeIndex);
+        selectedCubeIndex = -1;
+
+        // Aggiorna mappa finale
+        updateFinalUpdates(coord, clone.getStockedCubes());
+        
+        return true;
+    }
+
+    /**
+     * Rimuove un cubo dallo storage specificato (lo riaggiunge ai disponibili).
+     * 
+     * @param coord coordinate dello storage
+     */
+    public void removeCubeFromStorage(Coordinates coord) {
+        Storage storage = getStorageAt(coord);
+        if (storage == null || storage.getStockedCubes().isEmpty()) {
+            return;
+        }
+
+        CargoCube removedCube = storage.getStockedCubes().get(storage.getStockedCubes().size() - 1);
+        
+        // Rimuovi visivamente
+        Storage clone = cloneStorage(storage);
+        clone.getStockedCubes().remove(removedCube);
+        replaceStorageInShipBoard(coord, storage, clone);
+        
+        // Riaggiunge ai disponibili
+        availableCubes.add(removedCube);
+        
+        // Aggiorna mappa finale
+        updateFinalUpdates(coord, clone.getStockedCubes());
+    }
+
+    /**
+     * Verifica se la ridistribuzione è completa.
+     * 
+     * @return true se tutti i cubi sono stati posizionati
+     */
+    public boolean isRedistributionComplete() {
+        return availableCubes.isEmpty();
+    }
+
+    /**
+     * Ottiene la mappa finale degli aggiornamenti per l'invio al server.
+     * 
+     * @return mappa degli aggiornamenti
+     */
+    public Map<Coordinates, List<CargoCube>> getFinalUpdates() {
+        return new HashMap<>(finalUpdates);
+    }
+
+    /**
+     * Helper per ottenere uno storage alle coordinate specificate.
+     * 
+     * @param coord coordinate dello storage
+     * @return storage alle coordinate o null se non trovato
+     */
+    private Storage getStorageAt(Coordinates coord) {
+        return shipBoard.getCoordinatesAndStorages().get(coord);
+    }
+
+    /**
+     * Helper per aggiornare la mappa finale degli aggiornamenti.
+     * IMPORTANTE: Include sempre le coordinate nella mappa, anche se la lista è vuota,
+     * per notificare al server che lo storage è stato modificato.
+     * 
+     * @param coord coordinate dello storage
+     * @param cubes lista dei cubi nello storage
+     */
+    private void updateFinalUpdates(Coordinates coord, List<CargoCube> cubes) {
+        // SEMPRE metti le coordinate nella mappa, anche se lista vuota
+        // Questo è essenziale per notificare al server che lo storage è stato modificato
+        finalUpdates.put(coord, new ArrayList<>(cubes));
+    }
+
+    /**
+     * Reset per nuovo utilizzo.
+     */
+    public void resetRedistribution() {
+        availableCubes.clear();
+        finalUpdates.clear();
+        redistributionMode = false;
+        selectedCubeIndex = -1;
+    }
+
+    /**
+     * Verifica se è in modalità ridistribuzione.
+     * 
+     * @return true se in modalità ridistribuzione
+     */
+    public boolean isInRedistributionMode() {
+        return redistributionMode;
     }
 
 }

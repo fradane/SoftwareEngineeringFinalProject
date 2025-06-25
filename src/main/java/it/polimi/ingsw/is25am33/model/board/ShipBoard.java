@@ -995,8 +995,18 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                 int newY = neighbor[1];
 
                 if (isValidPosition(newX, newY) && shipMatrix[newX][newY] != null && !visited[newX][newY]) {
-                    visited[newX][newY] = true;
-                    queue.add(new Coordinates(newX, newY));
+
+                    Component currentComponent = shipMatrix[pos.getX()][pos.getY()];
+                    Component neighbourComponent = shipMatrix[newX][newY];
+
+                    // Verifica che i connettori combacino e non siano entrambi EMPTY
+                    ConnectorType srcConnector = currentComponent.getConnectors().get(direction);
+                    ConnectorType destConnector = neighbourComponent.getConnectors().get(getOppositeDirection(direction));
+
+                    if (srcConnector != EMPTY && destConnector != EMPTY) {
+                        visited[newX][newY] = true;
+                        queue.add(new Coordinates(newX, newY));
+                    }
                 }
             }
         }

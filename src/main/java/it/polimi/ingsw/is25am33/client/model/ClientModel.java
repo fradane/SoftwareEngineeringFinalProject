@@ -338,10 +338,6 @@ public class ClientModel {
             return new ArrayList<>(((ClientSmugglers) card).getReward());
         }
 
-        // If no rewards were found or the card type doesn't have rewards
-        if (currCardState == CardState.HANDLE_CUBES_REWARD)
-            throw new IllegalStateException("Could not determine cube rewards for this card type.");
-
         return cubes;
     }
 

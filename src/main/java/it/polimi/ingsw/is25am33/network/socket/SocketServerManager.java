@@ -709,5 +709,12 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    @Override
+    public void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nicknameToNotify, "notifyStorageError");
+        outMessage.setParamString(errorMessage);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
 }
 

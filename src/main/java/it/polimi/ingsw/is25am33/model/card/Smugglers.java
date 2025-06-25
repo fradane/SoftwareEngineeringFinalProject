@@ -5,6 +5,7 @@ import it.polimi.ingsw.is25am33.client.model.card.ClientSmugglers;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.card.interfaces.CubesRedistributionHandler;
 import it.polimi.ingsw.is25am33.model.card.interfaces.DoubleCannonActivator;
 import it.polimi.ingsw.is25am33.model.component.*;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
@@ -14,9 +15,8 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
-public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActivator {
+public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActivator, CubesRedistributionHandler {
 
     /**
      * Represents the penalty in terms of cargo cubes that the player incurs when interacting with this card.
@@ -101,13 +101,17 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
                 this.currPlayerChoseCannonsToActivate(playerChoices.getChosenDoubleCannons().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
                 break;
             case ACCEPT_THE_REWARD:
-                this.currPlayerDecidedToGetTheReward(playerChoices.hasAcceptedTheReward());
+                this.currPlayerDecidedToGetTheReward(playerChoices.isHasAcceptedTheReward());
                 break;
             case HANDLE_CUBES_MALUS:
                 this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
                 break;
             case HANDLE_CUBES_REWARD:
-                this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
+                if (playerChoices.getStorageUpdates().isPresent()) {
+                    this.handleStorageUpdates(playerChoices.getStorageUpdates().orElseThrow());
+                } else {
+                    this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
+                }
                 break;
             default:
                 throw new UnknownStateException("Unknown current state");
@@ -347,6 +351,48 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
 
+    }
+
+    /**
+     * Gestisce gli aggiornamenti degli storage tramite la nuova struttura dati.
+     * 
+     * @param storageUpdates mappa degli aggiornamenti degli storage
+     */
+    private void handleStorageUpdates(Map<Coordinates, List<CargoCube>> storageUpdates) {
+        try {
+            validateStorageUpdates(storageUpdates, gameModel);
+            applyStorageUpdates(storageUpdates, gameModel);
+            
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            });
+            
+            movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
+            setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
+            
+        } catch (IllegalArgumentException e) {
+            // Gestione errore con retry
+            String currentPlayer = gameModel.getCurrPlayer().getNickname();
+            gameModel.getGameClientNotifier().notifyClients(
+                Set.of(currentPlayer),
+                (nickname, clientController) -> {
+                    clientController.notifyStorageError(nickname, e.getMessage());
+                }
+            );
+            
+            // Ripristina stato shipboard
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            });
+            
+            // Rimani in HANDLE_CUBES_REWARD per il retry
+        }
     }
 
 }

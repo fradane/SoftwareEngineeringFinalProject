@@ -186,6 +186,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showCubeRedistributionMenu() {
+        //TODO
+    }
+
+    @Override
     public void showValidShipBoardMenu() {
         //TODO
     }

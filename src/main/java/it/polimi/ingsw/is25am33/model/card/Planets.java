@@ -5,6 +5,7 @@ import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.model.card.ClientPlanets;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.card.interfaces.CubesRedistributionHandler;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.SpecialStorage;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
@@ -13,14 +14,17 @@ import it.polimi.ingsw.is25am33.model.IllegalIndexException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Storage;
+import it.polimi.ingsw.is25am33.model.game.GameModel;
+import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Planets extends AdventureCard implements PlayerMover {
+public class Planets extends AdventureCard implements PlayerMover, CubesRedistributionHandler {
     private List<Planet> availablePlanets;
     private final Map<String, Planet> playerPlanet = new ConcurrentHashMap<>();
     private int stepsBack;
@@ -70,7 +74,11 @@ public class Planets extends AdventureCard implements PlayerMover {
                 }
                 break;
             case HANDLE_CUBES_REWARD:
-                this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
+                if (playerChoices.getStorageUpdates().isPresent()) {
+                    this.handleStorageUpdates(playerChoices.getStorageUpdates().orElseThrow());
+                } else {
+                    this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
+                }
                 break;
             default:
                 throw new UnknownStateException("Unknown current state");
@@ -237,6 +245,53 @@ public class Planets extends AdventureCard implements PlayerMover {
         // Procedi con il prossimo giocatore o termina la carta
         proceedToNextPlayerOrEndCard();
 
+    }
+
+    /**
+     * Gestisce gli aggiornamenti degli storage tramite la nuova struttura dati.
+     * 
+     * @param storageUpdates mappa degli aggiornamenti degli storage
+     */
+    private void handleStorageUpdates(Map<Coordinates, List<CargoCube>> storageUpdates) {
+        try {
+            validateStorageUpdates(storageUpdates, gameModel);
+            applyStorageUpdates(storageUpdates, gameModel);
+            
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            });
+            
+            // Muovi il giocatore indietro
+            movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
+            
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
+                    gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
+            });
+            
+            proceedToNextPlayerOrEndCard();
+            
+        } catch (IllegalArgumentException e) {
+            // Gestione errore con retry
+            String currentPlayer = gameModel.getCurrPlayer().getNickname();
+            gameModel.getGameClientNotifier().notifyClients(
+                Set.of(currentPlayer),
+                (nickname, clientController) -> {
+                    clientController.notifyStorageError(nickname, e.getMessage());
+                }
+            );
+            
+            // Ripristina stato shipboard
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            });
+            
+            // Rimani in HANDLE_CUBES_REWARD per il retry
+        }
     }
 
     /**

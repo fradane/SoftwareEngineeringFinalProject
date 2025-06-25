@@ -117,4 +117,6 @@ public interface CallableOnClientController extends Remote {
     void notifyErrorWhileBookingComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException;
 
     void notifyNotActiveComponents(String nicknameToNotify, String nickname, List<Component> notActiveComponents) throws IOException;
+
+    void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException;
 }
