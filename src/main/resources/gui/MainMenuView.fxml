@@ -4,190 +4,218 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<!--
-Rimuovo le dimensioni fisse (prefHeight/prefWidth) e uso AnchorPane con ancoraggi
-per fare in modo che il layout si adatti automaticamente alla dimensione della finestra
--->
-<AnchorPane styleClass="game-background"
-            stylesheets="@/galaxy-truckers.css"
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1"
-            xmlns="http://javafx.com/javafx/17.0.12"
+            styleClass="game-background"
+            style="-fx-background-color: #0e0e0e;"
+            stylesheets="@/galaxy-truckers.css"
             fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewController">
 
-    <!-- StackPane che occupa tutta l'area disponibile -->
-    <StackPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-               AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0">
-
-        <!-- Main Menu -->
-        <VBox fx:id="mainMenu" alignment="CENTER" spacing="25" visible="true" managed="true"
-              styleClass="menu-container">
+    <!-- Header superiore con titolo del gioco -->
+    <top>
+        <VBox styleClass="top-container">
             <padding>
-                <Insets top="50" right="40" bottom="50" left="40" />
+                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
             </padding>
 
-            <!-- Titolo Main Menu -->
-            <VBox alignment="CENTER" spacing="-8">
-                <Label styleClass="menu-title" text="GALAXY" />
-                <Label styleClass="menu-title" text="TRUCKERS" />
-            </VBox>
-
-            <Label styleClass="menu-subtitle" text="Choose your adventure" />
-
-            <!-- Label per errori - SEMPRE PRESENTE nel main menu, inizialmente nascosta -->
-            <Label fx:id="errorLabel"
-                   styleClass="error-label"
-                   visible="false"
-                   managed="false"
-                   wrapText="true"
-                   maxWidth="500.0"
-                   alignment="CENTER" />
-
-            <!-- Bottoni principali -->
-            <VBox alignment="CENTER" spacing="15">
-                <Button fx:id="createGameButton" onAction="#handleCreateGame"
-                        styleClass="menu-button-primary" text="CREATE GAME" />
-                <Button fx:id="joinGameButton" onAction="#handleChooseGameForm"
-                        styleClass="menu-button-primary" text="JOIN GAME" />
-                <Button fx:id="exitButton" onAction="#handleExit"
-                        styleClass="menu-button-secondary" text="EXIT" />
+            <!-- Titolo principale del gioco -->
+            <VBox alignment="CENTER" spacing="5.0">
+                <Label styleClass="screen-title" text="GALAXY TRUCKERS" />
+                <Label styleClass="menu-subtitle" text="Choose your adventure" />
             </VBox>
         </VBox>
+    </top>
 
-        <!-- Create Game Form -->
-        <VBox fx:id="createGameForm" alignment="CENTER" spacing="20" visible="false" managed="false"
-              styleClass="form-container">
-            <padding>
-                <Insets top="30" right="30" bottom="30" left="30" />
-            </padding>
+    <!-- Contenuto centrale con tutti i form -->
+    <center>
+        <StackPane fx:id="centerStackPane">
 
-            <Label styleClass="form-title" text="CREATE GAME" />
+            <!-- Main Menu -->
+            <VBox fx:id="mainMenu" alignment="CENTER" spacing="30"
+                  visible="true" managed="true">
+                <padding>
+                    <Insets top="50" right="50" bottom="50" left="50" />
+                </padding>
 
-            <!-- Label errori specifica per questo form -->
-            <Label fx:id="createGameErrorLabel"
-                   styleClass="error-label"
-                   visible="false"
-                   managed="false"
-                   wrapText="true"
-                   maxWidth="400.0"
-                   alignment="CENTER" />
+                <!-- Label per errori - sempre presente nel main menu -->
+                <Label fx:id="errorLabel" styleClass="error-label"
+                       visible="false" managed="false" wrapText="true"
+                       maxWidth="600.0" alignment="CENTER" />
 
-            <VBox alignment="CENTER" spacing="15" styleClass="form-content">
+                <!-- Bottoni principali -->
+                <VBox alignment="CENTER" spacing="20">
+                    <Button fx:id="createGameButton" onAction="#handleCreateGame"
+                            styleClass="menu-button-primary" text="CREATE GAME" />
+                    <Button fx:id="joinGameButton" onAction="#handleChooseGameForm"
+                            styleClass="menu-button-primary" text="JOIN GAME" />
+                    <Button fx:id="exitButton" onAction="#handleExit"
+                            styleClass="menu-button-secondary" text="EXIT" />
+                </VBox>
+            </VBox>
+
+            <!-- Create Game Form -->
+            <VBox fx:id="createGameForm" alignment="CENTER" spacing="40"
+                  visible="false" managed="false">
+                <padding>
+                    <Insets top="80" right="50" bottom="80" left="50" />
+                </padding>
+
+                <Label styleClass="screen-title" text="CREATE GAME" />
+
+                <!-- Label errori specifica per questo form -->
+                <Label fx:id="createGameErrorLabel"
+                       styleClass="error-label"
+                       visible="false" managed="false"
+                       wrapText="true" maxWidth="600.0"
+                       alignment="CENTER" />
+
                 <!-- Number of Players -->
-                <VBox alignment="CENTER" spacing="8">
+                <VBox alignment="CENTER" spacing="15">
                     <Label styleClass="form-label" text="Number of Players" />
-                    <ComboBox fx:id="playerCountComboBox" styleClass="space-combo-box" />
+                    <ComboBox fx:id="playerCountComboBox"
+                              styleClass="space-combo-box"
+                              promptText="Select players..." />
                 </VBox>
 
                 <!-- Easy Mode -->
-                <CheckBox fx:id="easyModeCheckBox" styleClass="space-checkbox" text="Easy Mode" />
+                <CheckBox fx:id="easyModeCheckBox"
+                          styleClass="space-checkbox"
+                          text="Easy Mode" />
 
                 <!-- Color Selection -->
-                <VBox alignment="CENTER" spacing="8">
+                <VBox alignment="CENTER" spacing="15">
                     <Label styleClass="form-label" text="Choose Your Color" />
-                    <ComboBox fx:id="colorComboBox" styleClass="space-combo-box" />
+                    <ComboBox fx:id="colorComboBox"
+                              styleClass="space-combo-box"
+                              promptText="Select color..." />
                 </VBox>
 
                 <!-- Action Buttons -->
-                <HBox alignment="CENTER" spacing="15">
-                    <Button fx:id="submitCreateGameButton" onAction="#handleSubmitCreateGame"
-                            styleClass="form-button-primary" text="CREATE" />
+                <HBox alignment="CENTER" spacing="25">
+                    <Button fx:id="submitCreateGameButton"
+                            onAction="#handleSubmitCreateGame"
+                            styleClass="form-button-primary"
+                            text="CREATE" />
                     <Button onAction="#backToMainMenu"
-                            styleClass="form-button-secondary" text="BACK" />
+                            styleClass="form-button-secondary"
+                            text="BACK" />
                 </HBox>
             </VBox>
-        </VBox>
 
-        <!-- Choose Game Form -->
-        <VBox fx:id="chooseGameForm" alignment="CENTER" spacing="20" visible="false" managed="false"
-              styleClass="form-container">
+            <!-- Choose Game Form -->
+            <VBox fx:id="chooseGameForm" alignment="CENTER" spacing="40"
+                  visible="false" managed="false">
+                <padding>
+                    <Insets top="80" right="50" bottom="80" left="50" />
+                </padding>
+
+                <Label styleClass="screen-title" text="AVAILABLE GAMES" />
+
+                <!-- Label errori specifica per questo form -->
+                <Label fx:id="chooseGameErrorLabel"
+                       styleClass="error-label"
+                       visible="false" managed="false"
+                       wrapText="true" maxWidth="600.0"
+                       alignment="CENTER" />
+
+                <!-- ListView con dimensioni responsive -->
+                <ListView fx:id="gameListView"
+                          styleClass="space-list-view"
+                          prefWidth="700" prefHeight="400"
+                          maxWidth="800" maxHeight="500" />
+
+                <HBox alignment="CENTER" spacing="25">
+                    <Button fx:id="chooseGameButton"
+                            onAction="#handleChooseGame"
+                            styleClass="form-button-primary"
+                            text="NEXT" />
+                    <Button onAction="#backToMainMenu"
+                            styleClass="form-button-secondary"
+                            text="BACK" />
+                </HBox>
+            </VBox>
+
+            <!-- Join Game Form -->
+            <VBox fx:id="joinGameForm" alignment="CENTER" spacing="40"
+                  visible="false" managed="false">
+                <padding>
+                    <Insets top="80" right="50" bottom="80" left="50" />
+                </padding>
+
+                <Label styleClass="screen-title" text="JOIN GAME" />
+                <Label styleClass="menu-subtitle" text="Choose your pilot color" />
+
+                <!-- Label errori specifica per questo form -->
+                <Label fx:id="joinGameErrorLabel"
+                       styleClass="error-label"
+                       visible="false" managed="false"
+                       wrapText="true" maxWidth="600.0"
+                       alignment="CENTER" />
+
+                <!-- ListView con dimensioni responsive -->
+                <ListView fx:id="colorListView"
+                          styleClass="space-list-view"
+                          prefWidth="500" prefHeight="350"
+                          maxWidth="600" maxHeight="400" />
+
+                <HBox alignment="CENTER" spacing="25">
+                    <Button fx:id="submitJoinGameButton"
+                            onAction="#handleSubmitJoinGame"
+                            styleClass="form-button-primary"
+                            text="JOIN" />
+                    <Button onAction="#backToChooseGame"
+                            styleClass="form-button-secondary"
+                            text="BACK" />
+                </HBox>
+            </VBox>
+
+            <!-- Game Created Screen -->
+            <VBox fx:id="gameCreatedScreen" alignment="CENTER" spacing="30"
+                  visible="false" managed="false"
+                  styleClass="waiting-container">
+                <padding>
+                    <Insets top="60" right="50" bottom="60" left="50" />
+                </padding>
+
+                <Label styleClass="waiting-title" text="MISSION CREATED!" />
+                <Label styleClass="waiting-message"
+                       text="Waiting for brave pilots to join the adventure..."
+                       wrapText="true" textAlignment="CENTER" />
+
+                <!-- Progress indicator -->
+                <ProgressIndicator styleClass="space-progress" />
+            </VBox>
+
+            <!-- Join Other Players Screen -->
+            <VBox fx:id="joinOtherPlayersScreen" alignment="CENTER" spacing="30"
+                  visible="false" managed="false"
+                  styleClass="waiting-container">
+                <padding>
+                    <Insets top="60" right="50" bottom="60" left="50" />
+                </padding>
+
+                <Label styleClass="waiting-title" text="MISSION JOINED!" />
+                <Label styleClass="waiting-message"
+                       text="Waiting for the commander to start the adventure..."
+                       wrapText="true" textAlignment="CENTER" />
+
+                <!-- Progress indicator -->
+                <ProgressIndicator styleClass="space-progress" />
+            </VBox>
+
+        </StackPane>
+    </center>
+
+    <!-- Footer con informazioni versione (opzionale) -->
+    <bottom>
+        <HBox alignment="CENTER" styleClass="action-bar" minHeight="50">
             <padding>
-                <Insets top="30" right="30" bottom="30" left="30" />
+                <Insets top="10" right="15" bottom="10" left="15" />
             </padding>
 
-            <Label styleClass="form-title" text="AVAILABLE GAMES" />
+            <Label styleClass="version-label"
+                   text="Galaxy Truckers © 2024 - Space Adventure Game" />
+        </HBox>
+    </bottom>
 
-            <!-- Label errori specifica per questo form -->
-            <Label fx:id="chooseGameErrorLabel"
-                   styleClass="error-label"
-                   visible="false"
-                   managed="false"
-                   wrapText="true"
-                   maxWidth="400.0"
-                   alignment="CENTER" />
-
-            <!-- ListView con dimensioni responsive -->
-            <ListView fx:id="gameListView" styleClass="space-list-view"
-                      prefWidth="500" prefHeight="300"
-                      maxWidth="600" maxHeight="400" />
-
-            <HBox alignment="CENTER" spacing="15">
-                <Button fx:id="chooseGameButton" onAction="#handleChooseGame"
-                        styleClass="form-button-primary" text="NEXT" />
-                <Button onAction="#backToMainMenu"
-                        styleClass="form-button-secondary" text="BACK" />
-            </HBox>
-        </VBox>
-
-        <!-- Join Game Form -->
-        <VBox fx:id="joinGameForm" alignment="CENTER" spacing="20" visible="false" managed="false"
-              styleClass="form-container">
-            <padding>
-                <Insets top="30" right="30" bottom="30" left="30" />
-            </padding>
-
-            <Label styleClass="form-title" text="JOIN GAME" />
-            <Label styleClass="form-subtitle" text="Choose your pilot color" />
-
-            <!-- Label errori specifica per questo form -->
-            <Label fx:id="joinGameErrorLabel"
-                   styleClass="error-label"
-                   visible="false"
-                   managed="false"
-                   wrapText="true"
-                   maxWidth="400.0"
-                   alignment="CENTER" />
-
-            <!-- ListView con dimensioni responsive -->
-            <ListView fx:id="colorListView" styleClass="space-list-view"
-                      prefWidth="350" prefHeight="250"
-                      maxWidth="400" maxHeight="300" />
-
-            <HBox alignment="CENTER" spacing="15">
-                <Button fx:id="submitJoinGameButton" onAction="#handleSubmitJoinGame"
-                        styleClass="form-button-primary" text="JOIN" />
-                <Button onAction="#backToChooseGame"
-                        styleClass="form-button-secondary" text="BACK" />
-            </HBox>
-        </VBox>
-
-        <!-- Game Created Screen -->
-        <VBox fx:id="gameCreatedScreen" alignment="CENTER" spacing="25" visible="false" managed="false"
-              styleClass="waiting-container">
-            <padding>
-                <Insets top="50" right="40" bottom="50" left="40" />
-            </padding>
-
-            <Label styleClass="waiting-title" text="MISSION CREATED!" />
-            <Label styleClass="waiting-message" text="Waiting for brave pilots to join the adventure..." />
-
-            <!-- Progress indicator opzionale -->
-            <ProgressIndicator styleClass="space-progress" />
-        </VBox>
-
-        <!-- Join Other Players Screen -->
-        <VBox fx:id="joinOtherPlayersScreen" alignment="CENTER" spacing="25" visible="false" managed="false"
-              styleClass="waiting-container">
-            <padding>
-                <Insets top="50" right="40" bottom="50" left="40" />
-            </padding>
-
-            <Label styleClass="waiting-title" text="MISSION JOINED!" />
-            <Label styleClass="waiting-message" text="Waiting for the commander to start the adventure..." />
-
-            <!-- Progress indicator opzionale -->
-            <ProgressIndicator styleClass="space-progress" />
-
-        </VBox>
-
-    </StackPane>
-</AnchorPane>
+</BorderPane>
