@@ -168,7 +168,7 @@ public class Pirates extends AdvancedEnemies implements PlayerMover, DoubleCanno
                 this.currPlayerChoseCannonsToActivate(playerChoices.getChosenDoubleCannons().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
                 break;
             case ACCEPT_THE_REWARD:
-                this.currPlayerDecidedToGetTheReward(playerChoices.hasAcceptedTheReward());
+                this.currPlayerDecidedToGetTheReward(playerChoices.isHasAcceptedTheReward());
                 break;
             case THROW_DICES:
                 this.throwDices();

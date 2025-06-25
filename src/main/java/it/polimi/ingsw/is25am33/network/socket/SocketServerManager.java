@@ -54,7 +54,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
             e.printStackTrace();
             return;
         }
-        System.out.println("[Socket] Server Socket pronto");
+        System.out.println("[Socket] Server Socket ready on localhost:" + NetworkConfiguration.DEFAULT_SOCKET_SERVER_PORT);
         while (true) {
             try {
                 final Socket socket = serverSocket.accept();
@@ -678,6 +678,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         SocketMessage outMessage = new SocketMessage("server", "notifyNotActiveComponents");
         outMessage.setParamString(nickname);
         outMessage.setParamComponentList(notActiveComponents);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException {
+        SocketMessage outMessage = new SocketMessage(nicknameToNotify, "notifyStorageError");
+        outMessage.setParamString(errorMessage);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 

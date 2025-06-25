@@ -554,6 +554,12 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyStorageError":
+                    if (clientController != null) {
+                        clientController.notifyStorageError(nickname, notification.getParamString());
+                    }
+                    break;
+
                 default:
                     System.err.println("Unknown notification: " + notification.getActions());
             }

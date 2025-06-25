@@ -265,6 +265,11 @@ public class GameControllerTest {
             public void notifyNotActiveComponents(String nicknameToNotify, String nickname, List<Component> notActiveComponents) throws IOException {
 
             }
+
+            @Override
+            public void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException {
+
+            }
         };
     }
 

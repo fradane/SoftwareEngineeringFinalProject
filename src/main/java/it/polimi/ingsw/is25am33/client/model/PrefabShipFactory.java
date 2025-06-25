@@ -149,6 +149,14 @@ public class PrefabShipFactory {
                 true
         ));
 
+        PREFAB_SHIPS.put("nave_smugglers", new PrefabShipInfo(
+                "nave_smugglers",
+                "Nave Per Carta Smugglers",
+                "Una nave con tutti cannoni a sufficienza e storages",
+                false,
+                false
+        ));
+
         PREFAB_SHIPS.put("nave_test_errori", new PrefabShipInfo(
                 "nave_test_errori",
                 "Nave Test Errori",
@@ -156,6 +164,16 @@ public class PrefabShipFactory {
                 false,
                 true
         ));
+
+        PREFAB_SHIPS.put("nave_test_errore_check_shipboard", new PrefabShipInfo(
+                "nave_test_errore_check_shipboard",
+                "Nave Test Errori nel metodo checkShipBoard",
+                "Una nave con un errore della checkShipBoard",
+                false,
+                true
+        ));
+
+
 
     }
 
@@ -197,9 +215,57 @@ public class PrefabShipFactory {
             case "storage_ship" -> applyStorageShip(shipBoard);
             case "gui_shipboard_meteorite" -> applyGuiMeteoriteShip(shipBoard);
             case "engine_batterybox_ship" -> applyEngineShip(shipBoard);
+            case "nave_smugglers" -> applySmugglersShip(shipBoard);
+            case "nave_test_errore_check_shipboard" -> applyCheckShipBoardShip(shipBoard);
 
             default -> false;
         };
+    }
+
+    private static boolean applyCheckShipBoardShip(ShipBoard shipBoard) {
+        clearShipBoard(shipBoard);
+
+        addComponent(shipBoard, new Cabin(createCustomConnectors(EMPTY, SINGLE, EMPTY, EMPTY)), 7, 5);
+        addComponent(shipBoard, new Engine(createCustomConnectors(EMPTY, EMPTY, SINGLE, EMPTY)), 7, 6);
+
+        addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, EMPTY, SINGLE, EMPTY)), 8, 5);
+        addComponent(shipBoard, new Cabin(createCustomConnectors(EMPTY, EMPTY, SINGLE, SINGLE)), 8, 6);
+        addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, EMPTY, EMPTY, SINGLE)), 8, 7);
+
+
+        shipBoard.checkShipBoard();
+        return true;
+    }
+
+    private static boolean applySmugglersShip(ShipBoard shipBoard) {
+        clearShipBoard(shipBoard);
+
+        addComponent(shipBoard, new Cannon(createSimpleConnectors()), 6, 6);
+        addComponent(shipBoard, new Cannon(createSimpleConnectors()), 6, 7);
+        addComponent(shipBoard, new Cannon(createSimpleConnectors()), 6, 8);
+
+        addComponent(shipBoard, new Cannon(createSimpleConnectors()), 7, 5);
+        addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 3), 7, 6);
+        addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 3), 7, 8);
+        addComponent(shipBoard, new Cannon(createSimpleConnectors()), 7, 9);
+
+        Cannon cannon1 = new Cannon(createSimpleConnectors());
+        cannon1.rotate();
+        cannon1.rotate();
+        cannon1.rotate();
+        addComponent(shipBoard, cannon1, 8, 6);
+        addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 3), 8, 7);
+        Cannon cannon2 = new Cannon(createSimpleConnectors());
+        cannon2.rotate();
+        addComponent(shipBoard, cannon2, 8, 8);
+
+        addComponent(shipBoard, new Cannon(createSimpleConnectors()), 9, 5);
+        addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 3), 9, 6);
+        addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 3), 9, 8);
+        addComponent(shipBoard, new Cannon(createSimpleConnectors()), 9, 9);
+
+        shipBoard.checkShipBoard();
+        return true;
     }
 
     private static boolean applyGuiMeteoriteShip(ShipBoard shipBoard) {

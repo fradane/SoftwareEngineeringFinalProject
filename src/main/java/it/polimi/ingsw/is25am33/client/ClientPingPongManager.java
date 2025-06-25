@@ -22,7 +22,7 @@ public class ClientPingPongManager {
                System.out.println("DISCONNESIONE Nessun pong ricevuto dal server .");
                 stop();
                 onTimeout.run();
-            }, 10000, TimeUnit.MILLISECONDS); // TODO cambiare a MILLISECONDS
+            }, 8000, TimeUnit.MILLISECONDS); // TODO cambiare a MILLISECONDS
         }
 
     }

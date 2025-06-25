@@ -1,6 +1,10 @@
 package it.polimi.ingsw.is25am33.client;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.client.model.ClientModel;
@@ -21,6 +25,8 @@ import it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType;
 import it.polimi.ingsw.is25am33.model.enumFiles.Direction;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
+import it.polimi.ingsw.is25am33.serializationLayer.SocketMessage;
+import it.polimi.ingsw.is25am33.serializationLayer.client.ClientSerializer;
 
 public class ClientLauncher {
 
@@ -51,6 +57,7 @@ public class ClientLauncher {
                 ║                                                                           ║
                 ╚═══════════════════════════════════════════════════════════════════════════╝""";
         System.out.println(titleScreen);
+
 
         // parsing parameters
         for (int i = 0; i < args.length; i++) {

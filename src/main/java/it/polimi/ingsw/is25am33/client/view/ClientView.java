@@ -305,6 +305,7 @@ public interface ClientView {
                 break;
             case HANDLE_CUBES_REWARD_MENU:
                 showHandleCubesRewardMenu();
+                //showCubeRedistributionMenu();
                 break;
             case EPIDEMIC_MENU:
                 showEpidemicMenu();
@@ -331,4 +332,6 @@ public interface ClientView {
     void showPlayerEarlyLanded(String nickname);
 
     void showCubes(ShipBoardClient shipboardOf, String nickname);
+
+    void showCubeRedistributionMenu();
 }

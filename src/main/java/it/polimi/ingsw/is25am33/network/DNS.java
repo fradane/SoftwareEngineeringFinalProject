@@ -28,6 +28,18 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     public static void main(String[] args) throws RemoteException {
 
+        // Parse command line arguments for -ip parameter
+        String serverIP = "localhost"; // Default to localhost
+        
+        for (int i = 0; i < args.length; i++) {
+            if ("-ip".equals(args[i]) && i + 1 < args.length) {
+                serverIP = args[i + 1];
+                break;
+            }
+        }
+        
+        System.out.println("[DNS] Server IP configured: " + serverIP);
+
         try {// create the dns to handle any type of connection
             DNS dns = new DNS();
 
@@ -35,8 +47,8 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
             socketThread = new Thread(new SocketServerManager(dns));
             socketThread.start();
 
-            // starts RMI thread
-            rmiThread = new Thread(new RMIServerRunnable(dns));
+            // starts RMI thread with specified IP
+            rmiThread = new Thread(new RMIServerRunnable(dns, serverIP));
             rmiThread.start();
         } catch(Exception e) {
             socketThread.interrupt();

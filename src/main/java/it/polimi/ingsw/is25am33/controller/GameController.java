@@ -582,7 +582,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void debugSkipToLastCard() throws RemoteException {
         if (!canSkipCards()) {
-            throw new RemoteException("Cannot skip cards: game not in appropriate state or deck is empty");
+            return;
         }
         
         try {

@@ -274,6 +274,11 @@ public class EndGamePhaseTest {
             notifications.add("notifyNotActiveComponents:" + nickname);
         }
 
+        @Override
+        public void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException {
+            notifications.add("notifyStorageError:" + errorMessage);
+        }
+
         public List<String> getNotifications() {
             return notifications;
         }

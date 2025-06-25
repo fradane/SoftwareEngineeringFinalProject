@@ -89,7 +89,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
                 this.currPlayerChoseCannonsToActivate(playerChoices.getChosenDoubleCannons().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
                 break;
             case ACCEPT_THE_REWARD:
-                this.currPlayerDecidedToGetTheReward(playerChoices.hasAcceptedTheReward());
+                this.currPlayerDecidedToGetTheReward(playerChoices.isHasAcceptedTheReward());
                 break;
             case REMOVE_CREW_MEMBERS:
                 this.currPlayerChoseRemovableCrewMembers(playerChoices.getChosenCabins().orElseThrow());

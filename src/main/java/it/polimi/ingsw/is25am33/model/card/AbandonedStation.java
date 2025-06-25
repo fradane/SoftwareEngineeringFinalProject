@@ -4,6 +4,7 @@ import it.polimi.ingsw.is25am33.client.model.card.ClientAbandonedStation;
 import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
+import it.polimi.ingsw.is25am33.model.card.interfaces.CubesRedistributionHandler;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.IllegalDecisionException;
@@ -16,8 +17,10 @@ import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class AbandonedStation extends AdventureCard implements PlayerMover {
+public class AbandonedStation extends AdventureCard implements PlayerMover, CubesRedistributionHandler {
 
     /**
      * Represents the number of steps a player must move back when interacting with the "AbandonedStation" card.
@@ -80,7 +83,11 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
                 break;
 
             case HANDLE_CUBES_REWARD:
-                this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
+                if (playerChoices.getStorageUpdates().isPresent()) {
+                    this.handleStorageUpdates(playerChoices.getStorageUpdates().orElseThrow());
+                } else {
+                    this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
+                }
                 break;
 
             default:
@@ -307,6 +314,53 @@ public class AbandonedStation extends AdventureCard implements PlayerMover {
             setCurrState(CardState.END_OF_CARD);
             gameModel.resetPlayerIterator();
             gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
+        }
+    }
+
+    /**
+     * Gestisce gli aggiornamenti degli storage tramite la nuova struttura dati.
+     * 
+     * @param storageUpdates mappa degli aggiornamenti degli storage
+     */
+    private void handleStorageUpdates(Map<Coordinates, List<CargoCube>> storageUpdates) {
+        try {
+            validateStorageUpdates(storageUpdates, gameModel);
+            applyStorageUpdates(storageUpdates, gameModel);
+            
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            });
+            
+            // Muovi il giocatore indietro
+            movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
+            
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
+                    gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
+            });
+            
+            proceedToNextPlayerOrEndCard();
+            
+        } catch (IllegalArgumentException e) {
+            // Gestione errore con retry
+            String currentPlayer = gameModel.getCurrPlayer().getNickname();
+            gameModel.getGameClientNotifier().notifyClients(
+                Set.of(currentPlayer),
+                (nickname, clientController) -> {
+                    clientController.notifyStorageError(nickname, e.getMessage());
+                }
+            );
+            
+            // Ripristina stato shipboard
+            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            });
+            
+            // Rimani in HANDLE_CUBES_REWARD per il retry
         }
     }
 
