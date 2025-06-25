@@ -8,7 +8,9 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="borderPane" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" styleClass="game-background" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.BuildAndCheckShipBoardController">
+<BorderPane fx:id="borderPane" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0"
+            styleClass="game-background" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.BuildAndCheckShipBoardController">
     <stylesheets>
         <URL value="@/galaxy-truckers.css" />
     </stylesheets>
@@ -18,7 +20,15 @@
             <HBox alignment="CENTER_RIGHT" spacing="10">
                 <Label styleClass="screen-title" text="Galaxy Truckers" />
                 <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="goBackButton" onAction="#handleGoBackButton" styleClass="nav-button" text="Go Back" />
+                <!-- VBox per impilare i bottoni con larghezza uniforme -->
+                <VBox alignment="CENTER_RIGHT" spacing="5" minWidth="120">
+                    <Button fx:id="goBackButton" onAction="#handleGoBackButton"
+                            styleClass="nav-button" text="Go Back"
+                            prefWidth="120" maxWidth="120" visible="false" />
+                    <Button fx:id="exitGameButton" onAction="#handleExitGame"
+                            styleClass="menu-button-secondary" text="EXIT GAME"
+                            prefWidth="120" maxWidth="120" />
+                </VBox>
             </HBox>
 
             <VBox alignment="CENTER_LEFT" spacing="5" styleClass="timer-container">
@@ -147,21 +157,31 @@
     </right>
 
     <bottom>
-        <HBox fx:id="bottomBox" alignment="CENTER" spacing="15.0" styleClass="action-bar">
-            <Button fx:id="pickRandomComponentButton" onAction="#handlePickRandomComponentButton" styleClass="action-button" text="Random Component" />
-            <Button fx:id="endPhaseButton" onAction="#handleEndPhaseButton" styleClass="action-button" text="End ship building phase" />
-            <Button fx:id="prefabShipBoardButton" onAction="#handleGenerateShipBoardButton" styleClass="action-button" text="Load a prebuilt ship board" />
-            <Button fx:id="confirmCrewMemberButton" onAction="#handleConfirmCrewMemberButton" styleClass="action-button" text="CONFIRM" visible="false" managed="false"/>
+        <HBox fx:id="bottomBox" styleClass="action-bar">
+            <!-- Spacer sinistro con larghezza fissa -->
+            <Region prefWidth="200.0" />
 
-            <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box" >
-                <items>
-                    <FXCollections fx:factory="observableArrayList">
-                        <Integer fx:value="1" />
-                        <Integer fx:value="2" />
-                        <Integer fx:value="3" />
-                    </FXCollections>
-                </items>
-            </ComboBox>
+            <!-- Container centrale per i bottoni principali -->
+            <HBox alignment="CENTER" spacing="15.0" HBox.hgrow="ALWAYS">
+                <Button fx:id="pickRandomComponentButton" onAction="#handlePickRandomComponentButton" styleClass="action-button" text="Random Component" />
+                <Button fx:id="prefabShipBoardButton" onAction="#handleGenerateShipBoardButton" styleClass="action-button" text="Load a prebuilt ship board" />
+                <Button fx:id="confirmCrewMemberButton" onAction="#handleConfirmCrewMemberButton" styleClass="action-button" text="CONFIRM" visible="false" managed="false"/>
+
+                <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box" >
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <Integer fx:value="1" />
+                            <Integer fx:value="2" />
+                            <Integer fx:value="3" />
+                        </FXCollections>
+                    </items>
+                </ComboBox>
+            </HBox>
+
+            <!-- Container destro per il bottone End Phase con larghezza fissa -->
+            <HBox alignment="CENTER_RIGHT" prefWidth="200.0">
+                <Button fx:id="endPhaseButton" onAction="#handleEndPhaseButton" styleClass="end-phase-button" text="End ship building phase" />
+            </HBox>
 
             <padding>
                 <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

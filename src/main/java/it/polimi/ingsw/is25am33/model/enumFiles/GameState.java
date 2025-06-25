@@ -76,8 +76,8 @@ public enum GameState implements Serializable {
                     return;
                 }
 
-
-                gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard());
+                int inGamePlayers = gameModel.getPlayers().size() - gameModel.getFlyingBoard().getOutPlayers().size();
+                gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard(inGamePlayers));
                 gameModel.setCurrGameState(GameState.PLAY_CARD);
             } catch (EmptyStackException e) {
                 //TODO
@@ -85,7 +85,6 @@ public enum GameState implements Serializable {
                 gameModel.setCurrAdventureCard(null);
             }
         }
-
     },
 
     PLAY_CARD {
@@ -97,7 +96,6 @@ public enum GameState implements Serializable {
 
     },
 
-    // TODO aggiungere al gioco
     CHECK_PLAYERS {
 
         @Override

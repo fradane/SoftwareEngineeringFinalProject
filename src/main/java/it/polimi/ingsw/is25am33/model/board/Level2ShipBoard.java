@@ -2,10 +2,8 @@ package it.polimi.ingsw.is25am33.model.board;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
-import it.polimi.ingsw.is25am33.model.GameClientNotifier;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
-import it.polimi.ingsw.is25am33.model.enumFiles.ComponentState;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.dangerousObj.*;
@@ -43,8 +41,6 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
 
     public void book () {
 
-        //TODO aggiungere il fatto che non si possono prenotare più di due componenti
-        //TODO quando un componente riservato diventa focused non lo puoi rilasciare
         if(notActiveComponents.size() >= 2) {
             gameClientNotifier.notifyClients(Set.of(player.getNickname()), (nicknameToNotify, clientController) -> {
                 clientController.notifyErrorWhileBookingComponent(nicknameToNotify, player.getNickname(), focusedComponent);
@@ -54,7 +50,6 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
         }
 
         notActiveComponents.add(focusedComponent);
-        focusedComponent.setCurrState(ComponentState.BOOKED);
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
             clientController.notifyBookedComponent(nicknameToNotify, player.getNickname(), focusedComponent);

@@ -48,8 +48,6 @@ public interface CallableOnClientController extends Remote {
 
     void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException;
 
-    void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException;
-
     void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException;
 
     void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws IOException;
@@ -61,12 +59,6 @@ public interface CallableOnClientController extends Remote {
     void notifyVisibleDeck(String nickname, List<List<ClientCard>> littleVisibleDeck) throws IOException;
 
     void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws IOException;
-
-    void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws IOException;
-
-    void notifyRemovalResult(String nicknameToNotify, boolean success) throws IOException;
-
-    void notifyShipCorrect(String nicknameToNotify ) throws IOException;
 
     void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayer) throws IOException;
 
@@ -117,6 +109,8 @@ public interface CallableOnClientController extends Remote {
     void notifyErrorWhileBookingComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException;
 
     void notifyNotActiveComponents(String nicknameToNotify, String nickname, List<Component> notActiveComponents) throws IOException;
+
+    void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException;
 
     void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException;
 }

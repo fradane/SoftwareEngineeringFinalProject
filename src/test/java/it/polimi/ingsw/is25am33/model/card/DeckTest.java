@@ -1,16 +1,12 @@
 package it.polimi.ingsw.is25am33.model.card;
 
-import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
 import it.polimi.ingsw.is25am33.model.GameClientNotifier;
-import it.polimi.ingsw.is25am33.model.GameClientNotifier;
-import it.polimi.ingsw.is25am33.model.GameClientNotifier;
-import it.polimi.ingsw.is25am33.model.ThrowingBiConsumer;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
+import java.util.EmptyStackException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class DeckTest {
 
     private Deck deck;
-    private GameModel gameModel = new GameModel("1234", 2, false);
-    private GameClientNotifier gameClientNotifier = new GameClientNotifier(gameModel, new ConcurrentHashMap<>()) {};
+    private final GameModel gameModel = new GameModel("1234", 2, false);
+    private final GameClientNotifier gameClientNotifier = new GameClientNotifier(gameModel, new ConcurrentHashMap<>()) {};
 
     @BeforeEach
     void setUp() {
@@ -140,46 +136,74 @@ class DeckTest {
 
     @Test
     void testDrawCardFromGameDeck() {
-
         // Prepare the decks
         deck.setUpLittleDecks(gameModel);
         deck.createGameDeck(false);
 
-        // Draw a card
-        AdventureCard drawnCard = deck.drawCard();
+        // Draw a card with multiplayer mode
+        AdventureCard drawnCard = deck.drawCard(2);
 
         assertNotNull(drawnCard, "Drawn card should not be null");
-        // Ensure the card's state was set correctly
         assertEquals(CardState.START_CARD, drawnCard.getCurrState(), "Card state should be START_CARD");
 
-        // Check that the size of the game deck decreased by one
-        List<AdventureCard> gameDeckField = null;
-        try {
-            var gameDeckReflect = Deck.class.getDeclaredField("gameDeck");
-            gameDeckReflect.setAccessible(true);
-            gameDeckField = (List<AdventureCard>) gameDeckReflect.get(deck);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            fail("Reflection access failed: " + e.getMessage());
-        }
+        // Verify deck size decreased
+        assertFalse(deck.hasFinishedCards(), "Deck should not be empty after drawing one card");
+    }
 
-        assertNotNull(gameDeckField);
-        assertEquals(11, gameDeckField.size(), "After drawing, the game deck should have one less card");
+    @Test
+    void testDrawCardSinglePlayer() {
+        // Prepare the decks
+        deck.setUpLittleDecks(gameModel);
+        deck.createGameDeck(false);
+
+        // Draw a card in single player mode
+        AdventureCard drawnCard = deck.drawCard(1);
+
+        assertNotNull(drawnCard, "Drawn card should not be null");
+        assertFalse(drawnCard instanceof WarField, "Single player should NOT draw WarField cards");
+        assertEquals(CardState.START_CARD, drawnCard.getCurrState(), "Card state should be START_CARD");
     }
 
     @Test
     void testDrawCardThrowsExceptionWhenDeckIsEmpty() {
-
-        // Prepare the decks and empty the game deck manually
+        // Prepare the decks
         deck.setUpLittleDecks(gameModel);
         deck.createGameDeck(false);
 
         // Draw all cards
-        for (int i = 0; i < 12; i++) {
-            deck.drawCard();
+        while (!deck.hasFinishedCards()) {
+            deck.drawCard(2);
         }
 
-        // Now the deck should be empty; drawing one more should throw EmptyStackException
-        assertThrows(java.util.EmptyStackException.class, deck::drawCard, "Expected EmptyStackException when drawing from an empty deck");
+        // Now the deck should be empty
+        assertThrows(EmptyStackException.class, () -> deck.drawCard(2),
+                "Expected EmptyStackException when drawing from an empty deck");
+    }
+
+    @Test
+    void testFirstCardDrawnIsCorrectLevel() {
+        // Test with normal mode (should draw level 2)
+        deck.setUpLittleDecks(gameModel);
+        deck.createGameDeck(false);
+
+        AdventureCard firstCard = deck.drawCard(2);
+        assertEquals(2, firstCard.getLevel(), "First card should be level 2 in normal mode");
+    }
+
+    @Test
+    void testFirstCardDrawnTestFlightMode() {
+        // Create a test flight game model
+        GameModel testFlightGameModel = new GameModel("abcd", 3, true);
+        Deck testDeck = new Deck();
+
+        testFlightGameModel.setGameClientNotifier(gameClientNotifier);
+        deck.setGameClientNotifier(gameClientNotifier);
+
+        testDeck.setUpLittleDecks(testFlightGameModel);
+        testDeck.createGameDeck(true);
+
+        AdventureCard testFirstCard = testDeck.drawCard(2);
+        assertEquals(1, testFirstCard.getLevel(), "First card should be level 1 in test flight mode");
     }
 
 

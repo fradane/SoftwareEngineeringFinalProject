@@ -230,7 +230,8 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 break;
 
             case "playerChoseCabins":
-                gameControllers.get(nickname).playerChoseCabin(nickname, inMessage.getParamCabinCoordinates());
+                //TODO non so perche c'è
+                //gameControllers.get(nickname).playerChoseCabin(nickname, inMessage.getParamCabinCoordinates());
                 break;
 
             case "playerHandleSmallMeteorite":
@@ -324,11 +325,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
             throw new IOException("Writer is null");
         }
 
-    }
-
-    @Override
-    public void notifyShipCorrect(String nicknameToNotify) throws IOException {
-        // TODO rimuovere
     }
 
     @Override
@@ -454,13 +450,9 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws IOException {
-
-    }
-
-    @Override
-    public void notifyRemovalResult(String nicknameToNotify, boolean success) throws IOException {
-
+    public void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyNoMoreHiddenComponents");
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override
@@ -596,11 +588,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamCoordinates(coordinates);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
-    }
-
-    @Override
-    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException{
-        // TODO
     }
 
     @Override

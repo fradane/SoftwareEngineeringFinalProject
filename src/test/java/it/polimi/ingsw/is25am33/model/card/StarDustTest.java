@@ -71,17 +71,33 @@ class StardustTest {
     @Test
     void testStardustFinalStateAfterPlay() {
         stardust.setCurrState(CardState.STARDUST);
-        stardust.play(new PlayerChoicesDataStructure());
+
+        // Esegui il play finché non arriviamo alla fine
+        while (stardust.getCurrState() == CardState.STARDUST) {
+            stardust.play(new PlayerChoicesDataStructure());
+        }
 
         assertEquals(CardState.END_OF_CARD, stardust.getCurrState(),
                 "Lo stato finale dovrebbe essere END_OF_CARD.");
     }
 
     @Test
-    void testStardustFinalGameStateAfterPlay() {
+    void testStardustStateTransition() {
         stardust.setCurrState(CardState.STARDUST);
+
+        boolean isLastPlayer = !gameModel.hasNextPlayer();
+
+        // Prima esecuzione - dovrebbe passare al prossimo giocatore
         stardust.play(new PlayerChoicesDataStructure());
-        assertEquals(CardState.END_OF_CARD,stardust.getCurrState());
+
+        // Se c'è ancora un giocatore, lo stato rimane STARDUST
+        if (!isLastPlayer) {
+            assertEquals(CardState.STARDUST, stardust.getCurrState(),
+                    "Lo stato dovrebbe rimanere STARDUST se ci sono altri giocatori");
+        } else {
+            assertEquals(CardState.END_OF_CARD, stardust.getCurrState(),
+                    "Lo stato dovrebbe essere END_OF_CARD se non ci sono più giocatori");
+        }
     }
 
     @Test

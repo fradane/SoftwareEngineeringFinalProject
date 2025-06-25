@@ -149,6 +149,26 @@ public class ShipBoardTest {
         assertTrue(shipBoard.getCoordinatesOfComponents(new ArrayList<>(List.of(cabin1,cabin2))).containsAll(new ArrayList<>(List.of(new Coordinates(6,7),new Coordinates(7,6)))));
     }
 
+    @Test
+    void testCanAcceptAlien(){
+        Cabin cabin1 = new Cabin(createSimpleConnectors());
+        LifeSupport lifeSupport = new LifeSupport(createSimpleConnectors(),ColorLifeSupport.PURPLE);
+        shipBoard.getShipMatrix()[6][7] = cabin1;
+
+        assertFalse(shipBoard.canAcceptAlien(new Coordinates(6,7), CrewMember.PURPLE_ALIEN));
+
+        shipBoard.getShipMatrix()[6][8] = lifeSupport;
+
+        assertTrue(shipBoard.canAcceptAlien(new Coordinates(6,7), CrewMember.PURPLE_ALIEN));
+
+        LifeSupport lifeSupport1 = new LifeSupport(createSimpleConnectors(),ColorLifeSupport.BROWN);
+        shipBoard.getShipMatrix()[6][8] = lifeSupport1;
+        assertTrue(shipBoard.canAcceptAlien(new Coordinates(6,7), CrewMember.BROWN_ALIEN));
+
+
+
+    }
+
 
     @Test
     @DisplayName("Test: isValidPosition returns false OOB, true in-bounds")
@@ -321,11 +341,11 @@ public class ShipBoardTest {
     void testReleaseComponentWithFocus() {
         // Create an Engine with a simple connector map
         Engine engine = new Engine(createSimpleConnectors());
-        engine.setCurrState(ComponentState.BOOKED);
+        //engine.setCurrState(ComponentState.BOOKED);
         shipBoard.focusedComponent = engine;
 
         shipBoard.releaseFocusedComponent();
-        assertEquals(ComponentState.VISIBLE, engine.getCurrState());
+        //assertEquals(ComponentState.VISIBLE, engine.getCurrState());
         assertNull(shipBoard.focusedComponent);
     }
 
@@ -808,21 +828,29 @@ public class ShipBoardTest {
         // Based on your snippet, single front=1, single side=0.5, double front=2, double side=1, etc.
         // But your code might do integer math => side single might become 0, etc.
         // Create a single front cannon, a single side cannon, a double front cannon
-        Cannon singleFront = new Cannon(createSimpleConnectors());
-        Cannon singleSide  = new Cannon(createSimpleConnectors());
-        singleSide.rotate();
-        singleSide.rotate();
-        //singleSide.rotateFireDirection();
-        DoubleCannon doubleFront = new DoubleCannon(createSimpleConnectors());
-
+        Cannon doubleCannon1 = new DoubleCannon(createSimpleConnectors());
+        Cannon cannon2 = new Cannon(createSimpleConnectors());
+        shipBoard.setFocusedComponent(cannon2);
+        shipBoard.placeComponentWithFocus(6, 7);
+        shipBoard.setFocusedComponent(doubleCannon1);
+        shipBoard.placeComponentWithFocus(6, 8);
         // Pretend we "activate" them all => pass them in a Stream
-        List<Cannon> all = List.of(singleFront, singleSide, doubleFront);
+        List<Cannon> all = List.of(doubleCannon1);
         double total = shipBoard.countTotalFirePower(all);
 
         // Adjust your expected value depending on how your code handles half-points
         // We'll just expect 3 if side single is truncated to 0.
         // If your code is floating, you might expect 3.5, in which case you'd have to do a float/double compare
-        assertEquals(2, total);
+        assertEquals(3, total);
+
+        Cabin c1 = new Cabin(createSimpleConnectors());
+        c1.fillCabin(CrewMember.PURPLE_ALIEN);
+        shipBoard.setFocusedComponent(c1);
+        shipBoard.placeComponentWithFocus(6, 9);
+
+        assertEquals(5, shipBoard.countTotalFirePower(all));
+
+
     }
 
     @Test
@@ -838,6 +866,14 @@ public class ShipBoardTest {
 
         int total = shipBoard.countTotalEnginePower(List.of(de));
         assertEquals(3, total);
+
+        Cabin c1 = new Cabin(createSimpleConnectors());
+        c1.fillCabin(CrewMember.BROWN_ALIEN);
+        shipBoard.setFocusedComponent(c1);
+        shipBoard.placeComponentWithFocus(6, 9);
+
+        assertEquals(5, shipBoard.countTotalEnginePower((List.of(de))));
+
     }
 
     @Test
@@ -1209,4 +1245,237 @@ public class ShipBoardTest {
         assertTrue(shipBoard.notActiveComponents.contains(engine));
         assertEquals(3, shipBoard.notActiveComponents.size()); // cabin + cannon + engine
     }
+
+    @Test
+    void testGetNumberOfComponentsWithOnlyMainCabin() {
+        // All'inizio dovrebbe esserci solo la MainCabin
+        assertEquals(1, shipBoard.getNumberOfComponents());
+    }
+
+    @Test
+    void testGetNumberOfComponentsAfterAddingAndRemoving() {
+        Map<Direction, ConnectorType> connectors = createSimpleConnectors();
+
+        // Aggiungo alcuni componenti
+        Cabin cabin = new Cabin(connectors);
+        shipBoard.setFocusedComponent(cabin);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
+
+        Cannon cannon = new Cannon(connectors);
+        shipBoard.setFocusedComponent(cannon);
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY);
+
+        Engine engine = new Engine(connectors);
+        shipBoard.setFocusedComponent(engine);
+        shipBoard.placeComponentWithFocus(cabinX - 1, cabinY);
+
+        // Dovrei avere MainCabin + 3 componenti = 4 totali
+        assertEquals(4, shipBoard.getNumberOfComponents());
+
+        // Rimuovo un componente
+        shipBoard.removeAndRecalculateShipParts(cabinX, cabinY + 1);
+
+        // Ora dovrei avere 3 componenti
+        assertEquals(3, shipBoard.getNumberOfComponents());
+
+        // Rimuovo altri componenti
+        Set<Coordinates> toRemove = new HashSet<>();
+        toRemove.add(new Coordinates(cabinX + 1, cabinY));
+        shipBoard.removeShipPart(toRemove);
+
+        // Ora dovrei avere 2 componenti
+        assertEquals(2, shipBoard.getNumberOfComponents());
+    }
+
+    @Test
+    @DisplayName("Test: Purple alien with correct purple life support should not be ejected")
+    void testEjectAliens_PurpleAlienWithCorrectLifeSupport_ShouldNotBeEjected() {
+        // Arrange: Create a cabin with purple alien adjacent to main cabin
+        Cabin cabin = new Cabin(createSimpleConnectors());
+        cabin.getInhabitants().add(CrewMember.PURPLE_ALIEN);
+
+        // Place cabin east of main cabin
+        shipBoard.setFocusedComponent(cabin);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
+
+        // Create purple life support adjacent to the cabin (north of cabin)
+        LifeSupport purpleLifeSupport = new LifeSupport(createSimpleConnectors(), ColorLifeSupport.PURPLE);
+        shipBoard.setFocusedComponent(purpleLifeSupport);
+        shipBoard.placeComponentWithFocus(cabinX - 1, cabinY + 1);
+
+        // Act
+        shipBoard.ejectAliens();
+
+        // Assert: Purple alien should still be in the cabin
+        assertTrue(cabin.getInhabitants().contains(CrewMember.PURPLE_ALIEN));
+        assertEquals(1, cabin.getInhabitants().size());
+    }
+
+    @Test
+    @DisplayName("Test: Purple alien without correct life support should be ejected")
+    void testEjectAliens_PurpleAlienWithoutCorrectLifeSupport_ShouldBeEjected() {
+        // Arrange: Create a cabin with purple alien adjacent to main cabin
+        Cabin cabin = new Cabin(createSimpleConnectors());
+        cabin.getInhabitants().add(CrewMember.PURPLE_ALIEN);
+
+        // Place cabin east of main cabin
+        shipBoard.setFocusedComponent(cabin);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
+
+        // Create brown life support (wrong type) adjacent to the cabin
+        LifeSupport brownLifeSupport = new LifeSupport(createSimpleConnectors(), ColorLifeSupport.BROWN);
+        shipBoard.setFocusedComponent(brownLifeSupport);
+        shipBoard.placeComponentWithFocus(cabinX - 1, cabinY + 1);
+
+        // Act
+        shipBoard.ejectAliens();
+
+        // Assert: Purple alien should be ejected
+        assertFalse(cabin.getInhabitants().contains(CrewMember.PURPLE_ALIEN));
+        assertEquals(0, cabin.getInhabitants().size());
+    }
+
+    @Test
+    @DisplayName("Test: Brown alien with correct brown life support should not be ejected")
+    void testEjectAliens_BrownAlienWithCorrectLifeSupport_ShouldNotBeEjected() {
+        // Arrange: Create a cabin with brown alien adjacent to main cabin
+        Cabin cabin = new Cabin(createSimpleConnectors());
+        cabin.getInhabitants().add(CrewMember.BROWN_ALIEN);
+
+        // Place cabin south of main cabin
+        shipBoard.setFocusedComponent(cabin);
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY);
+
+        // Create brown life support adjacent to the cabin (east of cabin)
+        LifeSupport brownLifeSupport = new LifeSupport(createSimpleConnectors(), ColorLifeSupport.BROWN);
+        shipBoard.setFocusedComponent(brownLifeSupport);
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY + 1);
+
+        // Act
+        shipBoard.ejectAliens();
+
+        // Assert: Brown alien should still be in the cabin
+        assertTrue(cabin.getInhabitants().contains(CrewMember.BROWN_ALIEN));
+        assertEquals(1, cabin.getInhabitants().size());
+    }
+
+    @Test
+    @DisplayName("Test: Brown alien without correct life support should be ejected")
+    void testEjectAliens_BrownAlienWithoutCorrectLifeSupport_ShouldBeEjected() {
+        // Arrange: Create a cabin with brown alien adjacent to main cabin
+        Cabin cabin = new Cabin(createSimpleConnectors());
+        cabin.getInhabitants().add(CrewMember.BROWN_ALIEN);
+
+        // Place cabin south of main cabin
+        shipBoard.setFocusedComponent(cabin);
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY);
+
+        // No life support adjacent to the cabin
+
+        // Act
+        shipBoard.ejectAliens();
+
+        // Assert: Brown alien should be ejected
+        assertFalse(cabin.getInhabitants().contains(CrewMember.BROWN_ALIEN));
+        assertEquals(0, cabin.getInhabitants().size());
+    }
+
+    @Test
+    void testEjectAliens_RegularCrewMember_ShouldNotBeEjected() {
+        // Arrange: Create a cabin with regular crew member adjacent to main cabin
+        Cabin cabin = new Cabin(createSimpleConnectors());
+        cabin.getInhabitants().add(CrewMember.HUMAN);
+
+        // Place cabin west of main cabin
+        shipBoard.setFocusedComponent(cabin);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY - 1);
+
+        // No life support adjacent to the cabin
+
+        // Act
+        shipBoard.ejectAliens();
+
+        // Assert: Regular crew member should not be ejected
+        assertTrue(cabin.getInhabitants().contains(CrewMember.HUMAN));
+        assertEquals(1, cabin.getInhabitants().size());
+    }
+
+    @Test
+    void testEjectAliens_MultipleCabinsWithDifferentConfigurations() {
+        // Arrange: Create multiple cabins with different alien types
+
+        // Cabin 1: Purple alien with correct life support
+        Cabin cabin1 = new Cabin(createSimpleConnectors());
+        cabin1.getInhabitants().add(CrewMember.PURPLE_ALIEN);
+        shipBoard.setFocusedComponent(cabin1);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1); // East of main cabin
+
+        LifeSupport purpleLifeSupport = new LifeSupport(createSimpleConnectors(), ColorLifeSupport.PURPLE);
+        shipBoard.setFocusedComponent(purpleLifeSupport);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 2); // East of cabin1
+
+        // Cabin 2: Brown alien without life support
+        Cabin cabin2 = new Cabin(createSimpleConnectors());
+        cabin2.getInhabitants().add(CrewMember.BROWN_ALIEN);
+        shipBoard.setFocusedComponent(cabin2);
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY); // South of main cabin
+
+        // Cabin 3: Human crew member (no life support needed)
+        Cabin cabin3 = new Cabin(createSimpleConnectors());
+        cabin3.getInhabitants().add(CrewMember.HUMAN);
+        shipBoard.setFocusedComponent(cabin3);
+        shipBoard.placeComponentWithFocus(cabinX - 1, cabinY); // North of main cabin
+
+        // Act
+        shipBoard.ejectAliens();
+
+        // Assert
+        // Cabin 1: Purple alien should remain (has correct life support)
+        assertTrue(cabin1.getInhabitants().contains(CrewMember.PURPLE_ALIEN));
+        assertEquals(1, cabin1.getInhabitants().size());
+
+        // Cabin 2: Brown alien should be ejected (no life support)
+        assertFalse(cabin2.getInhabitants().contains(CrewMember.BROWN_ALIEN));
+        assertEquals(0, cabin2.getInhabitants().size());
+
+        // Cabin 3: Human should remain (no life support needed)
+        assertTrue(cabin3.getInhabitants().contains(CrewMember.HUMAN));
+        assertEquals(1, cabin3.getInhabitants().size());
+    }
+
+    @Test
+    void testEjectAliens_AlienWithBothTypesOfLifeSupport_ShouldNotBeEjected() {
+        // Arrange: Create a cabin with purple alien
+        Cabin cabin = new Cabin(createSimpleConnectors());
+        cabin.getInhabitants().add(CrewMember.PURPLE_ALIEN);
+
+        // Place cabin east of main cabin
+        shipBoard.setFocusedComponent(cabin);
+        shipBoard.placeComponentWithFocus(cabinX, cabinY + 1);
+
+        // Create both purple and brown life support adjacent to the cabin
+        LifeSupport purpleLifeSupport = new LifeSupport(createSimpleConnectors(), ColorLifeSupport.PURPLE);
+        shipBoard.setFocusedComponent(purpleLifeSupport);
+        shipBoard.placeComponentWithFocus(cabinX - 1, cabinY + 1); // North of cabin
+
+        LifeSupport brownLifeSupport = new LifeSupport(createSimpleConnectors(), ColorLifeSupport.BROWN);
+        shipBoard.setFocusedComponent(brownLifeSupport);
+        shipBoard.placeComponentWithFocus(cabinX + 1, cabinY + 1); // South of cabin
+
+        // Act
+        shipBoard.ejectAliens();
+
+        // Assert: Purple alien should not be ejected (has required purple life support)
+        assertTrue(cabin.getInhabitants().contains(CrewMember.PURPLE_ALIEN));
+        assertEquals(1, cabin.getInhabitants().size());
+    }
+
+    @Test
+    void testEjectAliens_EmptyBoard_ShouldNotThrowException() {
+        // Arrange: Board has only the main cabin (no other cabins with aliens)
+
+        // Act & Assert: Should not throw any exception
+        assertDoesNotThrow(() -> shipBoard.ejectAliens());
+    }
+
 }

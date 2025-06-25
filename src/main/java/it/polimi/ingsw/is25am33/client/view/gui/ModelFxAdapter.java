@@ -26,6 +26,7 @@ public class ModelFxAdapter {
     private final Map<String, ObjectProperty<Component>[][]> observableShipBoards;
     private final Map<String, Pair<ObjectProperty<Component>, ObjectProperty<Component>>> observableBookedComponents;
     private final Map<PlayerColor, ObjectProperty<Integer>> observableColorRanking;
+    private final Map<String, ObjectProperty<Integer>> observableLostComponents;
     private final ObjectProperty<ClientCard> observableCurrAdventureCard;
     private final BoardsController boardsController;
     private final Boolean isCardAdapter;
@@ -46,6 +47,7 @@ public class ModelFxAdapter {
         this.observableColorRanking = new ConcurrentHashMap<>();
         this.observableBookedComponents = new ConcurrentHashMap<>();
         this.observableCurrAdventureCard = new SimpleObjectProperty<>();
+        this.observableLostComponents = new ConcurrentHashMap<>();
         this.observableCosmicCredits = new SimpleObjectProperty<>(0);
         this.boardsController = boardsController;
         this.isCardAdapter = isCardAdapter;
@@ -62,6 +64,7 @@ public class ModelFxAdapter {
                             observableShipBoards.get(nickname)[i][j] = prop;
                         }
                     }
+                    observableLostComponents.put(nickname, new SimpleObjectProperty<>());
                     observableBookedComponents.put(nickname, new Pair<>(new SimpleObjectProperty<>(), new SimpleObjectProperty<>()));
                 });
 
@@ -111,6 +114,10 @@ public class ModelFxAdapter {
         synchronized (observableShipBoards.get(nickname)) {
             return observableBookedComponents.get(nickname);
         }
+    }
+
+    public Map<String, ObjectProperty<Integer>> getObservableLostComponents() {
+        return observableLostComponents;
     }
 
     public ObjectProperty<Integer> getObservableCosmicCredits() {
@@ -172,6 +179,7 @@ public class ModelFxAdapter {
             // refresh the booked components
             List<Component> bookedComponents = clientModel.getShipboardOf(nickname).getBookedComponents();
 
+            observableLostComponents.get(nickname).set(bookedComponents.size());
 
             observableBookedComponents.get(nickname)
                     .getKey()

@@ -50,11 +50,6 @@ public class EndGamePhaseTest {
         private final List<String> notifications = new ArrayList<>();
 
         @Override
-        public void notifyShipCorrect(String nicknameToNotify) throws RemoteException {
-            notifications.add("shipCorrect:" + nicknameToNotify);
-        }
-
-        @Override
         public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException {
             notifications.add("gameInfos:" + nicknameToNotify);
         }
@@ -75,16 +70,6 @@ public class EndGamePhaseTest {
         }
 
         @Override
-        public void notifyShipPartSelection(String nicknameToNotify, List<Set<List<Integer>>> shipParts) throws RemoteException {
-            notifications.add("shipPartSelection:" + nicknameToNotify);
-        }
-
-        @Override
-        public void notifyRemovalResult(String nicknameToNotify, boolean success) throws RemoteException {
-            notifications.add("removalResult:" + success);
-        }
-
-        @Override
         public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
             notifications.add("invalidShipBoard:" + shipOwnerNickname);
         }
@@ -92,6 +77,11 @@ public class EndGamePhaseTest {
         @Override
         public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
             notifications.add("validShipBoard:" + shipOwnerNickname);
+        }
+
+        @Override
+        public void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException {
+            notifications.add("noMoreHiddenComponents:" + nicknameToNotify);
         }
 
         @Override
@@ -137,11 +127,6 @@ public class EndGamePhaseTest {
         @Override
         public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
             notifications.add("componentPlaced:" + coordinates.getX() + "," + coordinates.getY());
-        }
-
-        @Override
-        public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException {
-            notifications.add("notifyIncorrectlyPositionedComponentPlaced:" + coordinates.getX() + "," + coordinates.getY());
         }
 
         @Override

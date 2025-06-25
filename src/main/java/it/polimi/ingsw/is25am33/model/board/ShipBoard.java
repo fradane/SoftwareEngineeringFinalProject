@@ -862,7 +862,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @return The total engine power.
      */
     public int countTotalEnginePower(List<Engine> enginesToCountEnginePower) {
-            return enginesToCountEnginePower.size()*2+getSingleEngines().size()+getPurpleAlien()*2;
+            return enginesToCountEnginePower.size()*2+getSingleEngines().size()+getBrownAlien()*2;
     }
 
     /**
@@ -1147,9 +1147,6 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
         Component component = getFocusedComponent();
 
-        if(!notActiveComponents.contains(focusedComponent))
-            component.setCurrState(ComponentState.VISIBLE);
-
         setFocusedComponent(null);
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
@@ -1319,7 +1316,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return false; // Non è un alieno
     }
 
-    public int getPurpleAlien(){
+    private int getPurpleAlien(){
         for(CrewMember crewMember: getCrewMembers()){
             if(crewMember == CrewMember.PURPLE_ALIEN)
                 return 1;
@@ -1327,7 +1324,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return 0;
     }
 
-    public int getBrownAlien(){
+    private int getBrownAlien(){
         for(CrewMember crewMember: getCrewMembers()){
             if(crewMember == CrewMember.BROWN_ALIEN)
                 return 1;
@@ -1338,4 +1335,38 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     public MainCabin getMainCabin(){
         return (MainCabin) shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]];
     }
+
+    @Override
+    public long getNumberOfComponents() {
+        return componentsPerType.keySet()
+                .stream()
+                .mapToLong(clazz -> componentsPerType.get(clazz).size())
+                .sum();
+    }
+
+    public void ejectAliens() {
+        getCoordinatesAndCabinsWithCrew().forEach((coords, cabin) -> {
+            if (cabin.getInhabitants().contains(CrewMember.PURPLE_ALIEN) || cabin.getInhabitants().contains(CrewMember.BROWN_ALIEN))
+                hasCorrectLifeSupportOrRemove(cabin, coords, cabin.getInhabitants().getFirst());
+        });
+    }
+
+    private void hasCorrectLifeSupportOrRemove(Cabin cabin, Coordinates coords, CrewMember crewMember) {
+        // Get all life support modules connected to this cabin
+        Set<ColorLifeSupport> connectedLifeSupports = getConnectedLifeSupports(coords.getX(), coords.getY());
+
+        boolean shouldRemove = false;
+
+        // Check if the crew member is an alien that requires specific life support
+        if (crewMember == CrewMember.PURPLE_ALIEN) {
+            shouldRemove = !connectedLifeSupports.contains(ColorLifeSupport.PURPLE);
+        } else if (crewMember == CrewMember.BROWN_ALIEN) {
+            shouldRemove = !connectedLifeSupports.contains(ColorLifeSupport.BROWN);
+        }
+
+        // Remove the crew member if they don't have the required life support
+        if (shouldRemove)
+            cabin.getInhabitants().remove(crewMember);
+    }
+
 }

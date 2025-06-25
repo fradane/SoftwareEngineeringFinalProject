@@ -175,12 +175,14 @@ public class ClientModel {
         Map<PlayerColor, Integer> ranking = new HashMap<>();
 
         playerClientData.keySet()
-                .stream()
-                .filter(player -> !playerClientData.get(player).isLanded())
-                .forEach(nickname -> ranking.put(
-                        playerClientData.get(nickname).getColor(),
-                        playerClientData.get(nickname).getFlyingBoardPosition()
-                ));
+                .forEach(nickname -> {
+                    PlayerClientData currPlayerClientData = this.playerClientData.get(nickname);
+                    ranking.put(
+                            currPlayerClientData.getColor(),
+                            currPlayerClientData.isOut() || currPlayerClientData.isLanded() ?
+                                    Integer.MIN_VALUE : currPlayerClientData.getFlyingBoardPosition()
+                    );
+                });
 
         return ranking;
     }

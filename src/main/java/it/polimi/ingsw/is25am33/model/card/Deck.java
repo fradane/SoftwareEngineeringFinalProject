@@ -34,6 +34,8 @@ public class Deck {
     private final Stack<AdventureCard> gameDeck = new Stack<>();
     private GameClientNotifier gameClientNotifier;
     private final List<Boolean> isLittleDeckFree = new ArrayList<>(List.of(true, true, true));
+    private boolean isFirstCardDrawn = false;
+    private boolean isTestFlight;
 
     public void setGameClientNotifier(GameClientNotifier gameClientNotifier){
         this.gameClientNotifier = gameClientNotifier;
@@ -61,13 +63,44 @@ public class Deck {
     }
 
     /**
-     * Draws a card from the gameModel deck.
+     * Draws a card from the game deck with specific rules based on game state and player count.
+     * <p>
+     * First draw: Returns a level 2 card (level 1 in test mode) and sets it as START_CARD.
+     * Single player: Cannot draw WarField cards.
+     * Multiplayer: Draw any card from the deck.
      *
-     * @return The top AdventureCard from the deck.
-     * @throws EmptyStackException if the gameModel deck is empty.
+     * @param inGamePlayers The number of players in the game
+     * @return The drawn AdventureCard with a state set to START_CARD
+     * @throws EmptyStackException if the game deck is empty
      */
-    public AdventureCard drawCard() throws EmptyStackException {
-        AdventureCard card = gameDeck.pop();
+    public AdventureCard drawCard(int inGamePlayers) throws EmptyStackException {
+
+        if (!isFirstCardDrawn) {
+            isFirstCardDrawn = true;
+            AdventureCard firstCard = gameDeck.pop();
+            int cardLevel = firstCard.getLevel();
+
+            while (cardLevel != (isTestFlight ? 1 : 2)) {
+                gameDeck.push(firstCard);
+                Collections.shuffle(gameDeck);
+                firstCard = gameDeck.pop();
+                cardLevel = firstCard.getLevel();
+            }
+
+            firstCard.setCurrState(CardState.START_CARD);
+            return firstCard;
+        }
+
+        AdventureCard card;
+
+        if (inGamePlayers == 1) {
+            do {
+                card = gameDeck.pop();
+            } while (card instanceof WarField);
+        } else {
+            card = gameDeck.pop();
+        }
+
         card.setCurrState(CardState.START_CARD);
         return card;
     }
@@ -82,11 +115,13 @@ public class Deck {
     public void setUpLittleDecks(GameModel gameModel) {
 
         if (gameModel.isTestFlight()) {
+            isTestFlight = true;
             loadCards(true);
             allCards.forEach(adventureCard -> adventureCard.setGame(gameModel));
             return;
         }
 
+        isTestFlight = false;
         loadCards(false);
         allCards.forEach(adventureCard -> adventureCard.setGame(gameModel));
         List<AdventureCard> level1Cards = new ArrayList<>(allCards.stream().filter(c -> c.getLevel() == 1).collect(Collectors.toList()));
@@ -172,7 +207,6 @@ public class Deck {
 //        cards.addAll(Deck.loadEpidemicFromJson());
 //        cards.addAll(Deck.loadPlanetsFromJson());
 
-
         cards.addAll(Deck.loadPlanetsFromJson());
         cards.addAll(Deck.loadPlanetsFromJson());
         cards.addAll(Deck.loadPlanetsFromJson());
@@ -181,27 +215,6 @@ public class Deck {
         cards.addAll(Deck.loadPlanetsFromJson());
         cards.addAll(Deck.loadPlanetsFromJson());
         cards.addAll(Deck.loadPlanetsFromJson());
-
-//        cards.addAll(Deck.loadSmugglersFromJson());
-//        cards.addAll(Deck.loadSmugglersFromJson());
-//        cards.addAll(Deck.loadSmugglersFromJson());
-//        cards.addAll(Deck.loadSmugglersFromJson());
-//        cards.addAll(Deck.loadSmugglersFromJson());
-//        cards.addAll(Deck.loadSmugglersFromJson());
-//        cards.addAll(Deck.loadSmugglersFromJson());
-//        cards.addAll(Deck.loadSmugglersFromJson());
-
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-
-
 
 
         if (isTestFlight)

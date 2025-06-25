@@ -64,7 +64,7 @@ public class Epidemic extends AdventureCard{
         switch (currState) {
             case EPIDEMIC:
                 this.removeInfectedCrewMembers();
-                // After processing epidemic, move to confirmation state
+                // After processing the epidemic, move to confirmation state
 
                 if (gameModel.hasNextPlayer()) {
                     gameModel.nextPlayer();

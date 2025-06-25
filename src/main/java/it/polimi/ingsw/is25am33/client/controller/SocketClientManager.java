@@ -507,6 +507,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyNoMoreHiddenComponents":
+                    if (clientController != null) {
+                        clientController.notifyNoMoreHiddenComponents(nickname);
+                    }
+
                 case "PING":
                     if (clientController != null) {
                         clientController.pingToClientFromServer(nickname);
@@ -722,14 +727,6 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         SocketMessage outMessage = new SocketMessage(nickname, "playerChoseDoubleCannons");
         outMessage.setParamActivableCoordinates(doubleCannonsCoords);
         outMessage.setParamBatteryBoxCoordinates(batteryBoxesCoords);
-
-        out.println(ClientSerializer.serialize(outMessage));
-    }
-
-    @Override
-    public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords) throws RemoteException{
-        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseCabins");
-        outMessage.setParamCabinCoordinates(cabinCoords);
 
         out.println(ClientSerializer.serialize(outMessage));
     }

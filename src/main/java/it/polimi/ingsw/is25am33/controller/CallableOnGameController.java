@@ -35,8 +35,6 @@ public interface CallableOnGameController extends Remote {
 
     void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws IOException;
 
-    void playerChoseCabin(String nickname, List<Coordinates> cabin) throws IOException;
-
     void playerWantsToVisitPlanet(String nickname, int choice) throws IOException;
 
     void playerWantsToAcceptTheReward(String nickname, Boolean choice) throws IOException;
@@ -86,4 +84,5 @@ public interface CallableOnGameController extends Remote {
     void debugSkipToLastCard() throws IOException;
 
     void evaluatedCrewMembers(String nickname) throws IOException;
+
 }

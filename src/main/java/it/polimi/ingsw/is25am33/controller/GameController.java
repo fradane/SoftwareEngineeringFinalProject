@@ -31,7 +31,6 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     private final Map<String, Set<Set<Coordinates>>> temporaryShipParts = new ConcurrentHashMap<>();
 
-    // TODO metodo di debug
     @Override
     public void showMessage(String string) throws RemoteException {
         System.out.println("Show message: " + string);
@@ -56,10 +55,6 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.removePlayer(nickname);
     }
 
-    public ConcurrentHashMap<String, CallableOnClientController> getClientControllers() {
-        return clientControllers;
-    }
-
     public GameInfo getGameInfo() {
         Collection<Player> players = gameModel.getPlayers().values();
         Map<String, PlayerColor> playerAndColors = new HashMap<>();
@@ -78,40 +73,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         );
     }
 
-    public Thread notifyNewPlayerJoined(String gameId, String newPlayerNickname, PlayerColor color) {
-        return new Thread( () -> {
-            clientControllers.keySet()
-                    .stream()
-                    .filter(nickname -> !nickname.equals(newPlayerNickname))
-                    .forEach(nickname -> {
-                        try {
-                            clientControllers.get(nickname).notifyNewPlayerJoined(nickname, gameId, newPlayerNickname, color);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-        });
-    }
-
-    public void notifyGameStarted() {
-        new Thread( () -> {
-            clientControllers.keySet()
-                .stream()
-                .forEach(nickname -> {
-                    try {
-                        clientControllers.get(nickname).notifyGameStarted(nickname, getGameInfo());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-        }).start();
-    }
-
     public void startGame() {
         gameModel.setStarted(true);
         GameInfo gameInfo = getGameInfo();
         gameModel.setCurrGameState(GameState.BUILD_SHIPBOARD);
-        notifyGameStarted();
+        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyGameStarted(nicknameToNotify, getGameInfo());
+        });
         System.out.println("[" + gameInfo.getGameId() + "] Game started");
     }
 
@@ -162,7 +130,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerWantsToReleaseFocusedComponent(String nickname) throws RemoteException {
+    public void playerWantsToReleaseFocusedComponent(String nickname){
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
         Component component = shipBoard.releaseFocusedComponent();
         if(!shipBoard.getNotActiveComponents().contains(component))
@@ -210,8 +178,6 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             gameModel.getGameClientNotifier().notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
                 System.out.println("ERRORE submitCrewChoices: " + e.getMessage());
                 e.printStackTrace();
-                //TODO capire se ha senso aggiugnere un metodo notifyError per mostrare gli erorri generici
-                //clientController.notifyError(nicknameToNotify, e.getMessage());
             });
         }
     }
@@ -271,14 +237,23 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             }
         }
 
-        if(shipBoard.getMainCabin()!=null)
+        if (shipBoard.getMainCabin() != null) {
             shipBoard.getMainCabin().fillCabin(CrewMember.HUMAN);
+        }
     }
 
     @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) {
         Component chosenComponent = gameModel.getComponentTable().pickVisibleComponent(choice);
-        if (chosenComponent == null) return;
+        if (chosenComponent == null) {
+
+            gameModel.getGameClientNotifier()
+                    .notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
+                        clientController.notifyNoMoreHiddenComponents(nicknameToNotify);
+                    });
+
+            return;
+        }
         gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(chosenComponent);
     }
 
@@ -325,20 +300,6 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException {
 
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-
-        List<Engine> engines = doubleEnginesCoords
-                .stream()
-                .map(shipBoard::getComponentAt)
-                .map(Engine.class::cast)
-                .toList();
-
-        List<BatteryBox> batteryBoxes = batteryBoxesCoords
-                .stream()
-                .map(shipBoard::getComponentAt)
-                .map(BatteryBox.class::cast)
-                .toList();
-
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
                 .Builder()
                 .setChosenDoubleEngines(doubleEnginesCoords)
@@ -352,7 +313,6 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException{
 
-
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
                 .Builder()
                 .setChosenDoubleCannons(doubleCannonsCoords)
@@ -360,30 +320,11 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 .build();
 
         gameModel.getCurrAdventureCard().play(playerChoice);
-    }
 
-    @Override
-    public void playerChoseCabin(String nickname, List<Coordinates> cabinCoords) throws RemoteException{
-        //TODO probabilmente da eliminare
-//        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-//
-//        List<Cabin> cabins = cabinCoords
-//                .stream()
-//                .map(shipBoard::getComponentAt)
-//                .map(Cabin.class::cast)
-//                .toList();
-//
-//        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
-//                .Builder()
-//                .setChosenCabins(cabinsCoords)
-//                .build();
-//
-//        gameModel.getCurrAdventureCard().play(playerChoice);
     }
 
     @Override
     public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords) throws RemoteException {
-
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
@@ -392,20 +333,20 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 .build();
 
         gameModel.getCurrAdventureCard().play(choice);
+
     }
 
     @Override
     public void playerHandleBigMeteorite(String nickname, List<Coordinates> doubleCannonCoords, List<Coordinates> batteryBoxCoords) {
 
-        PlayerChoicesDataStructure choice;
-
-            choice = new PlayerChoicesDataStructure
+        PlayerChoicesDataStructure choice= new PlayerChoicesDataStructure
                     .Builder()
                     .setChosenBatteryBoxes(batteryBoxCoords)
                     .setChosenDoubleCannons(doubleCannonCoords)
                     .build();
 
         gameModel.getCurrAdventureCard().play(choice);
+
     }
 
     @Override
@@ -422,46 +363,27 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerChoseStorage(String nickname, List<Coordinates> storageCoords) throws RemoteException {
 
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-        List<Storage> storage = new ArrayList<>();
-        if (!storageCoords.isEmpty())
-            storageCoords.forEach(coords -> storage.add(coords.isCoordinateInvalid() ? null : ((Storage) shipBoard.getComponentAt(coords))));
-
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
                 .setChosenStorage(storageCoords)
                 .build();
 
         gameModel.getCurrAdventureCard().play(choice);
+
     }
 
     @Override
     public void spreadEpidemic(String nickname) throws RemoteException{
-
-        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
-                .Builder()
-                .build();
-
-        gameModel.getCurrAdventureCard().play(choice);
+        gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
     @Override
     public void stardustEvent(String nickname) throws RemoteException{
-
-        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
-                .Builder()
-                .build();
-
-        gameModel.getCurrAdventureCard().play(choice);
+        gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
     public void evaluatedCrewMembers(String nickname) throws RemoteException{
-
-        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
-                .Builder()
-                .build();
-
-        gameModel.getCurrAdventureCard().play(choice);
+        gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
     @Override
@@ -485,7 +407,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerWantsToRemoveComponent(String nickname, Coordinates coordinates) throws RemoteException {
+    public void playerWantsToRemoveComponent(String nickname, Coordinates coordinates) {
         if(coordinates!=null) {
             ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
             Set<Set<Coordinates>> shipParts = shipBoard.removeAndRecalculateShipParts(coordinates.getX(), coordinates.getY());
@@ -495,6 +417,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 try {
+                    shipBoard.ejectAliens();
                     Component[][] shipMatrix = shipBoard.getShipMatrix();
                     Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
                     Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
@@ -505,9 +428,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
                         } else
                             clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
-                    }//else if(shipParts.isEmpty())
-                    //   clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
-                    else
+                    } else
                         clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts, componentsPerType);
                 } catch (RemoteException e) {
                     System.err.println("Remote Exception");
@@ -562,7 +483,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerWantsToFocusReservedComponent(String nickname, int choice) throws RemoteException {
+    public void playerWantsToFocusReservedComponent(String nickname, int choice){
         ((Level2ShipBoard) gameModel.getPlayers().get(nickname).getPersonalBoard()).focusReservedComponent(choice);
     }
 
@@ -585,10 +506,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     public void startCheckShipBoardAfterAttack(String nickname){
-        PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
-                .Builder()
-                .build();
-        gameModel.getCurrAdventureCard().play(choice);
+        gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
     @Override
@@ -645,12 +563,11 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerWantsToLand(String nickname) throws IOException {
+    public void playerWantsToLand(String nickname){
         if(gameModel.getCurrGameState()!=GameState.PLAY_CARD
                 || gameModel.getCurrGameState()!=GameState.CHECK_PLAYERS
                 || gameModel.getCurrGameState()!=GameState.DRAW_CARD)
             return;
-
 
         Player player = gameModel.getPlayers().get(nickname);
         gameModel.getFlyingBoard().addOutPlayer(player, true);

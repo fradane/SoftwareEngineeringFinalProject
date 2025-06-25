@@ -20,14 +20,14 @@
     <StackPane fx:id="boardsPane">
         <!-- Main Player's Shipboard (with buttons for interaction) -->
         <StackPane fx:id="mainPlayerShipBoard">
-            <ImageView fx:id="shipboard" fitHeight="600.0" fitWidth="600.0" preserveRatio="true" StackPane.alignment="CENTER">
+            <ImageView fx:id="shipboard" fitHeight="600.0" fitWidth="600.0" preserveRatio="true" StackPane.alignment="CENTER" >
                 <Image url="@graphics/shipboard_1.jpg" />
                 <StackPane.margin>
                     <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                 </StackPane.margin>
             </ImageView>
 
-            <GridPane fx:id="myShipBoardGrid" alignment="BOTTOM_LEFT" hgap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="393.0" prefWidth="555.0" vgap="1.0">
+            <GridPane fx:id="myShipBoardGrid" alignment="BOTTOM_LEFT" hgap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="393.0" prefWidth="555.0" vgap="1.0" >
                 <columnConstraints>
                     <ColumnConstraints percentWidth="14.2857" />
                     <ColumnConstraints percentWidth="14.2857" />
@@ -549,6 +549,115 @@
                 </StackPane.margin>
             </ImageView>
 
+            <GridPane fx:id="flyingBoardGrid" alignment="CENTER" mouseTransparent="true"
+                      maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="393.0" prefWidth="555.0" >
+                <columnConstraints>
+                    <!-- 56 colonne per avere celle quadrate -->
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                    <ColumnConstraints percentWidth="1.786" />
+                </columnConstraints>
+                <rowConstraints>
+                    <!-- 40 righe per celle quadrate -->
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                    <RowConstraints percentHeight="2.5" />
+                </rowConstraints>
+                <StackPane.margin>
+                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                </StackPane.margin>
+            </GridPane>
+
             <!-- Main player pawn -->
             <Pane fx:id="pawnsPane" prefHeight="600.0" prefWidth="600.0">
                 <ImageView fx:id="redPawn" fitHeight="32.0" layoutX="149.0" layoutY="189.0" preserveRatio="true" visible="false" StackPane.alignment="CENTER">
@@ -575,7 +684,7 @@
                         <DropShadow color="black" offsetX="5" offsetY="5" />
                     </effect>
                 </ImageView>
-                <!-- TODO finire posizioni -->
+
 
             </Pane>
 

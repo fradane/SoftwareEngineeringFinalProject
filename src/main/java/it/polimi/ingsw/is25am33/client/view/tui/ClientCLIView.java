@@ -11,7 +11,6 @@ import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.Planet;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -120,6 +119,11 @@ public class ClientCLIView implements ClientView {
     // TODO
     @Override
     public void notifyHourglassRestarted(int flipsLeft) {
+
+    }
+
+    @Override
+    public void refreshGameInfos(List<GameInfo> gameInfos) {
 
     }
 
@@ -615,17 +619,14 @@ public class ClientCLIView implements ClientView {
             hitComponent = coordinates;
     }
 
-    public void showCrewMembersInfo(){
+    public void showCrewMembersInfo() {
         showMessage("You have " + clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size() + " crew members", STANDARD);
-        for(String player: clientModel.getSortedRanking()) {
-            if(!player.equals(clientModel.getMyNickname()))
+        for (String player : clientModel.getSortedRanking()) {
+            if (!player.equals(clientModel.getMyNickname()))
                 showMessage(player + "has" + clientModel.getShipboardOf(player).getCrewMembers().size() + " crew members", STANDARD);
         }
-        if(clientModel.isMyTurn()){
-            showMessage("Press enter to start this phase", ASK);
-        }
-        else
-            setClientState(WAIT_PLAYER);
+
+        showMessage("Press any key to start this phase...", ASK);
     }
 
     private void displayPiratesInfo(ClientPirates pirates, StringBuilder output) {
@@ -834,7 +835,7 @@ public class ClientCLIView implements ClientView {
         String nickname = clientModel.getMyNickname();
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         showShipBoard(shipBoard, nickname);
-        showMessage("TEXT TO BE CHANGED: non fare nulla che stai apposto così", STANDARD);
+        showMessage("No action needed, your ship is all set.", STANDARD);
     }
 
     @Override
@@ -843,7 +844,7 @@ public class ClientCLIView implements ClientView {
             clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
             hitComponent = null;
         } else {
-            showMessage("GOOD JOB! You are save!", STANDARD);
+            showMessage("GOOD JOB! You are safe!", STANDARD);
             setClientState(WAIT_PLAYER);
             clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
         }
@@ -1222,11 +1223,11 @@ public class ClientCLIView implements ClientView {
         if (myData != null && myData.isEarlyLanded()) {
             output.append("                        🛬 FINE DEL VIAGGIO 🛬\n");
         } else {
-            output.append("                        🚀 FINE DEL VIAGGIO 🚀\n");
+            output.append("                        🚀 END OF THE JOURNEY 🚀\n");
         }
         output.append("═══════════════════════════════════════════════════════════════════════\n\n");
 
-        output.append("🏆 CLASSIFICA FINALE\n");
+        output.append("🏆 FINAL RANKING\n");
         output.append("─────────────────────────────────────────────────────────────────────\n\n");
 
         // Show final ranking
@@ -1270,11 +1271,11 @@ public class ClientCLIView implements ClientView {
 
             // Add winner/early landing info
             if (data.isEarlyLanded()) {
-                output.append("  [ATTERRATO ANTICIPATAMENTE]");
+                output.append("  [LANDED EARLY]");
             } else if (data.getTotalCredits() == maxCredits && data.getTotalCredits() > 0) {
-                output.append("  🎉 VINCITORE ASSOLUTO!");
+                output.append("  🎉 OVERALL WINNER!");
             } else if (nickname.equals(myNickname) && data.getTotalCredits() > 0) {
-                output.append("  ✨ Sei tra i vincitori!");
+                output.append("  ✨ You're among the winners!");
             }
 
             output.append("\n");
@@ -1285,66 +1286,66 @@ public class ClientCLIView implements ClientView {
             output.append("\n═══════════════════════════════════════════════════════════════════════\n\n");
 
             if (myData.isEarlyLanded()) {
-                output.append("📊 IL TUO RIEPILOGO (Atterrato Anticipatamente)\n");
+                output.append("📊 YOUR SUMMARY (Landed Early)\n");
             } else {
-                output.append("📊 IL TUO RIEPILOGO\n");
+                output.append("📊 YOUR SUMMARY\n");
             }
             output.append("─────────────────────────────────────────────────────────────────────\n\n");
 
             // Calculate initial credits by subtracting bonuses/penalties
             int initialCredits = calculateInitialCredits(myData, myPosition, playersNicknamesWithPrettiestShip.contains(myNickname));
 
-            output.append(String.format("   💰 Crediti iniziali: %d\n\n", initialCredits));
+            output.append(String.format("   💰 Initial credits: %d\n\n", initialCredits));
 
             // Show bonuses and penalties
             if (!myData.isEarlyLanded()) {
                 // Normal player gets full bonuses
                 int positionBonus = getPositionBonus(myPosition);
-                output.append(String.format("   ✅ Ricompensa arrivo (%d° posto): +%d 💰\n", myPosition, positionBonus));
+                output.append(String.format("   ✅ Arrival reward (%d° posto): +%d 💰\n", myPosition, positionBonus));
 
                 int cubesValue = calculateCubesValue(myData.getAllOwnedCubes(), false);
-                output.append(String.format("   ✅ Vendita merci %s: +%d 💰\n", formatCubes(myData.getAllOwnedCubes()), cubesValue));
+                output.append(String.format("   ✅ Goods sold %s: +%d 💰\n", formatCubes(myData.getAllOwnedCubes()), cubesValue));
 
                 if (playersNicknamesWithPrettiestShip.contains(myNickname)) {
                     int prettiestBonus = getPrettiestShipBonus();
-                    output.append(String.format("   ✅ Nave più bella: +%d 💰\n", prettiestBonus));
+                    output.append(String.format("   ✅ Prettiest ship: +%d 💰\n", prettiestBonus));
                 }
             } else {
                 // Early landed player
-                output.append("   ❌ Ricompensa arrivo: -- (atterrato anticipatamente)\n");
+                output.append("   ❌ Arrival rewards: -- (landed early)\n");
 
                 int cubesValue = calculateCubesValue(myData.getAllOwnedCubes(), true);
-                output.append(String.format("   ⚠️  Vendita merci %s (DIMEZZATA): +%d 💰\n",
+                output.append(String.format("   ⚠️  Goods solds %s (HALVED): +%d 💰\n",
                         formatCubes(myData.getAllOwnedCubes()), cubesValue));
 
-                output.append("   ❌ Nave più bella: -- (atterrato anticipatamente)\n");
+                output.append("   ❌ Prettiest ship: -- (landed earlier)\n");
             }
 
             // Lost components penalty (always applied)
             if (myData.getLostComponents() > 0) {
-                output.append(String.format("   ❌ Componenti persi (%d): -%d 💰\n",
+                output.append(String.format("   ❌ Lost components (%d): -%d 💰\n",
                         myData.getLostComponents(), myData.getLostComponents()));
             }
 
             output.append("\n   ─────────────────────────────────────────\n");
-            output.append(String.format("   💎 TOTALE FINALE: %d 💰\n", myData.getTotalCredits()));
+            output.append(String.format("   💎 FINAL TOTAL: %d 💰\n", myData.getTotalCredits()));
             output.append("\n═══════════════════════════════════════════════════════════════════════\n\n");
 
             // Final message
             if (myData.isEarlyLanded()) {
                 if (myData.getTotalCredits() > 0) {
-                    output.append("   🛬 Hai abbandonato la corsa anticipatamente, ma hai comunque dei crediti!\n");
+                    output.append("   🛬 You landed early but still earned some credits!\n");
                 } else {
-                    output.append("   🛬 Hai abbandonato la corsa anticipatamente e non hai guadagnato crediti.\n");
+                    output.append("   🛬 You landed early and earned no credits.\n");
                 }
             }
 
             if (myData.getTotalCredits() == maxCredits && myData.getTotalCredits() > 0) {
-                output.append("   🏆 Complimenti! Sei il vincitore assoluto! 🎊\n");
+                output.append("   🏆 Congratulation! You're the overall winner! 🎊\n");
             } else if (myData.getTotalCredits() > 0) {
-                output.append("   🎉 Complimenti! Sei tra i vincitori!\n");
+                output.append("   🎉 Congratulation! You're among the winners!\n");
             } else {
-                output.append("   😔 Purtroppo non sei tra i vincitori questa volta...\n");
+                output.append("   😔 Unfortunately, you're not among the winners this time...\n");
             }
         }
 
@@ -1445,44 +1446,44 @@ public class ClientCLIView implements ClientView {
             StringBuilder output = new StringBuilder();
             output.append("\n");
             output.append("╔═══════════════════════════════════════════════════════════════════════╗\n");
-            output.append("║                    🛬 ATTERRAGGIO ANTICIPATO 🛬                       ║\n");
+            output.append("║                    🛬 EARLY LANDING 🛬                                ║\n");
             output.append("╠═══════════════════════════════════════════════════════════════════════╣\n");
             output.append("║                                                                       ║\n");
-            output.append("║ Il tuo razzo segna-rotta è stato rimosso dalla plancia di volo!       ║\n");
+            output.append("║ Your route marker rocket has been removed from the flight board!      ║\n");
             output.append("║                                                                       ║\n");
-            output.append("║ Hai abbandonato la corsa spaziale e sei atterrato in sicurezza.       ║\n");
-            output.append("║ A partire dalla prossima carta sarai solo uno spettatore.             ║\n");
+            output.append("║ You have left the space race and landed safely.                       ║\n");
+            output.append("║ From the next card on, you will only be a spectator.                  ║\n");
             output.append("║                                                                       ║\n");
-            output.append("║ ⚠️  RICORDA:                                                          ║\n");
-            output.append("║ • Nessuna carta avrà più effetto su di te                             ║\n");
-            output.append("║ • Non riceverai ricompense per l'ordine di arrivo                     ║\n");
-            output.append("║ • Non potrai competere per la nave più bella                          ║\n");
-            output.append("║ • Le tue merci saranno vendute a metà prezzo                          ║\n");
-            output.append("║ • Pagherai comunque le penalità per i componenti persi                ║\n");
+            output.append("║ ⚠️  REMEMBER:                                                         ║\n");
+            output.append("║ • No cards will affect you anymore                                   ║\n");
+            output.append("║ • You won't receive rewards for arrival order                        ║\n");
+            output.append("║ • You can't compete for the prettiest ship                           ║\n");
+            output.append("║ • Your goods will be sold at half price                              ║\n");
+            output.append("║ • You'll still pay penalties for lost components                     ║\n");
             output.append("║                                                                       ║\n");
-            output.append("║ Potrai ancora vincere se avrai accumulato abbastanza crediti!         ║\n");
+            output.append("║ You can still win if you’ve earned enough credits!                    ║\n");
             output.append("║                                                                       ║\n");
             output.append("╚═══════════════════════════════════════════════════════════════════════╝\n");
-
             showMessage(output.toString(), STANDARD);
+
         } else {
             // Another player has landed early - dynamic formatting for name
             StringBuilder output = new StringBuilder();
             output.append("\n");
             output.append("╔═══════════════════════════════════════════════════════════════════════╗\n");
-            output.append("║                        📢 ANNUNCIO DI VOLO 📢                         ║\n");
+            output.append("║                        📢 FLIGHT ANNOUNCEMENT 📢                       ║\n");
             output.append("╠═══════════════════════════════════════════════════════════════════════╣\n");
             output.append("║                                                                       ║\n");
 
             // Format the announcement with dynamic spacing
-            String announcement = nickname + " ha abbandonato la corsa!";
+            String announcement = nickname + " has left the race!";
             int padding = (69 - announcement.length()) / 2;
             String paddedAnnouncement = String.format("%" + padding + "s%s%" + padding + "s", "", announcement, "");
             output.append(String.format("║%-69s║\n", paddedAnnouncement));
 
             output.append("║                                                                       ║\n");
-            output.append("║ Il suo razzo ha effettuato un atterraggio anticipato.                 ║\n");
-            output.append("║ Dalla prossima carta non parteciperà più alle avventure.              ║\n");
+            output.append("║ Their rocket has landed early.                                        ║\n");
+            output.append("║ From the next card onward, they will no longer join the adventures.  ║\n");
             output.append("║                                                                       ║\n");
             output.append("╚═══════════════════════════════════════════════════════════════════════╝\n");
 
@@ -1589,6 +1590,12 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void showDisconnectMessage(String message) {
+        showMessage(message, ERROR);
+        System.exit(0);
+    }
+
+    @Override
     public void showThrowDicesMenu() {
 
         ClientCard card = clientModel.getCurrAdventureCard();
@@ -1670,7 +1677,7 @@ public class ClientCLIView implements ClientView {
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
         if(!isThereAvailableBattery()) {
             setClientState(WAIT_PLAYER);
-            showMessage("Hai finito le batterie coglione so you can't activate double engine.", STANDARD);
+            showMessage("You're out of batteries, so you can't activate double engine.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
             if (clientModel.getCurrAdventureCard().getCardName().equals("FreeSpace"))
                 showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
@@ -1762,7 +1769,7 @@ public class ClientCLIView implements ClientView {
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
         if(!isThereAvailableBattery()) {
-            showMessage("Hai finito le batterie coglione so you can't activate double cannon.", STANDARD);
+            showMessage("You're out of batteries, so you can't activate double cannon.", STANDARD);
             showMessage("You can use only single cannon", STANDARD);
             setClientState(WAIT_PLAYER);
             clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
@@ -1804,7 +1811,7 @@ public class ClientCLIView implements ClientView {
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare nessuno scudo
         if (!isThereAvailableBattery()) {
-            showMessage("Hai finito le batterie coglione so you can't activate shield.", STANDARD);
+            showMessage("You're out of batteries, so you can't activate shield.", STANDARD);
             showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
             setClientState(WAIT_PLAYER);
             clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
@@ -1848,7 +1855,7 @@ public class ClientCLIView implements ClientView {
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
         if(!isThereAvailableBattery()) {
-            showMessage("Hai finito le batterie coglione so you can't activate double Cannon.", STANDARD);
+            showMessage("You're out of batteries, so you can't activate double Cannon.", STANDARD);
             showMessage("You can use only single Cannon", STANDARD);
             clientController.playerHandleBigMeteorite(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
             return;
@@ -1892,7 +1899,7 @@ public class ClientCLIView implements ClientView {
         if (cabinsWithCrew.isEmpty()) {
             cabinInfo.append("You have no occupied cabins. You cannot sacrifice crew members.\n");
             showMessage(cabinInfo.toString(), STANDARD);
-            showMessage("ILLEGAL STATE: non si dovrebbe mai entrare qui dentro", ERROR);
+            showMessage("ILLEGAL STATE", ERROR);
             return;
             //TODO trovare un modo per mostrare al server questo errore, anche se non dovrebbe mai accadere perchè controlli già fatti
         } else {
@@ -1929,7 +1936,7 @@ public class ClientCLIView implements ClientView {
 
         // Check if the player has any storage available
         if (!storageManager.hasAnyStorage()) {
-            showMessage("\nYou have no storage available on your ship. You cannot accept any reward cubes.", NOTIFICATION_CRITICAL);
+            showMessage("\nYou have no available storage on your ship. You can’t accept any reward cubes", NOTIFICATION_CRITICAL);
             showMessage("The game will continue with the next player.", STANDARD);
             showMessage("Press any key to continue.", ASK);
             setClientState(ClientState.CANNOT_ACCEPT_CUBES_REWARDS);
@@ -1984,7 +1991,7 @@ public class ClientCLIView implements ClientView {
                 boolean isSpecial = storage instanceof SpecialStorage;
 
                 // Coordinate con colore
-                storageInfo.append(String.format("%s(%d,%d)%s: ", 
+                storageInfo.append(String.format("%s(%d,%d)%s: ",
                     ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET));
 
                 // Tipo storage con indicatore compatibilità
@@ -1997,7 +2004,7 @@ public class ClientCLIView implements ClientView {
                 // Capacità con indicatore di stato
                 String capacityInfo = storage.getMainAttribute();
                 storageInfo.append(" - ").append(capacityInfo);
-                
+
                 if (storage.isFull()) {
                     storageInfo.append(" " + ANSI_RED + "[FULL - WILL REPLACE]" + ANSI_RESET);
                 }
@@ -2033,6 +2040,7 @@ public class ClientCLIView implements ClientView {
         boolean anyAutoSkipped = false;
 
         // Process cubes that can't be accepted until we find one that can
+        // Process cubes that can't be accepted until we find one that can
         while (!storageManager.isSelectionComplete()) {
             String impossibilityReason = storageManager.getCurrentCubeImpossibilityReason();
             if (impossibilityReason == null) {
@@ -2041,14 +2049,14 @@ public class ClientCLIView implements ClientView {
 
             // This cube can't be accepted, show reason and skip it
             CargoCube currentCube = storageManager.getCurrentCube();
-            showMessage(impossibilityReason + ". Questo cubo verrà saltato automaticamente.", NOTIFICATION_INFO);
+            showMessage(impossibilityReason + ". This cube will be automatically skipped.", NOTIFICATION_INFO);
             storageManager.skipCurrentCube();
             anyAutoSkipped = true;
         }
 
-        // If all cubes have been processed because none could be accepted, submit and return
+        // If all cubes have been processed automatically because none could be accepted, submit and return
         if (storageManager.isSelectionComplete() && anyAutoSkipped) {
-            showMessage("Tutti i cubi sono stati processati automaticamente. Invio dati al server...", STANDARD);
+            showMessage("All cubes have been processed automatically. Sending data to the server...", STANDARD);
             List<Coordinates> selectedCoordinates = storageManager.getSelectedStorageCoordinates();
             clientController.playerChoseStorage(clientController.getNickname(), selectedCoordinates);
         }
@@ -2092,9 +2100,13 @@ public class ClientCLIView implements ClientView {
         else
             showMessage("You will lose no flight days, GOOD JOB ;)", STANDARD);
 
-        if(clientModel.isMyTurn())
-            inputQueue.add("\n");
-//            showMessage("Press Enter to continue...", ASK);
+        showMessage("Press any key to see the effect of the card...", STANDARD);
+    }
+
+    @Override
+    public void showNoMoreHiddenComponents() {
+        showMessage("Hidden components are no longer available, look among the visible ones...", NOTIFICATION_INFO);
+        showBuildShipBoardMenu();
     }
 
     @Override
@@ -2126,20 +2138,19 @@ public class ClientCLIView implements ClientView {
 
         if(clientModel.getShipboardOf(clientModel.getMyNickname()).getStorages().isEmpty()|| clientModel.getShipboardOf(clientModel.getMyNickname()).getCargoCubes().isEmpty()) {
             if(!clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes().isEmpty()) {
-                showMessage("You don't have any storage",STANDARD);
+                showMessage("You don't have any cube",STANDARD);
                 showMessage("You have to give back the batteries instead of the cubes ", STANDARD);
                 setClientState(CHOOSE_BATTERY_CUBES);
                 showBatteryBoxesWithColor();
                 showMessage("Enter coordinates of a battery to remove: ", ASK);
-                return;
             } else {
-                showMessage("You don't have any storage and battery boxes",STANDARD);
+                showMessage("You don't have any cube or battery box",STANDARD);
                 showMessage("You are safe...for now", STANDARD);
                 setClientState(WAIT_PLAYER);
                 clientController.playerChoseStorage(clientController.getNickname(), selectedStorage);
                 mostPreciousCube.clear();
-                return;
             }
+            return;
         }
         setClientState(ClientState.CHOOSE_STORAGE_FOR_CUBEMALUS);
         showMessage("You have to give back the most precious cubes", STANDARD);
@@ -2419,7 +2430,7 @@ public class ClientCLIView implements ClientView {
             // quindi ho fatto che se premi cancel non succede un cazzo
             if(batteryBox.getRemainingBatteries()==0){
                 showMessage("This batteryBox is empty!", ERROR);
-                showMessage("Please select another one or 'cancel' to cancel the last choise", ASK);
+                showMessage("Please select another one or 'cancel' to cancel the last choice", ASK);
                 return;
             }
 
@@ -2434,7 +2445,7 @@ public class ClientCLIView implements ClientView {
             //TODO stessa cosa qua
             if(batteryBox.getRemainingBatteries()==frequency){
                 showMessage("This battery box is empty", ERROR);
-                showMessage("Please select another one or 'cancel' to cancel the last choise", ASK);
+                showMessage("Please select another one or 'cancel' to cancel the last choice", ASK);
                 return;
             }
 
@@ -2572,7 +2583,6 @@ public class ClientCLIView implements ClientView {
     }
 
     private void handleStorageSelectionForReward(String input) {
-        //TODO OPTIONAL: aggiugnere possibilità di rifare da capo le scelte. Per esempio in caso un client sbagliasse a posizionare un cubo
         if (input.equalsIgnoreCase("done")) {
             // Se l'utente ha finito ma non ha selezionato tutti gli storage possibili
             if (!storageManager.isSelectionComplete() && storageManager.canAcceptCurrentCube()) {
@@ -2602,8 +2612,8 @@ public class ClientCLIView implements ClientView {
         }
 
         if (input.equalsIgnoreCase("skip")) {
-            // L'utente rinuncia a tutti i cubi reward
-            showMessage("Giving up all reward cubes...", STANDARD);
+            // The player gives up all reward cubes
+            showMessage("You are giving up all reward cubes...", STANDARD);
             List<Coordinates> emptyList = new ArrayList<>();
             clientController.playerChoseStorage(clientController.getNickname(), emptyList);
             return;
@@ -2617,7 +2627,7 @@ public class ClientCLIView implements ClientView {
 
             // Check if there are more cubes to process
             if (storageManager.isSelectionComplete()) {
-                showMessage("All cubes have been processed. Sending data to server...", STANDARD);
+                showMessage("All cubes have been processed. Sending data to the server...", STANDARD);
                 List<Coordinates> selectedCoordinates = storageManager.getSelectedStorageCoordinates();
                 clientController.playerChoseStorage(clientController.getNickname(), selectedCoordinates);
             } else {
@@ -2625,102 +2635,101 @@ public class ClientCLIView implements ClientView {
                 CargoCube nextCube = storageManager.getCurrentCube();
                 StringBuilder message = new StringBuilder("\nNext cube to place: ")
                         .append(nextCube)
-                        .append(" (valore: ").append(nextCube.getValue()).append(")")
+                        .append(" (value: ").append(nextCube.getValue()).append(")")
                         .append(nextCube == CargoCube.RED ? " - This cube requires special storage!" : "")
                         .append("\n");
-                message.append("Enter storage coordinates (row column), ")
-                        .append("\n'next' to skip this cube, 'skip' to give up all, ")
-                        .append("\n'done' to confirm: ");
+                message.append("Enter the coordinates of a storage (row column), ")
+                       .append("\n'next' to skip this cube, 'skip' to give up all, ")
+                       .append("\n'done' to confirm: ");
                 showMessage(message.toString(), ASK);
             }
             return;
         }
 
-        // Verifica se il cubo corrente può essere accettato
+        // Check if the current cube can be accepted
         if (!storageManager.canAcceptCurrentCube()) {
-            showMessage("You cannot accept this cube. Automatically added as 'discarded'.", NOTIFICATION_INFO);
+            showMessage("You can't accept this cube. It has been automatically marked as discarded.", NOTIFICATION_INFO);
 
-            // Aggiungiamo coordinate invalide per segnalare che questo cubo viene saltato
+            // Add invalid coordinates to indicate the cube is being skipped
             storageManager.skipCurrentCube();
 
-            // Verifica se abbiamo finito o se c'è un altro cubo
+            // Check if selection is complete or there's another cube to handle
             if (storageManager.isSelectionComplete()) {
-                showMessage("Selection completed. Sending data to server...", STANDARD);
+                showMessage("Selection complete. Sending data to the server...", STANDARD);
                 List<Coordinates> selectedCoordinates = storageManager.getSelectedStorageCoordinates();
                 clientController.playerChoseStorage(clientController.getNickname(), selectedCoordinates);
             } else {
-                // Mostra il menu per il prossimo cubo
+                // Show menu for the next cube
                 CargoCube nextCube = storageManager.getCurrentCube();
                 if (nextCube != null) {
                     showMessage("\nNext cube to place: " + nextCube +
-                                    " (value: " + nextCube.getValue() + ")" +
-                                    (nextCube == CargoCube.RED ? " - This cube requires special storage!" : ""),
+                                " (value: " + nextCube.getValue() + ")" +
+                                (nextCube == CargoCube.RED ? " - This cube requires special storage!" : ""),
                             STANDARD);
-                    showMessage("Enter storage coordinates (row column), " +
-                            "\n'next' to skip this cube, 'skip' to give up all, " +
-                            "\n'done' to confirm: ", ASK);
+                    showMessage("Enter the coordinates of a storage (row column), " +
+                                "\n'next' to skip this cube, 'skip' to give up all, " +
+                                "\n'done' to confirm: ", ASK);
                 }
             }
             return;
         }
 
         try {
-            // Parsa le coordinate
+            // Parse coordinates
             Coordinates coords = parseCoordinates(input);
             if (coords == null) {
-                showMessage("Formato coordinate non valido. Usa 'riga colonna' (es. '5 7').", ERROR);
-                showMessage("Oppure usa i comandi: 'done', 'skip', 'confirm'", STANDARD);
+                showMessage("Invalid coordinate format. Use 'row column' (e.g., '5 7').", ERROR);
+                showMessage("Or use commands: 'done', 'skip', 'confirm'", STANDARD);
                 return;
             }
 
-            // Verifica se le coordinate corrispondono a uno storage valido
+            // Check if the coordinates refer to a valid storage
             String storageStatus = storageManager.checkStorageStatus(coords);
             if (storageStatus == null) {
-                showMessage("Nessuno storage alle coordinate specificate.", ERROR);
+                showMessage("No storage found at the specified coordinates.", ERROR);
                 return;
             }
 
-            // Ottieni informazioni sul cubo corrente
+            // Get info on the current cube
             CargoCube currentCube = storageManager.getCurrentCube();
 
-            // Tenta di aggiungere lo storage alla selezione
+            // Try adding the storage to the selection
             boolean added = storageManager.addStorageSelection(coords);
             if (!added) {
-                // Se non è stato possibile aggiungere lo storage, mostra un messaggio di errore
                 if (currentCube == CargoCube.RED) {
-                    showMessage("ATTENZIONE: I cubi ROSSI possono essere messi solo in storage speciali!", ERROR);
+                    showMessage("WARNING: RED cubes can only be placed in special storage!", ERROR);
                 } else {
-                    showMessage("Errore nell'aggiungere lo storage alla selezione.", ERROR);
+                    showMessage("Error adding storage to selection.", ERROR);
                 }
                 return;
             }
 
-            // Storage aggiunto con successo
-            showMessage("Storage selezionato: " + storageStatus, STANDARD);
+            // Successfully added storage
+            showMessage("Storage selected: " + storageStatus, STANDARD);
 
-            // Se abbiamo selezionato tutti gli storage possibili
+            // If we've selected all possible storages
             if (storageManager.isSelectionComplete()) {
-                showMessage("\nHai selezionato storage per tutti i cubi che puoi accettare. Invio dati al server...", STANDARD);
+                showMessage("\nYou’ve selected storage for all cubes you can accept. Sending data to the server...", STANDARD);
                 List<Coordinates> selectedCoordinates = storageManager.getSelectedStorageCoordinates();
                 clientController.playerChoseStorage(clientController.getNickname(), selectedCoordinates);
             } else {
-                // Altrimenti, mostra il menu per il prossimo cubo
+                // Otherwise, show menu for next cube
                 CargoCube nextCube = storageManager.getCurrentCube();
                 if (nextCube != null) {
-                    StringBuilder message = new StringBuilder("\nCubo ").append(currentCube)
-                            .append(" posizionato con successo.\n\n");
-                    message.append("Prossimo cubo da posizionare: ").append(nextCube)
-                            .append(" (valore: ").append(nextCube.getValue()).append(")")
-                            .append(nextCube == CargoCube.RED ? " - Questo cubo richiede uno storage speciale!" : "")
+                    StringBuilder message = new StringBuilder("\nCube ").append(currentCube)
+                            .append(" successfully placed.\n\n");
+                    message.append("Next cube to place: ").append(nextCube)
+                            .append(" (value: ").append(nextCube.getValue()).append(")")
+                            .append(nextCube == CargoCube.RED ? " - This cube requires special storage!" : "")
                             .append("\n");
-                    message.append("Inserisci le coordinate di uno storage (riga colonna), ")
-                            .append("\n'done' per confermare, 'skip' per rinunciare a tutti, ")
-                            .append("\n'confirm' per confermare anche selection parziali, ");
+                    message.append("Enter the coordinates of a storage (row column), ")
+                            .append("\n'done' to confirm, 'skip' to give up all, ")
+                            .append("\n'confirm' to confirm even partial selections: ");
                     showMessage(message.toString(), ASK);
                 }
             }
         } catch (Exception e) {
-            showMessage("Errore nel processare le coordinate: " + e.getMessage(), ERROR);
+            showMessage("Error processing coordinates: " + e.getMessage(), ERROR);
         }
     }
 
@@ -2771,9 +2780,9 @@ public class ClientCLIView implements ClientView {
     public void showCubeRedistributionMenu() {
         // Mostra sempre gli storage disponibili
         showStoragesOnShipBoard();
-        
+
         List<CargoCube> available = storageManager.getAvailableCubes();
-        
+
         if (available.isEmpty()) {
             showMessage("\n" + ANSI_GREEN + "=== REDISTRIBUTION COMPLETED ===" + ANSI_RESET, STANDARD);
             showMessage("All cubes have been placed!", STANDARD);
@@ -2786,7 +2795,7 @@ public class ClientCLIView implements ClientView {
         for (int i = 0; i < available.size(); i++) {
             CargoCube cube = available.get(i);
             String marker = (i == storageManager.getSelectedCubeIndex()) ? ANSI_YELLOW + " -> " + ANSI_RESET : "    ";
-            
+
             // Colore del cubo
             String cubeColor = switch (cube) {
                 case RED -> ANSI_RED;
@@ -2794,7 +2803,7 @@ public class ClientCLIView implements ClientView {
                 case GREEN -> ANSI_GREEN;
                 case BLUE -> ANSI_BLUE;
             };
-            
+
             menu.append(marker).append(i).append(". ").append(cubeColor).append(cube).append(ANSI_RESET);
             if (cube == CargoCube.RED) {
                 menu.append(" " + ANSI_RED + "(SPECIAL STORAGE ONLY)" + ANSI_RESET);
@@ -2898,7 +2907,7 @@ public class ClientCLIView implements ClientView {
         // Pre-validazione per feedback migliore
         ShipBoardClient shipBoard = getMyShipBoard();
         Storage storage = shipBoard.getCoordinatesAndStorages().get(coords);
-        
+
         if (storage == null) {
             showMessage(ANSI_RED + "❌ No storage found at coordinates " + formatCoordinates(coords) + ANSI_RESET, ERROR);
             showCubeRedistributionMenu();
@@ -2929,11 +2938,11 @@ public class ClientCLIView implements ClientView {
                 case GREEN -> ANSI_GREEN;
                 case BLUE -> ANSI_BLUE;
             };
-            
+
             if (!preActionMessage.isEmpty()) {
                 showMessage(preActionMessage, NOTIFICATION_INFO);
             }
-            showMessage(ANSI_GREEN + "✅ Cube " + cubeColor + selectedCube + ANSI_GREEN + 
+            showMessage(ANSI_GREEN + "✅ Cube " + cubeColor + selectedCube + ANSI_GREEN +
                        " added to storage at " + formatCoordinates(coords) + ANSI_RESET, NOTIFICATION_INFO);
             
             clientModel.refreshShipBoardOf(clientModel.getMyNickname());
@@ -2957,7 +2966,7 @@ public class ClientCLIView implements ClientView {
         // Verifica che ci sia uno storage alle coordinate
         ShipBoardClient shipBoard = getMyShipBoard();
         Storage storage = shipBoard.getCoordinatesAndStorages().get(coords);
-        
+
         if (storage == null) {
             showMessage("❌ No storage found at coordinates " + formatCoordinates(coords), ERROR);
             showCubeRedistributionMenu();
@@ -2980,7 +2989,7 @@ public class ClientCLIView implements ClientView {
         };
 
         storageManager.removeCubeFromStorage(coords);
-        showMessage(ANSI_GREEN + "✅ Cube " + cubeColor + cubeToRemove + ANSI_GREEN + 
+        showMessage(ANSI_GREEN + "✅ Cube " + cubeColor + cubeToRemove + ANSI_GREEN +
                    " removed from storage at " + formatCoordinates(coords) + " and added to available cubes" + ANSI_RESET, STANDARD);
         
         // Aggiorna la visualizzazione
@@ -3032,8 +3041,9 @@ public class ClientCLIView implements ClientView {
                 if (selectedCabins.isEmpty()) {
                     showMessage("You must select at least one cabin.", ERROR);
                 } else {
-                    boolean success = clientController.playerChoseCabins(clientController.getNickname(), selectedCabins);
+                    boolean success = clientController.checkCabinSelection(clientController.getNickname(), selectedCabins);
                     if(success) {
+                        clientController.playerChoseCabins(clientModel.getMyNickname(), selectedCabins);
                         selectedCabins.clear();
                         return;
                     }else{
@@ -3388,6 +3398,15 @@ public class ClientCLIView implements ClientView {
                                 showBuildShipBoardMenu();
                                 break;
                             }
+
+                            long componentInShipBoard = clientModel.getMyShipboard().getNumberOfComponents();
+                            if (componentInShipBoard == 1) {
+                                showMessage("""
+                                        You cannot watch a little deck before having placed any component""", STANDARD);
+                                showBuildShipBoardMenu();
+                                break;
+                            }
+
                             clientState = WATCH_LITTLE_DECK;
                             showMessage("""
                                     Which little deck would you like to watch?
@@ -3660,7 +3679,7 @@ public class ClientCLIView implements ClientView {
 
                         if (selectedEngines.isEmpty()) {
                             showMessage("You didn't select any engine.", STANDARD);
-                            showMessage("Nel calcolo della tua potenza motrice verranno conteggiati solo i tuoi motori singoli", STANDARD);
+                            showMessage("Only your single engines will count toward your engine power.", STANDARD);
                         }
                         setClientState(WAIT_PLAYER);
                         clientController.playerChoseDoubleEngines(
@@ -3775,9 +3794,9 @@ public class ClientCLIView implements ClientView {
                 case CHOOSE_CANNONS_MENU:
                     if (input.equalsIgnoreCase("done")) {
 
-                        if (selectedCannons.isEmpty()) {
-                            showMessage("You didn't select any cannon.", STANDARD);
-                            showMessage("Nel calcolo della tua potenza di fuoco verranno conteggiati solo i tuoi cannoni singoli", STANDARD);
+                        if (selectedEngines.isEmpty()) {
+                            showMessage("You didn't select any engine.", STANDARD);
+                            showMessage("Only your single cannons will count toward your engine power.", STANDARD);
                         }
                         setClientState(WAIT_PLAYER);
                         clientController.playerChoseDoubleCannons(
@@ -3852,6 +3871,7 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case EVALUATE_CREW_MEMBERS_MENU:
+                    showMessage("Waiting for others to start the phase, hoping it won't take to long", STANDARD);
                     clientController.evaluatedCrewMembers();
                     break;
                 case WAIT_PLAYER:
