@@ -68,4 +68,35 @@ public class ClientSmugglers extends ClientCard {
         return true;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("┌────────────────────────────────────┐\n");
+        sb.append("│             SMUGGLERS              │\n");
+        sb.append("├────────────────────────────────────┤\n");
+        sb.append(String.format("│ Required Fire Power:      x%-8d │\n", requiredFirePower));
+        sb.append(String.format("│ Flight Days Cost:         %-8d │\n", stepsBack));
+        sb.append("│ Victory Reward:           ");
+        
+        if (reward != null && !reward.isEmpty()) {
+            String rewardStr = reward.toString();
+            if (rewardStr.length() <= 8) {
+                sb.append(String.format("%-8s │\n", rewardStr));
+            } else {
+                sb.append(String.format("%-8s │\n", rewardStr.substring(0, 5) + "..."));
+            }
+        } else {
+            sb.append(String.format("%-8s │\n", "None"));
+        }
+        
+        sb.append(String.format("│ Defeat Penalty:           x%-8d │\n", cubeMalus));
+        sb.append("└────────────────────────────────────┘\n");
+        sb.append("Effects: Enemies attack players in route order starting from the leader.\n");
+        sb.append("Compare your fire power against the required amount. Higher power means\n");
+        sb.append("victory and reward, lower power means defeat and penalty. Equal power\n");
+        sb.append("results in a draw with no effects.");
+        
+        return sb.toString();
+    }
+
 }

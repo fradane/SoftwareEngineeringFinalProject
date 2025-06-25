@@ -59,4 +59,23 @@ public class ClientSlaveTraders extends ClientCard implements Serializable, Crew
     public void setStepsBack(int stepsBack) {
         this.stepsBack = stepsBack;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("┌────────────────────────────────────┐\n");
+        sb.append("│           SLAVE TRADERS            │\n");
+        sb.append("├────────────────────────────────────┤\n");
+        sb.append(String.format("│ Required Fire Power:      x%-8d │\n", requiredFirePower));
+        sb.append(String.format("│ Flight Days Cost:         %-8d │\n", stepsBack));
+        sb.append(String.format("│ Cosmic Credits Reward:    %-8d │\n", reward));
+        sb.append(String.format("│ Crew Members Lost:        x%-8d │\n", crewMalus));
+        sb.append("└────────────────────────────────────┘\n");
+        sb.append("Effects: Advanced enemies that enslave crew members if you lose.\n");
+        sb.append("Victory grants cosmic credits, but defeat forces you to give up\n");
+        sb.append("crew members of your choice. Only one player can exploit this\n");
+        sb.append("opportunity. You can forfeit credits to avoid flight days penalty.");
+        
+        return sb.toString();
+    }
 }

@@ -79,29 +79,44 @@ public class ClientAbandonedStation extends ClientCard implements Serializable, 
 
     @Override
     public String toString() {
-        String firstString = String.format("""
-           %s
-           ┌────────────────────────────┐
-           │     Abandoned Station      │
-           ├────────────────────────────┤
-           │ Required Crew:     x%-2d     │
-           │ Steps Back:        %-2d      │
-           └────────────────────────────┘
-           """, imageName, requiredCrewMembers, stepsBack);
-
-        StringBuilder secondString = new StringBuilder("   ");
+        StringBuilder sb = new StringBuilder();
+        sb.append("┌────────────────────────────────────┐\n");
+        sb.append("│        ABANDONED STATION           │\n");
+        sb.append("├────────────────────────────────────┤\n");
+        sb.append(String.format("│ Required Crew Members:    x%-8d │\n", requiredCrewMembers));
+        sb.append(String.format("│ Flight Days Cost:         %-8d │\n", stepsBack));
+        sb.append("│ Cargo Cube Reward:       ");
+        
         if (reward != null && !reward.isEmpty()) {
-            secondString.append("Station Rewards:\n");
-            String cubes = reward
-                    .stream()
+            String rewardStr = reward.toString();
+            if (rewardStr.length() <= 8) {
+                sb.append(String.format("%-8s │\n", rewardStr));
+            } else {
+                sb.append(String.format("%-8s │\n", rewardStr.substring(0, 5) + "..."));
+            }
+        } else {
+            sb.append(String.format("%-8s │\n", "None"));
+        }
+        
+        sb.append("└────────────────────────────────────┘\n");
+        
+        if (reward != null && !reward.isEmpty()) {
+            sb.append("Reward Details:\n");
+            String cubes = reward.stream()
                     .map(Enum::name)
                     .toList()
                     .toString()
                     .replaceAll("[\\[\\]]", "");
-            secondString.append(String.format("   Cargo: %s%n", cubes));
+            sb.append(String.format("  Cargo Cubes: %s\n", cubes));
+            sb.append("\n");
         }
-
-        return firstString + secondString;
+        
+        sb.append("Effects: Requires minimum crew to dock at this abandoned station.\n");
+        sb.append("Only one player can exploit it. Docking loads goods that can be\n");
+        sb.append("redistributed or discarded, then you move back the specified\n");
+        sb.append("flight days. No crew members are lost in this process.");
+        
+        return sb.toString();
     }
 
     @Override

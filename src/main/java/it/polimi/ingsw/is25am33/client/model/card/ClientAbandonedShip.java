@@ -74,15 +74,19 @@ public class ClientAbandonedShip extends ClientCard implements Serializable, Cre
 
     @Override
     public String toString() {
-        return String.format("""
-           %s
-           ┌────────────────────────────┐
-           │       Abandoned Ship       │
-           ├────────────────────────────┤
-           │ Crew Lost:         x%-2d     │
-           │ Reward:            x%-2d     │
-           │ Steps Back:        %-2d      │
-           └────────────────────────────┘
-           """, imageName, crewMalus, reward, stepsBack);
+        StringBuilder sb = new StringBuilder();
+        sb.append("┌────────────────────────────────────┐\n");
+        sb.append("│         ABANDONED SHIP             │\n");
+        sb.append("├────────────────────────────────────┤\n");
+        sb.append(String.format("│ Crew Members Cost:        x%-8d │\n", crewMalus));
+        sb.append(String.format("│ Flight Days Cost:         %-8d │\n", stepsBack));
+        sb.append(String.format("│ Cosmic Credits Reward:    %-8d │\n", reward));
+        sb.append("└────────────────────────────────────┘\n");
+        sb.append("Effects: Only one player can repair this abandoned ship.\n");
+        sb.append("Repairing costs crew members and flight days, but grants\n");
+        sb.append("cosmic credits as reward. Once repaired by someone, no other\n");
+        sb.append("player can take advantage of this opportunity.");
+        
+        return sb.toString();
     }
 }

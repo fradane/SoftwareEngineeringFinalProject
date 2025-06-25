@@ -67,4 +67,36 @@ public class ClientPirates extends ClientCard implements Serializable {
     public void setStepsBack(int stepsBack) {
         this.stepsBack = stepsBack;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("┌────────────────────────────────────┐\n");
+        sb.append("│              PIRATES               │\n");
+        sb.append("├────────────────────────────────────┤\n");
+        sb.append(String.format("│ Required Fire Power:      x%-8d │\n", requiredFirePower));
+        sb.append(String.format("│ Flight Days Cost:         %-8d │\n", stepsBack));
+        sb.append(String.format("│ Cosmic Credits Reward:    %-8d │\n", reward));
+        sb.append(String.format("│ Number of Shots:          %-8d │\n", shots != null ? shots.size() : 0));
+        sb.append("└────────────────────────────────────┘\n");
+        
+        if (shots != null && !shots.isEmpty()) {
+            sb.append("Shot Details:\n");
+            for (int i = 0; i < Math.min(shots.size(), 3); i++) {
+                ClientDangerousObject shot = shots.get(i);
+                sb.append(String.format("  %d. %s from %s\n", i + 1, shot.getType(), shot.getDirection()));
+            }
+            if (shots.size() > 3) {
+                sb.append(String.format("  ... and %d more shots\n", shots.size() - 3));
+            }
+            sb.append("\n");
+        }
+        
+        sb.append("Effects: Advanced enemies that attack with multiple cannon shots.\n");
+        sb.append("Victory grants cosmic credits, but defeat means suffering heavy and\n");
+        sb.append("light cannon attacks. Only one player can exploit this opportunity.\n");
+        sb.append("You can choose to forfeit credits to avoid flight days penalty.");
+        
+        return sb.toString();
+    }
 }

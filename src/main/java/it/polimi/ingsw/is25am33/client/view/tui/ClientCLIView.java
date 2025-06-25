@@ -485,7 +485,7 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showCurrAdventureCard(boolean isFirstTime) {
-        if (isFirstTime) showMessage("The card has been drawn from the deck.", STANDARD);
+        if (isFirstTime) showMessage("The card has been drawn from the deck.\n", STANDARD);
 
         ClientCard card = clientModel.getCurrAdventureCard();
         if (card == null) {
@@ -493,30 +493,8 @@ public class ClientCLIView implements ClientView {
             return;
         }
 
-        StringBuilder output = new StringBuilder();
-        output.append("Current adventure card:\n");
-        output.append("═══════════════════════════════════════\n");
-        output.append("Name: ").append(card.getCardName()).append("\n");
-        output.append("═══════════════════════════════════════\n");
-
-        showMessage(output.toString(), STANDARD);
-
-        output = new StringBuilder();
-
-        // Display card-specific information
-        displayCardSpecificInfo(card, output);
-
-        showMessage(output.toString(), STANDARD);
-
-//        if (isFirstTime) System.out.println("The card has been drawn from the deck.");
-//
-//        StringBuilder output = new StringBuilder();
-//        output.append("Current adventure card:\n");
-//        String[] cardLines = clientModel.getCurrAdventureCard().split("\\n");
-//        for (int i = 1; i < cardLines.length; i++) {
-//            output.append(cardLines[i]).append("\n");
-//        }
-//        showMessage(output.toString(), STANDARD);
+        // Use the card's toString() method for display
+        showMessage(card.toString(), STANDARD);
     }
 
     /**
@@ -1004,6 +982,11 @@ public class ClientCLIView implements ClientView {
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
         showShipBoard(shipBoardClient, shipBoardOwnerNickname, Collections.emptyMap());
+        showBatteryBoxesInfo(shipBoardOwnerNickname);
+        showCabinsInfo(shipBoardOwnerNickname);
+        showPlayerCreditsInfo();
+        showNotActiveComponentsInfo(shipBoardOwnerNickname);
+        showStoragesInfo(shipBoardOwnerNickname);
     }
 
     @Override
@@ -1977,13 +1960,34 @@ public class ClientCLIView implements ClientView {
 //        showMessage(message.toString(), ASK);
     }
 
-    private void showStoragesOnShipBoard() {
-        StringBuilder storageInfo = new StringBuilder("\n" + "=== AVAILABLE STORAGE ===" + "\n");
-        Map<Coordinates, Storage> coordinatesAndStorages = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesAndStorages();
+    private void showStoragesInfo() {
+        showStoragesInfo(clientModel.getMyNickname());
+    }
+
+    /**
+     * Shows storage information for the specified player
+     * @param playerNickname the nickname of the player whose storages to display
+     */
+    public void showStoragesInfo(String playerNickname) {
+        StringBuilder storageInfo = new StringBuilder("\n=== AVAILABLE STORAGE - " + playerNickname + " ===\n");
+        
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
+        if (shipBoard == null) {
+            storageInfo.append("Player not found or no ship data available.\n");
+            showMessage(storageInfo.toString(), STANDARD);
+            return;
+        }
+        
+        Map<Coordinates, Storage> coordinatesAndStorages = shipBoard.getCoordinatesAndStorages();
 
         if (coordinatesAndStorages.isEmpty()) {
-            storageInfo.append("No storage available on your ship.\n");
+            storageInfo.append("No storage available on this ship.\n");
         } else {
+            int totalStorages = coordinatesAndStorages.size();
+            int totalCubes = 0;
+            int totalCapacity = 0;
+            int totalValue = 0;
+            
             for (Map.Entry<Coordinates, Storage> entry : coordinatesAndStorages.entrySet()) {
                 Coordinates coords = entry.getKey();
                 Storage storage = entry.getValue();
@@ -2004,6 +2008,13 @@ public class ClientCLIView implements ClientView {
                 // Capacità con indicatore di stato
                 String capacityInfo = storage.getMainAttribute();
                 storageInfo.append(" - ").append(capacityInfo);
+                
+                // Extract current/max capacity for totals
+                String[] capacityParts = capacityInfo.split("/");
+                if (capacityParts.length == 2) {
+                    totalCubes += Integer.parseInt(capacityParts[0]);
+                    totalCapacity += Integer.parseInt(capacityParts[1]);
+                }
 
                 if (storage.isFull()) {
                     storageInfo.append(" " + ANSI_RED + "[FULL - WILL REPLACE]" + ANSI_RESET);
@@ -2023,14 +2034,250 @@ public class ClientCLIView implements ClientView {
                             case BLUE -> ANSI_BLUE;
                         };
                         formattedCubes.add(cubeColor + cube.name() + ANSI_RESET);
+                        totalValue += cube.getValue();
                     }
-                    storageInfo.append(String.join(", ", formattedCubes));
+                    storageInfo.append(String.join(" ", formattedCubes));
                 }
 
                 storageInfo.append("\n");
             }
+            
+            // Add summary information
+            storageInfo.append(String.format("\nTotal Storages: %d | Total Cubes Stored: %d/%d\n",
+                totalStorages, totalCubes, totalCapacity));
+            
+            if (totalValue > 0) {
+                storageInfo.append(String.format("Total Cube Value: %d points\n", totalValue));
+            }
         }
         showMessage(storageInfo.toString(), STANDARD);
+    }
+
+    /**
+     * Shows battery boxes information for the specified player
+     * @param playerNickname the nickname of the player whose battery boxes to display
+     */
+    public void showBatteryBoxesInfo(String playerNickname) {
+        StringBuilder batteryInfo = new StringBuilder("\n=== BATTERY BOXES INFO - " + playerNickname + " ===\n");
+        
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
+        if (shipBoard == null) {
+            batteryInfo.append("Player not found or no ship data available.\n");
+            showMessage(batteryInfo.toString(), STANDARD);
+            return;
+        }
+
+        List<BatteryBox> batteryBoxes = shipBoard.getBatteryBoxes();
+        
+        if (batteryBoxes.isEmpty()) {
+            batteryInfo.append("No battery boxes available on this ship.\n");
+        } else {
+            int totalBatteries = 0;
+            int totalCapacity = 0;
+            
+            // Find coordinates for each battery box
+            Component[][] shipMatrix = shipBoard.getShipMatrix();
+            for (BatteryBox batteryBox : batteryBoxes) {
+                Coordinates coords = null;
+                // Search for battery box coordinates in the ship matrix
+                for (int i = 0; i < shipMatrix.length; i++) {
+                    for (int j = 0; j < shipMatrix[i].length; j++) {
+                        if (shipMatrix[i][j] == batteryBox) {
+                            coords = new Coordinates(i, j);
+                            break;
+                        }
+                    }
+                    if (coords != null) break;
+                }
+                
+                if (coords != null) {
+                    int remaining = batteryBox.getRemainingBatteries();
+                    int max = batteryBox.getMaxBatteryCapacity();
+                    totalBatteries += remaining;
+                    totalCapacity += max;
+                    
+                    batteryInfo.append(String.format("%s(%d,%d)%s: BatteryBox - %d/%d batteries remaining",
+                        ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, remaining, max));
+                    
+                    if (remaining == 0) {
+                        batteryInfo.append(" " + ANSI_RED + "[EMPTY]" + ANSI_RESET);
+                    } else if (remaining == max) {
+                        batteryInfo.append(" " + ANSI_GREEN + "[FULL]" + ANSI_RESET);
+                    }
+                    
+                    batteryInfo.append("\n");
+                }
+            }
+            
+            batteryInfo.append(String.format("\nTotal Battery Boxes: %d | Total Batteries Available: %d/%d\n",
+                batteryBoxes.size(), totalBatteries, totalCapacity));
+        }
+        
+        showMessage(batteryInfo.toString(), STANDARD);
+    }
+
+    /**
+     * Shows cabins information for the specified player
+     * @param playerNickname the nickname of the player whose cabins to display
+     */
+    public void showCabinsInfo(String playerNickname) {
+        StringBuilder cabinInfo = new StringBuilder("\n=== CABINS INFO - " + playerNickname + " ===\n");
+        
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
+        if (shipBoard == null) {
+            cabinInfo.append("Player not found or no ship data available.\n");
+            showMessage(cabinInfo.toString(), STANDARD);
+            return;
+        }
+
+        List<Cabin> cabins = shipBoard.getCabin();
+        MainCabin mainCabin = shipBoard.getMainCabin();
+        
+        if (cabins.isEmpty() && mainCabin == null) {
+            cabinInfo.append("No cabins available on this ship.\n");
+        } else {
+            int totalCrewMembers = 0;
+            int humanCount = 0;
+            int alienCount = 0;
+            int totalCabins = 0;
+            
+            Component[][] shipMatrix = shipBoard.getShipMatrix();
+            
+            // Process regular cabins
+            for (Cabin cabin : cabins) {
+                Coordinates coords = null;
+                // Search for cabin coordinates in the ship matrix
+                for (int i = 0; i < shipMatrix.length; i++) {
+                    for (int j = 0; j < shipMatrix[i].length; j++) {
+                        if (shipMatrix[i][j] == cabin) {
+                            coords = new Coordinates(i, j);
+                            break;
+                        }
+                    }
+                    if (coords != null) break;
+                }
+                
+                if (coords != null) {
+                    totalCabins++;
+                    List<CrewMember> inhabitants = cabin.getInhabitants();
+                    
+                    cabinInfo.append(String.format("%s(%d,%d)%s: Cabin - %d inhabitants → ",
+                        ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, 
+                        inhabitants.size()));
+                    
+                    if (inhabitants.isEmpty()) {
+                        cabinInfo.append(ANSI_CYAN + "[EMPTY]" + ANSI_RESET);
+                    } else {
+                        List<String> crewList = new ArrayList<>();
+                        for (CrewMember crew : inhabitants) {
+                            crewList.add(crew.name());
+                            totalCrewMembers++;
+                            if (crew.name().equals("HUMAN")) {
+                                humanCount++;
+                            } else {
+                                alienCount++;
+                            }
+                        }
+                        cabinInfo.append(String.join(" ", crewList));
+                    }
+                    
+                    cabinInfo.append("\n");
+                }
+            }
+            
+            // Process main cabin
+            if (mainCabin != null) {
+                Coordinates coords = null;
+                // Search for main cabin coordinates in the ship matrix
+                for (int i = 0; i < shipMatrix.length; i++) {
+                    for (int j = 0; j < shipMatrix[i].length; j++) {
+                        if (shipMatrix[i][j] == mainCabin) {
+                            coords = new Coordinates(i, j);
+                            break;
+                        }
+                    }
+                    if (coords != null) break;
+                }
+                
+                if (coords != null) {
+                    totalCabins++;
+                    List<CrewMember> inhabitants = mainCabin.getInhabitants();
+                    
+                    cabinInfo.append(String.format("%s(%d,%d)%s: MainCabin - %d inhabitants → ",
+                        ANSI_YELLOW, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, 
+                        inhabitants.size()));
+                    
+                    if (inhabitants.isEmpty()) {
+                        cabinInfo.append(ANSI_CYAN + "[EMPTY]" + ANSI_RESET);
+                    } else {
+                        List<String> crewList = new ArrayList<>();
+                        for (CrewMember crew : inhabitants) {
+                            crewList.add(crew.name());
+                            totalCrewMembers++;
+                            if (crew.name().equals("HUMAN")) {
+                                humanCount++;
+                            } else {
+                                alienCount++;
+                            }
+                        }
+                        cabinInfo.append(String.join(" ", crewList));
+                    }
+                    
+                    cabinInfo.append("\n");
+                }
+            }
+            
+            cabinInfo.append(String.format("\nTotal Cabins: %d | Total Crew Members: %d (%d Humans, %d Aliens)\n",
+                totalCabins, totalCrewMembers, humanCount, alienCount));
+        }
+        
+        showMessage(cabinInfo.toString(), STANDARD);
+    }
+
+    /**
+     * Shows the current player's credits information
+     */
+    public void showPlayerCreditsInfo() {
+        String myNickname = clientModel.getMyNickname();
+        PlayerClientData myData = clientModel.getPlayerClientData().get(myNickname);
+        
+        if (myData == null) {
+            showMessage("No player data available.\n", STANDARD);
+            return;
+        }
+        
+        int credits = myData.getCredits();
+        showMessage("Current Credits: " + credits + "\n", STANDARD);
+    }
+
+    /**
+     * Shows not active components information for the specified player
+     * @param playerNickname the nickname of the player whose not active components to display
+     */
+    public void showNotActiveComponentsInfo(String playerNickname) {
+        StringBuilder componentInfo = new StringBuilder("\n=== NOT ACTIVE COMPONENTS - " + playerNickname + " ===\n");
+        
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
+        if (shipBoard == null) {
+            componentInfo.append("Player not found or no ship data available.\n");
+            showMessage(componentInfo.toString(), STANDARD);
+            return;
+        }
+
+        List<Component> bookedComponents = shipBoard.getBookedComponents();
+        int totalComponents = bookedComponents.size();
+        
+        componentInfo.append("Total Components: ").append(totalComponents).append("\n\n");
+        
+        if (totalComponents > 0) {
+            componentInfo.append("These components may be:\n");
+            componentInfo.append("- Reserved components not yet used during build phase\n");
+            componentInfo.append("- Components lost during the journey due to damage or events\n");
+        } else {
+            componentInfo.append("No components are currently not active.\n");
+        }
+        
+        showMessage(componentInfo.toString(), STANDARD);
     }
 
     /**
@@ -2779,7 +3026,7 @@ public class ClientCLIView implements ClientView {
      */
     public void showCubeRedistributionMenu() {
         // Mostra sempre gli storage disponibili
-        showStoragesOnShipBoard();
+        showStoragesInfo();
 
         List<CargoCube> available = storageManager.getAvailableCubes();
 
