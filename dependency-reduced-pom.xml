@@ -12,13 +12,9 @@
         <includes>
           <include>**/*.json</include>
           <include>**/*.fxml</include>
-          <include>**/**/*.css</include>
+          <include>**/*.css</include>
           <include>**/*.png</include>
           <include>**/*.jpg</include>
-          <include>**/**/*.jpg</include>
-          <include>**/**/*.png</include>
-          <include>**/**/**/*.jpg</include>
-          <include>**/**/**/*.png</include>
         </includes>
       </resource>
     </resources>
@@ -32,58 +28,49 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-maven-plugin</artifactId>
-        <version>0.0.8</version>
-        <executions>
-          <execution>
-            <id>default-cli</id>
-            <configuration>
-              <mainClass>it.polimi.ingsw.is25am33/it.polimi.ingsw.is25am33.HelloApplication</mainClass>
-              <launcher>app</launcher>
-              <jlinkZipName>app</jlinkZipName>
-              <jlinkImageName>app</jlinkImageName>
-              <noManPages>true</noManPages>
-              <stripDebug>true</stripDebug>
-              <noHeaderFiles>true</noHeaderFiles>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.4.1</version>
         <executions>
           <execution>
-            <id>client</id>
+            <id>client-multiplatform</id>
             <phase>package</phase>
             <goals>
               <goal>shade</goal>
             </goals>
             <configuration>
               <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>client-intel</shadedClassifierName>
+              <shadedClassifierName>client-multiplatform</shadedClassifierName>
               <transformers>
                 <transformer>
                   <mainClass>it.polimi.ingsw.is25am33.client.ClientLauncher</mainClass>
                 </transformer>
               </transformers>
+              <artifactSet>
+                <includes>
+                  <include>*:*</include>
+                </includes>
+              </artifactSet>
             </configuration>
           </execution>
           <execution>
-            <id>server</id>
+            <id>server-multiplatform</id>
             <phase>package</phase>
             <goals>
               <goal>shade</goal>
             </goals>
             <configuration>
               <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>server-intel</shadedClassifierName>
+              <shadedClassifierName>server-multiplatform</shadedClassifierName>
               <transformers>
                 <transformer>
                   <mainClass>it.polimi.ingsw.is25am33.network.DNS</mainClass>
                 </transformer>
               </transformers>
+              <artifactSet>
+                <includes>
+                  <include>*:*</include>
+                </includes>
+              </artifactSet>
             </configuration>
           </execution>
         </executions>
@@ -148,6 +135,9 @@
   </dependencies>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <javafx.version>21.0.3</javafx.version>
+    <maven.compiler.target>23</maven.compiler.target>
     <junit.version>5.10.2</junit.version>
+    <maven.compiler.source>23</maven.compiler.source>
   </properties>
 </project>
