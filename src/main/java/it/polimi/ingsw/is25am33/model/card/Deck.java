@@ -173,23 +173,23 @@ public class Deck {
 //        cards.addAll(Deck.loadPlanetsFromJson());
 
 
-//        cards.addAll(Deck.loadPlanetsFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadPlanetsFromJson());
 
-        cards.addAll(Deck.loadSmugglersFromJson());
-        cards.addAll(Deck.loadSmugglersFromJson());
-        cards.addAll(Deck.loadSmugglersFromJson());
-        cards.addAll(Deck.loadSmugglersFromJson());
-        cards.addAll(Deck.loadSmugglersFromJson());
-        cards.addAll(Deck.loadSmugglersFromJson());
-        cards.addAll(Deck.loadSmugglersFromJson());
-        cards.addAll(Deck.loadSmugglersFromJson());
+//        cards.addAll(Deck.loadSmugglersFromJson());
+//        cards.addAll(Deck.loadSmugglersFromJson());
+//        cards.addAll(Deck.loadSmugglersFromJson());
+//        cards.addAll(Deck.loadSmugglersFromJson());
+//        cards.addAll(Deck.loadSmugglersFromJson());
+//        cards.addAll(Deck.loadSmugglersFromJson());
+//        cards.addAll(Deck.loadSmugglersFromJson());
+//        cards.addAll(Deck.loadSmugglersFromJson());
 
 //        cards.addAll(Deck.loadAbandonedStationFromJson());
 //        cards.addAll(Deck.loadAbandonedStationFromJson());

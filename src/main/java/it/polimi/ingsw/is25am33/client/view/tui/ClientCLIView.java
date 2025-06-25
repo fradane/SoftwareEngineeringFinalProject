@@ -1929,8 +1929,8 @@ public class ClientCLIView implements ClientView {
 
         // Check if the player has any storage available
         if (!storageManager.hasAnyStorage()) {
-            showMessage("\nNon hai storage disponibili sulla tua nave. Non puoi accettare nessun cubo reward.", NOTIFICATION_CRITICAL);
-            showMessage("Il gioco proseguirà con il prossimo giocatore.", STANDARD);
+            showMessage("\nYou have no storage available on your ship. You cannot accept any reward cubes.", NOTIFICATION_CRITICAL);
+            showMessage("The game will continue with the next player.", STANDARD);
             showMessage("Press any key to continue.", ASK);
             setClientState(ClientState.CANNOT_ACCEPT_CUBES_REWARDS);
             return;
@@ -1971,11 +1971,11 @@ public class ClientCLIView implements ClientView {
     }
 
     private void showStoragesOnShipBoard() {
-        StringBuilder storageInfo = new StringBuilder("\n" + "=== STORAGE DISPONIBILI ===" + "\n");
+        StringBuilder storageInfo = new StringBuilder("\n" + "=== AVAILABLE STORAGE ===" + "\n");
         Map<Coordinates, Storage> coordinatesAndStorages = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesAndStorages();
 
         if (coordinatesAndStorages.isEmpty()) {
-            storageInfo.append("Nessuno storage disponibile sulla tua nave.\n");
+            storageInfo.append("No storage available on your ship.\n");
         } else {
             for (Map.Entry<Coordinates, Storage> entry : coordinatesAndStorages.entrySet()) {
                 Coordinates coords = entry.getKey();
@@ -1999,13 +1999,13 @@ public class ClientCLIView implements ClientView {
                 storageInfo.append(" - ").append(capacityInfo);
                 
                 if (storage.isFull()) {
-                    storageInfo.append(" " + ANSI_RED + "[PIENO - SOSTITUIRÀ]" + ANSI_RESET);
+                    storageInfo.append(" " + ANSI_RED + "[FULL - WILL REPLACE]" + ANSI_RESET);
                 }
 
                 // Contenuto con colori
-                storageInfo.append(" - Contiene: ");
+                storageInfo.append(" - Contains: ");
                 if (storedCubes.isEmpty()) {
-                    storageInfo.append(ANSI_CYAN + "vuoto" + ANSI_RESET);
+                    storageInfo.append(ANSI_CYAN + "empty" + ANSI_RESET);
                 } else {
                     List<String> formattedCubes = new ArrayList<>();
                     for (CargoCube cube : storedCubes) {
@@ -2576,8 +2576,8 @@ public class ClientCLIView implements ClientView {
         if (input.equalsIgnoreCase("done")) {
             // Se l'utente ha finito ma non ha selezionato tutti gli storage possibili
             if (!storageManager.isSelectionComplete() && storageManager.canAcceptCurrentCube()) {
-                showMessage("Non hai selezionato storage per tutti i cubi che puoi accettare. " +
-                                "\nI cubi rimanenti verranno scartati. Continua con 'confirm' o seleziona altri storage.",
+                showMessage("You have not selected storage for all cubes you can accept. " +
+                                "\nRemaining cubes will be discarded. Continue with 'confirm' or select other storage.",
                         NOTIFICATION_INFO);
                 return;
             }
@@ -2603,7 +2603,7 @@ public class ClientCLIView implements ClientView {
 
         if (input.equalsIgnoreCase("skip")) {
             // L'utente rinuncia a tutti i cubi reward
-            showMessage("Rinuncia a tutti i cubi reward...", STANDARD);
+            showMessage("Giving up all reward cubes...", STANDARD);
             List<Coordinates> emptyList = new ArrayList<>();
             clientController.playerChoseStorage(clientController.getNickname(), emptyList);
             return;
@@ -2612,25 +2612,25 @@ public class ClientCLIView implements ClientView {
         if (input.equalsIgnoreCase("next")) {
             // Skip only the current cube
             CargoCube currentCube = storageManager.getCurrentCube();
-            showMessage("Salto il cubo " + currentCube + "...", STANDARD);
+            showMessage("Skipping cube " + currentCube + "...", STANDARD);
             storageManager.skipCurrentCube();
 
             // Check if there are more cubes to process
             if (storageManager.isSelectionComplete()) {
-                showMessage("Tutti i cubi sono stati processati. Invio dati al server...", STANDARD);
+                showMessage("All cubes have been processed. Sending data to server...", STANDARD);
                 List<Coordinates> selectedCoordinates = storageManager.getSelectedStorageCoordinates();
                 clientController.playerChoseStorage(clientController.getNickname(), selectedCoordinates);
             } else {
                 // Show menu for the next cube
                 CargoCube nextCube = storageManager.getCurrentCube();
-                StringBuilder message = new StringBuilder("\nProssimo cubo da posizionare: ")
+                StringBuilder message = new StringBuilder("\nNext cube to place: ")
                         .append(nextCube)
                         .append(" (valore: ").append(nextCube.getValue()).append(")")
-                        .append(nextCube == CargoCube.RED ? " - Questo cubo richiede uno storage speciale!" : "")
+                        .append(nextCube == CargoCube.RED ? " - This cube requires special storage!" : "")
                         .append("\n");
-                message.append("Inserisci le coordinate di uno storage (riga colonna), ")
-                        .append("\n'next' per saltare questo cubo, 'skip' per rinunciare a tutti, ")
-                        .append("\n'done' per confermare: ");
+                message.append("Enter storage coordinates (row column), ")
+                        .append("\n'next' to skip this cube, 'skip' to give up all, ")
+                        .append("\n'done' to confirm: ");
                 showMessage(message.toString(), ASK);
             }
             return;
@@ -2638,27 +2638,27 @@ public class ClientCLIView implements ClientView {
 
         // Verifica se il cubo corrente può essere accettato
         if (!storageManager.canAcceptCurrentCube()) {
-            showMessage("Non puoi accettare questo cubo. Aggiunto automaticamente come 'scartato'.", NOTIFICATION_INFO);
+            showMessage("You cannot accept this cube. Automatically added as 'discarded'.", NOTIFICATION_INFO);
 
             // Aggiungiamo coordinate invalide per segnalare che questo cubo viene saltato
             storageManager.skipCurrentCube();
 
             // Verifica se abbiamo finito o se c'è un altro cubo
             if (storageManager.isSelectionComplete()) {
-                showMessage("Selezione completata. Invio dati al server...", STANDARD);
+                showMessage("Selection completed. Sending data to server...", STANDARD);
                 List<Coordinates> selectedCoordinates = storageManager.getSelectedStorageCoordinates();
                 clientController.playerChoseStorage(clientController.getNickname(), selectedCoordinates);
             } else {
                 // Mostra il menu per il prossimo cubo
                 CargoCube nextCube = storageManager.getCurrentCube();
                 if (nextCube != null) {
-                    showMessage("\nProssimo cubo da posizionare: " + nextCube +
-                                    " (valore: " + nextCube.getValue() + ")" +
-                                    (nextCube == CargoCube.RED ? " - Questo cubo richiede uno storage speciale!" : ""),
+                    showMessage("\nNext cube to place: " + nextCube +
+                                    " (value: " + nextCube.getValue() + ")" +
+                                    (nextCube == CargoCube.RED ? " - This cube requires special storage!" : ""),
                             STANDARD);
-                    showMessage("Inserisci le coordinate di uno storage (riga colonna), " +
-                            "\n'next' per saltare questo cubo, 'skip' per rinunciare a tutti, " +
-                            "\n'done' per confermare: ", ASK);
+                    showMessage("Enter storage coordinates (row column), " +
+                            "\n'next' to skip this cube, 'skip' to give up all, " +
+                            "\n'done' to confirm: ", ASK);
                 }
             }
             return;
@@ -2775,13 +2775,13 @@ public class ClientCLIView implements ClientView {
         List<CargoCube> available = storageManager.getAvailableCubes();
         
         if (available.isEmpty()) {
-            showMessage("\n" + ANSI_GREEN + "=== RIDISTRIBUZIONE COMPLETATA ===" + ANSI_RESET, STANDARD);
-            showMessage("Tutti i cubi sono stati posizionati!", STANDARD);
-            showMessage("Premi 'c' per confermare e inviare al server: ", ASK);
+            showMessage("\n" + ANSI_GREEN + "=== REDISTRIBUTION COMPLETED ===" + ANSI_RESET, STANDARD);
+            showMessage("All cubes have been placed!", STANDARD);
+            showMessage("Press 'c' to confirm and send to server: ", ASK);
             return;
         }
 
-        StringBuilder menu = new StringBuilder("\n" + "=== CUBI DA POSIZIONARE ===" + "\n");
+        StringBuilder menu = new StringBuilder("\n" + "=== CUBES TO PLACE ===" + "\n");
         
         for (int i = 0; i < available.size(); i++) {
             CargoCube cube = available.get(i);
@@ -2797,22 +2797,22 @@ public class ClientCLIView implements ClientView {
             
             menu.append(marker).append(i).append(". ").append(cubeColor).append(cube).append(ANSI_RESET);
             if (cube == CargoCube.RED) {
-                menu.append(" " + ANSI_RED + "(SOLO STORAGE SPECIALE)" + ANSI_RESET);
+                menu.append(" " + ANSI_RED + "(SPECIAL STORAGE ONLY)" + ANSI_RESET);
             }
             menu.append(" [valore: ").append(cube.getValue()).append("]\n");
         }
 
-        menu.append("\n" + "=== COMANDI ===" + "\n");
-        menu.append("0-").append(available.size()-1).append(": Seleziona cubo | ");
+        menu.append("\n" + "=== COMMANDS ===" + "\n");
+        menu.append("0-").append(available.size()-1).append(": Select cube | ");
 
         CargoCube selectedCube = storageManager.getSelectedCube();
 
         if(selectedCube != null) {
-            menu.append("a [riga] [colonna]: Aggiungi | ");
+            menu.append("a [row] [column]: Add | ");
         }
-        menu.append("r [riga] [colonna]: Rimuovi");
+        menu.append("r [row] [column]: Remove");
         menu.append("\n");
-        menu.append("c: Conferma\n");
+        menu.append("c: Confirm\n");
 
         if (selectedCube != null) {
             String cubeColor = switch (selectedCube) {
@@ -2821,13 +2821,13 @@ public class ClientCLIView implements ClientView {
                 case GREEN -> ANSI_GREEN;
                 case BLUE -> ANSI_BLUE;
             };
-            menu.append("\n").append(ANSI_YELLOW).append("▶ Cubo selezionato: ").append(cubeColor).append(selectedCube).append(ANSI_RESET);
+            menu.append("\n").append(ANSI_YELLOW).append("▶ Selected cube: ").append(cubeColor).append(selectedCube).append(ANSI_RESET);
             if (selectedCube == CargoCube.RED) {
-                menu.append(" " + ANSI_RED + "(richiede SpecialStorage)" + ANSI_RESET);
+                menu.append(" " + ANSI_RED + "(requires SpecialStorage)" + ANSI_RESET);
             }
             menu.append("\n");
         } else {
-            menu.append("\n").append(ANSI_CYAN).append("Nessun cubo selezionato. Seleziona un cubo per indice.").append(ANSI_RESET).append("\n");
+            menu.append("\n").append(ANSI_CYAN).append("No cube selected. Select a cube by index.").append(ANSI_RESET).append("\n");
         }
 
         showMessage(menu.toString(), ASK);
@@ -2843,9 +2843,9 @@ public class ClientCLIView implements ClientView {
                 int index = Integer.parseInt(input);
                 if (storageManager.selectCubeByIndex(index)) {
                     CargoCube selectedCube = storageManager.getSelectedCube();
-                    showMessage("Cubo " + selectedCube + " selezionato", NOTIFICATION_INFO);
+                    showMessage("Cube " + selectedCube + " selected", NOTIFICATION_INFO);
                 } else {
-                    showMessage("Indice non valido. Usa un numero da 0 a " + (storageManager.getAvailableCubes().size()-1), ERROR);
+                    showMessage("Invalid index. Use a number from 0 to " + (storageManager.getAvailableCubes().size()-1), ERROR);
                 }
                 showCubeRedistributionMenu();
                 return;
@@ -2869,11 +2869,11 @@ public class ClientCLIView implements ClientView {
                     confirmRedistribution();
                     return;
                 default:
-                    showMessage("Comando non riconosciuto. Usa 'h' per vedere i comandi disponibili.", ERROR);
+                    showMessage("Command not recognized. Use 'h' to see available commands.", ERROR);
                     showCubeRedistributionMenu();
             }
         } catch (Exception e) {
-            showMessage("Errore nel processare il comando: " + e.getMessage(), ERROR);
+            showMessage("Error processing command: " + e.getMessage(), ERROR);
             showCubeRedistributionMenu();
         }
     }
@@ -2883,7 +2883,7 @@ public class ClientCLIView implements ClientView {
      */
     private void handleAddCubeCommand(String coordinates) {
         if (storageManager.getSelectedCube() == null) {
-            showMessage(ANSI_RED + "❌ Nessun cubo selezionato! Seleziona prima un cubo per indice." + ANSI_RESET, ERROR);
+            showMessage(ANSI_RED + "❌ No cube selected! Select a cube by index first." + ANSI_RESET, ERROR);
             showCubeRedistributionMenu();
             return;
         }
@@ -2900,13 +2900,13 @@ public class ClientCLIView implements ClientView {
         Storage storage = shipBoard.getCoordinatesAndStorages().get(coords);
         
         if (storage == null) {
-            showMessage(ANSI_RED + "❌ Nessuno storage trovato alle coordinate " + formatCoordinates(coords) + ANSI_RESET, ERROR);
+            showMessage(ANSI_RED + "❌ No storage found at coordinates " + formatCoordinates(coords) + ANSI_RESET, ERROR);
             showCubeRedistributionMenu();
             return;
         }
 
         if (selectedCube == CargoCube.RED && !(storage instanceof SpecialStorage)) {
-            showMessage(ANSI_RED + "❌ I cubi ROSSI possono essere posizionati solo in SpecialStorage!" + ANSI_RESET, ERROR);
+            showMessage(ANSI_RED + "❌ RED cubes can only be placed in SpecialStorage!" + ANSI_RESET, ERROR);
             showCubeRedistributionMenu();
             return;
         }
@@ -2918,7 +2918,7 @@ public class ClientCLIView implements ClientView {
                 .min(java.util.Comparator.comparing(CargoCube::getValue))
                 .orElse(null);
             if (worstCube != null) {
-                preActionMessage = ANSI_YELLOW + "⚠️ Storage pieno: " + worstCube + " verrà sostituito" + ANSI_RESET;
+                preActionMessage = ANSI_YELLOW + "⚠️ Full storage: " + worstCube + " will be replaced" + ANSI_RESET;
             }
         }
 
@@ -2933,12 +2933,12 @@ public class ClientCLIView implements ClientView {
             if (!preActionMessage.isEmpty()) {
                 showMessage(preActionMessage, NOTIFICATION_INFO);
             }
-            showMessage(ANSI_GREEN + "✅ Cubo " + cubeColor + selectedCube + ANSI_GREEN + 
-                       " aggiunto allo storage in " + formatCoordinates(coords) + ANSI_RESET, NOTIFICATION_INFO);
+            showMessage(ANSI_GREEN + "✅ Cube " + cubeColor + selectedCube + ANSI_GREEN + 
+                       " added to storage at " + formatCoordinates(coords) + ANSI_RESET, NOTIFICATION_INFO);
             
             clientModel.refreshShipBoardOf(clientModel.getMyNickname());
         } else {
-            showMessage(ANSI_RED + "❌ Impossibile aggiungere il cubo allo storage" + ANSI_RESET, ERROR);
+            showMessage(ANSI_RED + "❌ Cannot add cube to storage" + ANSI_RESET, ERROR);
         }
 
         showCubeRedistributionMenu();
@@ -2959,13 +2959,13 @@ public class ClientCLIView implements ClientView {
         Storage storage = shipBoard.getCoordinatesAndStorages().get(coords);
         
         if (storage == null) {
-            showMessage("❌ Nessuno storage trovato alle coordinate " + formatCoordinates(coords), ERROR);
+            showMessage("❌ No storage found at coordinates " + formatCoordinates(coords), ERROR);
             showCubeRedistributionMenu();
             return;
         }
 
         if (storage.getStockedCubes().isEmpty()) {
-            showMessage("⚠️ Lo storage alle coordinate " + formatCoordinates(coords) + " è già vuoto", ERROR);
+            showMessage("⚠️ Storage at coordinates " + formatCoordinates(coords) + " is already empty", ERROR);
             showCubeRedistributionMenu();
             return;
         }
@@ -2980,8 +2980,8 @@ public class ClientCLIView implements ClientView {
         };
 
         storageManager.removeCubeFromStorage(coords);
-        showMessage(ANSI_GREEN + "✅ Cubo " + cubeColor + cubeToRemove + ANSI_GREEN + 
-                   " rimosso dallo storage in " + formatCoordinates(coords) + " e aggiunto ai cubi disponibili" + ANSI_RESET, STANDARD);
+        showMessage(ANSI_GREEN + "✅ Cube " + cubeColor + cubeToRemove + ANSI_GREEN + 
+                   " removed from storage at " + formatCoordinates(coords) + " and added to available cubes" + ANSI_RESET, STANDARD);
         
         // Aggiorna la visualizzazione
         clientModel.refreshShipBoardOf(clientModel.getMyNickname());
@@ -2995,14 +2995,14 @@ public class ClientCLIView implements ClientView {
         //TODO togliere anche il client state confirm_redistribution ma prima controllare che non venga usato da nessun altro metodo
 //        if (!storageManager.getAvailableCubes().isEmpty()) {
 //            List<CargoCube> remaining = storageManager.getAvailableCubes();
-//            showMessage("Attenzione: " + remaining.size() + " cubi verranno scartati: " + remaining, NOTIFICATION_CRITICAL);
+//            showMessage("Warning: " + remaining.size() + " cubes will be discarded: " + remaining, NOTIFICATION_CRITICAL);
 //            showMessage("Continua con 'y' o torna alla ridistribuzione con qualsiasi altro tasto:", ASK);
 //            setClientState(ClientState.CONFIRM_REDISTRIBUTION);
 //            return;
 //        }
 
         List<CargoCube> remaining = storageManager.getAvailableCubes();
-        showMessage("Attenzione: " + remaining.size() + " cubi verranno scartati: " + remaining, NOTIFICATION_CRITICAL);
+        showMessage("Warning: " + remaining.size() + " cubes will be discarded: " + remaining, NOTIFICATION_CRITICAL);
 
         sendRedistributionToServer();
     }
