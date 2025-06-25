@@ -5,7 +5,6 @@ import it.polimi.ingsw.is25am33.client.model.card.*;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.client.view.tui.StorageSelectionManager;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
-import it.polimi.ingsw.is25am33.model.card.Pirates;
 import it.polimi.ingsw.is25am33.model.card.Planet;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
@@ -387,8 +386,11 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                     ATTENTION! you will be eliminated""",
                     (ClientCard) card,
                     () -> {
-                        boolean success = clientController.playerChoseCabins(clientModel.getMyNickname(), selectedCabinsCoords);
-                        if (!success)
+                        boolean success = clientController.checkCabinSelection(clientModel.getMyNickname(), selectedCabinsCoords);
+
+                        if (success)
+                            clientController.playerChoseCabins(clientModel.getMyNickname(), selectedCabinsCoords);
+                        else
                             showChooseCabinMenu();
                     });
 
@@ -480,18 +482,20 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         List<Coordinates> cabinSelectionForServer = convertSelectionForServer();
 
         // Invia la selezione al server
-        boolean success = clientController.playerChoseCabins(
+        boolean isCorrect = clientController.checkCabinSelection(
                 clientController.getNickname(),
                 cabinSelectionForServer
         );
 
-        if (success) {
+        if (isCorrect) {
             Platform.runLater(() -> bottomHBox.getChildren().clear());
             boardsController.removeHighlightColor();
             selectedCrewPerCabin.clear();
             showMessage("Crew members removed successfully!", true);
             showWaitingMessage();
-            showAbandonedShipReward();
+            if (clientModel.getCurrAdventureCard() instanceof ClientAbandonedShip)
+                showAbandonedShipReward();
+            clientController.playerChoseCabins(clientModel.getMyNickname(), cabinSelectionForServer);
         } else {
             selectedCrewPerCabin.clear();
             boardsController.removeHighlightColor();
@@ -2062,4 +2066,18 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         return batteriesCoordinates;
     }
 
+    public void showCrewMembersInfo() {
+        showInfoPopupWithCallback("""
+                The number of your crew member will be evaluated.
+                If the result is poor, you will be punished""",
+                clientModel.getCurrAdventureCard(),
+                () -> clientController.evaluatedCrewMembers());
+
+    }
+
+    public void showDisconnectMessage(String message) {
+        showInfoPopupWithCallback(message,
+                clientModel.getCurrAdventureCard(),
+                () -> System.exit(0));
+    }
 }

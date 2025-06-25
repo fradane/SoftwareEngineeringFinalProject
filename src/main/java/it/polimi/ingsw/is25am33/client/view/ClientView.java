@@ -333,4 +333,6 @@ public interface ClientView {
     void showCubes(ShipBoardClient shipboardOf, String nickname);
 
     void refreshGameInfos(List<GameInfo> gameInfos);
+
+    void showDisconnectMessage(String message);
 }

@@ -162,7 +162,19 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showCrewMembersInfo() {
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.showCrewMembersInfo()
+        );
+    }
 
+    @Override
+    public void showDisconnectMessage(String message) {
+        // TODO generalizzare per gli stati
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.showDisconnectMessage(message)
+        );
     }
 
     @Override

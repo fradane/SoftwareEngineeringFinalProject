@@ -448,13 +448,210 @@ public abstract class BoardsController {
                 button.setStyle("-fx-background-color: yellow;");
             }
         } else {
-            // FIXED: Completely clear the button when component is null
-            button.setGraphic(null);
-            button.setStyle("-fx-background-color: transparent;");
-            // Ensure button is still visible and managed for potential future components
-            button.setVisible(true);
-            button.setManaged(true);
+            // Apply destruction effect before clearing the button
+            applyDestructionEffect(button, () -> {
+                // This callback will be executed after the destruction animation completes
+                button.setGraphic(null);
+                button.setStyle("-fx-background-color: transparent;");
+                // Ensure button is still visible and managed for potential future components
+                button.setVisible(true);
+                button.setManaged(true);
+            });
         }
+    }
+
+    private void applyDestructionEffect(Button button, Runnable onComplete) {
+        if (button.getGraphic() == null) {
+            // No graphic to destroy, just run the completion callback
+            onComplete.run();
+            return;
+        }
+
+        // Create destruction visual effects
+        Node graphic = button.getGraphic();
+
+        // Create multiple destruction particles
+        List<ImageView> particles = createDestructionParticles();
+
+        // Add particles to the button's graphic (if it's a StackPane)
+        StackPane destructionPane;
+        if (graphic instanceof StackPane) {
+            destructionPane = (StackPane) graphic;
+        } else {
+            // Wrap the existing graphic in a StackPane
+            destructionPane = new StackPane(graphic);
+            button.setGraphic(destructionPane);
+        }
+
+        // Add particles to the destruction pane
+        particles.forEach(particle -> destructionPane.getChildren().add(particle));
+
+        // Create and configure destruction animations
+        javafx.animation.Timeline destructionTimeline = new javafx.animation.Timeline();
+
+        // Animate the original component (fade out and scale down)
+        if (graphic instanceof StackPane && !((StackPane) graphic).getChildren().isEmpty()) {
+            Node originalComponent = ((StackPane) graphic).getChildren().get(0);
+
+            javafx.animation.KeyFrame fadeOut = new javafx.animation.KeyFrame(
+                    javafx.util.Duration.millis(300),
+                    new javafx.animation.KeyValue(originalComponent.opacityProperty(), 0.0),
+                    new javafx.animation.KeyValue(originalComponent.scaleXProperty(), 0.8),
+                    new javafx.animation.KeyValue(originalComponent.scaleYProperty(), 0.8)
+            );
+            destructionTimeline.getKeyFrames().add(fadeOut);
+        }
+
+        // Animate particles (scatter and fade)
+        for (int i = 0; i < particles.size(); i++) {
+            ImageView particle = particles.get(i);
+            double angle = (360.0 / particles.size()) * i;
+            double distance = 30 + Math.random() * 20; // Random scatter distance
+
+            double targetX = Math.cos(Math.toRadians(angle)) * distance;
+            double targetY = Math.sin(Math.toRadians(angle)) * distance;
+
+            javafx.animation.KeyFrame particleAnimation = new javafx.animation.KeyFrame(
+                    javafx.util.Duration.millis(400),
+                    new javafx.animation.KeyValue(particle.translateXProperty(), targetX),
+                    new javafx.animation.KeyValue(particle.translateYProperty(), targetY),
+                    new javafx.animation.KeyValue(particle.opacityProperty(), 0.0),
+                    new javafx.animation.KeyValue(particle.rotateProperty(), 360 + Math.random() * 360)
+            );
+            destructionTimeline.getKeyFrames().add(particleAnimation);
+        }
+
+        // Add screen shake effect to the button
+        applyScreenShakeEffect(button);
+
+        // When animation completes, clean up and run callback
+        destructionTimeline.setOnFinished(event -> {
+            Platform.runLater(() -> {
+                // Remove all particles
+                particles.forEach(particle -> destructionPane.getChildren().remove(particle));
+                onComplete.run();
+            });
+        });
+
+        destructionTimeline.play();
+    }
+
+    private List<ImageView> createDestructionParticles() {
+        List<ImageView> particles = new ArrayList<>();
+
+        for (int i = 0; i < 8; i++) { // Create 8 particles
+            ImageView particle = createProceduralParticle(i);
+
+            // Set particle properties
+            particle.setFitWidth(6 + Math.random() * 6); // Random size between 6-12
+            particle.setFitHeight(6 + Math.random() * 6);
+            particle.setPreserveRatio(true);
+
+            // Initial position (center)
+            particle.setTranslateX(0);
+            particle.setTranslateY(0);
+
+            // Add glow effect
+            javafx.scene.effect.Glow glow = new javafx.scene.effect.Glow();
+            glow.setLevel(0.7);
+            particle.setEffect(glow);
+
+            particles.add(particle);
+        }
+
+        return particles;
+    }
+
+    private ImageView createProceduralParticle(int index) {
+        // Create particles with different shapes and colors
+        double size = 8 + Math.random() * 4; // Random size between 8-12
+        javafx.scene.canvas.Canvas canvas = new javafx.scene.canvas.Canvas(size, size);
+        javafx.scene.canvas.GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        // Different particle types
+        Color[] sparkColors = {Color.ORANGE, Color.YELLOW, Color.WHITE, Color.LIGHTYELLOW};
+        Color[] debrisColors = {Color.GRAY, Color.DARKGRAY, Color.BROWN, Color.DARKRED};
+
+        if (index < 4) {
+            // Create spark particles (bright colors, star-like shape)
+            gc.setFill(sparkColors[index % sparkColors.length]);
+
+            // Draw star-like spark
+            double centerX = size / 2;
+            double centerY = size / 2;
+            double radius = size / 3;
+
+            // Draw multiple overlapping circles for spark effect
+            gc.fillOval(centerX - radius/2, centerY - radius/2, radius, radius);
+            gc.setFill(Color.WHITE);
+            gc.fillOval(centerX - radius/4, centerY - radius/4, radius/2, radius/2);
+
+            // Add spark rays
+            gc.setStroke(sparkColors[index % sparkColors.length]);
+            gc.setLineWidth(1);
+            gc.strokeLine(0, centerY, size, centerY); // Horizontal ray
+            gc.strokeLine(centerX, 0, centerX, size); // Vertical ray
+
+        } else {
+            // Create debris particles (darker colors, irregular shapes)
+            gc.setFill(debrisColors[index % debrisColors.length]);
+
+            // Draw irregular debris shape
+            double[] xPoints = new double[6];
+            double[] yPoints = new double[6];
+
+            for (int i = 0; i < 6; i++) {
+                double angle = (Math.PI * 2 * i) / 6 + Math.random() * 0.5;
+                double distance = (size / 3) + Math.random() * (size / 6);
+                xPoints[i] = (size / 2) + Math.cos(angle) * distance;
+                yPoints[i] = (size / 2) + Math.sin(angle) * distance;
+            }
+
+            gc.fillPolygon(xPoints, yPoints, 6);
+
+            // Add some texture to debris
+            gc.setFill(debrisColors[index % debrisColors.length].darker());
+            gc.fillOval(size/3, size/3, size/6, size/6);
+        }
+
+        // Convert canvas to image
+        javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        Image particleImage = canvas.snapshot(params, null);
+
+        return new ImageView(particleImage);
+    }
+
+    private void applyScreenShakeEffect(Button button) {
+        // Store original position
+        double originalX = button.getTranslateX();
+        double originalY = button.getTranslateY();
+
+        // Create shake animation
+        javafx.animation.Timeline shakeTimeline = new javafx.animation.Timeline();
+
+        // Create multiple shake keyframes
+        for (int i = 0; i < 6; i++) {
+            double shakeX = (Math.random() - 0.5) * 4; // Random shake between -2 and 2
+            double shakeY = (Math.random() - 0.5) * 4;
+
+            javafx.animation.KeyFrame shakeFrame = new javafx.animation.KeyFrame(
+                    javafx.util.Duration.millis(50 * i),
+                    new javafx.animation.KeyValue(button.translateXProperty(), originalX + shakeX),
+                    new javafx.animation.KeyValue(button.translateYProperty(), originalY + shakeY)
+            );
+            shakeTimeline.getKeyFrames().add(shakeFrame);
+        }
+
+        // Return to original position
+        javafx.animation.KeyFrame returnFrame = new javafx.animation.KeyFrame(
+                javafx.util.Duration.millis(300),
+                new javafx.animation.KeyValue(button.translateXProperty(), originalX),
+                new javafx.animation.KeyValue(button.translateYProperty(), originalY)
+        );
+        shakeTimeline.getKeyFrames().add(returnFrame);
+
+        shakeTimeline.play();
     }
 
     protected void setupGridBindings(ObjectProperty<Component>[][] observableMatrix) {

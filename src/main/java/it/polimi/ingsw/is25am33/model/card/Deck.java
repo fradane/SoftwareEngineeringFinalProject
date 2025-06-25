@@ -207,16 +207,7 @@ public class Deck {
 //        cards.addAll(Deck.loadEpidemicFromJson());
 //        cards.addAll(Deck.loadPlanetsFromJson());
 
-
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
-        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());
 
 
         if (isTestFlight)

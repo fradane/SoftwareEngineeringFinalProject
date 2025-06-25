@@ -23,15 +23,12 @@ import it.polimi.ingsw.is25am33.client.model.Hourglass;
 import it.polimi.ingsw.is25am33.model.game.PlayerFinalData;
 import it.polimi.ingsw.is25am33.network.common.NetworkConfiguration;
 import it.polimi.ingsw.is25am33.network.CallableOnDNS;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.time.Instant;
 import java.util.*;
 
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
@@ -683,7 +680,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 || cardState == CardState.ACCEPT_THE_REWARD
                 || cardState == CardState.CHOOSE_CANNONS
                 || cardState == CardState.EPIDEMIC
-                || cardState == CardState.STARDUST;
+                || cardState == CardState.STARDUST
+                || cardState == CardState.EVALUATE_CREW_MEMBERS;
 
     }
 
@@ -937,7 +935,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void pongToClientFromServer(String nickname) throws IOException{
         //System.out.println("Pong dal server");
         clientPingPongManager.onPongReceived(this::handleDisconnection);
-        System.out.println(Instant.now());
     }
 
     //quando il server manda il ping al client
@@ -947,7 +944,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void handleDisconnection() {
-        System.exit(0);
+        view.showDisconnectMessage("DISCONNESIONE Nessun pong ricevuto dal server.");
     }
 
     public void forcedDisconnection(String nicknameToNotify, String gameId) throws IOException {
@@ -1063,7 +1060,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public boolean playerChoseCabins(String nickname, List<Coordinates> cabinCoords) {
+    public boolean checkCabinSelection(String nickname, List<Coordinates> cabinCoords) {
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
 
@@ -1094,21 +1091,19 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             }
         }
 
-        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
-                .Builder()
-                .setChosenCabins(cabinCoords)
-                .build();
-
-
-        new Thread(() -> {
-            try {
-                serverController.handleClientChoice(nickname, playerChoiceDataStructure);
-            } catch (IOException e) {
-                handleRemoteException(e);
-            }
-        }).start();
-
         return true;
+    }
+
+    public void playerChoseCabins(String nickname, List<Coordinates> cabinCoords) {
+        try {
+            PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                    .Builder()
+                    .setChosenCabins(cabinCoords)
+                    .build();
+            serverController.handleClientChoice(nickname, playerChoiceDataStructure);
+        } catch (IOException e) {
+            handleRemoteException(e);
+        }
     }
 
     public void playerWantsToVisitPlanet(String nickname, int choice) {

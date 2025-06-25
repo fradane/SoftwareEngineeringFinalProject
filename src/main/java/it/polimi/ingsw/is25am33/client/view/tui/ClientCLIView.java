@@ -11,7 +11,6 @@ import it.polimi.ingsw.is25am33.controller.CallableOnGameController;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.Level1ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
-import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.Planet;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
@@ -619,16 +618,14 @@ public class ClientCLIView implements ClientView {
             hitComponent = coordinates;
     }
 
-    public void showCrewMembersInfo(){
+    public void showCrewMembersInfo() {
         showMessage("You have " + clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size() + " crew members", STANDARD);
-        for (String player: clientModel.getSortedRanking()) {
+        for (String player : clientModel.getSortedRanking()) {
             if (!player.equals(clientModel.getMyNickname()))
                 showMessage(player + "has" + clientModel.getShipboardOf(player).getCrewMembers().size() + " crew members", STANDARD);
         }
-        if (clientModel.isMyTurn())
-            showMessage("Press enter to start this phase", ASK);
-        else
-            setClientState(WAIT_PLAYER);
+
+        showMessage("Press any key to start this phase...", ASK);
     }
 
     private void displayPiratesInfo(ClientPirates pirates, StringBuilder output) {
@@ -1592,6 +1589,12 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void showDisconnectMessage(String message) {
+        showMessage(message, ERROR);
+        System.exit(0);
+    }
+
+    @Override
     public void showThrowDicesMenu() {
 
         ClientCard card = clientModel.getCurrAdventureCard();
@@ -2147,20 +2150,19 @@ public class ClientCLIView implements ClientView {
 
         if(clientModel.getShipboardOf(clientModel.getMyNickname()).getStorages().isEmpty()|| clientModel.getShipboardOf(clientModel.getMyNickname()).getCargoCubes().isEmpty()) {
             if(!clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes().isEmpty()) {
-                showMessage("You don't have any storage",STANDARD);
+                showMessage("You don't have any cube",STANDARD);
                 showMessage("You have to give back the batteries instead of the cubes ", STANDARD);
                 setClientState(CHOOSE_BATTERY_CUBES);
                 showBatteryBoxesWithColor();
                 showMessage("Enter coordinates of a battery to remove: ", ASK);
-                return;
             } else {
-                showMessage("You don't have any storage and battery boxes",STANDARD);
+                showMessage("You don't have any cube or battery box",STANDARD);
                 showMessage("You are safe...for now", STANDARD);
                 setClientState(WAIT_PLAYER);
                 clientController.playerChoseStorage(clientController.getNickname(), selectedStorage);
                 mostPreciousCube.clear();
-                return;
             }
+            return;
         }
         setClientState(ClientState.CHOOSE_STORAGE_FOR_CUBEMALUS);
         showMessage("You have to give back the most precious cubes", STANDARD);
@@ -2793,9 +2795,10 @@ public class ClientCLIView implements ClientView {
                 if (selectedCabins.isEmpty()) {
                     showMessage("You must select at least one cabin.", ERROR);
                 } else {
-                    boolean success = clientController.playerChoseCabins(clientController.getNickname(), selectedCabins);
+                    boolean success = clientController.checkCabinSelection(clientController.getNickname(), selectedCabins);
                     if(success) {
                         selectedCabins.clear();
+                        clientController.playerChoseCabins(clientModel.getMyNickname(), selectedCabins);
                         return;
                     }else{
                         selectedCabins.clear();
@@ -3608,6 +3611,7 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case EVALUATE_CREW_MEMBERS_MENU:
+                    showMessage("Waiting for others to start the phase, hoping it won't take to long", STANDARD);
                     clientController.evaluatedCrewMembers();
                     break;
                 case WAIT_PLAYER:
