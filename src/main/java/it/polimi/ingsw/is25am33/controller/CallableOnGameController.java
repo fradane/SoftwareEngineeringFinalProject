@@ -84,4 +84,5 @@ public interface CallableOnGameController extends Remote {
     void debugSkipToLastCard() throws IOException;
 
     void evaluatedCrewMembers(String nickname) throws IOException;
+
 }

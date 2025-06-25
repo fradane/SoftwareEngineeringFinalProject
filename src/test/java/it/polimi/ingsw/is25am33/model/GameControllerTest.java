@@ -267,6 +267,11 @@ public class GameControllerTest {
             }
 
             @Override
+            public void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException {
+
+            }
+
+            @Override
             public void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException {
 
             }

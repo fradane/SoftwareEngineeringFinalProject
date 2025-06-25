@@ -62,6 +62,18 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
                 break;
             case EVALUATE_CREW_MEMBERS:
                 this.countCrewMembers();
+
+                if (gameModel.hasNextPlayer()) {
+                    gameModel.nextPlayer();
+                    setCurrState(CardState.EVALUATE_CREW_MEMBERS);
+                } else {
+                    gameModel.resetPlayerIterator();
+                    gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                        clientController.notifyLeastResourcedPlayer(nicknameToNotify, leastResourcedPlayer.getKey().getNickname() + " has the least members of all");
+                    });
+                    handleMalus();
+                }
+
                 break;
             case REMOVE_CREW_MEMBERS:
                 this.currPlayerChoseRemovableCrewMembers(playerChoices.getChosenCabins().orElseThrow());
@@ -254,18 +266,16 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
     public void countCrewMembers() {
 
-        for(Player player : gameModel.getPlayers().values()) {
-            if(leastResourcedPlayer==null || leastResourcedPlayer.getValue()>player.getPersonalBoard().getCrewMembers().size() ||
-                    (leastResourcedPlayer.getValue()==player.getPersonalBoard().getCrewMembers().size() &&
-                            gameModel.getFlyingBoard().getPlayerPosition(leastResourcedPlayer.getKey())<gameModel.getFlyingBoard().getPlayerPosition(player)))
-                leastResourcedPlayer = new Pair<>(player, (double) player.getPersonalBoard().getCrewMembers().size());
-        }
+        Player player =  gameModel.getCurrPlayer();
 
-        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyLeastResourcedPlayer(nicknameToNotify, leastResourcedPlayer.getKey().getNickname() + " has the least members of all");
-        });
+        if (
+                leastResourcedPlayer == null ||
+                leastResourcedPlayer.getValue() > player.getPersonalBoard().getCrewMembers().size() ||
+                (leastResourcedPlayer.getValue() == player.getPersonalBoard().getCrewMembers().size() &&
+                        gameModel.getFlyingBoard().getPlayerPosition(leastResourcedPlayer.getKey()) < gameModel.getFlyingBoard().getPlayerPosition(player))
+        )
+            leastResourcedPlayer = new Pair<>(player, (double) player.getPersonalBoard().getCrewMembers().size());
 
-        handleMalus();
     }
 
     private void handleMalus() {

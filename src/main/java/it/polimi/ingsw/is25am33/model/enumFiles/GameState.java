@@ -76,8 +76,8 @@ public enum GameState implements Serializable {
                     return;
                 }
 
-
-                gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard());
+                int inGamePlayers = gameModel.getPlayers().size() - gameModel.getFlyingBoard().getOutPlayers().size();
+                gameModel.setCurrAdventureCard(gameModel.getDeck().drawCard(inGamePlayers));
                 gameModel.setCurrGameState(GameState.PLAY_CARD);
             } catch (EmptyStackException e) {
                 //TODO

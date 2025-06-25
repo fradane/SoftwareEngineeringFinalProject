@@ -19,10 +19,9 @@ public class ClientPingPongManager {
             if (pongTimeout != null) pongTimeout.cancel(false);
 
             pongTimeout = scheduler.schedule(() -> {
-               System.out.println("DISCONNESIONE Nessun pong ricevuto dal server .");
                 stop();
                 onTimeout.run();
-            }, 8000, TimeUnit.MILLISECONDS); // TODO cambiare a MILLISECONDS
+            }, 9000, TimeUnit.MILLISECONDS); // TODO cambiare a MILLISECONDS
         }
 
     }

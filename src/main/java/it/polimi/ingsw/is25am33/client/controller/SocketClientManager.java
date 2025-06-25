@@ -507,6 +507,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyNoMoreHiddenComponents":
+                    if (clientController != null) {
+                        clientController.notifyNoMoreHiddenComponents(nickname);
+                    }
+
                 case "PING":
                     if (clientController != null) {
                         clientController.pingToClientFromServer(nickname);

@@ -48,7 +48,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     private String nickname;
     boolean gameStarted = false;
     private final ClientModel clientModel;
-    private final ObservableList<GameInfo> observableGames = FXCollections.observableArrayList();
+    private final List<GameInfo> observableGames = new ArrayList<>();
     private boolean isTestFlight;
     private final ClientPingPongManager clientPingPongManager;
 
@@ -68,7 +68,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         return new ArrayList<>(observableGames);
     }
 
-    public ObservableList<GameInfo> getObservableGames() {
+    public List<GameInfo> getObservableGames() {
         return observableGames;
     }
 
@@ -171,7 +171,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * @param chosenGameId the identifier of the game to join
      * @param chosenColor the color chosen by the player for the game
      */
-    public void joinGame(String chosenGameId, PlayerColor chosenColor) {
+    public boolean joinGame(String chosenGameId, PlayerColor chosenColor) {
 
         try {
 
@@ -180,7 +180,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             if (!success) {
                 view.showError("Error joining game");
                 view.showMainMenu();
-                return;
+                return false;
             }
 
             // if the dns was SocketClientManager (e.g., the client is socket), the serverController is the SocketClientManager used as a dns before
@@ -216,6 +216,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             view.showMainMenu();
         }
 
+        return true;
     }
 
     public void setView(ClientView view) {
@@ -343,6 +344,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws RemoteException {
         observableGames.clear();
         observableGames.addAll(gameInfos);
+        view.refreshGameInfos(gameInfos);
     }
 
     @Override
@@ -594,6 +596,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     @Override
     public void notifyEliminatedPlayer(String nicknameToNotify, String nickname) {
         clientModel.eliminatePlayer(nickname);
+        clientModel.refreshRanking();
         view.showMessage(nickname + " was eliminated.", STANDARD);
         view.showPlayerEarlyLanded(nickname);
     }
@@ -602,7 +605,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyCardState(String nickname, CardState cardState) {
         if (isStateRegardingCurrentPlayerOnly(cardState)) {
             if (!clientModel.isMyTurn()) {
-                view.showMessage(clientModel.getCurrentPlayer() + " is currently playing. Soon will to be your turn\n", NOTIFICATION_INFO);
+                view.showMessage(clientModel.getCurrentPlayer() + " is currently playing. Soon will be your turn\n", NOTIFICATION_INFO);
                 return;
             }
         }
@@ -656,7 +659,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     //Insieme di stati che non vanno notificati a meno che tu non sia il player di turno
-    private boolean isStateRegardingCurrentPlayerOnly(CardState cardState){
+    public boolean isStateRegardingCurrentPlayerOnly(CardState cardState) {
         //TODO capire quali altri stati entrano in questa categoria e aggiungerli sotto. Probabilmente da togliere perchè tutti gli stati sono RegardingCurrentPlayerOnly
         return cardState == CardState.HANDLE_CUBES_REWARD
                 || cardState == CardState.CHOOSE_PLANET
@@ -667,7 +670,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 || cardState == CardState.CHECK_SHIPBOARD_AFTER_ATTACK
                 || cardState == CardState.ACCEPT_THE_REWARD
                 || cardState == CardState.CHOOSE_CANNONS
-                || cardState == CardState.EPIDEMIC;
+                || cardState == CardState.EPIDEMIC
+                || cardState == CardState.STARDUST
+                || cardState == CardState.EVALUATE_CREW_MEMBERS;
 
     }
 
@@ -680,6 +685,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Component>> componentsPerType ){
         ShipBoardClient shipBoardClient = clientModel.getShipboardOf(playerNickname);
         shipBoardClient.setComponentsPerType(componentsPerType);
+    }
+
+    @Override
+    public void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException {
+        view.showNoMoreHiddenComponents();
     }
 
     @Override
@@ -930,7 +940,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void handleDisconnection() {
-        System.exit(0);
+        view.showDisconnectMessage("DISCONNECTION: No pong received from server");
     }
 
     public void forcedDisconnection(String nicknameToNotify, String gameId) throws IOException {
@@ -1011,7 +1021,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords){
         //TODO fare controlli di validità dei valori inseriti
         if(doubleEnginesCoords.size()!=batteryBoxesCoords.size())
-            throw new IllegalArgumentException("il numero di motori non corrisponde al numero di batterie");
+            throw new IllegalArgumentException("the number of engines does not match the number of batteries");
 
         if(!clientModel.isMyTurn()) {
             view.showMessage("This is not your turn, please wait for others to chose ...", ERROR);
@@ -1046,7 +1056,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public boolean playerChoseCabins(String nickname, List<Coordinates> cabinCoords) {
+    public boolean checkCabinSelection(String nickname, List<Coordinates> cabinCoords) {
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
 
@@ -1077,18 +1087,19 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             }
         }
 
-        PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
-                .Builder()
-                .setChosenCabins(cabinCoords)
-                .build();
+        return true;
+    }
 
+    public void playerChoseCabins(String nickname, List<Coordinates> cabinCoords) {
         try {
+            PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
+                    .Builder()
+                    .setChosenCabins(cabinCoords)
+                    .build();
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);
         } catch (IOException e) {
             handleRemoteException(e);
         }
-
-        return true;
     }
 
     public void playerWantsToVisitPlanet(String nickname, int choice) {
@@ -1325,6 +1336,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             serverController.debugSkipToLastCard();
             view.showMessage("Successfully skipped to last card!", NOTIFICATION_INFO);
         } catch (IOException e) {
+            System.err.println(e.getMessage());
             view.showMessage("Failed to skip cards: " + e.getMessage(), ERROR);
         }
     }

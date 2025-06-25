@@ -1147,9 +1147,6 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
         Component component = getFocusedComponent();
 
-        if(!notActiveComponents.contains(focusedComponent))
-            component.setCurrState(ComponentState.VISIBLE);
-
         setFocusedComponent(null);
 
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
@@ -1338,4 +1335,38 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     public MainCabin getMainCabin(){
         return (MainCabin) shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]];
     }
+
+    @Override
+    public long getNumberOfComponents() {
+        return componentsPerType.keySet()
+                .stream()
+                .mapToLong(clazz -> componentsPerType.get(clazz).size())
+                .sum();
+    }
+
+    public void ejectAliens() {
+        getCoordinatesAndCabinsWithCrew().forEach((coords, cabin) -> {
+            if (cabin.getInhabitants().contains(CrewMember.PURPLE_ALIEN) || cabin.getInhabitants().contains(CrewMember.BROWN_ALIEN))
+                hasCorrectLifeSupportOrRemove(cabin, coords, cabin.getInhabitants().getFirst());
+        });
+    }
+
+    private void hasCorrectLifeSupportOrRemove(Cabin cabin, Coordinates coords, CrewMember crewMember) {
+        // Get all life support modules connected to this cabin
+        Set<ColorLifeSupport> connectedLifeSupports = getConnectedLifeSupports(coords.getX(), coords.getY());
+
+        boolean shouldRemove = false;
+
+        // Check if the crew member is an alien that requires specific life support
+        if (crewMember == CrewMember.PURPLE_ALIEN) {
+            shouldRemove = !connectedLifeSupports.contains(ColorLifeSupport.PURPLE);
+        } else if (crewMember == CrewMember.BROWN_ALIEN) {
+            shouldRemove = !connectedLifeSupports.contains(ColorLifeSupport.BROWN);
+        }
+
+        // Remove the crew member if they don't have the required life support
+        if (shouldRemove)
+            cabin.getInhabitants().remove(crewMember);
+    }
+
 }

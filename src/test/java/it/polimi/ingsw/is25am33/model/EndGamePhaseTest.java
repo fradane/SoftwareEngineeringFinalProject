@@ -80,6 +80,11 @@ public class EndGamePhaseTest {
         }
 
         @Override
+        public void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException {
+            notifications.add("noMoreHiddenComponents:" + nicknameToNotify);
+        }
+
+        @Override
         public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
             notifications.add("shipPartsGenerated:" + shipOwnerNickname);
         }

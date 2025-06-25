@@ -2,9 +2,11 @@ package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
 import it.polimi.ingsw.is25am33.client.model.PrefabShipInfo;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
+import it.polimi.ingsw.is25am33.client.model.card.ClientCard;
 import it.polimi.ingsw.is25am33.client.view.gui.ClientGuiController;
 import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
+import it.polimi.ingsw.is25am33.model.component.LifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
 import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
@@ -24,6 +26,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
+
+import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.STANDARD;
 
 public class BuildAndCheckShipBoardController extends GuiController implements BoardsEventHandler {
 
@@ -134,6 +138,17 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 //        clientModel.getPlayerClientData().keySet().forEach(nickname -> modelFxAdapter.refreshShipBoardOf(nickname));
 //    }
 
+    @FXML
+    private void handleExitGame() {
+        try {
+            clientController.leaveGame();
+
+            Platform.runLater(() -> javafx.application.Platform.exit());
+
+        } catch (Exception e) {
+            showMessage("Error leaving the game: " + e.getMessage(), true);
+        }
+    }
     private void setupFocusedComponentBinding() {
         modelFxAdapter.getObservableFocusedComponent()
                 .addListener((_, _, newVal) -> Platform.runLater(() -> {
@@ -250,6 +265,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                 } else if (column == 9 && shipboard.getBookedComponents().get(1) != null) {
                     clientController.pickReservedComponent(2);
                 }
+                showMessage("The booked component you picked can be placed or booked again, you can't release it", true);
             } else
                 clientController.reserveFocusedComponent();
 
@@ -288,15 +304,24 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     }
 
     public void handleLittleDeck() {
+
+        long componentInShipBoard = clientModel.getMyShipboard().getNumberOfComponents();
+        if (componentInShipBoard == 1) {
+            showMessage("You cannot watch a little deck before having placed any component", false);
+            return;
+        }
+
         int index = littleDeckComboBox.getValue();
         List<String> imagesName = clientModel.getLittleVisibleDecks()
                 .get(index - 1)
                 .stream()
-                .map(card -> card.getImageName())
+                .map(ClientCard::getImageName)
                 .toList();
 
         Platform.runLater(() -> {
             try {
+                goBackButton.setVisible(true);
+                goBackButton.setManaged(true);
                 visibleCard1.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagesName.getFirst()))));
                 visibleCard2.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagesName.get(1)))));
                 visibleCard3.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagesName.get(2)))));
@@ -330,6 +355,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         Platform.runLater(() -> {
             littleDeckFlowPane.setVisible(false);
             littleDeckFlowPane.setManaged(false);
+            goBackButton.setVisible(false);
+            goBackButton.setManaged(false);
+            littleDeckComboBox.setPromptText("Watch a little deck");
+            //littleDeckComboBox.getSelectionModel().clearSelection();
         });
     }
 
@@ -509,6 +538,11 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
         if (this.currentCrewMemberChoice == CrewMember.PURPLE_ALIEN) {
 
+            if (!cabinsWithLifeSupport.get(selectedCoords).contains(ColorLifeSupport.PURPLE)) {
+                showMessage("The selected cabin cannot accept PURPLE", false);
+                return;
+            }
+
             // if the player has previously selected a purple alien and has changed its idea
             if (this.crewMemberChoice.containsValue(CrewMember.PURPLE_ALIEN)) {
                 Coordinates removedCoords = crewMemberChoice.keySet()
@@ -523,6 +557,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             boardsController.applyHighlightEffect(selectedCoords, Color.GREEN);
 
         } else if (this.currentCrewMemberChoice == CrewMember.BROWN_ALIEN) {
+
+            if (!cabinsWithLifeSupport.get(selectedCoords).contains(ColorLifeSupport.BROWN)) {
+                showMessage("The selected cabin cannot accept BROWN", false);
+                return;
+            }
+
             // if the player has already selected this cabin for the purple alien
             if (this.crewMemberChoice.containsKey(selectedCoords)) {
                 showMessage("This cabin was already selected for the PURPLE alien", false);
@@ -550,6 +590,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             showCrewPlacementMenu(true);
         else {
             Platform.runLater(() -> {
+                boardsController.removeHighlightColor();
                 confirmCrewMemberButton.setVisible(false);
                 confirmCrewMemberButton.setManaged(false);
             });
@@ -671,6 +712,11 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             prefabShipsMenu.setManaged(false);
             prefabShipsContainer.getChildren().clear();
         });
+    }
+
+    public void showNoMoreHiddenComponents() {
+        showMessage("""
+                Hidden components are no longer available, look among the visible ones...""", false);
     }
 
 //    public void prepareForPhaseTransition() {

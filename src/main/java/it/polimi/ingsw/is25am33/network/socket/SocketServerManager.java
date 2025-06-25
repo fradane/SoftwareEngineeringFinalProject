@@ -229,8 +229,17 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).playerChoseDoubleCannons(nickname, inMessage.getParamActivableCoordinates(), inMessage.getParamBatteryBoxCoordinates());
                 break;
 
+            case "playerChoseCabins":
+                //TODO non so perche c'è
+                //gameControllers.get(nickname).playerChoseCabin(nickname, inMessage.getParamCabinCoordinates());
+                break;
+
             case "playerHandleSmallMeteorite":
                 gameControllers.get(nickname).playerHandleSmallDanObj(nickname, inMessage.getParamActivableCoordinates(), inMessage.getParamBatteryBoxCoordinates());
+                break;
+
+            case "playerHandleBigMeteorite":
+                gameControllers.get(nickname).playerHandleBigMeteorite(nickname, inMessage.getParamActivableCoordinates(), inMessage.getParamBatteryBoxCoordinates());
                 break;
 
             case "playerHandleBigShot":
@@ -437,6 +446,12 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerEarlyLanded");
         outMessage.setParamString(nickname);
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException {
+        SocketMessage outMessage = new SocketMessage("server", "notifyNoMoreHiddenComponents");
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 

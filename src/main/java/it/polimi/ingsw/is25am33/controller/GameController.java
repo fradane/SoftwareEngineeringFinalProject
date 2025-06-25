@@ -237,14 +237,23 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             }
         }
 
-        if(shipBoard.getMainCabin()!=null)
+        if (shipBoard.getMainCabin() != null) {
             shipBoard.getMainCabin().fillCabin(CrewMember.HUMAN);
+        }
     }
 
     @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) {
         Component chosenComponent = gameModel.getComponentTable().pickVisibleComponent(choice);
-        if (chosenComponent == null) return;
+        if (chosenComponent == null) {
+
+            gameModel.getGameClientNotifier()
+                    .notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
+                        clientController.notifyNoMoreHiddenComponents(nicknameToNotify);
+                    });
+
+            return;
+        }
         gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(chosenComponent);
     }
 
@@ -408,6 +417,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 try {
+                    shipBoard.ejectAliens();
                     Component[][] shipMatrix = shipBoard.getShipMatrix();
                     Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
                     Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();

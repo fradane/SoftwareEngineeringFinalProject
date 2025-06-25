@@ -110,5 +110,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyNotActiveComponents(String nicknameToNotify, String nickname, List<Component> notActiveComponents) throws IOException;
 
+    void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException;
+
     void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException;
 }
