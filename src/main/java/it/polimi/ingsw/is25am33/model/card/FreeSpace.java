@@ -105,7 +105,8 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
         if (stepsForward == 0) {
             gameModel.getFlyingBoard().addOutPlayer(gameModel.getCurrPlayer(), false);
 
-            if(gameModel.getFlyingBoard().getRanking().isEmpty()){ // tutti i giocatori sono stati eliminati
+            //if all players are out, the game ends
+            if(gameModel.getFlyingBoard().getRanking().isEmpty()){
                 gameModel.setCurrGameState(GameState.END_GAME);
             }
         } else {

@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 
+import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.ERROR;
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.STANDARD;
 
 public class BuildAndCheckShipBoardController extends GuiController implements BoardsEventHandler {
@@ -111,33 +112,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     private final Map<Coordinates, CrewMember> crewMemberChoice = new HashMap<>();
     private CrewMember currentCrewMemberChoice;
 
-//    public void initialize() {
-//
-//        // loading boards from a different fxml file
-//        try {
-//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level2Boards.fxml"));
-//            VBox mainBoardBox = loader.load();
-//            centerStackPane.getChildren().add(mainBoardBox);
-//            this.boardsController = loader.getController();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            System.err.println("Error loading boards: " + e.getMessage());
-//        }
-//
-//        //borderPane.setVisible(true);
-//        modelFxAdapter = new ModelFxAdapter(clientModel);
-//
-//        this.boardsController.bindBoards(modelFxAdapter, this, clientModel);
-//
-//        // setting up dynamic elements of the scene
-//        setupFocusedComponentBinding();
-//        setupTimerBinding();
-//        setupVisibleComponentsBinding();
-//
-//        // initial shipboards refresh
-//        modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
-//        clientModel.getPlayerClientData().keySet().forEach(nickname -> modelFxAdapter.refreshShipBoardOf(nickname));
-//    }
 
     @FXML
     private void handleExitGame() {
@@ -150,6 +124,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             showMessage("Error leaving the game: " + e.getMessage(), true);
         }
     }
+
+    @Override
+    public String getControllerType() {
+        return "BuildAndCheckShipBoardController";
+    }
+
     private void setupFocusedComponentBinding() {
         modelFxAdapter.getObservableFocusedComponent()
                 .addListener((_, _, newVal) -> Platform.runLater(() -> {
@@ -217,12 +197,9 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     private void applyInitialStyling() {
         Platform.runLater(() -> {
-            // Applica classi CSS ai componenti principali
+            // CSS to the main components
             visibleComponentsPanel.getStyleClass().add("visible-components-panel");
             componentsScrollPane.getStyleClass().add("components-scroll-pane");
-
-            // Se hai un titolo per il pannello, applicagli anche la classe
-            // panelTitleLabel.getStyleClass().add("panel-title");
         });
     }
 
@@ -255,9 +232,9 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                 return;
             }
 
-            //se non ho nessun componente in focus
+            //if there isn't a focus component
             if (shipboard.getFocusedComponent() == null) {
-                //se nella lista dei componenti riservati c'è qualcosa, il componente torna in focus e viene tolto dai componenti riservati
+                //if in the reserved components list there is something, the component returns focus and it is removed from the reserved components list
                 if (column == 8 && shipboard.getBookedComponents().get(0) != null) {
                     clientController.pickReservedComponent(1);
                 } else if (column == 9 && shipboard.getBookedComponents().get(1) != null) {
@@ -319,7 +296,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         Platform.runLater(() -> {
             try {
                 goBackButton.setVisible(true);
-//                goBackButton.setManaged(true);
                 visibleCard1.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagesName.getFirst()))));
                 visibleCard2.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagesName.get(1)))));
                 visibleCard3.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagesName.get(2)))));
@@ -426,6 +402,9 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     }
 
     public void showInvalidComponents() {
+
+        showMessage("Time to correct the invalid shipboard", true);
+
         correctShipBoardAction = Optional.of(this::handleInvalidComponent);
         ShipBoardClient shipBoard = clientModel.getMyShipboard();
         shipBoard.getIncorrectlyPositionedComponentsCoordinates()
@@ -491,6 +470,8 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     public void showCrewPlacementMenu(boolean isPurpleSubmitted) {
 
+        showMessage("Time to place your crew members!", true);
+
         Platform.runLater(() -> {
             confirmCrewMemberButton.setVisible(true);
             confirmCrewMemberButton.setManaged(true);
@@ -530,6 +511,11 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             handleConfirmCrewMemberButton();
         }
 
+    }
+
+    public void showDisconnectMessage(String message) {
+        showMessage(message, true);
+        System.exit(0);
     }
 
     private void handleCrewPlacement(int row, int column) {
@@ -602,7 +588,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     }
 
     public void initialize() {
-        // Caricamento delle board
+        // board setup
         try {
             if (clientController.getCurrentGameInfo().isTestFlight()) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/Level1Boards.fxml"));
@@ -636,12 +622,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
         this.boardsController.createPaws();
 
-        // Altri setup specifici del controller
+        // other setup
         setupFocusedComponentBinding();
         setupTimerBinding();
         setupVisibleComponentsBinding();
 
-        // Refresh iniziale
+        // initial refresh
         modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
         clientModel.getPlayerClientData().keySet().forEach(nickname ->
                 modelFxAdapter.refreshShipBoardOf(nickname));
@@ -655,35 +641,34 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     public void showPrefabShipBoards(List<PrefabShipInfo> prefabShips) {
         Platform.runLater(() -> {
-            // Pulisci il container precedente
+            // clean container before adding new elements
             prefabShipsContainer.getChildren().clear();
 
-            // Crea un elemento per ogni nave prefabbricata
             for (PrefabShipInfo shipInfo : prefabShips) {
 
                 if (!shipInfo.isForGui())
                     continue;
 
-                // Crea un VBox per contenere nome, descrizione e pulsante
+                // Creation of a VBox to contain the ship name, description and button
                 VBox shipCard = new VBox();
                 shipCard.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                 shipCard.setSpacing(10.0);
                 shipCard.getStyleClass().add("component-controls");
                 shipCard.setPadding(new javafx.geometry.Insets(15, 15, 15, 15));
 
-                // Nome della nave
+                // Ship name
                 Label nameLabel = new Label(shipInfo.getName());
                 nameLabel.getStyleClass().add("controls-title");
                 shipCard.getChildren().add(nameLabel);
 
-                // Descrizione della nave
+                // Ship description
                 Label descLabel = new Label(shipInfo.getDescription());
                 descLabel.getStyleClass().add("timer-label");
                 descLabel.setWrapText(true);
                 descLabel.setMaxWidth(500);
                 shipCard.getChildren().add(descLabel);
 
-                // Pulsante per selezionare questa nave
+                // Button to select the ship
                 Button selectButton = new Button("Select Ship");
                 selectButton.getStyleClass().add("action-button");
                 selectButton.setOnAction(_ -> {
@@ -692,11 +677,11 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                 });
                 shipCard.getChildren().add(selectButton);
 
-                // Aggiungi la card al container
+                // Add card to the container
                 prefabShipsContainer.getChildren().add(shipCard);
             }
 
-            // Mostra il menu
+            // Show menu
             Platform.runLater(() -> {
                 prefabShipsMenu.setVisible(true);
                 prefabShipsMenu.setManaged(true);

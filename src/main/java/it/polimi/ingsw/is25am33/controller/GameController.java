@@ -85,19 +85,19 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void leaveGameAfterCreation(String nickname, Boolean isFirst) {
-        //se voglio uscire notifico a tutti gli altri giocatori nel game che mi sto disconnettendo ed esco.
-        // a quel punto loro si disconnetteranno tramite il game context
+        // If I want to leave, notify all other players in the game that I’m disconnecting and exit.
+        // At that point, they will disconnect via the game context
         dns.getClientGame().remove(nickname);
         clientControllers.remove(nickname);
         System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
-        //se sono il primo a chiamare e ci sono altri client notifico e chiudo altrimenti se ho rimosso gia tutti i client chiudo il gioco
+        // If I am the first to call and there are other clients, notify and close. Otherwise, if all clients have already been removed, close the game.
         if(isFirst && !gameModel.getGameClientNotifier().getClientControllers().isEmpty())
             gameModel.getGameClientNotifier().notifyDisconnection(nickname);
         else if(clientControllers.isEmpty()) {
             dns.removeGame(getGameInfo().getGameId());
             System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
         }
-        //se un client è crashato lo stato del gioco viene settato a false in automatico alla ricezione della disconnessione
+        // If a client has crashed, the game state is automatically set to false upon receiving the disconnection
     }
 
     @Override
@@ -160,23 +160,23 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         ShipBoard shipBoard = player.getPersonalBoard();
 
         try {
-            // Validazione delle scelte
+            // Validate the choices
             validateCrewChoices(shipBoard, choices);
 
-            // Applica le scelte
+            // Apply the choices
             applyCrewChoices(shipBoard, choices);
 
-            // Notifica tutti i client
+            // Notify all clients
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyCrewPlacementComplete(nicknameToNotify, nickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
             });
 
-            // Segna il giocatore come completato
+            // Mark the player as completed
             gameModel.markCrewPlacementCompleted(nickname);
         } catch (IllegalArgumentException e) {
-            // Notifica l'errore solo al client che ha inviato scelte non valide
+            // Notify the error only to the client who sent invalid choices
             gameModel.getGameClientNotifier().notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
-                System.out.println("ERRORE submitCrewChoices: " + e.getMessage());
+                System.out.println("ERROR submitCrewChoices: " + e.getMessage());
                 e.printStackTrace();
             });
         }
@@ -186,26 +186,26 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         if(choices.isEmpty())
             return;
 
-        // Verifica cabine con supporto vitale
+        // Check cabins with life support
         Map<Coordinates, Set<ColorLifeSupport>> cabinsWithLifeSupport = shipBoard.getCabinsWithLifeSupport();
 
-        // Verifica coordinate e compatibilità alieno/supporto vitale
+        // Check coordinates and alien/life support compatibility
         for (Map.Entry<Coordinates, CrewMember> entry : choices.entrySet()) {
             Coordinates coords = entry.getKey();
             CrewMember crew = entry.getValue();
 
-            // Verifica che sia una cabina con supporto vitale
+            // Check that it is a cabin with life support
             if (!cabinsWithLifeSupport.containsKey(coords)) {
                 throw new IllegalArgumentException("Invalid cabin at coordinates " + coords);
             }
 
-            // Verifica compatibilità
+            // Check compatibility
             if (!shipBoard.canAcceptAlien(coords, crew)) {
                 throw new IllegalArgumentException("This cabin cannot accept this type of alien");
             }
         }
 
-        // Verifica massimo 1 alieno per colore
+        // Check for a maximum of 1 alien per color
         long purpleCount = choices.values().stream().filter(c -> c == CrewMember.PURPLE_ALIEN).count();
         long brownCount = choices.values().stream().filter(c -> c == CrewMember.BROWN_ALIEN).count();
 
@@ -218,7 +218,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     private void applyCrewChoices(ShipBoard shipBoard, Map<Coordinates, CrewMember> choices) {
-        // Applica le scelte per gli alieni
+        // Apply choices for aliens
         for (Map.Entry<Coordinates, CrewMember> entry : choices.entrySet()) {
             Coordinates coords = entry.getKey();
             CrewMember crew = entry.getValue();
@@ -230,7 +230,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             }
         }
 
-        // Posiziona automaticamente umani nelle cabine rimanenti
+        // Automatically place humans in the remaining cabins
         for (Cabin cabin : shipBoard.getCabin()) {
             if (!cabin.hasInhabitants()) {
                 cabin.fillCabin(CrewMember.HUMAN);
@@ -412,7 +412,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
             Set<Set<Coordinates>> shipParts = shipBoard.removeAndRecalculateShipParts(coordinates.getX(), coordinates.getY());
 
-            // Memorizza le ship parts per questo giocatore
+            // Store the ship parts for this player
             temporaryShipParts.put(nickname, shipParts);
 
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
@@ -435,8 +435,8 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 }
             });
 
-            if (shipParts.size() <= 1) //ovvero ho direttamente rimosso un componente
-                // Controllo se tutte le navi sono corrette e in caso cambio la fase
+            if (shipParts.size() <= 1) // that is, I directly removed a component
+                // Check if all ships are correct and if so, change the phase
                 gameModel.checkAndTransitionToNextPhase();
         }
     }
@@ -445,11 +445,11 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     public void playerChoseShipPart(String nickname, Set<Coordinates> chosenShipPart) throws RemoteException {
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
 
-        // Ottieni tutte le ship parts memorizzate per questo giocatore
+        // Get all ship parts stored for this player
         Set<Set<Coordinates>> allShipParts = temporaryShipParts.get(nickname);
 
         if (allShipParts != null) {
-            // Rimuovi tutte le ship parts TRANNE quella scelta
+            // Remove all ship parts EXCEPT the chosen one
             for (Set<Coordinates> shipPart : allShipParts) {
                 if (!shipPart.equals(chosenShipPart)) {
                     shipBoard.removeShipPart(shipPart);
@@ -474,11 +474,11 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 }
             });
 
-            // Pulisci la mappa temporanea
+            // Clear the temporary map
             temporaryShipParts.remove(nickname);
         }
 
-        //Controlla se tutte le navi sono corrette e cambia fase se necessario
+        // Check if all ships are correct and change phase if necessary
         gameModel.checkAndTransitionToNextPhase();
     }
 
@@ -489,10 +489,10 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void requestPrefabShips(String nickname) throws RemoteException {
-        // Recupera la lista delle navi prefabbricate
+        // Retrieve the list of prefab ships
         List<PrefabShipInfo> prefabShips = PrefabShipFactory.getAvailablePrefabShips(gameModel.isTestFlight());
 
-        // Notifica il client in modo asincrono
+        // Notify the client asynchronously
         gameModel.getGameClientNotifier().notifyClients(
                 Set.of(nickname),
                 (nicknameToNotify, clientController) -> {
@@ -512,30 +512,30 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void requestSelectPrefabShip(String nickname, String prefabShipId) throws RemoteException {
         try {
-            // Ottieni informazioni sulla nave prefabbricata
+            // Get information about the prefab ship
             PrefabShipInfo prefabShipInfo = PrefabShipFactory.getPrefabShipInfo(prefabShipId);
             if (prefabShipInfo == null) {
                 notifySelectionFailure(nickname, "Invalid prefab ship ID: " + prefabShipId);
                 return;
             }
 
-            // Verifica se è una nave per test flight
+            // Check if it's a test flight ship
             if (prefabShipInfo.isForTestFlight() && !gameModel.isTestFlight()) {
                 notifySelectionFailure(nickname, "This prefab ship is only available in test flight mode");
                 return;
             }
 
-            // Ottieni la shipboard del giocatore
+            // Get the player's shipboard
             ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
 
-            // Applica la configurazione prefabbricata
+            // Apply the prefab configuration
             boolean success = PrefabShipFactory.applyPrefabShip(shipBoard, prefabShipId);
             if (!success) {
                 notifySelectionFailure(nickname, "Failed to apply prefab ship configuration");
                 return;
             }
 
-            // Notifica il client del successo
+            // Notify the client of success
             gameModel.getGameClientNotifier().notifyClients(
                     Set.of(nickname),
                     (nicknameToNotify, clientController) -> {
@@ -551,7 +551,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 clientController.notifyShipBoardUpdate(nicknameToNotify, nickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
             });
 
-            // Notifica tutti i client della scelta
+            // Notify all clients about the selection
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyPlayerSelectedPrefabShip(nicknameToNotify, nickname, prefabShipInfo);
             });

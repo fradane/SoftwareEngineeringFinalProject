@@ -126,19 +126,6 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return notActiveComponents;
     }
 
-//    /**
-//     * Initializes the matrix of valid positions for placing components.
-//     *
-//     * @param positions Boolean matrix indicating valid or invalid positions.
-//     * @throws IllegalStateException If the validPositions matrix has already been initialized.
-//     */
-//    Public static void initializeValidPositions(boolean[][] positions) throws IllegalStateException {
-//        if (validPositions == null) {
-//            validPositions = positions;
-//        } else {
-//            throw new IllegalStateException("validPositions has already been initialized.");
-//        }
-//    }
 
     /**
      * Checks whether the specified coordinates are valid and allowed on the board.
@@ -381,13 +368,13 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     }
 
     /**
-     * Ensures that if an adjacent component has an EMPTY connector,
-     * the newly placed component also has the corresponding EMPTY connector, avoiding mismatches.
+     * Ensures that if a neighboring component has an EMPTY connector,
+     * the newly placed component also has a corresponding EMPTY connector to avoid mismatches.
      *
      * @param componentToPlace The component to validate.
      * @param x The x-coordinate.
      * @param y The y-coordinate.
-     * @return true if there are no conflicts, otherwise false.
+     * @return true if there are no connector mismatches, false otherwise.
      */
     public boolean areEmptyConnectorsWellConnected(Component componentToPlace, int x, int y) {
 
@@ -403,15 +390,15 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             Component neighborComponent = shipMatrix[neighborX][neighborY];
             Direction oppositeDirection = getOppositeDirection(direction);
 
-            // Controllo 1: Se il vicino ha un connettore EMPTY nella direzione opposta,
-            // il nostro componente deve avere un connettore EMPTY nella direzione corrispondente
+            // Check 1: If the neighbor has an EMPTY connector in the opposite direction,
+            // our component must have an EMPTY connector in the corresponding direction
             if (neighborComponent.getConnectors().get(oppositeDirection) == EMPTY &&
                     componentToPlace.getConnectors().get(direction) != EMPTY) {
                 return false;
             }
 
-            // Controllo 2: Se il nostro componente ha un connettore EMPTY in una direzione,
-            // il vicino deve avere un connettore EMPTY nella direzione opposta
+            // Check 2: If our component has an EMPTY connector in a direction,
+            // the neighbor must have an EMPTY connector in the opposite direction
             if (componentToPlace.getConnectors().get(direction) == EMPTY &&
                     neighborComponent.getConnectors().get(oppositeDirection) != EMPTY) {
                 return false;
@@ -682,7 +669,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     @JsonIgnore
     public List<CrewMember> getCrewMembers() {
-        List<Component> cabins = new ArrayList<>(componentsPerType.getOrDefault(Cabin.class, Collections.emptyList())); // necessario fare la new ArrayList perchè emptyList è immutabile
+        List<Component> cabins = new ArrayList<>(componentsPerType.getOrDefault(Cabin.class, Collections.emptyList()));
 
         if(componentsPerType.get(MainCabin.class)!=null)
             cabins.addAll(componentsPerType.get(MainCabin.class));
@@ -735,7 +722,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                         Component neighborComponent = shipMatrix[newX][newY];
                         if (neighborComponent instanceof Cabin && ((Cabin) neighborComponent).hasInhabitants()) {
 
-                            // Verifica che i connettori combacino
+                            //check if the connectors are compatible
                             ConnectorType srcConnector = currentCabin.getConnectors().get(direction);
                             ConnectorType destConnector = neighborComponent.getConnectors().get(getOppositeDirection(direction));
 
@@ -999,7 +986,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                     Component currentComponent = shipMatrix[pos.getX()][pos.getY()];
                     Component neighbourComponent = shipMatrix[newX][newY];
 
-                    // Verifica che i connettori combacino e non siano entrambi EMPTY
+                    // Check that the connectors match and are not both EMPTY
                     ConnectorType srcConnector = currentComponent.getConnectors().get(direction);
                     ConnectorType destConnector = neighbourComponent.getConnectors().get(getOppositeDirection(direction));
 
@@ -1027,17 +1014,6 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             incorrectlyPositionedComponentsCoordinates.remove(componentPosition);
             shipMatrix[componentPosition.getX()][componentPosition.getY()] = null;
         }
-//        String playerNicknameToNotify = player != null ? player.getNickname() : "";
-//        gameContext.notifyClients(Set.of(playerNicknameToNotify), (nicknameToNotify, clientController) -> {
-//            try {
-//                if(isShipCorrect())
-//                    clientController.notifyValidShipBoard(nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates);
-//                else
-//                    clientController.notifyInvalidShipBoard(nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates);
-//            } catch (RemoteException e) {
-//                System.err.println("Remote Exception");
-//            }
-//        });
 
     }
 
@@ -1174,7 +1150,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         List<Component> componentsList = componentsPerType.get(componentClass);
         if (componentsList != null) {
             componentsList.remove(component);
-            // Se la lista diventa vuota, potresti volerla rimuovere dalla mappa
+            // if the list is empty, remove the entry from the map
             if (componentsList.isEmpty()) {
                 componentsPerType.remove(componentClass);
             }
@@ -1242,7 +1218,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             for (int j = 0; j < BOARD_DIMENSION; j++) {
                 Component component = shipMatrix[i][j];
 
-                // Verifica se è una cabina (non MainCabin)
+                // check if is a cabin, not main cabin
                 if (component instanceof Cabin && !(component instanceof MainCabin)) {
                     Set<ColorLifeSupport> supports = getConnectedLifeSupports(i, j);
 
@@ -1284,7 +1260,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             int neighborY = neighbor[1];
 
             if (isValidPosition(neighborX, neighborY) && shipMatrix[neighborX][neighborY] instanceof LifeSupport) {
-                // Verifica che i connettori combacino
+                //check if connectors match
                 ConnectorType srcConnector = shipMatrix[x][y].getConnectors().get(direction);
                 ConnectorType destConnector = shipMatrix[neighborX][neighborY].getConnectors().get(getOppositeDirection(direction));
 
@@ -1294,8 +1270,6 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                 }
             }
         }
-
-        //System.out.println("\n " + x + " " + y + " " + result);
 
         return result;
     }
@@ -1307,7 +1281,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         Set<ColorLifeSupport> supports = getConnectedLifeSupports(coords.getX(), coords.getY());
 
         if (supports.isEmpty()) {
-            return false; // Nessun supporto vitale
+            return false;
         }
 
         if (alien == CrewMember.PURPLE_ALIEN) {
@@ -1316,7 +1290,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             return supports.contains(ColorLifeSupport.BROWN);
         }
 
-        return false; // Non è un alieno
+        return false;
     }
 
     private int getPurpleAlien(){

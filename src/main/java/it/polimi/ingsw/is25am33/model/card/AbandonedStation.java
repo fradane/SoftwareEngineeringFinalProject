@@ -333,7 +333,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
                     gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
             });
             
-            // Muovi il giocatore indietro
+            // Move back the player
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
             
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
@@ -344,7 +344,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
             proceedToNextPlayerOrEndCard();
             
         } catch (IllegalArgumentException e) {
-            // Gestione errore con retry
+            // handle error with entry
             String currentPlayer = gameModel.getCurrPlayer().getNickname();
             gameModel.getGameClientNotifier().notifyClients(
                 Set.of(currentPlayer),
@@ -353,14 +353,13 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
                 }
             );
             
-            // Ripristina stato shipboard
+            // Restore ship board state
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
             });
-            
-            // Rimani in HANDLE_CUBES_REWARD per il retry
+
         }
     }
 

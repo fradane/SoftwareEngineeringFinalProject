@@ -12,9 +12,9 @@ public class ServerPingPongManager {
     public void start(String nickname, Runnable sendPing) {
 
         ScheduledFuture<?> pingFuture = scheduler.scheduleAtFixedRate(() -> {
-            sendPing.run(); // invia ping
+            sendPing.run(); // send ping
             //TODO cambiare a milliseconds
-        }, 1000, 5000, TimeUnit.MILLISECONDS);
+        }, 1000, 5000, TimeUnit.SECONDS);
 
         pingTasks.put(nickname, pingFuture);
 
@@ -29,7 +29,7 @@ public class ServerPingPongManager {
                System.out.println("DISCONNECTION: No pong received from " + nickname + ".");
                 stop(nickname);
                 onTimeout.run();
-            }, 9000, TimeUnit.MILLISECONDS); // TODO cambiare a MILLISECONDS
+            }, 9000, TimeUnit.SECONDS); // TODO cambiare a MILLISECONDS
 
             pongTimeouts.put(nickname, pongFuture);
         }

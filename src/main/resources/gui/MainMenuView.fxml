@@ -11,7 +11,7 @@
             stylesheets="@/galaxy-truckers.css"
             fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.MainMenuViewController">
 
-    <!-- Header superiore con titolo del gioco -->
+    <!-- Top header with game title -->
     <top>
         <VBox styleClass="top-container">
             <padding>
@@ -26,7 +26,7 @@
         </VBox>
     </top>
 
-    <!-- Contenuto centrale con tutti i form -->
+    <!-- Central content with all forms -->
     <center>
         <StackPane fx:id="centerStackPane">
 
@@ -37,12 +37,12 @@
                     <Insets top="50" right="50" bottom="50" left="50" />
                 </padding>
 
-                <!-- Label per errori - sempre presente nel main menu -->
+                <!-- Error label - always visible in the main menu -->
                 <Label fx:id="errorLabel" styleClass="error-label"
                        visible="false" managed="false" wrapText="true"
                        maxWidth="600.0" alignment="CENTER" />
 
-                <!-- Bottoni principali -->
+                <!-- Main buttons -->
                 <VBox alignment="CENTER" spacing="20">
                     <Button fx:id="createGameButton" onAction="#handleCreateGame"
                             styleClass="menu-button-primary" text="CREATE GAME" />
@@ -62,7 +62,7 @@
 
                 <Label styleClass="screen-title" text="CREATE GAME" />
 
-                <!-- Label errori specifica per questo form -->
+                <!-- Error label specific to this form -->
                 <Label fx:id="createGameErrorLabel"
                        styleClass="error-label"
                        visible="false" managed="false"
@@ -74,7 +74,7 @@
                     <Label styleClass="form-label" text="Number of Players" />
                     <ComboBox fx:id="playerCountComboBox"
                               styleClass="space-combo-box"
-                              promptText="Select players..." />
+                              promptText="Select players" />
                 </VBox>
 
                 <!-- Easy Mode -->
@@ -87,7 +87,7 @@
                     <Label styleClass="form-label" text="Choose Your Color" />
                     <ComboBox fx:id="colorComboBox"
                               styleClass="space-combo-box"
-                              promptText="Select color..." />
+                              promptText="Select color" />
                 </VBox>
 
                 <!-- Action Buttons -->
@@ -111,14 +111,14 @@
 
                 <Label styleClass="screen-title" text="AVAILABLE GAMES" />
 
-                <!-- Label errori specifica per questo form -->
+                <!-- Error label specific to this form -->
                 <Label fx:id="chooseGameErrorLabel"
                        styleClass="error-label"
                        visible="false" managed="false"
                        wrapText="true" maxWidth="600.0"
                        alignment="CENTER" />
 
-                <!-- ListView con dimensioni responsive -->
+                <!-- ListView with responsive dimensions -->
                 <ListView fx:id="gameListView"
                           styleClass="space-list-view"
                           prefWidth="700" prefHeight="400"
@@ -145,14 +145,14 @@
                 <Label styleClass="screen-title" text="JOIN GAME" />
                 <Label styleClass="menu-subtitle" text="Choose your pilot color" />
 
-                <!-- Label errori specifica per questo form -->
+                <!-- Error label specific to this form -->
                 <Label fx:id="joinGameErrorLabel"
                        styleClass="error-label"
                        visible="false" managed="false"
                        wrapText="true" maxWidth="600.0"
                        alignment="CENTER" />
 
-                <!-- ListView con dimensioni responsive -->
+                <!-- ListView with responsive dimensions -->
                 <ListView fx:id="colorListView"
                           styleClass="space-list-view"
                           prefWidth="500" prefHeight="350"
@@ -206,7 +206,7 @@
         </StackPane>
     </center>
 
-    <!-- Footer con informazioni versione (opzionale) -->
+    <!-- Footer with version information (optional) -->
     <bottom>
         <HBox alignment="CENTER" styleClass="action-bar" minHeight="50">
             <padding>

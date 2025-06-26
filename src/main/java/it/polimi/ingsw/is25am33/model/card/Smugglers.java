@@ -375,7 +375,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             
         } catch (IllegalArgumentException e) {
-            // Gestione errore con retry
+            // handle exit with retry
             String currentPlayer = gameModel.getCurrPlayer().getNickname();
             gameModel.getGameClientNotifier().notifyClients(
                 Set.of(currentPlayer),
@@ -384,14 +384,13 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
                 }
             );
             
-            // Ripristina stato shipboard
+            // Restore shipboard state
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
             });
-            
-            // Rimani in HANDLE_CUBES_REWARD per il retry
+
         }
     }
 

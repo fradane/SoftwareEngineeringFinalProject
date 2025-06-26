@@ -22,7 +22,7 @@ public class RMIServerRunnable implements Runnable {
 
         try {
 
-            // Configurazione system properties per compatibilità cross-platform
+            //configuration system properties for cross-platform compatibility
             System.setProperty("java.rmi.server.hostname", serverIP);
             System.setProperty("java.net.preferIPv4Stack", "true");
             System.setProperty("java.rmi.server.useLocalHostname", "true");
@@ -30,10 +30,10 @@ public class RMIServerRunnable implements Runnable {
             System.out.println("[RMI] Configured system properties for cross-platform compatibility");
             System.out.println("[RMI] Using hostname: " + serverIP);
 
-            // Crea/ottieni il registro RMI su una porta default
+            // create/obtain the RMI registry on a default port
             Registry registry = LocateRegistry.createRegistry(NetworkConfiguration.DEFAULT_RMI_SERVER_PORT);
 
-            // Binding dello stub col nome desiderato
+            //binding stup with the desired name
             registry.rebind(NetworkConfiguration.DNS_NAME, dns);
 
             System.out.println("[RMI] Server RMI ready on " + serverIP + ":" + NetworkConfiguration.DEFAULT_RMI_SERVER_PORT);

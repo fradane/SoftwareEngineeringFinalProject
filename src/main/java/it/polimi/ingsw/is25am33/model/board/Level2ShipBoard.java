@@ -81,13 +81,11 @@ public class Level2ShipBoard extends ShipBoard implements ShipBoardClient {
 
     @Override
     public Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport() {
-        // Utilizza l'implementazione della classe padre
         return super.getCabinsWithLifeSupport();
     }
 
     @Override
     public boolean canAcceptAlien(Coordinates coords, CrewMember alien) {
-        // Utilizza l'implementazione della classe padre
         return super.canAcceptAlien(coords, alien);
     }
 }

@@ -148,7 +148,7 @@ public class PlayerChoicesDataStructure implements Serializable {
         return Optional.ofNullable(chosenDoubleCannons);
     }
 
-    // Getter per la serializzazione JSON
+    // Getter for JSON serialization
    public List<Coordinates> getCabins() {
         return chosenCabins;
     }
@@ -344,7 +344,7 @@ public class PlayerChoicesDataStructure implements Serializable {
          * @return a new {@link PlayerChoicesDataStructure} instance.
          */
         public PlayerChoicesDataStructure build() {
-            // Inizializza tutte le liste
+            // Initialize all lists
             if (chosenDoubleEngines == null) chosenDoubleEngines = new ArrayList<Coordinates>();
             if (chosenBatteryBoxes == null) chosenBatteryBoxes = new ArrayList<Coordinates>();
             if (chosenCabins == null) chosenCabins = new ArrayList<>();

@@ -6,9 +6,7 @@ public enum ConnectorType {
     EMPTY, SINGLE, DOUBLE, UNIVERSAL;
 
     public static boolean areConnectorsCompatible (ConnectorType conn1, ConnectorType conn2) {
-        // Lati lisci possono connettersi solo con lati lisci
         if (
-            // ! ( (conn1==EMPTY => conn2==EMPTY) && (conn2==EMPTY => conn1==EMPTY) )
                 ! ( (conn1 != EMPTY ||  conn2 == EMPTY) && (conn2 != EMPTY ||  conn1 == EMPTY) )
         )
             return false;

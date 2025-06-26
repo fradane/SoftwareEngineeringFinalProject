@@ -41,7 +41,7 @@ public enum GameState implements Serializable {
             gameModel.notifyInvalidShipBoards();
             gameModel.notifyValidShipBoards();
 
-            //Controlla se tutte le navi sono corrette e cambia fase se necessario
+            //check if all ship are valid and change
             gameModel.checkAndTransitionToNextPhase();
         }
 
@@ -119,8 +119,8 @@ public enum GameState implements Serializable {
                     gameModel.resetPlayerIterator();
                 }
             });
-
-            if(gameModel.getFlyingBoard().getRanking().isEmpty()) // potrebbe essere stato eliminato qualche nuovo giocatore durante la check_players
+            // during the check_player someone could be eliminated
+            if(gameModel.getFlyingBoard().getRanking().isEmpty())
                 gameModel.setCurrGameState(GameState.END_GAME);
             else
                 gameModel.setCurrGameState(GameState.DRAW_CARD);
