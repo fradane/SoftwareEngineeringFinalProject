@@ -21,10 +21,12 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
@@ -90,21 +92,20 @@ public class ClientGuiController extends Application implements ClientView {
             System.err.println("Failed to set Taskbar icon: not supported by current OS");
         }
 
-        // Carica il container principale, ma imposta manualmente il controller
+        // Carica il container principale
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/MainContainer.fxml"));
-        loader.setController(this);  // Imposta questo oggetto come controller
-        Scene scene = new Scene(loader.load(), 1200, 700);
+        loader.setController(this);
+        Parent root = loader.load();
+
+        // CAMBIATO: Crea la scene senza dimensioni fisse
+        Scene scene = new Scene(root);
 
         // Configura il model e il controller
         GuiController.setClientModel(clientModel);
         GuiController.setClientController(clientController);
 
-        // Imposta il titolo e mostra la finestra
-        primaryStage.setTitle("Galaxy Trucker");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        primaryStage.setFullScreen(true);
-        primaryStage.setFullScreenExitHint("");
+        // NUOVO: Setup responsive
+        setupResponsiveWindow(primaryStage, scene);
 
         // Carica la schermata iniziale
         loadStartView();
@@ -1040,6 +1041,46 @@ public class ClientGuiController extends Application implements ClientView {
                 System.exit(1);
             }
         });
+    }
+
+    /**
+     * Configura la finestra per essere responsive
+     */
+    private void setupResponsiveWindow(Stage stage, Scene scene) {
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+
+        stage.setMinWidth(800);
+        stage.setMinHeight(600);
+
+        double targetWidth = screenBounds.getWidth() * 0.8;
+        double targetHeight = screenBounds.getHeight() * 0.8;
+
+        double windowWidth = Math.max(targetWidth, 800);
+        double windowHeight = Math.max(targetHeight, 600);
+
+        windowWidth = Math.min(windowWidth, screenBounds.getWidth());
+        windowHeight = Math.min(windowHeight, screenBounds.getHeight());
+
+        stage.setWidth(windowWidth);
+        stage.setHeight(windowHeight);
+
+        stage.setX((screenBounds.getWidth() - windowWidth) / 2);
+        stage.setY((screenBounds.getHeight() - windowHeight) / 2);
+
+        stage.setResizable(true);
+
+        stage.setScene(scene);
+        stage.setTitle("Galaxy Trucker");
+
+        stage.show();
+
+        stage.setFullScreenExitHint("");
+
+        // Usa Platform.runLater per impostare fullscreen dopo che tutto è stato caricato
+        Platform.runLater(() -> {
+            stage.setFullScreen(true);
+        });
+
     }
 
 }

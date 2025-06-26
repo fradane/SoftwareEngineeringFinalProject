@@ -187,7 +187,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                         imageView.setFitWidth(FIXED_COMPONENT_LENGTH);
                         imageView.setFitHeight(FIXED_COMPONENT_LENGTH);
 
-                        // Applica classe CSS all'ImageView aggiunto da claude
                         imageView.getStyleClass().add("image-view");
 
 
@@ -195,7 +194,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                         Button button = new Button();
                         button.setGraphic(imageView);
 
-                        //aggiunto da claude
                         button.getStyleClass().clear();
                         button.getStyleClass().add("component-item");
 
@@ -217,7 +215,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                 }));
     }
 
-    //aggiunto da claude
     private void applyInitialStyling() {
         Platform.runLater(() -> {
             // Applica classi CSS ai componenti principali
@@ -322,7 +319,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         Platform.runLater(() -> {
             try {
                 goBackButton.setVisible(true);
-                goBackButton.setManaged(true);
+//                goBackButton.setManaged(true);
                 visibleCard1.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagesName.getFirst()))));
                 visibleCard2.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagesName.get(1)))));
                 visibleCard3.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagesName.get(2)))));
@@ -359,9 +356,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             littleDeckFlowPane.setVisible(false);
             littleDeckFlowPane.setManaged(false);
             goBackButton.setVisible(false);
-            goBackButton.setManaged(false);
             littleDeckComboBox.setPromptText("Watch a little deck");
-            //littleDeckComboBox.getSelectionModel().clearSelection();
         });
     }
 
@@ -651,7 +646,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         clientModel.getPlayerClientData().keySet().forEach(nickname ->
                 modelFxAdapter.refreshShipBoardOf(nickname));
 
-        // claude
         applyInitialStyling();
     }
 
@@ -727,31 +721,4 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                 Hidden components are no longer available, look among the visible ones...""", false);
     }
 
-//    public void prepareForPhaseTransition() {
-//        // Pulisci eventuali effetti o evidenziazioni
-//        if (this.boardsController != null) {
-//            this.boardsController.removeHighlightColor();
-//        }
-//
-//        // Nascondi elementi dell'interfaccia che sono specifici di questa fase
-//        Platform.runLater(() -> {
-//            if (visibleComponentsPanel != null) visibleComponentsPanel.setVisible(false);
-//            if (componentsBoxV != null) componentsBoxV.setVisible(false);
-//            if (componentsBoxH != null) componentsBoxH.setVisible(false);
-//            if (componentControlsPanel != null) componentControlsPanel.setVisible(false);
-//            if (littleDeckFlowPane != null) {
-//                littleDeckFlowPane.setVisible(false);
-//                littleDeckFlowPane.setManaged(false);
-//            }
-//            if (pawnButtonPane != null) {
-//                pawnButtonPane.setVisible(false);
-//                pawnButtonPane.setManaged(false);
-//            }
-//            if (prefabShipsMenu != null) {
-//                prefabShipsMenu.setVisible(false);
-//                prefabShipsMenu.setManaged(false);
-//            }
-//            if (bottomBox != null) bottomBox.setVisible(false);
-//        });
-//    }
 }
