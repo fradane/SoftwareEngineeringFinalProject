@@ -70,6 +70,12 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     private boolean isRemovingBatteries = false;
     private int remainingCubesToRemove = 0;
     private final List<String> alreadyEliminated = new ArrayList<>();
+    
+    // Cube redistribution UI components
+    private VBox cubeSelectionColumn;
+    private final Map<CargoCube, Button> cubeButtons = new HashMap<>();
+    private CargoCube selectedCubeType = null;
+    private final Map<CargoCube, Label> cubeCountLabels = new HashMap<>();
 
     @FXML
     private void handleExitGame() {
@@ -186,7 +192,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 .addListener((_, _, newVal) ->
                         Platform.runLater(() -> {
 
-                            System.err.println("Updating curr adventure card...");
+                            //System.err.println("Updating curr adventure card...");
 
                             if (newVal != null) {
                                 String imagePath = newVal.getImageName();
@@ -199,7 +205,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                                 cardImageView.setImage(null);
                             }
 
-                            System.err.println("Updated: " + cardImageView.getImage());
+                            //System.err.println("Updated: " + cardImageView.getImage());
 
                         }));
     }
@@ -250,7 +256,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         modelFxAdapter.getObservableCosmicCredits()
                 .addListener((_, _, newCredits) -> {
                     if (newCredits != null) {
-                        updateCosmicCredits(newCredits.intValue());
+                        updateCosmicCredits(newCredits);
                     }
                 });
     }
@@ -279,7 +285,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
             Planet planet = planets.getAvailablePlanets().get(i);
 
-            System.err.println("Setting button for planet: " + i);
+//            System.err.println("Setting button for planet: " + i);
             if (!planet.isBusy()) {
                 final int planetIndex = i + 1; // Store planet index (1-based)
                 createAndAddButton("Planet " + planetIndex, () -> {
@@ -1097,9 +1103,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     private void highlightAvailableStorages() {
-
-        Set<Coordinates> selectableStoragesCoords = storageManager.getSelectableCoordinates();
-
+        Set<Coordinates> selectableStoragesCoords = storageManager.getSelectableCoordinates(selectedCubeType);
         selectableStoragesCoords.forEach(coords -> boardsController.applyHighlightEffect(coords, Color.GREEN));
     }
 
@@ -1564,33 +1568,59 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     private void handleChooseStorageSelection(Coordinates coordinates) {
+        Set<Coordinates> selectableStoragesCoords = storageManager.getSelectableCoordinates(selectedCubeType);
 
-        Set<Coordinates> selectableStoragesCoords = storageManager.getSelectableCoordinates();
-
-        if (!selectableStoragesCoords.contains(coordinates)) {
-            showMessage("Your selection is not correct, select another one or skip the current reward.", false);
+        if (selectedCubeType != null && !selectableStoragesCoords.contains(coordinates)) {
+            showMessage("Your selection is not correct, select another one.", false);
             return;
         }
 
-        storageManager.addStorageSelectionWithCopy(coordinates);
-        clientModel.refreshShipBoardOf(clientController.getNickname());
-        boardsController.removeHighlightColor();
-        Platform.runLater(() -> bottomHBox.getChildren().clear());
+        if (selectedCubeType != null) {
+            // Add cube to storage
+            boolean success = storageManager.addStorageSelectionWithCopy(coordinates, selectedCubeType);
+//            boolean success = storageManager.addSelectedCubeToStorage(coordinates);
+            if (success) {
+                clientModel.refreshShipBoardOf(clientModel.getMyNickname());
+                showMessage(selectedCubeType + " cube placed successfully!", false);
+                if (!storageManager.getAvailableCubes().contains(selectedCubeType))
+                    selectedCubeType = null;
+                updateCubeButtonStyles();
+                updateCubeRedistributionDisplay();
+                clientModel.refreshShipBoardOf(clientController.getNickname());
+            } else {
+                showMessage("Cannot place " + selectedCubeType + " cube there.", false);
+            }
+        } else {
 
-        showMessage("", true);
+            Component selectedComponent = clientModel.getMyShipboard().getShipMatrix()[coordinates.getX()][coordinates.getY()];
+            if (selectedComponent instanceof Storage) {
+                if (((Storage) selectedComponent).getStockedCubes().isEmpty()) {
+                    showMessage("No cubes in the selected storage", false);
+                    return;
+                }
+            } else {
+                showMessage("Error selection the storage! Try again.", false);
+                System.err.println("Error selection the storage: null or cast exception.");
+                return;
+            }
 
-        storageSelectionPhase();
+            // Remove cube from storage
+            storageManager.removeCubeFromStorageWithCopy(coordinates);
+            clientModel.refreshShipBoardOf(clientController.getNickname());
+            showMessage("Removed cube from storage.", false);
+            updateCubeRedistributionDisplay();
+        }
     }
 
     public void showHandleCubesRewardMenu() {
 
-        List<CargoCube> cubesReward = null;
+        List<CargoCube> cubesReward;
 
         try {
             cubesReward = clientModel.extractCubeRewardsFromCurrentCard();
         } catch (IllegalStateException e) {
             showMessage(e.getMessage(), false);
-            // TODO che si fa?
+            return;
         }
 
         // Initialize the storage manager with the cube rewards
@@ -1598,13 +1628,13 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         // Check if the player has any storage available
         if (!storageManager.hasAnyStorage()) {
-//            showMessage("No available storages on your ship. You cannot accept any reward.", false);
-            showInfoPopupWithCallback("No available storages on your ship. You cannot accept any reward.", clientModel.getCurrAdventureCard(),
-                    () -> createAndAddButton("Continue", () -> {
+            showInfoPopupWithCallback("No available storages on your ship. You cannot accept any reward.",
+                    clientModel.getCurrAdventureCard(),
+                    () -> {
                         Platform.runLater(() -> bottomHBox.getChildren().clear());
-                        List<Coordinates> emptyList = new ArrayList<>();
-                        clientController.playerChoseStorage(clientController.getNickname(), emptyList);
-                    }));
+                        selectedCubeType = null;
+                        clientController.sendStorageUpdates(new HashMap<>());
+                    });
             return;
         }
 
@@ -1612,51 +1642,157 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         ClientCard currCard = clientModel.getCurrAdventureCard();
         if (currCard instanceof ClientPlanets)
             showMessage("You have chosen planet " + planetChoice + " look at your rewards!!!", true);
-
         else if (currCard instanceof ClientAbandonedStation)
-            showMessage("You’ve landed on the cargo. Enjoy your rewards!!!", true);
+            showMessage("You’ve landed on the abandoned ship. Enjoy your rewards!!!", true);
         else
             showMessage("You have accepted the reward, look at it!!!", true);
 
-        storageSelectionPhase();
+        storageManager.startRedistribution(cubesReward);
+        showCubeRedistributionInterface();
 
     }
-
-    private void storageSelectionPhase() {
-
-        CargoCube currentCube = storageManager.getCurrentCube();
-
-        // if every cube has been handled
-        if (currentCube == null) {
-            showMessage("You have placed every cube, enjoy your richness.", false);
-            clientController.playerChoseStorage(clientModel.getMyNickname(), storageManager.getSelectedStorageCoordinates());
-            return;
-        }
-
-        // if you cannot accept the red cube
-        if (!storageManager.canAcceptCurrentCube()) {
-            showMessage("Skipping storage selection for " + currentCube + " cube, you are not provided with advanced technology yet", false);
-            if (!storageManager.skipCurrentCube())
-                clientController.playerChoseStorage(clientModel.getMyNickname(), storageManager.getSelectedStorageCoordinates());
-            else
-                storageSelectionPhase();
-            return;
-        }
-
-        createAndAddButton("Skip " + currentCube + " cube", () -> {
-            bottomHBox.getChildren().clear();
-            boardsController.removeHighlightColor();
-            if (!storageManager.skipCurrentCube())
-                clientController.playerChoseStorage(clientModel.getMyNickname(), storageManager.getSelectedStorageCoordinates());
-            else
-                storageSelectionPhase();
-        });
-
+    
+    private void showCubeRedistributionInterface() {
+        
+        // Create cube selection column
+        createCubeSelectionColumn();
+        
+        // Add confirmation button to bottom
+        createAndAddButton("Confirm Selection", this::confirmCubeRedistribution);
+        
+        // Update the interface
+        updateCubeRedistributionDisplay();
+        
+        // Highlight available storages
         highlightAvailableStorages();
-
-        showMessage("Now selecting a storage for the " + currentCube + " cube. " +
-                "If a storage is full, the least valuable cube will be removed", true);
-
+    }
+    
+    private void createCubeSelectionColumn() {
+        cubeSelectionColumn = new VBox(10);
+        cubeSelectionColumn.getStyleClass().add("cube-selection-column");
+        cubeSelectionColumn.setPrefWidth(200);
+        
+        Label title = new Label("Available Cubes");
+        title.getStyleClass().add("cube-column-title");
+        cubeSelectionColumn.getChildren().add(title);
+        
+        // Create buttons for each cube type
+        for (CargoCube cubeType : CargoCube.values()) {
+            HBox cubeRow = new HBox(10);
+            cubeRow.setAlignment(Pos.CENTER_LEFT);
+            
+            Button cubeButton = new Button();
+            cubeButton.setPrefSize(40, 40);
+            cubeButton.getStyleClass().addAll("cube-button", cubeType.name().toLowerCase() + "-cube");
+            cubeButton.setOnAction(_ -> selectCubeType(cubeType));
+            
+            Label countLabel = new Label("0");
+            countLabel.getStyleClass().add("cube-count-label");
+            countLabel.setPrefWidth(30);
+            
+            cubeRow.getChildren().addAll(cubeButton, countLabel);
+            cubeSelectionColumn.getChildren().add(cubeRow);
+            
+            cubeButtons.put(cubeType, cubeButton);
+            cubeCountLabels.put(cubeType, countLabel);
+        }
+        
+        Platform.runLater(() -> {
+            // Add to left side of center pane
+            if (!centerStackPane.getChildren().isEmpty()) {
+                HBox mainLayout = new HBox(20);
+                mainLayout.getChildren().addAll(cubeSelectionColumn, centerStackPane.getChildren().getFirst());
+                centerStackPane.getChildren().clear();
+                centerStackPane.getChildren().add(mainLayout);
+            }
+        });
+    }
+    
+    private void selectCubeType(CargoCube cubeType) {
+        // Check if this cube type is available
+        List<CargoCube> availableCubes = storageManager.getAvailableCubes();
+        if (!availableCubes.contains(cubeType)) {
+            showMessage("No " + cubeType + " cubes available", false);
+            return;
+        }
+        
+        // Update selection
+        if (selectedCubeType == cubeType) {
+            // Deselect if clicking the same cube
+            selectedCubeType = null;
+            updateCubeButtonStyles();
+            boardsController.removeHighlightColor();
+            showMessage("Cube deselected. Click on a storage to remove a cube.", true);
+        } else {
+            selectedCubeType = cubeType;
+            // Find and select the first available cube of this type
+            List<CargoCube> currentAvailableCubes = storageManager.getAvailableCubes();
+            for (int i = 0; i < currentAvailableCubes.size(); i++) {
+                if (currentAvailableCubes.get(i) == cubeType) {
+                    storageManager.selectCubeByIndex(i);
+                    break;
+                }
+            }
+            highlightAvailableStorages();
+            updateCubeButtonStyles();
+            showMessage("Selected " + cubeType + " cube. Click on a storage to place it.", true);
+        }
+    }
+    
+    private void updateCubeButtonStyles() {
+        for (Map.Entry<CargoCube, Button> entry : cubeButtons.entrySet()) {
+            Button button = entry.getValue();
+            CargoCube cubeType = entry.getKey();
+            
+            // Remove pressed style from all buttons
+            button.getStyleClass().remove("cube-button-pressed");
+            
+            // Add pressed style to selected button
+            if (cubeType == selectedCubeType) {
+                button.getStyleClass().add("cube-button-pressed");
+            }
+        }
+    }
+    
+    private void updateCubeRedistributionDisplay() {
+        // Update cube counts
+        List<CargoCube> availableCubes = storageManager.getAvailableCubes();
+        Map<CargoCube, Long> cubeCounts = availableCubes.stream()
+            .collect(Collectors.groupingBy(cube -> cube, Collectors.counting()));
+        
+        for (CargoCube cubeType : CargoCube.values()) {
+            long count = cubeCounts.getOrDefault(cubeType, 0L);
+            cubeCountLabels.get(cubeType).setText(String.valueOf(count));
+            
+            // Enable/disable button based on availability
+            cubeButtons.get(cubeType).setDisable(count == 0);
+        }
+        
+        // Update storage highlights
+        highlightAvailableStorages();
+    }
+    
+    private void confirmCubeRedistribution() {
+        
+        // Get the final selection from storage manager
+        Map<Coordinates, List<CargoCube>> finalUpdates = storageManager.getFinalUpdates();
+        
+        // Clean up UI
+        Platform.runLater(() -> {
+            bottomHBox.getChildren().clear();
+            // Remove cube selection column by restoring original layout
+            if (!centerStackPane.getChildren().isEmpty() && centerStackPane.getChildren().getFirst() instanceof HBox mainLayout) {
+                if (mainLayout.getChildren().size() > 1) {
+                    centerStackPane.getChildren().clear();
+                    centerStackPane.getChildren().add(mainLayout.getChildren().get(1));
+                }
+            }
+        });
+        boardsController.removeHighlightColor();
+        
+        // Send to server
+        clientController.sendStorageUpdates(finalUpdates);
+        showMessage("Cube selection confirmed!", false);
     }
 
     public void showHandleSmallDanObjMenu() {

@@ -1928,7 +1928,7 @@ public class ClientCLIView implements ClientView {
         setClientState(ClientState.HANDLE_CUBES_REWARD_MENU);
 
         // Get cube rewards directly from the current card
-        List<CargoCube> rewardCubes = null;
+        List<CargoCube> rewardCubes;
         rewardCubes = clientModel.extractCubeRewardsFromCurrentCard();
 
         // Initialize the storage manager with the cube rewards

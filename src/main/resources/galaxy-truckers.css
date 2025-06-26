@@ -2479,4 +2479,146 @@
         -fx-scale-y: 0.97;
         -fx-border-color: derive(-fx-space-green, 10%);
     }
+
+    /* ===== CUBE REDISTRIBUTION INTERFACE ===== */
+
+    /* Container column for cube selection */
+    .cube-selection-column {
+        -fx-background-color: rgba(28, 28, 28, 0.95);
+        -fx-background-radius: 10px;
+        -fx-border-color: -fx-space-blue;
+        -fx-border-radius: 10px;
+        -fx-border-width: 2px;
+        -fx-padding: 15px;
+        -fx-spacing: 10px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 2, 2);
+    }
+
+    /* Title for cube selection column */
+    .cube-column-title {
+        -fx-text-fill: -fx-space-accent;
+        -fx-font-size: 16px;
+        -fx-font-weight: bold;
+        -fx-effect: dropshadow(gaussian, rgba(255, 179, 0, 0.6), 3, 0, 0, 0);
+        -fx-alignment: center;
+    }
+
+    /* Base cube button styling */
+    .cube-button {
+        -fx-background-radius: 8px;
+        -fx-border-radius: 8px;
+        -fx-border-width: 2px;
+        -fx-cursor: hand;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 4, 0, 1, 1);
+        -fx-font-weight: bold;
+        -fx-text-fill: white;
+    }
+
+    .cube-button:hover {
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 6, 0, 1, 1);
+        -fx-scale-x: 1.05;
+        -fx-scale-y: 1.05;
+    }
+
+    .cube-button:pressed {
+        -fx-scale-x: 0.95;
+        -fx-scale-y: 0.95;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 2, 0, 0, 0);
+    }
+
+    /* Pressed state for selected cube */
+    .cube-button-pressed {
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 8, 0, 0, 0);
+        -fx-scale-x: 0.85;
+        -fx-scale-y: 0.85;
+        -fx-border-color: -fx-space-accent !important;
+        -fx-border-width: 3px !important;
+        -fx-opacity: 0.8;
+    }
+
+    /* Enhanced pressed state for each cube color */
+    .cube-button-pressed.red-cube {
+        -fx-background-color: derive(#dc3545, -30%) !important;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 8, 0, 0, 0),
+                    dropshadow(gaussian, rgba(255, 179, 0, 0.8), 8, 0, 0, 0);
+    }
+
+    .cube-button-pressed.yellow-cube {
+        -fx-background-color: derive(#ffc107, -30%) !important;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 8, 0, 0, 0),
+                    dropshadow(gaussian, rgba(255, 179, 0, 0.8), 8, 0, 0, 0);
+    }
+
+    .cube-button-pressed.green-cube {
+        -fx-background-color: derive(#28a745, -30%) !important;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 8, 0, 0, 0),
+                    dropshadow(gaussian, rgba(255, 179, 0, 0.8), 8, 0, 0, 0);
+    }
+
+    .cube-button-pressed.blue-cube {
+        -fx-background-color: derive(#007bff, -30%) !important;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 8, 0, 0, 0),
+                    dropshadow(gaussian, rgba(255, 179, 0, 0.8), 8, 0, 0, 0);
+    }
+
+    /* Cube type specific colors */
+    .red-cube {
+        -fx-background-color: #dc3545;
+        -fx-border-color: #c82333;
+    }
+
+    .red-cube:hover {
+        -fx-background-color: #e74c3c;
+    }
+
+    .yellow-cube {
+        -fx-background-color: #ffc107;
+        -fx-border-color: #e0a800;
+    }
+
+    .yellow-cube:hover {
+        -fx-background-color: #ffcd39;
+    }
+
+    .green-cube {
+        -fx-background-color: #28a745;
+        -fx-border-color: #1e7e34;
+    }
+
+    .green-cube:hover {
+        -fx-background-color: #34ce57;
+    }
+
+    .blue-cube {
+        -fx-background-color: #007bff;
+        -fx-border-color: #0056b3;
+    }
+
+    .blue-cube:hover {
+        -fx-background-color: #0099ff;
+    }
+
+    /* Disabled cube buttons */
+    .cube-button:disabled {
+        -fx-opacity: 0.4;
+        -fx-cursor: default;
+    }
+
+    .cube-button:disabled:hover {
+        -fx-scale-x: 1.0;
+        -fx-scale-y: 1.0;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 2, 0, 1, 1);
+    }
+
+    /* Cube count label */
+    .cube-count-label {
+        -fx-text-fill: white;
+        -fx-font-size: 14px;
+        -fx-font-weight: bold;
+        -fx-alignment: center;
+        -fx-background-color: rgba(0, 0, 0, 0.6);
+        -fx-background-radius: 4px;
+        -fx-padding: 2px 6px;
+        -fx-min-width: 25px;
+    }
 }

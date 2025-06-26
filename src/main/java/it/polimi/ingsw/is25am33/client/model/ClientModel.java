@@ -324,23 +324,19 @@ public class ClientModel {
         List<CargoCube> cubes = new ArrayList<>();
         ClientCard card = currAdventureCard;
 
-        if (card == null)
-            throw new IllegalStateException("No active card available.");
-
         // Extract rewards based on a card type
-        if (card instanceof ClientPlanets planets) {
-            return planets.getPlayerReward(myNickname);
-        }
-        else if (card instanceof ClientAbandonedStation) {
-            // AbandonedStation has a direct list of rewards
-            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
-        }
-        else if (card instanceof ClientSmugglers) {
-            // Smugglers have a direct list of rewards
-            return new ArrayList<>(((ClientSmugglers) card).getReward());
-        }
+        return switch (card) {
+            case null -> throw new IllegalStateException("No active card available.");
+            case ClientPlanets planets -> planets.getPlayerReward(myNickname);
+            case ClientAbandonedStation clientAbandonedStation ->
+                // AbandonedStation has a direct list of rewards
+                    new ArrayList<>(clientAbandonedStation.getReward());
+            case ClientSmugglers clientSmugglers ->
+                // Smugglers have a direct list of rewards
+                    new ArrayList<>(clientSmugglers.getReward());
+            default -> cubes;
+        };
 
-        return cubes;
     }
 
 }
