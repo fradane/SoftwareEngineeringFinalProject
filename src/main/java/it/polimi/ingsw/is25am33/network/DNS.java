@@ -84,8 +84,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     @Override
     public boolean registerWithNickname(String nickname, CallableOnClientController controller) throws RemoteException {
-        if (clients.containsKey(nickname)) return false;
-        clients.put(nickname, controller);
+        if (clients.putIfAbsent(nickname, controller) != null) return false;
         System.out.println("New user registered with nickname: " + nickname);
 
         new Thread(()->{
@@ -116,10 +115,14 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
     private void handleDisconnection(String nickname) {
             clients.remove(nickname);
 
-            if(clientGame.containsKey(nickname)) {
-                leaveGameAfterCreation(clientGame.get(nickname), nickname, true);
-            }
-            else{
+            // Atomic remove-and-check: if was in game, get controller, otherwise null
+            GameController gameController = clientGame.remove(nickname);
+            
+            if (gameController != null) {
+                // Was in game, handle disconnection
+                leaveGameAfterCreation(gameController, nickname, true);
+            } else {
+                // Was not in game, handle lobby disconnection
                 leaveGameBeforeCreation(nickname);
             }
     }
@@ -130,6 +133,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
     }
 
     public List<GameInfo> getAvailableGames() {
+        // ConcurrentHashMap is already thread-safe, no external synchronization needed
         return gameControllers.values().stream()
                 .map(GameController::getGameInfo)
                 .filter(game -> !game.isStarted() && !game.isFull())
@@ -147,12 +151,10 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
             throw new RemoteException("Invalid number of players: must be between 2 and 4");
         }
 
-        // unique ID for this gameModel
-        String gameId = generateUniqueGameId();
-
-        // creates a new controller for this gameModel
-        GameController newGameController = new GameController(gameId, numPlayers, isTestFlight, this);
-        gameControllers.put(gameId, newGameController);
+        // generates unique ID and creates controller atomically
+        String gameId = generateUniqueGameIdAndCreate(numPlayers, isTestFlight);
+        GameController newGameController = gameControllers.get(gameId);
+        
         System.out.println("GameModel created: " + gameId + " by " + nickname +
                 " for " + numPlayers + " players" + (isTestFlight ? " (Test Flight)" : ""));
         // Aggiungi il player alla partita
@@ -280,12 +282,23 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         });
     }
 
-    private String generateUniqueGameId() {
+    /**
+     * Generates a unique game ID and atomically creates and inserts the GameController.
+     * This prevents race conditions where multiple threads could generate the same ID.
+     * 
+     * @param numPlayers number of players for the game
+     * @param isTestFlight whether this is a test flight game
+     * @return the unique game ID that was generated and used
+     */
+    private String generateUniqueGameIdAndCreate(int numPlayers, boolean isTestFlight) throws RemoteException {
         String gameId;
+        GameController newGameController;
+        
         do {
             gameId = UUID.randomUUID().toString().substring(0, 8);
-        } while (gameControllers.containsKey(gameId));
-
+            newGameController = new GameController(gameId, numPlayers, isTestFlight, this);
+        } while (gameControllers.putIfAbsent(gameId, newGameController) != null);
+        
         return gameId;
     }
 

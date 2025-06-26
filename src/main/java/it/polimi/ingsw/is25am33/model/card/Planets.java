@@ -142,7 +142,7 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
 
         //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
-        List<Storage> chosenStorages = new ArrayList();
+        List<Storage> chosenStorages = new ArrayList<>();
         for (Coordinates coords : chosenStorageCoords) {
             if (coords.isCoordinateInvalid()) {
                 // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.is25am33.model.game.Player;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -75,7 +76,7 @@ public abstract class FlyingBoard {
     public FlyingBoard(int runLength) {
         this.runLenght = runLength;
         this.outPlayers = new HashSet<>();
-        this.ranking = new HashMap<>();
+        this.ranking = new ConcurrentHashMap<>();  // Thread-safe collection for concurrent access
     }
 
     /**
@@ -173,11 +174,13 @@ public abstract class FlyingBoard {
 
     /**
      * Moves a player by a specified offset, ensuring the new position is not already occupied.
+     * This method is synchronized to prevent race conditions when multiple threads attempt
+     * to move players simultaneously.
      *
      * @param player The player to be moved.
      * @param offset The number of positions to move (can be positive or negative).
      */
-    public void movePlayer(Player player, int offset){
+    public synchronized void movePlayer(Player player, int offset){
         int currentPosition = ranking.get(player);
         int newPosition = currentPosition + offset;
 

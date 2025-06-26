@@ -33,6 +33,7 @@ public class ClientModel {
     private ModelFxAdapter modelFxAdapter;
     private List<PrefabShipInfo> availablePrefabShips = new ArrayList<>();
     private final Object modelFxAdapterLock = new Object();
+    private Timer cardAdapterTimer;  // Track current timer to prevent memory leaks
 
     public void setModelFxAdapter(ModelFxAdapter modelFxAdapter) {
         synchronized (modelFxAdapterLock) {
@@ -64,8 +65,11 @@ public class ClientModel {
         this.hourglass = hourglass;
     }
 
-    public void eliminatePlayer(String nickname) {
-        playerClientData.get(nickname).setLanded(true);
+    public synchronized void eliminatePlayer(String nickname) {
+        PlayerClientData playerData = playerClientData.get(nickname);
+        if (playerData != null) {
+            playerData.setLanded(true);
+        }
     }
 
     public void setMyNickname(String myNickname) {
@@ -104,6 +108,7 @@ public class ClientModel {
      * Sets the current adventure card for the client model.
      * If the GUI adapter (modelFxAdapter) is available and ready (i.e., isCardAdapter returns true),
      * it schedules an asynchronous check using a Timer to update the GUI once the adapter is ready.
+     * Implements proper timer cleanup to prevent memory leaks.
      * <p>
      *     This ensures that the GUI update is non-blocking and runs only when the adapter is in the correct state.
      * </p>
@@ -123,22 +128,44 @@ public class ClientModel {
 
         // Synchronize on the lock to ensure thread-safe access to modelFxAdapter
         synchronized (modelFxAdapterLock) {
+            // Cancel any existing timer to prevent memory leaks
+            if (cardAdapterTimer != null) {
+                cardAdapterTimer.cancel();
+                cardAdapterTimer = null;
+            }
+            
             if (modelFxAdapter != null) {
-                //System.err.println("ModelFxAdapter not null");
-
-                // Create a Timer to periodically check if the adapter is ready
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
+                // Create a new Timer to periodically check if the adapter is ready
+                cardAdapterTimer = new Timer("CardAdapterTimer", true);  // daemon timer
+                final int maxAttempts = 100;  // Maximum 10 seconds (100 * 100ms)
+                
+                cardAdapterTimer.schedule(new TimerTask() {
+                    private int attempts = 0;
+                    
                     @Override
                     public void run() {
                         synchronized (modelFxAdapterLock) {
-                            // When the adapter becomes ready, update the GUI and cancel the timer
+                            attempts++;
+                            
+                            // Check if adapter is ready or if we've exceeded max attempts
                             if (modelFxAdapter != null && modelFxAdapter.isCardAdapter()) {
                                 Platform.runLater(() -> {
                                     modelFxAdapter.refreshCurrAdventureCard();
-                                    //System.err.println("refreshing current Adventure Card");
                                 });
-                                timer.cancel();
+                                cleanupTimer();
+                            } else if (attempts >= maxAttempts) {
+                                // Timeout: stop trying to avoid infinite loop
+                                System.err.println("CardAdapter timeout: adapter not ready after " + maxAttempts + " attempts");
+                                cleanupTimer();
+                            }
+                        }
+                    }
+                    
+                    private void cleanupTimer() {
+                        synchronized (modelFxAdapterLock) {
+                            if (cardAdapterTimer != null) {
+                                cardAdapterTimer.cancel();
+                                cardAdapterTimer = null;
                             }
                         }
                     }
@@ -258,15 +285,21 @@ public class ClientModel {
         this.littleVisibleDecks = littleVisibleDecks;
     }
 
-    public void updatePlayerCredits(String nickname, int newOwnedCredits) {
-        playerClientData.get(nickname).setCredits(newOwnedCredits);
-        if (nickname.equals(myNickname)) {
-            refreshCosmicCredits();
+    public synchronized void updatePlayerCredits(String nickname, int newOwnedCredits) {
+        PlayerClientData playerData = playerClientData.get(nickname);
+        if (playerData != null) {
+            playerData.setCredits(newOwnedCredits);
+            if (nickname.equals(myNickname)) {
+                refreshCosmicCredits();
+            }
         }
     }
 
-    public void updatePlayerPosition(String nickname, int newPosition) {
-        playerClientData.get(nickname).setFlyingBoardPosition(newPosition);
+    public synchronized void updatePlayerPosition(String nickname, int newPosition) {
+        PlayerClientData playerData = playerClientData.get(nickname);
+        if (playerData != null) {
+            playerData.setFlyingBoardPosition(newPosition);
+        }
     }
 
     public void addPlayer(String nickname, PlayerColor color, boolean isTestFlight, boolean isGui) {
@@ -281,10 +314,13 @@ public class ClientModel {
         return new HashSet<>(playerClientData.keySet());
     }
 
-    public Set<String> getEliminatedPlayers() {
+    public synchronized Set<String> getEliminatedPlayers() {
         return playerClientData.keySet()
                 .stream()
-                .filter(player -> playerClientData.get(player).isLanded())
+                .filter(player -> {
+                    PlayerClientData playerData = playerClientData.get(player);
+                    return playerData != null && playerData.isLanded();
+                })
                 .collect(Collectors.toSet());
     }
 
@@ -324,23 +360,19 @@ public class ClientModel {
         List<CargoCube> cubes = new ArrayList<>();
         ClientCard card = currAdventureCard;
 
-        if (card == null)
-            throw new IllegalStateException("No active card available.");
-
         // Extract rewards based on a card type
-        if (card instanceof ClientPlanets planets) {
-            return planets.getPlayerReward(myNickname);
-        }
-        else if (card instanceof ClientAbandonedStation) {
-            // AbandonedStation has a direct list of rewards
-            return new ArrayList<>(((ClientAbandonedStation) card).getReward());
-        }
-        else if (card instanceof ClientSmugglers) {
-            // Smugglers have a direct list of rewards
-            return new ArrayList<>(((ClientSmugglers) card).getReward());
-        }
+        return switch (card) {
+            case null -> throw new IllegalStateException("No active card available.");
+            case ClientPlanets planets -> planets.getPlayerReward(myNickname);
+            case ClientAbandonedStation clientAbandonedStation ->
+                // AbandonedStation has a direct list of rewards
+                    new ArrayList<>(clientAbandonedStation.getReward());
+            case ClientSmugglers clientSmugglers ->
+                // Smugglers have a direct list of rewards
+                    new ArrayList<>(clientSmugglers.getReward());
+            default -> cubes;
+        };
 
-        return cubes;
     }
 
 }

@@ -498,6 +498,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     @Override
+    public void notifyStolenVisibleComponent(String nicknameToNotify) throws IOException{
+        view.showStolenVisibleComponent();
+    }
+
+    @Override
     public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws IOException {
         clientModel.getShipboardOf(nickname).getBookedComponents().add(component);
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
@@ -710,11 +715,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void notifyHourglassEnded() throws IOException {
         serverController.notifyHourglassEnded(nickname);
-        if (clientModel.getHourglass().getFlipsLeft() == 0) {
-            //TODO
-            //clientModel.setGameState(GameState.CHECK_SHIPBOARD);
-            //view.showNewGameState();
-        }
     }
 
     public void pickRandomComponent() {

@@ -10,14 +10,14 @@ public class ServerPingPongManager {
     private final Object lock = new Object();
 
     public void start(String nickname, Runnable sendPing) {
+        synchronized (lock) {
+            ScheduledFuture<?> pingFuture = scheduler.scheduleAtFixedRate(() -> {
+                sendPing.run(); // invia ping
+                //TODO cambiare a milliseconds
+            }, 1000, 5000, TimeUnit.SECONDS);
 
-        ScheduledFuture<?> pingFuture = scheduler.scheduleAtFixedRate(() -> {
-            sendPing.run(); // invia ping
-            //TODO cambiare a milliseconds
-        }, 1000, 5000, TimeUnit.SECONDS);
-
-        pingTasks.put(nickname, pingFuture);
-
+            pingTasks.put(nickname, pingFuture);
+        }
     }
 
     private void resetTimeout(String nickname, Runnable onTimeout) {

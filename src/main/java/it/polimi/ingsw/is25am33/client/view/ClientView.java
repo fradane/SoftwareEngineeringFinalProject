@@ -340,4 +340,6 @@ public interface ClientView {
     void showNoMoreHiddenComponents();
 
     void showCubeRedistributionMenu();
+
+    void showStolenVisibleComponent();
 }

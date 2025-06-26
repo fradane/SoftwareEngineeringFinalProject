@@ -173,6 +173,15 @@ public class GameModel {
     private GameClientNotifier gameClientNotifier;
 
     /**
+     * GLOBAL LOCK ORDERING TO PREVENT DEADLOCKS:
+     * 1. stateTransitionLock (ALWAYS ACQUIRED FIRST)
+     * 2. hourglassLock (ACQUIRED SECOND)
+     * 3. crewPlacementCompletedLock (ACQUIRED THIRD)
+     * 
+     * This ordering must be respected in ALL methods to prevent circular lock dependencies.
+     */
+    
+    /**
      * A final lock object used to ensure thread safety during operations
      * related to the hourglass mechanism within the game.
      *
@@ -181,8 +190,8 @@ public class GameModel {
      * restarting the hourglass, waiting for timers to finish, or transitioning
      * game states based on hourglass-related events.
      *
-     * It provides a consistent and thread-safe mechanism to prevent race
-     * conditions and maintain the integrity of hourglass-related operations.
+     * IMPORTANT: This lock must ALWAYS be acquired AFTER stateTransitionLock
+     * to maintain global lock ordering and prevent deadlocks.
      */
     // attributes useful for hourglass restarting
     private final Object hourglassLock = new Object();
@@ -748,9 +757,11 @@ public class GameModel {
      * Exceptions are handled for interruptions during waiting, ensuring the thread's interrupted status
      * is maintained and errors are logged appropriately.
      * <p>
-     * Thread-safety is ensured using synchronization on the hourglassLock object.
+     * Thread-safety is ensured using proper lock ordering (stateTransitionLock then hourglassLock).
      */
     public void hourglassEnded() {
+        boolean shouldTransitionState = false;
+        Set<String> notRankedPlayers = null;
 
         synchronized (hourglassLock) {
             numClientsFinishedTimer++;
@@ -770,19 +781,23 @@ public class GameModel {
                     }
                 }
 
-                if (flyingBoard.getCurrentRanking().size() == maxPlayers)
-                    setCurrGameState(GameState.CHECK_SHIPBOARD);
-                else {
-                    Set<String> notRankedPlayers = players.keySet()
+                if (flyingBoard.getCurrentRanking().size() == maxPlayers) {
+                    shouldTransitionState = true;
+                } else {
+                    notRankedPlayers = players.keySet()
                             .stream()
                             .filter(nickname -> !flyingBoard.getRanking().containsKey(players.get(nickname)))
                             .collect(Collectors.toSet());
-
-                    gameClientNotifier.notifyClients(notRankedPlayers, (nicknameToNotify, clientController) ->
-                            clientController.notifyFirstToEnter(nicknameToNotify));
                 }
             }
+        }
 
+        // Perform state transition outside of hourglassLock to respect lock ordering
+        if (shouldTransitionState) {
+            setCurrGameState(GameState.CHECK_SHIPBOARD);
+        } else if (notRankedPlayers != null) {
+            gameClientNotifier.notifyClients(notRankedPlayers, (nicknameToNotify, clientController) ->
+                    clientController.notifyFirstToEnter(nicknameToNotify));
         }
     }
 
