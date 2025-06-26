@@ -55,7 +55,7 @@ public interface CallableOnGameController extends Remote {
 
     void notifyHourglassEnded(String nickname) throws IOException;
 
-    void leaveGameAfterCreation(String nickname, Boolean isFirst) throws IOException;
+    void leaveGameAfterCreation(String nickname) throws IOException;
 
     void playerWantsToRemoveComponent(String nickname, Coordinates coordinate) throws IOException;
 

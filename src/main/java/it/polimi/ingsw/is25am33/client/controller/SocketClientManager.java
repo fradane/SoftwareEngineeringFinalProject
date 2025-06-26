@@ -92,9 +92,8 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public void leaveGameAfterCreation(String nickname, Boolean isFirst) throws RemoteException {
+    public void leaveGameAfterCreation(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "leaveGameAfterCreation");
-        outMessage.setParamBoolean(isFirst);
         out.println(ClientSerializer.serialize(outMessage));
     }
 

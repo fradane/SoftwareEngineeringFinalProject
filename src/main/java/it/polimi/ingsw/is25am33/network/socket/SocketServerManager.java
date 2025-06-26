@@ -99,7 +99,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         switch (action) {
 
             case "leaveGameAfterCreation":
-                gameControllers.get(nickname).leaveGameAfterCreation(nickname, inMessage.getParamBoolean());
+                gameControllers.get(nickname).leaveGameAfterCreation(nickname);
                 writers.remove(nickname);
                 break;
 

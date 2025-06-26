@@ -326,7 +326,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 inGame = false;
                 gameStarted = false;
                 currentGameInfo = null;
-                serverController.leaveGameAfterCreation(nickname,true);
+                serverController.leaveGameAfterCreation(nickname);
                 System.exit(0);
             }
             else {

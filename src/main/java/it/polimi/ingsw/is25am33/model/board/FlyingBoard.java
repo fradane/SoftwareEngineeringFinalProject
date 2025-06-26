@@ -95,7 +95,6 @@ public abstract class FlyingBoard {
      * Inserts a player into the ranking with a specified position.
      *
      * @param player The player to be inserted.
-     * @return
      */
     public abstract int insertPlayer(Player player);
 

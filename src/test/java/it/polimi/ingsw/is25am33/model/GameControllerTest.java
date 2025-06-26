@@ -325,7 +325,7 @@ public class GameControllerTest {
         PlayerColor color = PlayerColor.BLUE;
         gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
-        gameController.leaveGameAfterCreation(PLAYER_NICKNAME, true);
+        gameController.leaveGameAfterCreation(PLAYER_NICKNAME);
 
         assertFalse(gameController.getGameModel().getGameClientNotifier().getClientControllers().containsKey(PLAYER_NICKNAME));
     }
