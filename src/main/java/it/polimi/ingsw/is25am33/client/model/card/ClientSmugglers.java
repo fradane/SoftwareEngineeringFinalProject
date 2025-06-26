@@ -5,7 +5,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 
 import java.util.List;
 
-public class ClientSmugglers extends ClientCard {
+public class ClientSmugglers extends ClientCard implements CubeMalusCard {
 
     private int requiredFirePower;
     private List<CargoCube> reward;
@@ -31,10 +31,12 @@ public class ClientSmugglers extends ClientCard {
         return "Smugglers";
     }
 
+    @Override
     public int getCubeMalus() {
         return cubeMalus;
     }
 
+    @Override
     public void setCubeMalus(int cubeMalus) {
         this.cubeMalus = cubeMalus;
     }
@@ -76,21 +78,15 @@ public class ClientSmugglers extends ClientCard {
         sb.append("├────────────────────────────────────┤\n");
         sb.append(String.format("│ Required Fire Power:      x%-8d │\n", requiredFirePower));
         sb.append(String.format("│ Flight Days Cost:         %-8d │\n", stepsBack));
-        sb.append("│ Victory Reward:           ");
+        sb.append(String.format("│ Cargo Cubes Penalty:     x%-8d │\n", cubeMalus));
+        sb.append("└────────────────────────────────────┘\n");
         
         if (reward != null && !reward.isEmpty()) {
-            String rewardStr = reward.toString();
-            if (rewardStr.length() <= 8) {
-                sb.append(String.format("%-8s │\n", rewardStr));
-            } else {
-                sb.append(String.format("%-8s │\n", rewardStr.substring(0, 5) + "..."));
-            }
-        } else {
-            sb.append(String.format("%-8s │\n", "None"));
+            sb.append("Victory Reward (Cargo Cubes):\n");
+            String rewardStr = reward.toString().replaceAll("[\\[\\]]", "");
+            sb.append(String.format("  %s\n\n", rewardStr));
         }
         
-        sb.append(String.format("│ Defeat Penalty:           x%-8d │\n", cubeMalus));
-        sb.append("└────────────────────────────────────┘\n");
         sb.append("Effects: Enemies attack players in route order starting from the leader.\n");
         sb.append("Compare your fire power against the required amount. Higher power means\n");
         sb.append("victory and reward, lower power means defeat and penalty. Equal power\n");

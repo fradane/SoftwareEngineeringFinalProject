@@ -85,30 +85,16 @@ public class ClientAbandonedStation extends ClientCard implements Serializable, 
         sb.append("├────────────────────────────────────┤\n");
         sb.append(String.format("│ Required Crew Members:    x%-8d │\n", requiredCrewMembers));
         sb.append(String.format("│ Flight Days Cost:         %-8d │\n", stepsBack));
-        sb.append("│ Cargo Cube Reward:       ");
-        
-        if (reward != null && !reward.isEmpty()) {
-            String rewardStr = reward.toString();
-            if (rewardStr.length() <= 8) {
-                sb.append(String.format("%-8s │\n", rewardStr));
-            } else {
-                sb.append(String.format("%-8s │\n", rewardStr.substring(0, 5) + "..."));
-            }
-        } else {
-            sb.append(String.format("%-8s │\n", "None"));
-        }
-        
         sb.append("└────────────────────────────────────┘\n");
         
         if (reward != null && !reward.isEmpty()) {
-            sb.append("Reward Details:\n");
+            sb.append("Cargo Cube Reward:\n");
             String cubes = reward.stream()
                     .map(Enum::name)
                     .toList()
                     .toString()
                     .replaceAll("[\\[\\]]", "");
-            sb.append(String.format("  Cargo Cubes: %s\n", cubes));
-            sb.append("\n");
+            sb.append(String.format("  %s\n\n", cubes));
         }
         
         sb.append("Effects: Requires minimum crew to dock at this abandoned station.\n");

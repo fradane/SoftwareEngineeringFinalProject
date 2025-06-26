@@ -5,7 +5,7 @@ import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import java.io.Serializable;
 import java.util.List;
 
-public class ClientWarField extends ClientCard implements Serializable, CrewMalusCard {
+public class ClientWarField extends ClientCard implements Serializable, CrewMalusCard, CubeMalusCard {
     private int crewMalus;
     private int stepsBack;
     private int cubeMalus;
@@ -21,6 +21,7 @@ public class ClientWarField extends ClientCard implements Serializable, CrewMalu
         this.shots = shots;
     }
 
+    @Override
     public int getCrewMalus() {
         return crewMalus;
     }
@@ -29,6 +30,7 @@ public class ClientWarField extends ClientCard implements Serializable, CrewMalu
         return stepsBack;
     }
 
+    @Override
     public int getCubeMalus() {
         return cubeMalus;
     }
@@ -37,6 +39,7 @@ public class ClientWarField extends ClientCard implements Serializable, CrewMalu
         return shots;
     }
 
+    @Override
     public void setCubeMalus(int cubeMalus) {
         this.cubeMalus = cubeMalus;
     }
@@ -49,14 +52,17 @@ public class ClientWarField extends ClientCard implements Serializable, CrewMalu
         this.stepsBack = stepsBack;
     }
 
+    @Override
     public void setCrewMalus(int crewMalus) {
         this.crewMalus = crewMalus;
     }
 
+    @Override
     public CardState getFirstState() {
         return CardState.CHOOSE_CANNONS;
     }
 
+    @Override
     public String getCardType() {
         return "WarField";
     }

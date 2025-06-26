@@ -482,5 +482,5 @@ public interface ShipBoardClient {
 
     long getNumberOfComponents();
 
-
+    Integer getBatteries();
 }

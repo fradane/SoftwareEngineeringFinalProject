@@ -984,7 +984,7 @@ public class ClientCLIView implements ClientView {
         showShipBoard(shipBoardClient, shipBoardOwnerNickname, Collections.emptyMap());
         showBatteryBoxesInfo(shipBoardOwnerNickname);
         showCabinsInfo(shipBoardOwnerNickname);
-        showPlayerCreditsInfo();
+        showPlayerCreditsInfo(shipBoardOwnerNickname);
         showNotActiveComponentsInfo(shipBoardOwnerNickname);
         showStoragesInfo(shipBoardOwnerNickname);
     }
@@ -2006,18 +2006,14 @@ public class ClientCLIView implements ClientView {
                 }
 
                 // Capacità con indicatore di stato
-                String capacityInfo = storage.getMainAttribute();
-                storageInfo.append(" - ").append(capacityInfo);
+                storageInfo.append(" - ").append(storage.getStockedCubes().size()).append("/").append(storage.getMaxCapacity());
                 
                 // Extract current/max capacity for totals
-                String[] capacityParts = capacityInfo.split("/");
-                if (capacityParts.length == 2) {
-                    totalCubes += Integer.parseInt(capacityParts[0]);
-                    totalCapacity += Integer.parseInt(capacityParts[1]);
-                }
+                totalCubes += storage.getStockedCubes().size();
+                totalCapacity += storage.getMaxCapacity();
 
                 if (storage.isFull()) {
-                    storageInfo.append(" " + ANSI_RED + "[FULL - WILL REPLACE]" + ANSI_RESET);
+                    storageInfo.append(" [FULL] ");
                 }
 
                 // Contenuto con colori
@@ -2203,12 +2199,11 @@ public class ClientCLIView implements ClientView {
     /**
      * Shows the current player's credits information
      */
-    public void showPlayerCreditsInfo() {
-        String myNickname = clientModel.getMyNickname();
-        PlayerClientData myData = clientModel.getPlayerClientData().get(myNickname);
+    public void showPlayerCreditsInfo(String playerName) {
+        PlayerClientData myData = clientModel.getPlayerClientData().get(playerName);
         
-        if (myData == null) {
-            showMessage("No player data available.\n", STANDARD);
+        if (!playerName.equals(clientModel.getMyNickname())) {
+            showMessage("Cannot see other player's credits.\n", STANDARD);
             return;
         }
         
@@ -2330,43 +2325,39 @@ public class ClientCLIView implements ClientView {
             return;
         }
 
-        if(clientModel.getCurrAdventureCard().getCardName().equals("WarField")) {
-            ClientWarField card = (ClientWarField) clientModel.getCurrAdventureCard();
-            cubeMalus=card.getCubeMalus();
+        CubeMalusCard card = (CubeMalusCard) clientModel.getCurrAdventureCard();
+        cubeMalus = card.getCubeMalus();
 
-            storageManager = new StorageSelectionManager(new ArrayList<>(), cubeMalus, clientModel.getShipboardOf(clientModel.getMyNickname()));
-            // Mostra la nave per visualizzare i depositi
-            this.showStorageWithColor();
-            showMessage("\nYou must remove " +cubeMalus +" cargo cubes!", STANDARD);
-        } else if(clientModel.getCurrAdventureCard().getCardName().equals("Smugglers")) {
-            ClientSmugglers card = (ClientSmugglers) clientModel.getCurrAdventureCard();
-            cubeMalus=card.getCubeMalus();
-            storageManager = new StorageSelectionManager(new ArrayList<>(), cubeMalus, clientModel.getShipboardOf(clientModel.getMyNickname()));
-            // Mostra la nave per visualizzare i depositi
-            this.showStorageWithColor();
-            showMessage("\nYou must remove " +cubeMalus +" cargo cubes!", STANDARD);
-        }
+        // Initialize StorageSelectionManager for malus mode
+        storageManager = new StorageSelectionManager(cubeMalus, clientModel.getShipboardOf(clientModel.getMyNickname()));
 
-        mostPreciousCube= storageManager.mostPreciousCube();
+        // Mostra la nave per visualizzare i depositi
+        this.showStorageWithColor();
+        showMessage("\nYou must remove " + storageManager.getRemainingCubesToRemove() +" cargo cubes!", STANDARD);
 
-        if(clientModel.getShipboardOf(clientModel.getMyNickname()).getStorages().isEmpty()|| clientModel.getShipboardOf(clientModel.getMyNickname()).getCargoCubes().isEmpty()) {
-            if(!clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes().isEmpty()) {
-                showMessage("You don't have any cube",STANDARD);
-                showMessage("You have to give back the batteries instead of the cubes ", STANDARD);
+        // Check if there are cubes available for removal
+        if (!storageManager.hasAvailableCubes()) {
+            // No cubes available, check if batteries can be used instead
+            if(!clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes().isEmpty() && 
+               clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteries() > 0) {
+                showMessage("You don't have any cube", STANDARD);
+                showMessage("You have to give back the batteries instead of the cubes", STANDARD);
                 setClientState(CHOOSE_BATTERY_CUBES);
                 showBatteryBoxesWithColor();
                 showMessage("Enter coordinates of a battery to remove: ", ASK);
             } else {
-                showMessage("You don't have any cube or battery box",STANDARD);
+                showMessage("You don't have any cube or battery box", STANDARD);
                 showMessage("You are safe...for now", STANDARD);
                 setClientState(WAIT_PLAYER);
                 clientController.playerChoseStorage(clientController.getNickname(), selectedStorage);
-                mostPreciousCube.clear();
+                storageManager.resetMalusState();
             }
             return;
         }
+
+        // Cubes are available for removal
         setClientState(ClientState.CHOOSE_STORAGE_FOR_CUBEMALUS);
-        showMessage("You have to give back the most precious cubes", STANDARD);
+        showAvailableCubeTypes();
         showMessage("Enter coordinates of a storage to remove a cargo cube from: ", ASK);
 
     }
@@ -2647,16 +2638,16 @@ public class ClientCLIView implements ClientView {
                 return;
             }
 
-            //se hai selezionato gia tutte le batterie presenti in un batteryBox non puoi piu selezionarlo
-            int frequency=0;
-            for(Coordinates selectedBatteryBoxCoords : selectedBatteries){
-                if(selectedBatteryBoxCoords.equals(coords)){
-                    frequency++;
-                }
-            }
+//            //se hai selezionato gia tutte le batterie presenti in un batteryBox non puoi piu selezionarlo
+//            int frequency=0;
+//            for(Coordinates selectedBatteryBoxCoords : selectedBatteries){
+//                if(selectedBatteryBoxCoords.equals(coords)){
+//                    frequency++;
+//                }
+//            }
 
             //TODO stessa cosa qua
-            if(batteryBox.getRemainingBatteries()==frequency){
+            if(batteryBox.getRemainingBatteries()==0){
                 showMessage("This battery box is empty", ERROR);
                 showMessage("Please select another one or 'cancel' to cancel the last choice", ASK);
                 return;
@@ -2664,6 +2655,8 @@ public class ClientCLIView implements ClientView {
 
             // Aggiungi la batteria e torna alla selezione del motore
             selectedBatteries.add(coords);
+
+            batteryBox.useBattery();
 
 
             if(clientState==CHOOSE_ENGINES_SELECT_BATTERY){
@@ -2713,17 +2706,32 @@ public class ClientCLIView implements ClientView {
 
             if (clientState == CHOOSE_BATTERY_CUBES) {
 
-                if (selectedBatteries.size() + selectedStorage.size() == cubeMalus
-                        || clientModel.getShipboardOf(clientModel.getMyNickname()).getTotalAvailableBattery()==selectedBatteries.size()) {
-                    showMessage(" All cargo cubes and batteries has been selected", STANDARD);
+                // Calculate total items selected (cubes + batteries)
+                int selectedCubes = (storageManager != null && storageManager.isInMalusMode()) 
+                    ? storageManager.getSelectedStoragesForRemoval().size() 
+                    : selectedStorage.size();
+                    
+                if (selectedBatteries.size() + selectedCubes == cubeMalus
+                        || clientModel.getShipboardOf(clientModel.getMyNickname()).getTotalAvailableBattery() == selectedBatteries.size()) {
+                    showMessage("All cargo cubes and batteries has been selected\nOr you don't have any more batteries to select", STANDARD);
                     setClientState(WAIT_PLAYER);
-                    clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStorage, selectedBatteries);
+                    
+                    // Get final list of selected storages
+                    List<Coordinates> finalSelectedStorages = (storageManager != null && storageManager.isInMalusMode()) 
+                        ? storageManager.getSelectedStoragesForRemoval() 
+                        : selectedStorage;
+                        
+                    clientController.playerChoseStorageAndBattery(clientController.getNickname(), finalSelectedStorages, selectedBatteries);
+                    
+                    // Cleanup
                     selectedBatteries.clear();
                     selectedStorage.clear();
-                    mostPreciousCube.clear();
-                }else{
+                    if (storageManager != null) {
+                        storageManager.resetMalusState();
+                    }
+                } else {
                     showBatteryBoxesWithColor();
-                    showMessage("You still need to remove " + (cubeMalus- selectedStorage.size()- selectedBatteries.size()) +" battery (s). Enter another battery box coordinate: ", STANDARD);
+                    showMessage("You still need to remove " + (cubeMalus - selectedCubes - selectedBatteries.size()) + " battery(s). Enter another battery box coordinate: ", STANDARD);
                     showMessage("Battery box selected. Enter another battery box. ", ASK);
                     setClientState(CHOOSE_BATTERY_CUBES);
                 }
@@ -3503,7 +3511,7 @@ public class ClientCLIView implements ClientView {
             showNotActiveComponentsInfo(input.trim().split("\\s+")[1]);
             return;
         }else if (input.equals("credit")) {
-            showPlayerCreditsInfo();
+            showPlayerCreditsInfo(clientModel.getMyNickname());
             return;
         } else if (input.equals("rank")) {
             showCurrentRanking();
@@ -4128,41 +4136,53 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case CHOOSE_STORAGE_FOR_CUBEMALUS:
-                        try{
-                            Coordinates coords = parseCoordinates(input);
+                    try {
+                        Coordinates coords = parseCoordinates(input);
+                        
+                        // Validate selection using StorageSelectionManager
+                        if (storageManager.isValidStorageSelection(coords)) {
+                            // Select the storage and get cube type that will be removed
+                            CargoCube removedCube = storageManager.getMostPreciousCubeAvailable();
+                            storageManager.selectStorageForRemoval(coords);
+                            
+                            showMessage("Storage selected. Cube " + removedCube.name() + " will be removed.", STANDARD);
 
-                            if(mostPreciousCube.contains(coords)){
-                                mostPreciousCube.remove(coords);
-                                selectedStorage.add(coords);
-                                showMessage("Storage selected.", STANDARD);
-                                if(!mostPreciousCube.isEmpty()){
+                            // Check if more cubes need to be removed
+                            if (storageManager.hasRemainingCubesToRemove()) {
+                                // Check if there are more available cubes in the ship
+                                if (storageManager.hasAvailableCubes()) {
+                                    // Continue with cube selection
                                     showStorageWithColor();
-                                    showMessage("You still need to remove " + mostPreciousCube.size() +" cube (s). Enter another storage coordinate: ", ASK);
+                                    showAvailableCubeTypes();
+                                    showMessage("You still need to remove " + storageManager.getRemainingCubesToRemove() + " cube(s). Enter another storage coordinate: ", ASK);
+                                } else {
+                                    // There are no more available cubes, start removing batteries
+                                    int requiredBatteries = storageManager.getRequiredBatteriesCount();
+                                    setClientState(CHOOSE_BATTERY_CUBES);
+                                    showBatteryBoxesWithColor();
+                                    showMessage("No more cubes available. You still need to remove " + requiredBatteries + " battery(s). Enter a battery box coordinate: ", ASK);
                                 }
-                                else{
-                                    if(selectedStorage.size() == cubeMalus){
-                                        setClientState(WAIT_PLAYER);
-                                        clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStorage, selectedBatteries);
-                                        selectedStorage.clear();
-                                        selectedBatteries.clear();
-                                        mostPreciousCube.clear();
-                                    }
-                                    else{
-                                        setClientState(CHOOSE_BATTERY_CUBES);
-                                        showBatteryBoxesWithColor();
-                                        showMessage("You still need to remove " + (cubeMalus- selectedStorage.size()) +" battery (s). Enter a battery box coordinate: ", ASK);
-                                        handleBatterySelection(input);
-                                    }
-                                }
-                            } else{
-                                showStorageWithColor();
-                                showMessage("ATTENTION! There are a more precious cube on the ship!", STANDARD);
-                                showMessage("You must remove them. Please enter storage coordinate: ", ASK);
-                            }
+                            } else {
+                                // Malus completato, invia al server
+                                List<Coordinates> selectedStoragesForRemoval = storageManager.getSelectedStoragesForRemoval();
+                                setClientState(WAIT_PLAYER);
+                                clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStoragesForRemoval, selectedBatteries);
 
-                        } catch (NumberFormatException e) {
-                            showMessage("Invalid input. Please enter valid numbers for row and column.", ERROR);
+                                // Cleanup
+                                selectedBatteries.clear();
+                                storageManager.resetMalusState();
+                            }
+                        } else {
+                            // Invalid selection, show error and valid options
+                            String errorMessage = storageManager.getValidationErrorMessage(coords);
+                            showMessage(errorMessage, ERROR);
+
+                            showMessage("You still need to remove " + storageManager.getRemainingCubesToRemove() + " cube(s). \nEnter another storage coordinate: ", ASK);
                         }
+                        
+                    } catch (NumberFormatException e) {
+                        showMessage("Invalid input. Please enter valid numbers for row and column.", ERROR);
+                    }
                     break;
 
                 default:
@@ -4259,5 +4279,35 @@ public class ClientCLIView implements ClientView {
         showStoragesInfo();
     }
 
+    /**
+     * Shows information about available cube types for malus removal.
+     * Called by showHandleCubesMalusMenu to inform user about next cube to remove.
+     */
+    private void showAvailableCubeTypes() {
+        if (storageManager != null && storageManager.isInMalusMode()) {
+            CargoCube mostPrecious = storageManager.getMostPreciousCubeAvailable();
+            if (mostPrecious != null) {
+                List<Coordinates> validOptions = storageManager.getValidStorageOptionsForMostPreciousCube();
+                showMessage("Next cube to remove: " + mostPrecious.name() + " (from " +
+                        validOptions.size() + " storage(s))", STANDARD);
+            }
+        }
+    }
+
+    /**
+     * Shows valid storage options when user makes invalid selection.
+     * Called by cube malus input handling to guide user to correct storages.
+     */
+    private void showValidStorageOptions(CargoCube cubeType) {
+        if (storageManager != null && storageManager.isInMalusMode()) {
+            List<Coordinates> validCoords = storageManager.getValidStorageOptionsForMostPreciousCube();
+            showMessage("Valid storage coordinates for " + cubeType.name() + " cubes:", STANDARD);
+            for (Coordinates coord : validCoords) {
+                showMessage("  - (" + coord.getX() + ", " + coord.getY() + ")", STANDARD);
+            }
+        }
+    }
+
 }
+
 

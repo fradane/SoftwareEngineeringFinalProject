@@ -1408,6 +1408,16 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                 .sum();
     }
 
+    @Override
+    public Integer getBatteries() {
+        List<Component> batteryBoxes = new ArrayList<>(componentsPerType.getOrDefault(BatteryBox.class, Collections.emptyList())); // necessario fare la new ArrayList perchè emptyList è immutabile
+
+        return batteryBoxes.stream()
+                .map(BatteryBox.class::cast)
+                .mapToInt(BatteryBox::getRemainingBatteries)
+                .sum();
+    }
+
     public void ejectAliens() {
         getCoordinatesAndCabinsWithCrew().forEach((coords, cabin) -> {
             if (cabin.getInhabitants().contains(CrewMember.PURPLE_ALIEN) || cabin.getInhabitants().contains(CrewMember.BROWN_ALIEN))
