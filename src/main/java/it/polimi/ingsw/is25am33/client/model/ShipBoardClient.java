@@ -450,6 +450,8 @@ public interface ShipBoardClient {
 
     Map<Coordinates, Storage> getCoordinatesAndStorages();
 
+    Map<Coordinates, BatteryBox> getCoordinatesAndBatteries();
+
     /**
      * Returns a map where keys are coordinates and values are Cabin components that have crew members.
      * Only includes coordinates that have Cabin components with at least one inhabitant.
@@ -457,6 +459,8 @@ public interface ShipBoardClient {
      * @return A map of coordinates to Cabin objects with crew
      */
     Map<Coordinates, Cabin> getCoordinatesAndCabinsWithCrew();
+
+    Map<Coordinates, Cabin> getCoordinatesAndCabins();
 
     /**
      * Restituisce una mappa di cabine connesse a moduli di supporto vitale.
@@ -477,5 +481,6 @@ public interface ShipBoardClient {
     void setNotActiveComponents(List<Component> notActiveComponents);
 
     long getNumberOfComponents();
+
 
 }

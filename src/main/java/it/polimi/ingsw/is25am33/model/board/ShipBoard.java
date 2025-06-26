@@ -292,7 +292,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             focusedComponent.insertInComponentsMap(componentsPerType);
 
             if(notActiveComponents.contains(focusedComponent))
-                notActiveComponents.remove(focusedComponent);
+                removeComponentByReference(notActiveComponents, focusedComponent);
 
             gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
                     clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
@@ -307,6 +307,18 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
             });
 
             focusedComponent = null;
+        }
+    }
+
+    private void removeComponentByReference(List<Component> list, Component target) {
+        if (list == null || target == null) return;
+
+        for (Iterator<Component> iterator = list.iterator(); iterator.hasNext(); ) {
+            Component c = iterator.next();
+            if (c == target) {
+                iterator.remove();
+                break; // Rimuove solo la prima occorrenza per riferimento
+            }
         }
     }
 
@@ -1173,8 +1185,15 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         Class<?> componentClass = component.getClass();
         List<Component> componentsList = componentsPerType.get(componentClass);
         if (componentsList != null) {
-            componentsList.remove(component);
-            // Se la lista diventa vuota, potresti volerla rimuovere dalla mappa
+            // Rimuove usando ==
+            for (Iterator<Component> iterator = componentsList.iterator(); iterator.hasNext(); ) {
+                Component c = iterator.next();
+                if (c == component) {
+                    iterator.remove();
+                    break; // Esci dopo aver rimosso il primo match con ==
+                }
+            }
+            // Se la lista diventa vuota, rimuovila dalla mappa
             if (componentsList.isEmpty()) {
                 componentsPerType.remove(componentClass);
             }
@@ -1223,6 +1242,48 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                     if (cabin.hasInhabitants()) {
                         result.put(new Coordinates(i, j), cabin);
                     }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a map where keys are coordinates and values are Cabin components (with or without inhabitants).
+     *
+     * @return A map of coordinates to Cabin objects
+     */
+    @JsonIgnore
+    public Map<Coordinates, Cabin> getCoordinatesAndCabins() {
+        Map<Coordinates, Cabin> result = new HashMap<>();
+
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                if (isValidPosition(i, j) && shipMatrix[i][j] instanceof Cabin) {
+                    Cabin cabin = (Cabin) shipMatrix[i][j];
+                    result.put(new Coordinates(i, j), cabin);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a map where keys are coordinates and values are Battery components.
+     *
+     * @return A map of coordinates to BatteryBox objects
+     */
+    @JsonIgnore
+    public Map<Coordinates, BatteryBox> getCoordinatesAndBatteries() {
+        Map<Coordinates, BatteryBox> result = new HashMap<>();
+
+        for (int i = 0; i < BOARD_DIMENSION; i++) {
+            for (int j = 0; j < BOARD_DIMENSION; j++) {
+                if (isValidPosition(i, j) && shipMatrix[i][j] instanceof BatteryBox) {
+                    BatteryBox batteryBox = (BatteryBox) shipMatrix[i][j];
+                    result.put(new Coordinates(i, j), batteryBox);
                 }
             }
         }

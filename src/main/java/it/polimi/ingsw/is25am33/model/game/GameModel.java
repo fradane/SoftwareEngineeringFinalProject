@@ -844,8 +844,9 @@ public class GameModel {
             Component[][] shipMatrix = shipBoard.getShipMatrix();
             Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
             Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+            List<Component> notActiveComponentsList = shipBoard.getNotActiveComponents();
 
-            clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+            clientController.notifyInvalidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType, notActiveComponentsList);
         });
     }
 
@@ -879,8 +880,9 @@ public class GameModel {
             Component[][] shipMatrix = shipBoard.getShipMatrix();
             Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
             Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+            List<Component> notActiveComponentsList = shipBoard.getNotActiveComponents();
 
-            clientController.notifyValidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType);
+            clientController.notifyValidShipBoard(nicknameToNotify, nicknameToNotify, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType, notActiveComponentsList);
 
         });
     }
@@ -1017,7 +1019,7 @@ public class GameModel {
                 shipBoard.getMainCabin().fillCabin(CrewMember.HUMAN);
 
             gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyShipBoardUpdate(nicknameToNotify, player.getNickname(), shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
+                clientController.notifyShipBoardUpdate(nicknameToNotify, player.getNickname(), shipBoard.getShipMatrix(), shipBoard.getComponentsPerType(), shipBoard.getNotActiveComponents());
             });
         }
     }

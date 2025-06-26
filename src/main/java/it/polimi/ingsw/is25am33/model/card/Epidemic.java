@@ -117,7 +117,7 @@ public class Epidemic extends AdventureCard{
         cabinCoordinatesWithNeighbors.forEach(coord -> ((Cabin)currShipBoard.getShipMatrix()[coord.getX()][coord.getY()]).removeMember());
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, currPlayer.getNickname(), currShipBoard.getShipMatrix(), currShipBoard.getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currPlayer.getNickname(), currShipBoard.getShipMatrix(), currShipBoard.getComponentsPerType(), currShipBoard.getNotActiveComponents());
         });
 
         gameModel.getGameClientNotifier().notifyClients(Set.of(currPlayer.getNickname()), (nicknameToNotify, clientController) -> {

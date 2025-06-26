@@ -2067,50 +2067,38 @@ public class ClientCLIView implements ClientView {
             return;
         }
 
-        List<BatteryBox> batteryBoxes = shipBoard.getBatteryBoxes();
+        Map<Coordinates, BatteryBox> coordinatesAndBatteries = shipBoard.getCoordinatesAndBatteries();
         
-        if (batteryBoxes.isEmpty()) {
+        if (coordinatesAndBatteries.isEmpty()) {
             batteryInfo.append("No battery boxes available on this ship.\n");
         } else {
             int totalBatteries = 0;
             int totalCapacity = 0;
             
-            // Find coordinates for each battery box
-            Component[][] shipMatrix = shipBoard.getShipMatrix();
-            for (BatteryBox batteryBox : batteryBoxes) {
-                Coordinates coords = null;
-                // Search for battery box coordinates in the ship matrix
-                for (int i = 0; i < shipMatrix.length; i++) {
-                    for (int j = 0; j < shipMatrix[i].length; j++) {
-                        if (shipMatrix[i][j] == batteryBox) {
-                            coords = new Coordinates(i, j);
-                            break;
-                        }
-                    }
-                    if (coords != null) break;
+            // Process battery boxes using the coordinates map
+            for (Map.Entry<Coordinates, BatteryBox> entry : coordinatesAndBatteries.entrySet()) {
+                Coordinates coords = entry.getKey();
+                BatteryBox batteryBox = entry.getValue();
+                
+                int remaining = batteryBox.getRemainingBatteries();
+                int max = batteryBox.getMaxBatteryCapacity();
+                totalBatteries += remaining;
+                totalCapacity += max;
+                
+                batteryInfo.append(String.format("%s(%d,%d)%s: BatteryBox - %d/%d batteries remaining",
+                    ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, remaining, max));
+                
+                if (remaining == 0) {
+                    batteryInfo.append(" " + ANSI_RED + "[EMPTY]" + ANSI_RESET);
+                } else if (remaining == max) {
+                    batteryInfo.append(" " + ANSI_GREEN + "[FULL]" + ANSI_RESET);
                 }
                 
-                if (coords != null) {
-                    int remaining = batteryBox.getRemainingBatteries();
-                    int max = batteryBox.getMaxBatteryCapacity();
-                    totalBatteries += remaining;
-                    totalCapacity += max;
-                    
-                    batteryInfo.append(String.format("%s(%d,%d)%s: BatteryBox - %d/%d batteries remaining",
-                        ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, remaining, max));
-                    
-                    if (remaining == 0) {
-                        batteryInfo.append(" " + ANSI_RED + "[EMPTY]" + ANSI_RESET);
-                    } else if (remaining == max) {
-                        batteryInfo.append(" " + ANSI_GREEN + "[FULL]" + ANSI_RESET);
-                    }
-                    
-                    batteryInfo.append("\n");
-                }
+                batteryInfo.append("\n");
             }
             
             batteryInfo.append(String.format("\nTotal Battery Boxes: %d | Total Batteries Available: %d/%d\n",
-                batteryBoxes.size(), totalBatteries, totalCapacity));
+                coordinatesAndBatteries.size(), totalBatteries, totalCapacity));
         }
         
         showMessage(batteryInfo.toString(), STANDARD);
@@ -2130,10 +2118,10 @@ public class ClientCLIView implements ClientView {
             return;
         }
 
-        List<Cabin> cabins = shipBoard.getCabin();
+        Map<Coordinates, Cabin> coordinatesAndCabins = shipBoard.getCoordinatesAndCabins();
         MainCabin mainCabin = shipBoard.getMainCabin();
         
-        if (cabins.isEmpty() && mainCabin == null) {
+        if (coordinatesAndCabins.isEmpty() && mainCabin == null) {
             cabinInfo.append("No cabins available on this ship.\n");
         } else {
             int totalCrewMembers = 0;
@@ -2141,90 +2129,68 @@ public class ClientCLIView implements ClientView {
             int alienCount = 0;
             int totalCabins = 0;
             
-            Component[][] shipMatrix = shipBoard.getShipMatrix();
-            
-            // Process regular cabins
-            for (Cabin cabin : cabins) {
-                Coordinates coords = null;
-                // Search for cabin coordinates in the ship matrix
-                for (int i = 0; i < shipMatrix.length; i++) {
-                    for (int j = 0; j < shipMatrix[i].length; j++) {
-                        if (shipMatrix[i][j] == cabin) {
-                            coords = new Coordinates(i, j);
-                            break;
+            // Process regular cabins using the coordinates map
+            for (Map.Entry<Coordinates, Cabin> entry : coordinatesAndCabins.entrySet()) {
+                Coordinates coords = entry.getKey();
+                Cabin cabin = entry.getValue();
+                totalCabins++;
+
+                if(cabin==mainCabin)
+                    continue;
+                
+                List<CrewMember> inhabitants = cabin.getInhabitants();
+                
+                cabinInfo.append(String.format("%s(%d,%d)%s: Cabin - %d inhabitants → ",
+                    ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, 
+                    inhabitants.size()));
+                
+                if (inhabitants.isEmpty()) {
+                    cabinInfo.append(ANSI_CYAN + "[EMPTY]" + ANSI_RESET);
+                } else {
+                    List<String> crewList = new ArrayList<>();
+                    for (CrewMember crew : inhabitants) {
+                        crewList.add(crew.name());
+                        totalCrewMembers++;
+                        if (crew.name().equals("HUMAN")) {
+                            humanCount++;
+                        } else {
+                            alienCount++;
                         }
                     }
-                    if (coords != null) break;
+                    cabinInfo.append(String.join(" ", crewList));
                 }
                 
-                if (coords != null) {
-                    totalCabins++;
-                    List<CrewMember> inhabitants = cabin.getInhabitants();
-                    
-                    cabinInfo.append(String.format("%s(%d,%d)%s: Cabin - %d inhabitants → ",
-                        ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, 
-                        inhabitants.size()));
-                    
-                    if (inhabitants.isEmpty()) {
-                        cabinInfo.append(ANSI_CYAN + "[EMPTY]" + ANSI_RESET);
-                    } else {
-                        List<String> crewList = new ArrayList<>();
-                        for (CrewMember crew : inhabitants) {
-                            crewList.add(crew.name());
-                            totalCrewMembers++;
-                            if (crew.name().equals("HUMAN")) {
-                                humanCount++;
-                            } else {
-                                alienCount++;
-                            }
-                        }
-                        cabinInfo.append(String.join(" ", crewList));
-                    }
-                    
-                    cabinInfo.append("\n");
-                }
+                cabinInfo.append("\n");
             }
             
-            // Process main cabin
+            // Process main cabin - always at position (7,7) if not destroyed
             if (mainCabin != null) {
-                Coordinates coords = null;
-                // Search for main cabin coordinates in the ship matrix
-                for (int i = 0; i < shipMatrix.length; i++) {
-                    for (int j = 0; j < shipMatrix[i].length; j++) {
-                        if (shipMatrix[i][j] == mainCabin) {
-                            coords = new Coordinates(i, j);
-                            break;
+                totalCabins++;
+                List<CrewMember> inhabitants = mainCabin.getInhabitants();
+                
+                cabinInfo.append(String.format("%s(7,7)%s: MainCabin - %d inhabitants → ",
+                    ANSI_YELLOW, ANSI_RESET, inhabitants.size()));
+                
+                if (inhabitants.isEmpty()) {
+                    cabinInfo.append(ANSI_CYAN + "[EMPTY]" + ANSI_RESET);
+                } else {
+                    List<String> crewList = new ArrayList<>();
+                    for (CrewMember crew : inhabitants) {
+                        crewList.add(crew.name());
+                        totalCrewMembers++;
+                        if (crew.name().equals("HUMAN")) {
+                            humanCount++;
+                        } else {
+                            alienCount++;
                         }
                     }
-                    if (coords != null) break;
+                    cabinInfo.append(String.join(" ", crewList));
                 }
                 
-                if (coords != null) {
-                    totalCabins++;
-                    List<CrewMember> inhabitants = mainCabin.getInhabitants();
-                    
-                    cabinInfo.append(String.format("%s(%d,%d)%s: MainCabin - %d inhabitants → ",
-                        ANSI_YELLOW, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, 
-                        inhabitants.size()));
-                    
-                    if (inhabitants.isEmpty()) {
-                        cabinInfo.append(ANSI_CYAN + "[EMPTY]" + ANSI_RESET);
-                    } else {
-                        List<String> crewList = new ArrayList<>();
-                        for (CrewMember crew : inhabitants) {
-                            crewList.add(crew.name());
-                            totalCrewMembers++;
-                            if (crew.name().equals("HUMAN")) {
-                                humanCount++;
-                            } else {
-                                alienCount++;
-                            }
-                        }
-                        cabinInfo.append(String.join(" ", crewList));
-                    }
-                    
-                    cabinInfo.append("\n");
-                }
+                cabinInfo.append("\n");
+            } else {
+                cabinInfo.append(String.format("%s(7,7)%s: MainCabin - %s[DESTROYED]%s\n",
+                    ANSI_YELLOW, ANSI_RESET, ANSI_RED, ANSI_RESET));
             }
             
             cabinInfo.append(String.format("\nTotal Cabins: %d | Total Crew Members: %d (%d Humans, %d Aliens)\n",
@@ -3508,21 +3474,58 @@ public class ClientCLIView implements ClientView {
             }
             clientController.showShipBoard(input.trim().split("\\s+")[1]);
             return;
-        }
-        else if (input.trim().split("\\s+")[0].equals("cube")) {
+        } else if (input.trim().split("\\s+")[0].equals("cube")) {
             if (input.trim().split("\\s+").length != 2) {
                 showMessage("Invalid cubes command", ERROR);
                 return;
             }
-            clientController.showCubes(input.trim().split("\\s+")[1]);
+            showStoragesInfo(input.trim().split("\\s+")[1]);
+            return;
+        } else if (input.trim().split("\\s+")[0].equals("battery")) {
+            if (input.trim().split("\\s+").length != 2) {
+                showMessage("Invalid cubes command", ERROR);
+                return;
+            }
+            showBatteryBoxesInfo(input.trim().split("\\s+")[1]);
+            return;
+        } else if (input.trim().split("\\s+")[0].equals("crew")) {
+                if (input.trim().split("\\s+").length != 2) {
+                    showMessage("Invalid cubes command", ERROR);
+                    return;
+                }
+                showCabinsInfo(input.trim().split("\\s+")[1]);
+                return;
+        }else if (input.trim().split("\\s+")[0].equals("notActiveComponent")) {
+            if (input.trim().split("\\s+").length != 2) {
+                showMessage("Invalid cubes command", ERROR);
+                return;
+            }
+            showNotActiveComponentsInfo(input.trim().split("\\s+")[1]);
+            return;
+        }else if (input.equals("credit")) {
+            showPlayerCreditsInfo();
             return;
         } else if (input.equals("rank")) {
             showCurrentRanking();
             return;
         } else if (input.equals("land")){
+            GameState state = clientModel.getGameState();
+            if(!(state==GameState.PLAY_CARD || state == GameState.CHECK_PLAYERS || state==GameState.DRAW_CARD)){
+                showMessage("You cannot land right now!", ERROR);
+                return;
+            }
             clientController.land();
             return;
         } else if (input.equals("skipToLastCard")) {
+            GameState currentState = clientModel.getGameState();
+            if (currentState == GameState.SETUP ||
+                    currentState == GameState.BUILD_SHIPBOARD ||
+                    currentState == GameState.CHECK_SHIPBOARD ||
+                    currentState == GameState.PLACE_CREW ||
+                    currentState == GameState.END_GAME) {
+                showMessage("You cannot skip cards right now!", ERROR);
+                return;
+            }
             clientController.skipToLastCard();
             return;
         }

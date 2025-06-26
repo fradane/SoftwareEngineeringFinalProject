@@ -115,7 +115,7 @@ public class FreeSpace extends AdventureCard implements PlayerMover {
             Player currentPlayer=gameModel.getCurrPlayer();
 
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-               clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
+               clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
             });
 
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsForward);

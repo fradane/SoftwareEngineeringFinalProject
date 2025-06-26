@@ -456,22 +456,24 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
+    public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyInvalidShipBoard");
         outMessage.setParamString(shipOwnerNickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
         outMessage.setParamIncorrectlyPositionedCoordinates(incorrectlyPositionedComponentsCoordinates);
         outMessage.setParamComponentsPerType(componentsPerType);
+        outMessage.setParamComponentList(notActiveComponentsList);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
     @Override
-    public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
+    public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyValidShipBoard");
         outMessage.setParamString(shipOwnerNickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
         outMessage.setParamIncorrectlyPositionedCoordinates(incorrectlyPositionedComponentsCoordinates);
         outMessage.setParamComponentsPerType(componentsPerType);
+        outMessage.setParamComponentList(notActiveComponentsList);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
@@ -591,11 +593,12 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
-    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException {
+    public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyShipBoardUpdate");
         outMessage.setParamString(nickname);
         outMessage.setParamShipBoardAsMatrix(shipMatrix);
         outMessage.setParamComponentsPerType(componentsPerType);
+        outMessage.setParamComponentList(notActiveComponentsList);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }

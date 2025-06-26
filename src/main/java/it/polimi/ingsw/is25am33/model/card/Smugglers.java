@@ -155,7 +155,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
         });
 
         if (currPlayerCannonPower > requiredFirePower)
@@ -266,7 +266,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
         }
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(), gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
         });
 
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
@@ -339,7 +339,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             chosenBatteryBoxes.forEach(BatteryBox::useBattery);
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
         });
 
         if (gameModel.hasNextPlayer()) {
@@ -366,7 +366,8 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
-                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(),
+                    gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
             });
             
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
@@ -388,7 +389,8 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
-                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(),
+                    gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
             });
             
             // Rimani in HANDLE_CUBES_REWARD per il retry
