@@ -727,31 +727,9 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                 Hidden components are no longer available, look among the visible ones...""", false);
     }
 
-//    public void prepareForPhaseTransition() {
-//        // Pulisci eventuali effetti o evidenziazioni
-//        if (this.boardsController != null) {
-//            this.boardsController.removeHighlightColor();
-//        }
-//
-//        // Nascondi elementi dell'interfaccia che sono specifici di questa fase
-//        Platform.runLater(() -> {
-//            if (visibleComponentsPanel != null) visibleComponentsPanel.setVisible(false);
-//            if (componentsBoxV != null) componentsBoxV.setVisible(false);
-//            if (componentsBoxH != null) componentsBoxH.setVisible(false);
-//            if (componentControlsPanel != null) componentControlsPanel.setVisible(false);
-//            if (littleDeckFlowPane != null) {
-//                littleDeckFlowPane.setVisible(false);
-//                littleDeckFlowPane.setManaged(false);
-//            }
-//            if (pawnButtonPane != null) {
-//                pawnButtonPane.setVisible(false);
-//                pawnButtonPane.setManaged(false);
-//            }
-//            if (prefabShipsMenu != null) {
-//                prefabShipsMenu.setVisible(false);
-//                prefabShipsMenu.setManaged(false);
-//            }
-//            if (bottomBox != null) bottomBox.setVisible(false);
-//        });
-//    }
+    public void showStolenVisibleComponent() {
+        showMessage("""
+                The component you picked was stolen, try with another one""", false);
+    }
+
 }

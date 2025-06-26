@@ -84,8 +84,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
 
     @Override
     public boolean registerWithNickname(String nickname, CallableOnClientController controller) throws RemoteException {
-        if (clients.containsKey(nickname)) return false;
-        clients.put(nickname, controller);
+        if (clients.putIfAbsent(nickname, controller) != null) return false;
         System.out.println("New user registered with nickname: " + nickname);
 
         new Thread(()->{
@@ -130,10 +129,12 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
     }
 
     public List<GameInfo> getAvailableGames() {
-        return gameControllers.values().stream()
-                .map(GameController::getGameInfo)
-                .filter(game -> !game.isStarted() && !game.isFull())
-                .toList();
+        synchronized (gameControllers) {
+            return gameControllers.values().stream()
+                    .map(GameController::getGameInfo)
+                    .filter(game -> !game.isStarted() && !game.isFull())
+                    .toList();
+        }
     }
 
     @Override

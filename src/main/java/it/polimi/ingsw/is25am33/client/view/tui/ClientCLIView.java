@@ -442,6 +442,12 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void showStolenVisibleComponent() {
+        showMessage("The component you picked was stolen, choose another one", NOTIFICATION_INFO);
+        showBuildShipBoardMenu();
+    }
+
+    @Override
     public void notifyPlayerJoined(String nickname, GameInfo gameInfo) {
         showMessage(nickname + " joined the game with color "+ gameInfo.getConnectedPlayers().get(nickname) + ". Players: " +
                 gameInfo.getConnectedPlayersNicknames().size() + "/" +

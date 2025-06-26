@@ -7,7 +7,7 @@ public class ServerSerializer{
 
     private static final ObjectMapper mapper = new ObjectMapper();
     static {
-        mapper.registerModule(new Jdk8Module());       // <-- aggiungi
+        mapper.registerModule(new Jdk8Module());
         // eventuali altri moduli (JavaTimeModule, ecc.)
     }
 

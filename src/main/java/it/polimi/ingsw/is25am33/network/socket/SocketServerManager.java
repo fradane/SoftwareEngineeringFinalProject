@@ -375,6 +375,12 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
     @Override
+    public void notifyStolenVisibleComponent(String nicknameToNotify) {
+        SocketMessage outMessage = new SocketMessage("server", "notifyStolenVisibleComponent");
+        writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
+    }
+
+    @Override
     public void notifyCurrAdventureCardUpdate(String nicknameToNotify, ClientCard adventureCard) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCardUpdate");
         outMessage.setParamClientCard(adventureCard);

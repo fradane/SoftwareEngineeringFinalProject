@@ -408,6 +408,12 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
                     }
                     break;
 
+                case "notifyStolenVisibleComponent":
+                    if (clientController != null) {
+                        clientController.notifyStolenVisibleComponent(nickname);
+                    }
+                    break;
+
                 case "notifyShipPartsGeneratedDueToRemoval":
                     if (clientController != null) {
                         clientController.notifyShipPartsGeneratedDueToRemoval(
