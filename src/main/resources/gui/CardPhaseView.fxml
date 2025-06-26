@@ -5,7 +5,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="700.0" prefWidth="1200.0"
+<BorderPane
             styleClass="game-background"
             stylesheets="@/galaxy-truckers.css"
             xmlns="http://javafx.com/javafx/17.0.12"

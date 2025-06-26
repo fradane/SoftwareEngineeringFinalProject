@@ -27,14 +27,96 @@ import java.util.stream.IntStream;
  */
 public class Deck {
 
+    /**
+     * A stack containing all adventure cards available in the game. This stack serves
+     * as the primary collection of cards, loaded during setup, and is used to populate
+     * various decks throughout the game.
+     *
+     * This field is initialized as a {@link Stack}, allowing for operations such as
+     * shuffling, drawing, and organizing cards according to game rules. The cards
+     * are instances of {@code AdventureCard} and represent distinct scenarios or events
+     * within the game.
+     *
+     * The content of this stack is managed through various methods in the {@code Deck}
+     * class, such as methods for loading cards, creating decks, and retrieving specific
+     * subsets of cards.
+     *
+     * This list is immutable once initialized to ensure consistent management of the
+     * game's adventure card collection.
+     */
     private final List<AdventureCard> allCards = new Stack<>();
+    /**
+     * Represents a collection of "little" visible decks in the game, where each deck is a
+     * list of adventure cards. Each inner list within this structure represents a distinct
+     * subset of visible cards in the game. These decks are organized for specific purposes
+     * in the game's mechanics and are initialized with three empty decks.
+     *
+     * This variable is immutable and meant to maintain a reference to the game's current
+     * state of visible "little" decks, ensuring their consistent accessibility during play.
+     * The decks are often manipulated and populated using various class methods, reflecting
+     * game state changes as players interact with the system.
+     */
     private final List<List<AdventureCard>> littleVisibleDecks = new ArrayList<>(List.of(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+    /**
+     * Represents a private deck of non-visible adventure cards within the game's little decks.
+     * This deck consists of a subset of cards intentionally hidden from the players during gameplay.
+     * It is used for managing the non-visible state of the little deck system in the game.
+     */
     private final List<AdventureCard> littleNotVisibleDeck = new ArrayList<>();
+    /**
+     * Stores the string representations of the little visible decks.
+     * Each inner list corresponds to a specific deck, and the strings
+     * represent the cards within those decks. This variable is populated
+     * to avoid transferring full card objects over the network, instead
+     * providing a lightweight representation for communication purposes.
+     */
     private final List<List<String>> littleVisibleDecksString = new ArrayList<>();
+    /**
+     * Represents the main game deck that holds a collection of adventure cards.
+     * This deck is used in gameplay to draw and manage cards as part of the game flow.
+     * The stack structure enforces a Last-In-First-Out (LIFO) mechanism, allowing cards
+     * to be drawn from the top and added to the bottom.
+     *
+     * The deck is populated and managed through various methods of the containing class.
+     * It can be shuffled, cards can be drawn based on specific game logic, and its state
+     * can be queried or modified depending on the current stage of the game.
+     */
     private final Stack<AdventureCard> gameDeck = new Stack<>();
+    /**
+     * A notifier instance responsible for handling communication and updates
+     * between the game system and its clients during gameplay events.
+     *
+     * This component is used to facilitate notifications about game state
+     * changes, ensuring that all connected clients remain synchronized and
+     * informed of important updates that occur during the game's progression.
+     */
     private GameClientNotifier gameClientNotifier;
+    /**
+     * Tracks the availability status of the "little decks" in the game.
+     * Each element in the list corresponds to a specific "little deck". If the value
+     * is {@code true}, the respective deck is free and available for use. If the value
+     * is {@code false}, the deck is currently occupied or unavailable.
+     *
+     * This list is initialized with every "little deck" marked as available.
+     * Updates to the list ensure synchronization with the game's state regarding
+     * the availability of these decks.
+     */
     private final List<Boolean> isLittleDeckFree = new ArrayList<>(List.of(true, true, true));
+    /**
+     * Represents whether the first card in the game deck has been drawn.
+     * This variable is used to track the game state and determine if
+     * specific actions or rules should apply during the card drawing process.
+     *
+     * Initially set to {@code false}, it is updated to {@code true} once
+     * the first card is drawn from the game deck.
+     */
     private boolean isFirstCardDrawn = false;
+    /**
+     * A boolean flag indicating whether the game is in test flight mode.
+     * Test flight mode alters the behavior of certain game functionalities,
+     * such as card loading and initial card drawing, to facilitate testing
+     * or specific game scenarios.
+     */
     private boolean isTestFlight;
 
     public void setGameClientNotifier(GameClientNotifier gameClientNotifier){
@@ -195,25 +277,16 @@ public class Deck {
 
         List<AdventureCard> cards = new ArrayList<>();
 
-//        cards.addAll(Deck.loadAbandonedShipFromJson());
-//        cards.addAll(Deck.loadAbandonedStationFromJson());
-//        cards.addAll(Deck.loadFreeSpaceFromJson());
-//        cards.addAll(Deck.loadPiratesFromJson());
-//        cards.addAll(Deck.loadSlaveTradersFromJson());
-//        cards.addAll(Deck.loadSmugglersFromJson());
-//        cards.addAll(Deck.loadStardustFromJson());
-//        cards.addAll(Deck.loadWarFieldFromJson());
-//        cards.addAll(Deck.loadMeteoriteStormFromJson());
-//        cards.addAll(Deck.loadEpidemicFromJson());
-//        cards.addAll(Deck.loadPlanetsFromJson());
-
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
-        cards.addAll(Deck.loadPlanetsFromJson());
+        cards.addAll(Deck.loadAbandonedShipFromJson());
+        cards.addAll(Deck.loadAbandonedStationFromJson());
+        cards.addAll(Deck.loadFreeSpaceFromJson());
+        cards.addAll(Deck.loadPiratesFromJson());
+        cards.addAll(Deck.loadSlaveTradersFromJson());
+        cards.addAll(Deck.loadSmugglersFromJson());
+        cards.addAll(Deck.loadStardustFromJson());
+        cards.addAll(Deck.loadWarFieldFromJson());
+        cards.addAll(Deck.loadMeteoriteStormFromJson());
+        cards.addAll(Deck.loadEpidemicFromJson());
         cards.addAll(Deck.loadPlanetsFromJson());
 
 
@@ -358,10 +431,23 @@ public class Deck {
         return warFields;
     }
 
+    /**
+     * Retrieves all the adventure cards available in the deck.
+     *
+     * @return a list containing all the AdventureCard objects in the deck.
+     */
     public List<AdventureCard> getAllCards() {
         return allCards;
     }
 
+    /**
+     * Checks if a specified little deck is available to use and marks it as unavailable if it is free.
+     * This method is thread-safe and ensures atomic updates to the little deck's availability state.
+     *
+     * @param littleDeckChoice The index (1-based) of the little deck to check for availability.
+     * @return {@code true} if the specified little deck is available and has been marked as unavailable,
+     *         {@code false} otherwise.
+     */
     public boolean isLittleDeckAvailable(int littleDeckChoice) {
         synchronized (isLittleDeckFree) {
             if (!isLittleDeckFree.get(littleDeckChoice - 1)) return false;
@@ -370,24 +456,60 @@ public class Deck {
         }
     }
 
+    /**
+     * Marks the specified little deck as available for future use by updating its state in the
+     * list that tracks the availability of little decks.
+     *
+     * @param littleDeckChoice The index of the little deck to be marked as free. The index value
+     *                         should be greater than or equal to 1.
+     */
     public void releaseLittleDeck(int littleDeckChoice) {
         synchronized (isLittleDeckFree) {
             isLittleDeckFree.set(littleDeckChoice - 1, true);
         }
     }
 
+    /**
+     * Retrieves the little visible decks, which consist of organized and accessible lists
+     * of adventure cards that are part of the game's current state. The little visible
+     * decks represent subsets of adventure cards that are intentionally visible to players
+     * within the game context.
+     *
+     * @return A list of lists containing adventure cards, where each inner list represents
+     *         a specific subset of visible adventure cards in the game's little decks.
+     */
     public List<List<AdventureCard>> getLittleVisibleDecks() {
         return littleVisibleDecks;
     }
 
+    /**
+     * Retrieves the "little" non-visible deck of adventure cards.
+     * This deck contains a subset of cards that are not currently visible in the playable game state.
+     *
+     * @return A list of {@link AdventureCard} objects representing the little non-visible deck.
+     */
     public List<AdventureCard> getLittleNotVisibleDeck() {
         return littleNotVisibleDeck;
     }
 
+    /**
+     * Retrieves the string representations of the little visible decks.
+     * This method returns a list of lists containing the string representation
+     * of cards in the little visible decks. The representation is pre-mapped
+     * to avoid transferring full card objects over the network.
+     *
+     * @return A list of lists of strings, where each inner list represents a deck.
+     */
     public List<List<String>> getLittleVisibleDecksString() {
         return littleVisibleDecksString;
     }
 
+    /**
+     * Skips all cards in the game deck except the last one. This method retains
+     * only the topmost card in the deck, removing all others.
+     *
+     * @throws IllegalStateException if the game deck contains only one or no cards.
+     */
     public void skipToLastCard() {
         if (gameDeck.size() <= 1) {
             throw new IllegalStateException("Cannot skip cards: only one or no cards remaining in deck");
@@ -397,6 +519,11 @@ public class Deck {
         gameDeck.push(lastCard);
     }
 
+    /**
+     * Checks if the game deck is empty, indicating that all cards have been finished.
+     *
+     * @return true if the game deck is empty, false otherwise
+     */
     public boolean hasFinishedCards(){
         return gameDeck.isEmpty();
     }

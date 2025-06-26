@@ -16,7 +16,7 @@ class Level2FlyingBoardTest {
     private GameModel gameModel = new GameModel("1234", 2, false);
     private FlyingBoard board = new Level2FlyingBoard();
     private Player player1, player2;
-    private GameClientNotifier gameClientNotifier= new GameClientNotifier(gameModel, new ConcurrentHashMap<>());
+    private GameClientNotifier gameClientNotifier= new GameClientNotifier(new ConcurrentHashMap<>());
 
     @BeforeEach
     void setUp() {

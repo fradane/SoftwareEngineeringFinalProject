@@ -131,10 +131,6 @@ public class ClientGuiController extends Application implements ClientView {
 //        primaryStage.show();
 //    }
 
-    @Override
-    public void notifyHourglassRestarted(int flipsLeft) {
-
-    }
 
     @Override
     public void setIsTestFlight(boolean isTestFlight) {
@@ -146,10 +142,6 @@ public class ClientGuiController extends Application implements ClientView {
 
     }
 
-    @Override
-    public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
-        return null;
-    }
 
     @Override
     public void checkShipBoardAfterAttackMenu() {
@@ -418,52 +410,7 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public void cancelInputWaiting() {
-
-    }
-
-    @Override
-    public int[] askCreateGame() {
-        return new int[0];
-    }
-
-    @Override
-    public String[] askJoinGame(List<GameInfo> games) {
-        return new String[0];
-    }
-
-//    @Override
-//    public void showMainMenu() {
-//
-//        javafx.application.Platform.runLater(() -> {
-//            try {
-//                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/MainMenuView.fxml"));
-//                Parent root = loader.load();
-//                mainMenuViewController = loader.getController();
-//                mainMenuViewController.setAvailableGames();
-//                primaryStage.setScene(new Scene(root));
-//                primaryStage.show();
-//            } catch (IOException e) {
-//                System.out.println("Error while loading the main menu view.");
-//                e.printStackTrace();
-//            }
-//        });
-//
-//    }
-
-    @Override
-    public int showGameMenu() {
-        return 0;
-    }
-
-    @Override
     public void notifyPlayerJoined(String nickname, GameInfo gameInfo) {
-
-    }
-
-    @Override
-    public void notifyPlayerLeft(String nickname, GameInfo gameInfo) {
-
     }
 
     @Override
@@ -473,41 +420,6 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void notifyGameStarted(GameState gameState) {
-
-    }
-
-    @Override
-    public void notifyGameEnded(String reason) {
-
-    }
-
-    @Override
-    public String askPlayerColor(List<PlayerColor> availableColors) {
-        return "";
-    }
-
-//    @Override
-//    public void showNewGameState() {
-//        if (clientModel.getGameState() == GameState.CREATE_DECK) {
-//            javafx.application.Platform.runLater(() -> {
-//                try {
-//                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/CardPhaseView.fxml"));
-//                    Parent root = loader.load();
-//                    cardPhaseController = loader.getController();
-//                    primaryStage.setScene(new Scene(root));
-//                    primaryStage.setFullScreen(true);
-//                    primaryStage.setMaximized(true);
-//                    primaryStage.show();
-//                } catch (IOException e) {
-//                    System.out.println("Error while loading the new card phase view.");
-//                    e.printStackTrace();
-//                }
-//            });
-//        }
-//    }
-
-    @Override
-    public void showDangerousObj() {
 
     }
 
@@ -555,11 +467,6 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public void notifyNoMoreComponentAvailable() {
-
-    }
-
-    @Override
     public void showShipBoard(ShipBoardClient shipBoard, String shipBoardOwnerNickname) {
 
     }
@@ -600,10 +507,6 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void notifyHourglassStarted(int flipsLeft, String nickname) {
-
-    }
-
-    public void showExitMenu(){
 
     }
 

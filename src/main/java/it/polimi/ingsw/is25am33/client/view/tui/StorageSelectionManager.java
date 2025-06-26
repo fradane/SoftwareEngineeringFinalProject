@@ -144,7 +144,7 @@ public class StorageSelectionManager {
                 // Se il cubo meno prezioso ha un valore maggiore del cubo corrente, avvisa l'utente
                 if (leastValuableCube.getValue() > currentCube.getValue()) {
                     //TODO farlo con showMessage
-                    System.out.println("ATTENZIONE: Il cubo meno prezioso nello storage (" +
+                    System.out.print("ATTENZIONE: Il cubo meno prezioso nello storage (" +
                             leastValuableCube + ", valore: " + leastValuableCube.getValue() +
                             ") è più prezioso del cubo corrente (" +
                             currentCube + ", valore: " + currentCube.getValue() + ")");

@@ -198,7 +198,6 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
             return false;
         }
 
-        // TODO
         if (!gameControllers.containsKey(gameId)) {
             return false;
         }

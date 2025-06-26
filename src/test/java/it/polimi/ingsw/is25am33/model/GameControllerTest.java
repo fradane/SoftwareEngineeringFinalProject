@@ -13,6 +13,7 @@ import it.polimi.ingsw.is25am33.model.card.*;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.Component;
 import it.polimi.ingsw.is25am33.model.component.LifeSupport;
+import it.polimi.ingsw.is25am33.model.dangerousObj.BigMeteorite;
 import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.ComponentTable;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -158,11 +159,6 @@ public class GameControllerTest {
 
             @Override
             public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
-
-            }
-
-            @Override
-            public void notifyCardStarted(String nicknameToNotify) throws IOException {
 
             }
 
@@ -329,6 +325,8 @@ public class GameControllerTest {
 
     @Test
     void testPlayerPicksHiddenComponent() {
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
+
         PlayerColor color = PlayerColor.BLUE;
         gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
@@ -355,6 +353,8 @@ public class GameControllerTest {
 
     @Test
     void testPlayerWantsToPlaceFocusedComponent() throws RemoteException {
+
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
         PlayerColor color = PlayerColor.BLUE;
         gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
@@ -380,6 +380,7 @@ public class GameControllerTest {
 
     @Test
     void testPlayerEndsBuildShipBoardPhase() {
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
         PlayerColor color = PlayerColor.BLUE;
         gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
@@ -390,15 +391,23 @@ public class GameControllerTest {
     }
 
     @Test
-    void testPlayerWantsToReleaseFocusedComponent() throws RemoteException {
+    void testPlayerWantsToReleaseFocusedComponent(){
+
         PlayerColor color = PlayerColor.BLUE;
         gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
         // Prima prendi un componente
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
         gameController.playerPicksHiddenComponent(PLAYER_NICKNAME);
 
         ShipBoard playerBoard = gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME).getPersonalBoard();
         Component focusedComponent = playerBoard.getFocusedComponent();
+
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerWantsToReleaseFocusedComponent(PLAYER_NICKNAME);
+        assertNotNull(focusedComponent);
+
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
 
         gameController.playerWantsToReleaseFocusedComponent(PLAYER_NICKNAME);
 
@@ -414,13 +423,18 @@ public class GameControllerTest {
         gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
         // Prima prendi un componente
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
         gameController.playerPicksHiddenComponent(PLAYER_NICKNAME);
 
         ShipBoard playerBoard = gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME).getPersonalBoard();
         Component focusedComponent = playerBoard.getFocusedComponent();
 
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.playerWantsToReserveFocusedComponent(PLAYER_NICKNAME);
+        assertNotNull(focusedComponent);
 
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
+        gameController.playerWantsToReserveFocusedComponent(PLAYER_NICKNAME);
         assertTrue(((Level2ShipBoard)playerBoard).getBookedComponents().contains(focusedComponent),
                 "Il componente dovrebbe essere tra i componenti prenotati");
     }
@@ -439,6 +453,7 @@ public class GameControllerTest {
 
     @Test
     void testSubmitCrewChoicesValid() throws IOException {
+
         // Preparazione
         PlayerColor color = PlayerColor.BLUE;
         gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
@@ -453,6 +468,7 @@ public class GameControllerTest {
         Cabin cabin = new Cabin(connectors);
         LifeSupport l1 = new LifeSupport(connectors,ColorLifeSupport.PURPLE);
 
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
         // Posizionamento cabina
         shipBoard.setFocusedComponent(cabin);
         gameController.playerWantsToPlaceFocusedComponent(PLAYER_NICKNAME, new Coordinates(6, 7), 1);
@@ -463,6 +479,7 @@ public class GameControllerTest {
         Map<Coordinates, CrewMember> validChoices = new HashMap<>();
         validChoices.put(new Coordinates(6, 7), CrewMember.PURPLE_ALIEN);
 
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.submitCrewChoices(PLAYER_NICKNAME, validChoices);
 
         assertTrue(shipBoard.getCabin().stream()
@@ -541,6 +558,7 @@ public class GameControllerTest {
 
     @Test
     void testPlayerPicksVisibleComponent(){
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
         PlayerColor color = PlayerColor.BLUE;
         gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
         ShipBoard shipBoard = gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME).getPersonalBoard();
@@ -554,49 +572,112 @@ public class GameControllerTest {
 
     @Test
     void testPlayerPlacesPown() {
+
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerPlacesPawn(PLAYER_NICKNAME);
+        assertFalse(gameController.getGameModel().getFlyingBoard().getRanking().containsKey(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME)));
+
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
         PlayerColor color = PlayerColor.BLUE;
         gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
         gameController.playerPlacesPawn(PLAYER_NICKNAME);
         assertTrue(gameController.getGameModel().getFlyingBoard().getRanking().containsKey(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME)));
+
     }
 
     @Test
     void testPlayerHAndleBigMeteorite(){
-        AdventureCard planets = new Planets(){
+
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerHandleBigMeteorite(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
+
+        Planets planets = new Planets();
+        planets.setGame(gameController.getGameModel());
+        planets.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrAdventureCard(planets);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerHandleBigMeteorite(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
+
+        MeteoriteStorm meteoriteStorm = new MeteoriteStorm(){
             @Override
             public void play(PlayerChoicesDataStructure playerChoices){
                 if(playerChoices.getChosenDoubleCannons().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
                     throw new IllegalArgumentException("Il giocatore non ha selezionato tutti i componenti necessari");
             }
         };
-        gameController.getGameModel().setCurrAdventureCard(planets);
-        assertDoesNotThrow(() -> gameController.playerHandleBigMeteorite(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7))));
+
+        meteoriteStorm.setGame(gameController.getGameModel());
+        meteoriteStorm.setMeteorites(List.of());
+        meteoriteStorm.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().setCurrAdventureCard(meteoriteStorm);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        assertDoesNotThrow( () -> gameController.playerHandleBigMeteorite(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7))));
+
     }
 
     @Test
     void testPlayerHAndleSmallObject(){
-        AdventureCard planets = new Planets(){
+
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerHandleSmallDanObj(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
+
+        Planets planets = new Planets();
+        planets.setGame(gameController.getGameModel());
+        planets.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrAdventureCard(planets);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerHandleSmallDanObj(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
+
+        MeteoriteStorm meteoriteStorm = new MeteoriteStorm(){
             @Override
             public void play(PlayerChoicesDataStructure playerChoices){
-                if(playerChoices.getChosenShield().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
+                if(playerChoices.getChosenDoubleCannons().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
                     throw new IllegalArgumentException("Il giocatore non ha selezionato tutti i componenti necessari");
             }
         };
-        gameController.getGameModel().setCurrAdventureCard(planets);
-        assertDoesNotThrow(() -> gameController.playerHandleSmallDanObj(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7))));
+
+        meteoriteStorm.setGame(gameController.getGameModel());
+        meteoriteStorm.setMeteorites(List.of());
+        meteoriteStorm.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().setCurrAdventureCard(meteoriteStorm);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        assertDoesNotThrow( () -> gameController.playerHandleSmallDanObj(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7))));
     }
 
     @Test
     void testPlayerWantsToVisitLocation(){
-        AdventureCard planets = new Planets(){
+
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerWantsToVisitLocation(PLAYER_NICKNAME,true);
+
+        Planets planets = new Planets();
+        planets.setGame(gameController.getGameModel());
+        planets.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrAdventureCard(planets);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerWantsToVisitLocation(PLAYER_NICKNAME,true);
+
+        AbandonedStation abandonedStation = new AbandonedStation(){
+
             @Override
             public void play(PlayerChoicesDataStructure playerChoices){
-                if(playerChoices==null)
+                if(playerChoices.getChosenDoubleCannons().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
                     throw new IllegalArgumentException("Il giocatore non ha selezionato tutti i componenti necessari");
             }
+
         };
-        gameController.getGameModel().setCurrAdventureCard(planets);
-        assertDoesNotThrow(() -> gameController.playerWantsToVisitLocation(PLAYER_NICKNAME,true));
+
+        abandonedStation.setGame(gameController.getGameModel());
+        abandonedStation.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().setCurrAdventureCard(abandonedStation);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        assertDoesNotThrow( () ->  gameController.playerWantsToVisitLocation(PLAYER_NICKNAME,true));
     }
 
     @Test
@@ -614,58 +695,160 @@ public class GameControllerTest {
 
     @Test
     void testPlayerChooseDoubleCannons(){
-        AdventureCard planets = new Planets(){
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerChoseDoubleCannons(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
+
+        Planets planets = new Planets();
+        planets.setGame(gameController.getGameModel());
+        planets.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrAdventureCard(planets);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerChoseDoubleCannons(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
+
+        MeteoriteStorm meteoriteStorm = new MeteoriteStorm(){
             @Override
             public void play(PlayerChoicesDataStructure playerChoices){
                 if(playerChoices.getChosenDoubleCannons().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
                     throw new IllegalArgumentException("Il giocatore non ha selezionato tutti i componenti necessari");
             }
         };
+
+        meteoriteStorm.setGame(gameController.getGameModel());
+        meteoriteStorm.setMeteorites(List.of());
+        meteoriteStorm.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().setCurrAdventureCard(meteoriteStorm);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        assertDoesNotThrow( () -> gameController.playerChoseDoubleCannons(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7))));
+    }
+
+    @Test
+    void testPlayerChooseCabin(){
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerChoseCabins(PLAYER_NICKNAME,List.of(new Coordinates(6,7)));
+
+        Planets planets = new Planets();
+        planets.setGame(gameController.getGameModel());
+        planets.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
         gameController.getGameModel().setCurrAdventureCard(planets);
-        assertDoesNotThrow(() -> gameController.playerChoseDoubleCannons(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7))));
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerChoseCabins(PLAYER_NICKNAME,List.of(new Coordinates(6,7)));
+
+        Epidemic epidemic = new Epidemic(){
+            @Override
+            public void play(PlayerChoicesDataStructure playerChoices){
+                if(playerChoices.getChosenDoubleCannons().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
+                    throw new IllegalArgumentException("Il giocatore non ha selezionato tutti i componenti necessari");
+            }
+        };
+
+        epidemic.setGame(gameController.getGameModel());
+        epidemic.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().setCurrAdventureCard(epidemic);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        assertDoesNotThrow( () -> gameController.playerChoseDoubleCannons(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7))));
     }
 
     @Test
     void testPlayerChooseDoubleEngine(){
-        AdventureCard planets = new Planets(){
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerChoseDoubleEngines(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
+
+        Planets planets = new Planets();
+        planets.setGame(gameController.getGameModel());
+        planets.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrAdventureCard(planets);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerChoseDoubleEngines(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
+
+        FreeSpace freeSpace = new FreeSpace(){
             @Override
             public void play(PlayerChoicesDataStructure playerChoices){
-                if(playerChoices.getChosenDoubleEngines().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
+                if(playerChoices.getChosenDoubleCannons().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
                     throw new IllegalArgumentException("Il giocatore non ha selezionato tutti i componenti necessari");
             }
         };
-        gameController.getGameModel().setCurrAdventureCard(planets);
-        assertDoesNotThrow(() -> gameController.playerChoseDoubleEngines(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7))));
+
+        freeSpace.setGame(gameController.getGameModel());
+        freeSpace.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().setCurrAdventureCard(freeSpace);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        assertDoesNotThrow( () -> gameController.playerChoseDoubleEngines(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7))));
     }
 
     @Test
     void testPlayerWantsToVisitPlanets(){
-        AdventureCard planets = new Planets(){
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerWantsToVisitPlanet(PLAYER_NICKNAME,1);
+
+        AbandonedStation abandonedStation = new AbandonedStation();
+        abandonedStation.setGame(gameController.getGameModel());
+        abandonedStation.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrAdventureCard(abandonedStation);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerWantsToVisitPlanet(PLAYER_NICKNAME,1);
+
+        Planets planets = new Planets(){
+
             @Override
             public void play(PlayerChoicesDataStructure playerChoices){
-                if(playerChoices.getChosenPlanetIndex()<0)
-                    throw new IllegalArgumentException("Il parametro non è valido");
+                if(playerChoices.getChosenDoubleCannons().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
+                    throw new IllegalArgumentException("Il giocatore non ha selezionato tutti i componenti necessari");
             }
+
         };
+
+        planets.setGame(gameController.getGameModel());
+        planets.setCurrState(CardState.START_CARD);
         gameController.getGameModel().setCurrAdventureCard(planets);
-        assertDoesNotThrow(() -> gameController.playerWantsToVisitPlanet(PLAYER_NICKNAME,2));
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        assertDoesNotThrow( () ->  gameController.playerWantsToVisitLocation(PLAYER_NICKNAME,true));
     }
 
     @Test
     void testPlayerChooseStorage(){
-        AdventureCard planets = new Planets(){
+
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerChoseStorage(PLAYER_NICKNAME,List.of(new Coordinates(6,7)));
+
+        AbandonedShip abandonedShip = new AbandonedShip();
+        abandonedShip.setGame(gameController.getGameModel());
+        abandonedShip.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrAdventureCard(abandonedShip);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerChoseStorage(PLAYER_NICKNAME,List.of(new Coordinates(6,7)));
+
+        Planets planets = new Planets(){
+
             @Override
             public void play(PlayerChoicesDataStructure playerChoices){
-                if(playerChoices.getChosenStorage().isEmpty())
-                    throw new IllegalArgumentException("Il parametro non è valido");
+                if(playerChoices.getChosenDoubleCannons().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
+                    throw new IllegalArgumentException("Il giocatore non ha selezionato tutti i componenti necessari");
             }
+
         };
+
+        planets.setGame(gameController.getGameModel());
+        planets.setCurrState(CardState.START_CARD);
         gameController.getGameModel().setCurrAdventureCard(planets);
-        assertDoesNotThrow(() -> gameController.playerChoseStorage(PLAYER_NICKNAME,List.of(new Coordinates(6,7))));
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        assertDoesNotThrow( () ->  gameController.playerChoseStorage(PLAYER_NICKNAME,List.of(new Coordinates(6,7))));
     }
 
     @Test
     void testPlayerWantsToFocusReservedComponent(){
+
+        gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
+
         PlayerColor color = PlayerColor.BLUE;
         gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
         ShipBoard shipBoard = gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME).getPersonalBoard();
@@ -679,7 +862,6 @@ public class GameControllerTest {
         Cabin cabin = new Cabin(connectors);
         Cabin cabin2 = new Cabin(connectors);
         Cabin cabin3 = new Cabin(connectors);
-
         shipBoard.setFocusedComponent(cabin);
         gameController.playerWantsToReserveFocusedComponent(PLAYER_NICKNAME);
         gameController.playerWantsToFocusReservedComponent(PLAYER_NICKNAME,0);
@@ -694,9 +876,6 @@ public class GameControllerTest {
         assertEquals(2, shipBoard.getBookedComponents().size());
         assertTrue(shipBoard.getBookedComponents().contains(cabin));
         assertTrue(shipBoard.getBookedComponents().contains(cabin2));
-
-
-
 
     }
 
@@ -715,15 +894,35 @@ public class GameControllerTest {
 
     @Test
     void testPlayerWantsToAcceptTheReward(){
-        AdventureCard planets = new Planets(){
+
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
+        gameController.playerWantsToAcceptTheReward(PLAYER_NICKNAME, true);
+
+        AbandonedShip abandonedShip = new AbandonedShip();
+        abandonedShip.setGame(gameController.getGameModel());
+        abandonedShip.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrAdventureCard(abandonedShip);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerWantsToAcceptTheReward(PLAYER_NICKNAME,true);
+
+        Smugglers smugglers = new Smugglers(){
+
             @Override
             public void play(PlayerChoicesDataStructure playerChoices){
-                if(playerChoices==null)
-                    throw new IllegalArgumentException("Il parametro non è valido");
+                if(playerChoices.getChosenDoubleCannons().isEmpty() || playerChoices.getChosenBatteryBoxes().isEmpty())
+                    throw new IllegalArgumentException("Il giocatore non ha selezionato tutti i componenti necessari");
             }
+
         };
-        gameController.getGameModel().setCurrAdventureCard(planets);
-        assertDoesNotThrow(() -> gameController.playerWantsToAcceptTheReward(PLAYER_NICKNAME,true));
+
+        smugglers.setGame(gameController.getGameModel());
+        smugglers.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().setCurrAdventureCard(smugglers);
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        assertDoesNotThrow( () ->  gameController.playerWantsToAcceptTheReward(PLAYER_NICKNAME,true));
+
     }
 
 

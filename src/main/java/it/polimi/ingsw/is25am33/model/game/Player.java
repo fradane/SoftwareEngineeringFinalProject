@@ -160,7 +160,7 @@ public class Player implements Serializable {
     /**
      * Sets the early landed status for the player.
      *
-     * @param earlyLanded a boolean indicating whether the player has landed early
+     * @param isEarlyLanded a boolean indicating whether the player has landed early
      */
     public void setEarlyLanded(boolean isEarlyLanded) {
         this.isEarlyLanded = isEarlyLanded;

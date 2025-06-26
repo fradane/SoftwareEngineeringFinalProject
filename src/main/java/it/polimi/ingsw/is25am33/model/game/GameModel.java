@@ -295,7 +295,7 @@ public class GameModel {
      *                          to their respective CallableOnClientController instances
      */
     public void createGameClientNotifier(ConcurrentHashMap<String, CallableOnClientController> clientControllers) {
-        this.gameClientNotifier = new GameClientNotifier(this, clientControllers);
+        this.gameClientNotifier = new GameClientNotifier( clientControllers);
         deck.setGameClientNotifier(gameClientNotifier);
         flyingBoard.setGameClientNotifier(gameClientNotifier);
         componentTable.setGameClientNotifier(gameClientNotifier);
@@ -541,16 +541,15 @@ public class GameModel {
         setCurrRanking(flyingBoard.getCurrentRanking());
         currAdventureCard.setGame(this);
         playerIterator = currRanking.iterator();
-        if (!playerIterator.hasNext()) {    // TODO sistemare per andare alla fase finale
+
+        if (!playerIterator.hasNext()) {
             System.err.println("NON CI SONO PIù GIOCATORI VIVI");
+            setCurrGameState(GameState.END_GAME);
             return;
         }
+
         setCurrPlayer(playerIterator.next());
         currAdventureCard.setCurrState(currAdventureCard.getFirstState());
-
-        getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyCardStarted(nicknameToNotify);
-        });
     }
 
     /**

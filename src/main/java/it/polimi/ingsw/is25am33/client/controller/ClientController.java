@@ -416,11 +416,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    @Override
-    public void notifyCardStarted(String nicknameToNotify) throws IOException {
-
-    }
-
     public void setCurrentShipPartsList(Set<Set<Coordinates>> shipParts) {
         this.currentShipPartsList = new ArrayList<>(shipParts);
     }
@@ -474,11 +469,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.refreshShipBoardOf(nickname);
     }
 
-    // TODO marco, controllare
-    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
-        //clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponentsCoordinates().add(component);
-    }
-
     /**
      * Notifies the client that the player called nickname has the focus on a specific component.
      *
@@ -502,7 +492,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws IOException {
         clientModel.getShipboardOf(nickname).getBookedComponents().add(component);
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
-        // TODO controllare metodo per riservare
         clientModel.refreshShipBoardOf(nickname);
     }
 
@@ -618,11 +607,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             view.showMessage("Wait for " + clientModel.getCurrentPlayer() + " to make his choice", NOTIFICATION_INFO);
         }
 
-
-//        if (clientModel.isMyTurn() && cardState != CardState.END_OF_CARD) {
-//            // Chiama direttamente il metodo showRelatedMenu sul CardState
-//            cardState.showRelatedMenu(view);
-//        }
     }
 
     @Override
@@ -698,16 +682,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.showMessage("GAME ENDED", STANDARD);
     }
 
-    //TODO probabilmente sarà da cancellare quando la fase di gioco funzionerà
-//    public void cardPhase() {
-//
-//        while(clientModel.getGameState() == GameState.PLAY_CARD) {
-//            if (clientModel.isMyTurn())
-//                clientModel.getCurrCardState().showRelatedMenu(view).accept(serverController, nickname);
-//        }
-//
-//    }
-
     public void notifyHourglassEnded() throws IOException {
         serverController.notifyHourglassEnded(nickname);
         if (clientModel.getHourglass().getFlipsLeft() == 0) {
@@ -729,10 +703,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void reserveFocusedComponent() {
         try {
-            // TODO aggiungere il caso in cui non si possa piu riservare
-            // PS gli aggiornamenti sul modello di chi fa l'azione li gestiscono le notify o chi fa l'azione?
-            // perche se io qua faccio book anche sul mio client model e poi mi arriva la notifica ne aggiungo due
-            //((Level2ShipBoard) clientModel.getShipboardOf(nickname)).book();
             if(clientModel.getShipboardOf(nickname).getBookedComponents().size() >= 2) {
                 view.showMessage("You cannot book more than 2 components", ERROR);
                 view.showPickedComponentAndMenu();
@@ -794,8 +764,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             handleRemoteException(e);
         } catch (IllegalArgumentException e) {
             view.showMessage("Invalid coordinates: " + e.getMessage() + "\n", ERROR);
-            // TODO togliere
-            System.err.println("Invalid coordinates: " + e.getMessage());
         }
     }
 
@@ -1019,7 +987,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords){
-        //TODO fare controlli di validità dei valori inseriti
         if(doubleEnginesCoords.size()!=batteryBoxesCoords.size())
             throw new IllegalArgumentException("the number of engines does not match the number of batteries");
 
@@ -1201,25 +1168,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void playerChoseStorage(String nickname, List<Coordinates> storageCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         List<Storage> storages = new ArrayList<>();
-
-        //TODO rimuovere la conversione a List<Storage>
-        if (!storageCoords.isEmpty()) {
-            for (Coordinates coords : storageCoords) {
-                if (coords.isCoordinateInvalid()) {
-                    // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
-                    storages.add(null);
-                } else {
-                    Component component = shipBoard.getComponentAt(coords);
-                    if (component instanceof Storage) {
-                        storages.add((Storage) component);
-                    } else {
-                        // Se le coordinate non puntano a uno storage, aggiungi null
-                        storages.add(null);
-                    }
-                }
-            }
-        }
-        // Se la lista è vuota, significa che il giocatore non può/non vuole salvare nessun cubo
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()

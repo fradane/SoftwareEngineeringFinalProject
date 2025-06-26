@@ -230,8 +230,7 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 break;
 
             case "playerChoseCabins":
-                //TODO non so perche c'è
-                //gameControllers.get(nickname).playerChoseCabin(nickname, inMessage.getParamCabinCoordinates());
+                gameControllers.get(nickname).playerChoseCabins(nickname, inMessage.getParamCabinCoordinates());
                 break;
 
             case "playerHandleSmallMeteorite":
@@ -284,12 +283,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
             case "requestSelectPrefabShip":
                 gameControllers.get(nickname).requestSelectPrefabShip(nickname, inMessage.getParamString());
-                break;
-
-            // TODO debug togliere prima o poi
-            case "showMessage":
-                String message = inMessage.getParamString();
-                gameControllers.get(nickname).showMessage(message);
                 break;
 
             case "PING":
@@ -484,11 +477,6 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         outMessage.setParamShipParts(shipParts);
         outMessage.setParamComponentsPerType(componentsPerType);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
-    }
-
-    @Override
-    public void notifyCardStarted(String nicknameToNotify) throws IOException {
-        //TODO
     }
 
     @Override

@@ -8,13 +8,11 @@ import it.polimi.ingsw.is25am33.model.board.Level2ShipBoard;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.PlayerChoicesDataStructure;
 import it.polimi.ingsw.is25am33.model.component.*;
-import it.polimi.ingsw.is25am33.model.enumFiles.ColorLifeSupport;
-import it.polimi.ingsw.is25am33.model.enumFiles.CrewMember;
+import it.polimi.ingsw.is25am33.model.enumFiles.*;
 import it.polimi.ingsw.is25am33.model.game.GameModel;
 
 import java.io.IOException;
-import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
-import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
+
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
 import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.network.DNS;
@@ -85,38 +83,37 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void leaveGameAfterCreation(String nickname, Boolean isFirst) {
-        //se voglio uscire notifico a tutti gli altri giocatori nel game che mi sto disconnettendo ed esco.
-        // a quel punto loro si disconnetteranno tramite il game context
         dns.getClientGame().remove(nickname);
         clientControllers.remove(nickname);
         System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
-        //se sono il primo a chiamare e ci sono altri client notifico e chiudo altrimenti se ho rimosso gia tutti i client chiudo il gioco
         if(isFirst && !gameModel.getGameClientNotifier().getClientControllers().isEmpty())
-            gameModel.getGameClientNotifier().notifyDisconnection(nickname);
+            gameModel.getGameClientNotifier().notifyDisconnection(nickname,gameModel);
         else if(clientControllers.isEmpty()) {
             dns.removeGame(getGameInfo().getGameId());
             System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
         }
-        //se un client è crashato lo stato del gioco viene settato a false in automatico alla ricezione della disconnessione
     }
 
     @Override
     public void playerPicksHiddenComponent(String nickname) {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerPicksHiddenComponent in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         Component pickedComponent = gameModel.getComponentTable().pickHiddenComponent();
         if (pickedComponent == null) return; //TODO notifica al singolo giocatore che sono finiti
         gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(pickedComponent);
     }
 
-    /**
-     * Handles the player's action to place a focused component on their ship board at the specified coordinates
-     * with the specified rotation.
-     *
-     * @param nickname the nickname of the player placing the component
-     * @param coordinates the coordinates on the ship board where the component will be placed
-     * @param rotation the number of clockwise rotations to apply to the component before placement
-     */
     @Override
     public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates, int rotation) {
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToPlaceFocusedComponent in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
         for (int i = 0; i < rotation; i++)
             shipBoard.getFocusedComponent().rotate();
@@ -125,12 +122,24 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerWantsToReserveFocusedComponent(String nickname) {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToReserveFocusedComponent in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
         ((Level2ShipBoard) shipBoard).book();
     }
 
     @Override
-    public void playerWantsToReleaseFocusedComponent(String nickname){
+    public void playerWantsToReleaseFocusedComponent(String nickname) {
+
+        if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD){
+            System.err.println("Player " + nickname + " tried to playerWantsToReleaseFocusedComponent in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
         Component component = shipBoard.releaseFocusedComponent();
         if(!shipBoard.getNotActiveComponents().contains(component))
@@ -139,12 +148,24 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerEndsBuildShipBoardPhase(String nickname) {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerEndsBuildShipBoardPhase in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         if (gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname)) == gameModel.getMaxPlayers())
             gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
     }
 
     @Override
     public void playerPlacesPawn(String nickname) {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerPlacesPawn in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         if (gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname)) == gameModel.getMaxPlayers())
             gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
     }
@@ -156,25 +177,26 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void submitCrewChoices(String nickname, Map<Coordinates, CrewMember> choices) throws IOException {
+
+        if(gameModel.getCurrGameState()!=GameState.PLACE_CREW) {
+            System.err.println("Player " + nickname + " tried to submitCrewChoices in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         Player player = gameModel.getPlayers().get(nickname);
         ShipBoard shipBoard = player.getPersonalBoard();
 
         try {
-            // Validazione delle scelte
             validateCrewChoices(shipBoard, choices);
 
-            // Applica le scelte
             applyCrewChoices(shipBoard, choices);
 
-            // Notifica tutti i client
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyCrewPlacementComplete(nicknameToNotify, nickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType());
             });
 
-            // Segna il giocatore come completato
             gameModel.markCrewPlacementCompleted(nickname);
         } catch (IllegalArgumentException e) {
-            // Notifica l'errore solo al client che ha inviato scelte non valide
             gameModel.getGameClientNotifier().notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
                 System.out.println("ERRORE submitCrewChoices: " + e.getMessage());
                 e.printStackTrace();
@@ -186,26 +208,21 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         if(choices.isEmpty())
             return;
 
-        // Verifica cabine con supporto vitale
         Map<Coordinates, Set<ColorLifeSupport>> cabinsWithLifeSupport = shipBoard.getCabinsWithLifeSupport();
 
-        // Verifica coordinate e compatibilità alieno/supporto vitale
         for (Map.Entry<Coordinates, CrewMember> entry : choices.entrySet()) {
             Coordinates coords = entry.getKey();
             CrewMember crew = entry.getValue();
 
-            // Verifica che sia una cabina con supporto vitale
             if (!cabinsWithLifeSupport.containsKey(coords)) {
                 throw new IllegalArgumentException("Invalid cabin at coordinates " + coords);
             }
 
-            // Verifica compatibilità
             if (!shipBoard.canAcceptAlien(coords, crew)) {
                 throw new IllegalArgumentException("This cabin cannot accept this type of alien");
             }
         }
 
-        // Verifica massimo 1 alieno per colore
         long purpleCount = choices.values().stream().filter(c -> c == CrewMember.PURPLE_ALIEN).count();
         long brownCount = choices.values().stream().filter(c -> c == CrewMember.BROWN_ALIEN).count();
 
@@ -244,6 +261,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerPicksVisibleComponent in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         Component chosenComponent = gameModel.getComponentTable().pickVisibleComponent(choice);
         if (chosenComponent == null) {
 
@@ -259,6 +282,17 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerWantsToVisitLocation(String nickname, Boolean choice) {
+
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToVisitLocation in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!((gameModel.getCurrAdventureCard().getCardName().equals("AbandonedShip") || gameModel.getCurrAdventureCard().getCardName().equals("AbandonedStation"))
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.VISIT_LOCATION))){
+            System.err.println("Player " + nickname + " tried to playerWantsToVisitLocation in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
+
 
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
                 .Builder()
@@ -276,6 +310,15 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerWantsToVisitPlanet(String nickname, int choice){
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToVisitPlanet in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!((gameModel.getCurrAdventureCard().getCardName().equals("Planets"))
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.CHOOSE_PLANET))){
+            System.err.println("Player " + nickname + " tried to playerWantsToVisitPlanet in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
 
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
                 .Builder()
@@ -288,6 +331,16 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerWantsToAcceptTheReward(String nickname, Boolean choice) {
 
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToVisitPlanet in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!((gameModel.getCurrAdventureCard().getCardName().equals("Smugglers")||(gameModel.getCurrAdventureCard().getCardName().equals("SlaveTraders") || gameModel.getCurrAdventureCard().getCardName().equals("Pirates"))
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.ACCEPT_THE_REWARD)))){
+            System.err.println("Player " + nickname + " tried to playerWantsToVisitPlanet in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
+
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
                 .Builder()
                 .setHasAcceptedTheReward(choice)
@@ -298,7 +351,17 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException {
+    public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords){
+
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to playerChoseDoubleEngines in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!((gameModel.getCurrAdventureCard().getCardName().equals("FreeSpace")||(gameModel.getCurrAdventureCard().getCardName().equals("WarField") || gameModel.getCurrAdventureCard().getCardName().equals("Pirates"))
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.CHOOSE_ENGINES)))){
+            System.err.println("Player " + nickname + " tried to playerChoseDoubleEngines in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
 
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
                 .Builder()
@@ -311,7 +374,17 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
 
     @Override
-    public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException{
+    public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords){
+
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to playerChoseDoubleEngine in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!((gameModel.getCurrAdventureCard().getCardName().equals("MeteoriteStorm")||(gameModel.getCurrAdventureCard().getCardName().equals("WarField") || gameModel.getCurrAdventureCard().getCardName().equals("Pirates"))
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.CHOOSE_CANNONS)))){
+            System.err.println("Player " + nickname + " tried to playerChoseDoubleEngine in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
 
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
                 .Builder()
@@ -324,7 +397,41 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords) throws RemoteException {
+    public void playerChoseCabins(String nickname, List<Coordinates> cabinCoords) {
+
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to playerChoseDoubleEngine in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!((gameModel.getCurrAdventureCard().getCardName().equals("AbandonedShip")||(gameModel.getCurrAdventureCard().getCardName().equals("SlaveTraders")
+                || gameModel.getCurrAdventureCard().getCardName().equals("Epidemic") || gameModel.getCurrAdventureCard().getCardName().equals("WarField"))
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.REMOVE_CREW_MEMBERS)))){
+            System.err.println("Player " + nickname + " tried to playerChoseCabin in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
+
+        PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure
+                .Builder()
+                .setChosenCabins(cabinCoords)
+                .build();
+
+        gameModel.getCurrAdventureCard().play(playerChoice);
+
+    }
+
+    @Override
+    public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords) {
+
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to playerSmallDanObj in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!((gameModel.getCurrAdventureCard().getCardName().equals("WarField")||(gameModel.getCurrAdventureCard().getCardName().equals("Pirates")
+                || gameModel.getCurrAdventureCard().getCardName().equals("MeteoriteStorm"))
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.DANGEROUS_ATTACK)))){
+            System.err.println("Player " + nickname + " tried to playerSmallDanObj in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
@@ -339,6 +446,16 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerHandleBigMeteorite(String nickname, List<Coordinates> doubleCannonCoords, List<Coordinates> batteryBoxCoords) {
 
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to playerBigMeteorite in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!(gameModel.getCurrAdventureCard().getCardName().equals("MeteoriteStorm")
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.DANGEROUS_ATTACK))){
+            System.err.println("Player " + nickname + " tried to playerBigMeteorite in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
+
         PlayerChoicesDataStructure choice= new PlayerChoicesDataStructure
                     .Builder()
                     .setChosenBatteryBoxes(batteryBoxCoords)
@@ -352,6 +469,16 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerHandleBigShot(String nickname) throws RemoteException {
 
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to playerBigShot in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!((gameModel.getCurrAdventureCard().getCardName().equals("WarField") || gameModel.getCurrAdventureCard().getCardName().equals("Pirates"))
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.DANGEROUS_ATTACK))){
+            System.err.println("Player " + nickname + " tried to playerBigShot in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
+
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
                 .build();
@@ -361,7 +488,18 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void playerChoseStorage(String nickname, List<Coordinates> storageCoords) throws RemoteException {
+    public void playerChoseStorage(String nickname, List<Coordinates> storageCoords){
+
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to playerChoseStorage in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!((gameModel.getCurrAdventureCard().getCardName().equals("Planets") || gameModel.getCurrAdventureCard().getCardName().equals("AbandonedStation")
+                || gameModel.getCurrAdventureCard().getCardName().equals("Smugglers"))
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.HANDLE_CUBES_REWARD))){
+            System.err.println("Player " + nickname + " tried to playerChoseStorage in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
 
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
@@ -374,40 +512,98 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void spreadEpidemic(String nickname) throws RemoteException{
+
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to spreadEpidemic in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!(gameModel.getCurrAdventureCard().getCardName().equals("Epidemic")
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.EPIDEMIC))){
+            System.err.println("Player " + nickname + " tried to spreadEpidemic in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
+
         gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
     @Override
     public void stardustEvent(String nickname) throws RemoteException{
+
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to stardustEvent in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!(gameModel.getCurrAdventureCard().getCardName().equals("Stardust")
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.STARDUST))){
+            System.err.println("Player " + nickname + " tried to stardustEvent in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
+
         gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
     public void evaluatedCrewMembers(String nickname) throws RemoteException{
+
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to evaluatedCrewMembers in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!(gameModel.getCurrAdventureCard().getCardName().equals("WarField")
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.EVALUATE_CREW_MEMBERS))){
+            System.err.println("Player " + nickname + " tried to evaluatedCrewMembers in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
+
         gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
     @Override
     public boolean playerWantsToWatchLittleDeck(String nickname, int littleDeckChoice) {
+
         return gameModel.getDeck().isLittleDeckAvailable(littleDeckChoice);
     }
 
     @Override
     public void playerWantsToReleaseLittleDeck(String nickname, int littleDeckChoice) {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToReleaseLittleDeck in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         gameModel.getDeck().releaseLittleDeck(littleDeckChoice);
     }
 
     @Override
     public void playerWantsToRestartHourglass(String nickname) throws RemoteException {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToRestartHourglass in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         gameModel.restartHourglass(nickname);
     }
 
     @Override
     public void notifyHourglassEnded(String nickname) {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to notifyHourglassEnded in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         gameModel.hourglassEnded();
     }
 
     @Override
     public void playerWantsToRemoveComponent(String nickname, Coordinates coordinates) {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToRemoveComponent in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         if(coordinates!=null) {
             ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
             Set<Set<Coordinates>> shipParts = shipBoard.removeAndRecalculateShipParts(coordinates.getX(), coordinates.getY());
@@ -443,20 +639,24 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerChoseShipPart(String nickname, Set<Coordinates> chosenShipPart) throws RemoteException {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerChoseShipPart in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
 
-        // Ottieni tutte le ship parts memorizzate per questo giocatore
         Set<Set<Coordinates>> allShipParts = temporaryShipParts.get(nickname);
 
         if (allShipParts != null) {
-            // Rimuovi tutte le ship parts TRANNE quella scelta
+
             for (Set<Coordinates> shipPart : allShipParts) {
                 if (!shipPart.equals(chosenShipPart)) {
                     shipBoard.removeShipPart(shipPart);
                 }
             }
 
-            // After removing parts, check the entire ship board for incorrect components
             shipBoard.checkShipBoard();
 
 
@@ -474,21 +674,31 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
                 }
             });
 
-            // Pulisci la mappa temporanea
             temporaryShipParts.remove(nickname);
         }
 
-        //Controlla se tutte le navi sono corrette e cambia fase se necessario
         gameModel.checkAndTransitionToNextPhase();
     }
 
     @Override
     public void playerWantsToFocusReservedComponent(String nickname, int choice){
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToFocusReservedComponent in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         ((Level2ShipBoard) gameModel.getPlayers().get(nickname).getPersonalBoard()).focusReservedComponent(choice);
     }
 
     @Override
     public void requestPrefabShips(String nickname) throws RemoteException {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToFocusReservedComponent in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         // Recupera la lista delle navi prefabbricate
         List<PrefabShipInfo> prefabShips = PrefabShipFactory.getAvailablePrefabShips(gameModel.isTestFlight());
 
@@ -506,11 +716,29 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     public void startCheckShipBoardAfterAttack(String nickname){
+
+        if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
+            System.err.println("Player " + nickname + " tried to startCheckShipBoardAfterAttack in state " + gameModel.getCurrGameState());
+            return;
+        }
+
+        if(!((gameModel.getCurrAdventureCard().getCardName().equals("MeteoriteStorm") || gameModel.getCurrAdventureCard().getCardName().equals("Pirates")
+             || gameModel.getCurrAdventureCard().getCardName().equals("WarField"))
+                && gameModel.getCurrAdventureCard().getCurrState().equals(CardState.CHECK_SHIPBOARD_AFTER_ATTACK))){
+            System.err.println("Player " + nickname + " tried to startCheckShipBoardAfterAttack in Card state " + gameModel.getCurrAdventureCard().getCurrState());
+        }
+
         gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
     @Override
     public void requestSelectPrefabShip(String nickname, String prefabShipId) throws RemoteException {
+
+        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+            System.err.println("Player " + nickname + " tried to playerWantsToFocusReservedComponent in state " + gameModel.getCurrGameState());
+            return;
+        }
+
         try {
             // Ottieni informazioni sulla nave prefabbricata
             PrefabShipInfo prefabShipInfo = PrefabShipFactory.getPrefabShipInfo(prefabShipId);
