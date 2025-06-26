@@ -163,24 +163,12 @@ public class SocketServerManager implements Runnable, CallableOnClientController
                 gameControllers.get(nickname).playerWantsToPlaceFocusedComponent(nickname, coordinates, inMessage.getParamInt());
                 break;
 
-            case "playerWantsToWatchLittleDeck":
-                boolean response = gameControllers.get(nickname).playerWantsToWatchLittleDeck(nickname, inMessage.getParamInt());
-                outMessage = new SocketMessage("server", "notifyLittleDeckVisibility");
-                outMessage.setParamBoolean(response);
-
-                out.println(ServerSerializer.serialize(outMessage));
-                break;
-
             case "playerEndsBuildShipBoardPhase":
                 gameControllers.get(nickname).playerEndsBuildShipBoardPhase(nickname);
                 break;
 
             case "playerPlacePlaceholder":
                 gameControllers.get(nickname).playerPlacesPawn(nickname);
-                break;
-
-            case "playerWantsToReleaseLittleDeck":
-                gameControllers.get(nickname).playerWantsToReleaseLittleDeck(nickname, inMessage.getParamInt());
                 break;
 
             case "playerWantsToReserveFocusedComponent":

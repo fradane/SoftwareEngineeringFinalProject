@@ -52,6 +52,11 @@ public class GameControllerTest {
             }
 
             @Override
+            public void notifyStolenVisibleComponent(String nicknameToNotify) throws IOException {
+
+            }
+
+            @Override
             public void notifyGameStarted(String nickname, GameInfo gameInfo) throws IOException {
 
             }
@@ -423,18 +428,6 @@ public class GameControllerTest {
 
         assertTrue(((Level2ShipBoard)playerBoard).getBookedComponents().contains(focusedComponent),
                 "Il componente dovrebbe essere tra i componenti prenotati");
-    }
-
-
-    @Test
-    void testPlayerWantsToWatchLittleDeck() {
-        PlayerColor color = PlayerColor.BLUE;
-        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
-
-        int littleDeckChoice = 1;
-        boolean result = gameController.playerWantsToWatchLittleDeck(PLAYER_NICKNAME, littleDeckChoice);
-
-        assertTrue(result);
     }
 
     @Test

@@ -65,6 +65,11 @@ public class EndGamePhaseTest {
         }
 
         @Override
+        public void notifyStolenVisibleComponent(String nicknameToNotify) throws IOException {
+            notifications.add("stolenVisibleComponent:" + nicknameToNotify);
+        }
+
+        @Override
         public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException {
             notifications.add("hourglassRestarted:" + nickname);
         }

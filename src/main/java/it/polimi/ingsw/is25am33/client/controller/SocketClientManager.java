@@ -787,22 +787,6 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
     @Override
-    public boolean playerWantsToWatchLittleDeck(String nickname, int littleDeckChoice) throws RemoteException {
-        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToWatchLittleDeck");
-        outMessage.setParamInt(littleDeckChoice);
-
-        SocketMessage inMessage = sendAndWaitForSpecificResponse(outMessage, Set.of("notifyLittleDeckVisibility"));
-        return inMessage.getParamBoolean();
-    }
-
-    @Override
-    public void playerWantsToReleaseLittleDeck(String nickname, int littleDeckChoice) throws RemoteException {
-        SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToReleaseLittleDeck");
-        outMessage.setParamInt(littleDeckChoice);
-        out.println(ClientSerializer.serialize(outMessage));
-    }
-
-    @Override
     public void notifyHourglassEnded(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "notifyHourglassEnded");
         out.println(ClientSerializer.serialize(outMessage));

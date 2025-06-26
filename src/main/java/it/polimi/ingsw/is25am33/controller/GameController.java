@@ -88,14 +88,17 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         //se voglio uscire notifico a tutti gli altri giocatori nel game che mi sto disconnettendo ed esco.
         // a quel punto loro si disconnetteranno tramite il game context
         dns.getClientGame().remove(nickname);
-        clientControllers.remove(nickname);
-        System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
-        //se sono il primo a chiamare e ci sono altri client notifico e chiudo altrimenti se ho rimosso gia tutti i client chiudo il gioco
-        if(isFirst && !gameModel.getGameClientNotifier().getClientControllers().isEmpty())
-            gameModel.getGameClientNotifier().notifyDisconnection(nickname);
-        else if(clientControllers.isEmpty()) {
-            dns.removeGame(getGameInfo().getGameId());
-            System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
+        
+        synchronized (this) {  // Sincronizza sulla GameController instance per evitare race condition
+            clientControllers.remove(nickname);
+            System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
+            //se sono il primo a chiamare e ci sono altri client notifico e chiudo altrimenti se ho rimosso gia tutti i client chiudo il gioco
+            if(isFirst && !gameModel.getGameClientNotifier().getClientControllers().isEmpty()) {
+                gameModel.getGameClientNotifier().notifyDisconnection(nickname);
+            } else if(clientControllers.isEmpty()) {
+                dns.removeGame(getGameInfo().getGameId());
+                System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
+            }
         }
         //se un client è crashato lo stato del gioco viene settato a false in automatico alla ricezione della disconnessione
     }
@@ -391,16 +394,6 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public boolean playerWantsToWatchLittleDeck(String nickname, int littleDeckChoice) {
-        return gameModel.getDeck().isLittleDeckAvailable(littleDeckChoice);
-    }
-
-    @Override
-    public void playerWantsToReleaseLittleDeck(String nickname, int littleDeckChoice) {
-        gameModel.getDeck().releaseLittleDeck(littleDeckChoice);
-    }
-
-    @Override
     public void playerWantsToRestartHourglass(String nickname) throws RemoteException {
         gameModel.restartHourglass(nickname);
     }
@@ -616,14 +609,10 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         }
         
         GameState currentState = gameModel.getCurrGameState();
-        if (currentState == GameState.SETUP || 
-            currentState == GameState.BUILD_SHIPBOARD || 
-            currentState == GameState.CHECK_SHIPBOARD || 
-            currentState == GameState.PLACE_CREW || 
-            currentState == GameState.END_GAME) {
-            return false;
-        }
-        
-        return true;
+        return currentState != GameState.SETUP &&
+                currentState != GameState.BUILD_SHIPBOARD &&
+                currentState != GameState.CHECK_SHIPBOARD &&
+                currentState != GameState.PLACE_CREW &&
+                currentState != GameState.END_GAME;
     }
 }
