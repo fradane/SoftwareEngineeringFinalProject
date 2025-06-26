@@ -116,7 +116,7 @@ public abstract class Storage extends Component {
             return null;
         }
 
-        // Ordina i cubi per valore e prendi il primo (meno prezioso)
+        // Sort the cubes by value and take the first one (least valuable)
         List<CargoCube> sortedCubes = new ArrayList<>(stockedCubes);
         sortedCubes.sort(CargoCube.byValue);
         return sortedCubes.getFirst();

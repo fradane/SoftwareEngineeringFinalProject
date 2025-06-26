@@ -11,28 +11,32 @@
 
 <StackPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.EndGameController"
-           fx:id="centerStackPane" prefHeight="768.0" prefWidth="1024.0"
+           fx:id="centerStackPane" prefHeight="1200.0" prefWidth="1600.0"
            styleClass="game-background" stylesheets="@/galaxy-truckers.css"
 >
 
-    <!-- Background starfield or space theme -->
-    <VBox alignment="CENTER" spacing="20" styleClass="game-background">
+    <!-- Background starfield or space theme with larger container -->
+    <VBox alignment="CENTER" spacing="60" styleClass="game-background">
         <padding>
-            <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+            <Insets bottom="80.0" left="80.0" right="80.0" top="80.0" />
         </padding>
 
-        <!-- Welcome message for end game screen -->
-        <Label text="🚀 GALAXY TRUCKERS 🚀" styleClass="game-title" />
-        <Label text="Preparing final screen..." styleClass="popup-message" />
+        <!-- Welcome message for end game screen con dimensioni molto aumentate -->
+        <Label text="🚀 GALAXY TRUCKERS 🚀" styleClass="game-title"
+               style="-fx-font-size: 72px; -fx-font-weight: bold; -fx-text-fill: #FFB300; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 15, 0, 0, 5); -fx-padding: 20px;" />
 
-        <!-- Spacer -->
-        <Region VBox.vgrow="ALWAYS" />
+        <Label text="Preparing final screen..." styleClass="popup-message"
+               style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 8, 0, 0, 3); -fx-padding: 15px;" />
 
-        <!-- Loading indicator or placeholder -->
-        <Label text="Loading final results..." styleClass="popup-message" />
+        <!-- Spacer più grande -->
+        <Region VBox.vgrow="ALWAYS" prefHeight="100.0" />
 
-        <!-- Spacer -->
-        <Region VBox.vgrow="ALWAYS" />
+        <!-- Loading indicator or placeholder con testo e padding più grandi -->
+        <Label text="Loading final results..." styleClass="popup-message"
+               style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: rgba(255, 255, 255, 0.9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 6, 0, 0, 3); -fx-padding: 20px; -fx-background-color: rgba(0, 0, 0, 0.3); -fx-background-radius: 15px;" />
+
+        <!-- Spacer più grande -->
+        <Region VBox.vgrow="ALWAYS" prefHeight="100.0" />
 
     </VBox>
 

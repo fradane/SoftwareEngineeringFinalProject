@@ -20,7 +20,6 @@
             <HBox alignment="CENTER_RIGHT" spacing="10">
                 <Label styleClass="screen-title" text="Galaxy Truckers" />
                 <Region HBox.hgrow="ALWAYS" />
-                <!-- VBox per impilare i bottoni con larghezza uniforme -->
                 <VBox alignment="CENTER_RIGHT" spacing="5" minWidth="120">
                     <Button fx:id="goBackButton" onAction="#handleGoBackButton"
                             styleClass="nav-button" text="Go Back"
@@ -51,7 +50,7 @@
     </top>
 
     <left>
-        <!-- Pannello sinistro per componenti visibili -->
+        <!-- Left panel for visible components -->
         <VBox fx:id="visibleComponentsPanel" maxWidth="300" minWidth="250" styleClass="visible-components-panel">
             <HBox alignment="CENTER" spacing="10.0" styleClass="component-controls"> </HBox>
 
@@ -60,7 +59,7 @@
                     <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                     </padding>
-                    <!-- I componenti visibili verranno aggiunti qui dinamicamente -->
+                    <!-- Visible components will be added here dynamically -->
                 </VBox>
             </ScrollPane>
         </VBox>
@@ -70,7 +69,7 @@
         <StackPane fx:id="centerStackPane">
             <!-- Dynamically insert shipboards and flying boards -->
 
-            <!-- Menu Navi Prefabbricate - elemento più alto dello stack -->
+            <!-- Prefab Ships Menu - topmost element of the stack -->
             <VBox fx:id="prefabShipsMenu" alignment="CENTER" managed="false" styleClass="little-deck-container" visible="false" StackPane.alignment="CENTER">
                 <Label styleClass="controls-title" text="Choose a Prefab Ship">
                     <VBox.margin>
@@ -78,13 +77,13 @@
                     </VBox.margin>
                 </Label>
 
-                <!-- TODO cambiare lo stile e ingrandire -->
+                <!-- TODO change the style and enlarge -->
                 <ScrollPane fitToWidth="true" prefHeight="400.0" prefWidth="600.0" styleClass="component-controls">
                     <VBox fx:id="prefabShipsContainer" alignment="TOP_CENTER" spacing="10.0" styleClass="component-controls">
                         <padding>
                             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                         </padding>
-                        <!-- Le navi prefabbricate verranno aggiunte qui dinamicamente -->
+                        <!-- Prefabricated ships will be added here dynamically -->
                     </VBox>
                 </ScrollPane>
 
@@ -133,9 +132,9 @@
     </center>
 
     <right>
-        <!-- Pannello destro con componente e controlli -->
+        <!-- Right panel with component and controls -->
         <VBox fx:id="componentsBoxV" maxWidth="350" minWidth="300" spacing="20.0">
-            <!-- Pannello dei controlli componente -->
+            <!-- Component controls panel -->
             <VBox fx:id="componentControlsPanel" alignment="CENTER"  spacing="20.0" styleClass="component-controls"  visible="false" managed="false">
 
                 <Button fx:id="rotateComponentButton" onAction="#handleRotateComponentButton" styleClass="component-control-button" text="Rotate Component" />
@@ -146,7 +145,7 @@
                 </padding>
             </VBox>
 
-            <!-- Box componente -->
+            <!-- Component display box -->
             <HBox fx:id="componentsBoxH" alignment="CENTER" spacing="30.0" styleClass="component-display">
                 <ImageView fx:id="focusComponentImage" />
                 <padding>
@@ -158,10 +157,10 @@
 
     <bottom>
         <HBox fx:id="bottomBox" styleClass="action-bar">
-            <!-- Spacer sinistro con larghezza fissa -->
+            <!-- Left spacer with fixed width -->
             <Region prefWidth="200.0" />
 
-            <!-- Container centrale per i bottoni principali -->
+            <!-- Center container for main buttons -->
             <HBox alignment="CENTER" spacing="15.0" HBox.hgrow="ALWAYS">
                 <Button fx:id="pickRandomComponentButton" onAction="#handlePickRandomComponentButton" styleClass="action-button" text="Random Component" />
                 <Button fx:id="prefabShipBoardButton" onAction="#handleGenerateShipBoardButton" styleClass="action-button" text="Load a prebuilt ship board" />
@@ -178,7 +177,7 @@
                 </ComboBox>
             </HBox>
 
-            <!-- Container destro per il bottone End Phase con larghezza fissa -->
+            <!-- Right container for End Phase button with fixed width -->
             <HBox alignment="CENTER_RIGHT" prefWidth="200.0">
                 <Button fx:id="endPhaseButton" onAction="#handleEndPhaseButton" styleClass="end-phase-button" text="End ship building phase" />
             </HBox>

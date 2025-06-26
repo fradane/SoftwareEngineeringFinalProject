@@ -128,7 +128,7 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
      * @param planet the Planet object to be set as the current planet
      */
     public void setCurrPlanet(Planet planet) {
-        this.currentPlanet= planet;
+        this.currentPlanet = planet;
     }
 
     /**
@@ -178,7 +178,6 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
             default:
                 throw new UnknownStateException("Unknown current state");
         }
-
     }
 
     /**
@@ -194,7 +193,6 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
     private void currPlayerWantsToVisit (int chosenPlanetIndex) throws IllegalIndexException, IndexOutOfBoundsException {
 
         if (chosenPlanetIndex != 0) {
-
             currentPlanet = availablePlanets.get(chosenPlanetIndex - 1);
 
             if (currentPlanet.isBusy())
@@ -202,11 +200,9 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
 
             playerPlanet.put(gameModel.getCurrPlayer().getNickname(), currentPlanet);
             availablePlanets.get(chosenPlanetIndex - 1).setBusy(true);
-
             currentPlanet.setNoMoreAvailable();
 
             ClientCard clientCard = this.toClientCard();
-
             String currPlayerNickname = gameModel.getCurrPlayer().getNickname();
 
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
@@ -227,44 +223,37 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
             gameModel.resetPlayerIterator();
             gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
-
     }
 
     private void currPlayerChoseCargoCubeStorage(List<Coordinates> chosenStorageCoords) {
         List<CargoCube> planetRewards = new ArrayList<>(currentPlanet.getReward());
 
-        //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
+        // no check is performed to ensure they are all storage because it's already handled on the client side
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
         List<Storage> chosenStorages = new ArrayList();
         for (Coordinates coords : chosenStorageCoords) {
             if (coords.isCoordinateInvalid()) {
-                // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
                 chosenStorages.add(null);
             } else {
                 Component component = shipBoard.getComponentAt(coords);
                 if (component instanceof Storage) {
                     chosenStorages.add((Storage) component);
                 } else {
-                    // Se le coordinate non puntano a uno storage, aggiungi null
                     chosenStorages.add(null);
                 }
             }
         }
 
-        // Caso 1: Il giocatore non ha scelto nessuno storage
+        // Case 1: no storage available
         if (chosenStorages.isEmpty()) {
-            // Scarta tutti i reward - il giocatore non può accettare nessun cubo
             System.out.println("Player " + gameModel.getCurrPlayer().getNickname() +
                     " cannot accept any rewards due to lack of storage space");
-
-            // Procedi con il prossimo giocatore o termina la carta
             proceedToNextPlayerOrEndCard();
             return;
         }
 
-        // Caso 2: Il giocatore ha scelto meno storage dei reward disponibili
+        // Case 2: fewer storages than rewards
         if (chosenStorages.size() < planetRewards.size()) {
-            // Mantieni solo i primi N reward, dove N = numero di storage scelti
             List<CargoCube> rewardsToProcess = planetRewards.subList(0, chosenStorages.size());
             List<CargoCube> discardedRewards = planetRewards.subList(chosenStorages.size(), planetRewards.size());
 
@@ -276,66 +265,61 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
             planetRewards = rewardsToProcess;
         }
 
-        // Caso 3: Il giocatore ha scelto più storage dei reward (non dovrebbe succedere, ma gestiamo)
+        // Case 3: more storages than rewards
         if (chosenStorages.size() > planetRewards.size()) {
-            // Usa solo i primi N storage, dove N = numero di reward
             chosenStorages = chosenStorages.subList(0, planetRewards.size());
         }
 
-        // Validazione: controlla che i cubi RED vadano solo in SpecialStorage
+        // Validation: RED cubes must go in SpecialStorage
         for (int i = 0; i < Math.min(chosenStorages.size(), planetRewards.size()); i++) {
             Storage storage = chosenStorages.get(i);
             CargoCube cube = planetRewards.get(i);
 
-            // Salta gli storage null (coordinate invalide dal client)
-            if (storage == null) {
-                continue;
-            }
+            if (storage == null) continue;
 
             if (!(storage instanceof SpecialStorage) && cube == CargoCube.RED) {
                 throw new IllegalArgumentException("Trying to store a RED cube in a non-special storage");
             }
         }
 
-        // Processa i cubi effettivamente posizionabili
+        // Apply cubes
         for (int i = 0; i < Math.min(chosenStorages.size(), planetRewards.size()); i++) {
             Storage storage = chosenStorages.get(i);
             CargoCube cube = planetRewards.get(i);
 
-            // Salta gli storage null (il giocatore non può/non vuole piazzare questo cubo)
             if (storage == null) {
                 System.out.println("Cube " + cube + " discarded - no valid storage selected");
                 continue;
             }
 
-            // Se lo storage è pieno, rimuovi il cubo meno prezioso
             if (storage.isFull()) {
                 List<CargoCube> sortedStorage = new ArrayList<>(storage.getStockedCubes());
                 sortedStorage.sort(CargoCube.byValue);
-                CargoCube lessValuableCargoCube = sortedStorage.get(0);
-                storage.removeCube(lessValuableCargoCube);
-                System.out.println("Removed " + lessValuableCargoCube + " to make space for " + cube);
+                CargoCube lessValuable = sortedStorage.get(0);
+                storage.removeCube(lessValuable);
+                System.out.println("Removed " + lessValuable + " to make space for " + cube);
             }
 
-            // Aggiungi il cubo allo storage
             storage.addCube(cube);
             System.out.println("Added " + cube + " to storage");
         }
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify,
+                    gameModel.getCurrPlayer().getNickname(),
+                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(),
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
         });
 
-        // Muovi il giocatore indietro
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
+            clientController.notifyRankingUpdate(nicknameToNotify,
+                    gameModel.getCurrPlayer().getNickname(),
+                    gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
         });
 
-        // Procedi con il prossimo giocatore o termina la carta
         proceedToNextPlayerOrEndCard();
-
     }
 
 
@@ -356,22 +340,24 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
         try {
             validateStorageUpdates(storageUpdates, gameModel);
             applyStorageUpdates(storageUpdates, gameModel);
-            
+
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
-                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
-                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+                clientController.notifyShipBoardUpdate(nicknameToNotify,
+                        gameModel.getCurrPlayer().getNickname(),
+                        gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(),
+                        gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
             });
 
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
-            
+
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
-                    gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
+                clientController.notifyRankingUpdate(nicknameToNotify,
+                        gameModel.getCurrPlayer().getNickname(),
+                        gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
             });
-            
+
             proceedToNextPlayerOrEndCard();
-            
+
         } catch (IllegalArgumentException e) {
             String currentPlayer = gameModel.getCurrPlayer().getNickname();
             gameModel.getGameClientNotifier().notifyClients(
@@ -382,9 +368,10 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
             );
 
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
-                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
-                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+                clientController.notifyShipBoardUpdate(nicknameToNotify,
+                        gameModel.getCurrPlayer().getNickname(),
+                        gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(),
+                        gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
             });
 
         }

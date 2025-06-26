@@ -8,11 +8,11 @@
 
 <VBox styleClass="board-container" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.Level2BoardsController">
 
-    <!-- Barra di navigazione delle navi -->
+    <!-- Ship navigation bar -->
     <HBox fx:id="shipNavigationBar" alignment="CENTER" spacing="10.0" styleClass="ship-navigation">
         <Button fx:id="showFlyingBoardButton" onAction="#handleShowFlyingBoardButton" styleClass="ship-nav-button" text="Flying board" />
         <Button fx:id="myShipButton" onAction="#handleMyShipBoardButton" styleClass="ship-nav-button, active" text="My Ship" />
-        <!-- Questi pulsanti verranno generati dinamicamente in base al numero di giocatori -->
+        <!-- These buttons will be generated dynamically based on the number of players -->
     </HBox>
 
     <StackPane fx:id="boardsPane">
@@ -43,7 +43,7 @@
                     <RowConstraints percentHeight="20" />
                 </rowConstraints>
 
-                <!-- Prima riga -->
+                <!-- First row -->
                 <Button fx:id="button04_03" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button04_04" maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button04_05" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
@@ -52,7 +52,7 @@
                 <Button fx:id="button04_08" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button04_09" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
 
-                <!-- Seconda riga -->
+                <!-- Second row -->
                 <Button maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button05_04" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button05_05" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
@@ -61,7 +61,7 @@
                 <Button fx:id="button05_08" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button maxHeight="Infinity" maxWidth="Infinity" styleClass="not-available-cell-button" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
 
-                <!-- Terza riga -->
+                <!-- Third row -->
                 <Button fx:id="button06_03" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button06_04" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button06_05" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
@@ -70,7 +70,7 @@
                 <Button fx:id="button06_08" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button06_09" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
 
-                <!-- Quarta riga -->
+                <!-- Fourth row -->
                 <Button fx:id="button07_03" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button07_04" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button07_05" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
@@ -79,7 +79,7 @@
                 <Button fx:id="button07_08" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button07_09" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
 
-                <!-- Quinta riga -->
+                <!-- Fifth row -->
                 <Button fx:id="button08_03" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button08_04" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="button08_05" maxHeight="Infinity" maxWidth="Infinity" onAction="#handleGridButtonClick" styleClass="cell-button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
@@ -550,7 +550,7 @@
             <GridPane fx:id="flyingBoardGrid" alignment="CENTER" mouseTransparent="true"
                       maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="393.0" prefWidth="555.0" >
                 <columnConstraints>
-                    <!-- 56 colonne per avere celle quadrate -->
+                    <!-- 56 columns to ensure square cells -->
                     <ColumnConstraints percentWidth="1.786" />
                     <ColumnConstraints percentWidth="1.786" />
                     <ColumnConstraints percentWidth="1.786" />
@@ -609,7 +609,7 @@
                     <ColumnConstraints percentWidth="1.786" />
                 </columnConstraints>
                 <rowConstraints>
-                    <!-- 40 righe per celle quadrate -->
+                    <!-- 40 rows to ensure square cells -->
                     <RowConstraints percentHeight="2.5" />
                     <RowConstraints percentHeight="2.5" />
                     <RowConstraints percentHeight="2.5" />

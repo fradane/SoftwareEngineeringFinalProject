@@ -289,6 +289,7 @@ public class Deck {
         cards.addAll(Deck.loadEpidemicFromJson());
         cards.addAll(Deck.loadPlanetsFromJson());
 
+        cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());cards.addAll(Deck.loadSlaveTradersFromJson());
 
         if (isTestFlight)
             allCards.addAll(cards.stream().filter(AdventureCard::isTestFlightCard).toList());

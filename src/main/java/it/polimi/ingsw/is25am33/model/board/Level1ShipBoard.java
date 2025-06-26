@@ -45,7 +45,7 @@ public class Level1ShipBoard extends ShipBoard implements ShipBoardClient {
 
     @Override
     public Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport() {
-        // In modalità test flight, nessuna cabina può avere alieni
+        // in test flight, no cabin can have alien
         return Collections.emptyMap();
     }
 

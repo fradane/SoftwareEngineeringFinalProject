@@ -13,38 +13,24 @@ import java.util.Set;
 public abstract class ClientGUIView implements ClientView {
 
     @Override
-    public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {
-        //TODO
-    }
+    public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {}
 
     @Override
-    public void showValidShipBoardMenu() {
-        //TODO
-    }
+    public void showValidShipBoardMenu() {}
 
     @Override
-    public void showChooseComponentToRemoveMenu() {
-        //TODO
-    }
+    public void showChooseComponentToRemoveMenu() {}
 
     @Override
-    public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {
-        //TODO
-    }
+    public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {}
 
     @Override
-    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
-        //TODO
-    }
+    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {}
 
     @Override
-    public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
-        //TODO
-    }
+    public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {}
 
     @Override
-    public void showPlayerEarlyLanded(String nickname) {
-        //TODO
-    }
+    public void showPlayerEarlyLanded(String nickname) {}
 
 }

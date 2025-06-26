@@ -12,7 +12,8 @@ public enum ConnectorType {
      * @return true if the connectors are compatible; false otherwise
      */
     public static boolean areConnectorsCompatible (ConnectorType conn1, ConnectorType conn2) {
-        if (! ( (conn1 != EMPTY ||  conn2 == EMPTY) && (conn2 != EMPTY ||  conn1 == EMPTY) )) return false;
+        if (! ( (conn1 != EMPTY ||  conn2 == EMPTY) && (conn2 != EMPTY ||  conn1 == EMPTY) ))
+            return false;
 
         if ((conn1 == SINGLE && conn2 == DOUBLE) || (conn1 == DOUBLE && conn2 == SINGLE)) return false;
 

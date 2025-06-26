@@ -49,13 +49,12 @@ public class ClientDeserializer extends KeyDeserializer {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        // Simuliamo un file con due JSON riga per riga
+        // simulate a file with two JSON lines per line
         BufferedReader reader = new BufferedReader(new StringReader(json));
 
         // 1° JSON: Coordinates
         String jsonLine = reader.readLine();
         T result = mapper.readValue(jsonLine, type);
-        //System.out.println(result.toString());
 
         reader.close();
 

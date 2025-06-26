@@ -559,7 +559,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
     private void currPlayerChoseRemovableCrewMembers(List<Coordinates> chosenCabinsCoordinate) throws IllegalArgumentException {
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
         Player currentPlayer=gameModel.getCurrPlayer();
-        //non viene fatto il controllo se sono tutte cabine perchè già fatto lato client
+        //no check is performed to ensure they are all cabins because it's already handled on the client side
         List<Cabin> chosenCabins = chosenCabinsCoordinate
                 .stream()
                 .map(shipBoard::getComponentAt)
@@ -620,11 +620,12 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
      */
     private void currPlayerChoseStorageToRemove(List<Coordinates> chosenStorageCoords, List<Coordinates> chosenBatteryBoxesCoords) throws IllegalArgumentException {
 
-        //non viene fatto il controllo se sono tutte storage perchè già fatto lato client
+        // no check is performed to ensure they are all storage because it's already handled on the client side
         Player currentPlayer=gameModel.getCurrPlayer();
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
         List<Storage> chosenStorages = new ArrayList();
         List<BatteryBox> chosenBatteryBoxes = new ArrayList<>();
+
 
         for (Coordinates chosenStorageCoord : chosenStorageCoords) {
             chosenStorages.add((Storage) currentPlayer.getPersonalBoard().getComponentAt(chosenStorageCoord));

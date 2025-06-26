@@ -65,16 +65,16 @@ public abstract class BoardsController {
     public void removeHighlightColor() {
         Set<Button> buttonsToRemove;
 
-        // Crea una copia del set per evitare ConcurrentModificationException
+        // Creation a copy the set to avoid ConcurrentModificationException
         synchronized (highlightLock) {
             buttonsToRemove = new HashSet<>(shadowedButtons);
             shadowedButtons.clear(); // Pulisci il set originale
         }
 
-        // Processa i button fuori dalla sincronizzazione
+        //Possessing of buttons outside the synchronization
         buttonsToRemove.forEach(button ->
             Platform.runLater(() -> {
-                // Non serve più sincronizzazione qui poiché abbiamo già pulito il set
+                //No synchronization needed here anymore since the set was already cleared
                 button.setEffect(null);
                 button.getStyleClass().remove("no-hover");
             })
@@ -122,15 +122,15 @@ public abstract class BoardsController {
         Button button = buttonMap.get(buttonId);
 
         if (button == null) {
-            return; // Controllo di sicurezza
+            return; // safety check
         }
 
-        // Aggiungi al set in modo thread-safe
-        synchronized (highlightLock) {
+        //Add to the set in a thread-safe manner
+            synchronized (highlightLock) {
             shadowedButtons.add(button);
         }
 
-        // Applica l'effetto sul JavaFX thread
+        // Apply the effect on the JavaFX thread
         Platform.runLater(() -> {
             DropShadow shadow = new DropShadow();
             shadow.setColor(color);
@@ -154,7 +154,7 @@ public abstract class BoardsController {
                 return (StackPane) node;
             }
         }
-        return null; // Nessun nodo trovato in quella posizione
+        return null;
     }
 
     protected void createPaws() {
@@ -372,7 +372,7 @@ public abstract class BoardsController {
         Button clickedButton = (Button) actionEvent.getSource();
         String id = clickedButton.getId();
 
-        // Parsing corretto dell'ID del pulsante
+        // corrected parsing button id
         String[] parts = id.replace("button", "").split("_");
         int row = Integer.parseInt(parts[0]);
         int column = Integer.parseInt(parts[1]);
@@ -885,23 +885,5 @@ public abstract class BoardsController {
 
         return storageStackPane;
     }
-
-//    protected void setupChangedAttributesBinding() {
-//        modelFxAdapter.getObservableChangedAttributesProperty()
-//                .addListener((_, _, newValue) -> {
-//                    String nickname = newValue.getKey();
-//                    Coordinates coords = newValue.getValue();
-//                    Component updatedComponent = clientModel.getShipboardOf(nickname).getShipMatrix()[coords.getX()][coords.getY()];
-//
-//                    if (nickname.equals(clientModel.getMyNickname())) {
-//                        Button button = buttonMap.get(fromCoordsToButtonId(coords));
-//                        Platform.runLater(() -> updateButtonAppearance(button, updatedComponent));
-//                    } else {
-//                        StackPane playerStackPane = otherPlayersShipBoards.get(nickname);
-//                        Platform.runLater(() -> updateOtherShipBoardsAppearance(playerStackPane, updatedComponent, coords.getX(), coords.getY()));
-//                    }
-//                });
-//    }
-
 
 }

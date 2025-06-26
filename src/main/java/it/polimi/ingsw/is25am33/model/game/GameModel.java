@@ -232,7 +232,6 @@ public class GameModel {
      * Ensures that modifications to the state are performed atomically and without interference
      * from other threads, preserving thread safety during state changes.
      */
-    // Lock per la transizione di stato
     private final Object stateTransitionLock = new Object();
 
     /**
@@ -541,9 +540,8 @@ public class GameModel {
         setCurrRanking(flyingBoard.getCurrentRanking());
         currAdventureCard.setGame(this);
         playerIterator = currRanking.iterator();
-
         if (!playerIterator.hasNext()) {
-            System.err.println("NON CI SONO PIù GIOCATORI VIVI");
+            System.err.println("THERE ARE NO ALIVE PLAYERS");
             setCurrGameState(GameState.END_GAME);
             return;
         }
@@ -611,7 +609,7 @@ public class GameModel {
             x.put(player, player.getPersonalBoard().countExposed());
         });
 
-        if(x.isEmpty()) // tutti i giocatori hanno fatto early landing
+        if(x.isEmpty()) // all players have landed early
             return Collections.emptyList();
 
         Integer minValue = Collections.min(x.values());
@@ -648,12 +646,12 @@ public class GameModel {
             int credits = player.getOwnedCredits();
             System.out.println("Crediti iniziali: " + credits);
 
-            // gestisce già il fatto che un player potrebbe essere earlyLanded
+
             int positionCredits = flyingBoard.getCreditsForPosition(player);
             credits += positionCredits;
             System.out.println("Crediti da posizione: +" + positionCredits + " (totale: " + credits + ")");
 
-            // gestisce già il fatto che un player potrebbe essere earlyLanded
+            // handle the landing early of a player
             List<Player> prettiestShipPlayers = getPlayerWithPrettiestShip();
             boolean hasPrettiestShip = prettiestShipPlayers.contains(player);
             if (hasPrettiestShip) {
@@ -910,7 +908,7 @@ public class GameModel {
 
         synchronized (stateTransitionLock) {
             if (areAllShipsCorrect()) {
-                // Cambia allo stato successivo
+                // Change state to the next one
                 if(currGameState==GameState.CHECK_SHIPBOARD)
                     setCurrGameState(GameState.PLACE_CREW);
                 else if(currGameState==GameState.PLAY_CARD )

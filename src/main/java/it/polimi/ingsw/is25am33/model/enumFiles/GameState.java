@@ -65,6 +65,7 @@ public enum GameState implements Serializable {
             gameModel.notifyInvalidShipBoards();
             gameModel.notifyValidShipBoards();
 
+            //check if all ship are valid and change
             gameModel.checkAndTransitionToNextPhase();
         }
 
@@ -199,7 +200,7 @@ public enum GameState implements Serializable {
                     gameModel.resetPlayerIterator();
                 }
             });
-
+            // during the check_player someone could be eliminated
             if(gameModel.getFlyingBoard().getRanking().isEmpty())
                 gameModel.setCurrGameState(GameState.END_GAME);
             else

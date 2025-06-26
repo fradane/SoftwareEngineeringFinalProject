@@ -148,7 +148,8 @@ public class PlayerChoicesDataStructure implements Serializable {
         return Optional.ofNullable(chosenDoubleCannons);
     }
 
-    public List<Coordinates> getCabins() {
+    // Getter for JSON serialization
+   public List<Coordinates> getCabins() {
         return chosenCabins;
     }
     public List<Coordinates> getStorage() {

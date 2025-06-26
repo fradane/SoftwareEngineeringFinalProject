@@ -28,7 +28,7 @@ public class ClientPingPongManager {
     public void onPongReceived(Runnable onTimeout) {
         synchronized (lock) {
             if (pongTimeout != null) pongTimeout.cancel(false);
-            //System.out.println("[PONG RECEIVED ON CLIENT] Timeout pong cancellato.");
+            //System.out.println("[PONG RECEIVED ON CLIENT]");
             resetTimeout(onTimeout);
         }
     }

@@ -66,19 +66,24 @@ public class StartViewController extends GuiController {
         loadingAnimation.setAutoReverse(true);
         loadingAnimation.play();
 
-        // Registrazione con il server
+        // registration with server
         clientController.register(nickname);
     }
 
     @Override
     public void showMessage(String message, boolean isPermanent) {
         Platform.runLater(() -> {
-            // Ripristina lo stato del bottone
+
             resetStartButton();
 
-            // Mostra il messaggio di errore nella label
+
             showError(message);
         });
+    }
+
+    @Override
+    public String getControllerType() {
+        return "startViewController";
     }
 
     private void showError(String message) {
@@ -141,9 +146,14 @@ public class StartViewController extends GuiController {
             startButton.setVisible(true);
             resetStartButton();
 
-            // Focus sul campo nickname
+
             nicknameField.requestFocus();
         });
+    }
+
+    public void showDisconnectMessage(String message) {
+        showMessage(message, true);
+        System.exit(0);
     }
 
     public void showServerError(String errorMessage) {
