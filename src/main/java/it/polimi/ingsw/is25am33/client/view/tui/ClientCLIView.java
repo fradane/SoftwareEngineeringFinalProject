@@ -3735,12 +3735,12 @@ public class ClientCLIView implements ClientView {
                     Component focusedComponent = clientModel.getPlayerClientData().get(clientController.getNickname()).getShipBoard().getFocusedComponent();
                     String[] focusedComponentString;
                     StringBuilder focusedComponentStringBuilder = new StringBuilder();
+                    if (focusedComponent == null) {
+                        showMessage("Still picking a component. Please wait...\n> ", ASK);
+                        break;
+                    }
                     switch (Integer.parseInt(input)) {
                         case 1:
-                            if (focusedComponent == null) {
-                                showMessage("Still picking the component. Please wait...\n> ", ASK);
-                                break;
-                            }
                             focusedComponentString = focusedComponent.toString().split("\\n");
                             for (int i = 1; i < focusedComponentString.length; i++) {
                                 focusedComponentStringBuilder.append(focusedComponentString[i]).append("\n");
@@ -3753,10 +3753,6 @@ public class ClientCLIView implements ClientView {
                             break;
 
                         case 2:
-                            if (focusedComponent == null) {
-                                showMessage("Still picking a component. Please wait...\n> ", ASK);
-                                break;
-                            }
                             focusedComponent.rotate();
                             focusedComponentString = focusedComponent.toString().split("\\n");
                             for (int i = 1; i < focusedComponentString.length; i++) {
@@ -4203,6 +4199,7 @@ public class ClientCLIView implements ClientView {
         colorMap.put(ANSI_GREEN, availableBatteryBoxCoords);
 
         showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+        showBatteryBoxesInfo(clientModel.getMyNickname());
     }
 
     public void showEngineWithColor(){
@@ -4259,6 +4256,7 @@ public class ClientCLIView implements ClientView {
         colorMap.put(ANSI_BLUE, availableStandardStoragesCoords);
 
         showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+        showStoragesInfo();
     }
 
 }
