@@ -85,16 +85,16 @@ public abstract class BoardsController {
     public void removeHighlightColor() {
         Set<Button> buttonsToRemove;
 
-        // Crea una copia del set per evitare ConcurrentModificationException
+        // Create a copy of the set to avoid ConcurrentModificationException
         synchronized (highlightLock) {
             buttonsToRemove = new HashSet<>(shadowedButtons);
-            shadowedButtons.clear(); // Pulisci il set originale
+            shadowedButtons.clear(); // Clear the original set
         }
 
-        // Processa i button fuori dalla sincronizzazione
+        // Process buttons outside synchronization
         buttonsToRemove.forEach(button ->
             Platform.runLater(() -> {
-                // Non serve più sincronizzazione qui poiché abbiamo già pulito il set
+                // No need for synchronization here since we already cleared the set
                 button.setEffect(null);
                 button.getStyleClass().remove("no-hover");
             })

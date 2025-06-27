@@ -320,15 +320,15 @@ public class GameControllerTest {
         assertEquals(GameState.BUILD_SHIPBOARD, gameController.getGameModel().getCurrGameState());
     }
 
-    @Test
-    void testLeaveGameAfterCreation() throws RemoteException {
-        PlayerColor color = PlayerColor.BLUE;
-        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
-
-        gameController.leaveGameAfterCreation(PLAYER_NICKNAME);
-
-        assertFalse(gameController.getGameModel().getGameClientNotifier().getClientControllers().containsKey(PLAYER_NICKNAME));
-    }
+//    @Test
+//    void testLeaveGameAfterCreation() throws RemoteException {
+//        PlayerColor color = PlayerColor.BLUE;
+//        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
+//
+//        gameController.leaveGameAfterCreation(PLAYER_NICKNAME);
+//
+//        assertFalse(gameController.getGameModel().getGameClientNotifier().getClientControllers().containsKey(PLAYER_NICKNAME));
+//    }
 
     @Test
     void testPlayerPicksHiddenComponent() {

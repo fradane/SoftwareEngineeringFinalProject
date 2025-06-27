@@ -86,9 +86,9 @@ public class ClientGuiController extends Application implements ClientView {
         // Initialize task queues
         initializeTaskQueues();
 
-        // Icona per la taskbar/dock
+        // Icon for taskbar/dock
         try {
-            // Icona per barra del titolo
+            // Icon for title bar
             primaryStage.getIcons().add(new Image(
                     Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/galaxy_trucker_icon.png"))
             ));
@@ -101,23 +101,23 @@ public class ClientGuiController extends Application implements ClientView {
             System.err.println("Failed to set Taskbar icon: not supported by current OS");
         }
 
-        // Carica il container principale, ma imposta manualmente il controller
+        // Load the main container and manually set the controller
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/MainContainer.fxml"));
-        loader.setController(this);  // Imposta questo oggetto come controller
+        loader.setController(this);  // Set this object as controller
         Scene scene = new Scene(loader.load(), 1200, 700);
 
-        // Configura il model e il controller
+        // Configure the model and controller
         GuiController.setClientModel(clientModel);
         GuiController.setClientController(clientController);
 
-        // Imposta il titolo e mostra la finestra
+        // Set title and show window
         primaryStage.setTitle("Galaxy Trucker");
         primaryStage.setScene(scene);
         primaryStage.show();
         primaryStage.setFullScreen(true);
         primaryStage.setFullScreenExitHint("");
 
-        // Carica la schermata iniziale
+        // Load the initial screen
         loadStartView();
 
         initializationDone.complete(null);
@@ -889,11 +889,11 @@ public class ClientGuiController extends Application implements ClientView {
 
     private static final CompletableFuture<Void> initializationDone = new CompletableFuture<>();
 
-    // Nuovo container principale
+    // Main container
     @FXML
     private StackPane mainContainer;
 
-    // Elementi attuali
+    // Current elements
     private Parent currentView;
     private GuiController currentController;
 

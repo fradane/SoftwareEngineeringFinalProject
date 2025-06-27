@@ -1,8 +1,8 @@
 package it.polimi.ingsw.is25am33.client.view.gui.viewControllers;
 
 /**
- * Interfaccia per gestire gli eventi provenienti dalla griglia delle shipboard.
- * Permette di separare la logica di gestione degli eventi dal componente riusabile.
+ * Interface for handling events from the ship board grid.
+ * Allows separation of event handling logic from the reusable component.
  */
 public interface BoardsEventHandler {
 

@@ -600,8 +600,8 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                     .filter(coords -> !crewMemberChoice.containsKey(coords))
                     .forEach(coords -> boardsController.applyHighlightEffect(coords, Color.BROWN));
         } else {
-            this.currentCrewMemberChoice = CrewMember.BROWN_ALIEN;
-            handleConfirmCrewMemberButton();
+            this.currentCrewMemberChoice = CrewMember.HUMAN;
+            showMessage("You cannot place any alien, every cabin will be filled with humans. Press continue...", true);
         }
 
     }
@@ -659,6 +659,8 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             this.crewMemberChoice.put(selectedCoords, CrewMember.BROWN_ALIEN);
             boardsController.applyHighlightEffect(selectedCoords, Color.GREEN);
 
+        } else {
+            showMessage("Press confirm...", false);
         }
     }
 

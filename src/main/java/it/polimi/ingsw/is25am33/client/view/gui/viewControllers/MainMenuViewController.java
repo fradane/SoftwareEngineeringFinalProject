@@ -113,12 +113,20 @@ public class MainMenuViewController extends GuiController {
         });
     }
 
+    /**
+     * Handles the UI event when user wants to create a new game.
+     * Shows the create game form.
+     */
     @FXML
     private void handleCreateGame() {
         hideErrorLabel();
         showForm(createGameForm);
     }
 
+    /**
+     * Handles the UI event when user submits game creation form.
+     * Validates form data and creates the game on the server.
+     */
     @FXML
     private void handleSubmitCreateGame() {
         Integer numPlayers = playerCountComboBox.getValue();
@@ -134,6 +142,10 @@ public class MainMenuViewController extends GuiController {
         showForm(gameCreatedScreen);
     }
 
+    /**
+     * Handles the UI event when user wants to exit the application.
+     * Plays a fade-out animation before closing.
+     */
     @FXML
     private void handleExit() {
         FadeTransition fadeOut = new FadeTransition(Duration.millis(300), mainMenu);
@@ -197,12 +209,20 @@ public class MainMenuViewController extends GuiController {
         }
     }
 
+    /**
+     * Handles the UI event when user wants to return to the main menu.
+     * Hides error messages and shows the main menu form.
+     */
     @FXML
     private void backToMainMenu() {
         hideErrorLabel();
         showForm(mainMenu);
     }
 
+    /**
+     * Handles the UI event when user wants to go back to game selection.
+     * Hides error messages and shows the choose game form.
+     */
     @FXML
     private void backToChooseGame() {
         hideErrorLabel();
@@ -210,6 +230,11 @@ public class MainMenuViewController extends GuiController {
     }
 
 
+    /**
+     * Shows a specific form while hiding all others with fade animation.
+     *
+     * @param targetForm the form to display
+     */
     private void showForm(VBox targetForm) {
         Platform.runLater(() -> {
             VBox[] allForms = {mainMenu, createGameForm, chooseGameForm,
@@ -220,11 +245,11 @@ public class MainMenuViewController extends GuiController {
                 form.setManaged(false);
             }
 
-            // Mostra il form target con animazione
+            // Show target form with animation
             targetForm.setVisible(true);
             targetForm.setManaged(true);
 
-            // Animazione di entrata
+            // Entry animation
             targetForm.setOpacity(0.0);
             FadeTransition fadeIn = new FadeTransition(Duration.millis(300), targetForm);
             fadeIn.setToValue(1.0);
@@ -232,6 +257,11 @@ public class MainMenuViewController extends GuiController {
         });
     }
 
+    /**
+     * Displays an error message to the user.
+     *
+     * @param message the error message to display
+     */
     private void showErrorMessage(String message) {
         Platform.runLater(() -> {
             if (errorLabel != null) {
@@ -250,6 +280,9 @@ public class MainMenuViewController extends GuiController {
         });
     }
 
+    /**
+     * Hides the error label and clears its text.
+     */
     private void hideErrorLabel() {
         Platform.runLater(() -> {
             if (errorLabel != null) {

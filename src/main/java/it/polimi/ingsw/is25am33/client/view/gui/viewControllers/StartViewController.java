@@ -44,6 +44,10 @@ public class StartViewController extends GuiController {
         });
     }
 
+    /**
+     * Handles the submit button click event.
+     * Validates the nickname and initiates server registration.
+     */
     @FXML
     private void handleSubmit() {
         String nickname = nicknameField.getText().trim();
@@ -70,7 +74,7 @@ public class StartViewController extends GuiController {
         loadingAnimation.setAutoReverse(true);
         loadingAnimation.play();
 
-        // Registrazione con il server
+        // Register with server
         clientController.register(nickname);
     }
 
@@ -83,14 +87,19 @@ public class StartViewController extends GuiController {
     @Override
     public void showMessage(String message, boolean isPermanent) {
         Platform.runLater(() -> {
-            // Ripristina lo stato del bottone
+            // Reset button state
             resetStartButton();
 
-            // Mostra il messaggio di errore nella label
+            // Show error message in label
             showError(message);
         });
     }
 
+    /**
+     * Shows an error message with fade-in animation.
+     *
+     * @param message the error message to display
+     */
     private void showError(String message) {
         Platform.runLater(() -> {
             errorLabel.setText(message);
@@ -108,6 +117,9 @@ public class StartViewController extends GuiController {
     }
 
 
+    /**
+     * Clears the current error message with fade-out animation.
+     */
     private void clearError() {
         Platform.runLater(() -> {
             if (errorLabel.isVisible()) {
@@ -119,11 +131,19 @@ public class StartViewController extends GuiController {
         });
     }
 
+    /**
+     * Resets the start button to its default state.
+     */
     private void resetStartButton() {
         startButton.setDisable(false);
         startButton.setText("START MISSION");
     }
 
+    /**
+     * Applies a shake animation to the specified node.
+     *
+     * @param node the JavaFX node to animate
+     */
     private void shakeNode(javafx.scene.Node node) {
         double originalX = node.getTranslateX();
 
@@ -155,7 +175,7 @@ public class StartViewController extends GuiController {
             startButton.setVisible(true);
             resetStartButton();
 
-            // Focus sul campo nickname
+            // Focus on nickname field
             nicknameField.requestFocus();
         });
     }
