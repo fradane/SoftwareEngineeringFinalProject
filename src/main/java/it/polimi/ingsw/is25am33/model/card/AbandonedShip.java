@@ -33,12 +33,10 @@ public class AbandonedShip extends AdventureCard implements PlayerMover, CrewMem
     /**
      * The reward represents a point or value granted to the current player when a specific
      * condition or event occurs within the game.
-     *
      * This variable is typically used to store the benefit or gain that a player receives
      * upon successfully completing or interacting with the AbandonedShip card. The reward
      * value can influence gameplay by providing an incentive to visit or make specific
      * decisions related to the AbandonedShip card.
-     *
      * The reward should be positive or zero, aligning with the mechanics of the game to
      * enhance player strategy and progression.
      */

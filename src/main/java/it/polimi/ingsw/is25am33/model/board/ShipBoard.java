@@ -17,8 +17,21 @@ import java.util.stream.Stream;
 import static it.polimi.ingsw.is25am33.model.enumFiles.ConnectorType.*;
 import static it.polimi.ingsw.is25am33.model.enumFiles.Direction.*;
 
+/**
+ * Abstract representation of a ship board in the game.
+ * This class provides the core functionality for managing components on a two-dimensional grid,
+ * enforcing placement rules, handling interactions with dangerous objects, and tracking the ship's state.
+ * <p>
+ * The ship board consists of a square grid where various components (cabins, engines, cannons, etc.) can be placed
+ * according to specific rules. Components must be properly connected, must not aim at each other,
+ * and must respect directional constraints.
+ * <p>
+ * This class is extended by specific ship board implementations (e.g., Level1ShipBoard, Level2ShipBoard)
+ * that define the valid positions where components can be placed.
+ */
 public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
+    /** The notifier used to update game clients about changes to the ship board. */
     protected GameClientNotifier gameClientNotifier;
 
     /**
@@ -59,6 +72,7 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     protected Component focusedComponent;
 
+    /** The player who owns this ship board. */
     protected Player player;
 
     /**
@@ -83,38 +97,78 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         this.gameClientNotifier = gameClientNotifier;
     }
 
+    /**
+     * Sets the player who owns this ship board.
+     *
+     * @param player The player to set as owner.
+     */
     public void setPlayer(Player player) {
         this.player = player;
     }
 
+    /**
+     * Returns the matrix of components that make up the ship.
+     *
+     * @return A 2D array of components representing the ship's layout.
+     */
     public Component[][] getShipMatrix() {
         synchronized (shipMatrix) {
             return shipMatrix;
         }
     }
 
+    /**
+     * Returns a map of component types to lists of components of that type.
+     *
+     * @return A map where keys are component classes and values are lists of components.
+     */
     public Map<Class<?>, List<Component>> getComponentsPerType() {
         synchronized (componentsPerType) {
             return componentsPerType;
         }
     }
 
+    /**
+     * Gets the component currently in focus (being placed or manipulated).
+     *
+     * @return The focused component, or null if no component is focused.
+     */
     public Component getFocusedComponent() {
         return focusedComponent;
     }
 
+    /**
+     * Gets the set of coordinates where components are incorrectly positioned.
+     *
+     * @return A set of coordinates for incorrectly positioned components.
+     */
     public Set<Coordinates> getIncorrectlyPositionedComponentsCoordinates() {
         return incorrectlyPositionedComponentsCoordinates;
     }
 
+    /**
+     * Sets the game client notifier used to update clients about changes.
+     *
+     * @param gameClientNotifier The notifier to set.
+     */
     public void setGameClientNotifier(GameClientNotifier gameClientNotifier) {
         this.gameClientNotifier = gameClientNotifier;
     }
 
+    /**
+     * Sets the ship matrix to a new configuration.
+     *
+     * @param shipMatrix The new ship matrix to set.
+     */
     public void setShipMatrix(Component[][] shipMatrix) {
         this.shipMatrix = shipMatrix;
     }
 
+    /**
+     * Sets the focused component and notifies all clients of the change.
+     *
+     * @param focusedComponent The component to focus on.
+     */
     public void setFocusedComponent(Component focusedComponent)  {
         this.focusedComponent = focusedComponent;
         gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
@@ -122,6 +176,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         });
     }
 
+    /**
+     * Gets the list of components that have been booked but are not yet placed on the board.
+     *
+     * @return A list of booked components.
+     */
     public List<Component> getBookedComponents(){
         return notActiveComponents;
     }
@@ -175,6 +234,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return false;
     }
 
+    /**
+     * Returns a list of all cargo cubes stored in storage components on the ship.
+     *
+     * @return A list of cargo cubes.
+     */
     @Override
     public List<CargoCube> getCargoCubes(){
         List<CargoCube> cargoCubes = new ArrayList<>();
@@ -187,6 +251,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return cargoCubes;
     }
 
+    /**
+     * Calculates the total number of batteries available across all battery boxes on the ship.
+     *
+     * @return The total number of available batteries.
+     */
     @Override
     public int getTotalAvailableBattery(){
         int result = 0;
@@ -196,7 +265,14 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return result;
     }
 
-    // throws an exception if is not allowed to place the component in that position
+    /**
+     * Validates if a component can be placed at the specified position.
+     * Throws exceptions for various invalid placement conditions.
+     *
+     * @param x The x-coordinate to check.
+     * @param y The y-coordinate to check.
+     * @throws IllegalArgumentException If the position is invalid, already occupied, or not properly connected.
+     */
     public void checkPosition(int x, int y) {
         if (!isValidPosition(x, y))
             throw new IllegalArgumentException("Not a valid position");
@@ -296,6 +372,12 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
     }
 
+    /**
+     * Removes a component from a list by reference comparison.
+     *
+     * @param list The list to remove the component from.
+     * @param target The component to remove.
+     */
     private void removeComponentByReference(List<Component> list, Component target) {
         if (list == null || target == null) return;
 
@@ -308,6 +390,14 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
     }
 
+    /**
+     * Checks if a component (cannon or engine) is aiming directly at another component.
+     *
+     * @param componentToPlace The component to check.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return true if the component is aiming at another component, false otherwise.
+     */
     public boolean isAimingAComponent(Component componentToPlace, int x, int y) {
         Direction fireDirection;
         if (componentToPlace instanceof Cannon) {
@@ -1028,6 +1118,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
     }
 
+    /**
+     * Sets the coordinates of incorrectly positioned components.
+     *
+     * @param incorrectlyPositionedComponentsCoordinates The set of coordinates to set.
+     */
     public void setIncorrectlyPositionedComponentsCoordinates(Set<Coordinates> incorrectlyPositionedComponentsCoordinates) {
         this.incorrectlyPositionedComponentsCoordinates = incorrectlyPositionedComponentsCoordinates;
     }
@@ -1125,14 +1220,30 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      */
     public abstract boolean canDifendItselfWithSingleCannons(DangerousObj obj);
 
+    /**
+     * Gets the list of components that are not currently active on the board.
+     *
+     * @return A list of inactive components.
+     */
     public List<Component> getNotActiveComponents() {
         return notActiveComponents;
     }
 
+    /**
+     * Gets the component at the specified coordinates.
+     *
+     * @param coordinates The coordinates to check.
+     * @return The component at the specified coordinates, or null if none exists.
+     */
     public Component getComponentAt(Coordinates coordinates) {
         return this.shipMatrix[coordinates.getX()][coordinates.getY()];
     }
 
+    /**
+     * Releases the currently focused component and notifies all clients.
+     *
+     * @return The component that was released.
+     */
     public Component releaseFocusedComponent() {
 
         Component component = getFocusedComponent();
@@ -1148,6 +1259,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
     }
 
 
+    /**
+     * Sets the list of components that are not currently active on the board.
+     *
+     * @param notActiveComponents The list of inactive components to set.
+     */
     public void setNotActiveComponents(List<Component> notActiveComponents) {
         this.notActiveComponents = notActiveComponents;
     }
@@ -1175,6 +1291,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         }
     }
 
+    /**
+     * Sets the map of component types to lists of components.
+     *
+     * @param componentsPerType The map to set.
+     */
     public void setComponentsPerType(Map<Class<?>, List<Component>> componentsPerType) {
         this.componentsPerType = componentsPerType;
     }
@@ -1244,11 +1365,10 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
         return result;
     }
-
     /**
      * Returns a map where keys are coordinates and values are Battery components.
      *
-     * @return A map of coordinates to BatteryBox objects
+     * @return A map of coordinates to BatteryBox objects.
      */
     @JsonIgnore
     public Map<Coordinates, BatteryBox> getCoordinatesAndBatteries() {
@@ -1265,10 +1385,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
         return result;
     }
-
     /**
-     * Restituisce una mappa di cabine connesse a moduli di supporto vitale.
-     * Le chiavi sono le coordinate delle cabine, i valori sono gli insiemi dei colori di supporto vitale collegati.
+     * Returns a map of cabins connected to life support modules.
+     * The keys are the coordinates of the cabins, the values are the sets of life support colors connected.
+     *
+     * @return A map of cabin coordinates to sets of connected life support colors.
      */
     @JsonIgnore
     public Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport() {
@@ -1292,6 +1413,12 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return result;
     }
 
+    /**
+     * Gets the coordinates of all components in the provided list.
+     *
+     * @param components The list of components to find coordinates for.
+     * @return A set of coordinates where the components are located.
+     */
     public Set<Coordinates> getCoordinatesOfComponents(List<? extends Component> components) {
         Set<Coordinates> coordinatesOfComponents = new HashSet<>();
 
@@ -1307,9 +1434,12 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
         return coordinatesOfComponents;
     }
-
     /**
-     * Trova tutti i moduli di supporto vitale connessi alla posizione specificata.
+     * Finds all life support modules connected to the specified position.
+     *
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return A set of life support colors connected to the position.
      */
     private Set<ColorLifeSupport> getConnectedLifeSupports(int x, int y) {
         Set<ColorLifeSupport> result = new HashSet<>();
@@ -1333,9 +1463,12 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
 
         return result;
     }
-
     /**
-     * Verifica se un alieno può essere posizionato in una cabina in base ai colori di supporto vitale.
+     * Verifies if an alien can be placed in a cabin based on connected life support modules.
+     *
+     * @param coords The coordinates of the cabin.
+     * @param alien The alien crew member to potentially place.
+     * @return true if the alien can be accepted at the given coordinates, false otherwise.
      */
     public boolean canAcceptAlien(Coordinates coords, CrewMember alien) {
         Set<ColorLifeSupport> supports = getConnectedLifeSupports(coords.getX(), coords.getY());
@@ -1353,6 +1486,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return false;
     }
 
+    /**
+     * Checks if there is a purple alien on the ship.
+     *
+     * @return 1 if a purple alien is present, 0 otherwise.
+     */
     private int getPurpleAlien(){
         for(CrewMember crewMember: getCrewMembers()){
             if(crewMember == CrewMember.PURPLE_ALIEN)
@@ -1361,6 +1499,12 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return 0;
     }
 
+
+    /**
+     * Checks if there is a brown alien on the ship.
+     *
+     * @return 1 if a brown alien is present, 0 otherwise.
+     */
     private int getBrownAlien(){
         for(CrewMember crewMember: getCrewMembers()){
             if(crewMember == CrewMember.BROWN_ALIEN)
@@ -1369,10 +1513,20 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         return 0;
     }
 
+    /**
+     * Gets the main cabin of the ship.
+     *
+     * @return The main cabin component.
+     */
     public MainCabin getMainCabin(){
         return (MainCabin) shipMatrix[STARTING_CABIN_POSITION[0]][STARTING_CABIN_POSITION[1]];
     }
 
+    /**
+     * Gets the total number of components on the ship.
+     *
+     * @return The number of components.
+     */
     @Override
     public long getNumberOfComponents() {
         return componentsPerType.keySet()
@@ -1381,6 +1535,11 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                 .sum();
     }
 
+    /**
+     * Gets the total number of batteries on the ship.
+     *
+     * @return The number of batteries.
+     */
     @Override
     public Integer getBatteries() {
         List<Component> batteryBoxes = new ArrayList<>(componentsPerType.getOrDefault(BatteryBox.class, Collections.emptyList())); // necessario fare la new ArrayList perchè emptyList è immutabile
@@ -1391,6 +1550,9 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
                 .sum();
     }
 
+    /**
+     * Ejects aliens from cabins that don't have the required life support.
+     */
     public void ejectAliens() {
         getCoordinatesAndCabinsWithCrew().forEach((coords, cabin) -> {
             if (cabin.getInhabitants().contains(CrewMember.PURPLE_ALIEN) || cabin.getInhabitants().contains(CrewMember.BROWN_ALIEN))
@@ -1398,6 +1560,14 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
         });
     }
 
+    /**
+     * Checks if a cabin has the correct life support for a crew member,
+     * and removes the crew member if not.
+     *
+     * @param cabin The cabin to check.
+     * @param coords The coordinates of the cabin.
+     * @param crewMember The crew member to check.
+     */
     private void hasCorrectLifeSupportOrRemove(Cabin cabin, Coordinates coords, CrewMember crewMember) {
         // Get all life support modules connected to this cabin
         Set<ColorLifeSupport> connectedLifeSupports = getConnectedLifeSupports(coords.getX(), coords.getY());

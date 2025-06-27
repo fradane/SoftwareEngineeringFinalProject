@@ -10,8 +10,6 @@ public class ClientSerializer {
     private static final ObjectMapper mapper = new ObjectMapper();
     static {
         mapper.registerModule(new Jdk8Module());
-        // <-- add
-        // other modules (JavaTimeModule, ecc.)
     }
 
     public static <T> String serialize(T objToSerialize) {
@@ -24,20 +22,4 @@ public class ClientSerializer {
         }
     }
 
-    public static void main(String[] args) {
-
-//        SocketMessage msg = new SocketMessage("fra", "action");
-//        msg.setParamPlayerColor(PlayerColor.GREEN);;
-//        msg.setParamBoolean(false);
-//        msg.setParamInt(2);
-//        msg.setParamString("giu");
-//        msg.setParamGameInfo(List.of(new GameInfo("ciao", 4, new HashMap<>(), true, true)));
-//
-//        String serialize = ClientSerializer.serialize(msg);
-//
-//        System.out.println(serialize);
-
-
-
-    }
 }

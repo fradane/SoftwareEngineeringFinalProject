@@ -222,42 +222,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     /**
-     * Allows the user to select the user interface
-     * @param scanner Scanner to read user input
-     * @return The chosen implementation of ClientView
-     */
-    public static ClientView selectUserInterface(Scanner scanner, String choice) throws IOException {
-
-        return switch (choice) {
-            case "cli" -> new ClientCLIView();
-            case "gui" -> new ClientGuiController();
-            default -> null;
-        };
-
-
-//        System.out.println("Select user interface:");
-//        System.out.println("1. Command Line Interface (CLI)");
-//        System.out.println("2. Graphical User Interface (GUI)");
-//
-//        while (true) {
-//            System.out.print("Your choice: ");
-//            try {
-//                int choice = Integer.parseInt(scanner.nextLine());
-//                switch (args) {
-//                    case 1:
-//                        return new ClientCLIView(clientModel);
-//                    case 2:
-//                        //return new ClientGUIView();
-//                    default:
-//                        System.out.println("Invalid choice. Please enter 1 or 2.");
-//                }
-//            } catch (NumberFormatException e) {
-//                System.out.println("Please enter a valid number.");
-//            }
-//        }
-    }
-
-    /**
      * Allows the user to select the network protocol
      * @return The chosen implementation of NetworkManager
      */
@@ -272,27 +236,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             return null;
         }
 
-//        System.out.println("Select network protocol:");
-//        System.out.println("1. RMI (Remote Method Invocation)");
-//        System.out.println("2. Socket TCP/IP");
-//
-//        while (true) {
-//            try {
-//                int choice = Integer.parseInt(view.askForInput("Your choice: "));
-//                switch (choice) {
-//                    case 1:
-//                        return this.setUpRMIConnection();
-//                    case 2:
-//                        return this.setUpSocketConnection();
-//                    default:
-//                        System.out.println("Invalid choice. Please enter 1 or 2.");
-//                }
-//            } catch (IOException e) {
-//                view.showError("Connection refused: " + e.getMessage());
-//            } catch (NumberFormatException e) {
-//                view.showMessage("Invalid choice. Please enter 1 or 2.");
-//            }
-//        }
     }
 
     private CallableOnDNS setUpRMIConnection(String serverAddress, int serverPort) throws IOException {

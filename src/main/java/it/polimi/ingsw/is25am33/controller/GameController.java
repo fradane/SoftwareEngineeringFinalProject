@@ -93,88 +93,95 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerPicksHiddenComponent(String nickname) {
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+                System.err.println("Player " + nickname + " tried to playerPicksHiddenComponent in state " + gameModel.getCurrGameState());
+                return;
+            }
 
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
-            System.err.println("Player " + nickname + " tried to playerPicksHiddenComponent in state " + gameModel.getCurrGameState());
-            return;
+            Component pickedComponent = gameModel.getComponentTable().pickHiddenComponent();
+            if (pickedComponent == null) {
+                gameModel.getGameClientNotifier()
+                        .notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
+                            clientController.notifyNoMoreHiddenComponents(nicknameToNotify);
+                        });
+                return;
+            }
+            gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(pickedComponent);
         }
-
-        Component pickedComponent = gameModel.getComponentTable().pickHiddenComponent();
-        if (pickedComponent == null) {
-            gameModel.getGameClientNotifier()
-                    .notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
-                        clientController.notifyNoMoreHiddenComponents(nicknameToNotify);
-                    });
-            return;
-        }
-        gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(pickedComponent);
     }
 
     @Override
     public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates, int rotation) {
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
-            System.err.println("Player " + nickname + " tried to playerWantsToPlaceFocusedComponent in state " + gameModel.getCurrGameState());
-            return;
+
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD) {
+                System.err.println("Player " + nickname + " tried to playerWantsToPlaceFocusedComponent in state " + gameModel.getCurrGameState());
+                return;
+            }
+
+            ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+            for (int i = 0; i < rotation; i++)
+                shipBoard.getFocusedComponent().rotate();
+            shipBoard.placeComponentWithFocus(coordinates.getX(), coordinates.getY());
         }
-
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-        for (int i = 0; i < rotation; i++)
-            shipBoard.getFocusedComponent().rotate();
-        shipBoard.placeComponentWithFocus(coordinates.getX(), coordinates.getY());
-
 
     }
 
     @Override
     public void playerWantsToReserveFocusedComponent(String nickname) {
 
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
-            System.err.println("Player " + nickname + " tried to playerWantsToReserveFocusedComponent in state " + gameModel.getCurrGameState());
-            return;
-        }
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD) {
+                System.err.println("Player " + nickname + " tried to playerWantsToReserveFocusedComponent in state " + gameModel.getCurrGameState());
+                return;
+            }
 
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-        ((Level2ShipBoard) shipBoard).book();
+            ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+            ((Level2ShipBoard) shipBoard).book();
+        }
 
     }
 
     @Override
     public void playerWantsToReleaseFocusedComponent(String nickname) {
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD) {
+                System.err.println("Player " + nickname + " tried to playerWantsToReleaseFocusedComponent in state " + gameModel.getCurrGameState());
+                return;
+            }
 
-        if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD){
-            System.err.println("Player " + nickname + " tried to playerWantsToReleaseFocusedComponent in state " + gameModel.getCurrGameState());
-            return;
+            ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+            Component component = shipBoard.releaseFocusedComponent();
+            if (!shipBoard.getNotActiveComponents().contains(component))
+                gameModel.getComponentTable().addVisibleComponent(component);
         }
-
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-        Component component = shipBoard.releaseFocusedComponent();
-        if (!shipBoard.getNotActiveComponents().contains(component))
-            gameModel.getComponentTable().addVisibleComponent(component);
-
     }
 
     @Override
     public void playerEndsBuildShipBoardPhase(String nickname) {
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD) {
+                System.err.println("Player " + nickname + " tried to playerEndsBuildShipBoardPhase in state " + gameModel.getCurrGameState());
+                return;
+            }
 
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
-            System.err.println("Player " + nickname + " tried to playerEndsBuildShipBoardPhase in state " + gameModel.getCurrGameState());
-            return;
+            if (gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname)) == gameModel.getMaxPlayers())
+                gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
         }
-
-        if (gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname)) == gameModel.getMaxPlayers())
-            gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
     }
 
     @Override
     public void playerPlacesPawn(String nickname) {
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD) {
+                System.err.println("Player " + nickname + " tried to playerPlacesPawn in state " + gameModel.getCurrGameState());
+                return;
+            }
 
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
-            System.err.println("Player " + nickname + " tried to playerPlacesPawn in state " + gameModel.getCurrGameState());
-            return;
+            if (gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname)) == gameModel.getMaxPlayers())
+                gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
         }
-
-        if (gameModel.getFlyingBoard().insertPlayer(gameModel.getPlayers().get(nickname)) == gameModel.getMaxPlayers())
-            gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
     }
 
     @Override
@@ -278,21 +285,22 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) {
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD) {
+                System.err.println("Player " + nickname + " tried to playerPicksVisibleComponent in state " + gameModel.getCurrGameState());
+                return;
+            }
 
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
-            System.err.println("Player " + nickname + " tried to playerPicksVisibleComponent in state " + gameModel.getCurrGameState());
-            return;
+            Component chosenComponent = gameModel.getComponentTable().pickVisibleComponent(choice);
+            if (chosenComponent == null) {
+                gameModel.getGameClientNotifier()
+                        .notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
+                            clientController.notifyStolenVisibleComponent(nicknameToNotify);
+                        });
+                return;
+            }
+            gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(chosenComponent);
         }
-
-        Component chosenComponent = gameModel.getComponentTable().pickVisibleComponent(choice);
-        if (chosenComponent == null) {
-            gameModel.getGameClientNotifier()
-                    .notifyClients(Set.of(nickname), (nicknameToNotify, clientController) -> {
-                        clientController.notifyStolenVisibleComponent(nicknameToNotify);
-                    });
-            return;
-        }
-        gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(chosenComponent);
     }
 
     @Override
@@ -596,126 +604,130 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void playerWantsToRemoveComponent(String nickname, Coordinates coordinates) {
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.CHECK_SHIPBOARD && gameModel.getCurrGameState() != GameState.PLAY_CARD) {
+                System.err.println("Player " + nickname + " tried to playerWantsToRemoveComponent in state " + gameModel.getCurrGameState());
+                return;
+            }
 
-        if(gameModel.getCurrGameState()!=GameState.CHECK_SHIPBOARD && gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
-            System.err.println("Player " + nickname + " tried to playerWantsToRemoveComponent in state " + gameModel.getCurrGameState());
-            return;
-        }
+            if (coordinates != null) {
+                ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+                Set<Set<Coordinates>> shipParts = shipBoard.removeAndRecalculateShipParts(coordinates.getX(), coordinates.getY());
 
-        if(coordinates!=null) {
-            ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-            Set<Set<Coordinates>> shipParts = shipBoard.removeAndRecalculateShipParts(coordinates.getX(), coordinates.getY());
+                // Store the ship parts for this player
+                temporaryShipParts.put(nickname, shipParts);
 
-            // Store the ship parts for this player
-            temporaryShipParts.put(nickname, shipParts);
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                    try {
+                        shipBoard.ejectAliens();
+                        Component[][] shipMatrix = shipBoard.getShipMatrix();
+                        Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
+                        Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+                        List<Component> notActiveComponentsList = shipBoard.getNotActiveComponents();
+                        if (shipParts.size() <= 1) {
+                            shipBoard.checkShipBoard();
+                            if (incorrectlyPositionedComponentsCoordinates.isEmpty()) {
+                                clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType, notActiveComponentsList);
 
-            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                try {
-                    shipBoard.ejectAliens();
-                    Component[][] shipMatrix = shipBoard.getShipMatrix();
-                    Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
-                    Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
-                    List<Component> notActiveComponentsList = shipBoard.getNotActiveComponents();
-                    if (shipParts.size() <= 1) {
-                        shipBoard.checkShipBoard();
-                        if (incorrectlyPositionedComponentsCoordinates.isEmpty()) {
-                            clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType, notActiveComponentsList);
-
+                            } else
+                                clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType, notActiveComponentsList);
                         } else
-                            clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType, notActiveComponentsList);
-                    } else
-                        clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts, componentsPerType);
-                } catch (RemoteException e) {
-                    System.err.println("Remote Exception");
-                }
-            });
+                            clientController.notifyShipPartsGeneratedDueToRemoval(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, shipParts, componentsPerType);
+                    } catch (RemoteException e) {
+                        System.err.println("Remote Exception");
+                    }
+                });
 
-            if (shipParts.size() <= 1) // that is, I directly removed a component
-                // Check if all ships are correct and if so, change the phase
-                gameModel.checkAndTransitionToNextPhase();
+                if (shipParts.size() <= 1) // that is, I directly removed a component
+                    // Check if all ships are correct and if so, change the phase
+                    gameModel.checkAndTransitionToNextPhase();
+            }
         }
     }
 
     @Override
     public void playerChoseShipPart(String nickname, Set<Coordinates> chosenShipPart) throws RemoteException {
-
-        if(gameModel.getCurrGameState()!=GameState.CHECK_SHIPBOARD && gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
-            System.err.println("Player " + nickname + " tried to playerChoseShipPart in state " + gameModel.getCurrGameState());
-            return;
-        }
-
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
-
-        // Get all ship parts stored for this player
-        Set<Set<Coordinates>> allShipParts = temporaryShipParts.get(nickname);
-
-        if (allShipParts != null) {
-            // Remove all ship parts EXCEPT the chosen one
-            for (Set<Coordinates> shipPart : allShipParts) {
-                if (!shipPart.equals(chosenShipPart)) {
-                    shipBoard.removeShipPart(shipPart);
-                }
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.CHECK_SHIPBOARD && gameModel.getCurrGameState() != GameState.PLAY_CARD) {
+                System.err.println("Player " + nickname + " tried to playerChoseShipPart in state " + gameModel.getCurrGameState());
+                return;
             }
 
-            shipBoard.checkShipBoard();
+            ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
 
+            // Get all ship parts stored for this player
+            Set<Set<Coordinates>> allShipParts = temporaryShipParts.get(nickname);
 
-            gameModel.getGameClientNotifier().notifyAllClients( (nicknameToNotify, clientController) -> {
-                try {
-                    Component[][] shipMatrix = shipBoard.getShipMatrix();
-                    Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
-                    Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
-                    List<Component> notActiveComponentsList = shipBoard.getNotActiveComponents();
-                    if(shipBoard.isShipCorrect())
-                        clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType, notActiveComponentsList);
-                    else
-                        clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType, notActiveComponentsList);
-                } catch (RemoteException e) {
-                    System.err.println("Remote Exception");
+            if (allShipParts != null) {
+                // Remove all ship parts EXCEPT the chosen one
+                for (Set<Coordinates> shipPart : allShipParts) {
+                    if (!shipPart.equals(chosenShipPart)) {
+                        shipBoard.removeShipPart(shipPart);
+                    }
                 }
-            });
 
-            // Clear the temporary map
-            temporaryShipParts.remove(nickname);
+                shipBoard.checkShipBoard();
+
+
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                    try {
+                        Component[][] shipMatrix = shipBoard.getShipMatrix();
+                        Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
+                        Set<Coordinates> incorrectlyPositionedComponentsCoordinates = shipBoard.getIncorrectlyPositionedComponentsCoordinates();
+                        List<Component> notActiveComponentsList = shipBoard.getNotActiveComponents();
+                        if (shipBoard.isShipCorrect())
+                            clientController.notifyValidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType, notActiveComponentsList);
+                        else
+                            clientController.notifyInvalidShipBoard(nicknameToNotify, nickname, shipMatrix, incorrectlyPositionedComponentsCoordinates, componentsPerType, notActiveComponentsList);
+                    } catch (RemoteException e) {
+                        System.err.println("Remote Exception");
+                    }
+                });
+
+                // Clear the temporary map
+                temporaryShipParts.remove(nickname);
+            }
+
+            // Check if all ships are correct and change phase if necessary
+            gameModel.checkAndTransitionToNextPhase();
         }
-
-        // Check if all ships are correct and change phase if necessary
-        gameModel.checkAndTransitionToNextPhase();
     }
 
     @Override
     public void playerWantsToFocusReservedComponent(String nickname, int choice){
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD) {
+                System.err.println("Player " + nickname + " tried to playerWantsToFocusReservedComponent in state " + gameModel.getCurrGameState());
+                return;
+            }
 
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
-            System.err.println("Player " + nickname + " tried to playerWantsToFocusReservedComponent in state " + gameModel.getCurrGameState());
-            return;
+            ((Level2ShipBoard) gameModel.getPlayers().get(nickname).getPersonalBoard()).focusReservedComponent(choice);
         }
-
-        ((Level2ShipBoard) gameModel.getPlayers().get(nickname).getPersonalBoard()).focusReservedComponent(choice);
     }
 
     @Override
     public void requestPrefabShips(String nickname) throws RemoteException {
         // Retrieve the list of prefab ships
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD) {
+                System.err.println("Player " + nickname + " tried to playerWantsToFocusReservedComponent in state " + gameModel.getCurrGameState());
+                return;
+            }
 
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
-            System.err.println("Player " + nickname + " tried to playerWantsToFocusReservedComponent in state " + gameModel.getCurrGameState());
-            return;
-        }
+            List<PrefabShipInfo> prefabShips = PrefabShipFactory.getAvailablePrefabShips(gameModel.isTestFlight());
 
-        List<PrefabShipInfo> prefabShips = PrefabShipFactory.getAvailablePrefabShips(gameModel.isTestFlight());
-
-        // Notify the client asynchronously
-        gameModel.getGameClientNotifier().notifyClients(
-                Set.of(nickname),
-                (nicknameToNotify, clientController) -> {
-                    try {
-                        clientController.notifyPrefabShipsAvailable(nicknameToNotify, prefabShips);
-                    } catch (IOException e) {
-                        System.err.println("Error notifying client about prefab ships: " + e.getMessage());
+            // Notify the client asynchronously
+            gameModel.getGameClientNotifier().notifyClients(
+                    Set.of(nickname),
+                    (nicknameToNotify, clientController) -> {
+                        try {
+                            clientController.notifyPrefabShipsAvailable(nicknameToNotify, prefabShips);
+                        } catch (IOException e) {
+                            System.err.println("Error notifying client about prefab ships: " + e.getMessage());
+                        }
                     }
-                }
-        );
+            );
+        }
     }
 
     public void startCheckShipBoardAfterAttack(String nickname){
@@ -736,75 +748,78 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     @Override
     public void requestSelectPrefabShip(String nickname, String prefabShipId) throws RemoteException {
-
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
-            System.err.println("Player " + nickname + " tried to playerWantsToFocusReservedComponent in state " + gameModel.getCurrGameState());
-            return;
-        }
-
-        try {
-            // Get information about the prefab ship
-            PrefabShipInfo prefabShipInfo = PrefabShipFactory.getPrefabShipInfo(prefabShipId);
-            if (prefabShipInfo == null) {
-                notifySelectionFailure(nickname, "Invalid prefab ship ID: " + prefabShipId);
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (gameModel.getCurrGameState() != GameState.BUILD_SHIPBOARD) {
+                System.err.println("Player " + nickname + " tried to playerWantsToFocusReservedComponent in state " + gameModel.getCurrGameState());
                 return;
             }
 
-            // Check if it's a test flight ship
-            if (prefabShipInfo.isForTestFlight() && !gameModel.isTestFlight()) {
-                notifySelectionFailure(nickname, "This prefab ship is only available in test flight mode");
-                return;
-            }
+            try {
+                // Get information about the prefab ship
+                PrefabShipInfo prefabShipInfo = PrefabShipFactory.getPrefabShipInfo(prefabShipId);
+                if (prefabShipInfo == null) {
+                    notifySelectionFailure(nickname, "Invalid prefab ship ID: " + prefabShipId);
+                    return;
+                }
 
-            // Get the player's shipboard
-            ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+                // Check if it's a test flight ship
+                if (prefabShipInfo.isForTestFlight() && !gameModel.isTestFlight()) {
+                    notifySelectionFailure(nickname, "This prefab ship is only available in test flight mode");
+                    return;
+                }
 
-            // Apply the prefab configuration
-            boolean success = PrefabShipFactory.applyPrefabShip(shipBoard, prefabShipId);
-            if (!success) {
-                notifySelectionFailure(nickname, "Failed to apply prefab ship configuration");
-                return;
-            }
+                // Get the player's shipboard
+                ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
 
-            // Notify the client of success
-            gameModel.getGameClientNotifier().notifyClients(
-                    Set.of(nickname),
-                    (nicknameToNotify, clientController) -> {
-                        try {
-                            clientController.notifyPrefabShipSelectionResult(nicknameToNotify, true, null);
-                        } catch (IOException e) {
-                            System.err.println("Error notifying client about selection result: " + e.getMessage());
+                // Apply the prefab configuration
+                boolean success = PrefabShipFactory.applyPrefabShip(shipBoard, prefabShipId);
+                if (!success) {
+                    notifySelectionFailure(nickname, "Failed to apply prefab ship configuration");
+                    return;
+                }
+
+                // Notify the client of success
+                gameModel.getGameClientNotifier().notifyClients(
+                        Set.of(nickname),
+                        (nicknameToNotify, clientController) -> {
+                            try {
+                                clientController.notifyPrefabShipSelectionResult(nicknameToNotify, true, null);
+                            } catch (IOException e) {
+                                System.err.println("Error notifying client about selection result: " + e.getMessage());
+                            }
                         }
-                    }
-            );
+                );
 
-            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyShipBoardUpdate(nicknameToNotify, nickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType(), shipBoard.getNotActiveComponents());
-            });
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyShipBoardUpdate(nicknameToNotify, nickname, shipBoard.getShipMatrix(), shipBoard.getComponentsPerType(), shipBoard.getNotActiveComponents());
+                });
 
-            // Notify all clients about the selection
-            gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyPlayerSelectedPrefabShip(nicknameToNotify, nickname, prefabShipInfo);
-            });
+                // Notify all clients about the selection
+                gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
+                    clientController.notifyPlayerSelectedPrefabShip(nicknameToNotify, nickname, prefabShipInfo);
+                });
 
-            //playerEndsBuildShipBoardPhase(nickname);
-        } catch (Exception e) {
-            notifySelectionFailure(nickname, "Internal error: " + e.getMessage());
+                //playerEndsBuildShipBoardPhase(nickname);
+            } catch (Exception e) {
+                notifySelectionFailure(nickname, "Internal error: " + e.getMessage());
+            }
         }
     }
 
     @Override
     public void playerWantsToLand(String nickname){
-        if(!(gameModel.getCurrGameState()!=GameState.PLAY_CARD
-                || gameModel.getCurrGameState()!=GameState.CHECK_PLAYERS
-                || gameModel.getCurrGameState()!=GameState.DRAW_CARD))
-            return;
+        synchronized (gameModel.getPlayers().get(nickname)) {
+            if (!(gameModel.getCurrGameState() != GameState.PLAY_CARD
+                    || gameModel.getCurrGameState() != GameState.CHECK_PLAYERS
+                    || gameModel.getCurrGameState() != GameState.DRAW_CARD))
+                return;
 
-        Player player = gameModel.getPlayers().get(nickname);
-        gameModel.getFlyingBoard().addOutPlayer(player, true);
+            Player player = gameModel.getPlayers().get(nickname);
+            gameModel.getFlyingBoard().addOutPlayer(player, true);
 
-        if(gameModel.getFlyingBoard().getRanking().isEmpty())
-            gameModel.setCurrGameState(GameState.END_GAME);
+            if (gameModel.getFlyingBoard().getRanking().isEmpty())
+                gameModel.setCurrGameState(GameState.END_GAME);
+        }
     }
 
     private void notifySelectionFailure(String nickname, String errorMessage) {
