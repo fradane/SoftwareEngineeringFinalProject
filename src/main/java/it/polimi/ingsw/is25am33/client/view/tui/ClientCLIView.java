@@ -54,7 +54,6 @@ public class ClientCLIView implements ClientView {
     private boolean isTestFlight;
 
     // Class-level variables to track selection state
-    Map<String, Set<Coordinates>> coloredCoordinates = new HashMap<>();
     private final List<Coordinates> selectedEngines = new ArrayList<>();
     private final List<Coordinates> selectedCabins = new ArrayList<>();
     private final List<Coordinates> selectedCannons = new ArrayList<>();
@@ -62,7 +61,6 @@ public class ClientCLIView implements ClientView {
     private final List<Coordinates> selectedShields = new ArrayList<>();
     private Coordinates currentSelection = null;
     private Coordinates hitComponent = null;
-    private boolean waitingForBatterySelection = false;
     private StorageSelectionManager storageManager = null;
     private final Map<Integer, Coordinates> crewPlacementCoordinatesMap = new HashMap<>();
     private final Map<Coordinates, CrewMember> crewChoices = new HashMap<>();
@@ -77,15 +75,10 @@ public class ClientCLIView implements ClientView {
     private static final String ANSI_YELLOW = "\u001B[33m";
     private static final String ANSI_GREEN = "\u001B[32m";
     private static final String ANSI_CYAN = "\u001B[36m";
-    private final String defaultInterrogationPrompt = "Your choice: ";
     private String currentInterrogationPrompt = "";
 
     public ClientCLIView() throws RemoteException {
         this.scanner = new Scanner(System.in);
-    }
-
-    public ClientState getClientState() {
-        return clientState;
     }
 
     public void setClientModel(ClientModel clientModel) {
@@ -110,22 +103,8 @@ public class ClientCLIView implements ClientView {
         return clientModel;
     }
 
-    // TODO
     @Override
-    public PlayerColor intToPlayerColor(int colorChoice) {
-        return null;
-    }
-
-    // TODO
-    @Override
-    public void notifyHourglassRestarted(int flipsLeft) {
-
-    }
-
-    @Override
-    public void refreshGameInfos(List<GameInfo> gameInfos) {
-
-    }
+    public void refreshGameInfos(List<GameInfo> gameInfos) {}
 
     @Override
     public void initialize() {
@@ -195,16 +174,6 @@ public class ClientCLIView implements ClientView {
     @Override
     public ClientController getClientController() {
         return clientController;
-    }
-
-    /**
-     * Metodo per interrompere l'attesa dell'input in caso di eventi importanti
-     * Questo metodo va chiamato quando arriva una notifica importante dal server
-     */
-    public void cancelInputWaiting() {
-        synchronized (consoleLock) {
-            waitingForInput = false;
-        }
     }
 
     /**
@@ -284,72 +253,6 @@ public class ClientCLIView implements ClientView {
         }
     }
 
-    @Override
-    public int[] askCreateGame() {
-        int[] result = new int[3]; // [numPlayers, isTestFlight, colorChoice]
-
-        // Chiedi numero di giocatori
-        while (true) {
-            String input = askForInput("", "Number of players (2-4): ");
-            try {
-                int numPlayers = Integer.parseInt(input);
-                if (numPlayers >= 2 && numPlayers <= 4) {
-                    result[0] = numPlayers;
-                    break;
-                } else {
-                    System.out.println("Invalid number. Must be between 2 and 4.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number.");
-            }
-        }
-
-        // Chiedi se è un volo di prova
-        while (true) {
-            String isTest = askForInput("", "Test flight [y/N]: ");
-            if (isTest.equalsIgnoreCase("n") || isTest.isEmpty()) {
-                result[1] = 0;
-                break;
-            } else if (isTest.equalsIgnoreCase("y")) {
-                result[1] = 1;
-                break;
-            } else {
-                System.out.println("Invalid input. Please enter y or n.");
-            }
-        }
-
-        // Scegli il color
-
-        return result;
-    }
-
-    @Override
-    public String[] askJoinGame(List<GameInfo> games) {
-        showAvailableGames(games);
-
-        String[] result = new String[2]; // [gameId, colorChoice]
-
-        result[0] = askForInput("", "Enter game ID to join: ");
-
-        List<String> gameIds = games.stream().map(GameInfo::getGameId).toList();
-        while(!gameIds.contains(result[0])){
-            showError("Invalid game ID");
-            result[0] = askForInput("", "Enter game ID to join: ");
-        }
-
-        List<PlayerColor> occupiedColors = games.stream()
-                .filter(gameInfo -> gameInfo.getGameId().equals(result[0]))
-                .flatMap(game -> game.getConnectedPlayers().values().stream())
-                .toList();
-        List<PlayerColor> availableColors = Arrays.stream(PlayerColor.values())
-                .filter(currColor -> !occupiedColors.contains(currColor))
-                .toList();
-
-        result[1] = askPlayerColor(availableColors);
-
-        return result;
-    }
-
     public void showColorQuestion() {
         String colorMenu = """
                 Choose your color:
@@ -378,31 +281,6 @@ public class ClientCLIView implements ClientView {
         showMessage(colorMenu.toString(), ASK);
     }
 
-
-
-    public String askPlayerColor(@NotNull List<PlayerColor> availableColors) {
-        String questionDescription = "\nChoose your color: \n";
-
-        for (PlayerColor color : availableColors) {
-            questionDescription = questionDescription.concat(color.getNumber() + ". " + color.toString() + "\n");
-        }
-
-        while (true) {
-            String input = askForInput(questionDescription, defaultInterrogationPrompt);
-            try {
-                int colorChoice = Integer.parseInt(input);
-                if (colorChoice >= 1 && colorChoice <= 4) {
-                    return Integer.toString(colorChoice);
-                } else {
-                    System.out.println("Invalid choice. Please select 1-4.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number.");
-            }
-        }
-
-    }
-
     @Override
     public void showMainMenu() {
         clientState = ClientState.MAIN_MENU;
@@ -415,50 +293,10 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
-    public int showGameMenu() {
-        System.out.println("\nEnter 1 if you want to leave the game otherwise wait for the game to start...\n");
-        waitingForGameStart = true;
-
-        try {
-            while (waitingForGameStart) {
-                // Controlla l'input per 500ms alla volta
-                String input = inputQueue.poll(500, TimeUnit.MILLISECONDS);
-                if (input != null && input.equals("1")) {
-                    waitingForGameStart = false;
-                    return 1; // Lascia il gioco
-                }
-
-                // Se il gioco è iniziato nel frattempo (tramite notifica dal server)
-                if (!waitingForGameStart) {
-                    return 0; // Il gioco è iniziato
-                }
-            }
-
-            return 0; // Il gioco è iniziato
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return 1; // In caso di interruzione, esci
-        }
-    }
-
-    @Override
-    public void showStolenVisibleComponent() {
-        showMessage("The component you picked was stolen, choose another one", NOTIFICATION_INFO);
-        showBuildShipBoardMenu();
-    }
-
-    @Override
     public void notifyPlayerJoined(String nickname, GameInfo gameInfo) {
         showMessage(nickname + " joined the game with color "+ gameInfo.getConnectedPlayers().get(nickname) + ". Players: " +
                 gameInfo.getConnectedPlayersNicknames().size() + "/" +
                 gameInfo.getMaxPlayers(), NOTIFICATION_INFO);
-    }
-
-    @Override
-    public void notifyPlayerLeft(String nickname, GameInfo gameInfo) {
-        System.out.println(ANSI_BLUE + nickname + ANSI_RESET + " left the game. Players: " +
-                gameInfo.getConnectedPlayersNicknames().size() + "/" +
-                gameInfo.getMaxPlayers());
     }
 
     public void notifyGameCreated(String gameId) {
@@ -485,11 +323,6 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
-    public void notifyGameEnded(String reason) {
-        System.out.println("Game ended. Reason: " + reason);
-    }
-
-    @Override
     public void showCurrAdventureCard(boolean isFirstTime) {
         if (isFirstTime) showMessage("The card has been drawn from the deck.\n", STANDARD);
 
@@ -511,7 +344,6 @@ public class ClientCLIView implements ClientView {
             case "Planets":
                 displayPlanetsInfo((ClientPlanets) card, output);
                 break;
-            //TODO uncommentare quando si inizia ad implementare questa carta
             case "AbandonedShip":
                 displayAbandonedShipInfo((ClientAbandonedShip) card, output);
                 break;
@@ -682,15 +514,6 @@ public class ClientCLIView implements ClientView {
                         """, clientModel.getGameState().toString()), STANDARD);
     }
 
-    public void showDangerousObj(){
-        showMessage(String.format("""
-                        \n===================================
-                        📢  [Dangerous Object Attack]
-                        ☄️  New Dangerous Object: %s
-                        ===================================
-                        """, clientModel.getCurrDangerousObj().toString()), STANDARD);
-    }
-
     @Override
     public void showNewCardState() {
         CardState currentCardState = clientModel.getCurrCardState();
@@ -710,7 +533,6 @@ public class ClientCLIView implements ClientView {
                     🆕  New Card State: %s
                     ===================================
                     """, currentCardState), STANDARD);
-                // TODO clientCLI
         showCardStateMenu(mappedState);
     }
 
@@ -772,31 +594,6 @@ public class ClientCLIView implements ClientView {
         showMessage("""
                 Your placeholder has not been placed yet!!!
                 Press any key to place it faster than the others...""", STANDARD);
-    }
-
-    @Override
-    public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
-        showShipBoard(shipBoard, clientModel.getMyNickname());
-
-        String questionDescription = "\nChoose a component to remove: \n";
-
-        for (Component component : incorrectlyPositionedComponents) {
-            questionDescription = questionDescription.concat(component.toString() + "\n");
-        }
-
-        while (true) {
-            String input = askForInput(questionDescription, defaultInterrogationPrompt);
-            try {
-                int indexChoosen = Integer.parseInt(input);
-                if (indexChoosen >= 1 && indexChoosen <= incorrectlyPositionedComponents.size()) {
-                    return incorrectlyPositionedComponents.get(indexChoosen);
-                } else {
-                    System.out.println("Invalid choice. Please select 1-" + incorrectlyPositionedComponents.size() + ".");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number.");
-            }
-        }
     }
 
     @Override
@@ -895,15 +692,6 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
-    public void notifyNoMoreComponentAvailable() {
-        clientState = BUILDING_SHIPBOARD_MENU;
-        this.showMessage("""
-                No more component available.
-                Tip: if you want more components to build your shipboard look among the visible ones.
-                """, STANDARD);
-    }
-
-    @Override
     public void showPickedComponentAndMenu() {
         clientState = BUILDING_SHIPBOARD_WITH_FOCUSED_COMPONENT;
         StringBuilder output = new StringBuilder();
@@ -986,6 +774,12 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void showStolenVisibleComponent() {
+        showMessage("The component was stolen, try another one", NOTIFICATION_INFO);
+        showBuildShipBoardMenu();
+    }
+
+    @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
         showShipBoard(shipBoardClient, shipBoardOwnerNickname, Collections.emptyMap());
         showBatteryBoxesInfo(shipBoardOwnerNickname);
@@ -1046,7 +840,6 @@ public class ClientCLIView implements ClientView {
 
         output.append(String.format("\t\t" + legendLines[legendIndex++] + "\n"));
 
-        // TODO generalizzare il caso per il livello 1
         for (int i = 4; i <= 8; i++) {
             // Ogni cella viene stampata su 4 righe
             for (int line = 0; line < 4; line++) {
@@ -1891,7 +1684,6 @@ public class ClientCLIView implements ClientView {
             showMessage(cabinInfo.toString(), STANDARD);
             showMessage("ILLEGAL STATE", ERROR);
             return;
-            //TODO trovare un modo per mostrare al server questo errore, anche se non dovrebbe mai accadere perchè controlli già fatti
         } else {
             for (Map.Entry<Coordinates, Cabin> entry : cabinsWithCrew.entrySet()) {
                 Coordinates coords = entry.getKey();
@@ -1937,34 +1729,6 @@ public class ClientCLIView implements ClientView {
         storageManager.startRedistribution(rewardCubes);
 
         showCubeRedistributionMenu();
-
-//        StringBuilder message = new StringBuilder("\nHai ottenuto i seguenti cubi come ricompensa:\n");
-//        for (int i = 0; i < rewardCubes.size(); i++) {
-//            CargoCube cube = rewardCubes.get(i);
-//            message.append("- ").append(cube).append(" (valore: ").append(cube.getValue()).append(")")
-//                    .append(cube == CargoCube.RED ? " - Richiede storage speciale!" : "")
-//                    .append("\n");
-//        }
-//
-//        message.append("\nDevi selezionare uno storage per ogni cubo che puoi accettare. ")
-//                .append("Ricorda che:\n")
-//                .append("- I cubi ROSSI possono essere conservati solo in storage speciali.\n")
-//                .append("- Se uno storage è pieno, il cubo meno prezioso verrà sostituito.\n")
-//                .append("- Puoi digitare 'next' per saltare il cubo corrente e passare al successivo.\n")
-//                .append("- Digita 'done' quando hai finito di selezionare tutti gli storage.\n\n");
-//
-//        CargoCube currentCube = storageManager.getCurrentCube();
-//        if (currentCube != null) {
-//            showStorageWithColor();
-//            message.append("Prossimo cubo da posizionare: ").append(currentCube)
-//                    .append(" (valore: ").append(currentCube.getValue()).append(")")
-//                    .append(currentCube == CargoCube.RED ? " - Questo cubo richiede uno storage speciale!" : "")
-//                    .append("\n");
-//            message.append("Inserisci le coordinate di uno storage (riga colonna) per questo cubo: ")
-//                    .append("'next' per saltare questo cubo, 'skip' per rinunciare a tutti: ");
-//        }
-//
-//        showMessage(message.toString(), ASK);
     }
 
     private void showStoragesInfo() {
@@ -1977,14 +1741,14 @@ public class ClientCLIView implements ClientView {
      */
     public void showStoragesInfo(String playerNickname) {
         StringBuilder storageInfo = new StringBuilder("\n=== AVAILABLE STORAGE - " + playerNickname + " ===\n");
-        
+
         ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
         if (shipBoard == null) {
             storageInfo.append("Player not found or no ship data available.\n");
             showMessage(storageInfo.toString(), STANDARD);
             return;
         }
-        
+
         Map<Coordinates, Storage> coordinatesAndStorages = shipBoard.getCoordinatesAndStorages();
 
         if (coordinatesAndStorages.isEmpty()) {
@@ -1994,7 +1758,7 @@ public class ClientCLIView implements ClientView {
             int totalCubes = 0;
             int totalCapacity = 0;
             int totalValue = 0;
-            
+
             for (Map.Entry<Coordinates, Storage> entry : coordinatesAndStorages.entrySet()) {
                 Coordinates coords = entry.getKey();
                 Storage storage = entry.getValue();
@@ -2014,7 +1778,7 @@ public class ClientCLIView implements ClientView {
 
                 // Capacità con indicatore di stato
                 storageInfo.append(" - ").append(storage.getStockedCubes().size()).append("/").append(storage.getMaxCapacity());
-                
+
                 // Extract current/max capacity for totals
                 totalCubes += storage.getStockedCubes().size();
                 totalCapacity += storage.getMaxCapacity();
@@ -2044,11 +1808,11 @@ public class ClientCLIView implements ClientView {
 
                 storageInfo.append("\n");
             }
-            
+
             // Add summary information
             storageInfo.append(String.format("\nTotal Storages: %d | Total Cubes Stored: %d/%d\n",
                 totalStorages, totalCubes, totalCapacity));
-            
+
             if (totalValue > 0) {
                 storageInfo.append(String.format("Total Cube Value: %d points\n", totalValue));
             }
@@ -2062,7 +1826,7 @@ public class ClientCLIView implements ClientView {
      */
     public void showBatteryBoxesInfo(String playerNickname) {
         StringBuilder batteryInfo = new StringBuilder("\n=== BATTERY BOXES INFO - " + playerNickname + " ===\n");
-        
+
         ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
         if (shipBoard == null) {
             batteryInfo.append("Player not found or no ship data available.\n");
@@ -2071,39 +1835,39 @@ public class ClientCLIView implements ClientView {
         }
 
         Map<Coordinates, BatteryBox> coordinatesAndBatteries = shipBoard.getCoordinatesAndBatteries();
-        
+
         if (coordinatesAndBatteries.isEmpty()) {
             batteryInfo.append("No battery boxes available on this ship.\n");
         } else {
             int totalBatteries = 0;
             int totalCapacity = 0;
-            
+
             // Process battery boxes using the coordinates map
             for (Map.Entry<Coordinates, BatteryBox> entry : coordinatesAndBatteries.entrySet()) {
                 Coordinates coords = entry.getKey();
                 BatteryBox batteryBox = entry.getValue();
-                
+
                 int remaining = batteryBox.getRemainingBatteries();
                 int max = batteryBox.getMaxBatteryCapacity();
                 totalBatteries += remaining;
                 totalCapacity += max;
-                
+
                 batteryInfo.append(String.format("%s(%d,%d)%s: BatteryBox - %d/%d batteries remaining",
                     ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, remaining, max));
-                
+
                 if (remaining == 0) {
                     batteryInfo.append(" " + ANSI_RED + "[EMPTY]" + ANSI_RESET);
                 } else if (remaining == max) {
                     batteryInfo.append(" " + ANSI_GREEN + "[FULL]" + ANSI_RESET);
                 }
-                
+
                 batteryInfo.append("\n");
             }
-            
+
             batteryInfo.append(String.format("\nTotal Battery Boxes: %d | Total Batteries Available: %d/%d\n",
                 coordinatesAndBatteries.size(), totalBatteries, totalCapacity));
         }
-        
+
         showMessage(batteryInfo.toString(), STANDARD);
     }
 
@@ -2113,7 +1877,7 @@ public class ClientCLIView implements ClientView {
      */
     public void showCabinsInfo(String playerNickname) {
         StringBuilder cabinInfo = new StringBuilder("\n=== CABINS INFO - " + playerNickname + " ===\n");
-        
+
         ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
         if (shipBoard == null) {
             cabinInfo.append("Player not found or no ship data available.\n");
@@ -2123,7 +1887,7 @@ public class ClientCLIView implements ClientView {
 
         Map<Coordinates, Cabin> coordinatesAndCabins = shipBoard.getCoordinatesAndCabins();
         MainCabin mainCabin = shipBoard.getMainCabin();
-        
+
         if (coordinatesAndCabins.isEmpty() && mainCabin == null) {
             cabinInfo.append("No cabins available on this ship.\n");
         } else {
@@ -2131,7 +1895,7 @@ public class ClientCLIView implements ClientView {
             int humanCount = 0;
             int alienCount = 0;
             int totalCabins = 0;
-            
+
             // Process regular cabins using the coordinates map
             for (Map.Entry<Coordinates, Cabin> entry : coordinatesAndCabins.entrySet()) {
                 Coordinates coords = entry.getKey();
@@ -2140,13 +1904,13 @@ public class ClientCLIView implements ClientView {
 
                 if(cabin==mainCabin)
                     continue;
-                
+
                 List<CrewMember> inhabitants = cabin.getInhabitants();
-                
+
                 cabinInfo.append(String.format("%s(%d,%d)%s: Cabin - %d inhabitants → ",
-                    ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, 
+                    ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET,
                     inhabitants.size()));
-                
+
                 if (inhabitants.isEmpty()) {
                     cabinInfo.append(ANSI_CYAN + "[EMPTY]" + ANSI_RESET);
                 } else {
@@ -2162,18 +1926,18 @@ public class ClientCLIView implements ClientView {
                     }
                     cabinInfo.append(String.join(" ", crewList));
                 }
-                
+
                 cabinInfo.append("\n");
             }
-            
+
             // Process main cabin - always at position (7,7) if not destroyed
             if (mainCabin != null) {
                 totalCabins++;
                 List<CrewMember> inhabitants = mainCabin.getInhabitants();
-                
+
                 cabinInfo.append(String.format("%s(7,7)%s: MainCabin - %d inhabitants → ",
                     ANSI_YELLOW, ANSI_RESET, inhabitants.size()));
-                
+
                 if (inhabitants.isEmpty()) {
                     cabinInfo.append(ANSI_CYAN + "[EMPTY]" + ANSI_RESET);
                 } else {
@@ -2189,17 +1953,17 @@ public class ClientCLIView implements ClientView {
                     }
                     cabinInfo.append(String.join(" ", crewList));
                 }
-                
+
                 cabinInfo.append("\n");
             } else {
                 cabinInfo.append(String.format("%s(7,7)%s: MainCabin - %s[DESTROYED]%s\n",
                     ANSI_YELLOW, ANSI_RESET, ANSI_RED, ANSI_RESET));
             }
-            
+
             cabinInfo.append(String.format("\nTotal Cabins: %d | Total Crew Members: %d (%d Humans, %d Aliens)\n",
                 totalCabins, totalCrewMembers, humanCount, alienCount));
         }
-        
+
         showMessage(cabinInfo.toString(), STANDARD);
     }
 
@@ -2208,12 +1972,12 @@ public class ClientCLIView implements ClientView {
      */
     public void showPlayerCreditsInfo(String playerName) {
         PlayerClientData myData = clientModel.getPlayerClientData().get(playerName);
-        
+
         if (!playerName.equals(clientModel.getMyNickname())) {
             showMessage("Cannot see other player's credits.\n", STANDARD);
             return;
         }
-        
+
         int credits = myData.getCredits();
         showMessage("Current Credits: " + credits + "\n", STANDARD);
     }
@@ -2224,7 +1988,7 @@ public class ClientCLIView implements ClientView {
      */
     public void showNotActiveComponentsInfo(String playerNickname) {
         StringBuilder componentInfo = new StringBuilder("\n=== NOT ACTIVE COMPONENTS - " + playerNickname + " ===\n");
-        
+
         ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
         if (shipBoard == null) {
             componentInfo.append("Player not found or no ship data available.\n");
@@ -2234,9 +1998,9 @@ public class ClientCLIView implements ClientView {
 
         List<Component> bookedComponents = shipBoard.getBookedComponents();
         int totalComponents = bookedComponents.size();
-        
+
         componentInfo.append("Total Components: ").append(totalComponents).append("\n\n");
-        
+
         if (totalComponents > 0) {
             componentInfo.append("These components may be:\n");
             componentInfo.append("- Reserved components not yet used during build phase\n");
@@ -2244,7 +2008,7 @@ public class ClientCLIView implements ClientView {
         } else {
             componentInfo.append("No components are currently not active.\n");
         }
-        
+
         showMessage(componentInfo.toString(), STANDARD);
     }
 
@@ -2353,7 +2117,7 @@ public class ClientCLIView implements ClientView {
         // Check if there are cubes available for removal
         if (!storageManager.hasAvailableCubes()) {
             // No cubes available, check if batteries can be used instead
-            if(!clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes().isEmpty() && 
+            if(!clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes().isEmpty() &&
                clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteries() > 0) {
                 showMessage("You don't have any cube", STANDARD);
                 showMessage("You have to give back the batteries instead of the cubes", STANDARD);
@@ -2397,12 +2161,6 @@ public class ClientCLIView implements ClientView {
             showMessage("No active players found!", ERROR);
             return;
         }
-
-        //TODO commentato perche avere 0 come punteggio puo verificarsi anche durante il gioco non solo prima della costruzione
-//        if (topScore == 0) {
-//            showMessage("Think about building your ship board, being the leader without a ship board is roughly impossible.\n> ", ASK);
-//            return;
-//        }
 
         for (int i = 0; i < sortedRanking.size(); i++) {
             String playerNickname = sortedRanking.get(i);
@@ -2644,23 +2402,12 @@ public class ClientCLIView implements ClientView {
             BatteryBox batteryBox = (BatteryBox) component;
 
             //se quel box non contiene batterie non posso selezionarlo
-            //TODO bisognerebbe diversificare nel caso in cui si stiano scegliendo batterie al posto di cubi ma non ho voglia
-            // quindi ho fatto che se premi cancel non succede un cazzo
             if(batteryBox.getRemainingBatteries()==0){
                 showMessage("This batteryBox is empty!", ERROR);
                 showMessage("Please select another one or 'cancel' to cancel the last choice", ASK);
                 return;
             }
 
-//            //se hai selezionato gia tutte le batterie presenti in un batteryBox non puoi piu selezionarlo
-//            int frequency=0;
-//            for(Coordinates selectedBatteryBoxCoords : selectedBatteries){
-//                if(selectedBatteryBoxCoords.equals(coords)){
-//                    frequency++;
-//                }
-//            }
-
-            //TODO stessa cosa qua
             if(batteryBox.getRemainingBatteries()==0){
                 showMessage("This battery box is empty", ERROR);
                 showMessage("Please select another one or 'cancel' to cancel the last choice", ASK);
@@ -2669,7 +2416,6 @@ public class ClientCLIView implements ClientView {
 
             // Aggiungi la batteria e torna alla selezione del motore
             selectedBatteries.add(coords);
-
             batteryBox.useBattery();
 
 
@@ -2721,22 +2467,22 @@ public class ClientCLIView implements ClientView {
             if (clientState == CHOOSE_BATTERY_CUBES) {
 
                 // Calculate total items selected (cubes + batteries)
-                int selectedCubes = (storageManager != null && storageManager.isInMalusMode()) 
-                    ? storageManager.getSelectedStoragesForRemoval().size() 
+                int selectedCubes = (storageManager != null && storageManager.isInMalusMode())
+                    ? storageManager.getSelectedStoragesForRemoval().size()
                     : selectedStorage.size();
-                    
+
                 if (selectedBatteries.size() + selectedCubes == cubeMalus
                         || clientModel.getShipboardOf(clientModel.getMyNickname()).getTotalAvailableBattery() == selectedBatteries.size()) {
                     showMessage("All cargo cubes and batteries has been selected\nOr you don't have any more batteries to select", STANDARD);
                     setClientState(WAIT_PLAYER);
-                    
+
                     // Get final list of selected storages
-                    List<Coordinates> finalSelectedStorages = (storageManager != null && storageManager.isInMalusMode()) 
-                        ? storageManager.getSelectedStoragesForRemoval() 
+                    List<Coordinates> finalSelectedStorages = (storageManager != null && storageManager.isInMalusMode())
+                        ? storageManager.getSelectedStoragesForRemoval()
                         : selectedStorage;
-                        
+
                     clientController.playerChoseStorageAndBattery(clientController.getNickname(), finalSelectedStorages, selectedBatteries);
-                    
+
                     // Cleanup
                     selectedBatteries.clear();
                     selectedStorage.clear();
@@ -3841,10 +3587,6 @@ public class ClientCLIView implements ClientView {
                     clientController.placeFocusedComponent(row, column);
                     break;
 
-                case CHECK_SHIPBOARD_INVALID:
-                    // TODO RIMUOVERE
-                    break;
-
                 case CHECK_SHIPBOARD_CHOOSE_COMPONENT_TO_REMOVE:
                     coordinates = input.trim().split("\\s+");
 
@@ -3887,9 +3629,6 @@ public class ClientCLIView implements ClientView {
                     }
                     break;
 
-                case CHECK_SHIPBOARD_CORRECT:
-                    // TODO RIMUOVERE
-                    break;
 
                 case CREW_PLACEMENT_MENU:
                     setClientState(WAITING_FOR_SERVER);
@@ -4055,7 +3794,6 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case END_GAME_PHASE:
-                    //TODO controllare che il metodo corretto da chiamare sia leaveGame
                     clientController.leaveGame();
                     break;
 
@@ -4152,13 +3890,13 @@ public class ClientCLIView implements ClientView {
                 case CHOOSE_STORAGE_FOR_CUBEMALUS:
                     try {
                         Coordinates coords = parseCoordinates(input);
-                        
+
                         // Validate selection using StorageSelectionManager
                         if (storageManager.isValidStorageSelection(coords)) {
                             // Select the storage and get cube type that will be removed
                             CargoCube removedCube = storageManager.getMostPreciousCubeAvailable();
                             storageManager.selectStorageForRemoval(coords);
-                            
+
                             showMessage("Storage selected. Cube " + removedCube.name() + " will be removed.", STANDARD);
 
                             // Check if more cubes need to be removed
@@ -4193,7 +3931,7 @@ public class ClientCLIView implements ClientView {
 
                             showMessage("You still need to remove " + storageManager.getRemainingCubesToRemove() + " cube(s). \nEnter another storage coordinate: ", ASK);
                         }
-                        
+
                     } catch (NumberFormatException e) {
                         showMessage("Invalid input. Please enter valid numbers for row and column.", ERROR);
                     }
@@ -4238,10 +3976,6 @@ public class ClientCLIView implements ClientView {
             showMessage("\nPlease enter a valid number.\n", ERROR);
         }
 
-    }
-
-    public void showExitMenu(){
-        scanner.next("exit");
     }
 
     private boolean isThereAvailableBattery() {
@@ -4353,5 +4087,4 @@ public class ClientCLIView implements ClientView {
     }
 
 }
-
 

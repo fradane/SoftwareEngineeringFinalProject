@@ -8,9 +8,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="borderPane" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0"
-            styleClass="game-background" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.BuildAndCheckShipBoardController">
+<BorderPane fx:id="borderPane" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" styleClass="game-background" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.BuildAndCheckShipBoardController">
     <stylesheets>
         <URL value="@/galaxy-truckers.css" />
     </stylesheets>
@@ -21,21 +19,16 @@
                 <Label styleClass="screen-title" text="Galaxy Truckers" />
                 <Region HBox.hgrow="ALWAYS" />
                 <!-- VBox per impilare i bottoni con larghezza uniforme -->
-                <VBox alignment="CENTER_RIGHT" spacing="5" minWidth="120">
-                    <Button fx:id="goBackButton" onAction="#handleGoBackButton"
-                            styleClass="nav-button" text="Go Back"
-                            prefWidth="120" maxWidth="120" visible="false" />
-                    <Button fx:id="exitGameButton" onAction="#handleExitGame"
-                            styleClass="menu-button-secondary" text="EXIT GAME"
-                            prefWidth="120" maxWidth="120" />
+                <VBox alignment="CENTER_RIGHT" minWidth="120" spacing="5">
+                    <Button fx:id="goBackButton" maxWidth="120" onAction="#handleGoBackButton" prefWidth="120" styleClass="nav-button" text="Go Back" visible="false" />
+                    <Button fx:id="exitGameButton" maxWidth="120" onAction="#handleExitGame" prefWidth="120" styleClass="menu-button-secondary" text="EXIT GAME" />
                 </VBox>
             </HBox>
 
             <VBox alignment="CENTER_LEFT" spacing="5" styleClass="timer-container">
                 <HBox>
                     <Label fx:id="timerLabel" styleClass="timer-label" />
-                    <Button fx:id="flipHourglassButton" minHeight="-Infinity" minWidth="-Infinity"
-                            onAction="#handleFlipHourglassButton" styleClass="action-button" text="Flip Hourglass" />
+                    <Button fx:id="flipHourglassButton" minHeight="-Infinity" minWidth="-Infinity" onAction="#handleFlipHourglassButton" styleClass="action-button" text="Flip Hourglass" />
 
                     <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
                         <Label fx:id="messageLabel" alignment="CENTER" contentDisplay="CENTER" styleClass="timer-label" />
@@ -51,7 +44,7 @@
     </top>
 
     <left>
-        <!-- Pannello sinistro per componenti visibili -->
+        <!-- Left panel for visible components -->
         <VBox fx:id="visibleComponentsPanel" maxWidth="300" minWidth="250" styleClass="visible-components-panel">
             <HBox alignment="CENTER" spacing="10.0" styleClass="component-controls"> </HBox>
 
@@ -60,7 +53,7 @@
                     <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                     </padding>
-                    <!-- I componenti visibili verranno aggiunti qui dinamicamente -->
+                    <!-- Visible components will be added here dynamically -->
                 </VBox>
             </ScrollPane>
         </VBox>
@@ -70,7 +63,7 @@
         <StackPane fx:id="centerStackPane">
             <!-- Dynamically insert shipboards and flying boards -->
 
-            <!-- Menu Navi Prefabbricate - elemento più alto dello stack -->
+            <!-- Prefab Ships Menu - topmost element of the stack -->
             <VBox fx:id="prefabShipsMenu" alignment="CENTER" managed="false" styleClass="little-deck-container" visible="false" StackPane.alignment="CENTER">
                 <Label styleClass="controls-title" text="Choose a Prefab Ship">
                     <VBox.margin>
@@ -78,19 +71,17 @@
                     </VBox.margin>
                 </Label>
 
-                <!-- TODO cambiare lo stile e ingrandire -->
                 <ScrollPane fitToWidth="true" prefHeight="400.0" prefWidth="600.0" styleClass="component-controls">
                     <VBox fx:id="prefabShipsContainer" alignment="TOP_CENTER" spacing="10.0" styleClass="component-controls">
                         <padding>
                             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                         </padding>
-                        <!-- Le navi prefabbricate verranno aggiunte qui dinamicamente -->
+                        <!-- Prefabricated ships will be added here dynamically -->
                     </VBox>
                 </ScrollPane>
 
                 <HBox alignment="CENTER" spacing="20.0">
-                    <Button fx:id="cancelPrefabSelectionButton" onAction="#handleCancelPrefabSelection"
-                            styleClass="action-button" text="Cancel" />
+                    <Button fx:id="cancelPrefabSelectionButton" onAction="#handleCancelPrefabSelection" styleClass="action-button" text="Cancel" />
                     <VBox.margin>
                         <Insets top="20.0" />
                     </VBox.margin>
@@ -124,18 +115,16 @@
             </FlowPane>
 
             <StackPane fx:id="pawnButtonPane" managed="false" styleClass="little-deck-container" visible="false">
-                <Button fx:id="placePawnButton" onAction="#handlePlacePawnButton" styleClass="place-pawn-button"
-                        text="Press the button to place your pawn, FAST!!!" StackPane.alignment="CENTER"
-                        prefWidth="600.0" prefHeight="100.0" style="-fx-font-size: 18pt;" visible="false" />
+                <Button fx:id="placePawnButton" onAction="#handlePlacePawnButton" prefHeight="100.0" prefWidth="600.0" style="-fx-font-size: 18pt;" styleClass="place-pawn-button" text="Press the button to place your pawn, FAST!!!" visible="false" StackPane.alignment="CENTER" />
             </StackPane>
 
         </StackPane>
     </center>
 
     <right>
-        <!-- Pannello destro con componente e controlli -->
+        <!-- Right panel with component and controls -->
         <VBox fx:id="componentsBoxV" maxWidth="350" minWidth="300" spacing="20.0">
-            <!-- Pannello dei controlli componente -->
+            <!-- Component controls panel -->
             <VBox fx:id="componentControlsPanel" alignment="CENTER"  spacing="20.0" styleClass="component-controls"  visible="false" managed="false">
 
                 <Button fx:id="rotateComponentButton" onAction="#handleRotateComponentButton" styleClass="component-control-button" text="Rotate Component" />
@@ -157,17 +146,20 @@
     </right>
 
     <bottom>
-        <HBox fx:id="bottomBox" styleClass="action-bar">
+        <HBox fx:id="bottomBox" maxHeight="95.0" minHeight="140" prefHeight="150.0" prefWidth="993.0" styleClass="action-bar">
             <!-- Spacer sinistro con larghezza fissa -->
-            <Region prefWidth="200.0" />
+            <Region prefWidth="200.0">
+            <padding>
+               <Insets bottom="50.0" />
+            </padding></Region>
 
-            <!-- Container centrale per i bottoni principali -->
+            <!-- Center container for main buttons -->
             <HBox alignment="CENTER" spacing="15.0" HBox.hgrow="ALWAYS">
                 <Button fx:id="pickRandomComponentButton" onAction="#handlePickRandomComponentButton" styleClass="action-button" text="Random Component" />
                 <Button fx:id="prefabShipBoardButton" onAction="#handleGenerateShipBoardButton" styleClass="action-button" text="Load a prebuilt ship board" />
-                <Button fx:id="confirmCrewMemberButton" onAction="#handleConfirmCrewMemberButton" styleClass="action-button" text="CONFIRM" visible="false" managed="false"/>
+                <Button fx:id="confirmCrewMemberButton" managed="false" onAction="#handleConfirmCrewMemberButton" styleClass="action-button" text="CONFIRM" visible="false" />
 
-                <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box" >
+                <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
                             <Integer fx:value="1" />
@@ -178,13 +170,13 @@
                 </ComboBox>
             </HBox>
 
-            <!-- Container destro per il bottone End Phase con larghezza fissa -->
+            <!-- Right container for End Phase button with fixed width -->
             <HBox alignment="CENTER_RIGHT" prefWidth="200.0">
                 <Button fx:id="endPhaseButton" onAction="#handleEndPhaseButton" styleClass="end-phase-button" text="End ship building phase" />
             </HBox>
 
             <padding>
-                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                <Insets bottom="70.0" left="20.0" right="20.0" top="20.0" />
             </padding>
         </HBox>
     </bottom>

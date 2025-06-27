@@ -20,25 +20,19 @@ public abstract class ClientGUIView implements ClientView {
      * @param colorMap mapping of colors to coordinate sets for visual representation
      */
     @Override
-    public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {
-        //TODO
-    }
+    public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {}
 
     /**
      * Shows the valid ship board menu.
      */
     @Override
-    public void showValidShipBoardMenu() {
-        //TODO
-    }
+    public void showValidShipBoardMenu() {}
 
     /**
      * Shows the menu for choosing which component to remove.
      */
     @Override
-    public void showChooseComponentToRemoveMenu() {
-        //TODO
-    }
+    public void showChooseComponentToRemoveMenu() {}
 
     /**
      * Shows the menu for choosing ship parts.
@@ -46,9 +40,7 @@ public abstract class ClientGUIView implements ClientView {
      * @param shipParts list of ship part coordinate sets to choose from
      */
     @Override
-    public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {
-        //TODO
-    }
+    public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {}
 
     /**
      * Shows information about infected crew members that were removed.
@@ -56,9 +48,7 @@ public abstract class ClientGUIView implements ClientView {
      * @param cabinWithNeighbors coordinates of cabins with their neighbors where crew members were removed
      */
     @Override
-    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
-        //TODO
-    }
+    public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {}
 
     /**
      * Shows the end game information including final ranking and prettiest ship winners.
@@ -67,9 +57,7 @@ public abstract class ClientGUIView implements ClientView {
      * @param playersNicknamesWithPrettiestShip list of player nicknames who have the prettiest ship
      */
     @Override
-    public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
-        //TODO
-    }
+    public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {}
 
     /**
      * Shows notification that a player has landed early.
@@ -77,8 +65,6 @@ public abstract class ClientGUIView implements ClientView {
      * @param nickname the nickname of the player who landed early
      */
     @Override
-    public void showPlayerEarlyLanded(String nickname) {
-        //TODO
-    }
+    public void showPlayerEarlyLanded(String nickname) {}
 
 }

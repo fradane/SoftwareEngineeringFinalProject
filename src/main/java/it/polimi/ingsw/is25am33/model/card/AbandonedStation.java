@@ -232,9 +232,14 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
     }
 
     /**
-     * Gestisce gli aggiornamenti degli storage tramite la nuova struttura dati.
-     * 
-     * @param storageUpdates mappa degli aggiornamenti degli storage
+     * Handles updates to the player's storage system based on the provided map of storage updates.
+     * It validates and applies the updates, notifies the clients of changes to the ship's board and ranking,
+     * and potentially moves the player backward, depending on the game's logic.
+     * In case of invalid updates, the method manages retry attempts and state restoration.
+     *
+     * @param storageUpdates a map containing the storage updates to apply. The map's keys are {@code Coordinates} objects
+     *                       representing specific storage locations on the player's ship board, and the values
+     *                       are lists of {@code CargoCube} objects representing the items to be stored at each location.
      */
     private void handleStorageUpdates(Map<Coordinates, List<CargoCube>> storageUpdates) {
         try {
@@ -248,7 +253,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
                     gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
             });
             
-            // Muovi il giocatore indietro
+            // Move back the player
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
             
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
@@ -261,7 +266,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
             gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             
         } catch (IllegalArgumentException e) {
-            // Gestione errore con retry
+            // handle error with entry
             String currentPlayer = gameModel.getCurrPlayer().getNickname();
             gameModel.getGameClientNotifier().notifyClients(
                 Set.of(currentPlayer),
@@ -270,14 +275,13 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
                 }
             );
             
-            // Ripristina stato shipboard
+            // Restore ship board state
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(), gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
             });
-            
-            // Rimani in HANDLE_CUBES_REWARD per il retry
+
         }
     }
 

@@ -95,6 +95,11 @@ public class StartViewController extends GuiController {
         });
     }
 
+    @Override
+    public String getControllerType() {
+        return "startViewController";
+    }
+
     /**
      * Shows an error message with fade-in animation.
      *
@@ -178,6 +183,11 @@ public class StartViewController extends GuiController {
             // Focus on nickname field
             nicknameField.requestFocus();
         });
+    }
+
+    public void showDisconnectMessage(String message) {
+        showMessage(message, true);
+        System.exit(0);
     }
 
     /**

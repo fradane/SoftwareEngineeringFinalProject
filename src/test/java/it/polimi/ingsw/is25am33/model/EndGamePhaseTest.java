@@ -95,11 +95,6 @@ public class EndGamePhaseTest {
         }
 
         @Override
-        public void notifyCardStarted(String nicknameToNotify) throws RemoteException {
-            notifications.add("cardStarted:" + nicknameToNotify);
-        }
-
-        @Override
         public void notifyGameState(String nickname, GameState gameState) throws RemoteException {
             notifications.add("gameState:" + gameState);
         }

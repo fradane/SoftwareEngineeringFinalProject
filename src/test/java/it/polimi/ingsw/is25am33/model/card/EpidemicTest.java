@@ -28,7 +28,7 @@ class EpidemicTest {
             public void setCurrGameState(GameState gameState){
             }
         };
-        gameClientNotifier = new GameClientNotifier(gameModel,new ConcurrentHashMap<>());
+        gameClientNotifier = new GameClientNotifier(new ConcurrentHashMap<>());
         gameModel.setGameClientNotifier(gameClientNotifier);
         epidemic = new Epidemic();
         epidemic.setGame(gameModel);

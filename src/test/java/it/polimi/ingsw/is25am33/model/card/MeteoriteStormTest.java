@@ -29,7 +29,7 @@ class MeteoriteStormTest {
             public void setCurrGameState(GameState state) {
             }
         };
-        gameClientNotifier = new GameClientNotifier(gameModel, new ConcurrentHashMap<>());
+        gameClientNotifier = new GameClientNotifier( new ConcurrentHashMap<>());
         gameModel.setGameClientNotifier(gameClientNotifier);
         meteoriteStorm = new MeteoriteStorm();
         meteoriteStorm.setMeteorites(List.of(new SmallMeteorite(Direction.NORTH), new BigMeteorite(Direction.NORTH)));

@@ -17,7 +17,7 @@ class DeckTest {
 
     private Deck deck;
     private final GameModel gameModel = new GameModel("1234", 2, false);
-    private final GameClientNotifier gameClientNotifier = new GameClientNotifier(gameModel, new ConcurrentHashMap<>()) {};
+    private final GameClientNotifier gameClientNotifier = new GameClientNotifier( new ConcurrentHashMap<>()) {};
 
     @BeforeEach
     void setUp() {

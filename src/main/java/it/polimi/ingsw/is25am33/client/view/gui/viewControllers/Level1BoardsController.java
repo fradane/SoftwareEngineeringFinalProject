@@ -95,7 +95,7 @@ public class Level1BoardsController extends BoardsController {
      * Initializes the Level 1 boards controller, called automatically by JavaFX.
      */
     public void initialize() {
-
+        // No initialization logic currently
     }
 
     // TODO togliere non usati: togliere da qua quelli non usati e dal fxml il fx:id a quelli che non si usano
@@ -106,26 +106,24 @@ public class Level1BoardsController extends BoardsController {
     @Override
     protected void initializeButtonMap() {
 
-        // Riga 4 del modello -> Riga 0 della griglia UI
+        // Model row 4 -> UI grid row 0
         buttonMap.put("4_3", button04_03);   buttonMap.put("4_4", button04_04);   buttonMap.put("4_5", button04_05);
         buttonMap.put("4_6", button04_06);   buttonMap.put("4_7", button04_07);   buttonMap.put("4_8", button04_08);   buttonMap.put("4_9", button04_09);
 
-        // Riga 5 del modello -> Riga 1 della griglia UI
+        // Model row 5 -> UI grid row 1
         buttonMap.put("5_3", button05_03);   buttonMap.put("5_4", button05_04);   buttonMap.put("5_5", button05_05);
         buttonMap.put("5_6", button05_06);   buttonMap.put("5_7", button05_07);   buttonMap.put("5_8", button05_08);   buttonMap.put("5_9", button05_09);
 
-        // Riga 6 del modello -> Riga 2 della griglia UI (CENTRO!)
+        // Model row 6 -> UI grid row 2 (CENTER!)
         buttonMap.put("6_3", button06_03);   buttonMap.put("6_4", button06_04);   buttonMap.put("6_5", button06_05);
         buttonMap.put("6_6", button06_06);   buttonMap.put("6_7", button06_07);   buttonMap.put("6_8", button06_08);   buttonMap.put("6_9", button06_09);
 
-        // Riga 7 del modello -> Riga 3 della griglia UI
+        // Model row 7 -> UI grid row 3
         buttonMap.put("7_3", button07_03);   buttonMap.put("7_4", button07_04);   buttonMap.put("7_5", button07_05);
         buttonMap.put("7_6", button07_06);   buttonMap.put("7_7", button07_07);   buttonMap.put("7_8", button07_08);   buttonMap.put("7_9", button07_09);
 
-        // Riga 8 del modello -> Riga 4 della griglia UI
+        // Model row 8 -> UI grid row 4
         buttonMap.put("8_3", button08_03);   buttonMap.put("8_4", button08_04);   buttonMap.put("8_5", button08_05);
         buttonMap.put("8_6", button08_06);   buttonMap.put("8_7", button08_07);   buttonMap.put("8_8", button08_08);   buttonMap.put("8_9", button08_09);
-
     }
-
 }

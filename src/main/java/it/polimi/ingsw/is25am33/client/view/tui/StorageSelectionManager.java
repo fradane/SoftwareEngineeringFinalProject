@@ -11,8 +11,8 @@ import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
 import java.util.*;
 
 /**
- * Classe utilitaria per la gestione delle scelte di storage durante la fase di reward.
- * Permette di tenere traccia e validare le scelte degli storage per i cubi.
+ * Utility class for managing storage selections during the reward phase.
+ * Allows tracking and validating storage choices for cargo cubes.
  */
 public class StorageSelectionManager {
 
@@ -36,10 +36,10 @@ public class StorageSelectionManager {
     private boolean malusMode = false;
 
     /**
-     * Costruttore per il gestore delle selezioni di storage.
+     * Constructor for the storage selection manager.
      *
-     * @param cubeRewards La lista di cubi reward da assegnare agli storage
-     * @param shipBoard La ship board del giocatore contenente gli storage
+     * @param cubeRewards The list of reward cubes to assign to storages
+     * @param shipBoard The player's ship board containing the storages
      */
     public StorageSelectionManager(List<CargoCube> cubeRewards, int cubeMalus, ShipBoardClient shipBoard) {
         this.cubeRewards = new ArrayList<>(cubeRewards);
@@ -71,10 +71,10 @@ public class StorageSelectionManager {
         this.malusMode = true;
         this.remainingCubesToRemove = cubeMalus;
 
-        // Inizializza la lista degli storage disponibili
+        // Initialize the list of available storages
         initializeAvailableStorages();
 
-        // Costruisce la mappa di compatibilità tra cubi e storage
+        // Build the compatibility map for each cube type
         buildCompatibilityMap();
 
         // Inizializza per modalità malus
@@ -86,10 +86,10 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Inizializza la lista degli storage disponibili sulla ship board.
+     * Initializes the list of available storages on the ship board.
      */
     private void initializeAvailableStorages() {
-        // Recupera tutti gli storage dalla ship board
+        // Retrieve all storages from the ship board
         List<Storage> storages = shipBoard.getStorages();
         if (storages != null) {
             this.availableStorages.addAll(storages);
@@ -97,23 +97,23 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Costruisce una mappa che associa ogni tipo di CargoCube agli storage compatibili.
+     * Builds a map that associates each CargoCube type with compatible storages.
      */
     private void buildCompatibilityMap() {
-        // Inizializza le liste per ogni tipo di cubo
+        // Initialize lists for each cube type
         for (CargoCube cubeType : CargoCube.values()) {
             compatibleStoragesMap.put(cubeType, new ArrayList<>());
         }
 
-        // Popola la mappa
+        // Populate the map
         for (Storage storage : availableStorages) {
-            // Gli storage speciali possono contenere qualsiasi tipo di cubo
+            // Special storages can hold any type of cube
             if (storage instanceof SpecialStorage) {
                 for (CargoCube cubeType : CargoCube.values()) {
                     compatibleStoragesMap.get(cubeType).add(storage);
                 }
             } else {
-                // Gli storage standard possono contenere tutti i cubi tranne quelli ROSSI
+                // Standard storages can hold all cubes except RED ones
                 for (CargoCube cubeType : CargoCube.values()) {
                     if (cubeType != CargoCube.RED) {
                         compatibleStoragesMap.get(cubeType).add(storage);
@@ -124,68 +124,67 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Verifica se il giocatore ha almeno uno storage disponibile.
+     * Checks if the player has at least one available storage.
      *
-     * @return true se il giocatore ha almeno uno storage, false altrimenti
+     * @return true if the player has at least one storage, false otherwise
      */
     public boolean hasAnyStorage() {
         return !availableStorages.isEmpty();
     }
 
     /**
-     * Aggiunge uno storage alla selezione per il cubo corrente.
+     * Adds a storage to the selection for the current cube.
      *
-     * @param storageCoords Le coordinate dello storage selezionato
-     * @return true se lo storage è stato aggiunto con successo, false altrimenti
+     * @param storageCoords The coordinates of the selected storage
+     * @return true if the storage was successfully added, false otherwise
      */
     public boolean addStorageSelection(Coordinates storageCoords) {
-        // Verifico se abbiamo già selezionato tutti gli storage necessari
+        // Check if we have already selected all necessary storages
         if (selectedStorages.size() >= cubeRewards.size()) {
             return false;
         }
 
-        // Il giocatore non vuole salvare questo cubo
+        // The player does not want to save this cube
         if(storageCoords.isCoordinateInvalid()){
             selectedStorages.add(storageCoords);
             return true;
         }
 
-        // Ottengo il componente alle coordinate specificate
+        // Get the component at the specified coordinates
         Storage storage = getStorageAtCoordinates(storageCoords);
         if (storage == null) {
             return false;
         }
 
-        // Controllo se il cubo corrente è rosso e lo storage è di tipo standard
+        // Check if the current cube is red and the storage is standard type
         int currentCubeIndex = selectedStorages.size();
         CargoCube currentCube = cubeRewards.get(currentCubeIndex);
 
         if (currentCube == CargoCube.RED && !(storage instanceof SpecialStorage)) {
-            return false;  // Cubi rossi possono essere messi solo in storage speciali
+            return false;  // Red cubes can only be placed in special storages
         }
 
-        // Verifico se lo storage è pieno e mostra informazioni sul cubo che verrebbe sostituito
+        // Check if the storage is full and show information about the cube that would be replaced
         if (storage.isFull()) {
             List<CargoCube> storedCubes = storage.getStockedCubes();
             if (!storedCubes.isEmpty()) {
-                // Ordina i cubi per valore (il meno prezioso per primo)
+                // Sort cubes by value (least valuable first)
                 storedCubes.sort(CargoCube.byValue);
                 CargoCube leastValuableCube = storedCubes.getFirst();
 
-                // Se il cubo meno prezioso ha un valore maggiore del cubo corrente, avvisa l'utente
+                // If the least valuable cube has a higher value than the current cube, warn the user
                 if (leastValuableCube.getValue() > currentCube.getValue()) {
-                    //TODO farlo con showMessage
-                    System.out.println("ATTENZIONE: Il cubo meno prezioso nello storage (" +
-                            leastValuableCube + ", valore: " + leastValuableCube.getValue() +
-                            ") è più prezioso del cubo corrente (" +
-                            currentCube + ", valore: " + currentCube.getValue() + ")");
+                    System.out.println("WARNING: The least valuable cube in the storage (" +
+                            leastValuableCube + ", value: " + leastValuableCube.getValue() +
+                            ") is more valuable than the current cube (" +
+                            currentCube + ", value: " + currentCube.getValue() + ")");
                 }
             }
         }
 
         storage.addCube(currentCube);
 
-        // Aggiungo le coordinate alla lista delle selezioni
+        // Add the coordinates to the selection list
         selectedStorages.add(storageCoords);
 
         return true;
@@ -237,9 +236,9 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Verifica se il giocatore può accettare il cubo corrente.
+     * Checks if the player can accept the current cube.
      *
-     * @return true se il giocatore ha almeno uno storage compatibile per il cubo corrente
+     * @return true if the player has at least one compatible storage for the current cube
      */
     public boolean canAcceptCurrentCube() {
         CargoCube currentCube = getCurrentCube();
@@ -252,27 +251,27 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Verifica se sono stati selezionati tutti gli storage necessari.
+     * Checks if all necessary storages have been selected.
      *
-     * @return true se tutti i cubi hanno uno storage assegnato, false altrimenti
+     * @return true if all cubes have a storage assigned, false otherwise
      */
     public boolean isSelectionComplete() {
         return selectedStorages.size() == cubeRewards.size();
     }
 
     /**
-     * Ottiene la lista di coordinate degli storage selezionati.
+     * Gets the list of coordinates of the selected storages.
      *
-     * @return La lista delle coordinate degli storage selezionati
+     * @return The list of coordinates of the selected storages
      */
     public List<Coordinates> getSelectedStorageCoordinates() {
         return new ArrayList<>(selectedStorages);
     }
 
     /**
-     * Restituisce il cubo corrente da assegnare.
+     * Returns the current cube to be assigned.
      *
-     * @return Il cubo corrente o null se tutti i cubi sono stati assegnati
+     * @return The current cube or null if all cubes have been assigned
      */
     public CargoCube getCurrentCube() {
         if (selectedStorages.size() >= cubeRewards.size()) {
@@ -282,10 +281,10 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Ottiene lo storage alle coordinate specificate.
+     * Gets the storage at the specified coordinates.
      *
-     * @param coordinates Le coordinate dello storage
-     * @return L'oggetto Storage alle coordinate specificate o null se non c'è uno storage
+     * @param coordinates The coordinates of the storage
+     * @return The Storage object at the specified coordinates or null if there is no storage
      */
     private Storage getStorageAtCoordinates(Coordinates coordinates) {
         if (coordinates == null || coordinates.isCoordinateInvalid()) {
@@ -293,23 +292,23 @@ public class StorageSelectionManager {
         }
 
         try {
-            // Ottiene il componente e verifica se è uno storage
+            // Get the component and check if it is a storage
             Object component = shipBoard.getComponentAt(coordinates);
             if (component instanceof Storage) {
                 return (Storage) component;
             }
         } catch (Exception e) {
-            // Gestisce l'eccezione se le coordinate sono fuori dai limiti
+            // Handles the exception if the coordinates are out of bounds
         }
 
         return null;
     }
 
     /**
-     * Controlla se uno storage è già pieno e fornisce informazioni sul cubo meno prezioso.
+     * Checks if a storage is already full and provides information about the least valuable cube.
      *
-     * @param storageCoords Le coordinate dello storage da controllare
-     * @return Una stringa che descrive lo stato dello storage, o null se non è uno storage valido
+     * @param storageCoords The coordinates of the storage to check
+     * @return A string describing the status of the storage, or null if it's not a valid storage
      */
     public String checkStorageStatus(Coordinates storageCoords) {
         Storage storage = getStorageAtCoordinates(storageCoords);
@@ -318,36 +317,36 @@ public class StorageSelectionManager {
         }
 
         if (!storage.isFull()) {
-            // Non possiamo usare getMaxCubes() e getCurrentCubes() perché non esistono
-            // Utilizziamo il metodo getStockedCubes() per ottenere i cubi correnti
+            // We can't use getMaxCubes() and getCurrentCubes() because they don't exist
+            // Use getStockedCubes() to get the current cubes
             List<CargoCube> storedCubes = storage.getStockedCubes();
-            // Non possiamo determinare esattamente lo spazio libero, quindi diamo un messaggio generico
-            return "Storage disponibile, contiene " + storedCubes.size() + " cubi";
+            // We can't determine the exact free space, so give a generic message
+            return "Available storage, contains " + storedCubes.size() + " cubes";
         } else {
-            // Ordino i cubi per valore e prendo il meno prezioso
+            // Sort cubes by value and take the least valuable one
             List<CargoCube> storedCubes = storage.getStockedCubes();
             if (storedCubes.isEmpty()) {
-                return "Storage pieno, ma non ci sono cubi (stato anomalo)";
+                return "Storage is full, but there are no cubes (anomalous state)";
             } else {
                 storedCubes.sort(CargoCube.byValue);
                 CargoCube leastValuableCube = storedCubes.get(0);
-                return "Storage pieno, il cubo meno prezioso è " + leastValuableCube +
-                        " (valore: " + leastValuableCube.getValue() + ")";
+                return "Storage is full, the least valuable cube is " + leastValuableCube +
+                        " (value: " + leastValuableCube.getValue() + ")";
             }
         }
     }
 
     /**
-     * Restituisce il numero totale di cubi reward da gestire.
+     * Returns the total number of reward cubes to manage.
      *
-     * @return Il numero totale di cubi reward
+     * @return The total number of reward cubes
      */
     public int getTotalCubesCount() {
         return cubeRewards.size();
     }
 
     /**
-     * Resetta tutte le selezioni.
+     * Resets all selections.
      */
     public void reset() {
         selectedStorages.clear();
@@ -355,7 +354,7 @@ public class StorageSelectionManager {
 
     public Map<CargoCube, List<Coordinates>> whereAreCube() {
 
-        //ottengo una lista degli storage che contengono un cubo di quel colore con ripetizioni
+        // Get a list of storages that contain a cube of that color, with repetitions
 
         Map<CargoCube,List<Coordinates>> storageAndCubes = new HashMap<>();
         storageAndCubes.put(CargoCube.RED, new ArrayList<>());
@@ -455,8 +454,6 @@ public class StorageSelectionManager {
         // If a cube was removed, inform the user
         if (removedCube != null) {
             availableCubes.add(removedCube);
-            // TODO: use showMessage
-            System.out.println("The cube " + removedCube + " was removed to make room for the new cube " + cubeType);
         }
 
         // Replace the storage in the shipboard
@@ -549,42 +546,41 @@ public class StorageSelectionManager {
         }
     }
 
-    // ======== METODI PER LA RIDISTRIBUZIONE ========
+    // ======== METHODS FOR REDISTRIBUTION ========
 
     /**
-     * Inizializza la modalità ridistribuzione con i cubi bonus.
-     * 
-     * @param newCubes cubi bonus da aggiungere
+     * Initializes redistribution mode with bonus cubes.
+     *
+     * @param newCubes bonus cubes to add
      */
     public void startRedistribution(List<CargoCube> newCubes) {
         this.redistributionMode = true;
         this.availableCubes.addAll(newCubes);
         this.finalUpdates.clear();
         this.selectedCubeIndex = -1;
-        
-        // Inizializza finalUpdates con lo stato attuale degli storage
+
+        // Initialize finalUpdates with the current state of the storages
         initializeFinalUpdatesWithCurrentState();
     }
 
     /**
-     * Inizializza la mappa degli aggiornamenti con lo stato attuale degli storage.
-     * Include TUTTI gli storage nella mappa, anche quelli vuoti, per garantire
-     * che il server riceva lo stato completo.
+     * Initializes the update map with the current state of the storages.
+     * ALWAYS includes all storages in the map, even if empty, to ensure the server receives the complete state.
      */
     private void initializeFinalUpdatesWithCurrentState() {
         Map<Coordinates, Storage> coordsAndStorages = shipBoard.getCoordinatesAndStorages();
         for (Map.Entry<Coordinates, Storage> entry : coordsAndStorages.entrySet()) {
             Storage storage = entry.getValue();
-            // SEMPRE aggiungi tutti gli storage, anche se vuoti
+            // ALWAYS add all storages, even if empty
             finalUpdates.put(entry.getKey(), new ArrayList<>(storage.getStockedCubes()));
         }
     }
 
     /**
-     * Seleziona un cubo tramite indice.
-     * 
-     * @param index indice del cubo da selezionare
-     * @return true se la selezione è avvenuta con successo
+     * Selects a cube by index.
+     *
+     * @param index index of the cube to select
+     * @return true if the selection was successful
      */
     public boolean selectCubeByIndex(int index) {
         if (index >= 0 && index < availableCubes.size()) {
@@ -595,9 +591,9 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Ottiene il cubo attualmente selezionato.
-     * 
-     * @return il cubo selezionato o null se nessuno è selezionato
+     * Gets the currently selected cube.
+     *
+     * @return the selected cube or null if none is selected
      */
     public CargoCube getSelectedCube() {
         if (selectedCubeIndex >= 0 && selectedCubeIndex < availableCubes.size()) {
@@ -607,28 +603,28 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Ottiene la lista dei cubi disponibili.
-     * 
-     * @return copia della lista dei cubi disponibili
+     * Gets the list of available cubes.
+     *
+     * @return copy of the list of available cubes
      */
     public List<CargoCube> getAvailableCubes() {
         return new ArrayList<>(availableCubes);
     }
 
     /**
-     * Ottiene l'indice del cubo selezionato.
-     * 
-     * @return indice del cubo selezionato o -1 se nessuno è selezionato
+     * Gets the index of the selected cube.
+     *
+     * @return index of the selected cube or -1 if none is selected
      */
     public int getSelectedCubeIndex() {
         return selectedCubeIndex;
     }
 
     /**
-     * Aggiunge il cubo selezionato allo storage specificato.
-     * 
-     * @param coord coordinate dello storage
-     * @return true se l'operazione è riuscita
+     * Adds the selected cube to the specified storage.
+     *
+     * @param coord coordinates of the storage
+     * @return true if the operation succeeded
      */
     public boolean addSelectedCubeToStorage(Coordinates coord) {
         if (selectedCubeIndex < 0 || selectedCubeIndex >= availableCubes.size()) {
@@ -637,33 +633,33 @@ public class StorageSelectionManager {
 
         CargoCube selectedCube = availableCubes.get(selectedCubeIndex);
         Storage storage = getStorageAt(coord);
-        
+
         if (storage == null) {
             return false;
         }
 
-        // Validazione cubo rosso
+        // Validate red cube
         if (selectedCube == CargoCube.RED && !(storage instanceof SpecialStorage)) {
             return false;
         }
 
-        // Aggiorna visivamente usando la logica esistente
+        // Visually update using the existing logic
         Storage clone = cloneStorage(storage);
         CargoCube displacedCube = clone.addCube(selectedCube);
         replaceStorageInShipBoard(coord, storage, clone);
 
-        // Se un cubo è stato espulso, riaggiungilo agli availableCubes
+        // If a cube was displaced, re-add it to availableCubes
         if (displacedCube != null) {
             availableCubes.add(displacedCube);
         }
 
-        // Rimuovi dai disponibili
+        // Remove from available cubes
         availableCubes.remove(selectedCubeIndex);
         selectedCubeIndex = -1;
 
-        // Aggiorna mappa finale
+        // Update final updates map
         updateFinalUpdates(coord, clone.getStockedCubes());
-        
+
         return true;
     }
 
@@ -693,9 +689,9 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Rimuove un cubo dallo storage specificato (lo riaggiunge ai disponibili).
-     * 
-     * @param coord coordinate dello storage
+     * Removes a cube from the specified storage (re-adds it to available cubes).
+     *
+     * @param coord coordinates of the storage
      */
     public void removeCubeFromStorage(Coordinates coord) {
         Storage storage = getStorageAt(coord);
@@ -704,63 +700,63 @@ public class StorageSelectionManager {
         }
 
         CargoCube removedCube = storage.getStockedCubes().get(storage.getStockedCubes().size() - 1);
-        
-        // Rimuovi visivamente
+
+        // Visually remove
         Storage clone = cloneStorage(storage);
         clone.getStockedCubes().remove(removedCube);
         replaceStorageInShipBoard(coord, storage, clone);
-        
-        // Riaggiunge ai disponibili
+
+        // Re-add to available cubes
         availableCubes.add(removedCube);
-        
-        // Aggiorna mappa finale
+
+        // Update final updates map
         updateFinalUpdates(coord, clone.getStockedCubes());
     }
 
     /**
-     * Verifica se la ridistribuzione è completa.
-     * 
-     * @return true se tutti i cubi sono stati posizionati
+     * Checks if redistribution is complete.
+     *
+     * @return true if all cubes have been placed
      */
     public boolean isRedistributionComplete() {
         return availableCubes.isEmpty();
     }
 
     /**
-     * Ottiene la mappa finale degli aggiornamenti per l'invio al server.
-     * 
-     * @return mappa degli aggiornamenti
+     * Gets the final updates map for sending to the server.
+     *
+     * @return updates map
      */
     public Map<Coordinates, List<CargoCube>> getFinalUpdates() {
         return new HashMap<>(finalUpdates);
     }
 
     /**
-     * Helper per ottenere uno storage alle coordinate specificate.
-     * 
-     * @param coord coordinate dello storage
-     * @return storage alle coordinate o null se non trovato
+     * Helper to get a storage at the specified coordinates.
+     *
+     * @param coord coordinates of the storage
+     * @return storage at the coordinates or null if not found
      */
     private Storage getStorageAt(Coordinates coord) {
         return shipBoard.getCoordinatesAndStorages().get(coord);
     }
 
     /**
-     * Helper per aggiornare la mappa finale degli aggiornamenti.
-     * IMPORTANTE: Include sempre le coordinate nella mappa, anche se la lista è vuota,
-     * per notificare al server che lo storage è stato modificato.
-     * 
-     * @param coord coordinate dello storage
-     * @param cubes lista dei cubi nello storage
+     * Helper to update the final updates map.
+     * IMPORTANT: Always include the coordinates in the map, even if the list is empty,
+     * to notify the server that the storage has been modified.
+     *
+     * @param coord coordinates of the storage
+     * @param cubes list of cubes in the storage
      */
     private void updateFinalUpdates(Coordinates coord, List<CargoCube> cubes) {
-        // SEMPRE metti le coordinate nella mappa, anche se lista vuota
-        // Questo è essenziale per notificare al server che lo storage è stato modificato
+        // ALWAYS put the coordinates in the map, even if the list is empty
+        // This is essential to notify the server that the storage has been modified
         finalUpdates.put(coord, new ArrayList<>(cubes));
     }
 
     /**
-     * Reset per nuovo utilizzo.
+     * Reset for reuse.
      */
     public void resetRedistribution() {
         availableCubes.clear();
@@ -770,9 +766,9 @@ public class StorageSelectionManager {
     }
 
     /**
-     * Verifica se è in modalità ridistribuzione.
-     * 
-     * @return true se in modalità ridistribuzione
+     * Checks if it is in redistribution mode.
+     *
+     * @return true if in redistribution mode
      */
     public boolean isInRedistributionMode() {
         return redistributionMode;

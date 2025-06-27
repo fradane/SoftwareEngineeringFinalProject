@@ -29,7 +29,7 @@ public class PlayerClientData {
         this.nickname = nickname;
         this.credits = 0;
         this.color = color;
-        this.shipBoard = isTestFlight ? new Level1ShipBoard(color, new GameClientNotifier(null, new ConcurrentHashMap<>()), isGui) : new Level2ShipBoard(color, new GameClientNotifier(null, new ConcurrentHashMap<>()), isGui);
+        this.shipBoard = isTestFlight ? new Level1ShipBoard(color, new GameClientNotifier( new ConcurrentHashMap<>()), isGui) : new Level2ShipBoard(color, new GameClientNotifier( new ConcurrentHashMap<>()), isGui);
         this.shipBoard.setPlayer(new Player(nickname, (ShipBoard) this.shipBoard, color));
         this.flyingBoardPosition = 0;
         this.isOut = false;

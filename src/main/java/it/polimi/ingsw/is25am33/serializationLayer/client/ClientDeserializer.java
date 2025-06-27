@@ -23,17 +23,6 @@ public class ClientDeserializer extends KeyDeserializer {
         // eventuali altri moduli (JavaTimeModule, ecc.)
     }
 
-    // TODO aggiornamenti della view, guardare la classe game e simili e il diagramma di marco
-    // TODO aggiornamenti della view, guardare la classe gameModel e simili e il diagramma di marco ilnegro
-
-    // TODO serializzare i cambiamenti sulle shipBoard
-
-    // TODO serializzare i cambiamenti sulla flyingBoard
-
-    // TODO serializzare le carte
-
-    // TODO serializzare i dangerousObj
-
     @Override
     public Coordinates deserializeKey(String key, DeserializationContext ctxt) throws IOException {
         Pattern COORDINATE_PATTERN = Pattern.compile("\\{x = (-?\\d+), y = (-?\\d+)\\}");
@@ -60,13 +49,12 @@ public class ClientDeserializer extends KeyDeserializer {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        // Simuliamo un file con due JSON riga per riga
+        // simulate a file with two JSON lines per line
         BufferedReader reader = new BufferedReader(new StringReader(json));
 
         // 1° JSON: Coordinates
         String jsonLine = reader.readLine();
         T result = mapper.readValue(jsonLine, type);
-        //System.out.println(result.toString());
 
         reader.close();
 

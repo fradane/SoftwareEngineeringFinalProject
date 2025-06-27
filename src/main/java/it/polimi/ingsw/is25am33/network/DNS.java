@@ -16,11 +16,11 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 public class DNS extends UnicastRemoteObject implements CallableOnDNS {
-    //ad ogni game il suo gameController
+    //every game has its own controller
     public static final Map<String, GameController> gameControllers = new ConcurrentHashMap<>();
-    //ad ogni client il suo controller
+    //every client has its controller
     private final Map<String, CallableOnClientController> clients = new ConcurrentHashMap<>();
-    // ad ogni il client il suo Game se esiste
+    // every client has its game, if it exists
     private final Map<String, GameController> clientGame = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private static Thread socketThread;
@@ -175,15 +175,21 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         
         System.out.println("GameModel created: " + gameId + " by " + nickname +
                 " for " + numPlayers + " players" + (isTestFlight ? " (Test Flight)" : ""));
-        // Aggiungi il player alla partita
+        // Add players to the game
         newGameController.addPlayer(nickname, color, clients.get(nickname));
         clientGame.put(nickname,newGameController);
         System.out.println("[" + gameId + "] " + nickname + " joined game with color " + color);
 
-        // Notifica tutti i client in attesa che è stata creata una nuova partita
+        //notify every waiting clients that has been created a new game
         notifyAvailableGamesToWaitingClients();
 
         return newGameController.getGameInfo();
+    }
+
+    public void removeGame(String gameId) {
+        gameControllers.remove(gameId);
+        //notify every waiting clients that has been removed a game
+        notifyAvailableGamesToWaitingClients();
     }
 
     public void pingToClientFromServer(String nickname) throws IOException {
@@ -218,7 +224,6 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
             return false;
         }
 
-        // TODO
         if (!gameControllers.containsKey(gameId)) {
             return false;
         }
@@ -256,6 +261,7 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
             });
 
             // Notifica tutti i client in attesa che la lista partite è cambiata
+            // notify every waiting client that the list of games has changed
             notifyAvailableGamesToWaitingClients();
 
             System.out.println("[" + gameId + "] " + nickname + " joined game with color " + color);

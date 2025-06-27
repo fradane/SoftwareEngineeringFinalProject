@@ -22,6 +22,11 @@ public class ClientSlaveTraders extends ClientCard implements Serializable, Crew
         this.stepsBack=stepsBack;
     }
 
+    @Override
+    public boolean hasReward() {
+        return true;
+    }
+
     public CardState getFirstState() {
         return CardState.CHOOSE_CANNONS;
     }
@@ -40,11 +45,6 @@ public class ClientSlaveTraders extends ClientCard implements Serializable, Crew
 
     public int getCrewMalus() {
         return crewMalus;
-    }
-
-    @Override
-    public boolean hasReward() {
-        return true;
     }
 
     public void setRequiredFirePower(int requiredFirePower) {

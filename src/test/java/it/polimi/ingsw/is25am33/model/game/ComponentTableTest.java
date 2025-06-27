@@ -25,7 +25,7 @@ class ComponentTableTest {
     @BeforeEach
     void setUp() {
         componentTable = new ComponentTable();
-        componentTable.setGameClientNotifier(new GameClientNotifier(null, new ConcurrentHashMap<>()));
+        componentTable.setGameClientNotifier(new GameClientNotifier( new ConcurrentHashMap<>()));
     }
 
 

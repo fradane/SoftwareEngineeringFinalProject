@@ -246,12 +246,10 @@ public class PrefabShipFactory {
     private static boolean applyTestManyExposed(ShipBoard shipBoard) {
         clearShipBoard(shipBoard);
 
-        // Nave con molti connettori esposti
         addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 8);
         addComponent(shipBoard, new Engine(createCustomConnectors(SINGLE, EMPTY, SINGLE, SINGLE)), 8, 8);
         addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, SINGLE, SINGLE, SINGLE)), 7, 6);
         addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 2), 6, 7);
-        // Lascia molti connettori esposti non collegati
 
         shipBoard.checkShipBoard();
         return true;
@@ -260,7 +258,6 @@ public class PrefabShipFactory {
     private static boolean applyTestNoExposed(ShipBoard shipBoard) {
         clearShipBoard(shipBoard);
 
-        // Nave compatta con tutti i connettori ben collegati
         addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, SINGLE, EMPTY)), 7, 8);
         addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, EMPTY, SINGLE, SINGLE)), 8, 8);
         addComponent(shipBoard, new Engine(createCustomConnectors(SINGLE, EMPTY, EMPTY, SINGLE)), 8, 7);
@@ -273,7 +270,6 @@ public class PrefabShipFactory {
     private static boolean applyTestCargoFull(ShipBoard shipBoard) {
         clearShipBoard(shipBoard);
 
-        // Aggiungi storage pieni di cubi specifici
         StandardStorage storage1 = new StandardStorage(createSimpleConnectors(), 3);
         storage1.addCube(CargoCube.YELLOW);
         storage1.addCube(CargoCube.YELLOW);
@@ -290,7 +286,6 @@ public class PrefabShipFactory {
         storage3.addCube(CargoCube.BLUE);
         addComponent(shipBoard, storage3, 8, 7);
 
-        // Aggiungi cabine per l'equipaggio
         addComponent(shipBoard, new Cabin(createSimpleConnectors()), 6, 7);
         addComponent(shipBoard, new Engine(createCustomConnectors(SINGLE, EMPTY, SINGLE, SINGLE)), 6, 6);
 
@@ -301,11 +296,10 @@ public class PrefabShipFactory {
     private static boolean applyTestManyLost(ShipBoard shipBoard) {
         clearShipBoard(shipBoard);
 
-        // Aggiungi componenti base
         addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 8);
         addComponent(shipBoard, new Engine(createCustomConnectors(SINGLE, EMPTY, SINGLE, SINGLE)), 8, 8);
 
-        // Aggiungi molti componenti alla lista notActiveComponents per simulare perdite
+
         for(int i = 0; i < 5; i++) {
             shipBoard.getNotActiveComponents().add(new Cannon(createSimpleConnectors()));
         }
@@ -317,7 +311,7 @@ public class PrefabShipFactory {
     private static boolean applyTestNoEngines(ShipBoard shipBoard) {
         clearShipBoard(shipBoard);
 
-        // Nave senza motori
+
         addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 8);
         addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 6);
         addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 2), 8, 7);
@@ -329,7 +323,6 @@ public class PrefabShipFactory {
     private static boolean applyTestNoHumans(ShipBoard shipBoard) {
         clearShipBoard(shipBoard);
 
-        // Nave con cabine ma senza umani (verranno rimossi nel test)
         addComponent(shipBoard, new Cabin(createSimpleConnectors()), 7, 8);
         addComponent(shipBoard, new Engine(createCustomConnectors(SINGLE, EMPTY, SINGLE, SINGLE)), 8, 8);
 
@@ -478,7 +471,6 @@ public class PrefabShipFactory {
         return connectors;
     }
 
-    // Implementazione per le altre navi prefabbricate...
 
     /**
      * Pulisce la plancia rimuovendo tutti i componenti tranne la MainCabin.
@@ -490,52 +482,41 @@ public class PrefabShipFactory {
         Component[][] matrix = shipBoard.getShipMatrix();
         Map<Class<?>, List<Component>> componentsPerType = shipBoard.getComponentsPerType();
 
-        // Posizione della MainCabin
         int mainCabinX = ShipBoard.STARTING_CABIN_POSITION[0];
         int mainCabinY = ShipBoard.STARTING_CABIN_POSITION[1];
 
-        // Salva la MainCabin
+
         Component mainCabin = matrix[mainCabinX][mainCabinY];
 
-        // Pulisci la mappa componentsPerType mantenendo solo la MainCabin
         for (Map.Entry<Class<?>, List<Component>> entry : new HashMap<>(componentsPerType).entrySet()) {
             Class<?> componentClass = entry.getKey();
             List<Component> components = new ArrayList<>(entry.getValue());
 
-            // Se non è la classe MainCabin, rimuovi tutti i componenti
             if (!MainCabin.class.equals(componentClass)) {
                 for (Component component : components) {
-                    // Aggiungi il componente alla lista dei componenti non attivi
-                    //shipBoard.getNotActiveComponents().add(component);
-                    // Rimuovi il componente dalla lista del suo tipo
                     componentsPerType.get(componentClass).remove(component);
                 }
-                // Se la lista è vuota, rimuovi la chiave dalla mappa
                 if (componentsPerType.get(componentClass).isEmpty()) {
                     componentsPerType.remove(componentClass);
                 }
             } else {
-                // Se è MainCabin, mantieni solo il componente nella posizione iniziale
                 components.removeIf(component -> component != mainCabin);
             }
         }
 
-        // Rimuovi i componenti dalla matrice (tranne la MainCabin)
         for (int i = 0; i < ShipBoard.BOARD_DIMENSION; i++) {
             for (int j = 0; j < ShipBoard.BOARD_DIMENSION; j++) {
-                // Se non è la posizione della MainCabin e c'è un componente, rimuovilo
                 if ((i != mainCabinX || j != mainCabinY) && matrix[i][j] != null) {
                     matrix[i][j] = null;
                 }
             }
         }
 
-        // Pulisci il set di componenti posizionati in modo errato
         shipBoard.getIncorrectlyPositionedComponentsCoordinates().clear();
     }
 
     private static void addComponent(ShipBoard shipBoard, Component component, int x, int y) {
-        // Passaggio da coordinate 1-based a 0-based
+        // from coordinates 1-based to 0-based
         int x_0_based = x-1;
         int y_0_based = y-1;
 
@@ -545,7 +526,6 @@ public class PrefabShipFactory {
     }
 
     private static void addComponent(ShipBoard shipBoard, Component component, int x, int y, String imageName) {
-        // Passaggio da coordinate 1-based a 0-based
         int x_0_based = x-1;
         int y_0_based = y-1;
 
@@ -593,7 +573,6 @@ public class PrefabShipFactory {
         addComponent(shipBoard, new Engine(createCustomConnectors(UNIVERSAL, EMPTY, DOUBLE, EMPTY)), 9, 8, "GT-new_tiles_16_for_web79.jpg");
         addComponent(shipBoard, new StandardStorage(createCustomConnectors(DOUBLE, SINGLE, EMPTY, DOUBLE), 3), 9, 9, "GT-new_tiles_16_for_web32.jpg");
 
-        // Verifica la correttezza della nave
         shipBoard.checkShipBoard();
         return true;
     }
@@ -626,7 +605,6 @@ public class PrefabShipFactory {
         addComponent(shipBoard, new StructuralModules(createCustomConnectors(UNIVERSAL, DOUBLE, DOUBLE, UNIVERSAL)), 9, 8, "GT-new_tiles_16_for_web60.jpg");
         addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, EMPTY, EMPTY, SINGLE)), 9, 9, "GT-new_tiles_16_for_web112.jpg");
 
-        // Verifica la correttezza della nave (dovrebbe trovare molti errori!)
         shipBoard.checkShipBoard();
         return true;
     }

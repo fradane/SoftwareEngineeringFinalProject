@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.ERROR;
+
 /**
  * Simplified controller for managing the final game screen
  */
@@ -58,6 +60,11 @@ public class EndGameController extends GuiController implements Initializable {
         System.out.println("EndGame message: " + message);
     }
 
+    @Override
+    public String getControllerType() {
+        return "endGameController";
+    }
+
     /**
      * Shows the final game information with ranking and results.
      *
@@ -70,25 +77,6 @@ public class EndGameController extends GuiController implements Initializable {
             createEndGameDisplay(finalRanking, playersNicknamesWithPrettiestShip);
         });
     }
-
-//    public void showPlayerEarlyLanded() {
-//        if (!gameEnded) {
-//            Platform.runLater(() -> {
-//                createEarlyLandingDisplay();
-//            });
-//        }
-//    }
-
-//    /**
-//     * Notifies that another player has landed early
-//     */
-//    public void notifyOtherPlayerEarlyLanded(String nickname) {
-//        if (!gameEnded) {
-//            Platform.runLater(() -> {
-//                createOtherPlayerLandingNotification(nickname);
-//            });
-//        }
-//    }
 
     /**
      * Creates the main end game results display - NO SCROLL
@@ -479,6 +467,11 @@ public class EndGameController extends GuiController implements Initializable {
         return totalCredits;
     }
 
+    public void showDisconnectMessage(String message) {
+        showMessage(message, true);
+        System.exit(0);
+    }
+
     private int getPositionBonus(int position) {
         boolean isTestFlight = false;
         try {
@@ -546,43 +539,39 @@ public class EndGameController extends GuiController implements Initializable {
             popupContent.getChildren().add(titleLabel);
         }
 
-        // Messaggio
+        // message
         Label messageLabel = new Label(message);
         messageLabel.getStyleClass().add("popup-message");
         messageLabel.setWrapText(true);
         popupContent.getChildren().add(messageLabel);
 
-        // Container per i pulsanti
+        // button container
         HBox buttonContainer = new HBox();
         buttonContainer.setAlignment(javafx.geometry.Pos.CENTER);
         buttonContainer.setSpacing(15);
 
-        // Pulsante Conferma
+        // confirm button
         Button confirmButton = new Button("Confirm");
         confirmButton.getStyleClass().addAll("popup-button", "confirm-button");
         confirmButton.setOnAction(e -> {
             centerStackPane.getChildren().remove(overlay);
             if (onClose != null) {
-                onClose.run(); // ← Esegue l'azione solo se confermato
+                onClose.run();
             }
         });
 
-        // Pulsante Annulla
         Button cancelButton = new Button("Cancel");
         cancelButton.getStyleClass().addAll("popup-button", "cancel-button");
         cancelButton.setOnAction(e -> {
             centerStackPane.getChildren().remove(overlay);
-            // Non esegue nessuna azione = annullamento
-            showMessage("Operation cancelled.", false); // Feedback opzionale
+            showMessage("Operation cancelled.", false);
         });
 
         buttonContainer.getChildren().addAll(confirmButton, cancelButton);
         popupContent.getChildren().add(buttonContainer);
 
-        // Assembla il popup
         overlay.getChildren().add(popupContent);
 
-        // Chiudi cliccando fuori dal popup (comportamento di annullamento)
         overlay.setOnMouseClicked(e -> {
             if (e.getTarget() == overlay) {
                 centerStackPane.getChildren().remove(overlay);
@@ -590,19 +579,10 @@ public class EndGameController extends GuiController implements Initializable {
             }
         });
 
-        // Aggiungi l'overlay
         Platform.runLater(() -> {
             centerStackPane.getChildren().add(overlay);
             overlay.toFront();
         });
-    }
-
-    private void showInfoPopupWithCallback(String message, ClientCard card, Runnable onClose) {
-        String title = null;
-        if (card != null) {
-            title = card.getCardType();
-        }
-        showOverlayPopup(title, message, onClose);
     }
 
 }

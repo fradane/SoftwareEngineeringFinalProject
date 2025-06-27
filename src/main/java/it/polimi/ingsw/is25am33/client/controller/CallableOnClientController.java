@@ -68,8 +68,6 @@ public interface CallableOnClientController extends Remote {
 
     void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts , Map<Class<?>, List<Component>> componentsPerType) throws RemoteException;
 
-    void notifyCardStarted(String nicknameToNotify)throws IOException;
-
     void notifyStopHourglass(String nicknameToNotify) throws IOException;
 
     void notifyFirstToEnter(String nicknameToNotify) throws IOException;

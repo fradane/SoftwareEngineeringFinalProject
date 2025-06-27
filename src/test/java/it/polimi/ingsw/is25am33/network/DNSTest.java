@@ -162,11 +162,6 @@ public class DNSTest {
         }
 
         @Override
-        public void notifyCardStarted(String nicknameToNotify) throws IOException {
-
-        }
-
-        @Override
         public void notifyStopHourglass(String nicknameToNotify) throws IOException {
 
         }

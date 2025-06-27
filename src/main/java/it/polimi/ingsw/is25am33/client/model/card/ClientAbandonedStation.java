@@ -7,8 +7,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-// implementa crewMalusCard per generalizzare il metodo playerWantsToVisitLocation che richiede un numero minimo di crew per visitare una stazione/nave
-//TODO cambiare nome all'interfaccia crewMalusCard per renderla più appropriata anche a questa classe
+// Implements CrewMalusCard to generalize the playerWantsToVisitLocation method, which requires a minimum number of crew to visit a station/ship
+//TODO rename the CrewMalusCard interface to make it more appropriate for this class as well
 public class ClientAbandonedStation extends ClientCard implements Serializable, CrewMalusCard {
     private int requiredCrewMembers;
     private int stepsBack;

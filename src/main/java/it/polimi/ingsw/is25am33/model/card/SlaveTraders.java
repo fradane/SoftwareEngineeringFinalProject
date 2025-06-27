@@ -140,13 +140,13 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         if (currPlayerCannonPower > requiredFirePower) {
 
-            setCurrState( CardState.ACCEPT_THE_REWARD);
+            setCurrState(CardState.ACCEPT_THE_REWARD);
 
         } else if (currPlayerCannonPower == requiredFirePower) {
 
             if (gameModel.hasNextPlayer()) {
                 gameModel.nextPlayer();
-                setCurrState( CardState.CHOOSE_CANNONS );
+                setCurrState( CardState.CHOOSE_CANNONS);
             } else {
                 setCurrState( CardState.END_OF_CARD);
                 gameModel.resetPlayerIterator();

@@ -14,6 +14,8 @@ import javafx.util.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.ERROR;
+
 public class MainMenuViewController extends GuiController {
 
     private final Set<PlayerColor> colors = new HashSet<>(Arrays.asList(PlayerColor.values()));
@@ -229,6 +231,16 @@ public class MainMenuViewController extends GuiController {
         showForm(chooseGameForm);
     }
 
+    @Override
+    public String getControllerType() {
+        return "MainMenuViewController";
+    }
+
+    public void showDisconnectMessage(String message) {
+        showMessage(message, true);
+        System.exit(0);
+    }
+
 
     /**
      * Shows a specific form while hiding all others with fade animation.
@@ -270,10 +282,6 @@ public class MainMenuViewController extends GuiController {
                 errorLabel.setManaged(true);
 
                 errorLabel.setOpacity(1.0);
-//                errorLabel.setOpacity(0.0);
-//                FadeTransition fadeIn = new FadeTransition(Duration.millis(200), errorLabel);
-//                fadeIn.setToValue(1.0);
-//                fadeIn.play();
 
                 System.err.println("Error: " + message);
             }
