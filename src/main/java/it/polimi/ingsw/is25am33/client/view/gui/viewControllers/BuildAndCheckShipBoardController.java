@@ -402,9 +402,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     }
 
     public void showInvalidComponents() {
-
-        showMessage("Time to correct the invalid shipboard", true);
-
         correctShipBoardAction = Optional.of(this::handleInvalidComponent);
         ShipBoardClient shipBoard = clientModel.getMyShipboard();
         shipBoard.getIncorrectlyPositionedComponentsCoordinates()
@@ -470,8 +467,6 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     public void showCrewPlacementMenu(boolean isPurpleSubmitted) {
 
-        showMessage("Time to place your crew members!", true);
-
         Platform.runLater(() -> {
             confirmCrewMemberButton.setVisible(true);
             confirmCrewMemberButton.setManaged(true);
@@ -492,7 +487,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
         if (hasPurple && !isPurpleSubmitted) {
             this.currentCrewMemberChoice = CrewMember.PURPLE_ALIEN;
-            showMessage("Select the cabin you want to place the purple alien in then press CONFIRM...", true);
+            showMessage("Select the cabin you want to place the purple alien in, then press CONFIRM...", true);
             cabinsWithLifeSupport.keySet()
                     .stream()
                     .filter(coords -> cabinsWithLifeSupport.get(coords).contains(ColorLifeSupport.PURPLE))
@@ -500,7 +495,7 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                     .forEach(coords -> boardsController.applyHighlightEffect(coords, Color.PURPLE));
         } else if (hasBrown) {
             this.currentCrewMemberChoice = CrewMember.BROWN_ALIEN;
-            showMessage("Select the cabin you want to place the brown alien in then press CONFIRM...", true);
+            showMessage("Select the cabin you want to place the brown alien in, then press CONFIRM...", true);
             cabinsWithLifeSupport.keySet()
                     .stream()
                     .filter(coords -> cabinsWithLifeSupport.get(coords).contains(ColorLifeSupport.BROWN))
@@ -704,6 +699,11 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
     public void showNoMoreHiddenComponents() {
         showMessage("""
                 Hidden components are no longer available, look among the visible ones...""", false);
+    }
+
+    public void showStolenVisibleComponent() {
+        showMessage("""
+                The component you picked was stolen, try with another one""", false);
     }
 
 }

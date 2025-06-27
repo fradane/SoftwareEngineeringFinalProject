@@ -63,7 +63,7 @@ public interface HowToDefend {
                 chosenBatteryBox.useBattery();
 
                 getGameModel().getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
+                    clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
                 });
 
                 if (chosenShield.getDirections().stream().noneMatch(d -> d == currMeteorite.getDirection()))
@@ -82,7 +82,7 @@ public interface HowToDefend {
             if(chosenShield != null && chosenBatteryBox != null){
                 chosenBatteryBox.useBattery();
                 getGameModel().getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
+                    clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
                 });
             }
 
@@ -121,7 +121,7 @@ public interface HowToDefend {
                 chosenBatteryBox.useBattery();
 
                 getGameModel().getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType());
+                    clientController.notifyShipBoardUpdate(nicknameToNotify,currentPlayer.getNickname(),currentPlayer.getPersonalBoardAsMatrix(),currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
                 });
 
                 if (!personalBoard.canDifendItselfWithSingleCannons(getGameModel().getCurrDangerousObj()) && !personalBoard.isThereADoubleCannon(currMeteorite.getCoordinate(), currMeteorite.getDirection())) {
@@ -142,7 +142,7 @@ public interface HowToDefend {
             if(chosenDoubleCannon != null && chosenBatteryBox != null) {
                 chosenBatteryBox.useBattery();
                 getGameModel().getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
                 });
             }
 
@@ -202,7 +202,7 @@ public interface HowToDefend {
 
                 chosenBatteryBox.useBattery();
                 getGameModel().getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
                 });
 
                 if (chosenShield.getDirections().stream().noneMatch(d -> d == currShot.getDirection())){
@@ -219,7 +219,7 @@ public interface HowToDefend {
             if(chosenShield != null && chosenBatteryBox != null) {
                 chosenBatteryBox.useBattery();
                 getGameModel().getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+                    clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
                 });
             }
             setCurrState(CardState.CHECK_SHIPBOARD_AFTER_ATTACK);

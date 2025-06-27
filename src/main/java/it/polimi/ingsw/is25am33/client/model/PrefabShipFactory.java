@@ -499,25 +499,19 @@ public class PrefabShipFactory {
 
         clearShipBoard(shipBoard);
 
-        ComponentLoader.loadComponents()
-                .stream()
-                .filter(component -> switch (component.getImageName()) {
-                    case "GT-new_tiles_16_for_web95.jpg",
-                         "GT-new_tiles_16_for_web5.jpg",
-                         "GT-new_tiles_16_for_web81.jpg",
-                         "GT-new_tiles_16_for_web4.jpg" -> true;
-                    default -> false;
-                })
-                .forEach(component -> {
-                    String imageName = component.getImageName();
-                    System.out.println(imageName);
-                    switch (imageName) {
-                        case "GT-new_tiles_16_for_web95.jpg" -> addComponent(shipBoard, component, 8, 7);
-                        case "GT-new_tiles_16_for_web5.jpg" -> addComponent(shipBoard, component, 8, 8);
-                        case "GT-new_tiles_16_for_web81.jpg" -> addComponent(shipBoard, component, 7, 6);
-                        case "GT-new_tiles_16_for_web4.jpg" -> addComponent(shipBoard, component, 6, 6);
-                    }
-                });
+        //addComponent(shipBoard, new BatteryBox(createSimpleConnectors(), 3), 8, 7);
+        SpecialStorage storage1 = new SpecialStorage(createSimpleConnectors(), 2);
+        storage1.addCube(CargoCube.RED);
+        storage1.addCube(CargoCube.YELLOW);
+        addComponent(shipBoard, storage1, 6, 7, "GT-new_tiles_16_for_web64.jpg");
+
+        SpecialStorage storage2 = new SpecialStorage(createSimpleConnectors(), 3);
+        storage2.addCube(CargoCube.GREEN);
+        storage2.addCube(CargoCube.RED);
+        storage2.addCube(CargoCube.BLUE);
+        addComponent(shipBoard, storage2, 7, 6, "GT-new_tiles_16_for_web64.jpg");
+        addComponent(shipBoard, new StandardStorage(createSimpleConnectors(), 3), 7, 8, "GT-new_tiles_16_for_web18.jpg");
+        addComponent(shipBoard, new BatteryBox(createSimpleConnectors(), 1), 6, 6, "GT-new_tiles_16_for_web12.jpg");
 
         return true;
     }
@@ -698,11 +692,16 @@ public class PrefabShipFactory {
         doubleCannon7.rotate();
         addComponent(shipBoard, doubleCannon7, 7, 5, "GT-new_tiles_16_for_web131.jpg");
         addComponent(shipBoard, new BatteryBox(createCustomConnectors(EMPTY, EMPTY, UNIVERSAL, UNIVERSAL), 2), 7, 6, "GT-new_tiles_16_for_web10.jpg");
-        addComponent(shipBoard, new SpecialStorage(createCustomConnectors(SINGLE, SINGLE, SINGLE, UNIVERSAL), 1), 7, 8, "GT-new_tiles_16_for_web64.jpg");
+        SpecialStorage storage1 = new SpecialStorage(createCustomConnectors(SINGLE, SINGLE, SINGLE, UNIVERSAL), 1);
+        storage1.addCube(CargoCube.RED);
+        addComponent(shipBoard, storage1 , 7, 8, "GT-new_tiles_16_for_web64.jpg");
         addComponent(shipBoard, new Shield(createCustomConnectors(SINGLE, SINGLE, EMPTY, SINGLE)), 7, 9, "GT-new_tiles_16_for_web150.jpg");
 
         // Riga 8
-        addComponent(shipBoard, new StandardStorage(createCustomConnectors(DOUBLE, UNIVERSAL, SINGLE, EMPTY), 2), 8, 4, "GT-new_tiles_16_for_web18.jpg");
+        StandardStorage storage2 = new StandardStorage(createCustomConnectors(DOUBLE, UNIVERSAL, SINGLE, EMPTY), 2);
+        storage2.addCube(CargoCube.BLUE);
+        storage2.addCube(CargoCube.BLUE);
+        addComponent(shipBoard, storage2, 8, 4, "GT-new_tiles_16_for_web18.jpg");
         addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, DOUBLE, SINGLE)), 8, 5, "GT-new_tiles_16_for_web36.jpg");
         addComponent(shipBoard, new LifeSupport(createCustomConnectors(EMPTY, EMPTY, EMPTY, UNIVERSAL), ColorLifeSupport.PURPLE), 8, 6, "GT-new_tiles_16_for_web145.jpg");
         addComponent(shipBoard, new DoubleEngine(createCustomConnectors(SINGLE, EMPTY, EMPTY, EMPTY)), 8, 7, "GT-new_tiles_16_for_web92.jpg");

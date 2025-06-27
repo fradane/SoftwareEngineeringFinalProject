@@ -7,6 +7,7 @@ import javafx.util.Pair;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 /**
@@ -42,7 +43,7 @@ public class ComponentTable {
      * visible to the game clients and ensures synchronization when used in
      * multi-threaded environments.
      */
-    private Integer currVisibleIndex = 1;
+    private final AtomicInteger currVisibleIndex = new AtomicInteger(1);
     /**
      * Manages communication with connected game clients by sending notifications about game state changes,
      * such as adding or removing visible components or handling player disconnections.
@@ -95,21 +96,19 @@ public class ComponentTable {
 
     /**
      * Adds a new visible component to the collection of visible components.
-     * The method is synchronized to ensure thread safety for both the visibleComponents map
+     * The method uses atomic operations to ensure thread safety for both the visibleComponents map
      * and the currVisibleIndex counter.
      * After adding the component, it notifies all connected clients about the new visible component.
      *
      * @param component the component to be added to the collection of visible components
      */
     public void addVisibleComponent(Component component){
-        synchronized (visibleComponents) {
-            visibleComponents.put(currVisibleIndex, component);
+        int index = currVisibleIndex.getAndIncrement();
+        visibleComponents.put(index, component);
 
-            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyAddVisibleComponents(nicknameToNotify, currVisibleIndex, component);
-            });
-            currVisibleIndex++;
-        }
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyAddVisibleComponents(nicknameToNotify, index, component);
+        });
     }
 
     /**

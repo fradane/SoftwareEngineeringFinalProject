@@ -194,17 +194,22 @@ public class ComponentLoader {
     public static List<Component> loadComponents() {
 
         List<Component> components = new ArrayList<>();
-        components.addAll(ComponentLoader.loadBatteryBoxes());
+//        components.addAll(ComponentLoader.loadBatteryBoxes());
+//        components.addAll(ComponentLoader.loadCabin());
+//        components.addAll(ComponentLoader.loadLifeSupport());
+//        components.addAll(ComponentLoader.loadCannon());
+//        components.addAll(ComponentLoader.loadDoubleCannon());
+//        components.addAll(ComponentLoader.loadDoubleEngine());
+//        components.addAll(ComponentLoader.loadEngine());
+//        components.addAll(ComponentLoader.loadShield());
+//        components.addAll(ComponentLoader.loadSpecialStorage());
+//        components.addAll(ComponentLoader.loadStandardStorage());
+//        components.addAll(ComponentLoader.loadStructuralModules());
+
         components.addAll(ComponentLoader.loadCabin());
-        components.addAll(ComponentLoader.loadLifeSupport());
-        components.addAll(ComponentLoader.loadCannon());
-        components.addAll(ComponentLoader.loadDoubleCannon());
-        components.addAll(ComponentLoader.loadDoubleEngine());
-        components.addAll(ComponentLoader.loadEngine());
-        components.addAll(ComponentLoader.loadShield());
-        components.addAll(ComponentLoader.loadSpecialStorage());
-        components.addAll(ComponentLoader.loadStandardStorage());
-        components.addAll(ComponentLoader.loadStructuralModules());
+        components.addAll(ComponentLoader.loadCabin());
+        components.addAll(ComponentLoader.loadCabin());
+        components.addAll(ComponentLoader.loadCabin());
 
         return components;
     }

@@ -214,8 +214,6 @@ public class ModelFxAdapter {
         if (clientModel.getMyNickname() != null) {
             int currentCredits = clientModel.getMyCosmicCredits();
             observableCosmicCredits.set(currentCredits);
-            // Debug
-            System.err.println("Refreshed cosmic credits: " + currentCredits);
         }
     }
 }

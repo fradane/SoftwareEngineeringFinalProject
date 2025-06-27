@@ -186,6 +186,14 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
+    public void showStolenVisibleComponent() {
+        executeWithController(
+                BUILD_SHIPBOARD_CONTROLLER,
+                () -> buildAndCheckShipBoardController.showStolenVisibleComponent()
+        );
+    }
+
+    @Override
     public void showPlayerEarlyLanded(String nickname) {
         if (nickname.equals(clientModel.getMyNickname())) {
             // current player landed early

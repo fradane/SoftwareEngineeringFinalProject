@@ -65,17 +65,22 @@ public class EndGamePhaseTest {
         }
 
         @Override
+        public void notifyStolenVisibleComponent(String nicknameToNotify) throws IOException {
+            notifications.add("stolenVisibleComponent:" + nicknameToNotify);
+        }
+
+        @Override
         public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws RemoteException {
             notifications.add("hourglassRestarted:" + nickname);
         }
 
         @Override
-        public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
+        public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws RemoteException {
             notifications.add("invalidShipBoard:" + shipOwnerNickname);
         }
 
         @Override
-        public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
+        public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws RemoteException {
             notifications.add("validShipBoard:" + shipOwnerNickname);
         }
 
@@ -190,7 +195,7 @@ public class EndGamePhaseTest {
         }
 
         @Override
-        public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
+        public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws RemoteException {
             notifications.add("shipBoardUpdate:" + nickname);
         }
 

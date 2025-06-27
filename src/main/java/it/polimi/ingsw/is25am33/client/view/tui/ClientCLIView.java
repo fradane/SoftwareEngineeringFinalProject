@@ -324,7 +324,7 @@ public class ClientCLIView implements ClientView {
 
     @Override
     public void showCurrAdventureCard(boolean isFirstTime) {
-        if (isFirstTime) showMessage("The card has been drawn from the deck.", STANDARD);
+        if (isFirstTime) showMessage("The card has been drawn from the deck.\n", STANDARD);
 
         ClientCard card = clientModel.getCurrAdventureCard();
         if (card == null) {
@@ -332,21 +332,8 @@ public class ClientCLIView implements ClientView {
             return;
         }
 
-        StringBuilder output = new StringBuilder();
-        output.append("Current adventure card:\n");
-        output.append("═══════════════════════════════════════\n");
-        output.append("Name: ").append(card.getCardName()).append("\n");
-        output.append("═══════════════════════════════════════\n");
-
-        showMessage(output.toString(), STANDARD);
-
-        output = new StringBuilder();
-
-        // Display card-specific information
-        displayCardSpecificInfo(card, output);
-
-        showMessage(output.toString(), STANDARD);
-
+        // Use the card's toString() method for display
+        showMessage(card.toString(), STANDARD);
     }
 
     /**
@@ -787,8 +774,19 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void showStolenVisibleComponent() {
+        showMessage("The component was stolen, try another one", NOTIFICATION_INFO);
+        showBuildShipBoardMenu();
+    }
+
+    @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
         showShipBoard(shipBoardClient, shipBoardOwnerNickname, Collections.emptyMap());
+        showBatteryBoxesInfo(shipBoardOwnerNickname);
+        showCabinsInfo(shipBoardOwnerNickname);
+        showPlayerCreditsInfo(shipBoardOwnerNickname);
+        showNotActiveComponentsInfo(shipBoardOwnerNickname);
+        showStoragesInfo(shipBoardOwnerNickname);
     }
 
     @Override
@@ -1711,7 +1709,7 @@ public class ClientCLIView implements ClientView {
         setClientState(ClientState.HANDLE_CUBES_REWARD_MENU);
 
         // Get cube rewards directly from the current card
-        List<CargoCube> rewardCubes = null;
+        List<CargoCube> rewardCubes;
         rewardCubes = clientModel.extractCubeRewardsFromCurrentCard();
 
         // Initialize the storage manager with the cube rewards
@@ -1730,43 +1728,36 @@ public class ClientCLIView implements ClientView {
         storageManager.startRedistribution(rewardCubes);
 
         showCubeRedistributionMenu();
-
-//        StringBuilder message = new StringBuilder("\nHai ottenuto i seguenti cubi come ricompensa:\n");
-//        for (int i = 0; i < rewardCubes.size(); i++) {
-//            CargoCube cube = rewardCubes.get(i);
-//            message.append("- ").append(cube).append(" (valore: ").append(cube.getValue()).append(")")
-//                    .append(cube == CargoCube.RED ? " - Richiede storage speciale!" : "")
-//                    .append("\n");
-//        }
-//
-//        message.append("\nDevi selezionare uno storage per ogni cubo che puoi accettare. ")
-//                .append("Ricorda che:\n")
-//                .append("- I cubi ROSSI possono essere conservati solo in storage speciali.\n")
-//                .append("- Se uno storage è pieno, il cubo meno prezioso verrà sostituito.\n")
-//                .append("- Puoi digitare 'next' per saltare il cubo corrente e passare al successivo.\n")
-//                .append("- Digita 'done' quando hai finito di selezionare tutti gli storage.\n\n");
-//
-//        CargoCube currentCube = storageManager.getCurrentCube();
-//        if (currentCube != null) {
-//            showStorageWithColor();
-//            message.append("Prossimo cubo da posizionare: ").append(currentCube)
-//                    .append(" (valore: ").append(currentCube.getValue()).append(")")
-//                    .append(currentCube == CargoCube.RED ? " - Questo cubo richiede uno storage speciale!" : "")
-//                    .append("\n");
-//            message.append("Inserisci le coordinate di uno storage (riga colonna) per questo cubo: ")
-//                    .append("'next' per saltare questo cubo, 'skip' per rinunciare a tutti: ");
-//        }
-//
-//        showMessage(message.toString(), ASK);
     }
 
-    private void showStoragesOnShipBoard() {
-        StringBuilder storageInfo = new StringBuilder("\n" + "=== AVAILABLE STORAGE ===" + "\n");
-        Map<Coordinates, Storage> coordinatesAndStorages = clientModel.getShipboardOf(clientModel.getMyNickname()).getCoordinatesAndStorages();
+    private void showStoragesInfo() {
+        showStoragesInfo(clientModel.getMyNickname());
+    }
+
+    /**
+     * Shows storage information for the specified player
+     * @param playerNickname the nickname of the player whose storages to display
+     */
+    public void showStoragesInfo(String playerNickname) {
+        StringBuilder storageInfo = new StringBuilder("\n=== AVAILABLE STORAGE - " + playerNickname + " ===\n");
+
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
+        if (shipBoard == null) {
+            storageInfo.append("Player not found or no ship data available.\n");
+            showMessage(storageInfo.toString(), STANDARD);
+            return;
+        }
+
+        Map<Coordinates, Storage> coordinatesAndStorages = shipBoard.getCoordinatesAndStorages();
 
         if (coordinatesAndStorages.isEmpty()) {
-            storageInfo.append("No storage available on your ship.\n");
+            storageInfo.append("No storage available on this ship.\n");
         } else {
+            int totalStorages = coordinatesAndStorages.size();
+            int totalCubes = 0;
+            int totalCapacity = 0;
+            int totalValue = 0;
+
             for (Map.Entry<Coordinates, Storage> entry : coordinatesAndStorages.entrySet()) {
                 Coordinates coords = entry.getKey();
                 Storage storage = entry.getValue();
@@ -1785,11 +1776,14 @@ public class ClientCLIView implements ClientView {
                 }
 
                 // Capacità con indicatore di stato
-                String capacityInfo = storage.getMainAttribute();
-                storageInfo.append(" - ").append(capacityInfo);
+                storageInfo.append(" - ").append(storage.getStockedCubes().size()).append("/").append(storage.getMaxCapacity());
+
+                // Extract current/max capacity for totals
+                totalCubes += storage.getStockedCubes().size();
+                totalCapacity += storage.getMaxCapacity();
 
                 if (storage.isFull()) {
-                    storageInfo.append(" " + ANSI_RED + "[FULL - WILL REPLACE]" + ANSI_RESET);
+                    storageInfo.append(" [FULL] ");
                 }
 
                 // Contenuto con colori
@@ -1806,14 +1800,215 @@ public class ClientCLIView implements ClientView {
                             case BLUE -> ANSI_BLUE;
                         };
                         formattedCubes.add(cubeColor + cube.name() + ANSI_RESET);
+                        totalValue += cube.getValue();
                     }
-                    storageInfo.append(String.join(", ", formattedCubes));
+                    storageInfo.append(String.join(" ", formattedCubes));
                 }
 
                 storageInfo.append("\n");
             }
+
+            // Add summary information
+            storageInfo.append(String.format("\nTotal Storages: %d | Total Cubes Stored: %d/%d\n",
+                totalStorages, totalCubes, totalCapacity));
+
+            if (totalValue > 0) {
+                storageInfo.append(String.format("Total Cube Value: %d points\n", totalValue));
+            }
         }
         showMessage(storageInfo.toString(), STANDARD);
+    }
+
+    /**
+     * Shows battery boxes information for the specified player
+     * @param playerNickname the nickname of the player whose battery boxes to display
+     */
+    public void showBatteryBoxesInfo(String playerNickname) {
+        StringBuilder batteryInfo = new StringBuilder("\n=== BATTERY BOXES INFO - " + playerNickname + " ===\n");
+
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
+        if (shipBoard == null) {
+            batteryInfo.append("Player not found or no ship data available.\n");
+            showMessage(batteryInfo.toString(), STANDARD);
+            return;
+        }
+
+        Map<Coordinates, BatteryBox> coordinatesAndBatteries = shipBoard.getCoordinatesAndBatteries();
+
+        if (coordinatesAndBatteries.isEmpty()) {
+            batteryInfo.append("No battery boxes available on this ship.\n");
+        } else {
+            int totalBatteries = 0;
+            int totalCapacity = 0;
+
+            // Process battery boxes using the coordinates map
+            for (Map.Entry<Coordinates, BatteryBox> entry : coordinatesAndBatteries.entrySet()) {
+                Coordinates coords = entry.getKey();
+                BatteryBox batteryBox = entry.getValue();
+
+                int remaining = batteryBox.getRemainingBatteries();
+                int max = batteryBox.getMaxBatteryCapacity();
+                totalBatteries += remaining;
+                totalCapacity += max;
+
+                batteryInfo.append(String.format("%s(%d,%d)%s: BatteryBox - %d/%d batteries remaining",
+                    ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET, remaining, max));
+
+                if (remaining == 0) {
+                    batteryInfo.append(" " + ANSI_RED + "[EMPTY]" + ANSI_RESET);
+                } else if (remaining == max) {
+                    batteryInfo.append(" " + ANSI_GREEN + "[FULL]" + ANSI_RESET);
+                }
+
+                batteryInfo.append("\n");
+            }
+
+            batteryInfo.append(String.format("\nTotal Battery Boxes: %d | Total Batteries Available: %d/%d\n",
+                coordinatesAndBatteries.size(), totalBatteries, totalCapacity));
+        }
+
+        showMessage(batteryInfo.toString(), STANDARD);
+    }
+
+    /**
+     * Shows cabins information for the specified player
+     * @param playerNickname the nickname of the player whose cabins to display
+     */
+    public void showCabinsInfo(String playerNickname) {
+        StringBuilder cabinInfo = new StringBuilder("\n=== CABINS INFO - " + playerNickname + " ===\n");
+
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
+        if (shipBoard == null) {
+            cabinInfo.append("Player not found or no ship data available.\n");
+            showMessage(cabinInfo.toString(), STANDARD);
+            return;
+        }
+
+        Map<Coordinates, Cabin> coordinatesAndCabins = shipBoard.getCoordinatesAndCabins();
+        MainCabin mainCabin = shipBoard.getMainCabin();
+
+        if (coordinatesAndCabins.isEmpty() && mainCabin == null) {
+            cabinInfo.append("No cabins available on this ship.\n");
+        } else {
+            int totalCrewMembers = 0;
+            int humanCount = 0;
+            int alienCount = 0;
+            int totalCabins = 0;
+
+            // Process regular cabins using the coordinates map
+            for (Map.Entry<Coordinates, Cabin> entry : coordinatesAndCabins.entrySet()) {
+                Coordinates coords = entry.getKey();
+                Cabin cabin = entry.getValue();
+                totalCabins++;
+
+                if(cabin==mainCabin)
+                    continue;
+
+                List<CrewMember> inhabitants = cabin.getInhabitants();
+
+                cabinInfo.append(String.format("%s(%d,%d)%s: Cabin - %d inhabitants → ",
+                    ANSI_GREEN, coords.getX() + 1, coords.getY() + 1, ANSI_RESET,
+                    inhabitants.size()));
+
+                if (inhabitants.isEmpty()) {
+                    cabinInfo.append(ANSI_CYAN + "[EMPTY]" + ANSI_RESET);
+                } else {
+                    List<String> crewList = new ArrayList<>();
+                    for (CrewMember crew : inhabitants) {
+                        crewList.add(crew.name());
+                        totalCrewMembers++;
+                        if (crew.name().equals("HUMAN")) {
+                            humanCount++;
+                        } else {
+                            alienCount++;
+                        }
+                    }
+                    cabinInfo.append(String.join(" ", crewList));
+                }
+
+                cabinInfo.append("\n");
+            }
+
+            // Process main cabin - always at position (7,7) if not destroyed
+            if (mainCabin != null) {
+                totalCabins++;
+                List<CrewMember> inhabitants = mainCabin.getInhabitants();
+
+                cabinInfo.append(String.format("%s(7,7)%s: MainCabin - %d inhabitants → ",
+                    ANSI_YELLOW, ANSI_RESET, inhabitants.size()));
+
+                if (inhabitants.isEmpty()) {
+                    cabinInfo.append(ANSI_CYAN + "[EMPTY]" + ANSI_RESET);
+                } else {
+                    List<String> crewList = new ArrayList<>();
+                    for (CrewMember crew : inhabitants) {
+                        crewList.add(crew.name());
+                        totalCrewMembers++;
+                        if (crew.name().equals("HUMAN")) {
+                            humanCount++;
+                        } else {
+                            alienCount++;
+                        }
+                    }
+                    cabinInfo.append(String.join(" ", crewList));
+                }
+
+                cabinInfo.append("\n");
+            } else {
+                cabinInfo.append(String.format("%s(7,7)%s: MainCabin - %s[DESTROYED]%s\n",
+                    ANSI_YELLOW, ANSI_RESET, ANSI_RED, ANSI_RESET));
+            }
+
+            cabinInfo.append(String.format("\nTotal Cabins: %d | Total Crew Members: %d (%d Humans, %d Aliens)\n",
+                totalCabins, totalCrewMembers, humanCount, alienCount));
+        }
+
+        showMessage(cabinInfo.toString(), STANDARD);
+    }
+
+    /**
+     * Shows the current player's credits information
+     */
+    public void showPlayerCreditsInfo(String playerName) {
+        PlayerClientData myData = clientModel.getPlayerClientData().get(playerName);
+
+        if (!playerName.equals(clientModel.getMyNickname())) {
+            showMessage("Cannot see other player's credits.\n", STANDARD);
+            return;
+        }
+
+        int credits = myData.getCredits();
+        showMessage("Current Credits: " + credits + "\n", STANDARD);
+    }
+
+    /**
+     * Shows not active components information for the specified player
+     * @param playerNickname the nickname of the player whose not active components to display
+     */
+    public void showNotActiveComponentsInfo(String playerNickname) {
+        StringBuilder componentInfo = new StringBuilder("\n=== NOT ACTIVE COMPONENTS - " + playerNickname + " ===\n");
+
+        ShipBoardClient shipBoard = clientModel.getShipboardOf(playerNickname);
+        if (shipBoard == null) {
+            componentInfo.append("Player not found or no ship data available.\n");
+            showMessage(componentInfo.toString(), STANDARD);
+            return;
+        }
+
+        List<Component> bookedComponents = shipBoard.getBookedComponents();
+        int totalComponents = bookedComponents.size();
+
+        componentInfo.append("Total Components: ").append(totalComponents).append("\n\n");
+
+        if (totalComponents > 0) {
+            componentInfo.append("These components may be:\n");
+            componentInfo.append("- Reserved components not yet used during build phase\n");
+            componentInfo.append("- Components lost during the journey due to damage or events\n");
+        } else {
+            componentInfo.append("No components are currently not active.\n");
+        }
+
+        showMessage(componentInfo.toString(), STANDARD);
     }
 
     /**
@@ -1900,43 +2095,39 @@ public class ClientCLIView implements ClientView {
             return;
         }
 
-        if(clientModel.getCurrAdventureCard().getCardName().equals("WarField")) {
-            ClientWarField card = (ClientWarField) clientModel.getCurrAdventureCard();
-            cubeMalus=card.getCubeMalus();
+        CubeMalusCard card = (CubeMalusCard) clientModel.getCurrAdventureCard();
+        cubeMalus = card.getCubeMalus();
 
-            storageManager = new StorageSelectionManager(new ArrayList<>(), cubeMalus, clientModel.getShipboardOf(clientModel.getMyNickname()));
-            // Mostra la nave per visualizzare i depositi
-            this.showStorageWithColor();
-            showMessage("\nYou must remove " +cubeMalus +" cargo cubes!", STANDARD);
-        } else if(clientModel.getCurrAdventureCard().getCardName().equals("Smugglers")) {
-            ClientSmugglers card = (ClientSmugglers) clientModel.getCurrAdventureCard();
-            cubeMalus=card.getCubeMalus();
-            storageManager = new StorageSelectionManager(new ArrayList<>(), cubeMalus, clientModel.getShipboardOf(clientModel.getMyNickname()));
-            // Mostra la nave per visualizzare i depositi
-            this.showStorageWithColor();
-            showMessage("\nYou must remove " +cubeMalus +" cargo cubes!", STANDARD);
-        }
+        // Initialize StorageSelectionManager for malus mode
+        storageManager = new StorageSelectionManager(cubeMalus, clientModel.getShipboardOf(clientModel.getMyNickname()));
 
-        mostPreciousCube= storageManager.mostPreciousCube();
+        // Mostra la nave per visualizzare i depositi
+        this.showStorageWithColor();
+        showMessage("\nYou must remove " + storageManager.getRemainingCubesToRemove() +" cargo cubes!", STANDARD);
 
-        if(clientModel.getShipboardOf(clientModel.getMyNickname()).getStorages().isEmpty()|| clientModel.getShipboardOf(clientModel.getMyNickname()).getCargoCubes().isEmpty()) {
-            if(!clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes().isEmpty()) {
-                showMessage("You don't have any cube",STANDARD);
-                showMessage("You have to give back the batteries instead of the cubes ", STANDARD);
+        // Check if there are cubes available for removal
+        if (!storageManager.hasAvailableCubes()) {
+            // No cubes available, check if batteries can be used instead
+            if(!clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteryBoxes().isEmpty() &&
+               clientModel.getShipboardOf(clientModel.getMyNickname()).getBatteries() > 0) {
+                showMessage("You don't have any cube", STANDARD);
+                showMessage("You have to give back the batteries instead of the cubes", STANDARD);
                 setClientState(CHOOSE_BATTERY_CUBES);
                 showBatteryBoxesWithColor();
                 showMessage("Enter coordinates of a battery to remove: ", ASK);
             } else {
-                showMessage("You don't have any cube or battery box",STANDARD);
+                showMessage("You don't have any cube or battery box", STANDARD);
                 showMessage("You are safe...for now", STANDARD);
                 setClientState(WAIT_PLAYER);
                 clientController.playerChoseStorage(clientController.getNickname(), selectedStorage);
-                mostPreciousCube.clear();
+                storageManager.resetMalusState();
             }
             return;
         }
+
+        // Cubes are available for removal
         setClientState(ClientState.CHOOSE_STORAGE_FOR_CUBEMALUS);
-        showMessage("You have to give back the most precious cubes", STANDARD);
+        showAvailableCubeTypes();
         showMessage("Enter coordinates of a storage to remove a cargo cube from: ", ASK);
 
     }
@@ -2267,19 +2458,34 @@ public class ClientCLIView implements ClientView {
 
             if (clientState == CHOOSE_BATTERY_CUBES) {
 
-                if (selectedBatteries.size() + selectedStorage.size() == cubeMalus
-                        || clientModel.getShipboardOf(clientModel.getMyNickname()).getTotalAvailableBattery()==selectedBatteries.size()) {
-                    showMessage(" All cargo cubes and batteries has been selected", STANDARD);
+                // Calculate total items selected (cubes + batteries)
+                int selectedCubes = (storageManager != null && storageManager.isInMalusMode())
+                    ? storageManager.getSelectedStoragesForRemoval().size()
+                    : selectedStorage.size();
+
+                if (selectedBatteries.size() + selectedCubes == cubeMalus
+                        || clientModel.getShipboardOf(clientModel.getMyNickname()).getTotalAvailableBattery() == selectedBatteries.size()) {
+                    showMessage("All cargo cubes and batteries has been selected\nOr you don't have any more batteries to select", STANDARD);
                     setClientState(WAIT_PLAYER);
-                    clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStorage, selectedBatteries);
+
+                    // Get final list of selected storages
+                    List<Coordinates> finalSelectedStorages = (storageManager != null && storageManager.isInMalusMode())
+                        ? storageManager.getSelectedStoragesForRemoval()
+                        : selectedStorage;
+
+                    clientController.playerChoseStorageAndBattery(clientController.getNickname(), finalSelectedStorages, selectedBatteries);
+
+                    // Cleanup
                     selectedBatteries.clear();
                     selectedStorage.clear();
-                    mostPreciousCube.clear();
-                }else{
-                    setClientState(CHOOSE_BATTERY_CUBES);
+                    if (storageManager != null) {
+                        storageManager.resetMalusState();
+                    }
+                } else {
                     showBatteryBoxesWithColor();
-                    showMessage("You still need to remove " + (cubeMalus- selectedStorage.size()- selectedBatteries.size()) +" battery (s). Enter another battery box coordinate: ", STANDARD);
+                    showMessage("You still need to remove " + (cubeMalus - selectedCubes - selectedBatteries.size()) + " battery(s). Enter another battery box coordinate: ", STANDARD);
                     showMessage("Battery box selected. Enter another battery box. ", ASK);
+                    setClientState(CHOOSE_BATTERY_CUBES);
                 }
 
             }
@@ -2546,7 +2752,7 @@ public class ClientCLIView implements ClientView {
      */
     public void showCubeRedistributionMenu() {
         // Mostra sempre gli storage disponibili
-        showStoragesOnShipBoard();
+        showStoragesInfo();
 
         List<CargoCube> available = storageManager.getAvailableCubes();
 
@@ -3028,21 +3234,58 @@ public class ClientCLIView implements ClientView {
             }
             clientController.showShipBoard(input.trim().split("\\s+")[1]);
             return;
-        }
-        else if (input.trim().split("\\s+")[0].equals("cube")) {
+        } else if (input.trim().split("\\s+")[0].equals("cube")) {
             if (input.trim().split("\\s+").length != 2) {
                 showMessage("Invalid cubes command", ERROR);
                 return;
             }
-            clientController.showCubes(input.trim().split("\\s+")[1]);
+            showStoragesInfo(input.trim().split("\\s+")[1]);
+            return;
+        } else if (input.trim().split("\\s+")[0].equals("battery")) {
+            if (input.trim().split("\\s+").length != 2) {
+                showMessage("Invalid cubes command", ERROR);
+                return;
+            }
+            showBatteryBoxesInfo(input.trim().split("\\s+")[1]);
+            return;
+        } else if (input.trim().split("\\s+")[0].equals("crew")) {
+                if (input.trim().split("\\s+").length != 2) {
+                    showMessage("Invalid cubes command", ERROR);
+                    return;
+                }
+                showCabinsInfo(input.trim().split("\\s+")[1]);
+                return;
+        }else if (input.trim().split("\\s+")[0].equals("notActiveComponent")) {
+            if (input.trim().split("\\s+").length != 2) {
+                showMessage("Invalid cubes command", ERROR);
+                return;
+            }
+            showNotActiveComponentsInfo(input.trim().split("\\s+")[1]);
+            return;
+        }else if (input.equals("credit")) {
+            showPlayerCreditsInfo(clientModel.getMyNickname());
             return;
         } else if (input.equals("rank")) {
             showCurrentRanking();
             return;
         } else if (input.equals("land")){
+            GameState state = clientModel.getGameState();
+            if(!(state==GameState.PLAY_CARD || state == GameState.CHECK_PLAYERS || state==GameState.DRAW_CARD)){
+                showMessage("You cannot land right now!", ERROR);
+                return;
+            }
             clientController.land();
             return;
         } else if (input.equals("skipToLastCard")) {
+            GameState currentState = clientModel.getGameState();
+            if (currentState == GameState.SETUP ||
+                    currentState == GameState.BUILD_SHIPBOARD ||
+                    currentState == GameState.CHECK_SHIPBOARD ||
+                    currentState == GameState.PLACE_CREW ||
+                    currentState == GameState.END_GAME) {
+                showMessage("You cannot skip cards right now!", ERROR);
+                return;
+            }
             clientController.skipToLastCard();
             return;
         }
@@ -3252,12 +3495,12 @@ public class ClientCLIView implements ClientView {
                     Component focusedComponent = clientModel.getPlayerClientData().get(clientController.getNickname()).getShipBoard().getFocusedComponent();
                     String[] focusedComponentString;
                     StringBuilder focusedComponentStringBuilder = new StringBuilder();
+                    if (focusedComponent == null) {
+                        showMessage("Still picking a component. Please wait...\n> ", ASK);
+                        break;
+                    }
                     switch (Integer.parseInt(input)) {
                         case 1:
-                            if (focusedComponent == null) {
-                                showMessage("Still picking the component. Please wait...\n> ", ASK);
-                                break;
-                            }
                             focusedComponentString = focusedComponent.toString().split("\\n");
                             for (int i = 1; i < focusedComponentString.length; i++) {
                                 focusedComponentStringBuilder.append(focusedComponentString[i]).append("\n");
@@ -3270,10 +3513,6 @@ public class ClientCLIView implements ClientView {
                             break;
 
                         case 2:
-                            if (focusedComponent == null) {
-                                showMessage("Still picking a component. Please wait...\n> ", ASK);
-                                break;
-                            }
                             focusedComponent.rotate();
                             focusedComponentString = focusedComponent.toString().split("\\n");
                             for (int i = 1; i < focusedComponentString.length; i++) {
@@ -3641,41 +3880,53 @@ public class ClientCLIView implements ClientView {
                     break;
 
                 case CHOOSE_STORAGE_FOR_CUBEMALUS:
-                        try{
-                            Coordinates coords = parseCoordinates(input);
+                    try {
+                        Coordinates coords = parseCoordinates(input);
 
-                            if(mostPreciousCube.contains(coords)){
-                                mostPreciousCube.remove(coords);
-                                selectedStorage.add(coords);
-                                showMessage("Storage selected.", STANDARD);
-                                if(!mostPreciousCube.isEmpty()){
+                        // Validate selection using StorageSelectionManager
+                        if (storageManager.isValidStorageSelection(coords)) {
+                            // Select the storage and get cube type that will be removed
+                            CargoCube removedCube = storageManager.getMostPreciousCubeAvailable();
+                            storageManager.selectStorageForRemoval(coords);
+
+                            showMessage("Storage selected. Cube " + removedCube.name() + " will be removed.", STANDARD);
+
+                            // Check if more cubes need to be removed
+                            if (storageManager.hasRemainingCubesToRemove()) {
+                                // Check if there are more available cubes in the ship
+                                if (storageManager.hasAvailableCubes()) {
+                                    // Continue with cube selection
                                     showStorageWithColor();
-                                    showMessage("You still need to remove " + mostPreciousCube.size() +" cube (s). Enter another storage coordinate: ", ASK);
+                                    showAvailableCubeTypes();
+                                    showMessage("You still need to remove " + storageManager.getRemainingCubesToRemove() + " cube(s). Enter another storage coordinate: ", ASK);
+                                } else {
+                                    // There are no more available cubes, start removing batteries
+                                    int requiredBatteries = storageManager.getRequiredBatteriesCount();
+                                    setClientState(CHOOSE_BATTERY_CUBES);
+                                    showBatteryBoxesWithColor();
+                                    showMessage("No more cubes available. You still need to remove " + requiredBatteries + " battery(s). Enter a battery box coordinate: ", ASK);
                                 }
-                                else{
-                                    if(selectedStorage.size() == cubeMalus){
-                                        setClientState(WAIT_PLAYER);
-                                        clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStorage, selectedBatteries);
-                                        selectedStorage.clear();
-                                        selectedBatteries.clear();
-                                        mostPreciousCube.clear();
-                                    }
-                                    else{
-                                        setClientState(CHOOSE_BATTERY_CUBES);
-                                        showBatteryBoxesWithColor();
-                                        showMessage("You still need to remove " + (cubeMalus- selectedStorage.size()) +" battery (s). Enter a battery box coordinate: ", ASK);
-                                        handleBatterySelection(input);
-                                    }
-                                }
-                            } else{
-                                showStorageWithColor();
-                                showMessage("ATTENTION! There are a more precious cube on the ship!", STANDARD);
-                                showMessage("You must remove them. Please enter storage coordinate: ", ASK);
-                            }
+                            } else {
+                                // Malus completato, invia al server
+                                List<Coordinates> selectedStoragesForRemoval = storageManager.getSelectedStoragesForRemoval();
+                                setClientState(WAIT_PLAYER);
+                                clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStoragesForRemoval, selectedBatteries);
 
-                        } catch (NumberFormatException e) {
-                            showMessage("Invalid input. Please enter valid numbers for row and column.", ERROR);
+                                // Cleanup
+                                selectedBatteries.clear();
+                                storageManager.resetMalusState();
+                            }
+                        } else {
+                            // Invalid selection, show error and valid options
+                            String errorMessage = storageManager.getValidationErrorMessage(coords);
+                            showMessage(errorMessage, ERROR);
+
+                            showMessage("You still need to remove " + storageManager.getRemainingCubesToRemove() + " cube(s). \nEnter another storage coordinate: ", ASK);
                         }
+
+                    } catch (NumberFormatException e) {
+                        showMessage("Invalid input. Please enter valid numbers for row and column.", ERROR);
+                    }
                     break;
 
                 default:
@@ -3708,6 +3959,7 @@ public class ClientCLIView implements ClientView {
         colorMap.put(ANSI_GREEN, availableBatteryBoxCoords);
 
         showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+        showBatteryBoxesInfo(clientModel.getMyNickname());
     }
 
     public void showEngineWithColor(){
@@ -3764,6 +4016,36 @@ public class ClientCLIView implements ClientView {
         colorMap.put(ANSI_BLUE, availableStandardStoragesCoords);
 
         showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
+        showStoragesInfo();
+    }
+
+    /**
+     * Shows information about available cube types for malus removal.
+     * Called by showHandleCubesMalusMenu to inform user about next cube to remove.
+     */
+    private void showAvailableCubeTypes() {
+        if (storageManager != null && storageManager.isInMalusMode()) {
+            CargoCube mostPrecious = storageManager.getMostPreciousCubeAvailable();
+            if (mostPrecious != null) {
+                List<Coordinates> validOptions = storageManager.getValidStorageOptionsForMostPreciousCube();
+                showMessage("Next cube to remove: " + mostPrecious.name() + " (from " +
+                        validOptions.size() + " storage(s))", STANDARD);
+            }
+        }
+    }
+
+    /**
+     * Shows valid storage options when user makes invalid selection.
+     * Called by cube malus input handling to guide user to correct storages.
+     */
+    private void showValidStorageOptions(CargoCube cubeType) {
+        if (storageManager != null && storageManager.isInMalusMode()) {
+            List<Coordinates> validCoords = storageManager.getValidStorageOptionsForMostPreciousCube();
+            showMessage("Valid storage coordinates for " + cubeType.name() + " cubes:", STANDARD);
+            for (Coordinates coord : validCoords) {
+                showMessage("  - (" + coord.getX() + ", " + coord.getY() + ")", STANDARD);
+            }
+        }
     }
 
 }

@@ -284,7 +284,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
         }
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(), gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
         });
 
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
@@ -335,7 +335,8 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
-                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(),
+                    gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
             });
             
             // Move back the player
@@ -362,7 +363,7 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
-                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(), gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
             });
 
         }

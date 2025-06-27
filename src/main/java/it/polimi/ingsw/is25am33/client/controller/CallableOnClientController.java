@@ -48,7 +48,7 @@ public interface CallableOnClientController extends Remote {
 
     void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException;
 
-    void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException;
+    void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws IOException;
 
     void notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws IOException;
 
@@ -62,9 +62,9 @@ public interface CallableOnClientController extends Remote {
 
     void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayer) throws IOException;
 
-    void notifyInvalidShipBoard(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException;
+    void notifyInvalidShipBoard(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws RemoteException;
 
-    void notifyValidShipBoard(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException;
+    void notifyValidShipBoard(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws RemoteException;
 
     void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify,String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts , Map<Class<?>, List<Component>> componentsPerType) throws RemoteException;
 
@@ -112,4 +112,5 @@ public interface CallableOnClientController extends Remote {
 
     void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException;
 
+    void notifyStolenVisibleComponent(String nicknameToNotify) throws IOException;
 }

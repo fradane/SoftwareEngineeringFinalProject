@@ -205,27 +205,6 @@ public interface CallableOnGameController extends Remote {
     void stardustEvent(String nickname) throws IOException;
 
     /**
-     * Handles the player's request to watch a specific "little deck" during the game.
-     * The player provides their nickname and the choice of the little deck they want to view.
-     *
-     * @param nickname the nickname of the player making the request
-     * @param littleDeckChoice the identifier of the little deck the player wants to watch
-     * @return true if the request to watch the little deck was successfully handled, false otherwise
-     * @throws IOException if an I/O error occurs during the handling of the request
-     */
-    boolean playerWantsToWatchLittleDeck(String nickname, int littleDeckChoice) throws IOException;
-
-    /**
-     * Handles the player's request to release a little deck during the game. This method processes the player's intent
-     * to release the specified little deck based on their choice.
-     *
-     * @param nickname the nickname of the player making the request
-     * @param littleDeckChoice the identifier or index of the little deck the player wants to release
-     * @throws IOException if there is an issue with communication or data processing during the execution of this method
-     */
-    void playerWantsToReleaseLittleDeck(String nickname, int littleDeckChoice) throws IOException;
-
-    /**
      * Allows the player with the specified nickname to restart the hourglass timer.
      *
      * @param nickname The nickname of the player who wants to restart the hourglass.

@@ -10,7 +10,6 @@ import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.board.ShipBoard;
 import it.polimi.ingsw.is25am33.model.card.interfaces.*;
 import it.polimi.ingsw.is25am33.model.component.*;
-import it.polimi.ingsw.is25am33.model.dangerousObj.DangerousObj;
 import it.polimi.ingsw.is25am33.model.enumFiles.CardState;
 import it.polimi.ingsw.is25am33.model.dangerousObj.Shot;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
@@ -396,7 +395,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
         });
 
         if (leastResourcedPlayer == null || currPlayerCannonPower < leastResourcedPlayer.getValue() ||
@@ -449,7 +448,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
         chosenBatteryBoxes.forEach(BatteryBox::useBattery);
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
         });
         int currPlayerEnginePower = gameModel.getCurrPlayer().getPersonalBoard().countTotalEnginePower(chosenDoubleEngines);
 
@@ -568,7 +567,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
 
         removeMemberProcess(chosenCabins, crewMalus);
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
         });
 
         if (phasesIterator.hasNext()) {
@@ -649,7 +648,7 @@ public class WarField extends AdventureCard implements PlayerMover, DoubleCannon
             chosenBatteryBoxes.forEach(BatteryBox::useBattery);
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
         });
 
         if (phasesIterator.hasNext()) {

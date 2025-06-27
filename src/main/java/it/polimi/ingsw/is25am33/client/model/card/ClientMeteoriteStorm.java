@@ -37,4 +37,33 @@ public class ClientMeteoriteStorm extends ClientCard implements Serializable {
       return meteorites.size();
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("┌────────────────────────────────────┐\n");
+        sb.append("│          METEORITE STORM           │\n");
+        sb.append("├────────────────────────────────────┤\n");
+        sb.append(String.format("│ Number of Meteorites:     x%-8d │\n", meteorites != null ? meteorites.size() : 0));
+        sb.append("└────────────────────────────────────┘\n");
+        
+        if (meteorites != null && !meteorites.isEmpty()) {
+            sb.append("Meteorite Details:\n");
+            for (int i = 0; i < Math.min(meteorites.size(), 5); i++) {
+                ClientDangerousObject meteorite = meteorites.get(i);
+                sb.append(String.format("  %d. %s from %s\n", i + 1, meteorite.getType(), meteorite.getDirection()));
+            }
+            if (meteorites.size() > 5) {
+                sb.append(String.format("  ... and %d more meteorites\n", meteorites.size() - 5));
+            }
+            sb.append("\n");
+        }
+        
+        sb.append("Effects: Meteorites rain down from various directions. Small meteorites\n");
+        sb.append("can be blocked by shields (1 battery cost), while large meteorites must\n");
+        sb.append("be destroyed by cannons pointing in the correct direction. Level I storms\n");
+        sb.append("come from sides and behind, Level II can also come from the front.");
+        
+        return sb.toString();
+    }
+
 }

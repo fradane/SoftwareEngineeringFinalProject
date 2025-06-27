@@ -58,13 +58,14 @@ public class ServerPingPongManager {
      * @param sendPing a {@link Runnable} task responsible for sending a ping message
      */
     public void start(String nickname, Runnable sendPing) {
+        synchronized (lock) {
+            ScheduledFuture<?> pingFuture = scheduler.scheduleAtFixedRate(() -> {
+                sendPing.run(); // invia ping
+                //TODO cambiare a milliseconds
+            }, 1000, 5000, TimeUnit.SECONDS);
 
-        ScheduledFuture<?> pingFuture = scheduler.scheduleAtFixedRate(() -> {
-            sendPing.run();
-        }, 1000, 5000, TimeUnit.MILLISECONDS);
-
-        pingTasks.put(nickname, pingFuture);
-
+            pingTasks.put(nickname, pingFuture);
+        }
     }
 
     /**
@@ -84,7 +85,6 @@ public class ServerPingPongManager {
                 stop(nickname);
                 onTimeout.run();
             }, 9000, TimeUnit.MILLISECONDS);
-
             pongTimeouts.put(nickname, pongFuture);
         }
     }

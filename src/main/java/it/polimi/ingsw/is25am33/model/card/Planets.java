@@ -14,8 +14,6 @@ import it.polimi.ingsw.is25am33.model.IllegalIndexException;
 import it.polimi.ingsw.is25am33.model.UnknownStateException;
 import it.polimi.ingsw.is25am33.model.card.interfaces.PlayerMover;
 import it.polimi.ingsw.is25am33.model.component.Storage;
-import it.polimi.ingsw.is25am33.model.game.GameModel;
-import it.polimi.ingsw.is25am33.model.game.Player;
 import it.polimi.ingsw.is25am33.model.enumFiles.GameState;
 
 import java.util.ArrayList;
@@ -230,7 +228,7 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
 
         // no check is performed to ensure they are all storage because it's already handled on the client side
         ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
-        List<Storage> chosenStorages = new ArrayList();
+        List<Storage> chosenStorages = new ArrayList<>();
         for (Coordinates coords : chosenStorageCoords) {
             if (coords.isCoordinateInvalid()) {
                 chosenStorages.add(null);
@@ -305,10 +303,7 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
         }
 
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify,
-                    gameModel.getCurrPlayer().getNickname(),
-                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(),
-                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(), gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
         });
 
         movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
@@ -342,10 +337,10 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
             applyStorageUpdates(storageUpdates, gameModel);
 
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyShipBoardUpdate(nicknameToNotify,
-                        gameModel.getCurrPlayer().getNickname(),
-                        gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(),
-                        gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+                clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(),
+                    gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
             });
 
             movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
@@ -368,10 +363,10 @@ public class Planets extends AdventureCard implements PlayerMover, CubesRedistri
             );
 
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyShipBoardUpdate(nicknameToNotify,
-                        gameModel.getCurrPlayer().getNickname(),
-                        gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(),
-                        gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+                clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
+                    gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(),
+                    gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
             });
 
         }

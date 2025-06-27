@@ -649,4 +649,6 @@ public interface ClientView {
      * interaction with the user to select or confirm redistribution choices.
      */
     void showCubeRedistributionMenu();
+
+    void showStolenVisibleComponent();
 }

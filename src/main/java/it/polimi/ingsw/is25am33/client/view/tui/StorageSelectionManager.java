@@ -7,7 +7,6 @@ import it.polimi.ingsw.is25am33.model.component.StandardStorage;
 import it.polimi.ingsw.is25am33.model.component.Storage;
 import it.polimi.ingsw.is25am33.model.enumFiles.CargoCube;
 import it.polimi.ingsw.is25am33.client.model.ShipBoardClient;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -24,10 +23,17 @@ public class StorageSelectionManager {
     private final List<Storage> availableStorages;
     private final Map<CargoCube, List<Storage>> compatibleStoragesMap;
 
-    private List<CargoCube> availableCubes = new ArrayList<>();
-    private Map<Coordinates, List<CargoCube>> finalUpdates = new HashMap<>();
+    // Nuovi campi per la ridistribuzione
+    private final List<CargoCube> availableCubes = new ArrayList<>();
+    private final Map<Coordinates, List<CargoCube>> finalUpdates = new HashMap<>();
     private boolean redistributionMode = false;
     private int selectedCubeIndex = -1;
+
+    // Nuovi campi per la gestione cube malus
+    private Map<CargoCube, List<Coordinates>> cubeLocationMap = new HashMap<>();
+    private int remainingCubesToRemove;
+    private List<Coordinates> selectedStoragesForRemoval = new ArrayList<>();
+    private boolean malusMode = false;
 
     /**
      * Constructor for the storage selection manager.
@@ -41,12 +47,38 @@ public class StorageSelectionManager {
         this.availableStorages = new ArrayList<>();
         this.compatibleStoragesMap = new HashMap<>();
         this.cubeMalus = cubeMalus;
+        this.malusMode = false;
+
+        // Inizializza la lista degli storage disponibili
+        initializeAvailableStorages();
+
+        // Costruisce la mappa di compatibilità tra cubi e storage
+        buildCompatibilityMap();
+    }
+
+    /**
+     * Costruttore specifico per cube malus.
+     *
+     * @param cubeMalus Numero di cubi da rimuovere
+     * @param shipBoard La ship board del giocatore contenente gli storage
+     */
+    public StorageSelectionManager(int cubeMalus, ShipBoardClient shipBoard) {
+        this.cubeRewards = new ArrayList<>(); // Lista vuota per malus
+        this.cubeMalus = cubeMalus;
+        this.shipBoard = shipBoard;
+        this.availableStorages = new ArrayList<>();
+        this.compatibleStoragesMap = new HashMap<>();
+        this.malusMode = true;
+        this.remainingCubesToRemove = cubeMalus;
 
         // Initialize the list of available storages
         initializeAvailableStorages();
 
         // Build the compatibility map for each cube type
         buildCompatibilityMap();
+
+        // Inizializza per modalità malus
+        initializeForMalusMode();
     }
 
     public Map<CargoCube, List<Storage>> getCompatibleStoragesMap() {
@@ -374,10 +406,18 @@ public class StorageSelectionManager {
         return mostPrecious;
     }
 
-    public Set<Coordinates> getSelectableCoordinates() {
-        CargoCube currentCube = getCurrentCube();
-        List<Storage> selectableStorages = compatibleStoragesMap.get(currentCube);
+//    public Set<Coordinates> getSelectableCoordinates() {
+//        CargoCube currentCube = getCurrentCube();
+//        List<Storage> selectableStorages = compatibleStoragesMap.get(currentCube);
+//
+//        return shipBoard.getCoordinatesOfComponents(selectableStorages);
+//    }
 
+    public Set<Coordinates> getSelectableCoordinates(CargoCube cubeType) {
+        if (cubeType == null)
+            return Collections.emptySet();
+
+        List<Storage> selectableStorages = compatibleStoragesMap.get(cubeType);
         return shipBoard.getCoordinatesOfComponents(selectableStorages);
     }
 
@@ -388,17 +428,11 @@ public class StorageSelectionManager {
      * @param storageCoords The coordinates of the selected storage
      * @return true if the storage was successfully added, false otherwise
      */
-    public boolean addStorageSelectionWithCopy(Coordinates storageCoords) {
-        // Check if we have already selected all necessary storages
-        if (selectedStorages.size() >= cubeRewards.size()) {
-            return false;
-        }
-
-        // The player doesn't want to save this cube
-        if (storageCoords.isCoordinateInvalid()) {
-            selectedStorages.add(storageCoords);
-            return true;
-        }
+    public boolean addStorageSelectionWithCopy(Coordinates storageCoords, CargoCube cubeType) {
+//        // Check if we have already selected all necessary storages
+//        if (selectedStorages.size() >= cubeRewards.size()) {
+//            return false;
+//        }
 
         // Get the component at the specified coordinates
         Storage originalStorage = getStorageAtCoordinates(storageCoords);
@@ -407,10 +441,7 @@ public class StorageSelectionManager {
         }
 
         // Check if the current cube is red and the storage is standard type
-        int currentCubeIndex = selectedStorages.size();
-        CargoCube currentCube = cubeRewards.get(currentCubeIndex);
-
-        if (currentCube == CargoCube.RED && !(originalStorage instanceof SpecialStorage)) {
+        if (cubeType == CargoCube.RED && !(originalStorage instanceof SpecialStorage)) {
             return false;  // Red cubes can only be placed in special storages
         }
 
@@ -418,19 +449,21 @@ public class StorageSelectionManager {
         Storage storageClone = cloneStorage(originalStorage);
 
         // Add the cube to the copy
-        CargoCube removedCube = storageClone.addCube(currentCube);
+        CargoCube removedCube = storageClone.addCube(cubeType);
 
         // If a cube was removed, inform the user
         if (removedCube != null) {
-            // TODO: use showMessage
-            System.out.println("The cube " + removedCube + " was removed to make room for the new cube " + currentCube);
+            availableCubes.add(removedCube);
         }
 
         // Replace the storage in the shipboard
         replaceStorageInShipBoard(storageCoords, originalStorage, storageClone);
 
+        availableCubes.remove(cubeType);
+
         // Add the coordinates to the selection list
         selectedStorages.add(storageCoords);
+        updateFinalUpdates(storageCoords, storageClone.getStockedCubes());
 
         return true;
     }
@@ -457,7 +490,7 @@ public class StorageSelectionManager {
         return clone;
     }
 
-    private static @NotNull Storage getClonedStorage(Storage original) {
+    private static Storage getClonedStorage(Storage original) {
         Storage clone;
 
         // Create the correct instance based on type
@@ -631,6 +664,31 @@ public class StorageSelectionManager {
     }
 
     /**
+     * Rimuove un cubo dallo storage specificato (lo riaggiunge ai disponibili).
+     *
+     * @param coords coordinate dello storage
+     */
+    public void removeCubeFromStorageWithCopy(Coordinates coords) {
+        Storage originalStorage = getStorageAt(coords);
+        if (originalStorage == null || originalStorage.getStockedCubes().isEmpty()) {
+            return;
+        }
+
+        CargoCube removedCube = originalStorage.getStockedCubes().getLast();
+
+        // Rimuovi visivamente
+        Storage storageClone = cloneStorage(originalStorage);
+        storageClone.getStockedCubes().remove(removedCube);
+        replaceStorageInShipBoard(coords, originalStorage, storageClone);
+
+        // Riaggiunge ai disponibili
+        availableCubes.add(removedCube);
+
+        // Aggiorna mappa finale
+        updateFinalUpdates(coords, storageClone.getStockedCubes());
+    }
+
+    /**
      * Removes a cube from the specified storage (re-adds it to available cubes).
      *
      * @param coord coordinates of the storage
@@ -714,6 +772,248 @@ public class StorageSelectionManager {
      */
     public boolean isInRedistributionMode() {
         return redistributionMode;
+    }
+
+    // ======== METODI PER LA GESTIONE CUBE MALUS ========
+
+    /**
+     * Initializes the malus mode by building the cube-storage location map.
+     * Called by the constructor when malusMode is true.
+     */
+    public void initializeForMalusMode() {
+        if (!malusMode) {
+            return;
+        }
+        buildCubeLocationMap();
+    }
+
+    /**
+     * Builds a map that associates each cube type with the coordinates of storages containing it.
+     * Called by initializeForMalusMode() and whenever the cube locations need to be refreshed.
+     */
+    public void buildCubeLocationMap() {
+        cubeLocationMap.clear();
+
+        // Initialize empty lists for each cube type
+        for (CargoCube cubeType : CargoCube.values()) {
+            cubeLocationMap.put(cubeType, new ArrayList<>());
+        }
+
+        // Populate the map by scanning all storages
+        shipBoard.getCoordinatesAndStorages().forEach((coords, storage) -> {
+            for (CargoCube cube : storage.getStockedCubes()) {
+                cubeLocationMap.get(cube).add(coords);
+            }
+        });
+    }
+
+    /**
+     * Determines the most precious cube available following priority RED > YELLOW > GREEN > BLUE.
+     * Called by validateStorageSelectionWithDetails() and UI methods to know which cube should be removed next.
+     *
+     * @return The most precious cube type available or null if no cubes exist
+     */
+    public CargoCube getMostPreciousCubeAvailable() {
+        // Priority order: RED > YELLOW > GREEN > BLUE
+        CargoCube[] priorityOrder = {CargoCube.RED, CargoCube.YELLOW, CargoCube.GREEN, CargoCube.BLUE};
+
+        for (CargoCube cubeType : priorityOrder) {
+            if (!cubeLocationMap.get(cubeType).isEmpty()) {
+                return cubeType;
+            }
+        }
+        return null; // No cubes available
+    }
+
+    /**
+     * Validates if a storage selection is valid for cube removal.
+     * Called by ClientCLIView when user selects storage coordinates for malus removal.
+     *
+     * @param coords Coordinates of the selected storage
+     * @return true if selection is valid, false otherwise
+     */
+    public boolean isValidStorageSelection(Coordinates coords) {
+        // Check if there's a storage at the coordinates
+        Storage storage = getStorageAtCoordinates(coords);
+        if (storage == null) {
+            return false;
+        }
+
+        // Determine the most precious cube available
+        CargoCube mostPreciousCube = getMostPreciousCubeAvailable();
+        if (mostPreciousCube == null) {
+            return false;
+        }
+
+        // Check if this storage contains the most precious cube
+        List<Coordinates> validStorages = cubeLocationMap.get(mostPreciousCube);
+        return validStorages.contains(coords);
+    }
+
+    /**
+     * Gets error message for invalid storage selection.
+     * Called by ClientCLIView to display appropriate error message.
+     *
+     * @param coords Coordinates that were invalid
+     * @return Error message string
+     */
+    public String getValidationErrorMessage(Coordinates coords) {
+        Storage storage = getStorageAtCoordinates(coords);
+        if (storage == null) {
+            return "No storage at these coordinates.";
+        }
+
+        CargoCube mostPreciousCube = getMostPreciousCubeAvailable();
+        if (mostPreciousCube == null) {
+            return "No cubes available to remove.";
+        }
+
+        return "ATTENTION! There are more precious cubes available!\nYou must remove " +
+               mostPreciousCube.name() + " cubes first!";
+    }
+
+    /**
+     * Selects a storage for cube removal, updating internal state and counters.
+     * Called by ClientCLIView after successful validation to register the storage selection.
+     *
+     * @param coords Coordinates of the storage to select
+     * @return true if selection was successful, false otherwise
+     */
+    public boolean selectStorageForRemoval(Coordinates coords) {
+        if (!isValidStorageSelection(coords)) {
+            return false;
+        }
+
+        // Add to selected storages list
+        selectedStoragesForRemoval.add(coords);
+
+        // Get the cube type that will be removed (most precious available)
+        CargoCube removedCube = getMostPreciousCubeAvailable();
+        updateCubeLocationMapAfterSelection(coords, removedCube);
+
+        Storage currStorage = getStorageAtCoordinates(coords);
+        currStorage.removeCube(removedCube);
+
+        // Decrease the counter
+        remainingCubesToRemove--;
+
+        return true;
+    }
+
+    /**
+     * Updates the cube location map after a storage selection for removal.
+     * Called by selectStorageForRemoval() to maintain map consistency after cube removal.
+     *
+     * @param coords Storage coordinates
+     * @param removedCube Type of cube being removed
+     */
+    public void updateCubeLocationMapAfterSelection(Coordinates coords, CargoCube removedCube) {
+        List<Coordinates> locations = cubeLocationMap.get(removedCube);
+        locations.remove(coords);
+    }
+
+    /**
+     * Checks if there are still cubes to remove.
+     * Called by ClientCLIView to determine if malus selection should continue.
+     *
+     * @return true if there are still cubes to remove
+     */
+    public boolean hasRemainingCubesToRemove() {
+        return remainingCubesToRemove > 0;
+    }
+
+    /**
+     * Gets the number of cubes still to remove.
+     * Called by ClientCLIView to display progress information to the user.
+     *
+     * @return Number of cubes still to remove
+     */
+    public int getRemainingCubesToRemove() {
+        return remainingCubesToRemove;
+    }
+
+    /**
+     * Gets the list of storage coordinates selected for removal.
+     * Called by ClientCLIView when malus selection is complete to send to server.
+     *
+     * @return List of coordinates of selected storages
+     */
+    public List<Coordinates> getSelectedStoragesForRemoval() {
+        return new ArrayList<>(selectedStoragesForRemoval);
+    }
+
+    /**
+     * Checks if batteries are needed to complete the malus.
+     * Called by ClientCLIView to determine if transition to battery selection is needed.
+     *
+     * @return true if batteries are needed
+     */
+    public boolean needsBatteries() {
+        return malusMode && remainingCubesToRemove > 0;
+    }
+
+    /**
+     * Calculates how many batteries are needed to complete the malus.
+     * Called by ClientCLIView to determine exact number of batteries to select.
+     *
+     * @return Number of batteries needed
+     */
+    public int getRequiredBatteriesCount() {
+        return Math.max(0, remainingCubesToRemove);
+    }
+
+    /**
+     * Checks if there are cubes available for removal.
+     * Called by ClientCLIView at malus start to determine if cube selection or battery selection should begin.
+     *
+     * @return true if cubes are available
+     */
+    public boolean hasAvailableCubes() {
+        if (!malusMode) {
+            return false;
+        }
+
+        // Check if at least one cube type has available storages
+        for (List<Coordinates> locations : cubeLocationMap.values()) {
+            if (!locations.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets coordinates of storages containing the most precious cube.
+     * Called by ClientCLIView to display valid options when user makes invalid selection.
+     *
+     * @return List of valid coordinates or empty list if no cubes exist
+     */
+    public List<Coordinates> getValidStorageOptionsForMostPreciousCube() {
+        CargoCube mostPrecious = getMostPreciousCubeAvailable();
+        if (mostPrecious == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(cubeLocationMap.get(mostPrecious));
+    }
+
+    /**
+     * Resets the state for malus mode.
+     * Called by ClientCLIView when malus selection is complete or cancelled.
+     */
+    public void resetMalusState() {
+        selectedStoragesForRemoval.clear();
+        cubeLocationMap.clear();
+        remainingCubesToRemove = 0;
+    }
+
+    /**
+     * Checks if currently in malus mode.
+     * Called by various methods to ensure malus-specific operations are only performed in malus mode.
+     *
+     * @return true if in malus mode
+     */
+    public boolean isInMalusMode() {
+        return malusMode;
     }
 
 }

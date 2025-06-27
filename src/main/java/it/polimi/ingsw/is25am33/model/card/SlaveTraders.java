@@ -135,7 +135,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         double currPlayerCannonPower = activateDoubleCannonsProcess(chosenDoubleCannons, chosenBatteryBoxes, gameModel.getCurrPlayer());
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, currentPlayer.getNickname(), currentPlayer.getPersonalBoardAsMatrix(), currentPlayer.getPersonalBoard().getComponentsPerType(), currentPlayer.getPersonalBoard().getNotActiveComponents());
         });
 
         if (currPlayerCannonPower > requiredFirePower) {
@@ -204,7 +204,7 @@ public class SlaveTraders extends AdvancedEnemies implements PlayerMover, CrewMe
 
         removeMemberProcess(chosenCabins, crewMalus);
         gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoardAsMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
+            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoardAsMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(), gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
         });
 
         if (gameModel.hasNextPlayer()) {

@@ -85,21 +85,49 @@ public class ClientPlanets extends ClientCard {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Planets Card: ");
-        sb.append(cardName).append("\n");
-        sb.append("Available Planets: ").append(availablePlanets.size()).append("\n");
-        sb.append("Steps Back: ").append(stepsBack).append("\n");
-
-        sb.append("Planet Rewards:\n");
-        for (int i = 0; i < availablePlanets.size(); i++) {
-            Planet planet = availablePlanets.get(i);
-            if (!planet.isBusy()) {
-                sb.append("  Planet ").append(i + 1).append(": ");
-                planet.getReward().forEach(cube -> sb.append(cube.name()).append(" "));
+        StringBuilder sb = new StringBuilder();
+        sb.append("┌────────────────────────────────────┐\n");
+        sb.append("│              PLANETS               │\n");
+        sb.append("├────────────────────────────────────┤\n");
+        sb.append(String.format("│ Available Planets:       %-8d │\n", availablePlanets != null ? availablePlanets.size() : 0));
+        sb.append(String.format("│ Flight Days Cost:         %-8d │\n", stepsBack));
+        sb.append("└────────────────────────────────────┘\n");
+        
+        if (availablePlanets != null && !availablePlanets.isEmpty()) {
+            sb.append("Planet Details:\n");
+            for (int i = 0; i < availablePlanets.size(); i++) {
+                Planet planet = availablePlanets.get(i);
+                String status = planet.isBusy() ? "OCCUPIED" : "AVAILABLE";
+                sb.append(String.format("  %d. Status: %-9s | Reward: ", i + 1, status));
+                if (planet.getReward() != null && !planet.getReward().isEmpty()) {
+                    planet.getReward().forEach(cube -> sb.append(cube.name()).append(" "));
+                } else {
+                    sb.append("None");
+                }
                 sb.append("\n");
             }
+            sb.append("\n");
         }
-
+        
+        if (!playerPlanet.isEmpty()) {
+            sb.append("Player Choices:\n");
+            playerPlanet.forEach((player, planet) -> {
+                sb.append(String.format("  %s -> ", player));
+                if (planet.getReward() != null && !planet.getReward().isEmpty()) {
+                    planet.getReward().forEach(cube -> sb.append(cube.name()).append(" "));
+                } else {
+                    sb.append("No reward");
+                }
+                sb.append("\n");
+            });
+            sb.append("\n");
+        }
+        
+        sb.append("Effects: Each planet shows 2-4 different worlds with cargo\n");
+        sb.append("rewards and flight day costs. Players choose in route order\n");
+        sb.append("whether to land or skip. Landing loads goods and moves you\n");
+        sb.append("back by the specified days. Each planet can only host one ship.");
+        
         return sb.toString();
     }
 
