@@ -8,6 +8,11 @@ import java.io.Serializable;
 import java.util.List;
 
 public class PlayerFinalData implements Serializable {
+    /**
+     * Represents the unique identifier or alias of the player. This field is immutable
+     * and is set when the {@code PlayerFinalData} object is instantiated.
+     * It is used to distinguish the player from others in the game.
+     */
     private final String nickname;
     /**
      * Represents the total credits earned by the player at the end of the game.

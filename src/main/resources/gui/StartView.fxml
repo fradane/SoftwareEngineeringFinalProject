@@ -11,7 +11,7 @@
             styleClass="game-background"
             stylesheets="@/galaxy-truckers.css">
 
-    <!-- Container principale centrato -->
+    <!-- Main centered container -->
     <VBox alignment="CENTER" spacing="30.0" prefWidth="600" prefHeight="400"
           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
           AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
@@ -21,9 +21,9 @@
             <Insets top="40.0" right="40.0" bottom="40.0" left="40.0" />
         </padding>
 
-        <!-- Sezione titolo -->
+        <!-- Title section -->
         <VBox alignment="CENTER" spacing="12.0" styleClass="title-section">
-            <!-- Titolo diviso su due righe centrate -->
+            <!-- Title split into two centered lines -->
             <VBox alignment="CENTER" spacing="-10.0">
                 <Label styleClass="game-title" text="GALAXY" alignment="CENTER" />
                 <Label styleClass="game-title" text="TRUCKERS" alignment="CENTER" />
@@ -32,18 +32,18 @@
             <Label styleClass="game-subtitle" text="Build • Explore • Survive" />
         </VBox>
 
-        <!-- Sezione input nickname -->
+        <!-- Nickname input section -->
         <VBox alignment="CENTER" spacing="15.0" styleClass="input-section">
             <Label styleClass="input-label" text="Enter your pilot nickname:" />
 
-            <!-- TextField con container proprio -->
+            <!-- TextField with its own container -->
             <TextField fx:id="nicknameField"
                        styleClass="space-text-field-with-border"
                        promptText="Minimum 3 characters"
                        maxWidth="280.0"
                        onAction="#handleSubmit" />
 
-            <!-- Label per errori (separata, senza container) -->
+            <!-- Error label (separate, without container) -->
             <Label fx:id="errorLabel"
                    styleClass="error-label"
                    visible="false"
@@ -51,7 +51,7 @@
                    maxWidth="280.0" />
         </VBox>
 
-        <!-- Sezione bottone -->
+        <!-- Button section -->
         <VBox alignment="CENTER" spacing="10.0" styleClass="button-section">
             <Button fx:id="startButton"
                     styleClass="start-button"

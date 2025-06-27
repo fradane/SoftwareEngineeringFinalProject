@@ -30,7 +30,7 @@ class GameModelTest{
 
             }
         };
-        gameModel.setGameClientNotifier(new GameClientNotifier(null, new ConcurrentHashMap<>()));
+        gameModel.setGameClientNotifier(new GameClientNotifier( new ConcurrentHashMap<>()));
         gameModel.addPlayer("luca", PlayerColor.YELLOW,null);
         gameModel.addPlayer("marco", PlayerColor.BLUE,null);
         gameModel.setCurrRanking(gameModel.getPlayers().values().stream().toList());
@@ -103,11 +103,6 @@ class GameModelTest{
         assertEquals(1, gameModel.getPlayerWithPrettiestShip().size());
         assertTrue(gameModel.getPlayerWithPrettiestShip().contains(gameModel.getPlayers().get("marco")));
 
-    }
-
-    @Test
-    void calculatePlayersCredits() {
-        //TODO lo ha fatto marco
     }
 
     @Test
@@ -208,7 +203,7 @@ class GameModelTest{
                 }
             }
         };
-        flightTest.setGameClientNotifier(new GameClientNotifier(null, new ConcurrentHashMap<>()));
+        flightTest.setGameClientNotifier(new GameClientNotifier(new ConcurrentHashMap<>()));
         flightTest.addPlayer("luca", PlayerColor.YELLOW,null);
         flightTest.addPlayer("marco", PlayerColor.BLUE,null);
         flightTest.setCurrRanking(gameModel.getPlayers().values().stream().toList());

@@ -224,9 +224,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     /**
-     * Permette all'utente di selezionare l'interfaccia utente
-     * @param scanner Scanner per leggere l'input dell'utente
-     * @return L'implementazione di ClientView scelta
+     * Allows the user to select the user interface
+     * @param scanner Scanner to read user input
+     * @return The chosen implementation of ClientView
      */
     public static ClientView selectUserInterface(Scanner scanner, String choice) throws IOException {
 
@@ -260,8 +260,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     /**
-     * Permette all'utente di selezionare il protocollo di rete
-     * @return L'implementazione di NetworkManager scelta
+     * Allows the user to select the network protocol
+     * @return The chosen implementation of NetworkManager
      */
     public CallableOnDNS selectNetworkProtocol(boolean isRmi, String serverAddress, int serverPort) {
 
@@ -383,7 +383,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
         clientModel.refreshShipBoardOf(shipOwnerNickname);
 
-        // Mostra il menu solo se è la propria shipBoard
+        // Shows the menu only if it is your own shipBoard
         if (shipOwnerNickname.equals(nickname)) {
             view.showInvalidShipBoardMenu();
         }
@@ -396,7 +396,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
         clientModel.refreshShipBoardOf(shipOwnerNickname);
 
-        // Mostra il menu solo se è la propria shipBoard
+        // Shows the menu only if it is your own shipBoard
         if (shipOwnerNickname.equals(nickname)) {
             view.showValidShipBoardMenu();
         }
@@ -409,16 +409,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(shipOwnerNickname).setComponentsPerType(componentsPerType);
         clientModel.refreshShipBoardOf(shipOwnerNickname);
 
-        // Gestisce la selezione solo se è la propria shipBoard
+        // Handles the selection only if it is your own shipBoard
         if (shipOwnerNickname.equals(nickname)) {
             setCurrentShipPartsList(shipParts);
             view.showChooseShipPartsMenu(currentShipPartsList);
         }
-    }
-
-    @Override
-    public void notifyCardStarted(String nicknameToNotify) throws IOException {
-
     }
 
     public void setCurrentShipPartsList(Set<Set<Coordinates>> shipParts) {
@@ -474,11 +469,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.refreshShipBoardOf(nickname);
     }
 
-    // TODO marco, controllare
-    public void notifyIncorrectlyPositionedComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws RemoteException {
-        //clientModel.getShipboardOf(nickname).getIncorrectlyPositionedComponentsCoordinates().add(component);
-    }
-
     /**
      * Notifies the client that the player called nickname has the focus on a specific component.
      *
@@ -502,7 +492,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws IOException {
         clientModel.getShipboardOf(nickname).getBookedComponents().add(component);
         clientModel.getShipboardOf(nickname).setFocusedComponent(null);
-        // TODO controllare metodo per riservare
         clientModel.refreshShipBoardOf(nickname);
     }
 
@@ -567,10 +556,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void submitCrewChoices(Map<Coordinates, CrewMember> choices) {
         try {
-            // Validazione locale
+            // Local validation
             validateCrewChoices(choices);
 
-            // Invia al server
+            // Send to server
             serverController.submitCrewChoices(nickname, choices);
         } catch (IllegalArgumentException e) {
             view.showError(e.getMessage());
@@ -581,7 +570,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     private void validateCrewChoices(Map<Coordinates, CrewMember> choices) {
-        // Verifica massimo 1 alieno per colore
+        // Check at most 1 alien per color
         long purpleCount = choices.values().stream().filter(c -> c == CrewMember.PURPLE_ALIEN).count();
         long brownCount = choices.values().stream().filter(c -> c == CrewMember.BROWN_ALIEN).count();
 
@@ -618,11 +607,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             view.showMessage("Wait for " + clientModel.getCurrentPlayer() + " to make his choice", NOTIFICATION_INFO);
         }
 
-
-//        if (clientModel.isMyTurn() && cardState != CardState.END_OF_CARD) {
-//            // Chiama direttamente il metodo showRelatedMenu sul CardState
-//            cardState.showRelatedMenu(view);
-//        }
     }
 
     @Override
@@ -658,9 +642,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    //Insieme di stati che non vanno notificati a meno che tu non sia il player di turno
+    //Set of states that should not be notified unless you are the current player
     public boolean isStateRegardingCurrentPlayerOnly(CardState cardState) {
-        //TODO capire quali altri stati entrano in questa categoria e aggiungerli sotto. Probabilmente da togliere perchè tutti gli stati sono RegardingCurrentPlayerOnly
+        //TODO figure out which other states fall into this category and add them below. Probably to be removed as all states are likely RegardingCurrentPlayerOnly
         return cardState == CardState.HANDLE_CUBES_REWARD
                 || cardState == CardState.CHOOSE_PLANET
                 || cardState == CardState.VISIT_LOCATION
@@ -698,16 +682,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.showMessage("GAME ENDED", STANDARD);
     }
 
-    //TODO probabilmente sarà da cancellare quando la fase di gioco funzionerà
-//    public void cardPhase() {
-//
-//        while(clientModel.getGameState() == GameState.PLAY_CARD) {
-//            if (clientModel.isMyTurn())
-//                clientModel.getCurrCardState().showRelatedMenu(view).accept(serverController, nickname);
-//        }
-//
-//    }
-
     public void notifyHourglassEnded() throws IOException {
         serverController.notifyHourglassEnded(nickname);
         if (clientModel.getHourglass().getFlipsLeft() == 0) {
@@ -729,10 +703,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void reserveFocusedComponent() {
         try {
-            // TODO aggiungere il caso in cui non si possa piu riservare
-            // PS gli aggiornamenti sul modello di chi fa l'azione li gestiscono le notify o chi fa l'azione?
-            // perche se io qua faccio book anche sul mio client model e poi mi arriva la notifica ne aggiungo due
-            //((Level2ShipBoard) clientModel.getShipboardOf(nickname)).book();
             if(clientModel.getShipboardOf(nickname).getBookedComponents().size() >= 2) {
                 view.showMessage("You cannot book more than 2 components", ERROR);
                 view.showPickedComponentAndMenu();
@@ -794,8 +764,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             handleRemoteException(e);
         } catch (IllegalArgumentException e) {
             view.showMessage("Invalid coordinates: " + e.getMessage() + "\n", ERROR);
-            // TODO togliere
-            System.err.println("Invalid coordinates: " + e.getMessage());
         }
     }
 
@@ -896,7 +864,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             //Component component = clientModel.getShipboardOf(nickname).getBookedComponents().remove(choice);
             Component component = clientModel.getShipboardOf(nickname).getBookedComponents().get(choice);
             clientModel.getMyShipboard().setFocusedComponent(component);
-            // TODO da sostituire: aggiungere il caso in cui non si possa piu riservare
+            // TODO to be replaced: add the case where you can no longer reserve
             //((Level2ShipBoard) clientModel.getShipboardOf(nickname)).focusReservedComponent(choice);
             serverController.playerWantsToFocusReservedComponent(nickname, choice);
 
@@ -922,18 +890,18 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    //manda il ping dal client al server
+    //sends the ping from the client to the server
     public void pingToServerFromClient(String nickname) throws IOException{
         dns.pingToServerFromClient(nickname);
     }
 
-    //quando ricevo il pong di risposta dal server resetto il timeout
+    //when I receive the pong reply from the server, I reset the timeout
     public void pongToClientFromServer(String nickname) throws IOException{
         //System.out.println("Pong dal server");
         clientPingPongManager.onPongReceived(this::handleDisconnection);
     }
 
-    //quando il server manda il ping al client
+    //when the server sends the ping to the client
     public void pingToClientFromServer(String nickname) throws IOException{
         //System.out.println("Ping dal server");
         dns.pongToServerFromClient(nickname);
@@ -1019,7 +987,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords){
-        //TODO fare controlli di validità dei valori inseriti
         if(doubleEnginesCoords.size()!=batteryBoxesCoords.size())
             throw new IllegalArgumentException("the number of engines does not match the number of batteries");
 
@@ -1041,7 +1008,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords){
+    public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) {
 
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
@@ -1049,9 +1016,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                 .setChosenBatteryBoxes(batteryBoxesCoords)
                 .build();
 
-        try{
+        try {
             serverController.handleClientChoice(nickname, playerChoiceDataStructure);
-        }catch (IOException e){
+        } catch (IOException e) {
             handleRemoteException(e);
         }
     }
@@ -1202,25 +1169,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         List<Storage> storages = new ArrayList<>();
 
-        //TODO rimuovere la conversione a List<Storage>
-        if (!storageCoords.isEmpty()) {
-            for (Coordinates coords : storageCoords) {
-                if (coords.isCoordinateInvalid()) {
-                    // Coordinate invalide (-1,-1) indicano che questo cubo non può essere salvato
-                    storages.add(null);
-                } else {
-                    Component component = shipBoard.getComponentAt(coords);
-                    if (component instanceof Storage) {
-                        storages.add((Storage) component);
-                    } else {
-                        // Se le coordinate non puntano a uno storage, aggiungi null
-                        storages.add(null);
-                    }
-                }
-            }
-        }
-        // Se la lista è vuota, significa che il giocatore non può/non vuole salvare nessun cubo
-
         PlayerChoicesDataStructure choice = new PlayerChoicesDataStructure
                 .Builder()
                 .setChosenStorage(storageCoords)
@@ -1263,7 +1211,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     public void requestPrefabShipsList() {
         try {
-            // Richiedi la lista in modo asincrono
+            // Request the list asynchronously
             view.showMessage("Requesting prefabricated ships list...", STANDARD);
             serverController.requestPrefabShips(nickname);
         } catch (IOException e) {
@@ -1273,10 +1221,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException {
-        // Memorizza le navi disponibili nel model
+        // Stores the available ships in the model
         clientModel.setAvailablePrefabShips(prefabShips);
 
-        // Mostra il menu con le navi disponibili
+        // Shows the menu with available ships
         view.showPrefabShipsMenu(prefabShips);
     }
 
@@ -1300,7 +1248,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     public void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException {
         if (success) {
             view.showMessage("Prefab ship selected successfully! Waiting for other players...", STANDARD);
-            // Aggiornare lo stato se necessario
+            // Update the state if necessary
         } else {
             view.showError("Failed to select prefab ship: " + errorMessage);
             view.showBuildShipBoardMenu();
@@ -1343,15 +1291,15 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException {
-        view.showError("Errore selezione storage: " + errorMessage);
-        // Torna alla fase di selezione storage per il retry
-        view.showMessage("Riprova con una configurazione valida.", STANDARD);
+        view.showError("Storage selection error: " + errorMessage);
+        // Returns to the storage selection phase for retry
+        view.showMessage("Please try again with a valid configuration.", STANDARD);
     }
 
     /**
-     * Invia gli aggiornamenti degli storage al server usando la nuova struttura dati.
+     * Sends storage updates to the server using the new data structure.
      *
-     * @param storageUpdates mappa degli aggiornamenti degli storage
+     * @param storageUpdates map of storage updates
      */
     public void sendStorageUpdates(Map<Coordinates, List<CargoCube>> storageUpdates) {
         try {
@@ -1361,8 +1309,8 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
             serverController.handleClientChoice(nickname, choices);
         } catch (IOException e) {
-            view.showError("Errore durante l'invio al server: " + e.getMessage());
-            view.showMessage("Riprova con 'c' per confermare", STANDARD);
+            view.showError("Error while sending to server: " + e.getMessage());
+            view.showMessage("Retry with 'c' to confirm", STANDARD);
         }
     }
 }

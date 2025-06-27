@@ -68,9 +68,23 @@ public class ClientGuiController extends Application implements ClientView {
 
     private ControllerState currentControllerState = ControllerState.START_CONTROLLER;
 
-
     public static ClientGuiController getInstance() {
         return instance;
+    }
+
+    private String getCurrentControllerType() {
+        if (currentController == startViewController) {
+            return START_CONTROLLER;
+        } else if (currentController == mainMenuViewController) {
+            return MAIN_MENU_CONTROLLER;
+        } else if (currentController == buildAndCheckShipBoardController) {
+            return BUILD_SHIPBOARD_CONTROLLER;
+        } else if (currentController == cardPhaseController) {
+            return CARD_PHASE_CONTROLLER;
+        } else if (currentController == endGameController) {
+            return END_GAME_CONTROLLER;
+        }
+        return null;
     }
 
     @Override
@@ -80,9 +94,9 @@ public class ClientGuiController extends Application implements ClientView {
         // Initialize task queues
         initializeTaskQueues();
 
-        // Icona per la taskbar/dock
+        // icon for taskbar/dock
         try {
-            // Icona per barra del titolo
+            // icon for title
             primaryStage.getIcons().add(new Image(
                     Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/galaxy_trucker_icon.png"))
             ));
@@ -95,50 +109,28 @@ public class ClientGuiController extends Application implements ClientView {
             System.err.println("Failed to set Taskbar icon: not supported by current OS");
         }
 
-        // Carica il container principale
+        // loading of main container
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/MainContainer.fxml"));
         loader.setController(this);
         Parent root = loader.load();
 
-        // CAMBIATO: Crea la scene senza dimensioni fisse
+        // creation of the scene
         Scene scene = new Scene(root);
 
-        // Configura il model e il controller
+        // configuration of model e controller
         GuiController.setClientModel(clientModel);
         GuiController.setClientController(clientController);
 
-        // NUOVO: Setup responsive
+        // responsive setup
         setupResponsiveWindow(primaryStage, scene);
 
-        // Carica la schermata iniziale
+        // loading of main scene
         loadStartView();
 
         initializationDone.complete(null);
     }
 
-//    public ClientGuiController() throws RemoteException {
-//        clientModel = new ClientModel();
-//        clientController = new ClientController(clientModel, new ClientPingPongManager());
-//    }
 
-//    @Override
-//    public void start(Stage primaryStage) throws Exception {
-//        instance = this;
-//        this.primaryStage = primaryStage;
-//        FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/StartView.fxml"));
-//        Scene scene = new Scene(loader.load());
-//        startViewController = loader.getController();
-//        GuiController.setClientModel(clientModel);
-//        GuiController.setClientController(clientController);
-//        primaryStage.setTitle("Galaxy Trucker");
-//        primaryStage.setScene(scene);
-//        primaryStage.show();
-//    }
-
-    @Override
-    public void notifyHourglassRestarted(int flipsLeft) {
-
-    }
 
     @Override
     public void setIsTestFlight(boolean isTestFlight) {
@@ -150,10 +142,6 @@ public class ClientGuiController extends Application implements ClientView {
 
     }
 
-    @Override
-    public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
-        return null;
-    }
 
     @Override
     public void checkShipBoardAfterAttackMenu() {
@@ -178,10 +166,9 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showDisconnectMessage(String message) {
-        // TODO generalizzare per gli stati
         executeWithController(
-                CARD_PHASE_CONTROLLER,
-                () -> cardPhaseController.showDisconnectMessage(message)
+                currentController.getControllerType(),
+                () -> currentController.showDisconnectMessage(message)
         );
     }
 
@@ -201,13 +188,13 @@ public class ClientGuiController extends Application implements ClientView {
     @Override
     public void showPlayerEarlyLanded(String nickname) {
         if (nickname.equals(clientModel.getMyNickname())) {
-            // Il giocatore corrente è atterrato anticipatamente
+            // current player landed early
             executeWithController(
                     CARD_PHASE_CONTROLLER,
                     () -> cardPhaseController.showPlayerLanded()
             );
         } else {
-            // Un altro giocatore è atterrato anticipatamente
+            // other player landed early
             executeWithController(
                     CARD_PHASE_CONTROLLER,
                     () -> cardPhaseController.notifyOtherPlayerEarlyLanded(nickname)
@@ -222,7 +209,6 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showCubeRedistributionMenu() {
-        //TODO
     }
 
     @Override
@@ -235,12 +221,14 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showValidShipBoardMenu() {
-        //TODO
+        executeWithController(
+                BUILD_SHIPBOARD_CONTROLLER,
+                () -> buildAndCheckShipBoardController.showMessage("Your ship is correct, other player's ship is not, wait for them...", true)
+        );
     }
 
     @Override
     public void showChooseComponentToRemoveMenu() {
-        //TODO
     }
 
     @Override
@@ -422,79 +410,15 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public void cancelInputWaiting() {
-
-    }
-
-    @Override
-    public int[] askCreateGame() {
-        return new int[0];
-    }
-
-    @Override
-    public String[] askJoinGame(List<GameInfo> games) {
-        return new String[0];
-    }
-
-
-    @Override
-    public int showGameMenu() {
-        return 0;
-    }
-
-    @Override
     public void notifyPlayerJoined(String nickname, GameInfo gameInfo) {
-
-    }
-
-    @Override
-    public void notifyPlayerLeft(String nickname, GameInfo gameInfo) {
-
     }
 
     @Override
     public void notifyGameCreated(String gameId) {
-
     }
 
     @Override
     public void notifyGameStarted(GameState gameState) {
-
-    }
-
-    @Override
-    public void notifyGameEnded(String reason) {
-
-    }
-
-    @Override
-    public String askPlayerColor(List<PlayerColor> availableColors) {
-        return "";
-    }
-
-//    @Override
-//    public void showNewGameState() {
-//        if (clientModel.getGameState() == GameState.CREATE_DECK) {
-//            javafx.application.Platform.runLater(() -> {
-//                try {
-//                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/CardPhaseView.fxml"));
-//                    Parent root = loader.load();
-//                    cardPhaseController = loader.getController();
-//                    primaryStage.setScene(new Scene(root));
-//                    primaryStage.setFullScreen(true);
-//                    primaryStage.setMaximized(true);
-//                    primaryStage.show();
-//                } catch (IOException e) {
-//                    System.out.println("Error while loading the new card phase view.");
-//                    e.printStackTrace();
-//                }
-//            });
-//        }
-//    }
-
-    @Override
-    public void showDangerousObj() {
-
     }
 
     @Override
@@ -506,31 +430,7 @@ public class ClientGuiController extends Application implements ClientView {
 
     @Override
     public void showCurrAdventureCard(boolean isFirstTime) {
-
     }
-
-    // TODO
-//    @Override
-//    public void showBuildShipBoardMenu() {
-//
-//        if (buildAndCheckShipBoardController != null) return;
-//
-//        String fxmlPath = "/gui/BuildAndCheckShipBoardView.fxml";
-//
-//        javafx.application.Platform.runLater(() -> {
-//            try {
-//                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-//                Parent root = loader.load();
-//                buildAndCheckShipBoardController = loader.getController();
-//                GuiController.setClientModel(clientModel);
-//                primaryStage.setScene(new Scene(root));
-//                primaryStage.show();
-//            } catch (IOException e) {
-//                System.out.println("Error while loading the shipboard view.");
-//                e.printStackTrace();
-//            }
-//        });
-//    }
 
     @Override
     public void showBuildShipBoardMenu() {
@@ -541,18 +441,12 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     @Override
-    public void notifyNoMoreComponentAvailable() {
-
-    }
-
-    @Override
     public void showShipBoard(ShipBoardClient shipBoard, String shipBoardOwnerNickname) {
 
     }
 
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {
-        //TODO
     }
 
     @Override
@@ -589,17 +483,11 @@ public class ClientGuiController extends Application implements ClientView {
 
     }
 
-    public void showExitMenu(){
-
-    }
-
     private static final CompletableFuture<Void> initializationDone = new CompletableFuture<>();
 
-    // Nuovo container principale
     @FXML
     private StackPane mainContainer;
 
-    // Elementi attuali
     private Parent currentView;
     private GuiController currentController;
 
@@ -626,7 +514,7 @@ public class ClientGuiController extends Application implements ClientView {
         synchronized (loaderLock) {
             // Check if already loading this controller
             if (loadingControllers.contains(controllerType)) {
-                return; // Will be handled by pending tasks
+                return;
             }
 
             // Check if the controller already exists and is the correct type
@@ -635,7 +523,6 @@ public class ClientGuiController extends Application implements ClientView {
                 return;
             }
 
-            // Mark as loading
             loadingControllers.add(controllerType);
 
             try {
@@ -651,20 +538,16 @@ public class ClientGuiController extends Application implements ClientView {
                     return;
                 }
 
-                // Remove previous view
                 if (currentView != null) {
                     mainContainer.getChildren().remove(currentView);
                 }
 
-                // Add new view
                 mainContainer.getChildren().add(newView);
                 currentView = newView;
                 currentController = controller;
 
-                // Update specific controller references
                 updateControllerReference(controller, controllerType);
 
-                // Mark as loaded and process pending tasks
                 loadingControllers.remove(controllerType);
                 processPendingTasks(controllerType);
 
@@ -1061,7 +944,7 @@ public class ClientGuiController extends Application implements ClientView {
 
         stage.setFullScreenExitHint("");
 
-        // Usa Platform.runLater per impostare fullscreen dopo che tutto è stato caricato
+        // set fullscreen
         Platform.runLater(() -> {
             stage.setFullScreen(true);
         });

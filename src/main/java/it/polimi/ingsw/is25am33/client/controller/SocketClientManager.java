@@ -31,15 +31,15 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     private Socket socket;
     private Thread messageHandler;
 
-    // Coda per memorizzare le notifiche mentre aspettiamo risposte specifiche
+    // Queue to store notifications while waiting for specific responses
     private final Queue<SocketMessage> notificationBuffer = new ConcurrentLinkedQueue<>();
 
-    // Flag che indica quando siamo in attesa di una risposta specifica
+    // Flag indicating whether we are waiting for a specific response
     private volatile boolean waitingForResponse = false;
     private volatile Set<String> expectedResponseActions;
     private volatile CompletableFuture<SocketMessage> responseFuture = null;
 
-    // Lock per sincronizzare le operazioni
+    // Lock to synchronize operations
     private final Object lock = new Object();
 
     public SocketClientManager(CallableOnClientController clientController) {
@@ -51,25 +51,25 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
      */
     private SocketMessage sendAndWaitForSpecificResponse(SocketMessage message, Set<String> expectedActions) throws RemoteException {
         synchronized (lock) {
-            // Impostiamo lo stato di attesa
+            // Set the waiting state
             waitingForResponse = true;
             expectedResponseActions = expectedActions;
             responseFuture = new CompletableFuture<>();
 
-            // Inviamo la richiesta
+            // Send the request
             out.println(ClientSerializer.serialize(message));
         }
 
         try {
-            // Attendiamo la risposta
+            // Wait for the response
             SocketMessage response = responseFuture.get();
 
-            // Elaboriamo le notifiche in attesa
+            // Process buffered notifications
             processBufferedNotifications();
 
             return response;
         } catch (InterruptedException | ExecutionException e) {
-            //TODO capire dove gestirle queste eccezioni
+            //TODO understand where to handle these exceptions
             throw new RemoteException("Failed to get response: " + e.getMessage(), e);
         } finally {
             synchronized (lock) {
@@ -759,6 +759,13 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     public void playerChoseStorage(String nickname, List<Coordinates> storageCoords) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerChoseStorage");
         outMessage.setParamActivableCoordinates(storageCoords);
+        out.println(ClientSerializer.serialize(outMessage));
+    }
+
+    @Override
+    public void playerChoseCabins(String nickname, List<Coordinates> cabinsCoords) throws RemoteException {
+        SocketMessage outMessage = new SocketMessage(nickname, "playerChoseCabins");
+        outMessage.setParamCabinCoordinates(cabinsCoords);
         out.println(ClientSerializer.serialize(outMessage));
     }
 

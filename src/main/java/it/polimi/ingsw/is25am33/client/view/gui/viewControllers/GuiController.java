@@ -9,9 +9,13 @@ public abstract class GuiController {
     protected static ClientController clientController;
     protected static ClientModel clientModel;
 
+    private String currentPermanentMessage = "";
+
     public static void setClientController(ClientController clientController) {
         GuiController.clientController = clientController;
     }
+
+    public abstract String getControllerType();
 
     public static void setClientModel(ClientModel clientModel) {
         GuiController.clientModel = clientModel;
@@ -23,6 +27,7 @@ public abstract class GuiController {
         messageLabel.getTransforms().clear();
         messageLabel.setText(message);
         messageLabel.setOpacity(1.0);
+        this.currentPermanentMessage = message;
     }
 
     public void showNonPermanentMessage(String message, Label messageLabel) {
@@ -41,11 +46,15 @@ public abstract class GuiController {
         javafx.animation.FadeTransition fadeOut = new javafx.animation.FadeTransition(javafx.util.Duration.seconds(0.5), messageLabel);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0.0);
-        fadeOut.setOnFinished(_ -> messageLabel.setText(""));
+        fadeOut.setOnFinished(_ -> {
+            messageLabel.setText(currentPermanentMessage);
+            messageLabel.setOpacity(1.0);
+        });
 
         // Play sequence
         javafx.animation.SequentialTransition sequence = new javafx.animation.SequentialTransition(fadeIn, pause, fadeOut);
         sequence.play();
     }
 
+    public abstract void showDisconnectMessage(String message);
 }

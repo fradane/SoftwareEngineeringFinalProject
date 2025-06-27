@@ -29,7 +29,7 @@ class StardustTest {
                 // Nessuna implementazione necessaria per test
             }
         };
-        GameClientNotifier gameClientNotifier = new GameClientNotifier(gameModel, new ConcurrentHashMap<>());
+        GameClientNotifier gameClientNotifier = new GameClientNotifier( new ConcurrentHashMap<>());
         gameModel.setGameClientNotifier(gameClientNotifier);
         gameModel.getFlyingBoard().setGameClientNotifier(gameClientNotifier);
         player1 = new Player("luca", new Level2ShipBoard(PlayerColor.YELLOW, gameClientNotifier, false), PlayerColor.YELLOW);

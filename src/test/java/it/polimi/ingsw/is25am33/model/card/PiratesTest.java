@@ -34,7 +34,7 @@ public class PiratesTest {
             public void setCurrGameState(GameState state) {
             }
         };
-        gameClientNotifier = new GameClientNotifier(gameModel, new ConcurrentHashMap<>());
+        gameClientNotifier = new GameClientNotifier( new ConcurrentHashMap<>());
         gameModel.setGameClientNotifier(gameClientNotifier);
         pirates = new Pirates();
         pirates.setGame(gameModel);

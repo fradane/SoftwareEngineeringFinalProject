@@ -6,6 +6,7 @@ import it.polimi.ingsw.is25am33.client.view.gui.ModelFxAdapter;
 import it.polimi.ingsw.is25am33.client.view.tui.StorageSelectionManager;
 import it.polimi.ingsw.is25am33.model.board.Coordinates;
 import it.polimi.ingsw.is25am33.model.card.Planet;
+import it.polimi.ingsw.is25am33.model.card.SlaveTraders;
 import it.polimi.ingsw.is25am33.model.component.BatteryBox;
 import it.polimi.ingsw.is25am33.model.component.Cabin;
 import it.polimi.ingsw.is25am33.model.component.DoubleCannon;
@@ -89,8 +90,9 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     @FXML
     public void handleLand() {
-        Platform.runLater(() -> landButton.setVisible(false));
-        createEarlyLandingDisplay();
+//        Platform.runLater(() -> landButton.setVisible(false));
+//        createEarlyLandingDisplay();
+        showPlayerLanded();
     }
 
     public void notifyOtherPlayerEarlyLanded(String nickname) {
@@ -103,6 +105,11 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     @FXML
     private void handleSkipToLastCart() {
         clientController.skipToLastCard();
+    }
+
+    @Override
+    public String getControllerType() {
+        return "cardPhaseController";
     }
 
     /**
@@ -135,7 +142,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     public void initialize() {
-        // Caricamento delle board
+        // Board loading
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(
                     clientController.getCurrentGameInfo().isTestFlight() ?
@@ -158,7 +165,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         this.initializeCosmicCredits();
         this.boardsController.createPaws();
 
-        // Refresh iniziale
+        // initial refresh
         modelFxAdapter.refreshShipBoardOf(clientModel.getMyNickname());
         clientModel.getPlayerClientData().keySet().forEach(nickname ->
                 modelFxAdapter.refreshShipBoardOf(nickname));
@@ -192,7 +199,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                                 String imagePath = newVal.getImageName();
                                 Image cardImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/gui/graphics/cards/" + imagePath)));
 
-                                // Applica l'animazione di caduta dalla profondità (asse Z)
                                 animateCardFall(cardImage);
 
                             } else {
@@ -205,19 +211,15 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     private void animateCardFall(Image cardImage) {
-        // Timeline per l'animazione completa
         Timeline cardFallAnimation = new Timeline();
 
-        // Stato iniziale: carta piccola e lontana (simula profondità)
         cardImageView.setScaleX(0.3);
         cardImageView.setScaleY(0.3);
         cardImageView.setOpacity(0.7);
-        cardImageView.setRotate(-10); // Leggera rotazione per effetto dinamico
+        cardImageView.setRotate(-10);
 
-        // Imposta l'immagine
         cardImageView.setImage(cardImage);
 
-        // Keyframe per la crescita (avvicinamento dall'asse Z)
         KeyFrame scaleUp = new KeyFrame(Duration.millis(400),
                 new KeyValue(cardImageView.scaleXProperty(), 1.05, Interpolator.EASE_OUT),
                 new KeyValue(cardImageView.scaleYProperty(), 1.05, Interpolator.EASE_OUT),
@@ -225,24 +227,20 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 new KeyValue(cardImageView.rotateProperty(), 5, Interpolator.EASE_OUT)
         );
 
-        // Keyframe per il rimbalzo (simulazione dell'atterraggio)
         KeyFrame bounce = new KeyFrame(Duration.millis(600),
                 new KeyValue(cardImageView.scaleXProperty(), 0.95, Interpolator.EASE_IN),
                 new KeyValue(cardImageView.scaleYProperty(), 0.95, Interpolator.EASE_IN),
                 new KeyValue(cardImageView.rotateProperty(), -2, Interpolator.EASE_IN)
         );
 
-        // Keyframe finale: carta in posizione normale
         KeyFrame settle = new KeyFrame(Duration.millis(800),
                 new KeyValue(cardImageView.scaleXProperty(), 1.0, Interpolator.EASE_OUT),
                 new KeyValue(cardImageView.scaleYProperty(), 1.0, Interpolator.EASE_OUT),
                 new KeyValue(cardImageView.rotateProperty(), 0, Interpolator.EASE_OUT)
         );
 
-        // Aggiungi i keyframes alla timeline
         cardFallAnimation.getKeyFrames().addAll(scaleUp, bounce, settle);
 
-        // Avvia l'animazione
         cardFallAnimation.play();
     }
 
@@ -442,7 +440,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         Map<Coordinates, Cabin> cabinsWithCrew = clientModel.getMyShipboard().getCoordinatesAndCabinsWithCrew();
 
-        // Non si dovrebbe mai arrivare qui
+        // This should never be reached
         if (cabinsWithCrew.isEmpty()) {
             showMessage("ILLEGAL STATE: You have no occupied cabins. You cannot sacrifice crew members.", false);
             return;
@@ -517,10 +515,8 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             return;
         }
 
-        // Converti la selezione nel formato richiesto dal server
         List<Coordinates> cabinSelectionForServer = convertSelectionForServer();
 
-        // Invia la selezione al server
         boolean isCorrect = clientController.checkCabinSelection(
                 clientController.getNickname(),
                 cabinSelectionForServer
@@ -551,7 +547,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             Coordinates cabinCoords = entry.getKey();
             int selectedCrewCount = entry.getValue();
 
-            // Aggiungi le coordinate tante volte quanti crew members sono selezionati
             for (int i = 0; i < selectedCrewCount; i++) {
                 serverFormat.add(cabinCoords);
             }
@@ -598,13 +593,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
             Color highlightColor;
             if (selectedCrew == 0) {
-                // Cabina non selezionata - evidenzia in giallo (selezionabile)
                 highlightColor = Color.YELLOW;
             } else if (selectedCrew == maxCrew) {
-                // Tutti i crew members selezionati - evidenzia in rosso (prossimo click deseleziona)
                 highlightColor = Color.RED;
             } else {
-                // Parzialmente selezionata - evidenzia in verde (prossimo click aggiunge)
                 highlightColor = Color.GREEN;
             }
 
@@ -685,7 +677,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             return;
         }
 
-        //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
         if (!isThereAvailableBattery()) {
             showInfoPopupWithCallback("""
                     You ran out of batteries so you can't activate double cannons.
@@ -1132,15 +1123,12 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     private void handleBatteryBoxSelection(Coordinates coordinates) {
 
         ClientCard card = clientModel.getCurrAdventureCard();
-        String componentToActivate;
-
-        if (card instanceof ClientPirates) {
-            componentToActivate = "cannon";
-        } else if (card instanceof ClientFreeSpace) {
-            componentToActivate = "engine";
-        } else {
-            componentToActivate = "component";
-        }
+        String componentToActivate = switch (card) {
+            case ClientPirates clientPirates -> "cannon";
+            case ClientFreeSpace clientFreeSpace -> "engine";
+            case ClientSlaveTraders clientSlaveTraders -> "cannon";
+            case null, default -> "incorrect component";
+        };
 
         if (!isSelectingBattery()) {
             showMessage("You must first select a double " + componentToActivate + ".", false);
@@ -1223,71 +1211,11 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         return false;
     }
 
-//    @Override
-//    public void onGridButtonClick(int row, int column) {
-//        Coordinates coordinates = new Coordinates(row, column);
-//        switch (clientModel.getCurrCardState()) {
-//            case CardState.CHOOSE_ENGINES -> {
-//
-//                if (isSelectingEngine()) {
-//                    handleDoubleEngineSelection(coordinates);
-//                } else if (isSelectingBattery()) {
-//                    handleBatteryBoxSelection(coordinates);
-//                }
-//            }
-//            case CardState.CHOOSE_CANNONS -> {
-//                // Mantieni la vecchia logica per i cannoni (da correggere in futuro)
-//                if (hasChosenDoubleCannon) {
-//                    handleDoubleCannonSelection(coordinates);
-//                } else {
-//                    handleBatteryBoxSelection(coordinates);
-//                }
-//            }
-//            case CardState.HANDLE_CUBES_REWARD ->
-//                handleChooseStorageSelection(coordinates);
-//
-//            case CardState.DANGEROUS_ATTACK -> {
-//                ClientDangerousObject dangerousObj = clientModel.getCurrDangerousObj();
-//                if (dangerousObj != null) {
-//                    String type = dangerousObj.getType();
-//                    if (hasChosenDoubleCannon || hasChosenShield)
-//                        handleSingleBatteryBox(coordinates);
-//                    else if (type.contains("small"))
-//                        handleSmallDanObj(coordinates);
-//                    else if (type.contains("bigMeteorite"))
-//                        handleBigMeteorite(coordinates);
-//                    else if (type.contains("bigShot"))
-//                        handleBigShot(coordinates);
-//                }
-//            }
-//            case CardState.CHECK_SHIPBOARD_AFTER_ATTACK -> {
-//                if (shipParts.isEmpty())
-//                    handeRepairShipboard(coordinates);
-//                else
-//                    handleShipParts(coordinates);
-//            }
-//            case CardState.VISIT_LOCATION ->
-//                showCanVisitLocationMenu();
-//
-//            case CardState.REMOVE_CREW_MEMBERS ->
-//                    handleCabinSelection(coordinates);
-//
-//            case CardState.STARDUST ->
-//                showStardustMenu();
-//
-//            case CardState.EPIDEMIC ->
-//                showEpidemicMenu();
-//
-//            default -> System.err.println("Unknown card state: " + clientModel.getCurrCardState());
-//        }
-//    }
-
     @Override
     public void onGridButtonClick(int row, int column) {
-        // Controllo se è il turno del giocatore corrente
         if (!isPlayerTurnActive()) {
             showTurnMessage();
-            return; // Blocca l'esecuzione se non è il turno del giocatore
+            return;
         }
 
         Coordinates coordinates = new Coordinates(row, column);
@@ -1300,7 +1228,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 }
             }
             case CardState.CHOOSE_CANNONS -> {
-                // Mantieni la vecchia logica per i cannoni (da correggere in futuro)
                 if (isSelectingDoubleCannon()) {
                     handleDoubleCannonSelection(coordinates);
                 } else {
@@ -1341,8 +1268,37 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
             case CardState.EPIDEMIC -> showEpidemicMenu();
 
+            case CardState.ACCEPT_THE_REWARD -> showAcceptTheReward();
+
             default -> System.err.println("Unknown card state: " + clientModel.getCurrCardState());
         }
+    }
+
+    private void showAcceptTheReward() {
+
+        ClientCard card = clientModel.getCurrAdventureCard();
+
+        if (
+                !(card instanceof ClientSlaveTraders ||
+                card instanceof ClientPirates)
+        ) {
+            showMessage("Error: Expected StarDust card", false);
+            return;
+        }
+
+        showMessage("Do you want to visit the location?", true);
+
+        createAndAddButton("Accept the reward", () -> {
+            Platform.runLater(() -> bottomHBox.getChildren().clear());
+            clientController.playerWantsToAcceptTheReward(clientController.getNickname(), true);
+        });
+
+        createAndAddButton("Reject the reward", () -> {
+            Platform.runLater(() -> bottomHBox.getChildren().clear());
+            clientController.playerWantsToAcceptTheReward(clientController.getNickname(), false);
+            showWaitingMessage();
+        });
+
     }
 
     /**
@@ -1352,29 +1308,23 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
      * @return true se il giocatore può interagire, false altrimenti
      */
     private boolean isPlayerTurnActive() {
-        // Controllo base: è il mio turno?
         if (!clientModel.isMyTurn()) {
             return false;
         }
 
         CardState currentState = clientModel.getCurrCardState();
 
-        // Utilizza la stessa logica del ClientController per determinare
-        // se lo stato richiede che sia specificamente il turno del giocatore
         if (clientController.isStateRegardingCurrentPlayerOnly(currentState)) {
-            // Per questi stati, se isMyTurn() è true, il giocatore può agire
             return true;
         }
 
-        // Per stati che potrebbero permettere azioni simultanee o avere logica speciale
-        switch (currentState) {
+        // For states that may allow simultaneous actions or have special logic
+            switch (currentState) {
             case CardState.START_CARD:
             case CardState.END_OF_CARD:
-                // Stati informativi, generalmente non richiedono interazione
                 return false;
 
             default:
-                // Per altri stati non specificati, segui la logica base del turno
                 return true;
         }
     }
@@ -1387,7 +1337,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         CardState currentState = clientModel.getCurrCardState();
         String currentPlayer = clientModel.getCurrentPlayer();
 
-        // Replica i messaggi dal ClientController per coerenza
         if (clientController.isStateRegardingCurrentPlayerOnly(currentState)) {
             if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
                 showMessage(currentPlayer + " is currently playing. Soon will be your turn", true);
@@ -1395,7 +1344,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 showMessage("Wait for " + currentPlayer + " to make his choice", true);
             }
         } else {
-            // Per stati generali, messaggio semplice
             if (currentPlayer != null && !currentPlayer.equals(clientModel.getMyNickname())) {
                 showMessage("It's " + currentPlayer + "'s turn.", true);
             } else {
@@ -1503,7 +1451,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             return;
         }
 
-        //se quel box non contiene batterie non posso selezionarlo
         BatteryBox batteryBox = (BatteryBox) component;
         if (batteryBox.getRemainingBatteries() == 0) {
             showMessage("The selected battery box does not have enough batteries", false);
@@ -1723,7 +1670,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                         return;
                     }
 
-                    //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
                     if (!isThereAvailableBattery()) {
                         showInfoPopupWithCallback("No batteries available, you will only defend your ship with single ones...",
                                 clientModel.getCurrAdventureCard(),
@@ -1744,15 +1690,14 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     private void showOverlayPopup(String title, String message, @NotNull Runnable onClose) {
-        // Overlay di sfondo
         StackPane overlay = new StackPane();
         overlay.getStyleClass().add("popup-overlay");
 
-        // Container del popup
+        // popup container
         VBox popupContent = new VBox();
         popupContent.getStyleClass().add("popup-container");
 
-        // Titolo (solo se fornito)
+        // title
         if (title != null && !title.trim().isEmpty()) {
             Label titleLabel = new Label(title);
             titleLabel.getStyleClass().add("popup-title");
@@ -1760,18 +1705,18 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             popupContent.getChildren().add(titleLabel);
         }
 
-        // Messaggio
+        // message
         Label messageLabel = new Label(message);
         messageLabel.getStyleClass().add("popup-message");
         messageLabel.setWrapText(true);
         popupContent.getChildren().add(messageLabel);
 
-        // Container per i pulsanti
+        // button container
         HBox buttonContainer = new HBox();
         buttonContainer.setAlignment(javafx.geometry.Pos.CENTER);
         buttonContainer.setSpacing(15);
 
-        // Pulsante Conferma
+        // confirm button
         Button confirmButton = new Button("Confirm");
         confirmButton.getStyleClass().addAll("popup-button", "confirm-button");
         confirmButton.setOnAction(e -> {
@@ -1779,23 +1724,12 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             onClose.run();
         });
 
-//        // Pulsante Annulla
-//        Button cancelButton = new Button("Cancel");
-//        cancelButton.getStyleClass().addAll("popup-button", "cancel-button");
-//        cancelButton.setOnAction(e -> {
-//            centerStackPane.getChildren().remove(overlay);
-//            // Non esegue nessuna azione = annullamento
-//            showMessage("Operation cancelled.", false); // Feedback opzionale
-//        });
-
-//        buttonContainer.getChildren().addAll(confirmButton, cancelButton);
         buttonContainer.getChildren().add(confirmButton);
         popupContent.getChildren().add(buttonContainer);
 
-        // Assembla il popup
         overlay.getChildren().add(popupContent);
 
-        // Chiudi cliccando fuori dal popup (comportamento di annullamento)
+        // Close
         overlay.setOnMouseClicked(e -> {
             if (e.getTarget() == overlay) {
                 centerStackPane.getChildren().remove(overlay);
@@ -1803,7 +1737,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             }
         });
 
-        // Aggiungi l'overlay
         Platform.runLater(() -> {
             centerStackPane.getChildren().add(overlay);
             overlay.toFront();
@@ -1882,7 +1815,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         ClientCard currCard = clientModel.getCurrAdventureCard();
         int cubeMalus;
 
-        // Estrai il malus dalla carta corrente
+        // Extract the malus from the current card
         if (currCard.getCardName().equals("WarField")) {
             ClientWarField card = (ClientWarField) currCard;
             cubeMalus = card.getCubeMalus();
@@ -1894,12 +1827,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             return;
         }
 
-        // Inizializza il manager per la rimozione (lista vuota per reward, cubeMalus per malus)
         storageManager = new StorageSelectionManager(new ArrayList<>(), cubeMalus, clientModel.getMyShipboard());
 
         ShipBoardClient shipBoard = clientModel.getMyShipboard();
 
-        // Controlla se ci sono abbastanza cubi da rimuovere
         List<CargoCube> allCubes = shipBoard.getCargoCubes();
         remainingCubesToRemove = cubeMalus;
 
@@ -1955,26 +1886,24 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     private void handleCubeRemovalSelection(Coordinates coordinates) {
-        // Verifica se le coordinate sono nella lista dei cubi più preziosi
+        // Check if the coordinates are in the list of the most valuable cubes
         if (!mostPreciousCube.contains(coordinates)) {
             showMessage("You must select one of the highlighted storages containing the most precious cubes.", false);
             return;
         }
 
-        // Aggiungi alla selezione
         selectedStorage.add(coordinates);
         mostPreciousCube.remove(coordinates);
         remainingCubesToRemove--;
 
         showMessage("Cube removed. Remaining cubes to remove: " + remainingCubesToRemove, false);
 
-        // Aggiorna l'highlighting
+        // Update highlighting
         boardsController.removeHighlightColor();
 
         if (remainingCubesToRemove > 0) {
             highlightMostPreciousCubes();
         } else {
-            // Tutti i cubi richiesti sono stati rimossi
             handleCubeMalusConfirmation();
         }
     }
@@ -1998,19 +1927,17 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             return;
         }
 
-        // Aggiungi la batteria alla selezione
         selectedBatteryBoxes.add(coordinates);
         remainingCubesToRemove--;
 
         showMessage("Battery removed. Remaining batteries to remove: " + remainingCubesToRemove, false);
 
-        // Aggiorna l'highlighting
+        // Update highlighting
         boardsController.removeHighlightColor();
 
         if (remainingCubesToRemove > 0) {
             highlightBatteryBoxes();
         } else {
-            // Tutte le batterie richieste sono state rimosse
             boardsController.removeHighlightColor();
             Platform.runLater(() -> bottomHBox.getChildren().clear());
             isRemovingBatteries = false;
@@ -2026,13 +1953,12 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             return;
         }
 
-        // Invia la selezione al server
+        //sending the selection to the server
         Platform.runLater(() -> bottomHBox.getChildren().clear());
         boardsController.removeHighlightColor();
 
         clientController.playerChoseStorageAndBattery(clientController.getNickname(), selectedStorage, selectedBatteryBoxes);
 
-        // Reset delle variabili
         selectedStorage.clear();
         mostPreciousCube.clear();
         isRemovingBatteries = false;
@@ -2041,19 +1967,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         showMessage("Cube malus applied successfully!", false);
     }
 
-    private void finalizeCubeMalusSelection() {
-        Platform.runLater(() -> bottomHBox.getChildren().clear());
-        boardsController.removeHighlightColor();
-
-        showMessage("Malus applied. All required items removed.", false);
-        clientController.playerChoseStorage(clientController.getNickname(), selectedStorage);
-
-        // Reset delle variabili
-        selectedStorage.clear();
-        mostPreciousCube.clear();
-        isRemovingBatteries = false;
-        remainingCubesToRemove = 0;
-    }
 
     private void highlightMostPreciousCubes() {
         boardsController.removeHighlightColor();
@@ -2097,7 +2010,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
             if (batteryBox.getRemainingBatteries() > 0) {
                 Set<Coordinates> coords = shipboard.getCoordinatesOfComponents(new ArrayList<>(List.of(batteryBox)));
 
-                // Per ogni battery box, aggiungi le sue coordinate tante volte quante sono le batterie
                 for (Coordinates coord : coords) {
                     for (int i = 0; i < batteryBox.getRemainingBatteries(); i++) {
                         batteriesCoordinates.add(coord);
@@ -2123,18 +2035,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 () -> System.exit(0));
     }
 
-    private void createEarlyLandingDisplay() {
-        String warningMessage = ("""
-        🛬 EARLY LANDING 🛬
-        Your ship marker has been removed from the flight board!
-        You have abandoned the space race and landed safely.
-        You can continue to follow the game as a spectator until the end.
-        
-        You can still win if you have accumulated enough credits!
-        Continue watching the game and see how it ends!""");
-
-        showOverlayPopup("warning Message", warningMessage, () -> clientController.land());
-    }
 
     private void createOtherPlayersDisplay(String nickname) {
         String warningMessage = String.format("""

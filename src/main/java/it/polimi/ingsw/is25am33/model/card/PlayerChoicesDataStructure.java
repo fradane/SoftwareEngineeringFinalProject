@@ -148,7 +148,7 @@ public class PlayerChoicesDataStructure implements Serializable {
         return Optional.ofNullable(chosenDoubleCannons);
     }
 
-    // Getter per la serializzazione JSON
+    // Getter for JSON serialization
    public List<Coordinates> getCabins() {
         return chosenCabins;
     }
@@ -294,28 +294,6 @@ public class PlayerChoicesDataStructure implements Serializable {
         }
 
         /**
-         * Sets the single battery box selected by the player.
-         *
-         * @param chosenBatteryBox the chosen {@link BatteryBox} component.
-         * @return this builder instance for method chaining.
-         */
-//        public Builder setChosenBatteryBox(BatteryBox chosenBatteryBox) {
-//            this.chosenBatteryBox = chosenBatteryBox;
-//            return this;
-//        }
-
-        /**
-         * Sets the double cannon selected by the player.
-         *
-         * @param chosenDoubleCannon the chosen {@link DoubleCannon} component.
-         * @return this builder instance for method chaining.
-         */
-//        public Builder setChosenDoubleCannon(DoubleCannon chosenDoubleCannon) {
-//            this.chosenDoubleCannon = chosenDoubleCannon;
-//            return this;
-//        }
-
-        /**
          * Sets the list of double cannons selected by the player.
          *
          * @param chosenDoubleCannons the list of chosen {@link Cannon} components.
@@ -344,7 +322,6 @@ public class PlayerChoicesDataStructure implements Serializable {
          * @return a new {@link PlayerChoicesDataStructure} instance.
          */
         public PlayerChoicesDataStructure build() {
-            // Inizializza tutte le liste
             if (chosenDoubleEngines == null) chosenDoubleEngines = new ArrayList<Coordinates>();
             if (chosenBatteryBoxes == null) chosenBatteryBoxes = new ArrayList<Coordinates>();
             if (chosenCabins == null) chosenCabins = new ArrayList<>();

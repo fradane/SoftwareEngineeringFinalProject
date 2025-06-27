@@ -353,10 +353,15 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
 
     }
 
+
     /**
-     * Gestisce gli aggiornamenti degli storage tramite la nuova struttura dati.
-     * 
-     * @param storageUpdates mappa degli aggiornamenti degli storage
+     * Handles updates to the player's cargo storage by validating the changes, applying them to the game model,
+     * and notifying the game clients about the updated storage state. If the updates are invalid, an error
+     * notification is sent to the current player.
+     *
+     * @param storageUpdates a map where the key is a {@code Coordinates} object representing the storage location
+     *                       on the player's ship, and the value is a list of {@code CargoCube} objects to be added
+     *                       to that storage location.
      */
     private void handleStorageUpdates(Map<Coordinates, List<CargoCube>> storageUpdates) {
         try {
@@ -375,7 +380,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             
         } catch (IllegalArgumentException e) {
-            // Gestione errore con retry
+
             String currentPlayer = gameModel.getCurrPlayer().getNickname();
             gameModel.getGameClientNotifier().notifyClients(
                 Set.of(currentPlayer),
@@ -383,15 +388,13 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
                     clientController.notifyStorageError(nickname, e.getMessage());
                 }
             );
-            
-            // Ripristina stato shipboard
+
             gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
                 clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), 
                     gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType());
             });
-            
-            // Rimani in HANDLE_CUBES_REWARD per il retry
+
         }
     }
 

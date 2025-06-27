@@ -20,8 +20,8 @@ public class ServerDeserializer extends KeyDeserializer {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     static {
-        mapper.registerModule(new Jdk8Module());       // <-- aggiungi
-        // eventuali altri moduli (JavaTimeModule, ecc.)
+        mapper.registerModule(new Jdk8Module());       // <-- add
+        // other modules(JavaTimeModule, ecc.)
     }
 
     @Override

@@ -28,7 +28,7 @@ public class SmugglersTest {
 
             }
         };
-        gameClientNotifier = new GameClientNotifier(gameModel, new ConcurrentHashMap<>());
+        gameClientNotifier = new GameClientNotifier( new ConcurrentHashMap<>());
         gameModel.setGameClientNotifier(gameClientNotifier);
         gameModel.getFlyingBoard().setGameClientNotifier(gameClientNotifier);
 
@@ -89,39 +89,114 @@ public class SmugglersTest {
     }
 
     @Test
-    void testHandleCubesRewardFlow() {
-        //TODO modificare questi test con funzionalità di redistribuzione dei cubi
-//        // Prepara la carta
-//        smugglers.setReward(Arrays.asList(CargoCube.GREEN, CargoCube.BLUE));
-//        smugglers.setCurrState(CardState.HANDLE_CUBES_REWARD);
-//
-//        ShipBoard shipBoard = player1.getPersonalBoard();
-//        Map<Direction, ConnectorType> connectors = new ConcurrentHashMap<>();
-//        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
-//        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
-//        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
-//        connectors.put(Direction.WEST,ConnectorType.SINGLE);
-//        // Aggiungiamo due Storage liberi sulla plancia
-//        Storage storage1 = new StandardStorage(connectors,2);
-//        storage1.addCube(CargoCube.GREEN);
-//        storage1.addCube(CargoCube.BLUE);
-//        Storage storage2 = new StandardStorage(connectors, 3);
-//        shipBoard.getShipMatrix()[6][7] = storage1;
-//        shipBoard.getShipMatrix()[7][6] = storage2;
-//
-//        PlayerChoicesDataStructure choices = new PlayerChoicesDataStructure
-//                .Builder()
-//                .setChosenStorage(Arrays.asList(new Coordinates(6,7), new Coordinates(7 ,6)))
-//                .build();
-//
-//        smugglers.play(choices);
-//
-//        // Verifica che gli Storage contengano i cubi assegnati
-//        assertTrue( storage1.getStockedCubes().contains(CargoCube.GREEN), "Il primo Storage dovrebbe contenere RED");
-//        assertTrue(storage2.getStockedCubes().contains(CargoCube.BLUE), "Il secondo Storage dovrebbe contenere BLUE");
-//
-//        // Verifica stato e reset
-//        assertEquals(CardState.END_OF_CARD, smugglers.getCurrState(), "Stato dovrebbe essere END_OF_CARD");
+    void testHandleCubesRewardFlowValidChoise() {
+        // Prepara la carta
+        smugglers.setReward(Arrays.asList(CargoCube.GREEN, CargoCube.BLUE));
+        smugglers.setCurrState(CardState.HANDLE_CUBES_REWARD);
+
+        ShipBoard shipBoard = player1.getPersonalBoard();
+        Map<Direction, ConnectorType> connectors = new ConcurrentHashMap<>();
+        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
+        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
+        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
+        connectors.put(Direction.WEST,ConnectorType.SINGLE);
+        // Aggiungiamo due Storage liberi sulla plancia
+        Storage storage1 = new StandardStorage(connectors,2);
+        storage1.addCube(CargoCube.BLUE);
+        Storage storage2 = new StandardStorage(connectors, 3);
+        shipBoard.getShipMatrix()[6][7] = storage1;
+        shipBoard.getShipMatrix()[7][6] = storage2;
+
+        Map<Coordinates, List<CargoCube>> storageUpdates = new ConcurrentHashMap<>();
+        storageUpdates.put(new Coordinates(6,7), Arrays.asList(CargoCube.GREEN));
+        storageUpdates.put(new Coordinates(7,6), Arrays.asList(CargoCube.BLUE,CargoCube.BLUE));
+
+        PlayerChoicesDataStructure choices = new PlayerChoicesDataStructure
+                .Builder()
+                .setStorageUpdates(storageUpdates)
+                .build();
+
+        smugglers.play(choices);
+
+        // Verifica che gli Storage contengano i cubi assegnati
+        assertEquals(1, storage1.getStockedCubes().size());
+        assertEquals(2, storage2.getStockedCubes().size());
+        assertFalse( storage1.getStockedCubes().contains(CargoCube.BLUE));
+        assertTrue( storage1.getStockedCubes().contains(CargoCube.GREEN));
+        assertFalse(storage2.getStockedCubes().contains(CargoCube.GREEN));
+
+        // Verifica stato e reset
+        assertEquals(CardState.END_OF_CARD, smugglers.getCurrState(), "Stato dovrebbe essere END_OF_CARD");
+    }
+
+    @Test
+    void testHandleCubesRewardFlowInvalidChoise() {
+        // Prepara la carta
+        smugglers.setReward(Arrays.asList(CargoCube.RED, CargoCube.BLUE));
+        smugglers.setCurrState(CardState.HANDLE_CUBES_REWARD);
+
+        ShipBoard shipBoard = player1.getPersonalBoard();
+        Map<Direction, ConnectorType> connectors = new ConcurrentHashMap<>();
+        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
+        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
+        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
+        connectors.put(Direction.WEST,ConnectorType.SINGLE);
+
+        // Aggiungiamo due Storage liberi sulla plancia
+        Storage storage1 = new StandardStorage(connectors,2);
+        storage1.addCube(CargoCube.BLUE);
+        Storage storage2 = new StandardStorage(connectors, 3);
+        shipBoard.getShipMatrix()[6][7] = storage1;
+        shipBoard.getShipMatrix()[7][6] = storage2;
+
+        // Test 1: Cubo rosso in StandardStorage
+        Map<Coordinates, List<CargoCube>> storageUpdates = new ConcurrentHashMap<>();
+        storageUpdates.put(new Coordinates(6,7), Arrays.asList(CargoCube.RED));
+        storageUpdates.put(new Coordinates(7,6), Arrays.asList(CargoCube.BLUE));
+
+        PlayerChoicesDataStructure choices = new PlayerChoicesDataStructure
+                .Builder()
+                .setStorageUpdates(storageUpdates)
+                .build();
+
+        smugglers.play(choices);
+        assertEquals(1,storage1.getStockedCubes().size());
+        assertTrue(storage1.getStockedCubes().contains(CargoCube.BLUE));
+        assertTrue(storage2.getStockedCubes().isEmpty());
+        assertEquals(CardState.HANDLE_CUBES_REWARD, smugglers.getCurrState());
+
+        // Test 2: Troppi cubi per lo storage
+        Map<Coordinates, List<CargoCube>> storageUpdates1 = new ConcurrentHashMap<>();
+        storageUpdates1.put(new Coordinates(6,7), Arrays.asList(CargoCube.GREEN, CargoCube.BLUE, CargoCube.YELLOW, CargoCube.GREEN));
+        storageUpdates1.put(new Coordinates(7,6), Arrays.asList(CargoCube.BLUE));
+
+        PlayerChoicesDataStructure choices1 = new PlayerChoicesDataStructure
+                .Builder()
+                .setStorageUpdates(storageUpdates1)
+                .build();
+
+        smugglers.play(choices1);
+        assertEquals(1,storage1.getStockedCubes().size());
+        assertTrue(storage1.getStockedCubes().contains(CargoCube.BLUE));
+        assertTrue(storage2.getStockedCubes().isEmpty());
+        assertEquals(CardState.HANDLE_CUBES_REWARD, smugglers.getCurrState());
+
+        // Test 3: Coordinate non valide
+        Map<Coordinates, List<CargoCube>> storageUpdates2 = new ConcurrentHashMap<>();
+        storageUpdates2.put(new Coordinates(0,7), Arrays.asList(CargoCube.GREEN));
+        storageUpdates2.put(new Coordinates(7,6), Arrays.asList(CargoCube.BLUE));
+
+        PlayerChoicesDataStructure choices2 = new PlayerChoicesDataStructure
+                .Builder()
+                .setStorageUpdates(storageUpdates2)
+                .build();
+
+        smugglers.play(choices2);
+        assertEquals(1,storage1.getStockedCubes().size());
+        assertTrue(storage1.getStockedCubes().contains(CargoCube.BLUE));
+        assertTrue(storage2.getStockedCubes().isEmpty());
+        assertEquals(CardState.HANDLE_CUBES_REWARD, smugglers.getCurrState());
+
     }
 
     @Test

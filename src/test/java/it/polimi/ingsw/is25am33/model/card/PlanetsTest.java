@@ -28,7 +28,7 @@ public class PlanetsTest {
 
             }
         };
-        gameClientNotifier = new GameClientNotifier(gameModel, new ConcurrentHashMap<>());
+        gameClientNotifier = new GameClientNotifier( new ConcurrentHashMap<>());
         gameModel.setGameClientNotifier(gameClientNotifier);
         gameModel.getFlyingBoard().setGameClientNotifier(gameClientNotifier);
 
@@ -64,38 +64,42 @@ public class PlanetsTest {
 
     @Test
     void testHandleCubesRewardFlow() {
-        //TODO modificare questi test con funzionalità di redistribuzione dei cubi
-//        Planet planet1 = new Planet(List.of(CargoCube.GREEN,CargoCube.BLUE));
-//        planets.setCurrPlanet(planet1);
-//        planets.setCurrState(CardState.HANDLE_CUBES_REWARD);
-//
-//        ShipBoard shipBoard = player1.getPersonalBoard();
-//        Map<Direction, ConnectorType> connectors = new ConcurrentHashMap<>();
-//        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
-//        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
-//        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
-//        connectors.put(Direction.WEST,ConnectorType.SINGLE);
-//        // Aggiungiamo due Storage liberi sulla plancia
-//        Storage storage1 = new StandardStorage(connectors,2);
-//        storage1.addCube(CargoCube.GREEN);
-//        storage1.addCube(CargoCube.BLUE);
-//        Storage storage2 = new StandardStorage(connectors, 3);
-//        shipBoard.getShipMatrix()[6][7] = storage1;
-//        shipBoard.getShipMatrix()[7][6] = storage2;
-//
-//        PlayerChoicesDataStructure choices = new PlayerChoicesDataStructure
-//                .Builder()
-//                .setChosenStorage(Arrays.asList(new Coordinates(6,7), new Coordinates(7 ,6)))
-//                .build();
-//
-//        planets.play(choices);
-//
-//        // Verifica che gli Storage contengano i cubi assegnati
-//        assertTrue( storage1.getStockedCubes().contains(CargoCube.GREEN), "Il primo Storage dovrebbe contenere GREEN");
-//        assertTrue(storage2.getStockedCubes().contains(CargoCube.BLUE), "Il secondo Storage dovrebbe contenere BLUE");
-//
-//        // Verifica stato e reset
-//        assertEquals(CardState.END_OF_CARD, planets.getCurrState(), "Stato dovrebbe essere END_OF_CARD");
+        // Prepara la carta
+        planets.setCurrState(CardState.HANDLE_CUBES_REWARD);
+
+        ShipBoard shipBoard = player1.getPersonalBoard();
+        Map<Direction, ConnectorType> connectors = new ConcurrentHashMap<>();
+        connectors.put(Direction.NORTH,ConnectorType.UNIVERSAL);
+        connectors.put(Direction.EAST,ConnectorType.DOUBLE);
+        connectors.put(Direction.SOUTH,ConnectorType.DOUBLE);
+        connectors.put(Direction.WEST,ConnectorType.SINGLE);
+        // Aggiungiamo due Storage liberi sulla plancia
+        Storage storage1 = new StandardStorage(connectors,2);
+        storage1.addCube(CargoCube.BLUE);
+        Storage storage2 = new StandardStorage(connectors, 3);
+        shipBoard.getShipMatrix()[6][7] = storage1;
+        shipBoard.getShipMatrix()[7][6] = storage2;
+
+        Map<Coordinates, List<CargoCube>> storageUpdates = new ConcurrentHashMap<>();
+        storageUpdates.put(new Coordinates(6,7), Arrays.asList(CargoCube.GREEN));
+        storageUpdates.put(new Coordinates(7,6), Arrays.asList(CargoCube.BLUE,CargoCube.BLUE));
+
+        PlayerChoicesDataStructure choices = new PlayerChoicesDataStructure
+                .Builder()
+                .setStorageUpdates(storageUpdates)
+                .build();
+
+        planets.play(choices);
+
+        // Verifica che gli Storage contengano i cubi assegnati
+        assertEquals(1, storage1.getStockedCubes().size());
+        assertEquals(2, storage2.getStockedCubes().size());
+        assertFalse( storage1.getStockedCubes().contains(CargoCube.BLUE));
+        assertTrue( storage1.getStockedCubes().contains(CargoCube.GREEN));
+        assertFalse(storage2.getStockedCubes().contains(CargoCube.GREEN));
+
+        // Verifica stato e reset
+        assertEquals(CardState.END_OF_CARD, planets.getCurrState(), "Stato dovrebbe essere END_OF_CARD");
     }
 
     @Test
