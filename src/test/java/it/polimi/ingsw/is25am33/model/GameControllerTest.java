@@ -563,14 +563,14 @@ public class GameControllerTest {
 
     @Test
     void testPlayerPlacesPown() {
+        PlayerColor color = PlayerColor.BLUE;
+        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
         gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.playerPlacesPawn(PLAYER_NICKNAME);
         assertFalse(gameController.getGameModel().getFlyingBoard().getRanking().containsKey(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME)));
 
         gameController.getGameModel().setCurrGameState(GameState.BUILD_SHIPBOARD);
-        PlayerColor color = PlayerColor.BLUE;
-        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
         gameController.playerPlacesPawn(PLAYER_NICKNAME);
         assertTrue(gameController.getGameModel().getFlyingBoard().getRanking().containsKey(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME)));
 
@@ -578,6 +578,8 @@ public class GameControllerTest {
 
     @Test
     void testPlayerHAndleBigMeteorite(){
+        PlayerColor color = PlayerColor.BLUE;
+        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
         gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.playerHandleBigMeteorite(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
@@ -610,6 +612,8 @@ public class GameControllerTest {
 
     @Test
     void testPlayerHAndleSmallObject(){
+        PlayerColor color = PlayerColor.BLUE;
+        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
         gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.playerHandleSmallDanObj(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
@@ -641,6 +645,8 @@ public class GameControllerTest {
 
     @Test
     void testPlayerWantsToVisitLocation(){
+        PlayerColor color = PlayerColor.BLUE;
+        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
         gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.playerWantsToVisitLocation(PLAYER_NICKNAME,true);
@@ -686,6 +692,9 @@ public class GameControllerTest {
 
     @Test
     void testPlayerChooseDoubleCannons(){
+        PlayerColor color = PlayerColor.BLUE;
+        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
+        
         gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.playerChoseDoubleCannons(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
 
@@ -716,6 +725,9 @@ public class GameControllerTest {
 
     @Test
     void testPlayerChooseCabin(){
+        PlayerColor color = PlayerColor.BLUE;
+        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
+        
         gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.playerChoseCabins(PLAYER_NICKNAME,List.of(new Coordinates(6,7)));
 
@@ -745,7 +757,10 @@ public class GameControllerTest {
 
     @Test
     void testPlayerChooseDoubleEngine(){
-        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        PlayerColor color = PlayerColor.BLUE;
+        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
+        
+        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.playerChoseDoubleEngines(PLAYER_NICKNAME,List.of(new Coordinates(6,7)),List.of(new Coordinates(6,7)));
 
         Planets planets = new Planets();
@@ -774,16 +789,8 @@ public class GameControllerTest {
 
     @Test
     void testPlayerWantsToVisitPlanets(){
-        gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
-        gameController.playerWantsToVisitPlanet(PLAYER_NICKNAME,1);
-
-        AbandonedStation abandonedStation = new AbandonedStation();
-        abandonedStation.setGame(gameController.getGameModel());
-        abandonedStation.setCurrState(CardState.START_CARD);
-        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
-        gameController.getGameModel().setCurrAdventureCard(abandonedStation);
-        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
-        gameController.playerWantsToVisitPlanet(PLAYER_NICKNAME,1);
+        PlayerColor color = PlayerColor.BLUE;
+        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
         Planets planets = new Planets(){
 
@@ -798,6 +805,21 @@ public class GameControllerTest {
         planets.setGame(gameController.getGameModel());
         planets.setCurrState(CardState.START_CARD);
         gameController.getGameModel().setCurrAdventureCard(planets);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerWantsToVisitPlanet(PLAYER_NICKNAME,1);
+
+        AbandonedStation abandonedStation = new AbandonedStation();
+        abandonedStation.setGame(gameController.getGameModel());
+        abandonedStation.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().setGameClientNotifier(new GameClientNotifier(new ConcurrentHashMap<>()));
+        gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
+        gameController.getGameModel().setCurrAdventureCard(abandonedStation);
+        gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
+        gameController.playerWantsToVisitPlanet(PLAYER_NICKNAME,1);
+
+        planets.setGame(gameController.getGameModel());
+        planets.setCurrState(CardState.START_CARD);
+        gameController.getGameModel().setCurrAdventureCard(planets);
         gameController.getGameModel().getFlyingBoard().getRanking().put(gameController.getGameModel().getPlayers().get(PLAYER_NICKNAME),1);
         gameController.getGameModel().setCurrGameState(GameState.PLAY_CARD);
         assertDoesNotThrow( () ->  gameController.playerWantsToVisitLocation(PLAYER_NICKNAME,true));
@@ -805,6 +827,8 @@ public class GameControllerTest {
 
     @Test
     void testPlayerChooseStorage(){
+        PlayerColor color = PlayerColor.BLUE;
+        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
         gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.playerChoseStorage(PLAYER_NICKNAME,List.of(new Coordinates(6,7)));
@@ -885,6 +909,8 @@ public class GameControllerTest {
 
     @Test
     void testPlayerWantsToAcceptTheReward(){
+        PlayerColor color = PlayerColor.BLUE;
+        gameController.addPlayer(PLAYER_NICKNAME, color, clientController);
 
         gameController.getGameModel().setCurrGameState(GameState.PLACE_CREW);
         gameController.playerWantsToAcceptTheReward(PLAYER_NICKNAME, true);
