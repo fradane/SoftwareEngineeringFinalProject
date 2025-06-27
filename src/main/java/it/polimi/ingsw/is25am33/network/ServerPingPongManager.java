@@ -61,8 +61,7 @@ public class ServerPingPongManager {
         synchronized (lock) {
             ScheduledFuture<?> pingFuture = scheduler.scheduleAtFixedRate(() -> {
                 sendPing.run(); // invia ping
-                //TODO cambiare a milliseconds
-            }, 1000, 5000, TimeUnit.MILLISECONDS);
+            }, 1000, 3000, TimeUnit.MILLISECONDS);
 
             pingTasks.put(nickname, pingFuture);
         }
@@ -84,7 +83,7 @@ public class ServerPingPongManager {
                System.out.println("DISCONNECTION: No pong received from " + nickname + ".");
                 stop(nickname);
                 onTimeout.run();
-            }, 9000, TimeUnit.MILLISECONDS); // TODO cambiare a MILLISECONDS
+            }, 9500, TimeUnit.MILLISECONDS);
 
             pongTimeouts.put(nickname, pongFuture);
         }

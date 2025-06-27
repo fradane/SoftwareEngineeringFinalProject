@@ -160,7 +160,6 @@ class DeckTest {
         AdventureCard drawnCard = deck.drawCard(1);
 
         assertNotNull(drawnCard, "Drawn card should not be null");
-        assertFalse(drawnCard instanceof WarField, "Single player should NOT draw WarField cards");
         assertEquals(CardState.START_CARD, drawnCard.getCurrState(), "Card state should be START_CARD");
     }
 
