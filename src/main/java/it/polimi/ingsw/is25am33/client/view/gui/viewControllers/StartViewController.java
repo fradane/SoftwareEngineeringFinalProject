@@ -10,6 +10,21 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.util.Duration;
 
+/**
+ * Controller class for the start view of the application.
+ * Handles the initial user interaction where players enter their nickname
+ * and attempt to connect to the game server.
+ * <p>
+ * This controller manages:
+ * - Nickname input validation
+ * - Server connection attempts
+ * - Visual feedback through animations
+ * - Error message display
+ * - Initial game setup process
+ * <p>
+ * The view contains a text field for nickname input, a start button
+ * to initiate the connection, and an error label for feedback messages.
+ */
 public class StartViewController extends GuiController {
 
     @FXML
@@ -185,6 +200,12 @@ public class StartViewController extends GuiController {
         });
     }
 
+    /**
+     * Displays a disconnect message to the user, ensuring the message is shown
+     * with priority for disconnection events, and then terminates the application.
+     *
+     * @param message the message to be displayed to the user explaining the disconnection reason.
+     */
     public void showDisconnectMessage(String message) {
         showMessage(message, true);
         System.exit(0);

@@ -49,10 +49,11 @@ public class EndGameController extends GuiController implements Initializable {
         }
     }
 
+
     /**
-     * Shows a message to the user in the end game view.
+     * Shows a message in the end game view.
      *
-     * @param message the message to display
+     * @param message     the message to display
      * @param isPermanent whether the message should persist or fade out
      */
     @Override
@@ -60,6 +61,11 @@ public class EndGameController extends GuiController implements Initializable {
         System.out.println("EndGame message: " + message);
     }
 
+    /**
+     * Gets the type of this controller.
+     *
+     * @return the controller type identifier string
+     */
     @Override
     public String getControllerType() {
         return "endGameController";
@@ -78,9 +84,6 @@ public class EndGameController extends GuiController implements Initializable {
         });
     }
 
-    /**
-     * Creates the main end game results display - NO SCROLL
-     */
     private void createEndGameDisplay(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
         centerStackPane.getChildren().clear();
 
@@ -141,9 +144,7 @@ public class EndGameController extends GuiController implements Initializable {
         overlay.toFront();
     }
 
-    /**
-     * Creates compact header
-     */
+
     private VBox createCompactHeader(PlayerFinalData myData) {
         VBox headerBox = new VBox(8);
         headerBox.setAlignment(Pos.CENTER);
@@ -161,9 +162,8 @@ public class EndGameController extends GuiController implements Initializable {
         return headerBox;
     }
 
-    /**
-     * Creates compact ranking section
-     */
+
+
     private VBox createCompactRankingSection(List<PlayerFinalData> finalRanking,
                                              Map<String, PlayerFinalData> nicknameToData,
                                              String myNickname) {
@@ -202,9 +202,7 @@ public class EndGameController extends GuiController implements Initializable {
         return rankingBox;
     }
 
-    /**
-     * Creates compact player row
-     */
+
     private HBox createCompactPlayerRow(PlayerFinalData data, String nickname, String myNickname,
                                         int displayPosition, int maxCredits, String[] medals) {
         HBox playerRow = new HBox(8);
@@ -254,9 +252,7 @@ public class EndGameController extends GuiController implements Initializable {
         return playerRow;
     }
 
-    /**
-     * Creates compact personal section
-     */
+
     private VBox createCompactPersonalSection(PlayerFinalData myData,
                                               List<PlayerFinalData> finalRanking,
                                               List<String> playersNicknamesWithPrettiestShip) {
@@ -275,9 +271,7 @@ public class EndGameController extends GuiController implements Initializable {
         return personalBox;
     }
 
-    /**
-     * Creates compact breakdown
-     */
+
     private VBox createCompactBreakdown(PlayerFinalData myData,
                                         List<PlayerFinalData> finalRanking,
                                         List<String> playersNicknamesWithPrettiestShip) {
@@ -346,9 +340,7 @@ public class EndGameController extends GuiController implements Initializable {
         return detailsBox;
     }
 
-    /**
-     * Compact final message
-     */
+
     private VBox createCompactFinalMessage(PlayerFinalData myData, List<PlayerFinalData> finalRanking) {
         VBox messageBox = new VBox(5);
         messageBox.getStyleClass().add("endgame-final-message");
@@ -384,9 +376,6 @@ public class EndGameController extends GuiController implements Initializable {
         return messageBox;
     }
 
-    /**
-     * Handles game exit
-     */
     private void handleGameExit() {
         try {
             if (clientController != null) {
@@ -467,6 +456,11 @@ public class EndGameController extends GuiController implements Initializable {
         return totalCredits;
     }
 
+    /**
+     * Shows a disconnect message to the user and exits the application.
+     *
+     * @param message the disconnect message to display
+     */
     public void showDisconnectMessage(String message) {
         showMessage(message, true);
         System.exit(0);

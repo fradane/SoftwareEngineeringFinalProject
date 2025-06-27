@@ -31,6 +31,36 @@ import java.util.stream.IntStream;
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.ERROR;
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.STANDARD;
 
+/**
+ * Controller class for managing the ship building and validation phases in the game's GUI.
+ * This controller handles all user interactions during ship construction, component placement,
+ * ship validation, and crew member assignment.
+ * <p>
+ * Key responsibilities include:
+ * <ul>
+ *   <li>Managing component selection, placement, rotation and booking</li>
+ *   <li>Handling ship part validation and error correction</li>
+ *   <li>Coordinating crew member placement in cabins</li>
+ *   <li>Managing game timer and hourglass flips</li>
+ *   <li>Displaying visible components and prefabricated ship options</li>
+ *   <li>Processing player pawn placement for phase transitions</li>
+ * </ul>
+ * <p>
+ * The controller uses JavaFX for UI updates and integrates with:
+ * <ul>
+ *   <li>{@link ModelFxAdapter} for reactive data binding</li>
+ *   <li>{@link BoardsController} for board visualization</li>
+ *   <li>{@link ClientGuiController} for game state management</li>
+ * </ul>
+ * <p>
+ * All UI operations are executed on the JavaFX Application Thread using Platform.runLater()
+ * to ensure thread safety.
+ *
+ * @see GuiController
+ * @see BoardsEventHandler
+ * @see ModelFxAdapter
+ * @see ClientGuiController
+ */
 public class BuildAndCheckShipBoardController extends GuiController implements BoardsEventHandler {
 
     @FXML
@@ -278,6 +308,17 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                 );
     }
 
+    /**
+     * Handles the UI event when the user selects a little deck from the combo box.
+     * <p>
+     * This method:
+     * <ul>
+     *   <li>Checks if at least one component has been placed on the ship board.</li>
+     *   <li>Retrieves the selected little deck index from the combo box.</li>
+     *   <li>Displays the three corresponding visible cards in the GUI.</li>
+     * </ul>
+     * If no components are placed yet, an informative message is shown to the user.
+     */
     public void handleLittleDeck() {
 
         long componentInShipBoard = clientModel.getMyShipboard().getNumberOfComponents();
@@ -577,6 +618,11 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     }
 
+    /**
+     * Displays a disconnection message to the user and terminates the application.
+     *
+     * @param message the message to be shown before exiting
+     */
     public void showDisconnectMessage(String message) {
         showMessage(message, true);
         System.exit(0);

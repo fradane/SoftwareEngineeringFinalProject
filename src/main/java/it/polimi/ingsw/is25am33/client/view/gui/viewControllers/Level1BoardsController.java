@@ -98,7 +98,6 @@ public class Level1BoardsController extends BoardsController {
         // No initialization logic currently
     }
 
-    // TODO togliere non usati: togliere da qua quelli non usati e dal fxml il fx:id a quelli che non si usano
     /**
      * Initializes the mapping between coordinates and UI buttons for Level 1.
      * Maps all ship board positions to their corresponding FXML button references.

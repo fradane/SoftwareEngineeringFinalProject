@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Abstract GUI implementation of the ClientView interface for displaying game information graphically.
+ * Provides methods to show game boards, menus and notifications in a graphical user interface.
+ */
 public abstract class ClientGUIView implements ClientView {
 
     /**
@@ -19,17 +23,32 @@ public abstract class ClientGUIView implements ClientView {
      * @param shipBoardOwnerNickname the nickname of the ship board owner
      * @param colorMap mapping of colors to coordinate sets for visual representation
      */
+    /**
+     * Shows a ship board with color mapping for components in the GUI.
+     *
+     * @param shipBoardClient        the ship board to display
+     * @param shipBoardOwnerNickname the nickname of the ship board owner
+     * @param colorMap               mapping of colors to coordinate sets for visual representation
+     */
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {}
 
     /**
      * Shows the valid ship board menu.
      */
+    /**
+     * Shows the valid ship board menu in the GUI.
+     * Displays options related to valid ship board configurations.
+     */
     @Override
     public void showValidShipBoardMenu() {}
 
     /**
      * Shows the menu for choosing which component to remove.
+     */
+    /**
+     * Shows the menu for choosing which component to remove from the ship board.
+     * Presents available components that can be removed in the GUI.
      */
     @Override
     public void showChooseComponentToRemoveMenu() {}
@@ -39,11 +58,21 @@ public abstract class ClientGUIView implements ClientView {
      *
      * @param shipParts list of ship part coordinate sets to choose from
      */
+    /**
+     * Shows the menu for selecting ship parts in the GUI.
+     *
+     * @param shipParts list of ship part coordinate sets to choose from
+     */
     @Override
     public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {}
 
     /**
      * Shows information about infected crew members that were removed.
+     *
+     * @param cabinWithNeighbors coordinates of cabins with their neighbors where crew members were removed
+     */
+    /**
+     * Displays information about infected crew members that were removed in the GUI.
      *
      * @param cabinWithNeighbors coordinates of cabins with their neighbors where crew members were removed
      */
@@ -56,11 +85,22 @@ public abstract class ClientGUIView implements ClientView {
      * @param finalRanking list of player final data sorted by ranking
      * @param playersNicknamesWithPrettiestShip list of player nicknames who have the prettiest ship
      */
+    /**
+     * Shows the end game information including final ranking and prettiest ship winners in the GUI.
+     *
+     * @param finalRanking                      list of player final data sorted by ranking
+     * @param playersNicknamesWithPrettiestShip list of player nicknames who have the prettiest ship
+     */
     @Override
     public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {}
 
     /**
      * Shows notification that a player has landed early.
+     *
+     * @param nickname the nickname of the player who landed early
+     */
+    /**
+     * Shows notification that a player has landed early in the GUI.
      *
      * @param nickname the nickname of the player who landed early
      */

@@ -87,6 +87,14 @@ public class Hourglass {
         }, 0, 1, TimeUnit.SECONDS);
     }
 
+    /**
+     * Stops the currently running hourglass timer if it is active.
+     * This method shuts down the internal scheduler and updates the state
+     * to indicate that the timer is no longer running.
+     *
+     * If the scheduler is already stopped or uninitialized, this method
+     * performs no action.
+     */
     public void stop() {
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdown();

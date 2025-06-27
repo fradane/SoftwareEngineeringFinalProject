@@ -18,8 +18,17 @@ import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.ERROR;
 
 public class MainMenuViewController extends GuiController {
 
+    /**
+     * Set of all available player colors
+     */
     private final Set<PlayerColor> colors = new HashSet<>(Arrays.asList(PlayerColor.values()));
+    /**
+     * Current selected game ID
+     */
     private String currGameId;
+    /**
+     * Observable list containing all available games
+     */
     private final ObservableList<GameInfo> gameInfoList = FXCollections.observableArrayList();
 
     @FXML
@@ -216,14 +225,15 @@ public class MainMenuViewController extends GuiController {
      * Hides error messages and shows the main menu form.
      */
     @FXML
+
     private void backToMainMenu() {
         hideErrorLabel();
         showForm(mainMenu);
     }
 
     /**
-     * Handles the UI event when user wants to go back to game selection.
-     * Hides error messages and shows the choose game form.
+     * Returns to the game selection screen.
+     * Hides any error messages and displays the choose game form.
      */
     @FXML
     private void backToChooseGame() {
@@ -231,11 +241,21 @@ public class MainMenuViewController extends GuiController {
         showForm(chooseGameForm);
     }
 
+    /**
+     * Returns the type identifier for this controller.
+     *
+     * @return String identifier "MainMenuViewController"
+     */
     @Override
     public String getControllerType() {
         return "MainMenuViewController";
     }
 
+    /**
+     * Shows a disconnect message to the user and exits the application.
+     *
+     * @param message The disconnect message to display
+     */
     public void showDisconnectMessage(String message) {
         showMessage(message, true);
         System.exit(0);

@@ -36,6 +36,19 @@ import java.util.*;
 
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
 
+/**
+ * Main controller for managing the client in a distributed game application.
+ * This class coordinates the interaction between the client model, view, and network
+ * communication, handling all operations related to game participation, from
+ * nickname registration to game phase management.
+ *
+ * The class extends UnicastRemoteObject to support RMI communication and implements
+ * CallableOnClientController to receive notifications from the game server.
+ *
+ * @author Your development team
+ * @version 1.0
+ * @since 1.0
+ */
 public class ClientController extends UnicastRemoteObject implements CallableOnClientController {
 
     private ClientView view;
@@ -52,32 +65,79 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     private List<Set<Coordinates>> currentShipPartsList = new ArrayList<>();
 
+    /**
+     * Constructs a new ClientController with the specified client model and ping-pong manager.
+     * Initializes the controller preparing it for handling network operations and model management.
+     *
+     * @param clientModel the client model that maintains the local game state
+     * @param clientPingPongManager the manager for network connection monitoring
+     * @throws RemoteException if an error occurs during remote object initialization
+     */
     public ClientController(ClientModel clientModel, ClientPingPongManager clientPingPongManager) throws RemoteException {
         super();
         this.clientModel = clientModel;
         this.clientPingPongManager = clientPingPongManager;
     }
 
+    /**
+     * Starts the execution of the client controller by requesting nickname input.
+     * This method represents the main entry point for user interaction,
+     * delegating to the view the request for initial credentials.
+     */
     public void run() {
         view.askNickname();
     }
 
+    /**
+     * Returns a copy of the list of currently observable games.
+     * Provides read-only access to available game information
+     * to prevent unauthorized modifications to the internal data structure.
+     *
+     * @return a new list containing the information of observable games
+     */
     public List<GameInfo> getGames() {
         return new ArrayList<>(observableGames);
     }
 
+    /**
+     * Returns the direct reference to the observable games list.
+     * This method provides direct access to the internal data structure and
+     * should be used with caution to avoid unwanted modifications.
+     *
+     * @return the list of observable games maintained internally
+     */
     public List<GameInfo> getObservableGames() {
         return observableGames;
     }
 
+    /**
+     * Returns the identifier of the current game.
+     * Provides access to the ID of the game to which the client is currently connected.
+     *
+     * @return the current game ID, or null if no active game is present
+     */
     public String getCurrentGameId() {
         return currentGameInfo.getGameId();
     }
 
+    /**
+     * Returns the client model associated with this controller.
+     * Provides access to the model that maintains the local client state.
+     *
+     * @return the client model instance
+     */
     public ClientModel getClientModel() {
         return clientModel;
     }
 
+    /**
+     * Handles the nickname registration process with the DNS server.
+     * Attempts to register the specified nickname and starts the ping-pong
+     * mechanism for connection monitoring if successful. Displays appropriate
+     * error messages if registration fails.
+     *
+     * @param attemptedNickname the nickname to register with the server
+     */
     public void register(String attemptedNickname) {
 
         try {
@@ -109,23 +169,42 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     }
 
+    /**
+     * Sets the DNS service reference for network communication.
+     * Establishes the connection to the DNS service that manages
+     * game discovery and player registration.
+     *
+     * @param dns the DNS service implementation to use for network operations
+     */
     public void setDns(CallableOnDNS dns) {
         this.dns = dns;
     }
 
+    /**
+     * Returns the current DNS service reference.
+     * Provides access to the DNS service used for network communication.
+     *
+     * @return the current DNS service instance
+     */
     public CallableOnDNS getDns() {
         return dns;
     }
 
+    /**
+     * Returns the nickname of the current player.
+     * Provides access to the registered nickname for this client session.
+     *
+     * @return the player's nickname, or null if not yet registered
+     */
     public String getNickname() {
         return nickname;
     }
 
     /**
      * Handles the creation of a new game based on the specified parameters.
-     * It verifies the validity of the number of players, creates the game using
-     * the provided parameters, and updates the game state accordingly. Errors
-     * encountered during game creation are communicated to the user.
+     * Validates the number of players, creates the game using the provided
+     * parameters, and updates the game state accordingly. Displays error
+     * messages to the user if game creation fails.
      *
      * @param numPlayers the number of players for the new game; must be between 2 and 4
      * @param isTestFlight a flag indicating whether the game is in test flight mode
@@ -164,10 +243,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     /**
      * Attempts to join a selected game with the given game ID and chosen player color.
-     * It handles the connection process, updates the game state, and manages error cases.
+     * Handles the connection process, updates the game state, and manages error cases.
+     * Returns true if the join operation was successful, false otherwise.
      *
      * @param chosenGameId the identifier of the game to join
      * @param chosenColor the color chosen by the player for the game
+     * @return true if successfully joined the game, false otherwise
      */
     public boolean joinGame(String chosenGameId, PlayerColor chosenColor) {
 
@@ -217,14 +298,26 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         return true;
     }
 
+    /**
+     * Sets the view component for this controller.
+     * Establishes the connection between the controller and the user interface
+     * component responsible for displaying game information and collecting user input.
+     *
+     * @param view the view implementation to use for user interaction
+     */
     public void setView(ClientView view) {
         this.view = view;
     }
 
     /**
-     * Allows the user to select the user interface
-     * @param scanner Scanner to read user input
-     * @return The chosen implementation of ClientView
+     * Allows the user to select the user interface implementation.
+     * Creates and returns the appropriate view implementation based on the
+     * user's choice between CLI and GUI interfaces.
+     *
+     * @param scanner Scanner instance for reading user input (legacy parameter)
+     * @param choice the interface choice: "cli" for command line interface, "gui" for graphical interface
+     * @return the chosen implementation of ClientView, or null if choice is invalid
+     * @throws IOException if an error occurs during view initialization
      */
     public static ClientView selectUserInterface(Scanner scanner, String choice) throws IOException {
 
@@ -258,8 +351,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     /**
-     * Allows the user to select the network protocol
-     * @return The chosen implementation of NetworkManager
+     * Allows the user to select the network protocol for communication.
+     * Establishes the network connection using either RMI or Socket protocol
+     * based on the specified parameters.
+     *
+     * @param isRmi true to use RMI protocol, false to use Socket TCP/IP
+     * @param serverAddress the server address to connect to
+     * @param serverPort the server port to connect to
+     * @return the chosen implementation of CallableOnDNS, or null if connection fails
      */
     public CallableOnDNS selectNetworkProtocol(boolean isRmi, String serverAddress, int serverPort) {
 
@@ -320,6 +419,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     }
 
+    /**
+     * Leaves the current game and terminates the client application.
+     * Handles the disconnection process by notifying the server and
+     * performing cleanup operations before exiting the application.
+     */
     public void leaveGame() {
         try {
             if (currentGameInfo != null) {
@@ -558,6 +662,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Submits crew placement choices to the server for validation.
+     * Performs local validation of crew choices before sending them to the server.
+     * Displays appropriate error messages if validation fails.
+     *
+     * @param choices a map of coordinates to crew members representing the placement choices
+     */
     public void submitCrewChoices(Map<Coordinates, CrewMember> choices) {
         try {
             // Local validation
@@ -639,6 +750,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         clientModel.getShipboardOf(nickname).setNotActiveComponents(notActiveComponents);
     }
 
+    /**
+     * Notifies the server that crew member evaluation has been completed.
+     * This method is called when the player has finished evaluating their crew members
+     * and is ready to proceed to the next game phase.
+     */
     public void evaluatedCrewMembers(){
         try {
             serverController.evaluatedCrewMembers(nickname);
@@ -686,10 +802,22 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.notifyPlayerDisconnected(disconnectedPlayerNickname);
     }
 
+    /**
+     * Notifies the server that the hourglass timer has ended.
+     * This method is called when the time limit for a game phase has expired,
+     * triggering the appropriate server-side handling for timeout scenarios.
+     *
+     * @throws IOException if a network communication error occurs
+     */
     public void notifyHourglassEnded() throws IOException {
         serverController.notifyHourglassEnded(nickname);
     }
 
+    /**
+     * Requests a random component from the hidden component deck.
+     * Initiates the process of picking a random component and displays
+     * the appropriate menu for component handling.
+     */
     public void pickRandomComponent() {
         try {
             serverController.playerPicksHiddenComponent(nickname);
@@ -699,7 +827,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-
+    /**
+     * Attempts to reserve the currently focused component.
+     * Validates that the player hasn't exceeded the maximum number of
+     * reserved components (2) before sending the reservation request to the server.
+     */
     public void reserveFocusedComponent() {
         try {
             if(clientModel.getShipboardOf(nickname).getBookedComponents().size() >= 2) {
@@ -715,6 +847,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Releases the currently focused component.
+     * Removes the focus from the current component both locally and on the server,
+     * returning to the ship board building menu.
+     */
     public void releaseFocusedComponent() {
         try {
             clientModel.getShipboardOf(nickname).releaseFocusedComponent();
@@ -725,11 +862,24 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles remote exceptions by logging the error and terminating the application.
+     * This method provides centralized error handling for network communication failures.
+     *
+     * @param e the IOException that occurred during remote communication
+     */
     public void handleRemoteException(IOException e) {
         System.err.println("Remote exception: " + e);
         System.exit(1);
     }
 
+    /**
+     * Displays the ship board of the specified player.
+     * Searches for the player in the client data and shows their ship board
+     * if found, otherwise displays an error message.
+     *
+     * @param nickname the nickname of the player whose ship board to display
+     */
     public void showShipBoard(String nickname) {
         clientModel.getPlayerClientData()
                 .keySet()
@@ -740,6 +890,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                         () -> view.showMessage("Player not found\n", STANDARD));
     }
 
+    /**
+     * Displays the cargo cubes of the specified player.
+     * Shows the current cargo cube configuration on the player's ship board.
+     *
+     * @param nickname the nickname of the player whose cubes to display
+     */
     public void showCubes(String nickname) {
         clientModel.getPlayerClientData()
                 .keySet()
@@ -750,8 +906,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
                         () -> view.showMessage("Player not found\n", STANDARD));
     }
 
-
-
+    /**
+     * Places the currently focused component at the specified coordinates.
+     * Validates the position and sends the placement request to the server.
+     * Displays error messages for invalid coordinates.
+     *
+     * @param row the row coordinate for component placement
+     * @param column the column coordinate for component placement
+     */
     public void placeFocusedComponent(int row, int column) {
         try {
             ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
@@ -766,6 +928,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Removes a component from the specified coordinates.
+     * Sends a removal request to the server for the component at the given position.
+     *
+     * @param row the row coordinate of the component to remove
+     * @param column the column coordinate of the component to remove
+     */
     public void removeComponent(int row, int column) {
         try {
             serverController.playerWantsToRemoveComponent(nickname, new Coordinates(row, column));
@@ -776,6 +945,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Removes a ship part consisting of multiple connected components.
+     * Sends the selected ship part to the server for removal from the ship board.
+     *
+     * @param shipPart a set of coordinates representing the connected ship part to remove
+     */
     public void removeShipPart(Set<Coordinates> shipPart) {
         try{
             serverController.playerChoseShipPart(nickname, shipPart);
@@ -784,6 +959,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Picks a visible component from the available selection.
+     * Validates that the component is still available before sending the
+     * selection request to the server.
+     *
+     * @param chosenIndex the index of the visible component to pick
+     */
     public void pickVisibleComponent(int chosenIndex) {
 
         try {
@@ -800,6 +982,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     }
 
+    /**
+     * Restarts the hourglass timer for the current game phase.
+     * Checks if the hourglass is already running and validates the request
+     * before sending the restart command to the server.
+     */
     public void restartHourglass() {
 
         if (clientModel.getHourglass().isRunning()) {
@@ -829,7 +1016,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     /**
      * Allows the player to select a reserved component based on their choice input.
-     * It validates the input, manages reserved components, and informs the server
+     * Validates the input, manages reserved components, and informs the server
      * about the selected component to focus on. Displays appropriate views and messages
      * based on the player's actions or errors encountered.
      *
@@ -875,6 +1062,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     }
 
+    /**
+     * Handles the selection of a ship part from the available options.
+     * Validates the choice and sends the selected ship part to the server.
+     * Displays error messages for invalid selections.
+     *
+     * @param choice the 1-based index of the ship part to select
+     */
     public void handleShipPartSelection(int choice) {
         try {
             if (choice >= 1 && choice <= currentShipPartsList.size()) {
@@ -889,31 +1083,69 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
-    //sends the ping from the client to the server
+    /**
+     * Sends a ping message from the client to the server.
+     * This method is part of the keep-alive mechanism to monitor network connectivity.
+     *
+     * @param nickname the nickname of the player sending the ping
+     * @throws IOException if a network communication error occurs
+     */
     public void pingToServerFromClient(String nickname) throws IOException{
         dns.pingToServerFromClient(nickname);
     }
 
-    //when I receive the pong reply from the server, I reset the timeout
+    /**
+     * Handles the pong reply received from the server.
+     * Resets the timeout counter when a pong response is received, maintaining
+     * the connection monitoring mechanism.
+     *
+     * @param nickname the nickname of the player receiving the pong
+     * @throws IOException if a network communication error occurs
+     */
     public void pongToClientFromServer(String nickname) throws IOException{
         //System.out.println("Pong dal server");
         clientPingPongManager.onPongReceived(this::handleDisconnection);
     }
 
-    //when the server sends the ping to the client
+    /**
+     * Handles ping messages received from the server.
+     * Responds with a pong message to maintain the bidirectional keep-alive mechanism.
+     *
+     * @param nickname the nickname of the player receiving the ping
+     * @throws IOException if a network communication error occurs
+     */
     public void pingToClientFromServer(String nickname) throws IOException{
         //System.out.println("Ping dal server");
         dns.pongToServerFromClient(nickname);
     }
 
+    /**
+     * Handles client disconnection scenarios.
+     * Displays appropriate disconnection messages to inform the user
+     * about network connectivity issues.
+     */
     public void handleDisconnection() {
         view.showDisconnectMessage("DISCONNECTION: No pong received from server");
     }
 
+    /**
+     * Handles forced disconnection initiated by the server.
+     * Performs cleanup operations and exits the game when the server
+     * forces a disconnection.
+     *
+     * @param nicknameToNotify the nickname of the player being disconnected
+     * @param gameId the ID of the game from which the player is being disconnected
+     * @throws IOException if a network communication error occurs during disconnection
+     */
     public void forcedDisconnection(String nicknameToNotify, String gameId) throws IOException {
         leaveGame();
     }
 
+    /**
+     * Ends the ship board building phase for the current player.
+     * Notifies the server that the player has completed their ship construction
+     * and is ready to proceed to the next game phase.
+     */
     public void endBuildShipBoardPhase() {
         try {
             view.showMessage("""
@@ -926,6 +1158,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Places the player's pawn on the game board.
+     * Initiates the pawn placement process by sending the request to the server.
+     */
     public void placePawn() {
         try {
             serverController.playerPlacesPawn(nickname);
@@ -934,11 +1170,24 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Returns the current game information.
+     * Provides access to the complete game state and metadata.
+     *
+     * @return the current GameInfo instance, or null if no game is active
+     */
     public GameInfo getCurrentGameInfo() {
         return currentGameInfo;
     }
 
-
+    /**
+     * Handles the player's decision to visit a location.
+     * Validates crew requirements for location visits and sends the choice to the server.
+     * Automatically sets the choice to false if the player doesn't have enough crew members.
+     *
+     * @param nickname the nickname of the player making the choice
+     * @param choice true if the player wants to visit the location, false otherwise
+     */
     public void playerWantsToVisitLocation(String nickname, Boolean choice){
         if (!clientModel.isMyTurn()) {
             view.showMessage("This is not your turn, please wait for others to choose...", ERROR);
@@ -973,6 +1222,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the player's action to throw dice.
+     * Sends a dice throwing request to the server for the current player.
+     *
+     * @param nickname the nickname of the player throwing the dice
+     */
     public void playerWantsToThrowDices(String nickname){
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
@@ -985,6 +1240,16 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the player's choice of double engines and corresponding battery boxes.
+     * Validates that the number of engines matches the number of batteries before
+     * sending the selection to the server.
+     *
+     * @param nickname the nickname of the player making the choice
+     * @param doubleEnginesCoords the coordinates of the selected double engines
+     * @param batteryBoxesCoords the coordinates of the corresponding battery boxes
+     * @throws IllegalArgumentException if the number of engines doesn't match the number of batteries
+     */
     public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords){
         if(doubleEnginesCoords.size()!=batteryBoxesCoords.size())
             throw new IllegalArgumentException("the number of engines does not match the number of batteries");
@@ -1007,6 +1272,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the player's choice of double cannons and corresponding battery boxes.
+     * Sends the cannon and battery selection to the server for processing.
+     *
+     * @param nickname the nickname of the player making the choice
+     * @param doubleCannonsCoords the coordinates of the selected double cannons
+     * @param batteryBoxesCoords the coordinates of the corresponding battery boxes
+     */
     public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) {
 
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
@@ -1022,6 +1295,15 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Validates the selection of cabins for crew member removal.
+     * Checks that the correct number of crew members are selected and that
+     * no cabin is selected more times than it has inhabitants.
+     *
+     * @param nickname the nickname of the player making the selection
+     * @param cabinCoords the coordinates of the selected cabins
+     * @return true if the cabin selection is valid, false otherwise
+     */
     public boolean checkCabinSelection(String nickname, List<Coordinates> cabinCoords) {
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
@@ -1056,6 +1338,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         return true;
     }
 
+    /**
+     * Handles the player's choice of cabins for crew member operations.
+     * Sends the cabin selection to the server after validation.
+     *
+     * @param nickname the nickname of the player making the choice
+     * @param cabinCoords the coordinates of the selected cabins
+     */
     public void playerChoseCabins(String nickname, List<Coordinates> cabinCoords) {
         try {
             PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
@@ -1068,6 +1357,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the player's choice to visit a specific planet.
+     * Validates that it's the player's turn before sending the planet choice to the server.
+     *
+     * @param nickname the nickname of the player making the choice
+     * @param choice the index of the chosen planet
+     */
     public void playerWantsToVisitPlanet(String nickname, int choice) {
         if (!clientModel.isMyTurn()) {
             view.showMessage("This is not your turn, please wait for others to chose ...", ERROR);
@@ -1085,6 +1381,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the player's decision to accept or reject a reward.
+     * Sends the player's choice regarding reward acceptance to the server.
+     *
+     * @param nickname the nickname of the player making the choice
+     * @param choice true if the player accepts the reward, false otherwise
+     */
     public void playerWantsToAcceptTheReward(String nickname, Boolean choice){
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
@@ -1098,6 +1401,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the player's response to small dangerous objects.
+     * Manages shield and battery box selections for defending against small threats.
+     *
+     * @param nickname the nickname of the player making the choice
+     * @param shieldCoords the coordinates of selected shields
+     * @param batteryBoxCoords the coordinates of selected battery boxes
+     */
     public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
 
@@ -1116,6 +1427,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the player's response to big meteorite attacks.
+     * Manages double cannon and battery box selections for defending against large meteorites.
+     *
+     * @param nickname the nickname of the player making the choice
+     * @param doubleCannonCoords the coordinates of selected double cannons
+     * @param batteryBoxCoords the coordinates of selected battery boxes
+     */
     public void playerHandleBigMeteorite(String nickname, List<Coordinates> doubleCannonCoords, List<Coordinates> batteryBoxCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
 
@@ -1134,6 +1453,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the player's response to big shot attacks.
+     * Sends an empty choice structure to the server for big shot handling.
+     *
+     * @param nickname the nickname of the player responding to the attack
+     */
     public void playerHandleBigShot(String nickname){
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
@@ -1146,6 +1471,14 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the player's choice of storage and battery components.
+     * Manages storage and battery box selections for cargo operations.
+     *
+     * @param nickname the nickname of the player making the choice
+     * @param storageCoords the coordinates of selected storage components
+     * @param batteryBoxCoords the coordinates of selected battery boxes
+     */
     public void playerChoseStorageAndBattery(String nickname, List<Coordinates> storageCoords, List<Coordinates> batteryBoxCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
 
@@ -1164,6 +1497,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the player's choice of storage components only.
+     * Sends storage selections to the server for processing.
+     *
+     * @param nickname the nickname of the player making the choice
+     * @param storageCoords the coordinates of selected storage components
+     */
     public void playerChoseStorage(String nickname, List<Coordinates> storageCoords){
         ShipBoardClient shipBoard = clientModel.getShipboardOf(nickname);
         List<Storage> storages = new ArrayList<>();
@@ -1180,6 +1520,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the epidemic spreading mechanism.
+     * Sends an epidemic event to the server for processing.
+     *
+     * @param nickname the nickname of the player triggering the epidemic
+     */
     public void spreadEpidemic(String nickname){
         PlayerChoicesDataStructure playerChoiceDataStructure = new PlayerChoicesDataStructure
                 .Builder()
@@ -1192,6 +1538,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Handles the stardust event mechanism.
+     * Initiates a stardust event on the server for the specified player.
+     *
+     * @param nickname the nickname of the player triggering the stardust event
+     */
     public void stardustEvent(String nickname){
         try{
             serverController.stardustEvent(nickname);
@@ -1200,6 +1552,13 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Initiates the ship board check process after an attack.
+     * Starts the validation process for ship integrity following combat damage.
+     *
+     * @param nickname the nickname of the player whose ship board needs checking
+     * @param coordinates the coordinates where the attack occurred
+     */
     public void startCheckShipBoardAfterAttack(String nickname, Coordinates coordinates) {
         try {
             serverController.startCheckShipBoardAfterAttack(nickname);
@@ -1208,6 +1567,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Requests the list of available prefabricated ships from the server.
+     * Initiates an asynchronous request to retrieve all available ship templates.
+     */
     public void requestPrefabShipsList() {
         try {
             // Request the list asynchronously
@@ -1234,6 +1597,12 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Selects a prefabricated ship based on the provided ship ID.
+     * Sends a selection request to the server for the specified prefab ship.
+     *
+     * @param prefabShipId the unique identifier of the prefabricated ship to select
+     */
     public void selectPrefabShip(String prefabShipId) {
         try {
             view.showMessage("Requesting prefab ship selection...", STANDARD);
@@ -1270,6 +1639,10 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         view.showPlayerEarlyLanded(nickname);
     }
 
+    /**
+     * Initiates the landing process for the current player.
+     * Sends a landing request to the server, allowing the player to end their participation.
+     */
     public void land() {
         try {
             serverController.playerWantsToLand(nickname);
@@ -1278,6 +1651,11 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
         }
     }
 
+    /**
+     * Debug method to skip to the last card in the game.
+     * This method is intended for testing and debugging purposes only.
+     * Allows rapid progression through the game for development testing.
+     */
     public void skipToLastCard() {
         try {
             serverController.debugSkipToLastCard();
@@ -1297,8 +1675,9 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     /**
      * Sends storage updates to the server using the new data structure.
+     * Transmits changes to storage configurations including cargo cube placements.
      *
-     * @param storageUpdates map of storage updates
+     * @param storageUpdates map containing storage coordinates and their cargo cube contents
      */
     public void sendStorageUpdates(Map<Coordinates, List<CargoCube>> storageUpdates) {
         try {

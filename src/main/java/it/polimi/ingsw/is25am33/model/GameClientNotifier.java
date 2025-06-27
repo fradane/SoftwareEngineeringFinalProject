@@ -8,18 +8,18 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * Anche se il sistema utilizza un meccanismo di ping-pong per rilevare la disconnessione dei client,
- * manteniamo l'uso dei Future con timeout per evitare che una singola chiamata remota (RMI o socket)
- * blocchi l'intera notifica verso gli altri client.
+ * Although the system uses a ping-pong mechanism to detect client disconnections,
+ * we retain the use of Futures with timeouts to prevent a single remote call (RMI or socket)
+ * from blocking the entire notification process to other clients.
  *
- * Questo approccio è utile per gestire casi in cui un client:
- * - È ancora considerato connesso dal ping-pong (es. appena disconnesso, ma non ancora scaduto il timeout)
- * - Risponde molto lentamente (latenze elevate o rete congestionata)
- * - Non risponde affatto, ma la RemoteException non viene immediatamente lanciata (tipico in TCP)
+ * This approach is useful for handling cases where a client:
+ * - Is still considered connected by the ping-pong mechanism (e.g., just disconnected, but the timeout has not yet expired)
+ * - Responds very slowly (due to high latency or network congestion)
+ * - Does not respond at all, but a RemoteException is not thrown immediately (typical in TCP)
  *
- * In questi casi, il Future con timeout assicura che la notifica globale non venga rallentata o bloccata
- * da client non responsivi. Anche se si ignora l'eccezione a livello di logica, il timeout impedisce
- * blocchi indefiniti o rallentamenti dell'intero sistema.
+ * In these cases, using a Future with a timeout ensures that global notifications are not slowed down
+ * or blocked by unresponsive clients. Even if the exception is ignored at the logic level,
+ * the timeout prevents indefinite blocking or system-wide slowdowns.
  */
 
 public class GameClientNotifier {

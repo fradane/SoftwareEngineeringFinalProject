@@ -35,6 +35,11 @@ public class ClientModel {
     private final Object modelFxAdapterLock = new Object();
     private Timer cardAdapterTimer;  // Track current timer to prevent memory leaks
 
+    /**
+     * Sets the ModelFxAdapter for this client model.
+     *
+     * @param modelFxAdapter the adapter to be set
+     */
     public void setModelFxAdapter(ModelFxAdapter modelFxAdapter) {
         synchronized (modelFxAdapterLock) {
             this.modelFxAdapter = modelFxAdapter;
@@ -42,6 +47,11 @@ public class ClientModel {
         }
     }
 
+    /**
+     * Refreshes the ship board display for a specific player.
+     *
+     * @param nickname the nickname of the player whose ship board needs to be refreshed
+     */
     public void refreshShipBoardOf(String nickname) {
         synchronized (modelFxAdapterLock) {
             if (modelFxAdapter != null)
@@ -49,22 +59,47 @@ public class ClientModel {
         }
     }
 
+    /**
+     * Returns the list of available prefabricated ships.
+     *
+     * @return list of available prefabricated ship information
+     */
     public List<PrefabShipInfo> getAvailablePrefabShips() {
         return availablePrefabShips;
     }
 
+    /**
+     * Sets the list of available prefabricated ships.
+     *
+     * @param availablePrefabShips list of prefabricated ship information to be set
+     */
     public void setAvailablePrefabShips(List<PrefabShipInfo> availablePrefabShips) {
         this.availablePrefabShips = availablePrefabShips;
     }
 
+    /**
+     * Gets the hourglass timer object.
+     *
+     * @return the hourglass timer
+     */
     public Hourglass getHourglass() {
         return hourglass;
     }
 
+    /**
+     * Sets the hourglass timer.
+     *
+     * @param hourglass the hourglass timer to be set
+     */
     public void setHourglass(Hourglass hourglass) {
         this.hourglass = hourglass;
     }
 
+    /**
+     * Marks a player as eliminated from the game.
+     *
+     * @param nickname the nickname of the player to be eliminated
+     */
     public synchronized void eliminatePlayer(String nickname) {
         PlayerClientData playerData = playerClientData.get(nickname);
         if (playerData != null) {
@@ -72,34 +107,74 @@ public class ClientModel {
         }
     }
 
+    /**
+     * Sets the nickname for the current player.
+     *
+     * @param myNickname the nickname to be set
+     */
     public void setMyNickname(String myNickname) {
         this.myNickname = myNickname;
     }
 
+    /**
+     * Checks if it's currently this player's turn.
+     *
+     * @return true if it's this player's turn, false otherwise
+     */
     public boolean isMyTurn() {
         return myNickname.equals(currentPlayer);
     }
 
+    /**
+     * Sets whether it's currently this player's turn.
+     *
+     * @param myTurn true if it's this player's turn, false otherwise
+     */
     public void setMyTurn(boolean myTurn) {
         isMyTurn = myTurn;
     }
 
+    /**
+     * Sets the current state of the card.
+     *
+     * @param cardState the state to set for the current card
+     */
     public void setCardState(CardState cardState){
         this.currCardState = cardState;
     }
 
+    /**
+     * Gets the current state of the card.
+     *
+     * @return the current card state
+     */
     public CardState getCurrCardState() {
         return currCardState;
     }
 
+    /**
+     * Gets the nickname of the current player.
+     *
+     * @return the player's nickname
+     */
     public String getMyNickname() {
         return myNickname;
     }
 
+    /**
+     * Gets the current state of the game.
+     *
+     * @return the current game state
+     */
     public GameState getGameState() {
         return gameState;
     }
 
+    /**
+     * Sets the current state of the game.
+     *
+     * @param gameState the game state to set
+     */
     public void setGameState(GameState gameState) {
         this.gameState = gameState;
     }
@@ -174,30 +249,65 @@ public class ClientModel {
         }
     }
 
+    /**
+     * Gets the current adventure card.
+     *
+     * @return the current adventure card
+     */
     public ClientCard getCurrAdventureCard() {
         return currAdventureCard;
     }
 
+    /**
+     * Sets the current dangerous object.
+     *
+     * @param currDangerousObj the dangerous object to set
+     */
     public void setCurrDangerousObj(ClientDangerousObject currDangerousObj) {
         this.currDangerousObj = currDangerousObj;
     }
 
+    /**
+     * Gets the map of visible components.
+     *
+     * @return map of component IDs to components
+     */
     public Map<Integer, Component> getVisibleComponents() {
         return visibleComponents;
     }
 
+    /**
+     * Gets the nickname of the player whose turn it currently is.
+     *
+     * @return the current player's nickname
+     */
     public String getCurrentPlayer() {
         return currentPlayer;
     }
 
+    /**
+     * Gets the map of all player data.
+     *
+     * @return map of player nicknames to their client data
+     */
     public Map<String, PlayerClientData> getPlayerClientData() {
         return playerClientData;
     }
 
+    /**
+     * Gets the ship board for the current player.
+     *
+     * @return the current player's ship board
+     */
     public ShipBoardClient getMyShipboard() {
         return playerClientData.get(myNickname).getShipBoard();
     }
 
+    /**
+     * Gets the ranking of players by their colors and positions.
+     *
+     * @return map of player colors to their ranking positions
+     */
     public Map<PlayerColor, Integer> getColorRanking() {
         Map<PlayerColor, Integer> ranking = new HashMap<>();
 
@@ -214,6 +324,11 @@ public class ClientModel {
         return ranking;
     }
 
+    /**
+     * Gets the number of cosmic credits owned by the current player.
+     *
+     * @return the current player's cosmic credits
+     */
     public int getMyCosmicCredits() {
         if (myNickname != null && playerClientData.containsKey(myNickname)) {
             return playerClientData.get(myNickname).getCredits();
@@ -254,6 +369,11 @@ public class ClientModel {
         return combinedRanking;
     }
 
+    /**
+     * Gets the list of players who are out of the game.
+     *
+     * @return list of nicknames of players who are out
+     */
     public List<String> getOutPlayers() {
         return playerClientData.keySet()
                 .stream()
@@ -261,30 +381,67 @@ public class ClientModel {
                 .toList();
     }
 
+    /**
+     * Sets the current state of the card.
+     *
+     * @param currCardState the card state to set
+     */
     public void setCurrCardState(CardState currCardState) {
         this.currCardState = currCardState;
     }
 
+    /**
+     * Sets the current active player.
+     *
+     * @param currentPlayer nickname of the player to set as current
+     */
     public void setCurrentPlayer(String currentPlayer) {
         this.currentPlayer = currentPlayer;
     }
 
+    /**
+     * Sets the map of visible components.
+     *
+     * @param visibleComponents map of component IDs to Components to set
+     */
     public void setVisibleComponents(Map<Integer, Component> visibleComponents) {
         this.visibleComponents = visibleComponents;
     }
 
+    /**
+     * Gets the current dangerous object.
+     *
+     * @return the current dangerous object
+     */
     public ClientDangerousObject getCurrDangerousObj() {
         return currDangerousObj;
     }
 
+    /**
+     * Gets the list of visible card decks.
+     *
+     * @return list of visible card decks
+     */
     public List<List<ClientCard>> getLittleVisibleDecks() {
         return littleVisibleDecks;
     }
 
+    /**
+     * Sets the list of visible card decks.
+     *
+     * @param littleVisibleDecks list of visible card decks to set
+     */
     public void setLittleVisibleDeck(List<List<ClientCard>> littleVisibleDecks) {
         this.littleVisibleDecks = littleVisibleDecks;
     }
 
+    /**
+     * Updates the cosmic credits for a player.
+     * If the updated player is the current player, refreshes the cosmic credits display.
+     *
+     * @param nickname        nickname of the player to update
+     * @param newOwnedCredits new amount of credits for the player
+     */
     public synchronized void updatePlayerCredits(String nickname, int newOwnedCredits) {
         PlayerClientData playerData = playerClientData.get(nickname);
         if (playerData != null) {
@@ -295,6 +452,12 @@ public class ClientModel {
         }
     }
 
+    /**
+     * Updates the board position for a player.
+     *
+     * @param nickname    nickname of the player to update
+     * @param newPosition new position for the player
+     */
     public synchronized void updatePlayerPosition(String nickname, int newPosition) {
         PlayerClientData playerData = playerClientData.get(nickname);
         if (playerData != null) {
@@ -302,18 +465,42 @@ public class ClientModel {
         }
     }
 
+    /**
+     * Adds a new player to the game.
+     *
+     * @param nickname     nickname of the player to add
+     * @param color        color assigned to the player
+     * @param isTestFlight whether the player is in test flight mode
+     * @param isGui        whether the player is using GUI interface
+     */
     public void addPlayer(String nickname, PlayerColor color, boolean isTestFlight, boolean isGui) {
         playerClientData.put(nickname, new PlayerClientData(nickname, color, isTestFlight, isGui));
     }
 
+    /**
+     * Gets the shipboard for a specific player.
+     *
+     * @param nickname nickname of the player
+     * @return the player's shipboard
+     */
     public ShipBoardClient getShipboardOf(String nickname) {
         return playerClientData.get(nickname).getShipBoard();
     }
 
+    /**
+     * Gets the set of all player nicknames.
+     *
+     * @return set of player nicknames
+     */
     public Set<String> getPlayersNickname() {
         return new HashSet<>(playerClientData.keySet());
     }
 
+    /**
+     * Gets the set of players who have been eliminated.
+     *
+     * @return set of eliminated player nicknames
+     */
     public synchronized Set<String> getEliminatedPlayers() {
         return playerClientData.keySet()
                 .stream()
@@ -324,10 +511,18 @@ public class ClientModel {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Sets the nickname for this client.
+     *
+     * @param nickname nickname to set
+     */
     public void setNickname(String nickname) {
         this.myNickname = nickname;
     }
 
+    /**
+     * Refreshes the display of visible components.
+     */
     public void refreshVisibleComponents() {
         synchronized (modelFxAdapterLock) {
             if (modelFxAdapter != null)
@@ -335,6 +530,9 @@ public class ClientModel {
         }
     }
 
+    /**
+     * Refreshes the ranking display.
+     */
     public void refreshRanking() {
         synchronized (modelFxAdapterLock) {
             if (modelFxAdapter != null)
@@ -342,6 +540,9 @@ public class ClientModel {
         }
     }
 
+    /**
+     * Refreshes the cosmic credits display.
+     */
     public void refreshCosmicCredits() {
         synchronized (modelFxAdapterLock) {
             if (modelFxAdapter != null) {
@@ -355,6 +556,7 @@ public class ClientModel {
      * Uses the ClientCard object properties directly instead of string parsing.
      *
      * @return List of CargoCube that represent the rewards of the current card
+     * @throws IllegalStateException if no active card is available
      */
     public List<CargoCube> extractCubeRewardsFromCurrentCard() throws IllegalStateException {
         List<CargoCube> cubes = new ArrayList<>();

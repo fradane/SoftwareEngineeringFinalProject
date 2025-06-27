@@ -17,14 +17,31 @@ public enum ControllerState {
         this.controllerTypeName = controllerTypeName;
     }
 
+    /**
+     * Gets the numerical order of the controller state.
+     *
+     * @return the order value of this controller state
+     */
     public int getOrder() {
         return order;
     }
 
+    /**
+     * Gets the FXML file path associated with this controller state.
+     *
+     * @return the FXML file path as a String
+     */
     public String getFxmlPath() {
         return fxmlPath;
     }
 
+    /**
+     * Converts a controller type name to its corresponding ControllerState enum value.
+     *
+     * @param controllerType the name of the controller type to convert
+     * @return the matching ControllerState enum value
+     * @throws IllegalArgumentException if no matching controller type is found
+     */
     public static ControllerState fromString(String controllerType) {
         for (ControllerState state : values()) {
             if (state.controllerTypeName.equals(controllerType)) {

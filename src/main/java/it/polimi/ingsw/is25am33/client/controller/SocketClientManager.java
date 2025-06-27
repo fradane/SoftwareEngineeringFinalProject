@@ -42,6 +42,11 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     // Lock to synchronize operations
     private final Object lock = new Object();
 
+    /**
+     * Constructs a new SocketClientManager with the specified client controller
+     *
+     * @param clientController The controller handling client-side operations
+     */
     public SocketClientManager(CallableOnClientController clientController) {
         this.clientController = clientController;
     }
@@ -81,11 +86,25 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         }
     }
 
+    /**
+     * Gets the game controller for a specific game
+     *
+     * @param gameId The ID of the game
+     * @return The game controller
+     * @throws RemoteException If remote communication fails
+     */
     @Override
     public GameController getController(String gameId)  throws RemoteException{
         return null;
     }
 
+    /**
+     * Gets information about a specific game
+     *
+     * @param gameId The ID of the game
+     * @return Information about the game
+     * @throws RemoteException If remote communication fails
+     */
     @Override
     public GameInfo getGameInfo(String gameId) throws RemoteException {
         return null;
@@ -103,6 +122,14 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Registers a player with the specified nickname
+     *
+     * @param nickname   The player's chosen nickname
+     * @param controller The client controller
+     * @return True if registration successful, false otherwise
+     * @throws RemoteException If remote communication fails
+     */
     @Override
     public boolean registerWithNickname(String nickname, CallableOnClientController controller) throws RemoteException {
 
@@ -122,6 +149,13 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     }
 
+    /**
+     * Establishes a socket connection to the specified server
+     *
+     * @param serverAddress The server's IP address or hostname
+     * @param serverPort    The server's port number
+     * @throws IOException If connection cannot be established
+     */
     public void connect(String serverAddress, int serverPort) throws IOException {
 
         try {
@@ -138,6 +172,16 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     }
 
+    /**
+     * Creates a new game with specified parameters
+     *
+     * @param color        The player's chosen color
+     * @param numPlayers   The number of players in the game
+     * @param isTestFlight Whether this is a test flight
+     * @param nickname     The player's nickname
+     * @return Information about the created game
+     * @throws IOException If communication fails
+     */
     @Override
     public GameInfo createGame(PlayerColor color, int numPlayers, boolean isTestFlight, String nickname) throws IOException {
 
@@ -152,6 +196,15 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
 
     }
 
+    /**
+     * Attempts to join an existing game
+     *
+     * @param gameId   The ID of the game to join
+     * @param nickname The player's nickname
+     * @param color    The player's chosen color
+     * @return True if successfully joined, false otherwise
+     * @throws IOException If communication fails
+     */
     @Override
     public boolean joinGame(String gameId, String nickname, PlayerColor color) throws IOException {
 
@@ -581,24 +634,51 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         }
     }
 
+    /**
+     * Sends a ping message to the server to check connection
+     *
+     * @param nickname The player's nickname
+     * @throws IOException If message cannot be sent
+     */
     public void pingToServerFromClient(String nickname) throws IOException{
         SocketMessage outMessage = new SocketMessage(nickname, "PING");
         out.println(ClientSerializer.serialize(outMessage));
         //System.out.println("Ping inviato al server");
     }
 
+    /**
+     * Sends a pong response to the server
+     *
+     * @param nickname The player's nickname
+     * @throws IOException If message cannot be sent
+     */
     public void pongToServerFromClient(String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "PONG");
         out.println(ClientSerializer.serialize(outMessage));
         //System.out.println("Pong inviato al server");
     }
 
+    /**
+     * Notifies the server that the player wants to pick a hidden component.
+     *
+     * @param nickname The nickname of the player performing the action.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerPicksHiddenComponent(String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "playerPicksHiddenComponent");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player wants to place the currently focused component
+     * at the specified coordinates with a given rotation.
+     *
+     * @param nickname  The player's nickname.
+     * @param coordinates The coordinates where the component is to be placed.
+     * @param rotation   The rotation of the component.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates, int rotation) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToPlaceFocusedComponent");
@@ -607,24 +687,48 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player wants to reserve the currently focused component.
+     *
+     * @param nickname The player's nickname.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerWantsToReserveFocusedComponent(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToReserveFocusedComponent");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player wants to release the currently focused component.
+     *
+     * @param nickname The player's nickname.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerWantsToReleaseFocusedComponent(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToReleaseFocusedComponent");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player wants to manually restart the hourglass timer.
+     *
+     * @param nickname The nickname of the player requesting the restart.
+     */
     @Override
     public void playerWantsToRestartHourglass(String nickname) {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToRestartHourglass");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player wants to remove a component from the ship at the specified coordinate.
+     *
+     * @param nickname  The player's nickname.
+     * @param coordinate The coordinate of the component to remove.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerWantsToRemoveComponent(String nickname, Coordinates coordinate) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToRemoveComponent");
@@ -632,6 +736,13 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server of the ship part chosen by the player during the rebuild or repair phase.
+     *
+     * @param nickname  The player's nickname.
+     * @param shipPart  The set of coordinates representing the chosen ship part.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerChoseShipPart(String nickname, Set<Coordinates> shipPart) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerChoseShipPart");
@@ -640,18 +751,35 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
 
+    /**
+     * Notifies the server that the player has completed the ship board building phase.
+     *
+     * @param nickname The nickname of the player.
+     */
     @Override
     public void playerEndsBuildShipBoardPhase(String nickname) {
         SocketMessage outMessage = new SocketMessage(nickname, "playerEndsBuildShipBoardPhase");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player has placed their pawn.
+     *
+     * @param nickname The nickname of the player.
+     */
     @Override
     public void playerPlacesPawn(String nickname) {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPlacePlaceholder");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Sends the player's choice to the server during an interaction requiring a decision.
+     *
+     * @param nickname The nickname of the player.
+     * @param choice The choice made by the player.
+     * @throws IOException If communication with the server fails.
+     */
     @Override
     public void handleClientChoice(String nickname, PlayerChoicesDataStructure choice) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "handleClientChoice");
@@ -659,6 +787,13 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Submits the player's crew placement choices to the server.
+     *
+     * @param nickname The nickname of the player.
+     * @param choices A map of coordinates to crew members chosen for placement.
+     * @throws IOException If communication with the server fails.
+     */
     @Override
     public void submitCrewChoices(String nickname, Map<Coordinates, CrewMember> choices) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "submitCrewChoices");
@@ -666,12 +801,25 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Requests the list of available prefab ships from the server.
+     *
+     * @param nickname The nickname of the player requesting the prefab ships.
+     * @throws IOException If communication with the server fails.
+     */
     @Override
     public void requestPrefabShips(String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "requestPrefabShips");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Requests the server to select a prefab ship based on the player's choice.
+     *
+     * @param nickname The nickname of the player making the selection.
+     * @param prefabShipId The identifier of the selected prefab ship.
+     * @throws IOException If communication with the server fails.
+     */
     @Override
     public void requestSelectPrefabShip(String nickname, String prefabShipId) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "requestSelectPrefabShip");
@@ -679,12 +827,25 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player wants to land.
+     *
+     * @param nickname The nickname of the player.
+     * @throws IOException If communication with the server fails.
+     */
     @Override
     public void playerWantsToLand(String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToLand");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player has picked a visible component.
+     *
+     * @param nickname The nickname of the player.
+     * @param choice The index of the chosen component.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerPicksVisibleComponent");
@@ -692,6 +853,13 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server of the player's decision regarding visiting a location.
+     *
+     * @param nickname The nickname of the player.
+     * @param choice True if the player wants to visit the location; false otherwise.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerWantsToVisitLocation(String nickname, Boolean choice) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToVisitLocation");
@@ -699,12 +867,24 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player wants to throw the dice.
+     *
+     * @param nickname The nickname of the player.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerWantsToThrowDices(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToThrowDices");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player has chosen a planet to visit.
+     *
+     * @param nickname The nickname of the player.
+     * @param choice The index of the chosen planet.
+     */
     @Override
     public void playerWantsToVisitPlanet(String nickname, int choice){
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToVisitPlanet");
@@ -712,6 +892,13 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server of the player's decision to accept or refuse a reward.
+     *
+     * @param nickname The nickname of the player.
+     * @param choice True if the player accepts the reward; false otherwise.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerWantsToAcceptTheReward(String nickname, Boolean choice) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToAcceptTheReward");
@@ -720,48 +907,89 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
     }
 
 
+    /**
+     * Notifies the server of the player's selection of double engines and associated battery boxes.
+     *
+     * @param nickname The nickname of the player.
+     * @param doubleEnginesCoords The coordinates of the selected double engines.
+     * @param batteryBoxesCoords The coordinates of the battery boxes used to activate them.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "playerChoseDoubleEngines");
         outMessage.setParamActivableCoordinates(doubleEnginesCoords);
         outMessage.setParamBatteryBoxCoordinates(batteryBoxesCoords);
-
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server of the player's selection of double cannons and associated battery boxes.
+     *
+     * @param nickname The nickname of the player.
+     * @param doubleCannonsCoords The coordinates of the selected double cannons.
+     * @param batteryBoxesCoords The coordinates of the battery boxes used to activate them.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "playerChoseDoubleCannons");
         outMessage.setParamActivableCoordinates(doubleCannonsCoords);
         outMessage.setParamBatteryBoxCoordinates(batteryBoxesCoords);
-
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server of the player's attempt to handle a small meteorite using shields and battery boxes.
+     *
+     * @param nickname The nickname of the player.
+     * @param shieldCoords The coordinates of the shields used.
+     * @param batteryBoxCoords The coordinates of the battery boxes powering the shields.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "playerHandleSmallMeteorite");
         outMessage.setParamActivableCoordinates(shieldCoords);
         outMessage.setParamBatteryBoxCoordinates(batteryBoxCoords);
-
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server of the player's attempt to handle a big meteorite using double cannons and battery boxes.
+     *
+     * @param nickname The nickname of the player.
+     * @param doubleCannonCoords The coordinates of the double cannons used.
+     * @param batteryBoxCoords The coordinates of the battery boxes powering the cannons.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerHandleBigMeteorite(String nickname, List<Coordinates> doubleCannonCoords, List<Coordinates> batteryBoxCoords) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerHandleBigMeteorite");
         outMessage.setParamActivableCoordinates(doubleCannonCoords);
         outMessage.setParamBatteryBoxCoordinates(batteryBoxCoords);
-
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player wants to handle a big shot.
+     *
+     * @param nickname The nickname of the player.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerHandleBigShot(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerHandleBigShot");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server of the player's selection of storage locations.
+     *
+     * @param nickname The nickname of the player.
+     * @param storageCoords The coordinates of the chosen storage components.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerChoseStorage(String nickname, List<Coordinates> storageCoords) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerChoseStorage");
@@ -769,6 +997,13 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server of the player's selection of cabins.
+     *
+     * @param nickname The nickname of the player.
+     * @param cabinsCoords The coordinates of the chosen cabins.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerChoseCabins(String nickname, List<Coordinates> cabinsCoords) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerChoseCabins");
@@ -776,30 +1011,61 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server to spread the epidemic event for the current player.
+     *
+     * @param nickname The nickname of the player.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void spreadEpidemic(String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "spreadEpidemic");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the Stardust event has been triggered.
+     *
+     * @param nickname The nickname of the player.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void stardustEvent(String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "stardustEvent");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the crew members have been evaluated.
+     *
+     * @param nickname The nickname of the player.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void evaluatedCrewMembers(String nickname) throws RemoteException{
         SocketMessage outMessage = new SocketMessage(nickname, "evaluatedCrewMembers");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player's hourglass has ended.
+     *
+     * @param nickname The nickname of the player.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void notifyHourglassEnded(String nickname) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "notifyHourglassEnded");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies the server that the player wants to focus on one of their reserved components.
+     *
+     * @param nickname The nickname of the player.
+     * @param choice The index of the reserved component to focus on.
+     * @throws RemoteException If communication with the server fails.
+     */
     @Override
     public void playerWantsToFocusReservedComponent(String nickname, int choice) throws RemoteException {
         SocketMessage outMessage = new SocketMessage(nickname, "playerWantsToFocusReservedComponent");
@@ -807,11 +1073,22 @@ public class SocketClientManager implements CallableOnDNS, CallableOnGameControl
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Initiates checking of the ship board after an attack
+     *
+     * @param nickname The player's nickname
+     * @throws IOException If communication fails
+     */
     public void startCheckShipBoardAfterAttack(String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "startCheckShipBoardAfterAttack");
         out.println(ClientSerializer.serialize(outMessage));
     }
 
+    /**
+     * Debug method to skip to the last card
+     *
+     * @throws IOException If communication fails
+     */
     @Override
     public void debugSkipToLastCard() throws IOException {
         SocketMessage outMessage = new SocketMessage(nickname, "debugSkipToLastCard");

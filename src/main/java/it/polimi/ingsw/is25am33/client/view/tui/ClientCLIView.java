@@ -34,10 +34,24 @@ import static it.polimi.ingsw.is25am33.client.view.tui.ClientState.*;
 import static it.polimi.ingsw.is25am33.client.view.tui.MessageType.*;
 
 /**
- * The ClientCLIView class provides a command-line interface for interactions with the client-side
- * of the game. It extends the general client view, specifically tailored for use in a terminal
- * environment, and includes non-blocking user input handling alongside various game state
- * display functionalities.
+ * The ClientCLIView class represents the Command-Line Interface (CLI) view for the client in the application.
+ * It serves as the primary interface for interacting with the user, handling input and displaying output.
+ * The class provides various methods for rendering user menus, game updates, and notifications, and for
+ * gathering user input during gameplay.
+ *
+ * This class manages the state of the client, including interactions with the client model and controller,
+ * as well as the formatting and display of game-related information. It uses color formatting where applicable
+ * to enhance the user's experience.
+ *
+ * Key responsibilities:
+ * - Display game state information and updates to the console.
+ * - Ask users for specific inputs based on game prompts.
+ * - Handle user interaction during various gameplay phases, including setup, decision-making, and resolution.
+ * - Display notifications, errors, and game alerts in a structured and formatted manner.
+ * - Provide helper methods for formatting and managing internal representations of game entities.
+ *
+ * This class interacts with the ClientModel and ClientController to coordinate game logic updates and display
+ * information to the user.
  */
 public class ClientCLIView implements ClientView {
 
@@ -77,14 +91,31 @@ public class ClientCLIView implements ClientView {
     private static final String ANSI_CYAN = "\u001B[36m";
     private String currentInterrogationPrompt = "";
 
+    /**
+     * Constructs a new ClientCLIView instance with input stream initialization.
+     * Initializes the Scanner to read input from the standard input stream.
+     *
+     * @throws RemoteException if a remote communication error occurs.
+     */
     public ClientCLIView() throws RemoteException {
         this.scanner = new Scanner(System.in);
     }
 
+    /**
+     * Sets the client model reference for this view.
+     * This model provides access to game state and data used for rendering the UI.
+     *
+     * @param clientModel The client-side game model instance.
+     */
     public void setClientModel(ClientModel clientModel) {
         this.clientModel = clientModel;
     }
 
+    /**
+     * Sets the client controller instance used by this view to communicate with the game logic.
+     *
+     * @param clientController The controller managing the client-side logic.
+     */
     public void setClientController(ClientController clientController) {
         this.clientController = clientController;
     }
@@ -93,19 +124,41 @@ public class ClientCLIView implements ClientView {
         this.clientState = clientState;
     }
 
+    /**
+     * Sets whether the current game is a test flight mode.
+     * Affects game rules such as scoring and available features.
+     *
+     * @param isTestFlight true if the game is a test flight; false otherwise.
+     */
     @Override
     public void setIsTestFlight(boolean isTestFlight) {
         this.isTestFlight = isTestFlight;
     }
 
+    /**
+     * Retrieves the current client model.
+     * Provides access to the client-side representation of the game state.
+     *
+     * @return the current ClientModel instance.
+     */
     @Override
     public ClientModel getClientModel() {
         return clientModel;
     }
 
+    /**
+     * Updates the client-side interface with the current list of available game sessions.
+     * This method is called to refresh the game lobby or join menu after receiving new game info.
+     *
+     * @param gameInfos A list of available games retrieved from the server.
+     */
     @Override
     public void refreshGameInfos(List<GameInfo> gameInfos) {}
 
+    /**
+     * Initializes the view by starting background threads for input handling.
+     * Creates and starts daemon threads for reading user input and processing input messages.
+     */
     @Override
     public void initialize() {
         // Avvia il thread di input
@@ -143,7 +196,14 @@ public class ClientCLIView implements ClientView {
         handlerInputMessage.start();
     }
 
-
+    /**
+     * Prompts the user for input with a specific question and waits for their response.
+     * This method blocks until input is received or interrupted.
+     *
+     * @param questionDescription a description of what information is being requested
+     * @param interrogationPrompt the specific prompt to display to the user
+     * @return the user's input as a String, or INPUT_INTERRUPT if the operation was interrupted
+     */
     public String askForInput(String questionDescription, String interrogationPrompt) {
 
         synchronized (consoleLock) {
@@ -171,6 +231,12 @@ public class ClientCLIView implements ClientView {
 
     }
 
+    /**
+     * Retrieves the client controller associated with this view.
+     * This controller manages interactions and logic on the client side.
+     *
+     * @return the current ClientController instance.
+     */
     @Override
     public ClientController getClientController() {
         return clientController;
@@ -220,16 +286,33 @@ public class ClientCLIView implements ClientView {
 
     }
 
+
+    /**
+     * Displays an error message to the user.
+     * Uses red color and a standard error format for visibility in the terminal.
+     *
+     * @param errorMessage The error message to be displayed.
+     */
     @Override
     public void showError(String errorMessage) {
         showMessage(errorMessage, MessageType.ERROR);
     }
 
+    /**
+     * Prompts the user to enter their nickname.
+     * This method is typically called during the registration phase.
+     */
     @Override
     public void askNickname() {
         showMessage("Please enter your nickname: ", ASK);
     }
 
+    /**
+     * Displays the list of available games that the user can join.
+     * If no games are found, it informs the user and returns to the main menu.
+     *
+     * @param games An iterable of GameInfo objects representing available game sessions.
+     */
     public void showAvailableGames(Iterable<GameInfo> games) {
         boolean hasGames = false;
 
@@ -253,6 +336,10 @@ public class ClientCLIView implements ClientView {
         }
     }
 
+    /**
+     * Displays a prompt asking the user to choose a color from a predefined list.
+     * Typically called during the setup or joining phase of a game.
+     */
     public void showColorQuestion() {
         String colorMenu = """
                 Choose your color:
@@ -264,6 +351,12 @@ public class ClientCLIView implements ClientView {
         showMessage(colorMenu, ASK);
     }
 
+    /**
+     * Displays the list of available colors for a specific game session.
+     * Informs the user to choose from the remaining options.
+     *
+     * @param gameID The identifier of the game session.
+     */
     public void showAvailableColorsQuestion(String gameID) {
         List<PlayerColor> occupiedColors = clientController.getGames().stream()
                 .filter(gameInfo -> gameInfo.getGameId().equals(gameID))
@@ -281,6 +374,10 @@ public class ClientCLIView implements ClientView {
         showMessage(colorMenu.toString(), ASK);
     }
 
+    /**
+     * Displays the main menu options to the user.
+     * Typically includes options such as creating or joining a game, or exiting the application.
+     */
     @Override
     public void showMainMenu() {
         clientState = ClientState.MAIN_MENU;
@@ -292,6 +389,12 @@ public class ClientCLIView implements ClientView {
         showMessage(menu, ASK);
     }
 
+    /**
+     * Notifies that a player has joined the game and displays updated game information.
+     *
+     * @param nickname the nickname of the player who joined
+     * @param gameInfo the updated game information after the player joined
+     */
     @Override
     public void notifyPlayerJoined(String nickname, GameInfo gameInfo) {
         showMessage(nickname + " joined the game with color "+ gameInfo.getConnectedPlayers().get(nickname) + ". Players: " +
@@ -299,10 +402,24 @@ public class ClientCLIView implements ClientView {
                 gameInfo.getMaxPlayers(), NOTIFICATION_INFO);
     }
 
+    /**
+     * Notifies that a new game has been created and displays the game ID.
+     *
+     * @param gameId the ID of the newly created game
+     */
     public void notifyGameCreated(String gameId) {
         showMessage("Game created! ID: " + gameId, NOTIFICATION_INFO);
     }
 
+    /**
+     * Displays a message to the user without adding any formatting or additional UI prompts.
+     *
+     * @param message The plain message to be shown.
+     */
+    /**
+     * Informs the user that the game is waiting for other players to join before starting.
+     * Displays a simple waiting message in the CLI.
+     */
     @Override
     public void showWaitingForPlayers() {
         String menu = """
@@ -313,6 +430,10 @@ public class ClientCLIView implements ClientView {
         showMessage(menu, STANDARD);
     }
 
+    /**
+     * Notifies the user that the game has officially started.
+     * Usually displayed after all players are ready and the game setup is complete.
+     */
     @Override
     public void notifyGameStarted(GameState gameState) {
         waitingForGameStart = false;
@@ -322,9 +443,17 @@ public class ClientCLIView implements ClientView {
                 """, STANDARD);
     }
 
+    /**
+     * Informs the user that the game has entered the build phase.
+     * Prompts the player to start building their ship or components.
+     */
     @Override
     public void showCurrAdventureCard(boolean isFirstTime) {
         if (isFirstTime) showMessage("The card has been drawn from the deck.\n", STANDARD);
+    /**
+     * Informs the user that the game has entered the rebuild phase.
+     * The player can now perform repairs or rearrangements as allowed.
+     */
 
         ClientCard card = clientModel.getCurrAdventureCard();
         if (card == null) {
@@ -430,11 +559,29 @@ public class ClientCLIView implements ClientView {
         }
     }
 
+    /**
+     * Displays a message indicating that a specific component has been hit.
+     * Also updates the last hit component coordinates for reference.
+     *
+     * @param coordinates The coordinates of the component that was hit.
+     */
     public void showComponentHitInfo(Coordinates coordinates) {
             showMessage("The component at coordinates " + coordinates.getX() + "-"+ coordinates.getY() + " has been hit", STANDARD);
             hitComponent = coordinates;
     }
 
+
+
+    /**
+     * Displays information about the crew members of the current user and other players.
+     * It first shows the number of crew members belonging to the current user.
+     * Then, it iterates through the sorted ranking of all players and displays
+     * the number of crew members for each player except the current user.
+     * Concludes with a message prompting the user to proceed with the next phase.
+     *
+     * This method retrieves data from the client model, including the user's nickname,
+     * the shipboard associated with each player, and the sorted rankings of all players.
+     */
     public void showCrewMembersInfo() {
         showMessage("You have " + clientModel.getShipboardOf(clientModel.getMyNickname()).getCrewMembers().size() + " crew members", STANDARD);
         for (String player : clientModel.getSortedRanking()) {
@@ -504,6 +651,22 @@ public class ClientCLIView implements ClientView {
         output.append("Shots: ").append(warField.getShots().size()).append("\n");
     }
 
+    /**
+     * Returns the coordinates of the last component that was hit.
+     * This information is updated whenever a component is struck.
+     *
+     * @return The coordinates of the most recently hit component.
+     */
+    public Coordinates getLastHitComponent() {
+        return hitComponent;
+    }
+
+    /**
+     * Displays a formatted message regarding the new game state to the user.
+     * The method retrieves the current game state from the client model,
+     * formats it into a predefined template, and outputs it with a standard message type.
+     * This is primarily used to update users about the latest game state changes.
+     */
     @Override
     public void showNewGameState() {
         showMessage(String.format("""
@@ -514,6 +677,16 @@ public class ClientCLIView implements ClientView {
                         """, clientModel.getGameState().toString()), STANDARD);
     }
 
+    /**
+     * Updates the client interface to reflect the new state of the card.
+     * This method retrieves the current card state from the client model, maps it to
+     * a client state, and updates the client's state accordingly.
+     * It also resets any previous selection states for engines, cannons, batteries, and shields,
+     * and clears the current selection.
+     *
+     * The method generates and displays a message summarizing the new card state and
+     * then shows the corresponding card state menu.
+     */
     @Override
     public void showNewCardState() {
         CardState currentCardState = clientModel.getCurrCardState();
@@ -536,6 +709,26 @@ public class ClientCLIView implements ClientView {
         showCardStateMenu(mappedState);
     }
 
+    /**
+     * Displays the menu for the Build Ship Board phase of the game.
+     *
+     * This method provides the user with a list of menu options to select during
+     * the shipboard building phase. Based on the current game state, different
+     * options will be available:
+     *
+     * Options include:
+     *  - Building a prefabricated ship.
+     *  - Selecting a random covered component from the table.
+     *  - Picking a visible component from the table.
+     *  - Ending the shipboard construction process.
+     *  - Additional options such as restarting the hourglass, watching the little deck,
+     *    and placing reserved components if the game is not in a test flight state.
+     *
+     * Players can also observe another player's shipboard by typing "show [nickname]".
+     *
+     * The method ensures the player receives a prompt highlighting their options and
+     * expects an input response.
+     */
     @Override
     public void showBuildShipBoardMenu() {
         clientState = BUILDING_SHIPBOARD_MENU;
@@ -588,6 +781,12 @@ public class ClientCLIView implements ClientView {
 
     }
 
+    /**
+     * Displays a message prompting the user to place their placeholder.
+     * This method sets the client state to a specific placeholder state
+     * and informs the user that their placeholder has not yet been positioned.
+     * The message encourages the user to act quickly and place the placeholder before others.
+     */
     @Override
     public void showFirstToEnter() {
         clientState = PLACE_PLACEHOLDER;
@@ -596,6 +795,19 @@ public class ClientCLIView implements ClientView {
                 Press any key to place it faster than the others...""", STANDARD);
     }
 
+    /**
+     * Displays the menu to inform the user about invalid ship components
+     * on their board and allows them to choose components to remove.
+     * <br>
+     * The method transitions the client state to indicate invalid shipboard
+     * components, retrieves the shipboard of the current user, and identifies
+     * incorrectly positioned components. It highlights these invalid components
+     * with a specified color (red) when displaying the shipboard.
+     * <br>
+     * After showing the shipboard with invalid components, the method
+     * transitions the client state further to allow the user to select and
+     * remove a component for correction.
+     */
     @Override
     public void showInvalidShipBoardMenu() {
         setClientState(CHECK_SHIPBOARD_INVALID);
@@ -610,6 +822,12 @@ public class ClientCLIView implements ClientView {
         showChooseComponentToRemoveMenu();
     }
 
+    /**
+     * Displays the valid shipboard menu for the client.
+     * Updates the client state to indicate that the shipboard is correct.
+     * Retrieves the nickname of the client and the associated shipboard.
+     * Displays the client's shipboard and a standard message indicating no further action is required.
+     */
     @Override
     public void showValidShipBoardMenu() {
         setClientState(CHECK_SHIPBOARD_CORRECT);
@@ -619,6 +837,17 @@ public class ClientCLIView implements ClientView {
         showMessage("No action needed, your ship is all set.", STANDARD);
     }
 
+    /**
+     * Checks the state of the shipboard after an attack and takes appropriate actions.
+     * If there is a hit component, it triggers the client controller to start checking the shipboard
+     * with the associated player's nickname and resets the hit component. Otherwise, it informs the player
+     * that their shipboard is safe and prompts them to continue.
+     *
+     * The method transitions between two possible scenarios:
+     * 1. When a hit component is detected, it initializes a check on the client's shipboard.
+     * 2. When no hit component is detected, it displays a success message and sets the client state
+     *    to confirm the shipboard check result.
+     */
     @Override
     public void checkShipBoardAfterAttackMenu() {
         if (hitComponent != null) {
@@ -631,6 +860,18 @@ public class ClientCLIView implements ClientView {
         }
     }
 
+    /**
+     * Displays a menu prompting the user to input the coordinates of a component to remove.
+     *
+     * The method generates a message that provides instructions for the user to enter
+     * the coordinates of a component they wish to remove. If there are incorrectly positioned
+     * components on the shipboard, the valid coordinates are listed and shown for reference.
+     * The coordinates are converted from 0-based indices to 1-based indices for display purposes.
+     * If no incorrectly positioned components are found, the message notifies the user accordingly.
+     *
+     * The user is instructed to enter the coordinates in the format 'row column' (e.g., 'x y').
+     * The resultant message is displayed to the user using the standard messaging mechanism.
+     */
     @Override
     public void showChooseComponentToRemoveMenu() {
         //showMessage("Insert the coordinates of the component you want to remove: ", STANDARD);
@@ -658,6 +899,15 @@ public class ClientCLIView implements ClientView {
         showMessage(message.toString(), STANDARD);
     }
 
+    /**
+     * Displays a menu to choose ship parts to keep from a list of options.
+     * The menu assigns each set of ship parts a color for visual identification
+     * and prompts the user to select one by entering its corresponding number.
+     *
+     * @param shipPartsList A list of sets of coordinates representing the available ship parts
+     *                      that can be chosen. Each set contains the coordinates for a specific
+     *                      ship part, and each ship part is visually differentiated by a color.
+     */
     @Override
     public void showChooseShipPartsMenu(List<Set<Coordinates>> shipPartsList) {
         setClientState(CHECK_SHIPBOARD_CHOOSE_SHIP_PART_TO_KEEP);
@@ -683,6 +933,11 @@ public class ClientCLIView implements ClientView {
         showMessage(menu.toString(), ASK);
     }
 
+    /**
+     * Displays the selected little deck based on the user's choice.
+     *
+     * @param littleDeckChoice the index of the little deck chosen by the user
+     */
     @Override
     public void showLittleDeck(int littleDeckChoice) {
         StringBuilder littleDeck = new StringBuilder();
@@ -691,6 +946,17 @@ public class ClientCLIView implements ClientView {
         showMessage(littleDeck.toString(), STANDARD);
     }
 
+    /**
+     * Displays the currently picked component along with the corresponding menu of options for the user to interact with.
+     *
+     * The method updates the state of the client to indicate that a component is being focused on the shipboard and displays a menu
+     * offering various actions that can be performed with the component. The available options include viewing the focused component,
+     * rotating the component, placing it on the ship board, or releasing it. An additional option to reserve the component is
+     * displayed depending on the state of the `isTestFlight` flag. Additionally, users may use a specific command to view the ship
+     * board of another player.
+     *
+     * The menu is displayed using the `showMessage` method with the content built dynamically based on the current state.
+     */
     @Override
     public void showPickedComponentAndMenu() {
         clientState = BUILDING_SHIPBOARD_WITH_FOCUSED_COMPONENT;
@@ -752,6 +1018,13 @@ public class ClientCLIView implements ClientView {
 
     }
 
+    /**
+     * Displays the details of the cubes stored in the storages of a ShipBoardClient.
+     * If no storages or cubes are found, it notifies accordingly.
+     *
+     * @param shipboardOf the instance of ShipBoardClient whose storages and cubes are to be displayed
+     * @param nickname    the nickname of the user for whom the storage details are being displayed
+     */
     @Override
     public void showCubes(ShipBoardClient shipboardOf, String nickname) {
         StringBuilder output = new StringBuilder();
@@ -773,12 +1046,28 @@ public class ClientCLIView implements ClientView {
         showMessage(output.toString(), STANDARD);
     }
 
+    /**
+     * Displays a notification message indicating that the component has been stolen
+     * and renders the build ship board menu.
+     *
+     * This method is typically used when an action leads to the invalidation or
+     * unavailability of a specific component, prompting the user to select or use
+     * a different option. The notification provides user feedback, while the
+     * invocation of the build ship board menu facilitates the next steps in the
+     * application's workflow.
+     */
     @Override
     public void showStolenVisibleComponent() {
         showMessage("The component was stolen, try another one", NOTIFICATION_INFO);
         showBuildShipBoardMenu();
     }
 
+    /**
+     * Displays the shipboard and associated information for the specified user.
+     *
+     * @param shipBoardClient the client interface used for displaying the shipboard
+     * @param shipBoardOwnerNickname the nickname of the shipboard's owner whose information is being displayed
+     */
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname) {
         showShipBoard(shipBoardClient, shipBoardOwnerNickname, Collections.emptyMap());
@@ -789,6 +1078,13 @@ public class ClientCLIView implements ClientView {
         showStoragesInfo(shipBoardOwnerNickname);
     }
 
+    /**
+     * Displays the ship board of a particular player along with legends and component details.
+     *
+     * @param shipBoardClient the client object holding the ship board data and configurations
+     * @param shipBoardOwnerNickname the nickname of the owner of the displayed ship board
+     * @param colorMap a map containing coordinates and their associated color set for rendering ship components
+     */
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {
 
@@ -921,6 +1217,15 @@ public class ClientCLIView implements ClientView {
         showMessage(output.toString(), ASK);
     }
 
+    /**
+     * Displays the menu for selecting a prefabricated ship to the user.
+     * This method generates a list of available prefabricated ships and prompts the user to choose one.
+     * The menu also includes an option to return to the previous build menu.
+     *
+     * @param prefabShips a list of PrefabShipInfo objects representing the available prefabricated ships.
+     *                    Each ship includes details like its name, description, and whether it is marked
+     *                    for test flight use only.
+     */
     public void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips) {
         clientState = BUILDING_SHIPBOARD_SELECT_PREFAB;
 
@@ -945,6 +1250,13 @@ public class ClientCLIView implements ClientView {
         showMessage(menu.toString(), ASK);
     }
 
+    /**
+     * Displays the infected crew members that were removed from specific cabin locations and their neighbors on the shipboard.
+     * If there are affected cabins, they are highlighted in blue and a message is displayed indicating the affected cabins.
+     * If no infected crew members were removed, a message indicating no removals is shown.
+     *
+     * @param cabinWithNeighbors A set of coordinates representing the cabins and their neighbors where infected crew members were removed.
+     */
     @Override
     public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
         String nickname = clientModel.getMyNickname();
@@ -956,6 +1268,15 @@ public class ClientCLIView implements ClientView {
             showMessage("You had no infected crew membership", STANDARD);
     }
 
+    /**
+     * Displays the end-game results and detailed information about the player's final performance
+     * based on the specified final ranking and other game data.
+     *
+     * @param finalRanking a list of {@code PlayerFinalData} containing the final ranking and details
+     *                     of all players, including scores, position, and other statistics.
+     * @param playersNicknamesWithPrettiestShip a list of nicknames of players who received the
+     *                                          prettiest ship bonus.
+     */
     @Override
     public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
         setClientState(END_GAME_PHASE);
@@ -1137,6 +1458,7 @@ public class ClientCLIView implements ClientView {
         showMessage("Press any key to leave the game", ASK);
     }
 
+
     // Helper method to calculate initial credits by removing bonuses/penalties
     private int calculateInitialCredits(PlayerFinalData data, int position, boolean hasPrettiestShip) {
         int totalCredits = data.getTotalCredits();
@@ -1220,6 +1542,16 @@ public class ClientCLIView implements ClientView {
         return String.format("%d🟥 %d🟨 %d🟩 %d🟦", red, yellow, green, blue);
     }
 
+    /**
+     * Displays a message indicating that a player has landed early in the game.
+     * The message differs depending on whether the current player or another player
+     * has landed early. It provides detailed information about the consequences
+     * and status updates for the early landing.
+     *
+     * @param nickname The nickname of the player who landed early. If the nickname matches the
+     *                 current player's nickname, a personalized message is shown. Otherwise,
+     *                 a general announcement message about the other player's early landing is displayed.
+     */
     @Override
     public void showPlayerEarlyLanded(String nickname) {
         // Check if it's the current player who landed early
@@ -1273,14 +1605,15 @@ public class ClientCLIView implements ClientView {
         }
     }
 
+
     /**
-     * Determina il colore ANSI da applicare alla coordinata specificata
-     * basandosi sulla mappa dei colori fornita.
+     * Determines the color associated with the specified coordinate based on the given color map.
      *
-     * @param x La coordinata x
-     * @param y La coordinata y
-     * @param colorMap La mappa che associa stringhe colore a set di coordinate
-     * @return La stringa del colore ANSI da applicare, o stringa vuota se nessun colore è specificato
+     * @param x the x-coordinate of the point
+     * @param y the y-coordinate of the point
+     * @param colorMap a map where each key is a color and the associated value is a set of coordinates
+     *                 that are mapped to that color
+     * @return the color associated with the specified coordinate if found, or an empty string if no color is specified
      */
     private String getColorForCoordinate(int x, int y, Map<String, Set<Coordinates>> colorMap) {
         Coordinates coord = new Coordinates(x, y);
@@ -1294,6 +1627,13 @@ public class ClientCLIView implements ClientView {
         return ""; // Nessun colore specificato, usa il default
     }
 
+    /**
+     * Displays a list of visible components and prompts the user to choose one of them.
+     * If no visible components are available, a message is displayed and the Build Ship Board menu is shown.
+     *
+     * @param visibleComponents a map containing visible components, where the key is the component's index
+     *                           and the value is the component object
+     */
     @Override
     public void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents) {
 
@@ -1322,6 +1662,33 @@ public class ClientCLIView implements ClientView {
     }
 
 
+    /**
+     * Displays the visit location menu based on the type of adventure card the player has encountered.
+     * This method provides contextual information about the location, including potential rewards
+     * and the associated costs or requirements to visit it. Additionally, it checks if the player
+     * meets the necessary conditions (e.g., sufficient crew members) to visit the location.
+     * If the player does not meet the requirements, the client state is updated, and appropriate
+     * messages are shown. Otherwise, the player is prompted to decide whether to visit the location.
+     *
+     * Behavior:
+     * - For "AbandonedShip" cards:
+     *   - Describes the rewards and penalties of visiting the abandoned ship.
+     *   - Checks if the player has enough crew members. If not, disallows the visit and informs the player.
+     * - For "AbandonedStation" cards:
+     *   - Describes the rewards and the required minimum crew members.
+     *   - Checks if the player has enough crew members. If not, disallows the visit and informs the player.
+     * - Prompts the user with the question of whether they want to visit the location.
+     *
+     * Preconditions:
+     * - The client's current adventure card is properly set in the client model.
+     * - The client model should provide accurate and up-to-date information about the player's
+     *   ship, crew members, and other relevant details.
+     *
+     * Postconditions:
+     * - If the player does not meet the requirements for visiting the location, the client state
+     *   will be set to {@code ClientState.CANNOT_VISIT_LOCATION}, and the player will not be allowed to proceed.
+     * - A menu option is displayed to allow the player to decide if they want to visit the location.
+     */
     @Override
     public void showVisitLocationMenu() {
         //setClientState(ClientState.VISIT_LOCATION_MENU);
@@ -1371,12 +1738,29 @@ public class ClientCLIView implements ClientView {
         showMessage(message.toString(), ASK);
     }
 
+    /**
+     * Displays a disconnect message to the user and terminates the application.
+     *
+     * @param message the disconnect message to be displayed
+     */
     @Override
     public void showDisconnectMessage(String message) {
         showMessage(message, ERROR);
         System.exit(0);
     }
 
+    /**
+     * Displays the menu or messages associated with throwing dice during specific game events based on the current adventure card and the player's turn.
+     *
+     * This method identifies the type of adventure card and presents relevant messages to the player or other participants.
+     * It determines the client state depending on whether it is the player's turn and provides instructions or updates accordingly.
+     *
+     * Behavior:
+     * - If the adventure card type is "Pirates" or "SlaveTraders", an appropriate message indicating enemy attack is shown.
+     * - If the adventure card type is "MeteoriteStorm", a message indicating an impending meteorite storm is displayed.
+     * - If it is the player's turn, the client state is set to THROW_DICES_MENU, and a prompt to throw the dice is shown.
+     * - If it is not the player's turn, the client state is set to WAIT_PLAYER, and a message indicating that another player is throwing dice is displayed.
+     */
     @Override
     public void showThrowDicesMenu() {
 
@@ -1427,6 +1811,22 @@ public class ClientCLIView implements ClientView {
         showMessage(planetsInfo.toString(), ASK);
     }
 
+    /**
+     * Displays the menu for choosing engines during the player's turn in the game.
+     * This method handles the logic for displaying the available engine options
+     * and necessary information for the player to make a decision.
+     *
+     * Functionality includes:
+     * - Resetting the selection states for engines and batteries.
+     * - Showing the current state of the engine components using a visual highlight.
+     * - Managing conditions where certain engine options (e.g., double engines)
+     *   may be unavailable due to game constraints, such as the absence of batteries
+     *   or eligible engine types.
+     * - Displaying relevant messages to inform or warn the player based on game state,
+     *   such as the risk of elimination in specific scenarios.
+     * - Allowing the player to specify engine coordinates or confirm their selections.
+     * - Updating the client state to appropriately reflect the current action context.
+     */
     @Override
     public void showChooseEnginesMenu() {
 
@@ -1473,6 +1873,27 @@ public class ClientCLIView implements ClientView {
         showMessage("Enter coordinates of a double engine (row column) or 'done' when finished: ", ASK);
     }
 
+    /**
+     * Displays the "Accept the Reward" menu to the user based on the current adventure card.
+     *
+     * Depending on the type of the adventure card and its attributes, this method extracts
+     * the reward details and the associated cost (e.g., steps lost in the game) if the card
+     * contains a reward. The details are presented to the user in a sequence of messages.
+     *
+     * The user is then prompted to decide whether to accept the reward or not.
+     *
+     * Behavioral Notes:
+     * - If the current adventure card has no reward, the menu only shows a success message.
+     * - Rewards and step costs are displayed for specific card types that extend the
+     *   {@code ClientCard} class (e.g., {@code ClientPirates}, {@code ClientSlaveTraders}).
+     * - The specific handling logic for other card types, such as {@code ClientAbandonedShip},
+     *   may be included in the future but is currently commented out.
+     *
+     * Messages:
+     * - A success message indicating that the user has succeeded in the adventure.
+     * - A detailed message about the potential reward and its cost, if applicable.
+     * - A prompt asking the user to accept or decline the reward.
+     */
     @Override
     public void showAcceptTheRewardMenu() {
 
@@ -1505,6 +1926,24 @@ public class ClientCLIView implements ClientView {
         showMessage("Do you want to accept the reward? [Y/n]", ASK);
     }
 
+    /**
+     * Displays the menu to choose cannons for a combat scenario in the game.
+     * This method provides information about the current adversary, their required firepower,
+     * and the available options for using cannons (single or double) based on the player's resources.
+     *
+     * The method performs the following actions:
+     * 1. Resets the selected cannons and batteries to clear previous state.
+     * 2. Determines the type of adventure card currently in play and displays relevant
+     *    enemy firepower and conditions for defeating them.
+     * 3. Checks the availability of double cannons and batteries:
+     *    - If double cannons are unavailable or batteries are insufficient, the method adjusts
+     *      the state to restrict usage to single cannons and prompts the player to proceed.
+     * 4. If double cannons can be activated, instructions are displayed to guide the player
+     *    through selecting double cannon coordinates or finalizing their selection.
+     *
+     * The client's state is updated dynamically based on the availability of resources, ensuring
+     * that appropriate restrictions or options are presented to the player.
+     */
     @Override
     public void showChooseCannonsMenu() {
         // Reset the selection state
@@ -1564,6 +2003,26 @@ public class ClientCLIView implements ClientView {
         showMessage("Enter coordinates of a double cannon (row column) or 'done' when finished: ", ASK);
     }
 
+    /**
+     * Displays the menu for handling a small dangerous object in the game.
+     * This method provides options and information to the player for defending against
+     * an approaching small dangerous object or allowing it to hit their ship. It also
+     * checks the availability of resources (shields and batteries) to determine if the player
+     * can actively defend.
+     *
+     * Behavior:
+     * 1. Displays information about the incoming small dangerous object.
+     * 2. Visually highlights the shield options with appropriate colors.
+     * 3. Determines if the player has no shields, no battery boxes, or no available batteries,
+     *    and displays relevant messages.
+     * 4. If no defense is possible, the game state is updated accordingly and the player
+     *    is informed they cannot defend.
+     * 5. If defense is possible, prompts the player to activate a shield by inputting shield
+     *    coordinates, or skip the defense.
+     *
+     * Client-specific state and messages are managed to ensure proper communication
+     * of the game's ongoing situation.
+     */
     @Override
     public void showSmallDanObjMenu() {
         //setClientState(ClientState.HANDLE_SMALL_DANGEROUS_MENU);
@@ -1606,6 +2065,9 @@ public class ClientCLIView implements ClientView {
 
     }
 
+    /**
+     * Displays the menu for handling a big meteorite event in the game. This method guides the user to
+     * either defend against the big meteorite using available weaponry or skip the*/
     @Override
     public void showBigMeteoriteMenu() {
         // setClientState(ClientState.HANDLE_BIG_METEORITE_MENU);
@@ -1648,6 +2110,20 @@ public class ClientCLIView implements ClientView {
         showMessage("Enter coordinates of a double cannon (row column) or 'done' to skip: ", ASK);
     }
 
+    /**
+     * Displays the "Big Shot" menu to the user, providing details about an incoming
+     * dangerous object and the ensuing impact on the ship.
+     *
+     * This method constructs and outputs formatted messages with information about the
+     * type and details of the incoming "Big Shot" object, accompanied by a prompt
+     * for the user to proceed and view its effects.
+     *
+     * The messages displayed include:
+     * - The type of the incoming dangerous object.
+     * - Details of the incoming object as provided by its string representation.
+     * - A warning about the unstoppable nature of the "Big Shot."
+     * - A prompt directing the user to press Enter to proceed and observe the effects.
+     */
     @Override
     public void showBigShotMenu() {
         StringBuilder BigShotInfo = new StringBuilder();
@@ -1658,6 +2134,25 @@ public class ClientCLIView implements ClientView {
         showMessage("Press Enter to see the effect on your ship", ASK);
     }
 
+    /**
+     * Handles the display and interaction for removing crew members during the game.
+     * This method is invoked when the player needs to sacrifice crew members as part of the game mechanics.
+     *
+     * The method updates the client state to a specific menu, displays the ship board to give the player
+     * a visual representation of occupied cabins, and prompts the player to remove the required number
+     * of crew members from specific cabins. It ensures the game state is properly updated while validating
+     * any potential edge cases, such as insufficient crew members.
+     *
+     * Key operations performed by the method:
+     * - Retrieves the number of crew members to be removed from the current adventure card.
+     * - Displays the list of currently occupied cabins, including coordinates and crew count.
+     * - Checks whether the player has enough crew members to meet the removal requirement and handles
+     *   edge cases accordingly (e.g., not enough crew members or no occupied cabins).
+     * - Prompts the user to input cabin coordinates to remove crew from, or to indicate completion.
+     *
+     * Messages are displayed to guide the player through the process, including status messages for
+     * illegal states or warnings when the required crew removal exceeds available crew members.
+     */
     @Override
     public void showHandleRemoveCrewMembersMenu() {
         setClientState(ClientState.CHOOSE_CABIN_MENU);
@@ -1705,6 +2200,24 @@ public class ClientCLIView implements ClientView {
 
     }
 
+    /**
+     * Displays the Handle Cubes Reward Menu, allowing the player to handle cube rewards during the game.
+     *
+     * This method is responsible for managing the process of distributing cargo cubes to the player's ship,
+     * ensuring that the player has available storage space. If no storage space is available, appropriate
+     * messages are displayed, and the method finalizes without proceeding to cube redistribution.
+     *
+     * Functionality includes:
+     * - Updating the client state to HANDLE_CUBES_REWARD_MENU.
+     * - Extracting the cube rewards directly from the current card.
+     * - Initializing a storage manager to manage the cube rewards and available storage space on the player's ship.
+     * - Verifying storage availability. Displays critical notifications if no storage is available.
+     * - Initiating the cube redistribution process if storage constraints are met.
+     * - Displaying the Cube Redistribution Menu for further distribution actions.
+     *
+     * Note: If storage is unavailable, the client state is updated to CANNOT_ACCEPT_CUBES_REWARDS,
+     * and the game offers an option to proceed to the next player.
+     */
     @Override
     public void showHandleCubesRewardMenu() {
         setClientState(ClientState.HANDLE_CUBES_REWARD_MENU);
@@ -2012,9 +2525,7 @@ public class ClientCLIView implements ClientView {
         showMessage(componentInfo.toString(), STANDARD);
     }
 
-    /**
-     * Pre-processes any cubes that can't possibly be accepted due to lack of compatible storage
-     */
+
     private void processImpossibleCubes() {
         boolean anyAutoSkipped = false;
 
@@ -2041,13 +2552,6 @@ public class ClientCLIView implements ClientView {
         }
     }
 
-    /**
-     * Conta le occorrenze di una sottostringa in una stringa.
-     *
-     * @param text La stringa in cui cercare
-     * @param substring La sottostringa da contare
-     * @return Il numero di occorrenze della sottostringa
-     */
     private int countOccurrences(String text, String substring) {
         int count = 0;
         int index = 0;
@@ -2058,6 +2562,18 @@ public class ClientCLIView implements ClientView {
         return count;
     }
 
+    /**
+     * Displays the epidemic menu to notify the user of an ongoing epidemic event.
+     * The method presents messages explaining the impact of the epidemic on
+     * connected occupied cabins in the fleet and prompts the user to proceed.
+     *
+     * The displayed messages include:
+     * - Notification of the epidemic spreading through the fleet.
+     * - Explanation of how the epidemic affects occupied cabins.
+     * - An instruction to press any key to continue and observe the epidemic's spread.
+     *
+     * Utilizes the showMessage method to output information to the user.
+     */
     @Override
     public void showEpidemicMenu() {
         showMessage("\nAn epidemic is spreading throughout the fleet!", STANDARD);
@@ -2065,6 +2581,15 @@ public class ClientCLIView implements ClientView {
         showMessage("Press any key see how the epidemic is going to spread...", STANDARD);
     }
 
+    /**
+     * Displays the Stardust menu in the game client.
+     *
+     * This method updates the client state to indicate the Stardust menu is active
+     * and provides contextual messages to the user about the effects of stardust
+     * on their ship's progress. It calculates the number of flight days lost
+     * based on exposed connectors on the player's ship and informs the user about
+     * the result. The menu prompts the user to proceed to view the card effect.
+     */
     @Override
     public void showStardustMenu() {
         setClientState(ClientState.STARDUST_MENU);
@@ -2082,12 +2607,26 @@ public class ClientCLIView implements ClientView {
         showMessage("Press any key to see the effect of the card...", STANDARD);
     }
 
+    /**
+     * Notifies the user that there are no more hidden components and
+     * prompts them to focus on the visible components. This method
+     * displays an informational message and invokes a method to
+     * present the options related to the "Build Ship Board" menu.
+     *
+     * Overrides the implementation of a parent class or interface.
+     */
     @Override
     public void showNoMoreHiddenComponents() {
         showMessage("Hidden components are no longer available, look among the visible ones...", NOTIFICATION_INFO);
         showBuildShipBoardMenu();
     }
 
+    /**
+     * Notifies the client that a player has disconnected and handles
+     * the transition to the appropriate client state.
+     *
+     * @param disconnectedPlayerNickname the nickname of the player who has disconnected
+     */
     @Override
     public void notifyPlayerDisconnected(String disconnectedPlayerNickname) {
         showMessage(disconnectedPlayerNickname + " disconnected.", ERROR);
@@ -2096,6 +2635,31 @@ public class ClientCLIView implements ClientView {
         setClientState(WAITING_TO_EXIT);
     }
 
+    /**
+     * Handles the process of showing and managing the Cube Malus Menu interaction for the player.
+     * This method is triggered when the player needs to handle a "cube malus" event by removing a specified
+     * number of cargo cubes from their storage or, in special cases, using batteries instead.
+     *
+     * The method checks the player's turn and determines if they possess sufficient resources to handle the cube malus.
+     * It provides appropriate feedback and interaction prompts based on the current game state.
+     *
+     * Functional details:
+     * - If it's not the player's turn, the client state is set to wait for the other player.
+     * - Retrieves the cube malus from the current adventure card and initializes the storage selection manager
+     *   to manage the malus removal process.
+     * - Displays the ship's storage with color-coded visuals for user interaction.
+     * - If no removable cubes are available, the method checks if batteries can be used as a substitute for the cube malus:
+     *   - If batteries are available: prompts the user to return battery cubes.
+     *   - If neither cubes nor batteries are available: informs the user that they are safe, and no action is required for now.
+     * - If removable cubes are available, sets the client state to allow selection of storage for cube removal.
+     * - Prompts the user to input coordinates for removing cubes or batteries, depending on the scenario.
+     *
+     * State transitions:
+     * - WAIT_PLAYER: If it's not the player's turn.
+     * - CHOOSE_BATTERY_CUBES: If no cubes are available and batteries need to be removed.
+     * - CANNOT_HANDLE_CUBE_MALUS: If neither cubes nor batteries can be removed.
+     * - CHOOSE_STORAGE_FOR_CUBEMALUS: If cubes are available for removal.
+     */
     @Override
     public void showHandleCubesMalusMenu() {
 
@@ -2140,14 +2704,46 @@ public class ClientCLIView implements ClientView {
 
     }
 
+    /**
+     * Retrieves the shipboard associated with the current client's nickname.
+     *
+     * @return the ShipBoardClient instance corresponding to the current client's nickname
+     */
     private ShipBoardClient getMyShipBoard() {
         return clientModel.getShipboardOf(clientModel.getMyNickname());
     }
 
+    /**
+     * Displays the player's ship board along with their nickname.
+     * This method retrieves the player's ship board and invokes another method
+     * to handle the display of the ship board associated with the player's nickname.
+     */
     private void showMyShipBoard() {
         this.showShipBoard(getMyShipBoard(), clientModel.getMyNickname());
     }
 
+    /**
+     * Displays the current ranking of players in a formatted manner.
+     *
+     * This method retrieves the ranking details of all active players from the client model,
+     * sorts them based on their position on the flying board, and formats the ranking
+     * with additional details like scores and differences from the leader. The output
+     * also includes a legend explaining the format of the ranking information.
+     *
+     * Behavior:
+     * - If there are no active players, an error message is displayed.
+     * - Players who have landed early are marked with "[EARLY LANDED]".
+     * - For other players, their position, score, and steps behind the leader (if any) are displayed.
+     *
+     * Output is generated and displayed using the `showMessage` method, with ASK or ERROR indicators.
+     *
+     * Exceptions:
+     * - Catches and handles NoSuchElementException if there are no players in the ranking list.
+     *
+     * Dependencies:
+     * - Requires the clientModel object to retrieve player data and ranking information.
+     * - Relies on the showMessage method to display messages to the user.
+     */
     public void showCurrentRanking() {
         StringBuilder output = new StringBuilder();
         output.append("==========  Ranking  ==========\n");
@@ -2180,6 +2776,29 @@ public class ClientCLIView implements ClientView {
         showMessage(output.toString(), ASK);
     }
 
+    /**
+     * Displays the interface for the crew placement phase within the game. This method allows
+     * the player to assign crew members (Purple or Brown Aliens) to specific cabins on their spaceship,
+     * ensuring proper placement while visualizing available life support connections.
+     *
+     * Key functionalities of this method:
+     *
+     * - Sets the client state to CREW_PLACEMENT_MENU.
+     * - Clears existing cabin placement mappings without resetting previous choices.
+     * - Retrieves information about cabins with available life support connections from the client model.
+     * - Highlights and categorizes cabins as either available or already occupied based on player choices.
+     * - Presents a visual representation of the ship's board with life support configurations and cabin statuses.
+     * - Provides the player with a menu interface for selecting and managing crew placement:
+     *   - Displays the cabins currently selected by the player with respective crew members.
+     *   - Enumerates cabins with available life support, detailing specific connection types.
+     *   - Differentiates between cabins with Purple and Brown Alien life support compatibilities, and indicates if they are still available for placement.
+     *   - Allows removal of selected crew members from cabins or placing new members in cabins.
+     * - Displays a summary of cabins with crew members and the cabins that will default to hosting humans.
+     * - Provides options to confirm choices, reset all assignments, or proceed if no life-support-connected cabins are present.
+     *
+     * When no cabins with life support are available, the player receives a notification, and the state transitions
+     * to NO_CREW_TO_PLACE, skipping further crew placement.
+     */
     @Override
     public void showCrewPlacementMenu() {
         setClientState(ClientState.CREW_PLACEMENT_MENU);
@@ -2319,6 +2938,11 @@ public class ClientCLIView implements ClientView {
     }
 
 
+    /**
+     * Notifies the user that the timer has ended and provides information about the remaining flips.
+     *
+     * @param flipsLeft the number of flips left when the timer ends
+     */
     @Override
     public void notifyTimerEnded(int flipsLeft) {
         if (flipsLeft == 0)
@@ -2329,6 +2953,12 @@ public class ClientCLIView implements ClientView {
             showMessage("Timer ended! There are now " + flipsLeft + " flips left.", NOTIFICATION_INFO);
     }
 
+    /**
+     * Updates the time left and displays a message when specific conditions are met.
+     *
+     * @param timeLeft the remaining amount of time to be updated
+     * @param flipsLeft the remaining number of flips; currently unused in this method
+     */
     @Override
     public void updateTimeLeft(int timeLeft, int flipsLeft) {
         if (timeLeft % 20 == 0 && timeLeft != 0 && timeLeft != 60) {
@@ -2342,14 +2972,29 @@ public class ClientCLIView implements ClientView {
 
     private static final BiFunction<CallableOnGameController, String, Component> INTERRUPTED = (s, n) -> null;
 
+    /**
+     * Displays a question asking the user to input the number of players.
+     * The message specifies the query and is shown in the context of asking for user input.
+     * Typically used to prompt the user during the initialization phase of a multiplayer game.
+     */
     public void showNumPlayersQuestion() {
         showMessage("How many players do you want to play with? ", ASK);
     }
 
+    /**
+     * Displays a message prompting the user with a question asking if they
+     * want to participate in the test flight. The method uses a message
+     * display system with a specified format to convey the prompt.
+     */
     public void showTestFlightQuestion() {
         showMessage("Do you want to play the test flight? [y/n] ", ASK);
     }
 
+    /**
+     * Displays a message prompting the user to select a reserved component.
+     * The message includes guidance for users to press '0' if they wish to go back.
+     * This method utilizes the {@code showMessage} function to present the prompt.
+     */
     public void showPickReservedComponentQuestion() {
         showMessage("Please pick a reserved component (0 to go back): ", ASK);
     }
@@ -2756,7 +3401,7 @@ public class ClientCLIView implements ClientView {
     // ======== METODI PER LA RIDISTRIBUZIONE CUBI ========
 
     /**
-     * Mostra il menu di ridistribuzione cubi con lista cubi disponibili e opzioni.
+     * Displays the cube redistribution menu with a list of available cubes and options.
      */
     public void showCubeRedistributionMenu() {
         // Mostra sempre gli storage disponibili
@@ -2823,9 +3468,6 @@ public class ClientCLIView implements ClientView {
         showMessage(menu.toString(), ASK);
     }
 
-    /**
-     * Gestisce l'input dell'utente durante la ridistribuzione.
-     */
     private void handleRedistributionInput(String input) {
         try {
             // Comando di selezione cubo per indice
@@ -2868,9 +3510,6 @@ public class ClientCLIView implements ClientView {
         }
     }
 
-    /**
-     * Gestisce il comando di aggiunta cubo a storage.
-     */
     private void handleAddCubeCommand(String coordinates) {
         if (storageManager.getSelectedCube() == null) {
             showMessage(ANSI_RED + "❌ No cube selected! Select a cube by index first." + ANSI_RESET, ERROR);
@@ -2934,9 +3573,7 @@ public class ClientCLIView implements ClientView {
         showCubeRedistributionMenu();
     }
 
-    /**
-     * Gestisce il comando di rimozione cubo da storage.
-     */
+
     private void handleRemoveCubeCommand(String coordinates) {
         Coordinates coords = parseCoordinates(coordinates);
         if (coords == null) {
@@ -2978,18 +3615,8 @@ public class ClientCLIView implements ClientView {
         showCubeRedistributionMenu();
     }
 
-    /**
-     * Conferma la ridistribuzione e invia i dati al server.
-     */
+
     private void confirmRedistribution() {
-        //TODO togliere anche il client state confirm_redistribution ma prima controllare che non venga usato da nessun altro metodo
-//        if (!storageManager.getAvailableCubes().isEmpty()) {
-//            List<CargoCube> remaining = storageManager.getAvailableCubes();
-//            showMessage("Warning: " + remaining.size() + " cubes will be discarded: " + remaining, NOTIFICATION_CRITICAL);
-//            showMessage("Continua con 'y' o torna alla ridistribuzione con qualsiasi altro tasto:", ASK);
-//            setClientState(ClientState.CONFIRM_REDISTRIBUTION);
-//            return;
-//        }
 
         List<CargoCube> remaining = storageManager.getAvailableCubes();
         showMessage("Warning: " + remaining.size() + " cubes will be discarded: " + remaining, NOTIFICATION_CRITICAL);
@@ -2997,18 +3624,14 @@ public class ClientCLIView implements ClientView {
         sendRedistributionToServer();
     }
 
-    /**
-     * Invia la mappa degli aggiornamenti al server tramite ClientController.
-     */
+
     private void sendRedistributionToServer() {
         Map<Coordinates, List<CargoCube>> storageUpdates = storageManager.getFinalUpdates();
         showMessage("Invio configurazione storage al server...", STANDARD);
         clientController.sendStorageUpdates(storageUpdates);
     }
 
-    /**
-     * Formatta le coordinate per la visualizzazione (1-based).
-     */
+
     private String formatCoordinates(Coordinates coords) {
         return "(" + (coords.getX() + 1) + "," + (coords.getY() + 1) + ")";
     }
@@ -3227,6 +3850,14 @@ public class ClientCLIView implements ClientView {
         showCrewPlacementMenu();
     }
 
+    /**
+     * Handles various user input commands and controls the flow of the application based on the current client state.
+     * Recognizes and processes commands such as registering, creating/joining a game, building a shipboard, and other
+     * game-related or menu commands. Includes validation for specific input contexts.
+     *
+     * @param input the user command input in String format. The input must not be null and represents the action
+     *              to be performed or the data required for the current client state.
+     */
     public void handleInput(@NotNull String input) {
         String[] coordinates;
         int row;
@@ -4000,6 +4631,17 @@ public class ClientCLIView implements ClientView {
         showBatteryBoxesInfo(clientModel.getMyNickname());
     }
 
+    /**
+     * Displays the shipboard with engines highlighted in specific colors according to their type.
+     * Double engines are highlighted in green and single engines are highlighted in blue.
+     *
+     * The method retrieves the available double engines and their coordinates, as well as all single
+     * engines with their respective coordinates. A map is created to associate colors with these
+     * coordinates, which is then passed to the rendering function.
+     *
+     * This method uses the client model to fetch the user's shipboard and identify the locations of
+     * the double and single engines. Color-coded visualization is applied using ANSI color codes.
+     */
     public void showEngineWithColor(){
         Map<String, Set<Coordinates>> colorMap = new HashMap<>();
 
@@ -4015,6 +4657,17 @@ public class ClientCLIView implements ClientView {
         showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
     }
 
+    /**
+     * Displays the shipboard with a specific color highlighting the available shields.
+     * The method retrieves the available shield components of the shipboard
+     * for the current player's ship and highlights their positions in green.
+     *
+     * The process includes:
+     * - Accessing the shipboard of the current player.
+     * - Determining which shield components are available for selection by removing already selected shields.
+     * - Mapping the coordinates of the available shields to the green color code.
+     * - Showing the shipboard with the updated color mapping applied.
+     */
     public void showShieldWithColor() {
         Map<String, Set<Coordinates>> colorMap = new HashMap<>();
 
@@ -4025,6 +4678,18 @@ public class ClientCLIView implements ClientView {
         showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()), clientModel.getMyNickname(), colorMap);
     }
 
+    /**
+     * Displays the current shipboard view with colored indicators representing the positions of different types of cannons.
+     * The method associates predefined colors with available double cannons and single cannons, and overlays these
+     * representations on the shipboard.
+     *
+     * Green (ANSI_GREEN) is used to highlight the positions of available double cannons that have not
+     * been selected yet. Blue (ANSI_BLUE) is used to represent the positions of single cannons on the shipboard.
+     *
+     * The method retrieves the shipboard of the current user, identifies the relevant cannon positions,
+     * and then applies the color mappings. Finally, it calls {@code showShipBoard} to update and render the shipboard
+     * with the visualizations.
+     */
     public void showCannonWithColor(){
         Map<String, Set<Coordinates>> colorMap = new HashMap<>();
 
@@ -4040,6 +4705,37 @@ public class ClientCLIView implements ClientView {
         showShipBoard(clientModel.getShipboardOf(clientModel.getMyNickname()),clientModel.getMyNickname(), colorMap);
     }
 
+    /**
+     * Displays the storage locations on the shipboard with associated colors
+     * based on their type (Special or Standard storage).
+     *
+     * - Special storages are highlighted in green.
+     * - Standard storages are highlighted in blue.
+     *
+     * This method retrieves the storage locations belonging to the current user
+     * by filtering out the already selected storages and then assigns a
+     * corresponding color identifier to each storage type. The color-coded
+     * storage locations are visualized on the shipboard. Additionally, it
+     * provides information about the storages.
+     *
+     * The method utilizes the following classes and objects:
+     * - Coordinates: Represents the coordinates of storage locations.
+     * - SpecialStorage and StandardStorage: Different types of storages.
+     * - Shipboard: The shipboard associated with the current user, from which
+     *   storages and their locations are retrieved.
+     * - SelectedStorage: List of currently selected storage components.
+     *
+     * The method makes use of predefined ANSI constants for color representation:
+     * - ANSI_GREEN: For special storages.
+     * - ANSI_BLUE: For standard storages.
+     *
+     * Steps performed:
+     * 1. Retrieves and filters the special and standard storages for the current user.
+     * 2. Maps the locations of available special and standard storages to their
+     *    respective colors.
+     * 3. Calls functions to display the color-coded shipboard and additional
+     *    storage information.
+     */
     public void showStorageWithColor(){
         Map<String, Set<Coordinates>> colorMap = new HashMap<>();
 
@@ -4073,8 +4769,11 @@ public class ClientCLIView implements ClientView {
     }
 
     /**
-     * Shows valid storage options when user makes invalid selection.
-     * Called by cube malus input handling to guide user to correct storages.
+     * Displays valid storage options for the given type of cargo cube. If the storage manager is
+     * in malus mode, it retrieves and prints valid coordinates for storing the most valuable cubes.
+     * Each valid coordinate is displayed in the message window.
+     *
+     * @param cubeType The type of cargo cube for which valid storage options are being shown.
      */
     private void showValidStorageOptions(CargoCube cubeType) {
         if (storageManager != null && storageManager.isInMalusMode()) {

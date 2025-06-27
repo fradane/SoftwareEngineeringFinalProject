@@ -39,7 +39,52 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 
-
+/**
+ * Main GUI controller for the Galaxy Trucker game client application that orchestrates
+ * the game flow, view management and user interactions. This controller acts as the central
+ * coordinator between the game model, network communication and various view controllers.
+ *
+ * <p>Core Responsibilities:
+ * <ul>
+ *   <li>View Management:
+ *     <ul>
+ *       <li>Dynamic FXML view loading and initialization</li>
+ *       <li>Smooth transitions between game phases</li>
+ *       <li>Management of specialized view controllers</li>
+ *       <li>Responsive window layout adaptation</li>
+ *     </ul>
+ *   </li>
+ *   <li>Game State Management:
+ *     <ul>
+ *       <li>Coordinating game phase transitions</li>
+ *       <li>Handling user input and game events</li>
+ *       <li>Managing client-server communication</li>
+ *       <li>Maintaining game state consistency</li>
+ *     </ul>
+ *   </li>
+ *   <li>Task Queue System:
+ *     <ul>
+ *       <li>Asynchronous task scheduling</li>
+ *       <li>Thread-safe UI updates</li>
+ *       <li>Ordered task execution</li>
+ *       <li>Controller state synchronization</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ * <p>Implementation Details:
+ * <ul>
+ *   <li>Uses singleton pattern for global access</li>
+ *   <li>Implements JavaFX Application for GUI functionality</li>
+ *   <li>Maintains separate task queues per controller type</li>
+ *   <li>Ensures thread-safe view updates via Platform.runLater()</li>
+ *   <li>Handles graceful application shutdown</li>
+ * </ul>
+ *
+ * @see Application JavaFX application base class
+ * @see ClientView Interface defining required view operations
+ * @see GuiController Base class for specialized view controllers
+ */
 public class ClientGuiController extends Application implements ClientView {
 
     final ClientModel clientModel;
@@ -68,34 +113,43 @@ public class ClientGuiController extends Application implements ClientView {
 
     private ControllerState currentControllerState = ControllerState.START_CONTROLLER;
 
+    // Main container
+    @FXML
+    private StackPane mainContainer;
+
+
     /**
      * Returns the singleton instance of ClientGuiController.
      *
      * @return the current instance of ClientGuiController
      */
+    /**
+     * Returns the singleton instance of the ClientGuiController.
+     * This method provides global access to the main GUI controller.
+     *
+     * @return The singleton instance of ClientGuiController
+     */
     public static ClientGuiController getInstance() {
         return instance;
     }
-
-    private String getCurrentControllerType() {
-        if (currentController == startViewController) {
-            return START_CONTROLLER;
-        } else if (currentController == mainMenuViewController) {
-            return MAIN_MENU_CONTROLLER;
-        } else if (currentController == buildAndCheckShipBoardController) {
-            return BUILD_SHIPBOARD_CONTROLLER;
-        } else if (currentController == cardPhaseController) {
-            return CARD_PHASE_CONTROLLER;
-        } else if (currentController == endGameController) {
-            return END_GAME_CONTROLLER;
-        }
-        return null;
-    }
+    
 
     /**
      * Starts the JavaFX application and initializes the main GUI.
      *
      * @param primaryStage the primary stage for this application
+     * @throws Exception if an error occurs during application startup
+     */
+    /**
+     * Initializes and starts the JavaFX application.
+     * Sets up the main window, loads initial views, and configures the GUI environment.
+     * This includes:
+     * - Setting application icons
+     * - Loading the main container
+     * - Configuring the responsive window layout
+     * - Loading the initial start view
+     *
+     * @param primaryStage The primary stage for this application
      * @throws Exception if an error occurs during application startup
      */
     @Override
@@ -516,6 +570,13 @@ public class ClientGuiController extends Application implements ClientView {
      *
      * @return a CompletableFuture that completes when initialization is finished
      */
+    /**
+     * Provides access to the initialization completion future.
+     * This future completes when the GUI initialization process is finished,
+     * including loading of initial views and setup of controllers.
+     *
+     * @return A CompletableFuture that completes when GUI initialization is done
+     */
     public CompletableFuture<Void> getInitializationDoneFuture() {
         return initializationDone;
     }
@@ -705,27 +766,20 @@ public class ClientGuiController extends Application implements ClientView {
 
     }
 
-    /**
-     * Shows the exit menu for leaving the game.
-     */
-    public void showExitMenu(){
-
-    }
-
+    
     private static final CompletableFuture<Void> initializationDone = new CompletableFuture<>();
 
-    // Main container
-    @FXML
-    private StackPane mainContainer;
-
+  
     // Current elements
     private Parent currentView;
     private GuiController currentController;
 
+
     /**
-     * Creates a new ClientGuiController instance.
+     * Constructs a new ClientGuiController instance.
+     * Initializes the client model, controller and ping-pong manager for network communication.
      *
-     * @throws RemoteException if there's an error with remote communication setup
+     * @throws RemoteException if there's an error establishing remote communication
      */
     public ClientGuiController() throws RemoteException {
         clientModel = new ClientModel();
@@ -799,13 +853,7 @@ public class ClientGuiController extends Application implements ClientView {
         }
     }
 
-    /**
-     * Updates the specific controller reference based on type.
-     *
-     * @param controller the controller instance to update
-     * @param controllerType the type of controller
-     * @param <T> the type of GuiController
-     */
+
     private <T extends GuiController> void updateControllerReference(T controller, String controllerType) {
         switch (controllerType) {
             case START_CONTROLLER:
@@ -826,13 +874,7 @@ public class ClientGuiController extends Application implements ClientView {
         }
     }
 
-    /**
-     * Gets current controller by type.
-     *
-     * @param controllerType the type of controller to retrieve
-     * @param <T> the type of GuiController
-     * @return the controller instance or null if not found
-     */
+
     @SuppressWarnings("unchecked")
     private <T extends GuiController> T getCurrentControllerByType(String controllerType) {
         return switch (controllerType) {
@@ -845,11 +887,7 @@ public class ClientGuiController extends Application implements ClientView {
         };
     }
 
-    /**
-     * Processes all pending tasks for a specific controller type.
-     *
-     * @param controllerType the type of controller whose tasks to process
-     */
+
     private void processPendingTasks(String controllerType) {
         // Mark as processing to prevent new tasks from jumping the queue
         processingTasks.add(controllerType);
@@ -891,12 +929,6 @@ public class ClientGuiController extends Application implements ClientView {
         }
     }
 
-    /**
-     * Checks if a controller is ready and not processing pending tasks.
-     *
-     * @param controllerType the type of controller to check
-     * @return true if the controller is ready for immediate execution, false otherwise
-     */
     private boolean isControllerReadyForImmediateExecution(String controllerType) {
         return getCurrentControllerByType(controllerType) != null &&
                 !processingTasks.contains(controllerType) &&
@@ -1172,6 +1204,13 @@ public class ClientGuiController extends Application implements ClientView {
      * @return the client controller instance
      */
     @Override
+    /**
+     * Returns the client controller instance associated with this GUI controller.
+     * The client controller handles communication with the game server and
+     * manages game state updates.
+     *
+     * @return The ClientController instance for this application
+     */
     public ClientController getClientController() {
         return clientController;
     }
@@ -1182,6 +1221,12 @@ public class ClientGuiController extends Application implements ClientView {
      * @return the client model instance
      */
     @Override
+    /**
+     * Returns the client model instance associated with this GUI controller.
+     * The client model maintains the local game state and data.
+     *
+     * @return The ClientModel instance containing game state data
+     */
     public ClientModel getClientModel() {
         return clientModel;
     }
@@ -1216,6 +1261,14 @@ public class ClientGuiController extends Application implements ClientView {
 
     /**
      * Handles the game exit process, cleaning up resources and terminating the application.
+     */
+    /**
+     * Handles the graceful exit of the game application.
+     * Performs cleanup operations including:
+     * - Notifying the server of disconnection via ClientController
+     * - Closing the JavaFX platform
+     * - Terminating the JVM process
+     * If any errors occur during cleanup, forces an exit with status code 1.
      */
     public void handleGameExit() {
         Platform.runLater(() -> {

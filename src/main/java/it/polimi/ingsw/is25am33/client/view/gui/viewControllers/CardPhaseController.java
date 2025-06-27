@@ -51,7 +51,9 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     @FXML
     public Label cosmicCreditsLabel;
 
-    // TODO fare per il livello 1
+   
+    
+    
     private BoardsController boardsController;
     private ModelFxAdapter modelFxAdapter;
     private final List<Coordinates> selectedDoubleEngines = new ArrayList<>();
@@ -95,9 +97,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     @FXML
-    public void handleLand() {
-//        Platform.runLater(() -> landButton.setVisible(false));
-//        createEarlyLandingDisplay();
+    private void handleLanding() {
         showPlayerLanded();
     }
 
@@ -124,12 +124,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         return "cardPhaseController";
     }
 
-    /**
-     * Helper method to create styled buttons and add them to bottomHBox
-     *
-     * @param buttonText The text to display on the button
-     * @param action     The action to perform when button is clicked
-     */
+
     private void createAndAddButton(String buttonText, Runnable action) {
         Button button = new Button(buttonText);
         button.getStyleClass().add("action-button");
@@ -137,6 +132,14 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         Platform.runLater(() -> bottomHBox.getChildren().add(button));
     }
 
+    /**
+     * Displays a message to the player.
+     * If the message is permanent, it remains on screen until replaced.
+     * If not, it uses a fade effect and disappears after a short duration.
+     *
+     * @param message      the message to display
+     * @param isPermanent  true if the message should persist, false for a temporary display
+     */
     @Override
     public void showMessage(String message, boolean isPermanent) {
         if (isPermanent) {
@@ -149,10 +152,19 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         Platform.runLater(() -> showNonPermanentMessage(message, messageLabel));
     }
 
+    /**
+     * Gets the model adapter used for FX bindings and updates.
+     *
+     * @return The ModelFxAdapter instance used by this controller
+     */
     public ModelFxAdapter getModelFxAdapter() {
         return modelFxAdapter;
     }
 
+    /**
+     * Initializes the card phase controller.
+     * Sets up the game boards, binds model data, and performs initial UI refresh.
+     */
     public void initialize() {
         // Board loading
         try {
@@ -186,6 +198,11 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     }
 
+    /**
+     * Updates the display of cosmic credits with an animation effect.
+     *
+     * @param credits The new amount of cosmic credits to display
+     */
     public void updateCosmicCredits(int credits) {
         Platform.runLater(() -> {
             cosmicCreditsLabel.setText(String.valueOf(credits));
@@ -274,6 +291,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     //-------------------- PLANET ----------------------
 
+    /**
+     * Displays the menu for choosing a planet to visit.
+     * Shows available planets and allows the player to select one or skip.
+     */
     public void showChoosePlanetMenu() {
 
         ClientCard modelCard = clientModel.getCurrAdventureCard();
@@ -319,6 +340,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     //-------------------- STARDUST ----------------------
 
+    /**
+     * Shows the stardust event menu with appropriate warnings about exposed connectors.
+     * Evaluates ship construction and applies flight day penalties if needed.
+     */
     public void showStardustMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
         if (!(card instanceof ClientStarDust starDust)) {
@@ -357,6 +382,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     //-------------------- ABANDONED SHIP ----------------------
 
+    /**
+     * Displays the abandoned ship interaction menu.
+     * Checks if player has enough crew members to visit and shows appropriate options.
+     */
     public void showAbandonedShipMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
         if (!(card instanceof ClientAbandonedShip abandonedShip)) {
@@ -403,6 +432,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         });
     }
 
+    /**
+     * Shows the menu for selecting cabins and removing crew members.
+     * Allows players to choose which crew members to sacrifice.
+     */
     public void showChooseCabinMenu() {
         CrewMalusCard card = (CrewMalusCard) clientModel.getCurrAdventureCard();
         int crewToRemove = card.getCrewMalus();
@@ -627,6 +660,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     //-------------------- ABANDONED STATION ----------------------
 
+    /**
+     * Displays the abandoned station interaction menu.
+     * Checks crew requirements and shows visit options if eligible.
+     */
     public void showAbandonedStationMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
         if (!(card instanceof ClientAbandonedStation abandonedStation)) {
@@ -653,6 +690,17 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     //-------------------- PIRATES ----------------------
 
+    /**
+     * Displays the menu for selecting double cannons to activate in response to enemy cards.
+     * <p>
+     * This method checks for available double cannons and battery boxes on the player's ship:
+     * <ul>
+     *   <li>If no double cannons are available, a message is shown and single cannons are used.</li>
+     *   <li>If no battery boxes are available or batteries are exhausted, only single cannons are allowed.</li>
+     *   <li>If batteries and double cannons are available, opens the double cannon selection menu.</li>
+     * </ul>
+     * This is triggered during combat events such as Pirates, Smugglers, SlaveTraders, or WarField.
+     */
     public void showChooseCannonsMenu(){
         ClientCard card = clientModel.getCurrAdventureCard();
         if (
@@ -726,6 +774,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         hasChosenDoubleCannon = false;
     }
 
+    /**
+     * Displays the menu for throwing dice during combat or events.
+     * Shows appropriate messages based on the current card type.
+     */
     public void showThrowDicesMenu() {
 
         ClientCard card = clientModel.getCurrAdventureCard();
@@ -750,6 +802,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     }
 
+    /**
+     * Shows a popup dialog for throwing dice.
+     * Allows the player to initiate the dice throw action.
+     */
     public void showThrowDicePopUp() {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Throw Dice");
@@ -805,6 +861,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         highlightAvailableDoubleCannon();
     }
 
+    /**
+     * Displays the reward menu after successful combat or events.
+     * Shows available rewards and their consequences.
+     */
     public void showRewardMenu() {
         showMessage("Well done, you beat them!", true);
 
@@ -853,6 +913,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     // -------------------- FREE SPACE ----------------------
 
+    /**
+     * Shows the free space menu for engine activation.
+     * Checks battery availability and allows double engine activation if possible.
+     */
     public void showFreeSpaceMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
         if (
@@ -905,6 +969,18 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
     }
 
+    /**
+     * Displays the selection menu for activating double engines.
+     * <p>
+     * The user must pair each selected double engine with a battery box.
+     * The menu includes:
+     * <ul>
+     *   <li>Confirmation button to send selections to the server.</li>
+     *   <li>Reset option to clear selections and restart the process.</li>
+     *   <li>Skip button to avoid using double engines.</li>
+     * </ul>
+     * Highlighting is applied to available double engines and batteries to assist the user.
+     */
     public void showChooseDoubleEngineMenu() {
         updateSelectionMessage();
         setupControlButtons();
@@ -1175,6 +1251,14 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     // -------------------- EPIDEMIC ----------------------
+    /**
+     * Displays the epidemic event menu.
+     * <p>
+     * Shows an information popup explaining how the epidemic spreads among occupied cabins.
+     * If it's the player's turn, they are prompted to confirm and trigger the epidemic effect.
+     * <p>
+     * Cabins that are connected to other occupied cabins will lose one crew member.
+     */
     public void showEpidemicMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
         if (!(card instanceof ClientEpidemic epidemic)) {
@@ -1221,6 +1305,21 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         return false;
     }
 
+    /**
+     * Handles user interactions with the grid during card phases.
+     * <p>
+     * This method delegates behavior based on the current card state, including:
+     * <ul>
+     *   <li>Selecting double engines or batteries</li>
+     *   <li>Handling cannon selection and attacks</li>
+     *   <li>Placing or removing cargo cubes</li>
+     *   <li>Managing damage, ship repair, crew loss, and other event responses</li>
+     * </ul>
+     * If the player's turn is not active, a message is shown instead of acting.
+     *
+     * @param row the row index of the clicked grid cell
+     * @param column the column index of the clicked grid cell
+     */
     @Override
     public void onGridButtonClick(int row, int column) {
         if (!isPlayerTurnActive()) {
@@ -1311,12 +1410,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     }
 
-    /**
-     * Verifica se è il turno attivo del giocatore corrente basandosi sui controlli
-     * implementati nel ClientController per mantenere coerenza logica.
-     *
-     * @return true se il giocatore può interagire, false altrimenti
-     */
+
     private boolean isPlayerTurnActive() {
         if (!clientModel.isMyTurn()) {
             return false;
@@ -1339,10 +1433,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
     }
 
-    /**
-     * Mostra un messaggio appropriato quando non è il turno del giocatore,
-     * utilizzando la stessa logica di messaggistica del ClientController
-     */
+
     private void showTurnMessage() {
         CardState currentState = clientModel.getCurrCardState();
         String currentPlayer = clientModel.getCurrentPlayer();
@@ -1483,7 +1574,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
     }
 
     private void handleBigShot(Coordinates coordinates) {
-        // TODO
     }
 
     private void handleBigMeteorite(Coordinates coordinates) {
@@ -1531,7 +1621,6 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         if (selectedCubeType != null) {
             // Add cube to storage
             boolean success = storageManager.addStorageSelectionWithCopy(coordinates, selectedCubeType);
-//            boolean success = storageManager.addSelectedCubeToStorage(coordinates);
             if (success) {
                 clientModel.refreshShipBoardOf(clientModel.getMyNickname());
                 showMessage(selectedCubeType + " cube placed successfully!", false);
@@ -1565,6 +1654,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
     }
 
+    /**
+     * Displays the menu for handling cube rewards.
+     * Allows players to distribute received cargo cubes to storage.
+     */
     public void showHandleCubesRewardMenu() {
 
         List<CargoCube> cubesReward;
@@ -1748,6 +1841,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         showMessage("Cube selection confirmed!", false);
     }
 
+    /**
+     * Shows menu for handling small dangerous objects.
+     * Allows players to use shields or take damage.
+     */
     public void showHandleSmallDanObjMenu() {
 
         initializeBeforeCard();
@@ -1789,6 +1886,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     }
 
+    /**
+     * Displays the menu for handling big meteorites.
+     * Shows impact information and defense options.
+     */
     public void showBigMeteoriteMenu() {
 
         initializeBeforeCard();
@@ -1893,6 +1994,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         showOverlayPopup(title, message, onClose);
     }
 
+    /**
+     * Shows the menu for checking and repairing ship damage after attacks.
+     * Initiates damage assessment and repair process.
+     */
     public void checkShipBoardAfterAttackMenu() {
         if (hitComponent != null) {
             clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
@@ -1906,6 +2011,11 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         }
     }
 
+    /**
+     * Displays information about a component that was hit during an attack.
+     *
+     * @param coordinates The coordinates of the hit component
+     */
     public void showComponentHitInfo(Coordinates coordinates) {
         this.hitComponent = coordinates;
         boardsController.removeHighlightColor();
@@ -1916,12 +2026,22 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 () -> {});
     }
 
+    /**
+     * Highlights invalid or incorrectly positioned components on the ship board.
+     * Used during repair and validation phases.
+     */
     public void showInvalidComponents() {
         ShipBoardClient shipBoard = clientModel.getMyShipboard();
         shipBoard.getIncorrectlyPositionedComponentsCoordinates()
                 .forEach(coordinate -> this.boardsController.applyHighlightEffect(coordinate, Color.RED));
     }
 
+    /**
+     * Highlights different parts of the ship with distinct colors.
+     * Used to show ship sections during various game phases.
+     *
+     * @param shipParts List of coordinate sets representing different ship sections
+     */
     public void showShipParts(List<Set<Coordinates>> shipParts) {
         List<Color> colors = List.of(Color.RED, Color.ORANGE, Color.BLUE, Color.YELLOW);
         Map<Color, Set<Coordinates>> shipPartsMap = new HashMap<>();
@@ -1938,6 +2058,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         );
     }
 
+    /**
+     * Displays the menu for handling big shots.
+     * Shows impact information and unavoidable damage warning.
+     */
     public void showBigShotMenu() {
         ClientDangerousObject dangerousObj = clientModel.getCurrDangerousObj();
         showInfoPopupWithCallback(String.format("""
@@ -1947,6 +2071,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                 () -> clientController.playerHandleBigShot(clientModel.getMyNickname()));
     }
 
+    /**
+     * Shows the menu for handling cube penalties.
+     * Manages the removal of cargo cubes as penalties.
+     */
     public void showHandleCubesMalusMenu() {
 
         if (!clientModel.isMyTurn())
@@ -2163,6 +2291,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         return batteriesCoordinates;
     }
 
+    /**
+     * Displays information about crew member evaluation.
+     * Shows potential consequences of insufficient crew.
+     */
     public void showCrewMembersInfo() {
         showInfoPopupWithCallback("""
                 The number of your crew member will be evaluated.
@@ -2172,9 +2304,9 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     }
 
+
     /**
      * Shows a disconnection message when a player leaves the game.
-     *
      * @param message the disconnection message to display
      */
     public void showDisconnectMessage(String message) {
@@ -2213,6 +2345,11 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         );
     }
 
+    /**
+     * Notifies when a player has disconnected from the game.
+     *
+     * @param disconnectedPlayerNickname the nickname of the disconnected player
+     */
     /**
      * Notifies when a player has disconnected from the game.
      *

@@ -462,14 +462,10 @@ public interface ShipBoardClient {
 
     Map<Coordinates, Cabin> getCoordinatesAndCabins();
 
-    /**
-     * Restituisce una mappa di cabine connesse a moduli di supporto vitale.
-     */
+
     Map<Coordinates, Set<ColorLifeSupport>> getCabinsWithLifeSupport();
 
-    /**
-     * Verifica se un alieno può essere posizionato in una cabina.
-     */
+
     boolean canAcceptAlien(Coordinates coords, CrewMember alien);
 
     Set<Coordinates> getCoordinatesOfComponents(List<? extends Component> components);

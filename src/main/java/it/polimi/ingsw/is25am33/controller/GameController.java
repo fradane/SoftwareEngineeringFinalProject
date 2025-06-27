@@ -30,34 +30,76 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     private final Map<String, Set<Set<Coordinates>>> temporaryShipParts = new ConcurrentHashMap<>();
 
+    /**
+     * Displays a message on the server console.
+     *
+     * @param string The message to display
+     * @throws RemoteException If there is an error in remote communication
+     */
     @Override
     public void showMessage(String string) throws RemoteException {
         System.out.println("Show message: " + string);
     }
 
+    /**
+     * Creates a new GameController instance.
+     *
+     * @param gameId       The unique identifier for this game
+     * @param maxPlayers   Maximum number of players allowed in the game
+     * @param isTestFlight Whether this is a test flight game mode
+     * @param dns          The DNS service for network communication
+     * @throws RemoteException If there is an error in remote communication
+     */
     public GameController(String gameId, int maxPlayers, boolean isTestFlight, DNS dns) throws RemoteException {
         this.gameModel = new GameModel(gameId, maxPlayers, isTestFlight);
         this.gameModel.createGameClientNotifier(clientControllers);
         this.dns = dns;
     }
 
+    /**
+     * Gets the game model associated with this controller.
+     *
+     * @return The GameModel instance
+     */
     public GameModel getGameModel() {
         return gameModel;
     }
 
+    /**
+     * Adds a new player to the game.
+     *
+     * @param nickname         The player's unique nickname
+     * @param color            The player's chosen color
+     * @param clientController The client controller associated with this player
+     */
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController) {
         clientControllers.put(nickname, clientController);
         gameModel.addPlayer(nickname, color, clientController);
     }
 
+    /**
+     * Gets all client controllers currently in the game.
+     *
+     * @return Map of player nicknames to their client controllers
+     */
     public ConcurrentHashMap<String, CallableOnClientController> getClientControllers() {
         return clientControllers;
     }
 
+    /**
+     * Removes a player from the game.
+     *
+     * @param nickname The nickname of the player to remove
+     */
     public void removePlayer(String nickname) {
         gameModel.removePlayer(nickname);
     }
 
+    /**
+     * Gets current game information including players and game state.
+     *
+     * @return GameInfo object containing current game state
+     */
     public GameInfo getGameInfo() {
         Collection<Player> players = gameModel.getPlayers().values();
         Map<String, PlayerColor> playerAndColors = new HashMap<>();
@@ -76,6 +118,9 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         );
     }
 
+    /**
+     * Starts the game and notifies all clients.
+     */
     public void startGame() {
         gameModel.setStarted(true);
         GameInfo gameInfo = getGameInfo();
@@ -86,11 +131,21 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         System.out.println("[" + gameInfo.getGameId() + "] Game started");
     }
 
+    /**
+     * Handles a player leaving the game after it was created.
+     *
+     * @param nickname The nickname of the leaving player
+     */
     @Override
     public void leaveGameAfterCreation(String nickname) {
         dns.handleDisconnection(nickname);
     }
 
+    /**
+     * Handles a player picking a hidden component during ship building.
+     *
+     * @param nickname The nickname of the player picking the component
+     */
     @Override
     public void playerPicksHiddenComponent(String nickname) {
 
@@ -110,6 +165,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(pickedComponent);
     }
 
+    /**
+     * Handles a player's request to place their focused component.
+     *
+     * @param nickname    The player's nickname
+     * @param coordinates Where to place the component
+     * @param rotation    How many times to rotate the component
+     */
     @Override
     public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates, int rotation) {
         if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
@@ -153,6 +215,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    /**
+     * Handles a player's request to end their ship board building phase.
+     * This method is called when a player has finished building their ship and wants to proceed.
+     * If all players have ended their building phase, the game state changes to CHECK_SHIPBOARD.
+     *
+     * @param nickname The nickname of the player ending their building phase
+     */
     @Override
     public void playerEndsBuildShipBoardPhase(String nickname) {
 
@@ -165,6 +234,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
     }
 
+    /**
+     * Handles a player placing their pawn on the game board.
+     * When all players have placed their pawns, the game state changes to CHECK_SHIPBOARD.
+     *
+     * @param nickname The nickname of the player placing their pawn
+     */
     @Override
     public void playerPlacesPawn(String nickname) {
 
@@ -177,11 +252,27 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
             gameModel.setCurrGameState(GameState.CHECK_SHIPBOARD);
     }
 
+    /**
+     * Handles a client's choice during gameplay.
+     * Processes the player's choice through the current adventure card.
+     *
+     * @param nickname The nickname of the player making the choice
+     * @param choice   The data structure containing the player's choices
+     * @throws IOException If there is an error processing the choice
+     */
     @Override
     public void handleClientChoice(String nickname, PlayerChoicesDataStructure choice) throws IOException {
         gameModel.getCurrAdventureCard().play(choice);
     }
 
+    /**
+     * Submits crew placement choices for a player.
+     * Validates and applies the crew placement choices, then notifies all clients.
+     *
+     * @param nickname The nickname of the player submitting crew choices
+     * @param choices  Map of coordinates to crew member placements
+     * @throws IOException If there is an error processing the choices
+     */
     @Override
     public void submitCrewChoices(String nickname, Map<Coordinates, CrewMember> choices) throws IOException {
 
@@ -276,6 +367,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         }
     }
 
+    /**
+     * Handles a player's request to pick a visible component from the component table.
+     * The component becomes the player's focused component if successfully picked.
+     *
+     * @param nickname The nickname of the player picking the component
+     * @param choice   The index of the chosen visible component
+     */
     @Override
     public void playerPicksVisibleComponent(String nickname, Integer choice) {
 
@@ -295,6 +393,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getPlayers().get(nickname).getPersonalBoard().setFocusedComponent(chosenComponent);
     }
 
+    /**
+     * Handles a player's decision to visit or skip a location card event.
+     * Only valid during certain adventure card states.
+     *
+     * @param nickname The nickname of the player making the choice
+     * @param choice   True to visit the location, false to skip
+     */
     @Override
     public void playerWantsToVisitLocation(String nickname, Boolean choice) {
 
@@ -317,12 +422,25 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getCurrAdventureCard().play(playerChoice);
     }
 
+    /**
+     * Handles a player's request to throw dice during card events.
+     * Creates and processes an empty choice data structure.
+     *
+     * @param nickname The nickname of the player throwing dice
+     */
     @Override
     public void playerWantsToThrowDices(String nickname) {
         PlayerChoicesDataStructure playerChoice = new PlayerChoicesDataStructure.Builder().build();
         gameModel.getCurrAdventureCard().play(playerChoice);
     }
 
+    /**
+     * Handles a player's choice to visit a planet during the Planets card event.
+     * Only valid during the CHOOSE_PLANET state of the Planets card.
+     *
+     * @param nickname The nickname of the player making the choice
+     * @param choice   The index of the chosen planet
+     */
     @Override
     public void playerWantsToVisitPlanet(String nickname, int choice){
         if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
@@ -343,6 +461,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getCurrAdventureCard().play(playerChoice);
     }
 
+    /**
+     * Handles a player's decision to accept or reject a reward.
+     * Valid during reward offering events like Smugglers or Pirates cards.
+     *
+     * @param nickname The nickname of the player making the choice
+     * @param choice   True to accept the reward, false to reject
+     */
     @Override
     public void playerWantsToAcceptTheReward(String nickname, Boolean choice) {
 
@@ -365,6 +490,14 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    /**
+     * Handles a player's selection of double engines and battery boxes during card events.
+     * Used in FreeSpace, WarField and Pirates card events.
+     *
+     * @param nickname            The nickname of the player making the selection
+     * @param doubleEnginesCoords List of coordinates for chosen double engines
+     * @param batteryBoxesCoords  List of coordinates for chosen battery boxes
+     */
     @Override
     public void playerChoseDoubleEngines(String nickname, List<Coordinates> doubleEnginesCoords, List<Coordinates> batteryBoxesCoords){
 
@@ -388,6 +521,14 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
 
+    /**
+     * Handles a player's selection of double cannons and battery boxes.
+     * Used in MeteoriteStorm, WarField and Pirates card events.
+     *
+     * @param nickname            The nickname of the player making the selection
+     * @param doubleCannonsCoords List of coordinates for chosen double cannons
+     * @param batteryBoxesCoords  List of coordinates for chosen battery boxes
+     */
     @Override
     public void playerChoseDoubleCannons(String nickname, List<Coordinates> doubleCannonsCoords, List<Coordinates> batteryBoxesCoords){
 
@@ -411,6 +552,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    /**
+     * Handles a player's selection of cabins during crew-related events.
+     * Used in various card events that affect crew members.
+     *
+     * @param nickname    The nickname of the player choosing the cabins
+     * @param cabinCoords List of coordinates for the chosen cabins
+     */
     @Override
     public void playerChoseCabins(String nickname, List<Coordinates> cabinCoords) {
 
@@ -434,6 +582,14 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    /**
+     * Handles a player's response to small dangerous objects.
+     * Used in WarField, Pirates, and MeteoriteStorm events.
+     *
+     * @param nickname         The nickname of the player handling the threat
+     * @param shieldCoords     List of coordinates for shields to use
+     * @param batteryBoxCoords List of coordinates for battery boxes to use
+     */
     @Override
     public void playerHandleSmallDanObj(String nickname, List<Coordinates> shieldCoords, List<Coordinates> batteryBoxCoords) {
 
@@ -458,6 +614,14 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    /**
+     * Handles a player's response to a big meteorite threat.
+     * Used specifically in the MeteoriteStorm card event.
+     *
+     * @param nickname           The nickname of the player handling the meteorite
+     * @param doubleCannonCoords List of coordinates for double cannons to use
+     * @param batteryBoxCoords   List of coordinates for battery boxes to use
+     */
     @Override
     public void playerHandleBigMeteorite(String nickname, List<Coordinates> doubleCannonCoords, List<Coordinates> batteryBoxCoords) {
 
@@ -481,6 +645,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    /**
+     * Handles a player's response to a big shot threat.
+     * Used in WarField and Pirates card events.
+     *
+     * @param nickname The nickname of the player handling the big shot
+     * @throws RemoteException If there is an error in remote communication
+     */
     @Override
     public void playerHandleBigShot(String nickname) throws RemoteException {
 
@@ -502,6 +673,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    /**
+     * Handles a player's selection of storage components.
+     * Used during cube reward events in various cards.
+     *
+     * @param nickname      The nickname of the player choosing storage
+     * @param storageCoords List of coordinates for chosen storage components
+     */
     @Override
     public void playerChoseStorage(String nickname, List<Coordinates> storageCoords){
 
@@ -525,6 +703,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    /**
+     * Handles the spread of an epidemic during the Epidemic card event.
+     *
+     * @param nickname The nickname of the player affected by the epidemic
+     * @throws RemoteException If there is an error in remote communication
+     */
     @Override
     public void spreadEpidemic(String nickname) throws RemoteException{
 
@@ -541,6 +725,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
+    /**
+     * Handles the Stardust card event for a player.
+     *
+     * @param nickname The nickname of the player experiencing the stardust event
+     * @throws RemoteException If there is an error in remote communication
+     */
     @Override
     public void stardustEvent(String nickname) throws RemoteException{
 
@@ -557,6 +747,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
+    /**
+     * Evaluates crew members during the WarField card event.
+     *
+     * @param nickname The nickname of the player whose crew is being evaluated
+     * @throws RemoteException If there is an error in remote communication
+     */
     public void evaluatedCrewMembers(String nickname) throws RemoteException{
 
         if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
@@ -572,6 +768,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
+    /**
+     * Handles a player's request to restart the hourglass timer.
+     * This can only be done during the BUILD_SHIPBOARD phase.
+     *
+     * @param nickname The nickname of the player requesting the restart
+     * @throws RemoteException If there is an error in remote communication
+     */
     @Override
     public void playerWantsToRestartHourglass(String nickname) throws RemoteException {
 
@@ -583,6 +786,14 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.restartHourglass(nickname);
     }
 
+    /**
+     * Notifies the game that the hourglass timer has ended for a player.
+     * <p>
+     * Only allowed during the BUILD_SHIPBOARD phase. If the call occurs in a different phase,
+     * the method logs an error and returns without taking action.
+     *
+     * @param nickname The nickname of the player whose timer ended
+     */
     @Override
     public void notifyHourglassEnded(String nickname) {
 
@@ -594,6 +805,21 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.hourglassEnded();
     }
 
+    /**
+     * Handles a player's request to remove a component from their ship.
+     * <p>
+     * This method:
+     * <ul>
+     *   <li>Validates that the current game state allows removal.</li>
+     *   <li>Recalculates ship parts after removal and stores them for later player choice.</li>
+     *   <li>Updates the ship board by ejecting aliens and identifying disconnected parts.</li>
+     *   <li>Sends the updated ship board view to all clients, indicating whether it's valid or not.</li>
+     *   <li>Checks and triggers a phase transition if the board is valid and connected.</li>
+     * </ul>
+     *
+     * @param nickname   The nickname of the player requesting removal
+     * @param coordinates The coordinates of the component to remove
+     */
     @Override
     public void playerWantsToRemoveComponent(String nickname, Coordinates coordinates) {
 
@@ -636,6 +862,17 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         }
     }
 
+    /**
+     * Handles the player's decision to keep a specific ship part after a component removal caused disconnection.
+     * <p>
+     * This method removes all other disconnected parts from the player's ship, leaving only the chosen one.
+     * It then notifies all clients with the updated ship status, indicating whether it is valid or not.
+     * Finally, it clears temporary ship parts and checks whether the phase should advance.
+     *
+     * @param nickname         The nickname of the player making the selection
+     * @param chosenShipPart   The coordinates of the ship part the player chooses to keep
+     * @throws RemoteException If a remote communication error occurs
+     */
     @Override
     public void playerChoseShipPart(String nickname, Set<Coordinates> chosenShipPart) throws RemoteException {
 
@@ -683,6 +920,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.checkAndTransitionToNextPhase();
     }
 
+    /**
+     * Handles a player's request to focus on a previously reserved component.
+     * Only available during the BUILD_SHIPBOARD phase.
+     *
+     * @param nickname The nickname of the player focusing the component
+     * @param choice   The index of the reserved component to focus
+     */
     @Override
     public void playerWantsToFocusReservedComponent(String nickname, int choice){
 
@@ -694,6 +938,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         ((Level2ShipBoard) gameModel.getPlayers().get(nickname).getPersonalBoard()).focusReservedComponent(choice);
     }
 
+    /**
+     * Handles a player's request to view available prefabricated ships.
+     * Only available during the BUILD_SHIPBOARD phase.
+     *
+     * @param nickname The nickname of the player requesting prefab ships
+     * @throws RemoteException If there is an error in remote communication
+     */
     @Override
     public void requestPrefabShips(String nickname) throws RemoteException {
         // Retrieve the list of prefab ships
@@ -718,6 +969,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         );
     }
 
+    /**
+     * Initiates the ship board check after an attack event.
+     * Used in MeteoriteStorm, Pirates, and WarField events.
+     *
+     * @param nickname The nickname of the player whose ship is being checked
+     */
     public void startCheckShipBoardAfterAttack(String nickname){
 
         if(gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
@@ -734,6 +991,14 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         gameModel.getCurrAdventureCard().play(new PlayerChoicesDataStructure());
     }
 
+    /**
+     * Handles a player's request to select and apply a prefabricated ship design.
+     * Validates the selection and applies it to the player's ship board.
+     *
+     * @param nickname     The nickname of the player selecting the prefab ship
+     * @param prefabShipId The identifier of the chosen prefab ship
+     * @throws RemoteException If there is an error in remote communication
+     */
     @Override
     public void requestSelectPrefabShip(String nickname, String prefabShipId) throws RemoteException {
 
@@ -793,6 +1058,13 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         }
     }
 
+    /**
+     * Handles a player's request to land their ship.
+     * This action is only available during certain game states.
+     * If all players have landed, the game transitions to END_GAME state.
+     *
+     * @param nickname The nickname of the player requesting to land
+     */
     @Override
     public void playerWantsToLand(String nickname){
         if(!(gameModel.getCurrGameState()!=GameState.PLAY_CARD
@@ -820,6 +1092,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
         );
     }
 
+    /**
+     * Debug method to skip to the last card in the deck.
+     * Only works in certain game states and when the game has started.
+     *
+     * @throws RemoteException If there is an error in remote communication
+     */
     @Override
     public void debugSkipToLastCard() throws RemoteException {
         if (!canSkipCards()) {

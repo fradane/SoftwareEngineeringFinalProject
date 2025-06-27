@@ -29,6 +29,13 @@ import javafx.util.Pair;
 import java.util.*;
 import java.util.stream.IntStream;
 
+/**
+ * The BoardsController is an abstract class that defines the base behavior, UI interactions, and 
+ * functionality for managing ship boards and flying boards within the game. The class provides 
+ * methods for binding game models, initializing button mappings, handling user interactions, and 
+ * applying various visual effects to components in the game. It serves as a superclass for 
+ * specific level-based boards controllers.
+ */
 public abstract class BoardsController {
 
     @FXML public Button myShipButton, showFlyingBoardButton;
@@ -82,6 +89,10 @@ public abstract class BoardsController {
      * Removes all highlight effects from the ship board buttons.
      * Thread-safe method that clears visual effects and styling.
      */
+    /**
+     * Removes highlight effects from all ship board buttons.
+     * Thread-safe method that clears visual effects and styling from previously highlighted buttons.
+     */
     public void removeHighlightColor() {
         Set<Button> buttonsToRemove;
 
@@ -122,6 +133,12 @@ public abstract class BoardsController {
      *
      * @param coordinates the coordinates of the button to highlight
      * @param color the color of the highlight effect
+     */
+    /**
+     * Applies a highlight effect to a specific button on the ship board.
+     *
+     * @param coordinates the coordinates of the button to highlight
+     * @param color       the color to use for the highlight effect
      */
     public void applyHighlightEffect(Coordinates coordinates, Color color) {
         String buttonId = fromCoordsToButtonId(coordinates);
@@ -368,6 +385,10 @@ public abstract class BoardsController {
      * Handles the UI event when user clicks the my ship board button.
      * Switches the view to show the player's own ship board.
      */
+    /**
+     * Handles the UI event when user clicks the my ship board button.
+     * Switches the view to show the player's own ship board and updates UI elements accordingly.
+     */
     @FXML
     public void handleMyShipBoardButton() {
         Platform.runLater(() -> {
@@ -387,6 +408,12 @@ public abstract class BoardsController {
      *
      * @param actionEvent the JavaFX action event from the button click
      */
+    /**
+     * Handles clicks on ship board grid buttons.
+     * Parses the clicked button's coordinates and delegates to the event handler.
+     *
+     * @param actionEvent the JavaFX action event from the button click
+     */
     @FXML
     public void handleGridButtonClick(ActionEvent actionEvent) {
         Button clickedButton = (Button) actionEvent.getSource();
@@ -401,12 +428,14 @@ public abstract class BoardsController {
     }
 
     /**
-     * Updates the visual appearance of ship boards when components change.
+     * Updates the visual appearance of the ship boards when a component changes.
+     * If the updated component belongs to the current player, it updates the associated button on their ship board.
+     * Otherwise, it updates the corresponding cell in the other player's ship board grid.
      *
-     * @param nickname the player whose ship board to update
-     * @param row the row coordinate of the changed component
-     * @param column the column coordinate of the changed component
-     * @param newComponent the new component to display
+     * @param nickname     the name of the player whose board is being updated
+     * @param row          the row index of the updated component
+     * @param column       the column index of the updated component
+     * @param newComponent the new component to display at the specified location
      */
     public void updateShipBoards(String nickname, int row, int column, Component newComponent) {
         if (nickname.equals(clientModel.getMyNickname())) {
@@ -419,6 +448,16 @@ public abstract class BoardsController {
         }
     }
 
+    /**
+     * Updates the appearance of a specific cell on another player's ship board.
+     * It removes the existing node (if any) and adds a new StackPane with the appropriate image(s),
+     * depending on the component type (Cabin, BatteryBox, Storage).
+     *
+     * @param playerStackPane the container StackPane for the other player's ship board
+     * @param newVal          the new component to render at the specified location
+     * @param row             the row index of the cell to update (absolute coordinates)
+     * @param column          the column index of the cell to update (absolute coordinates)
+     */
     private void updateOtherShipBoardsAppearance(StackPane playerStackPane, Component newVal, int row, int column) {
         try {
             GridPane gridPane = (GridPane) playerStackPane.getChildren().get(1);

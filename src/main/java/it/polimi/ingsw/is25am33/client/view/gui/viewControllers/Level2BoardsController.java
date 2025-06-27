@@ -98,7 +98,6 @@ public class Level2BoardsController extends BoardsController {
      * Initializes the Level 2 boards controller, called automatically by JavaFX.
      */
     public void initialize() {
-
     }
 
     /**
