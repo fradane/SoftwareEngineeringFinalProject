@@ -36,7 +36,7 @@
                         <Button fx:id="landButton"
                                 text="Land"
                                 styleClass="control-button, land-button"
-                                onAction="#handleLand"
+                                onAction="#handleLanding"
                                 minWidth="90.0"
                                 maxWidth="90.0" />
                     </HBox>

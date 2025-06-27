@@ -38,10 +38,20 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     private final Map<String, CallableOnGameController> gameControllers = new ConcurrentHashMap<>();
     private final Map<String, PrintWriter> writers = new ConcurrentHashMap<>();
 
+    /**
+     * Constructs a new SocketServerManager with the specified DNS.
+     *
+     * @param dns The DNS service to be used by this socket server
+     */
     public SocketServerManager(DNS dns) {
         this.dns = dns;
     }
 
+    /**
+     * Starts the socket server and listens for incoming client connections.
+     * Each client connection is handled in a separate thread from a thread pool.
+     * The server continuously accepts new connections until an IOException occurs.
+     */
     @Override
     public void run() {
 
@@ -85,6 +95,11 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         executor.shutdown();
     }
 
+    /**
+     * Returns the map of client nickname to PrintWriter objects.
+     *
+     * @return A map containing PrintWriter objects for connected clients
+     */
     public Map<String, PrintWriter> getWriters() {
         return writers;
     }
@@ -300,6 +315,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     }
 
+    /**
+     * Checks if the given PrintWriter is still valid and removes it from the writers map if not.
+     *
+     * @param writer The PrintWriter to check
+     * @param nickname The nickname associated with the writer
+     * @throws IOException If the writer is null or has encountered an error
+     */
     public void checkWriterStatus(PrintWriter writer,String nickname) throws IOException{
         if(writer.checkError()){
             writers.remove(nickname);
@@ -308,6 +330,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
 
     }
 
+    /**
+     * Notifies a client about available game information.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param gameInfos The list of game information to send
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyGameInfos(String nicknameToNotify, List<GameInfo> gameInfos) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyGameInfos");
@@ -316,6 +345,15 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client that a new player has joined a game.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param gameId The ID of the game that was joined
+     * @param newPlayerNickname The nickname of the player who joined
+     * @param color The color chosen by the new player
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyNewPlayerJoined(String nicknameToNotify, String gameId, String newPlayerNickname, PlayerColor color) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyNewPlayerJoined");
@@ -326,6 +364,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client that a game has started.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param gameInfo The information about the started game
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyGameStarted(String nicknameToNotify, GameInfo gameInfo) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyGameStarted");
@@ -334,6 +379,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client that the hourglass has been restarted.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player who restarted the hourglass
+     * @param flipsLeft The number of flips remaining for the hourglass
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyHourglassRestarted(String nicknameToNotify, String nickname, Integer flipsLeft) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyHourglassRestarted");
@@ -343,24 +396,45 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client to stop the hourglass.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     */
     @Override
     public void notifyStopHourglass(String nicknameToNotify) {
         SocketMessage outMessage = new SocketMessage("server", "notifyStopHourglass");
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
-
+    /**
+     * Notifies a client that they are the first to enter a phase.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     */
     @Override
     public void notifyFirstToEnter(String nicknameToNotify) {
         SocketMessage outMessage = new SocketMessage("server", "notifyFirstToEnter");
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that a visible component has been stolen.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     */
     @Override
     public void notifyStolenVisibleComponent(String nicknameToNotify) {
         SocketMessage outMessage = new SocketMessage("server", "notifyStolenVisibleComponent");
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client about an update to the current adventure card.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param adventureCard The updated adventure card
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyCurrAdventureCardUpdate(String nicknameToNotify, ClientCard adventureCard) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCardUpdate");
@@ -368,6 +442,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that a player has visited a planet.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player who visited the planet
+     * @param adventureCard The adventure card associated with the planet visit
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyPlayerVisitedPlanet(String nicknameToNotify, String nickname, ClientCard adventureCard) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerVisitedPlanet");
@@ -376,12 +458,27 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that the crew placement phase has begun.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyCrewPlacementPhase(String nicknameToNotify) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyCrewPlacementPhase");
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that crew placement has been completed for a player.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param playerNickname The nickname of the player who completed crew placement
+     * @param shipMatrix The ship matrix after crew placement
+     * @param componentsPerType Map of components organized by their type
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyCrewPlacementComplete(String nicknameToNotify, String playerNickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyCrewPlacementComplete");
@@ -391,6 +488,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client about available prefabricated ships.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param prefabShips List of available prefabricated ship information
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyPrefabShipsAvailable(String nicknameToNotify, List<PrefabShipInfo> prefabShips) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPrefabShipsAvailable");
@@ -398,6 +502,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that a player has selected a prefabricated ship.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param playerNickname The nickname of the player who selected the ship
+     * @param prefabShipInfo Information about the selected prefabricated ship
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyPlayerSelectedPrefabShip(String nicknameToNotify, String playerNickname, PrefabShipInfo prefabShipInfo) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerSelectedPrefabShip");
@@ -406,6 +518,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client about the result of a prefabricated ship selection.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param success Whether the selection was successful
+     * @param errorMessage Error message in case of failure
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyPrefabShipSelectionResult(String nicknameToNotify, boolean success, String errorMessage) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPrefabShipSelectionResult");
@@ -414,6 +534,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that infected crew members have been removed.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param cabinCoordinatesWithNeighbors Set of coordinates of cabins with infected crew members and their neighbors
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyInfectedCrewMembersRemoved(String nicknameToNotify, Set<Coordinates> cabinCoordinatesWithNeighbors) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyInfectedCrewMembersRemoved");
@@ -421,6 +548,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client about final player data and rankings.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param finalRanking List of final player data in ranking order
+     * @param playersNicknamesWithPrettiestShip List of players with the prettiest ships
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyPlayersFinalData(String nicknameToNotify, List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayersFinalData");
@@ -429,6 +564,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that a player has landed early.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player who landed early
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyPlayerEarlyLanded(String nicknameToNotify, String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerEarlyLanded");
@@ -436,12 +578,29 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that there are no more hidden components available.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyNoMoreHiddenComponents(String nicknameToNotify) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyNoMoreHiddenComponents");
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that a ship board is invalid.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param shipOwnerNickname The nickname of the ship owner
+     * @param shipMatrix The ship matrix to evaluate
+     * @param incorrectlyPositionedComponentsCoordinates Set of coordinates where components are incorrectly positioned
+     * @param componentsPerType Map of components organized by their type
+     * @param notActiveComponentsList List of components that are not active
+     * @throws RemoteException If a remote communication error occurs
+     */
     @Override
     public void notifyInvalidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyInvalidShipBoard");
@@ -453,6 +612,17 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that a ship board is valid.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param shipOwnerNickname The nickname of the ship owner
+     * @param shipMatrix The ship matrix that was validated
+     * @param incorrectlyPositionedComponentsCoordinates Set of coordinates where components are incorrectly positioned
+     * @param componentsPerType Map of components organized by their type
+     * @param notActiveComponentsList List of components that are not active
+     * @throws RemoteException If a remote communication error occurs
+     */
     @Override
     public void notifyValidShipBoard(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyValidShipBoard");
@@ -464,6 +634,17 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client that ship parts have been generated due to component removal.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param shipOwnerNickname The nickname of the ship owner
+     * @param shipMatrix The updated ship matrix
+     * @param incorrectlyPositionedComponentsCoordinates Set of coordinates where components are incorrectly positioned
+     * @param shipParts Set of ship parts generated
+     * @param componentsPerType Map of components organized by their type
+     * @throws RemoteException If a remote communication error occurs
+     */
     @Override
     public void notifyShipPartsGeneratedDueToRemoval(String nicknameToNotify, String shipOwnerNickname, Component[][] shipMatrix, Set<Coordinates> incorrectlyPositionedComponentsCoordinates, Set<Set<Coordinates>> shipParts, Map<Class<?>, List<Component>> componentsPerType) throws RemoteException {
         SocketMessage outMessage = new SocketMessage("server", "notifyShipPartsGeneratedDueToRemoval");
@@ -475,6 +656,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client about a change in game state.
+     *
+     * @param nickname The nickname of the client to notify
+     * @param gameState The new game state
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyGameState(String nickname, GameState gameState) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyGameState");
@@ -483,6 +671,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nickname),nickname);
     }
 
+    /**
+     * Notifies a client about a dangerous object attack.
+     *
+     * @param nickname The nickname of the client to notify
+     * @param dangerousObj The dangerous object that is attacking
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyDangerousObjAttack(String nickname, ClientDangerousObject dangerousObj) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyDangerousObjAttack");
@@ -491,6 +686,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nickname),nickname);
     }
 
+    /**
+     * Notifies a client about a change in the current player.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the new current player
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyCurrPlayerChanged(String nicknameToNotify, String nickname) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrPlayerChanged");
@@ -499,12 +701,16 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client about the current adventure card.
+     *
+     * @param nickname The nickname of the client to notify
+     * @param adventureCard The current adventure card
+     * @param isFirstTime Whether this is the first time the card is being shown
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyCurrAdventureCard(String nickname, ClientCard adventureCard, boolean isFirstTime) throws IOException{
-//        SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCard");
-//        outMessage.setParamString(adventureCard);
-//        writers.get(nickname).println(ServerSerializer.serialize(outMessage));
-//        checkWriterStatus(writers.get(nickname),nickname);
         SocketMessage outMessage = new SocketMessage("server", "notifyCurrAdventureCard");
         outMessage.setParamClientCard(adventureCard);
         outMessage.setParamBoolean(isFirstTime);
@@ -512,6 +718,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nickname),nickname);
     }
 
+    /**
+     * Notifies a client about a change in card state.
+     *
+     * @param nickname The nickname of the client to notify
+     * @param cardState The new card state
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyCardState(String nickname, CardState cardState) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyCardState");
@@ -520,6 +733,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nickname),nickname);
     }
 
+    /**
+     * Notifies a client that a player has focused on a component.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player who focused the component
+     * @param component The component that was focused
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyFocusedComponent(String nicknameToNotify, String nickname, Component component) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyChooseComponent");
@@ -530,6 +751,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
     }
 
 
+    /**
+     * Notifies a client that a player has released a component.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player who released the component
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyReleaseComponent(String nicknameToNotify, String nickname) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyReleaseComponent");
@@ -538,6 +766,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client that a player has booked a component.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player who booked the component
+     * @param component The component that was booked
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyBookedComponent(String nicknameToNotify, String nickname, Component component) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyBookedComponent");
@@ -547,6 +783,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client that a visible component has been added.
+     *
+     * @param nickname The nickname of the client to notify
+     * @param index The index where the component was added
+     * @param component The component that was added
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyAddVisibleComponents(String nickname, int index, Component component) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyAddVisibleComponents");
@@ -556,6 +800,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nickname),nickname);
     }
 
+    /**
+     * Notifies a client that a visible component has been removed.
+     *
+     * @param nickname The nickname of the client to notify
+     * @param index The index from which the component was removed
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyRemoveVisibleComponents(String nickname, int index) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyRemoveVisibleComponents");
@@ -564,6 +815,15 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nickname),nickname);
     }
 
+    /**
+     * Notifies a client that a component has been placed.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player who placed the component
+     * @param component The component that was placed
+     * @param coordinates The coordinates where the component was placed
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyComponentPlaced(String nicknameToNotify, String nickname, Component component, Coordinates coordinates) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyComponentPlaced");
@@ -574,6 +834,16 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client about an update to a ship board.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the ship owner
+     * @param shipMatrix The updated ship matrix
+     * @param componentsPerType Map of components organized by their type
+     * @param notActiveComponentsList List of components that are not active
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyShipBoardUpdate(String nicknameToNotify, String nickname, Component[][] shipMatrix, Map<Class<?>, List<Component>> componentsPerType, List<Component> notActiveComponentsList) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyShipBoardUpdate");
@@ -585,6 +855,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client about a player's credits.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player whose credits are being reported
+     * @param credits The number of credits
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void  notifyPlayerCredits(String nicknameToNotify, String nickname, int credits) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerCredits");
@@ -594,6 +872,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client that a player has been eliminated.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player who was eliminated
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void  notifyEliminatedPlayer(String nicknameToNotify, String nickname) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyEliminatedPlayer");
@@ -602,6 +887,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client about an update to the player ranking.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player whose ranking changed
+     * @param newPosition The new position in the ranking
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void  notifyRankingUpdate(String nicknameToNotify, String nickname, int newPosition) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyRankingUpdate");
@@ -611,6 +904,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nicknameToNotify),nicknameToNotify);
     }
 
+    /**
+     * Notifies a client about the visible deck of cards.
+     *
+     * @param nickname The nickname of the client to notify
+     * @param littleVisibleDeck The visible deck information
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyVisibleDeck(String nickname, List<List<ClientCard>> littleVisibleDeck) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyVisibleDeck");
@@ -619,6 +919,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         checkWriterStatus(writers.get(nickname),nickname);
     }
 
+    /**
+     * Notifies a client that a player has disconnected.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param disconnectedPlayer The nickname of the player who disconnected
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayer) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyPlayerDisconnected");
@@ -626,6 +933,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Forces a client to disconnect from a game.
+     *
+     * @param nicknameToNotify The nickname of the client to disconnect
+     * @param gameId The ID of the game from which to disconnect
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void forcedDisconnection(String nicknameToNotify,String gameId) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "forcedDisconnection");
@@ -633,18 +947,37 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Sends a ping message to a client.
+     *
+     * @param nickname The nickname of the client to ping
+     * @throws IOException If an I/O error occurs during notification
+     */
     public void pingToClientFromServer(String nickname) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "PING");
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
         //System.out.println("Ping inviato a " + nickname);
     }
 
+    /**
+     * Sends a pong message to a client.
+     *
+     * @param nickname The nickname of the client to send the pong to
+     * @throws IOException If an I/O error occurs during notification
+     */
     public void pongToClientFromServer(String nickname) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "PONG");
         writers.get(nickname).println(ServerSerializer.serialize(outMessage));
         //System.out.println("Pong inviato a " + nickname);
     }
 
+    /**
+     * Notifies a client about the components per type for a player.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param playerNickname The nickname of the player whose components are being reported
+     * @param componentsPerType Map of components organized by their type
+     */
     public void notifyComponentPerType(String nicknameToNotify, String playerNickname, Map<Class<?>, List<Component>> componentsPerType ){
         SocketMessage outMessage = new SocketMessage("server", "notifyComponentPerType");
         outMessage.setParamString(playerNickname);
@@ -652,6 +985,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client about the coordinates of a component that was hit.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player whose component was hit
+     * @param coordinates The coordinates of the hit component
+     * @throws IOException If an I/O error occurs during notification
+     */
     public void notifyCoordinateOfComponentHit(String nicknameToNotify, String nickname, Coordinates coordinates) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyCoordinateOfComponentHit");
         outMessage.setParamString(nickname);
@@ -659,12 +1000,27 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client about the least resourced player.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nicknameAndMotivations The nickname of the least resourced player and the motivations
+     * @throws IOException If an I/O error occurs during notification
+     */
     public  void notifyLeastResourcedPlayer(String nicknameToNotify, String nicknameAndMotivations) throws IOException{
         SocketMessage outMessage = new SocketMessage("server", "notifyLeastResourcedPlayer");
         outMessage.setParamString(nicknameAndMotivations);
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client about an error that occurred while booking a component.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player who attempted to book the component
+     * @param focusedComponent The component that was being booked
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyErrorWhileBookingComponent(String nicknameToNotify, String nickname, Component focusedComponent) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyErrorWhileBookingComponent");
@@ -673,6 +1029,14 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client about components that are not active.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param nickname The nickname of the player who owns the components
+     * @param notActiveComponents List of components that are not active
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyNotActiveComponents(String nicknameToNotify, String nickname, List<Component> notActiveComponents) throws IOException {
         SocketMessage outMessage = new SocketMessage("server", "notifyNotActiveComponents");
@@ -681,6 +1045,13 @@ public class SocketServerManager implements Runnable, CallableOnClientController
         writers.get(nicknameToNotify).println(ServerSerializer.serialize(outMessage));
     }
 
+    /**
+     * Notifies a client about an error related to storage.
+     *
+     * @param nicknameToNotify The nickname of the client to notify
+     * @param errorMessage The error message describing the storage issue
+     * @throws IOException If an I/O error occurs during notification
+     */
     @Override
     public void notifyStorageError(String nicknameToNotify, String errorMessage) throws IOException {
         SocketMessage outMessage = new SocketMessage(nicknameToNotify, "notifyStorageError");

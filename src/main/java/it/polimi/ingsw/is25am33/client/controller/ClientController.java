@@ -310,47 +310,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
     }
 
     /**
-     * Allows the user to select the user interface implementation.
-     * Creates and returns the appropriate view implementation based on the
-     * user's choice between CLI and GUI interfaces.
-     *
-     * @param scanner Scanner instance for reading user input (legacy parameter)
-     * @param choice the interface choice: "cli" for command line interface, "gui" for graphical interface
-     * @return the chosen implementation of ClientView, or null if choice is invalid
-     * @throws IOException if an error occurs during view initialization
-     */
-    public static ClientView selectUserInterface(Scanner scanner, String choice) throws IOException {
-
-        return switch (choice) {
-            case "cli" -> new ClientCLIView();
-            case "gui" -> new ClientGuiController();
-            default -> null;
-        };
-
-
-//        System.out.println("Select user interface:");
-//        System.out.println("1. Command Line Interface (CLI)");
-//        System.out.println("2. Graphical User Interface (GUI)");
-//
-//        while (true) {
-//            System.out.print("Your choice: ");
-//            try {
-//                int choice = Integer.parseInt(scanner.nextLine());
-//                switch (args) {
-//                    case 1:
-//                        return new ClientCLIView(clientModel);
-//                    case 2:
-//                        //return new ClientGUIView();
-//                    default:
-//                        System.out.println("Invalid choice. Please enter 1 or 2.");
-//                }
-//            } catch (NumberFormatException e) {
-//                System.out.println("Please enter a valid number.");
-//            }
-//        }
-    }
-
-    /**
      * Allows the user to select the network protocol for communication.
      * Establishes the network connection using either RMI or Socket protocol
      * based on the specified parameters.
@@ -371,27 +330,6 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
             return null;
         }
 
-//        System.out.println("Select network protocol:");
-//        System.out.println("1. RMI (Remote Method Invocation)");
-//        System.out.println("2. Socket TCP/IP");
-//
-//        while (true) {
-//            try {
-//                int choice = Integer.parseInt(view.askForInput("Your choice: "));
-//                switch (choice) {
-//                    case 1:
-//                        return this.setUpRMIConnection();
-//                    case 2:
-//                        return this.setUpSocketConnection();
-//                    default:
-//                        System.out.println("Invalid choice. Please enter 1 or 2.");
-//                }
-//            } catch (IOException e) {
-//                view.showError("Connection refused: " + e.getMessage());
-//            } catch (NumberFormatException e) {
-//                view.showMessage("Invalid choice. Please enter 1 or 2.");
-//            }
-//        }
     }
 
     private CallableOnDNS setUpRMIConnection(String serverAddress, int serverPort) throws IOException {

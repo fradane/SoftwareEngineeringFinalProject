@@ -718,7 +718,7 @@ public class GameModel {
      *                          used for communication with the client
      */
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController){
-        if(clientController!=null)
+        if (clientController != null)
             gameClientNotifier.getClientControllers().put(nickname, clientController);
         ShipBoard shipBoard = isTestFlight ? new Level1ShipBoard(color, gameClientNotifier, false) : new Level2ShipBoard(color, gameClientNotifier, false);
         Player player = new Player(nickname, shipBoard, color);
@@ -1050,9 +1050,8 @@ public class GameModel {
      * @param nickname the nickname of the user who has completed their crew placement
      */
     public void markCrewPlacementCompleted(String nickname) {
-        crewPlacementCompleted.put(nickname, true);
-
         synchronized (crewPlacementCompletedLock) {
+            crewPlacementCompleted.put(nickname, true);
             boolean allCompleted = crewPlacementCompleted.values().stream().allMatch(Boolean::booleanValue);
             if (allCompleted) {
                 setCurrGameState(GameState.CREATE_DECK);

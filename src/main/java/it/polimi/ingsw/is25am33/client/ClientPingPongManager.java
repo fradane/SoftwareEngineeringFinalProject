@@ -16,8 +16,7 @@ public class ClientPingPongManager {
     public void start(Runnable sendPing) {
         pingTask = scheduler.scheduleAtFixedRate(() -> {
             sendPing.run(); // invia ping
-            
-        }, 1000, 5000, TimeUnit.MILLISECONDS);
+        }, 1000, 2000, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -27,13 +26,14 @@ public class ClientPingPongManager {
      * @param onTimeout the runnable to execute when timeout occurs
      */
     private void resetTimeout(Runnable onTimeout) {
+
         synchronized (lock) {
             if (pongTimeout != null) pongTimeout.cancel(false);
 
             pongTimeout = scheduler.schedule(() -> {
                 stop();
                 onTimeout.run();
-            }, 9000, TimeUnit.MILLISECONDS); 
+            }, 9000, TimeUnit.MILLISECONDS);
         }
 
     }

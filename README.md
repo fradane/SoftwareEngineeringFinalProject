@@ -38,7 +38,7 @@ Inoltre, sono previste **funzionalità avanzate** (opzionali) quali:
 Per avviare l’applicazione client da linea di comando è necessario eseguire il file `.jar` con i seguenti parametri:
 
 ```
-java -jar nomefile.jar [rmi|socket] [cli|gui] [-ip indirizzo_server] [-port porta_server]
+java -jar client.jar [rmi|socket] [cli|gui] [-ip indirizzo_server] [-port porta_server]
 ```
 
 #### Parametri obbligatori
@@ -51,6 +51,14 @@ Se questi parametri non vengono forniti, l’applicazione **non verrà eseguita*
 - `-ip` → specifica l’indirizzo IP del server (default: `localhost`).
 - `-port` → specifica la porta del server (default: `1099` per RMI, `3000` per Socket).
 
+Per avviare l’applicazione server da linea di comando è necessario eseguire il file `.jar` con i seguenti parametri:
+
+```
+java -jar server.jar [-ip indirizzo_server]
+```
+
+#### Parametri opzionali
+- `-ip` → specifica l’indirizzo IP esposto dal server (default: `localhost`).
 
 ### Struttura e Materiale Richiesto
 Il progetto dovrà includere:
@@ -135,7 +143,7 @@ Additionally, the project may feature **advanced functionalities** (optional) su
 To start the client application from the command line, you must execute the `.jar` file with the following parameters:
 
 ```
-java -jar filename.jar [rmi|socket] [cli|gui] [-ip server_address] [-port server_port]
+java -jar client.jar [rmi|socket] [cli|gui] [-ip server_address] [-port server_port]
 ```
 
 #### Required parameters
@@ -148,6 +156,14 @@ If these parameters are not provided, the application **will not start**.
 - `-ip` → specifies the server IP address (default: `localhost`).
 - `-port` → specifies the server port (default: `1099` for RMI, `3000` for Socket).
 
+To start the server application from the command line, you must execute the `.jar` file with the following parameters:
+
+```
+java -jar server.jar [-ip server_address]
+```
+
+#### Optional parameters
+- `-ip` → specifies the exposed IP address (default: `localhost`).
 
 ### Project Materials and Deliverables
 The project should include:

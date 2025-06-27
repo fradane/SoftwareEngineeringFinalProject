@@ -19,8 +19,7 @@ public class ClientDeserializer extends KeyDeserializer {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     static {
-        mapper.registerModule(new Jdk8Module());       // <-- aggiungi
-        // eventuali altri moduli (JavaTimeModule, ecc.)
+        mapper.registerModule(new Jdk8Module());
     }
 
     @Override
@@ -70,19 +69,6 @@ public class ClientDeserializer extends KeyDeserializer {
         // Deserialize the JSON array into a List<T>
 
         return mapper.readValue(json, listType);
-    }
-
-
-    public static void main(String[] args) {
-
-        try {
-//            ClientDeserializer.deserialize("""
-//            {"level":1,"cardName":"Planets","availablePlanets":[{"reward":["RED","RED"],"busy":false},{"reward":["RED","BLUE","BLUE"],"busy":false},{"reward":["YELLOW"],"busy":false}],"stepsBack":-2}
-//            """, Planets.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
     }
 
 }

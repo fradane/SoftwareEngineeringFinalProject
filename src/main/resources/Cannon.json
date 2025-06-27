@@ -4,8 +4,8 @@
     "connectors" : {
       "NORTH": "EMPTY",
       "EAST": "EMPTY",
-      "SOUTH": "EMPTY",
-      "WEST": "SINGLE"
+      "SOUTH": "SINGLE",
+      "WEST": "EMPTY"
     },
     "imageName": "GT-new_tiles_16_for_web101.jpg"
   },
