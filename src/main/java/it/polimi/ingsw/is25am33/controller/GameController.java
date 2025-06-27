@@ -597,7 +597,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerWantsToRemoveComponent(String nickname, Coordinates coordinates) {
 
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+        if(gameModel.getCurrGameState()!=GameState.CHECK_SHIPBOARD && gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
             System.err.println("Player " + nickname + " tried to playerWantsToRemoveComponent in state " + gameModel.getCurrGameState());
             return;
         }
@@ -639,7 +639,7 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     @Override
     public void playerChoseShipPart(String nickname, Set<Coordinates> chosenShipPart) throws RemoteException {
 
-        if(gameModel.getCurrGameState()!=GameState.BUILD_SHIPBOARD) {
+        if(gameModel.getCurrGameState()!=GameState.CHECK_SHIPBOARD && gameModel.getCurrGameState()!=GameState.PLAY_CARD) {
             System.err.println("Player " + nickname + " tried to playerChoseShipPart in state " + gameModel.getCurrGameState());
             return;
         }
