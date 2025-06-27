@@ -107,11 +107,7 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
                 this.currPlayerChoseStorageToRemove(playerChoices.getChosenStorage().orElseThrow(), playerChoices.getChosenBatteryBoxes().orElseThrow());
                 break;
             case HANDLE_CUBES_REWARD:
-                if (playerChoices.getStorageUpdates().isPresent()) {
-                    this.handleStorageUpdates(playerChoices.getStorageUpdates().orElseThrow());
-                } else {
-                    this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
-                }
+                this.handleStorageUpdates(playerChoices.getStorageUpdates().orElseThrow());
                 break;
             default:
                 throw new UnknownStateException("Unknown current state");
@@ -189,91 +185,6 @@ public class Smugglers extends Enemies implements PlayerMover, DoubleCannonActiv
             gameModel.resetPlayerIterator();
             gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
         }
-    }
-
-    /**
-     * Handles the action where the current player chooses storage locations for cargo cubes.
-     * Validates the chosen storage locations and updates the storage with the rewarded cargo cubes.
-     * Handles cases where storage is full or invalid, and appropriately discards or replaces lower value cargo cubes.
-     *
-     * @param chosenStorageCoords a list of {@code Coordinates} representing the storage locations
-     *                            selected by the current player for the cargo cubes.
-     *                            The validity of these coordinates will be checked,
-     *                            and any invalid coordinates will be ignored or handled.
-     */
-    private void currPlayerChoseCargoCubeStorage(List<Coordinates> chosenStorageCoords) {
-        List<CargoCube> stationRewards = new ArrayList<>(reward);
-
-        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
-        List<Storage> chosenStorages = new ArrayList();
-        for (Coordinates coords : chosenStorageCoords) {
-            if (coords.isCoordinateInvalid()) {
-                chosenStorages.add(null);
-            } else {
-                Component component = shipBoard.getComponentAt(coords);
-                if (component instanceof Storage) {
-                    chosenStorages.add((Storage) component);
-                } else {
-                    chosenStorages.add(null);
-                }
-            }
-        }
-
-        if (chosenStorages.isEmpty()) {
-            proceedToNextPlayerOrEndCard();
-            return;
-        }
-
-        if (chosenStorages.size() < stationRewards.size()) {
-            List<CargoCube> rewardsToProcess = stationRewards.subList(0, chosenStorages.size());
-            List<CargoCube> discardedRewards = stationRewards.subList(chosenStorages.size(), stationRewards.size());
-            stationRewards = rewardsToProcess;
-        }
-
-        if (chosenStorages.size() > stationRewards.size()) {
-            chosenStorages = chosenStorages.subList(0, stationRewards.size());
-        }
-
-        for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
-            Storage storage = chosenStorages.get(i);
-            CargoCube cube = stationRewards.get(i);
-
-            if (storage == null) {
-                continue;
-            }
-
-            if (!(storage instanceof SpecialStorage) && cube == CargoCube.RED) {
-                throw new IllegalArgumentException("Trying to store a RED cube in a non-special storage");
-            }
-        }
-
-        for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
-            Storage storage = chosenStorages.get(i);
-            CargoCube cube = stationRewards.get(i);
-
-            if (storage == null) {
-                System.out.println("Cube " + cube + " discarded - no valid storage selected");
-                continue;
-            }
-
-            if (storage.isFull()) {
-                List<CargoCube> sortedStorage = new ArrayList<>(storage.getStockedCubes());
-                sortedStorage.sort(CargoCube.byValue);
-                CargoCube lessValuableCargoCube = sortedStorage.get(0);
-                storage.removeCube(lessValuableCargoCube);
-            }
-            storage.addCube(cube);
-        }
-
-        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(), gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
-        });
-
-        movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
-
-        setCurrState(CardState.END_OF_CARD);
-        gameModel.resetPlayerIterator();
-        gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
     }
 
     /**

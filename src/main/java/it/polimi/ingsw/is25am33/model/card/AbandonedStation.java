@@ -83,11 +83,8 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
                 break;
 
             case HANDLE_CUBES_REWARD:
-                if (playerChoices.getStorageUpdates().isPresent()) {
-                    this.handleStorageUpdates(playerChoices.getStorageUpdates().orElseThrow());
-                } else {
-                    this.currPlayerChoseCargoCubeStorage(playerChoices.getChosenStorage().orElseThrow());
-                }
+                this.handleStorageUpdates(playerChoices.getStorageUpdates().orElseThrow());
+
                 break;
 
             default:
@@ -212,89 +209,6 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
     }
 
     /**
-     * Handles the selection of storage locations by the current player for storing cargo cubes.
-     * The chosen storage locations are validated and updated with the assigned rewards if possible.
-     *
-     * @param chosenStorageCoords a list of coordinates representing the storages chosen by the player.
-     *                            Each coordinate corresponds to a potential storage location on the player's ship board.
-     *                            Invalid coordinates or non-storage components will result in null being added to the internal list of storages.
-     */
-    private void currPlayerChoseCargoCubeStorage(List<Coordinates> chosenStorageCoords) {
-        List<CargoCube> stationRewards = new ArrayList<>(reward);
-
-        ShipBoard shipBoard = gameModel.getCurrPlayer().getPersonalBoard();
-        List<Storage> chosenStorages = new ArrayList();
-        for (Coordinates coords : chosenStorageCoords) {
-            if (coords.isCoordinateInvalid()) {
-                chosenStorages.add(null);
-            } else {
-                Component component = shipBoard.getComponentAt(coords);
-                if (component instanceof Storage) {
-                    chosenStorages.add((Storage) component);
-                } else {
-                    chosenStorages.add(null);
-                }
-            }
-        }
-
-        if (chosenStorages.isEmpty()) {
-            proceedToNextPlayerOrEndCard();
-            return;
-        }
-
-        if (chosenStorages.size() < stationRewards.size()) {
-            List<CargoCube> rewardsToProcess = stationRewards.subList(0, chosenStorages.size());
-            List<CargoCube> discardedRewards = stationRewards.subList(chosenStorages.size(), stationRewards.size());
-            stationRewards = rewardsToProcess;
-        }
-
-        if (chosenStorages.size() > stationRewards.size()) {
-            chosenStorages = chosenStorages.subList(0, stationRewards.size());
-        }
-
-        for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
-            Storage storage = chosenStorages.get(i);
-            CargoCube cube = stationRewards.get(i);
-
-            if (storage == null) {
-                continue;
-            }
-
-            if (!(storage instanceof SpecialStorage) && cube == CargoCube.RED) {
-                throw new IllegalArgumentException("Trying to store a RED cube in a non-special storage");
-            }
-        }
-
-        for (int i = 0; i < Math.min(chosenStorages.size(), stationRewards.size()); i++) {
-            Storage storage = chosenStorages.get(i);
-            CargoCube cube = stationRewards.get(i);
-
-            if (storage == null) {
-                continue;
-            }
-
-            if (storage.isFull()) {
-                List<CargoCube> sortedStorage = new ArrayList<>(storage.getStockedCubes());
-                sortedStorage.sort(CargoCube.byValue);
-                CargoCube lessValuableCargoCube = sortedStorage.get(0);
-                storage.removeCube(lessValuableCargoCube);
-            }
-
-            storage.addCube(cube);
-        }
-
-        gameModel.getGameClientNotifier().notifyAllClients((nicknameToNotify, clientController) -> {
-            clientController.notifyShipBoardUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), gameModel.getCurrPlayer().getPersonalBoard().getShipMatrix(), gameModel.getCurrPlayer().getPersonalBoard().getComponentsPerType(), gameModel.getCurrPlayer().getPersonalBoard().getNotActiveComponents());
-        });
-
-        movePlayer(gameModel.getFlyingBoard(), gameModel.getCurrPlayer(), stepsBack);
-
-        setCurrState(CardState.END_OF_CARD);
-        gameModel.resetPlayerIterator();
-        gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
-    }
-
-    /**
      * Determines the next step in the game's progression based on the availability of additional players.
      * This method either moves the game to the next player or concludes the current card's execution
      * if there are no more players remaining in the sequence.
@@ -341,8 +255,10 @@ public class AbandonedStation extends AdventureCard implements PlayerMover, Cube
                 clientController.notifyRankingUpdate(nicknameToNotify, gameModel.getCurrPlayer().getNickname(), 
                     gameModel.getFlyingBoard().getPlayerPosition(gameModel.getCurrPlayer()));
             });
-            
-            proceedToNextPlayerOrEndCard();
+
+            setCurrState(CardState.END_OF_CARD);
+            gameModel.resetPlayerIterator();
+            gameModel.setCurrGameState(GameState.CHECK_PLAYERS);
             
         } catch (IllegalArgumentException e) {
             // Gestione errore con retry

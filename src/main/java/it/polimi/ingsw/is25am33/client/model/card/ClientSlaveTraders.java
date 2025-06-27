@@ -42,6 +42,11 @@ public class ClientSlaveTraders extends ClientCard implements Serializable, Crew
         return crewMalus;
     }
 
+    @Override
+    public boolean hasReward() {
+        return true;
+    }
+
     public void setRequiredFirePower(int requiredFirePower) {
         this.requiredFirePower = requiredFirePower;
     }
