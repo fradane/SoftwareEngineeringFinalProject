@@ -34,6 +34,13 @@ public class ModelFxAdapter {
     private final Object visibleComponentsLock  = new Object();
     private final ObjectProperty<Integer> observableCosmicCredits;
 
+    /**
+     * Creates a new ModelFxAdapter instance.
+     *
+     * @param clientModel the client model to adapt
+     * @param isCardAdapter whether this adapter is for the card-related phase
+     * @param boardsController the boards controller for UI updates
+     */
     @SuppressWarnings("unchecked")
     public ModelFxAdapter(ClientModel clientModel, Boolean isCardAdapter, BoardsController boardsController) {
         this.clientModel = clientModel;
@@ -74,67 +81,138 @@ public class ModelFxAdapter {
 
     /* -------------- GETTERS -------------- */
 
+    /**
+     * Gets the observable ship board matrix for a specific player.
+     *
+     * @param nickname the nickname of the player
+     * @return the observable ship board matrix
+     */
     public ObjectProperty<Component>[][] getObservableShipBoardOf(String nickname) {
         synchronized (observableShipBoards.get(nickname)) {
             return observableShipBoards.get(nickname);
         }
     }
 
+    /**
+     * Gets the observable ship board matrix for the current player.
+     *
+     * @return the observable ship board matrix for the current player
+     */
     public ObjectProperty<Component>[][] getMyObservableMatrix() {
         synchronized (observableShipBoards.get(clientModel.getMyNickname())) {
             return observableShipBoards.get(clientModel.getMyNickname());
         }
     }
 
+    /**
+     * Gets the observable current adventure card.
+     *
+     * @return the observable current adventure card property
+     */
     public ObjectProperty<ClientCard> getObservableCurrAdventureCard() {
         return observableCurrAdventureCard;
     }
 
+    /**
+     * Gets the observable focused component.
+     *
+     * @return the observable focused component property
+     */
     public ObjectProperty<Component> getObservableFocusedComponent() {
         return observableFocusedComponent;
     }
 
+    /**
+     * Gets the observable timer value.
+     *
+     * @return the observable timer property
+     */
     public ObjectProperty<Integer> getObservableTimer() {
         return observableTimer;
     }
 
+    /**
+     * Gets the observable hourglass flips left value.
+     *
+     * @return the observable flips left property
+     */
     public ObjectProperty<Integer> getObservableFlipsLeft() {
         return observableFlipsLeft;
     }
 
+    /**
+     * Gets the observable list of visible components.
+     *
+     * @return the observable visible components list
+     */
     public ObservableList<String> getObservableVisibleComponents() {
         return observableVisibleComponents;
     }
 
+    /**
+     * Gets the observable color ranking map.
+     *
+     * @return the observable color ranking map
+     */
     public Map<PlayerColor, ObjectProperty<Integer>> getObservableColorRanking() {
         return observableColorRanking;
     }
 
+    /**
+     * Gets the observable booked components for a specific player.
+     *
+     * @param nickname the nickname of the player
+     * @return a pair of observable component properties representing booked components
+     */
     public Pair<ObjectProperty<Component>, ObjectProperty<Component>> getObservableBookedComponentsOf(String nickname) {
         synchronized (observableShipBoards.get(nickname)) {
             return observableBookedComponents.get(nickname);
         }
     }
 
+    /**
+     * Gets the observable lost components map.
+     *
+     * @return the observable lost components map
+     */
     public Map<String, ObjectProperty<Integer>> getObservableLostComponents() {
         return observableLostComponents;
     }
 
+    /**
+     * Gets the observable cosmic credits value.
+     *
+     * @return the observable cosmic credits property
+     */
     public ObjectProperty<Integer> getObservableCosmicCredits() {
         return observableCosmicCredits;
     }
 
+    /**
+     * Checks if this adapter is for card-related operations.
+     *
+     * @return true if this is a card adapter, false otherwise
+     */
     public Boolean isCardAdapter() {
         return isCardAdapter;
     }
 
     /* -------------- REFRESH METHODS -------------- */
 
+    /**
+     * Refreshes the timer and flips left values.
+     *
+     * @param timeLeft the time remaining in seconds
+     * @param flipsLeft the number of hourglass flips remaining
+     */
     public void refreshTimer(int timeLeft, int flipsLeft) {
         observableTimer.set(timeLeft);
         observableFlipsLeft.set(flipsLeft);
     }
 
+    /**
+     * Refreshes the visible components list from the client model.
+     */
     public void refreshVisibleComponents() {
         observableVisibleComponents.clear();
         synchronized (visibleComponentsLock) {
@@ -149,6 +227,11 @@ public class ModelFxAdapter {
         }
     }
 
+    /**
+     * Refreshes the ship board data for a specific player.
+     *
+     * @param nickname the nickname of the player whose ship board to refresh
+     */
     public void refreshShipBoardOf(String nickname) {
 
         if (nickname.equals(clientModel.getMyNickname()))
@@ -196,6 +279,9 @@ public class ModelFxAdapter {
 
     }
 
+    /**
+     * Refreshes the color ranking from the client model.
+     */
     public void refreshRanking() {
         synchronized (rankingLock) {
             clientModel.getColorRanking()
@@ -206,10 +292,16 @@ public class ModelFxAdapter {
         }
     }
 
+    /**
+     * Refreshes the current adventure card from the client model.
+     */
     public void refreshCurrAdventureCard() {
         observableCurrAdventureCard.set(clientModel.getCurrAdventureCard());
     }
 
+    /**
+     * Refreshes the cosmic credits value from the client model.
+     */
     public void refreshCosmicCredits() {
         if (clientModel.getMyNickname() != null) {
             int currentCredits = clientModel.getMyCosmicCredits();

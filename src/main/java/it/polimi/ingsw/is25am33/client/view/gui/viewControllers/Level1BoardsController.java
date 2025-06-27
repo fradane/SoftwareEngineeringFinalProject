@@ -62,11 +62,23 @@ public class Level1BoardsController extends BoardsController {
     );
 
 
+    /**
+     * Gets the relative positions for the Level 1 flying board.
+     *
+     * @return a map of position indices to coordinate pairs for Level 1
+     */
     @Override
     protected Map<Integer, Pair<Integer, Integer>> getFlyingBoardRelativePositions() {
         return flyingBoardRelativePositions;
     }
 
+    /**
+     * Binds the Level 1 boards controller to the model and event handlers.
+     *
+     * @param modelFxAdapter the adapter for reactive UI updates
+     * @param boardsEventHandler the handler for board interaction events
+     * @param clientModel the client-side game model
+     */
     @Override
     public void bindBoards(ModelFxAdapter modelFxAdapter, BoardsEventHandler boardsEventHandler, ClientModel clientModel) {
         this.modelFxAdapter = modelFxAdapter;
@@ -79,11 +91,18 @@ public class Level1BoardsController extends BoardsController {
         //setupChangedAttributesBinding();
     }
 
+    /**
+     * Initializes the Level 1 boards controller, called automatically by JavaFX.
+     */
     public void initialize() {
 
     }
 
     // TODO togliere non usati: togliere da qua quelli non usati e dal fxml il fx:id a quelli che non si usano
+    /**
+     * Initializes the mapping between coordinates and UI buttons for Level 1.
+     * Maps all ship board positions to their corresponding FXML button references.
+     */
     @Override
     protected void initializeButtonMap() {
 

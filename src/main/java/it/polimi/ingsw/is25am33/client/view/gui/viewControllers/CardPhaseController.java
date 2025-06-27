@@ -99,6 +99,12 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         createEarlyLandingDisplay();
     }
 
+    /**
+     * Notifies when another player has made an early landing.
+     * Shows a notification to inform about the player's early exit.
+     *
+     * @param nickname the nickname of the player who landed early
+     */
     public void notifyOtherPlayerEarlyLanded(String nickname) {
         if (!alreadyEliminated.contains(nickname)) {
             createOtherPlayersDisplay(nickname);
@@ -2254,6 +2260,11 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     }
 
+    /**
+     * Shows a disconnection message when a player leaves the game.
+     *
+     * @param message the disconnection message to display
+     */
     public void showDisconnectMessage(String message) {
         showOverlayPopup("warning message", message,
                 () -> System.exit(0));
@@ -2283,6 +2294,10 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         showOverlayPopup("warning message", warningMessage, () -> {});
     }
 
+    /**
+     * Shows the early landing confirmation message for the current player.
+     * Displays the consequences of landing early and hides the land button.
+     */
     public void showPlayerLanded() {
         String warningMessage = ("""
         🛬 EARLY LANDING 🛬
@@ -2295,6 +2310,19 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
         showOverlayPopup("warning Message", warningMessage, () ->
                 Platform.runLater(() -> landButton.setVisible(false))
+        );
+    }
+
+    /**
+     * Notifies when a player has disconnected from the game.
+     *
+     * @param disconnectedPlayerNickname the nickname of the disconnected player
+     */
+    public void notifyPlayerDisconnected(String disconnectedPlayerNickname) {
+        showOverlayPopup(
+                "DISCONNECTION",
+                disconnectedPlayerNickname + "left, press the button to quit",
+                () -> System.exit(0)
         );
     }
 }

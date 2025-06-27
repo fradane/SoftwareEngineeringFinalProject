@@ -64,10 +64,21 @@ public class ClientGuiController extends Application implements ClientView {
     private static final String CARD_PHASE_CONTROLLER = "CardPhaseController";
     private static final String END_GAME_CONTROLLER = "EndGameController";
 
+    /**
+     * Returns the singleton instance of ClientGuiController.
+     *
+     * @return the current instance of ClientGuiController
+     */
     public static ClientGuiController getInstance() {
         return instance;
     }
 
+    /**
+     * Starts the JavaFX application and initializes the main GUI.
+     *
+     * @param primaryStage the primary stage for this application
+     * @throws Exception if an error occurs during application startup
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
         instance = this;
@@ -131,26 +142,49 @@ public class ClientGuiController extends Application implements ClientView {
 //        primaryStage.show();
 //    }
 
+    /**
+     * Notifies that the hourglass has been restarted.
+     *
+     * @param flipsLeft number of hourglass flips remaining
+     */
     @Override
     public void notifyHourglassRestarted(int flipsLeft) {
 
     }
 
+    /**
+     * Sets whether this is a test flight.
+     *
+     * @param isTestFlight true if this is a test flight, false otherwise
+     */
     @Override
     public void setIsTestFlight(boolean isTestFlight) {
 
     }
 
+    /**
+     * Shows the question dialog for picking a reserved component.
+     */
     @Override
     public void showPickReservedComponentQuestion() {
 
     }
 
+    /**
+     * Asks the user to select a component to remove from incorrectly positioned components.
+     *
+     * @param shipBoard the ship board containing the components
+     * @param incorrectlyPositionedComponents list of components that are incorrectly positioned
+     * @return the component selected for removal, or null if none selected
+     */
     @Override
     public Component askComponentToRemove(ShipBoardClient shipBoard, List<Component> incorrectlyPositionedComponents) {
         return null;
     }
 
+    /**
+     * Shows the ship board check menu after an attack.
+     */
     @Override
     public void checkShipBoardAfterAttackMenu() {
         executeWithController(
@@ -159,11 +193,17 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the current ranking of players.
+     */
     @Override
     public void showCurrentRanking() {
         //TODO
     }
 
+    /**
+     * Shows information about crew members.
+     */
     @Override
     public void showCrewMembersInfo() {
         executeWithController(
@@ -172,6 +212,11 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows a disconnect message to the user.
+     *
+     * @param message the disconnect message to display
+     */
     @Override
     public void showDisconnectMessage(String message) {
         // TODO generalizzare per gli stati
@@ -181,11 +226,22 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows information about infected crew members that were removed.
+     *
+     * @param cabinWithNeighbors coordinates of cabins with their neighbors where crew members were removed
+     */
     @Override
     public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
 
     }
 
+    /**
+     * Shows the end game information including final ranking and prettiest ship winners.
+     *
+     * @param finalRanking list of player final data sorted by ranking
+     * @param playersNicknamesWithPrettiestShip list of player nicknames who have the prettiest ship
+     */
     @Override
     public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
         executeWithController(
@@ -194,6 +250,9 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows notification that a visible component was stolen.
+     */
     @Override
     public void showStolenVisibleComponent() {
         executeWithController(
@@ -202,6 +261,11 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows notification that a player has landed early.
+     *
+     * @param nickname the nickname of the player who landed early
+     */
     @Override
     public void showPlayerEarlyLanded(String nickname) {
         if (nickname.equals(clientModel.getMyNickname())) {
@@ -219,16 +283,28 @@ public class ClientGuiController extends Application implements ClientView {
         }
     }
 
+    /**
+     * Shows the cubes on a player's ship board.
+     *
+     * @param shipboardOf the ship board to display cubes for
+     * @param nickname the nickname of the ship board owner
+     */
     @Override
     public void showCubes(ShipBoardClient shipboardOf, String nickname) {
 
     }
 
+    /**
+     * Shows the cube redistribution menu.
+     */
     @Override
     public void showCubeRedistributionMenu() {
         //TODO
     }
 
+    /**
+     * Shows notification that there are no more hidden components available.
+     */
     @Override
     public void showNoMoreHiddenComponents() {
         executeWithController(
@@ -237,16 +313,25 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the valid ship board menu.
+     */
     @Override
     public void showValidShipBoardMenu() {
         //TODO
     }
 
+    /**
+     * Shows the menu for choosing which component to remove.
+     */
     @Override
     public void showChooseComponentToRemoveMenu() {
         //TODO
     }
 
+    /**
+     * Shows the visit location menu based on the current adventure card.
+     */
     @Override
     public void showVisitLocationMenu() {
         ClientCard currentCard = clientModel.getCurrAdventureCard();
@@ -265,6 +350,9 @@ public class ClientGuiController extends Application implements ClientView {
 
     }
 
+    /**
+     * Shows the choose engines menu for space navigation.
+     */
     @Override
     public void showChooseEnginesMenu() {
         ClientCard currentCard = clientModel.getCurrAdventureCard();
@@ -282,6 +370,9 @@ public class ClientGuiController extends Application implements ClientView {
             System.err.println("Not FreeSpace card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
     }
 
+    /**
+     * Shows the menu for accepting rewards from enemy encounters.
+     */
     @Override
     public void showAcceptTheRewardMenu() {
         ClientCard card = clientModel.getCurrAdventureCard();
@@ -302,6 +393,9 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
 
+    /**
+     * Shows the menu for choosing cannons for combat.
+     */
     @Override
     public void showChooseCannonsMenu() {
 
@@ -321,6 +415,9 @@ public class ClientGuiController extends Application implements ClientView {
             System.err.println("Not enemies: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
     }
 
+    /**
+     * Shows the menu for handling small dangerous objects.
+     */
     @Override
     public void showSmallDanObjMenu() {
         executeWithController(
@@ -329,6 +426,9 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the menu for handling big meteorite encounters.
+     */
     @Override
     public void showBigMeteoriteMenu() {
         executeWithController(
@@ -337,6 +437,9 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the menu for handling big shot encounters.
+     */
     @Override
     public void showBigShotMenu() {
         executeWithController(
@@ -345,6 +448,9 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the menu for handling removal of crew members.
+     */
     @Override
     public void showHandleRemoveCrewMembersMenu() {
         if (
@@ -360,6 +466,9 @@ public class ClientGuiController extends Application implements ClientView {
            System.err.println("Not AbandonedShipCard or SlaveTraders or War field: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
    }
 
+    /**
+     * Shows the menu for handling cube rewards.
+     */
     @Override
     public void showHandleCubesRewardMenu() {
         executeWithController(
@@ -368,6 +477,9 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the epidemic handling menu.
+     */
     @Override
     public void showEpidemicMenu() {
         ClientCard currentCard = clientModel.getCurrAdventureCard();
@@ -382,6 +494,9 @@ public class ClientGuiController extends Application implements ClientView {
             System.err.println("Not EpidemicCard: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
     }
 
+    /**
+     * Shows the stardust encounter menu.
+     */
     @Override
     public void showStardustMenu() {
 
@@ -397,6 +512,9 @@ public class ClientGuiController extends Application implements ClientView {
             System.err.println("Not Stardust card: " + clientModel.getCurrAdventureCard().getClass().getSimpleName());
     }
 
+    /**
+     * Shows the menu for handling cube malus effects.
+     */
     @Override
     public void showHandleCubesMalusMenu() {
         executeWithController(
@@ -405,36 +523,74 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Converts an integer choice to a PlayerColor.
+     *
+     * @param colorChoice the integer representing the color choice
+     * @return the corresponding PlayerColor
+     */
     @Override
     public PlayerColor intToPlayerColor(int colorChoice) {
         return ClientView.super.intToPlayerColor(colorChoice);
     }
 
+    /**
+     * Returns a future that completes when initialization is done.
+     *
+     * @return a CompletableFuture that completes when initialization is finished
+     */
     public CompletableFuture<Void> getInitializationDoneFuture() {
         return initializationDone;
     }
 
+    /**
+     * Shows the waiting for players screen.
+     */
     @Override
     public void showWaitingForPlayers() {}
 
+    /**
+     * Initializes the GUI controller.
+     */
     @Override
     public void initialize() {}
 
+    /**
+     * Asks for user input with a question and prompt.
+     *
+     * @param questionDescription description of the question being asked
+     * @param interrogationPrompt the prompt to show to the user
+     * @return the user's input as a string
+     */
     @Override
     public String askForInput(String questionDescription, String interrogationPrompt) {
         return "";
     }
 
+    /**
+     * Cancels any pending input waiting operations.
+     */
     @Override
     public void cancelInputWaiting() {
 
     }
 
+    /**
+     * Asks the user for game creation parameters.
+     *
+     * @return an array of integers representing the game creation parameters
+     */
     @Override
     public int[] askCreateGame() {
         return new int[0];
     }
 
+    /**
+     * Asks the user to join a game from available games.
+     *
+     * @param games list of available games to join
+     * @return an array of strings representing the join game parameters
+     */
     @Override
     public String[] askJoinGame(List<GameInfo> games) {
         return new String[0];
@@ -459,36 +615,87 @@ public class ClientGuiController extends Application implements ClientView {
 //
 //    }
 
+    /**
+     * Shows the game menu and returns the user's choice.
+     *
+     * @return an integer representing the user's menu choice
+     */
     @Override
     public int showGameMenu() {
         return 0;
     }
 
+    /**
+     * Notifies that a player has joined the game.
+     *
+     * @param nickname the nickname of the player who joined
+     * @param gameInfo information about the game that was joined
+     */
     @Override
     public void notifyPlayerJoined(String nickname, GameInfo gameInfo) {
 
     }
 
+    /**
+     * Notifies that a player has left the game.
+     *
+     * @param nickname the nickname of the player who left
+     * @param gameInfo information about the game that was left
+     */
     @Override
     public void notifyPlayerLeft(String nickname, GameInfo gameInfo) {
 
     }
 
+    /**
+     * Notifies that a player has disconnected from the game.
+     *
+     * @param disconnectedPlayerNickname the nickname of the disconnected player
+     */
+    @Override
+    public void notifyPlayerDisconnected(String disconnectedPlayerNickname) {
+        executeWithController(
+                CARD_PHASE_CONTROLLER,
+                () -> cardPhaseController.notifyPlayerDisconnected(disconnectedPlayerNickname)
+        );
+    }
+
+    /**
+     * Notifies that a new game has been created.
+     *
+     * @param gameId the ID of the created game
+     */
     @Override
     public void notifyGameCreated(String gameId) {
 
     }
 
+    /**
+     * Notifies that a game has started.
+     *
+     * @param gameState the initial state of the started game
+     */
     @Override
     public void notifyGameStarted(GameState gameState) {
 
     }
 
+    /**
+     * Notifies that a game has ended.
+     *
+     * @param reason the reason why the game ended
+     */
     @Override
     public void notifyGameEnded(String reason) {
 
     }
 
+    /**
+     * Asks the player to choose a color from available colors.
+     *
+     * @param availableColors list of colors available for selection
+     * @return the selected color as a string
+     */
     @Override
     public String askPlayerColor(List<PlayerColor> availableColors) {
         return "";
@@ -514,11 +721,17 @@ public class ClientGuiController extends Application implements ClientView {
 //        }
 //    }
 
+    /**
+     * Shows dangerous objects encountered during the game.
+     */
     @Override
     public void showDangerousObj() {
 
     }
 
+    /**
+     * Shows the new card state when it changes.
+     */
     @Override
     public void showNewCardState() {
         CardState currentCardState = clientModel.getCurrCardState();
@@ -526,6 +739,11 @@ public class ClientGuiController extends Application implements ClientView {
         this.showCardStateMenu(mappedState);
     }
 
+    /**
+     * Shows the current adventure card.
+     *
+     * @param isFirstTime true if this is the first time showing this card, false otherwise
+     */
     @Override
     public void showCurrAdventureCard(boolean isFirstTime) {
 
@@ -554,6 +772,9 @@ public class ClientGuiController extends Application implements ClientView {
 //        });
 //    }
 
+    /**
+     * Shows the build ship board menu for ship construction.
+     */
     @Override
     public void showBuildShipBoardMenu() {
         // Only load if not already loaded
@@ -562,26 +783,52 @@ public class ClientGuiController extends Application implements ClientView {
         }
     }
 
+    /**
+     * Notifies that no more components are available.
+     */
     @Override
     public void notifyNoMoreComponentAvailable() {
 
     }
 
+    /**
+     * Shows a ship board for a specific player.
+     *
+     * @param shipBoard the ship board to display
+     * @param shipBoardOwnerNickname the nickname of the ship board owner
+     */
     @Override
     public void showShipBoard(ShipBoardClient shipBoard, String shipBoardOwnerNickname) {
 
     }
 
+    /**
+     * Shows a ship board with color mapping for components.
+     *
+     * @param shipBoardClient the ship board to display
+     * @param shipBoardOwnerNickname the nickname of the ship board owner
+     * @param colorMap mapping of colors to coordinate sets for visual representation
+     */
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {
         //TODO
     }
 
+    /**
+     * Shows visible components and their associated menu.
+     *
+     * @param visibleComponents map of component IDs to visible components
+     */
     @Override
     public void showVisibleComponentAndMenu(Map<Integer, Component> visibleComponents) {
 
     }
 
+    /**
+     * Shows information about a component that was hit.
+     *
+     * @param coordinates the coordinates of the hit component
+     */
     @Override
     public void showComponentHitInfo(Coordinates coordinates){
         executeWithController(
@@ -590,27 +837,52 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the little deck selection.
+     *
+     * @param littleDeckChoice the choice number for the little deck
+     */
     @Override
     public void showLittleDeck(int littleDeckChoice) {
 
     }
 
+    /**
+     * Updates the time left display.
+     *
+     * @param timeLeft the time remaining in seconds
+     * @param flipsLeft the number of hourglass flips remaining
+     */
     @Override
     public void updateTimeLeft(int timeLeft, int flipsLeft) {
         if (buildAndCheckShipBoardController != null && buildAndCheckShipBoardController.getModelFxAdapter() != null)
             buildAndCheckShipBoardController.getModelFxAdapter().refreshTimer(timeLeft, flipsLeft);
     }
 
+    /**
+     * Notifies that the timer has ended.
+     *
+     * @param flipsLeft the number of hourglass flips remaining
+     */
     @Override
     public void notifyTimerEnded(int flipsLeft) {
 
     }
 
+    /**
+     * Notifies that the hourglass has started.
+     *
+     * @param flipsLeft the number of hourglass flips remaining
+     * @param nickname the nickname of the player who started the hourglass
+     */
     @Override
     public void notifyHourglassStarted(int flipsLeft, String nickname) {
 
     }
 
+    /**
+     * Shows the exit menu for leaving the game.
+     */
     public void showExitMenu(){
 
     }
@@ -625,13 +897,18 @@ public class ClientGuiController extends Application implements ClientView {
     private Parent currentView;
     private GuiController currentController;
 
+    /**
+     * Creates a new ClientGuiController instance.
+     *
+     * @throws RemoteException if there's an error with remote communication setup
+     */
     public ClientGuiController() throws RemoteException {
         clientModel = new ClientModel();
         clientController = new ClientController(clientModel, new ClientPingPongManager());
     }
 
     /**
-     * Initialize task queues for all controller types
+     * Initialize task queues for all controller types.
      */
     private void initializeTaskQueues() {
         pendingTasks.put(START_CONTROLLER, new ConcurrentLinkedQueue<>());
@@ -642,7 +919,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     /**
-     * Loads a view and handles task execution
+     * Loads a view and handles task execution.
+     *
+     * @param fxmlPath the path to the FXML file
+     * @param controllerType the type of controller to load
+     * @param <T> the type of GuiController
      */
     private <T extends GuiController> void loadView(String fxmlPath, String controllerType) {
         synchronized (loaderLock) {
@@ -699,7 +980,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     /**
-     * Updates the specific controller reference based on type
+     * Updates the specific controller reference based on type.
+     *
+     * @param controller the controller instance to update
+     * @param controllerType the type of controller
+     * @param <T> the type of GuiController
      */
     private <T extends GuiController> void updateControllerReference(T controller, String controllerType) {
         switch (controllerType) {
@@ -722,7 +1007,11 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     /**
-     * Gets current controller by type
+     * Gets current controller by type.
+     *
+     * @param controllerType the type of controller to retrieve
+     * @param <T> the type of GuiController
+     * @return the controller instance or null if not found
      */
     @SuppressWarnings("unchecked")
     private <T extends GuiController> T getCurrentControllerByType(String controllerType) {
@@ -737,7 +1026,9 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     /**
-     * Processes all pending tasks for a specific controller type
+     * Processes all pending tasks for a specific controller type.
+     *
+     * @param controllerType the type of controller whose tasks to process
      */
     private void processPendingTasks(String controllerType) {
         // Mark as processing to prevent new tasks from jumping the queue
@@ -781,7 +1072,10 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     /**
-     * Checks if a controller is ready and not processing pending tasks
+     * Checks if a controller is ready and not processing pending tasks.
+     *
+     * @param controllerType the type of controller to check
+     * @return true if the controller is ready for immediate execution, false otherwise
      */
     private boolean isControllerReadyForImmediateExecution(String controllerType) {
         return getCurrentControllerByType(controllerType) != null &&
@@ -790,7 +1084,10 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     /**
-     * Executes a task with a specific controller, queueing if necessary
+     * Executes a task with a specific controller, queueing if necessary.
+     *
+     * @param controllerType the type of controller to execute the task with
+     * @param task the task to execute
      */
     private void executeWithController(String controllerType, Runnable task) {
 
@@ -836,6 +1133,9 @@ public class ClientGuiController extends Application implements ClientView {
 
     // Updated methods using the task queue system
 
+    /**
+     * Shows the crew placement menu for positioning crew members.
+     */
     @Override
     public void showCrewPlacementMenu() {
         executeWithController(
@@ -844,6 +1144,11 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the prefab ships menu for ship selection.
+     *
+     * @param prefabShips list of available prefab ship configurations
+     */
     @Override
     public void showPrefabShipsMenu(List<PrefabShipInfo> prefabShips) {
         executeWithController(
@@ -852,6 +1157,9 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the invalid ship board menu when ship configuration is invalid.
+     */
     @Override
     public void showInvalidShipBoardMenu() {
 
@@ -867,6 +1175,11 @@ public class ClientGuiController extends Application implements ClientView {
             );
     }
 
+    /**
+     * Shows the menu for choosing ship parts.
+     *
+     * @param shipParts list of ship part coordinate sets to choose from
+     */
     @Override
     public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {
         if (clientModel.getCurrAdventureCard() == null)
@@ -881,6 +1194,9 @@ public class ClientGuiController extends Application implements ClientView {
             );
     }
 
+    /**
+     * Shows the throw dices menu for dice-based actions.
+     */
     @Override
     public void showThrowDicesMenu() {
         executeWithController(
@@ -889,6 +1205,9 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the choose planet menu for planetary encounters.
+     */
     @Override
     public void showChoosePlanetMenu() {
         executeWithController(
@@ -897,6 +1216,9 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the picked component and its associated menu options.
+     */
     @Override
     public void showPickedComponentAndMenu() {
         if (buildAndCheckShipBoardController != null) {
@@ -909,6 +1231,9 @@ public class ClientGuiController extends Application implements ClientView {
         }
     }
 
+    /**
+     * Shows the first to enter notification and button.
+     */
     @Override
     public void showFirstToEnter() {
         if (buildAndCheckShipBoardController != null) {
@@ -921,6 +1246,9 @@ public class ClientGuiController extends Application implements ClientView {
         }
     }
 
+    /**
+     * Shows the main menu with available games.
+     */
     @Override
     public void showMainMenu() {
         executeWithController(
@@ -929,6 +1257,9 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows the new game state when it changes.
+     */
     @Override
     public void showNewGameState() {
         if (clientModel.getGameState() == GameState.CREATE_DECK) {
@@ -936,6 +1267,9 @@ public class ClientGuiController extends Application implements ClientView {
         }
     }
 
+    /**
+     * Asks the user to enter their nickname.
+     */
     @Override
     public void askNickname() {
         executeWithController(
@@ -944,6 +1278,11 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Shows an error message to the user.
+     *
+     * @param errorMessage the error message to display
+     */
     @Override
     public void showError(String errorMessage) {
         switch (errorMessage) {
@@ -969,6 +1308,12 @@ public class ClientGuiController extends Application implements ClientView {
         }
     }
 
+    /**
+     * Shows a message to the user.
+     *
+     * @param message the message to display
+     * @param type the type of message
+     */
     @Override
     public void showMessage(String message, MessageType type) {
         if (clientModel.getGameState() == null)
@@ -995,22 +1340,37 @@ public class ClientGuiController extends Application implements ClientView {
     }
 
     /**
-     * Load the start view
+     * Load the start view.
      */
     private void loadStartView() {
         Platform.runLater(() -> loadView("/gui/StartView.fxml", START_CONTROLLER));
     }
 
+    /**
+     * Gets the client controller instance.
+     *
+     * @return the client controller instance
+     */
     @Override
     public ClientController getClientController() {
         return clientController;
     }
 
+    /**
+     * Gets the client model instance.
+     *
+     * @return the client model instance
+     */
     @Override
     public ClientModel getClientModel() {
         return clientModel;
     }
 
+    /**
+     * Refreshes the game information display.
+     *
+     * @param gameInfos list of updated game information
+     */
     @Override
     public void refreshGameInfos(List<GameInfo> gameInfos) {
         executeWithController(
@@ -1019,6 +1379,9 @@ public class ClientGuiController extends Application implements ClientView {
         );
     }
 
+    /**
+     * Transitions to the end game view.
+     */
     private void transitionToEndGame() {
         Platform.runLater(() -> {
             // Clear any existing views
@@ -1031,6 +1394,9 @@ public class ClientGuiController extends Application implements ClientView {
         });
     }
 
+    /**
+     * Handles the game exit process, cleaning up resources and terminating the application.
+     */
     public void handleGameExit() {
         Platform.runLater(() -> {
             try {

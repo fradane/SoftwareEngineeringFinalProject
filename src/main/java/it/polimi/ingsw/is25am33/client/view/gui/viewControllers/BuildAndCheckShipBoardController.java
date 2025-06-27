@@ -334,6 +334,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         });
     }
 
+    /**
+     * Shows the focused component display and control panel.
+     * Makes the component details and controls visible to the user.
+     */
     public void showFocusComponent(){
         Platform.runLater(() -> {
             componentsBoxH.setVisible(true);
@@ -343,17 +347,29 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         });
     }
 
+    /**
+     * Handles the UI event when user clicks the pick random component button.
+     * Picks a random component from the hidden deck if no component is focused.
+     */
     public void handlePickRandomComponentButton() {
         if (clientModel.getMyShipboard().getFocusedComponent() == null)
             clientController.pickRandomComponent();
     }
 
+    /**
+     * Handles the UI event when user clicks the release component button.
+     * Releases the currently focused component back to the deck.
+     */
     public void handleReleaseComponentButton(){
         if (clientModel.getMyShipboard().getFocusedComponent() == null)
             return;
         clientController.releaseFocusedComponent();
     }
 
+    /**
+     * Handles the UI event when user clicks the go back button.
+     * Hides the little deck display and returns to the main view.
+     */
     public void handleGoBackButton() {
         Platform.runLater(() -> {
             littleDeckFlowPane.setVisible(false);
@@ -365,6 +381,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         });
     }
 
+    /**
+     * Handles the UI event when user clicks the rotate component button.
+     * Rotates the currently focused component by 90 degrees.
+     */
     public void handleRotateComponentButton() {
 
         Component focusedComponent = clientModel.getMyShipboard().getFocusedComponent();
@@ -383,14 +403,27 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         }
     }
 
+    /**
+     * Handles the UI event when user clicks the flip hourglass button.
+     * Restarts the game timer by flipping the hourglass.
+     */
     public void handleFlipHourglassButton() {
         clientController.restartHourglass();
     }
 
+    /**
+     * Gets the model adapter used for reactive UI updates.
+     *
+     * @return the ModelFxAdapter instance
+     */
     public ModelFxAdapter getModelFxAdapter() {
         return modelFxAdapter;
     }
 
+    /**
+     * Handles the UI event when user clicks the end phase button.
+     * Ends the ship building phase and disables building elements.
+     */
     public void handleEndPhaseButton() {
         clientController.endBuildShipBoardPhase();
 
@@ -417,6 +450,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         prefabShipBoardButton.setManaged(false);
     }
 
+    /**
+     * Shows a message to the user in the build and check ship board view.
+     *
+     * @param message the message to display
+     * @param isPermanent whether the message should persist or fade out
+     */
     @Override
     public void showMessage(String message, boolean isPermanent) {
 
@@ -430,6 +469,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         Platform.runLater(() -> showNonPermanentMessage(message, messageLabel));
     }
 
+    /**
+     * Shows invalid components on the ship board by highlighting them in red.
+     * Sets up the correct action for handling invalid component removal.
+     */
     public void showInvalidComponents() {
         correctShipBoardAction = Optional.of(this::handleInvalidComponent);
         ShipBoardClient shipBoard = clientModel.getMyShipboard();
@@ -437,6 +480,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
                 .forEach(coordinate -> this.boardsController.applyHighlightEffect(coordinate, Color.RED));
     }
 
+    /**
+     * Shows ship parts by highlighting them in different colors.
+     * Each ship part is highlighted in a different color for user selection.
+     *
+     * @param shipParts the list of ship parts to display
+     */
     public void showShipParts(List<Set<Coordinates>> shipParts) {
 
         List<Color> colors = List.of(Color.RED, Color.ORANGE, Color.BLUE, Color.YELLOW);
@@ -457,6 +506,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
 
     }
 
+    /**
+     * Handles grid button clicks based on the current game state.
+     *
+     * @param row the row coordinate of the clicked button
+     * @param column the column coordinate of the clicked button
+     */
     @Override
     public void onGridButtonClick(int row, int column) {
         if (clientModel.getGameState() == GameState.BUILD_SHIPBOARD)
@@ -472,6 +527,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
             handleCrewPlacement(row, column);
     }
 
+    /**
+     * Handles the UI event when user clicks the place pawn button.
+     * Places the player's pawn on the flying board to indicate readiness.
+     */
     public void handlePlacePawnButton() {
         Platform.runLater(() -> {
             littleDeckFlowPane.setVisible(false);
@@ -484,6 +543,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         clientController.placePawn();
     }
 
+    /**
+     * Shows the first to enter button for the flying board.
+     * Displays the pawn placement button when the player is ready to enter the flying phase.
+     */
     public void showFirstToEnterButton() {
         Platform.runLater(() -> {
             this.disableBuildShipboardElements();
@@ -494,6 +557,12 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         });
     }
 
+    /**
+     * Shows the crew placement menu for alien crew members.
+     * Handles the placement of purple and brown aliens in cabins with life support.
+     *
+     * @param isPurpleSubmitted whether the purple alien has already been placed
+     */
     public void showCrewPlacementMenu(boolean isPurpleSubmitted) {
 
         Platform.runLater(() -> {
@@ -593,6 +662,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         }
     }
 
+    /**
+     * Handles the UI event when user confirms crew member placement.
+     * Processes the crew placement choices and submits them to the server.
+     */
     public void handleConfirmCrewMemberButton() {
         if (this.currentCrewMemberChoice == CrewMember.PURPLE_ALIEN)
             showCrewPlacementMenu(true);
@@ -606,6 +679,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         }
     }
 
+    /**
+     * Initializes the build and check ship board controller, called automatically by JavaFX.
+     * Sets up boards, bindings, and initial styling based on game mode.
+     */
     public void initialize() {
         // Caricamento delle board
         try {
@@ -655,10 +732,20 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         applyInitialStyling();
     }
 
+    /**
+     * Handles the UI event when user clicks the generate ship board button.
+     * Requests a list of prefabricated ships from the server.
+     */
     public void handleGenerateShipBoardButton() {
         clientController.requestPrefabShipsList();
     }
 
+    /**
+     * Shows the prefabricated ship boards selection menu.
+     * Displays available prefab ships with their descriptions and selection buttons.
+     *
+     * @param prefabShips the list of available prefabricated ships
+     */
     public void showPrefabShipBoards(List<PrefabShipInfo> prefabShips) {
         Platform.runLater(() -> {
             // Pulisci il container precedente
@@ -710,6 +797,10 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         });
     }
 
+    /**
+     * Handles the UI event when user cancels prefab ship selection.
+     * Hides the prefab ships menu and returns to the normal view.
+     */
     public void handleCancelPrefabSelection() {
         hidePrefabShipsMenu();
     }
@@ -722,11 +813,19 @@ public class BuildAndCheckShipBoardController extends GuiController implements B
         });
     }
 
+    /**
+     * Shows a message when no more hidden components are available.
+     * Informs the user to select from visible components instead.
+     */
     public void showNoMoreHiddenComponents() {
         showMessage("""
                 Hidden components are no longer available, look among the visible ones...""", false);
     }
 
+    /**
+     * Shows a message when a visible component was stolen by another player.
+     * Informs the user that their selected component is no longer available.
+     */
     public void showStolenVisibleComponent() {
         showMessage("""
                 The component you picked was stolen, try with another one""", false);

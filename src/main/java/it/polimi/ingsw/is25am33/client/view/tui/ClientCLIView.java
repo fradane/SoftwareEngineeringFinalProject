@@ -829,8 +829,8 @@ public class ClientCLIView implements ClientView {
             hitComponent = null;
         } else {
             showMessage("GOOD JOB! You are safe!", STANDARD);
-            setClientState(WAIT_PLAYER);
-            clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CONFIRM_CHECK_SHIPBOARD_AFTER_ATTACK);
         }
     }
 
@@ -1644,33 +1644,33 @@ public class ClientCLIView implements ClientView {
         showEngineWithColor();
 
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleEngines().isEmpty() ) {
-            setClientState(WAIT_PLAYER);
             showMessage("No double engines available.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
             if (clientModel.getCurrAdventureCard().getCardName().equals("FreeSpace"))
                 showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedEngines, selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_CHOOSE_ENGINES);
             return;
         }
 
         if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
-            setClientState(WAIT_PLAYER);
             showMessage("No battery boxes available so you can't activate double engine.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
             if (clientModel.getCurrAdventureCard().getCardName().equals("FreeSpace"))
                 showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedEngines, selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_CHOOSE_ENGINES);
             return;
         }
 
         //se non ci sono batterie disponibili nei box allora non puoi attivare i doppi cannoni
         if(!isThereAvailableBattery()) {
-            setClientState(WAIT_PLAYER);
             showMessage("You're out of batteries, so you can't activate double engine.", STANDARD);
             showMessage("You can use only single engine", STANDARD);
             if (clientModel.getCurrAdventureCard().getCardName().equals("FreeSpace"))
                 showMessage("ATTENTION! If your ship doesn't have engine power, you will be eliminated!", NOTIFICATION_INFO);
-            clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedEngines, selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_CHOOSE_ENGINES);
             return;
         }
 
@@ -1743,16 +1743,16 @@ public class ClientCLIView implements ClientView {
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleCannons().isEmpty() ) {
             showMessage("No double cannon available.", STANDARD);
             showMessage("You can use only single cannon", STANDARD);
-            setClientState(WAIT_PLAYER);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_CHOOSE_CANNONS);
             return;
         }
 
         if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
             showMessage("No battery boxes available so you can't activate double cannon.", STANDARD);
             showMessage("You can use only single cannon", STANDARD);
-            setClientState(WAIT_PLAYER);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_CHOOSE_CANNONS);
             return;
         }
 
@@ -1760,8 +1760,8 @@ public class ClientCLIView implements ClientView {
         if(!isThereAvailableBattery()) {
             showMessage("You're out of batteries, so you can't activate double cannon.", STANDARD);
             showMessage("You can use only single cannon", STANDARD);
-            setClientState(WAIT_PLAYER);
-            clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_CHOOSE_CANNONS);
             return;
         }
 
@@ -1785,16 +1785,16 @@ public class ClientCLIView implements ClientView {
         if (clientModel.getShipboardOf(clientController.getNickname()).getShields().isEmpty() ) {
             showMessage("No shield available.", STANDARD);
             showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
-            setClientState(WAIT_PLAYER);
-            clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_DEFEND_FROM_SMALL_DANGEROUS_OBJ);
             return;
         }
 
         if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
             showMessage("No battery boxes available so you can't activate shield.", STANDARD);
             showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
-            setClientState(WAIT_PLAYER);
-            clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_DEFEND_FROM_SMALL_DANGEROUS_OBJ);
             return;
         }
 
@@ -1802,8 +1802,8 @@ public class ClientCLIView implements ClientView {
         if (!isThereAvailableBattery()) {
             showMessage("You're out of batteries, so you can't activate shield.", STANDARD);
             showMessage("ATTENTION! You can't defend!", NOTIFICATION_INFO);
-            setClientState(WAIT_PLAYER);
-            clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_DEFEND_FROM_SMALL_DANGEROUS_OBJ);
             return;
         }
 
@@ -1829,16 +1829,16 @@ public class ClientCLIView implements ClientView {
         if(clientModel.getShipboardOf(clientController.getNickname()).getDoubleCannons().isEmpty() ) {
             showMessage("No double Cannon available.", STANDARD);
             showMessage("ATTENTION! You can defend only with single cannon!", NOTIFICATION_INFO);
-            setClientState(WAIT_PLAYER);
-            clientController.playerHandleBigMeteorite(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_DEFEND_FROM_BIG_DANGEROUS_OBJ);
             return;
         }
 
         if (clientModel.getShipboardOf(clientController.getNickname()).getBatteryBoxes().isEmpty()){
             showMessage("No battery boxes available so you can't activate Double Cannons.", STANDARD);
             showMessage("ATTENTION! You can defend only with single cannon!", NOTIFICATION_INFO);
-            setClientState(WAIT_PLAYER);
-            clientController.playerHandleBigMeteorite(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_DEFEND_FROM_BIG_DANGEROUS_OBJ);
             return;
         }
 
@@ -1846,7 +1846,8 @@ public class ClientCLIView implements ClientView {
         if(!isThereAvailableBattery()) {
             showMessage("You're out of batteries, so you can't activate double Cannon.", STANDARD);
             showMessage("You can use only single Cannon", STANDARD);
-            clientController.playerHandleBigMeteorite(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+            showMessage("Press any key to continue...", ASK);
+            setClientState(CANNOT_DEFEND_FROM_BIG_DANGEROUS_OBJ);
             return;
         }
 
@@ -2324,6 +2325,14 @@ public class ClientCLIView implements ClientView {
     }
 
     @Override
+    public void notifyPlayerDisconnected(String disconnectedPlayerNickname) {
+        showMessage(disconnectedPlayerNickname + " disconnected.", ERROR);
+        showMessage("GAME ENDED", STANDARD);
+        showMessage("Press any key to quit...", STANDARD);
+        setClientState(WAITING_TO_EXIT);
+    }
+
+    @Override
     public void showHandleCubesMalusMenu() {
 
         if(!clientModel.isMyTurn()){
@@ -2354,9 +2363,8 @@ public class ClientCLIView implements ClientView {
             } else {
                 showMessage("You don't have any cube or battery box", STANDARD);
                 showMessage("You are safe...for now", STANDARD);
-                setClientState(WAIT_PLAYER);
-                clientController.playerChoseStorage(clientController.getNickname(), selectedStorage);
-                storageManager.resetMalusState();
+                showMessage("Press any key to continue...", ASK);
+                setClientState(CANNOT_HANDLE_CUBE_MALUS);
             }
             return;
         }
@@ -4189,6 +4197,36 @@ public class ClientCLIView implements ClientView {
                     } catch (NumberFormatException e) {
                         showMessage("Invalid input. Please enter valid numbers for row and column.", ERROR);
                     }
+                    break;
+
+                case CANNOT_CHOOSE_CANNONS:
+                    setClientState(WAIT_PLAYER);
+                    clientController.playerChoseDoubleCannons(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+                    break;
+                case CANNOT_CHOOSE_ENGINES:
+                    setClientState(WAIT_PLAYER);
+                    clientController.playerChoseDoubleEngines(clientModel.getMyNickname(), selectedEngines, selectedBatteries);
+                    break;
+                case CANNOT_HANDLE_CUBE_MALUS:
+                    setClientState(WAIT_PLAYER);
+                    clientController.playerChoseStorage(clientController.getNickname(), selectedStorage);
+                    storageManager.resetMalusState();
+                    break;
+                case CANNOT_DEFEND_FROM_SMALL_DANGEROUS_OBJ:
+                    setClientState(WAIT_PLAYER);
+                    clientController.playerHandleSmallDanObj(clientModel.getMyNickname(),selectedShields,selectedBatteries);
+                    break;
+                case CANNOT_DEFEND_FROM_BIG_DANGEROUS_OBJ:
+                    setClientState(WAIT_PLAYER);
+                    clientController.playerHandleBigMeteorite(clientModel.getMyNickname(),selectedCannons,selectedBatteries);
+                    break;
+                case CONFIRM_CHECK_SHIPBOARD_AFTER_ATTACK:
+                    setClientState(WAIT_PLAYER);
+                    clientController.startCheckShipBoardAfterAttack(clientModel.getMyNickname(), hitComponent);
+                    break;
+
+                case WAITING_TO_EXIT:
+                    System.exit(0);
                     break;
 
                 default:

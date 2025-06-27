@@ -21,6 +21,10 @@ public class StartViewController extends GuiController {
     @FXML
     private Button startButton;
 
+    /**
+     * Initializes the start view controller, called automatically by JavaFX.
+     * Sets up initial animations and focuses the nickname field.
+     */
     public void initialize() {
         Platform.runLater(() -> {
             nicknameField.requestFocus();
@@ -70,6 +74,12 @@ public class StartViewController extends GuiController {
         clientController.register(nickname);
     }
 
+    /**
+     * Shows a message to the user in the start view.
+     *
+     * @param message the message to display
+     * @param isPermanent whether the message should persist or fade out
+     */
     @Override
     public void showMessage(String message, boolean isPermanent) {
         Platform.runLater(() -> {
@@ -133,6 +143,10 @@ public class StartViewController extends GuiController {
         timeline.play();
     }
 
+    /**
+     * Prompts the user to enter their nickname again.
+     * Resets the form and focuses the nickname field.
+     */
     public void askNickname() {
         Platform.runLater(() -> {
             nicknameField.setText("");
@@ -146,6 +160,11 @@ public class StartViewController extends GuiController {
         });
     }
 
+    /**
+     * Displays a server connection error message to the user.
+     *
+     * @param errorMessage the error message from the server
+     */
     public void showServerError(String errorMessage) {
         String formattedMessage = "Connection Error: " + errorMessage;
         showMessage(formattedMessage, false);

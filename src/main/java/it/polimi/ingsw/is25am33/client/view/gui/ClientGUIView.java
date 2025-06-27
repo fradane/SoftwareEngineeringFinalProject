@@ -12,36 +12,70 @@ import java.util.Set;
 
 public abstract class ClientGUIView implements ClientView {
 
+    /**
+     * Shows a ship board with color mapping for components.
+     *
+     * @param shipBoardClient the ship board to display
+     * @param shipBoardOwnerNickname the nickname of the ship board owner
+     * @param colorMap mapping of colors to coordinate sets for visual representation
+     */
     @Override
     public void showShipBoard(ShipBoardClient shipBoardClient, String shipBoardOwnerNickname, Map<String, Set<Coordinates>> colorMap) {
         //TODO
     }
 
+    /**
+     * Shows the valid ship board menu.
+     */
     @Override
     public void showValidShipBoardMenu() {
         //TODO
     }
 
+    /**
+     * Shows the menu for choosing which component to remove.
+     */
     @Override
     public void showChooseComponentToRemoveMenu() {
         //TODO
     }
 
+    /**
+     * Shows the menu for choosing ship parts.
+     *
+     * @param shipParts list of ship part coordinate sets to choose from
+     */
     @Override
     public void showChooseShipPartsMenu(List<Set<Coordinates>> shipParts) {
         //TODO
     }
 
+    /**
+     * Shows information about infected crew members that were removed.
+     *
+     * @param cabinWithNeighbors coordinates of cabins with their neighbors where crew members were removed
+     */
     @Override
     public void showInfectedCrewMembersRemoved(Set<Coordinates> cabinWithNeighbors) {
         //TODO
     }
 
+    /**
+     * Shows the end game information including final ranking and prettiest ship winners.
+     *
+     * @param finalRanking list of player final data sorted by ranking
+     * @param playersNicknamesWithPrettiestShip list of player nicknames who have the prettiest ship
+     */
     @Override
     public void showEndGameInfo(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
         //TODO
     }
 
+    /**
+     * Shows notification that a player has landed early.
+     *
+     * @param nickname the nickname of the player who landed early
+     */
     @Override
     public void showPlayerEarlyLanded(String nickname) {
         //TODO

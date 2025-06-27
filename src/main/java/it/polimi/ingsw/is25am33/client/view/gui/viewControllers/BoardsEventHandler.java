@@ -9,10 +9,10 @@ public interface BoardsEventHandler {
     // TODO
 
     /**
-     * Chiamato quando viene cliccato un pulsante della griglia principale.
+     * Called when a button on the main grid is clicked.
      *
-     * @param row la riga del modello (4-8)
-     * @param column la colonna del modello (3-9)
+     * @param row the model row (4-8)
+     * @param column the model column (3-9)
      */
     void onGridButtonClick(int row, int column);
 

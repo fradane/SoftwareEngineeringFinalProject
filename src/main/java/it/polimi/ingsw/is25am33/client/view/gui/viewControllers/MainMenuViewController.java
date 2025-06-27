@@ -65,6 +65,10 @@ public class MainMenuViewController extends GuiController {
     @FXML
     private Label errorLabel;
 
+    /**
+     * Updates the list of available games in the UI.
+     * Synchronizes access to the game list and updates the ListView.
+     */
     public void setAvailableGames() {
         Platform.runLater(() -> {
             synchronized (gameInfoList) {
@@ -73,6 +77,10 @@ public class MainMenuViewController extends GuiController {
         });
     }
 
+    /**
+     * Initializes the main menu view controller, called automatically by JavaFX.
+     * Sets up combo boxes and list view cell factories.
+     */
     @FXML
     public void initialize() {
         colorComboBox.getItems().setAll(PlayerColor.values());
@@ -134,12 +142,20 @@ public class MainMenuViewController extends GuiController {
         fadeOut.play();
     }
 
+    /**
+     * Handles the UI event when user wants to join an existing game.
+     * Shows the choose game form.
+     */
     @FXML
     public void handleChooseGameForm() {
         hideErrorLabel();
         showForm(chooseGameForm);
     }
 
+    /**
+     * Handles the selection of a game from the available games list.
+     * Validates the selection and proceeds to color selection.
+     */
     @FXML
     public void handleChooseGame() {
         GameInfo gameInfo = gameListView.getSelectionModel().getSelectedItem();
@@ -158,6 +174,10 @@ public class MainMenuViewController extends GuiController {
         );
     }
 
+    /**
+     * Handles the UI event when user submits their game join request.
+     * Validates color selection and sends join request to server.
+     */
     @FXML
     public void handleSubmitJoinGame() {
         PlayerColor chosenColor = colorListView.getSelectionModel().getSelectedItem();
@@ -240,6 +260,12 @@ public class MainMenuViewController extends GuiController {
         });
     }
 
+    /**
+     * Shows a message to the user in the main menu view.
+     *
+     * @param errorMessage the message to display
+     * @param isPermanent whether the message should persist or fade out
+     */
     @Override
     public void showMessage(String errorMessage, boolean isPermanent) {
         Platform.runLater(() -> {
@@ -264,6 +290,11 @@ public class MainMenuViewController extends GuiController {
         });
     }
 
+    /**
+     * Refreshes the list of available games with new data from the server.
+     *
+     * @param gameInfos the updated list of game information
+     */
     public void refreshGameInfos(List<GameInfo> gameInfos) {
         synchronized (gameInfoList) {
             gameInfoList.clear();

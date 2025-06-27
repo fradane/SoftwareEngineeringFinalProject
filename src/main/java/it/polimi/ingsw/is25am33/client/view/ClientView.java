@@ -342,4 +342,6 @@ public interface ClientView {
     void showCubeRedistributionMenu();
 
     void showStolenVisibleComponent();
+
+    void notifyPlayerDisconnected(String disconnectedPlayerNickname);
 }

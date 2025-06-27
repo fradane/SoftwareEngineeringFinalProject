@@ -21,140 +21,12 @@ public class PrefabShipFactory {
     //TODO aggiungere una nave prefabbricata per i testing durante l'esame. Quindi una nave completa per giocare e poter sfruttare tutte le carte e una scorretta per mostrare il controllo della shipboard
     static {
         // Inizializza le navi prefabbricate disponibili
-        PREFAB_SHIPS.put("storage_ship", new PrefabShipInfo(
-                "storage_ship",
-                "storage_ship",
-                "Ship for testing cube malus",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("basic_ship", new PrefabShipInfo(
-                "basic_ship",
-                "Basic Ship",
-                "A simple ship with essential components",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("cargo_ship", new PrefabShipInfo(
-                "cargo_ship",
-                "cargo ship",
-                "ship which can only store cargo cubes",
-                false,
-                true
-        ));
-
-        PREFAB_SHIPS.put("basic_gui_shipboard", new PrefabShipInfo(
-                "basic_gui_shipboard",
-                "GUI ship",
-                "A simple ship, but GUI friendly",
-                false,
-                true
-        ));
-
-        PREFAB_SHIPS.put("gui_shipboard_meteorite", new PrefabShipInfo(
-                "gui_shipboard_meteorite",
-                "meteorite_GUI",
-                "ship with shields and battery box",
-                false,
-                true
-        ));
-
-        PREFAB_SHIPS.put("ship_for_meteorites", new PrefabShipInfo(
-                "ship_for_meteorites",
-                "ship_for_meteorites",
-                "A ship with cannon, double cannon and shield",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("test_many_exposed", new PrefabShipInfo(
-                "test_many_exposed",
-                "Test Many Exposed",
-                "Ship with many exposed connectors for prettiest ship tests",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("test_no_exposed", new PrefabShipInfo(
-                "test_no_exposed",
-                "Test No Exposed",
-                "Ship with no exposed connectors for prettiest ship tests",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("test_cargo_full", new PrefabShipInfo(
-                "test_cargo_full",
-                "Test Cargo Full",
-                "Ship with storages full of specific cubes",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("test_many_lost", new PrefabShipInfo(
-                "test_many_lost",
-                "Test Many Lost",
-                "Ship for testing lost components penalty",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("test_no_engines", new PrefabShipInfo(
-                "test_no_engines",
-                "Test No Engines",
-                "Ship without engines for elimination tests",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("test_no_humans", new PrefabShipInfo(
-                "test_no_humans",
-                "Test No Humans",
-                "Ship without humans for elimination tests",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("cargo_hauler", new PrefabShipInfo(
-                "cargo_hauler",
-                "Cargo Hauler",
-                "A mid-sized cargo ship with 3 crew cabins and 2 storage units, perfect for freight missions",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("nave_scorretta", new PrefabShipInfo(
-                "nave_scorretta",
-                "Nave Scorretta",
-                "nave scorretta per fare controlli sulla nave",
-                false,
-                false
-        ));
-
-        PREFAB_SHIPS.put("engine_batterybox_ship", new PrefabShipInfo(
-                "engine_batterybox_ship",
-                "Nave Con Engine e Battery Box",
-                "ship with engine and battery box",
-                false,
-                true
-        ));
-
         PREFAB_SHIPS.put("nave_completa", new PrefabShipInfo(
                 "nave_completa",
                 "Nave Completa da Gioco",
                 "Una nave completa con tutti i tipi di componenti per testare il gioco",
                 false,
                 true
-        ));
-
-        PREFAB_SHIPS.put("nave_smugglers", new PrefabShipInfo(
-                "nave_smugglers",
-                "Nave Per Carta Smugglers",
-                "Una nave con tutti cannoni a sufficienza e storages",
-                false,
-                false
         ));
 
         PREFAB_SHIPS.put("nave_test_errori", new PrefabShipInfo(
@@ -164,16 +36,6 @@ public class PrefabShipFactory {
                 false,
                 true
         ));
-
-        PREFAB_SHIPS.put("nave_test_errore_check_shipboard", new PrefabShipInfo(
-                "nave_test_errore_check_shipboard",
-                "Nave Test Errori nel metodo checkShipBoard",
-                "Una nave con un errore della checkShipBoard",
-                false,
-                true
-        ));
-
-
 
     }
 
@@ -703,7 +565,6 @@ public class PrefabShipFactory {
         addComponent(shipBoard, new LifeSupport(createCustomConnectors(DOUBLE, EMPTY, DOUBLE, DOUBLE), ColorLifeSupport.PURPLE), 6, 6, "GT-new_tiles_16_for_web144.jpg");
         addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, EMPTY, UNIVERSAL)), 6, 7, "GT-new_tiles_16_for_web48.jpg");
         addComponent(shipBoard, new Cannon(createCustomConnectors(EMPTY, SINGLE, EMPTY, EMPTY)), 6, 8, "GT-new_tiles_16_for_web102.jpg");
-        addComponent(shipBoard, new DoubleCannon(createCustomConnectors(EMPTY, SINGLE, EMPTY, EMPTY)), 6, 9, "GT-new_tiles_16_for_web126.jpg");
 
         // Riga 7
         DoubleCannon doubleCannon7 = new DoubleCannon(createCustomConnectors(EMPTY, DOUBLE, SINGLE, SINGLE));
@@ -718,12 +579,8 @@ public class PrefabShipFactory {
         addComponent(shipBoard, new Shield(createCustomConnectors(SINGLE, SINGLE, EMPTY, SINGLE)), 7, 9, "GT-new_tiles_16_for_web150.jpg");
 
         // Riga 8
-        StandardStorage storage2 = new StandardStorage(createCustomConnectors(DOUBLE, UNIVERSAL, SINGLE, EMPTY), 2);
-        storage2.addCube(CargoCube.BLUE);
-        storage2.addCube(CargoCube.BLUE);
-        addComponent(shipBoard, storage2, 8, 4, "GT-new_tiles_16_for_web18.jpg");
         addComponent(shipBoard, new Cabin(createCustomConnectors(SINGLE, SINGLE, DOUBLE, SINGLE)), 8, 5, "GT-new_tiles_16_for_web36.jpg");
-        addComponent(shipBoard, new LifeSupport(createCustomConnectors(EMPTY, EMPTY, EMPTY, UNIVERSAL), ColorLifeSupport.PURPLE), 8, 6, "GT-new_tiles_16_for_web145.jpg");
+        addComponent(shipBoard, new LifeSupport(createCustomConnectors(EMPTY, EMPTY, EMPTY, UNIVERSAL), ColorLifeSupport.BROWN), 8, 6, "GT-new_tiles_16_for_web139.jpg");
         addComponent(shipBoard, new DoubleEngine(createCustomConnectors(SINGLE, EMPTY, EMPTY, EMPTY)), 8, 7, "GT-new_tiles_16_for_web92.jpg");
         addComponent(shipBoard, new BatteryBox(createCustomConnectors(SINGLE, DOUBLE, EMPTY, EMPTY), 3), 8, 8, "GT-new_tiles_16_for_web12.jpg");
         Cannon cannon8 = new Cannon(createCustomConnectors(EMPTY, EMPTY, DOUBLE, UNIVERSAL));

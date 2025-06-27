@@ -1,6 +1,7 @@
 package it.polimi.ingsw.is25am33.network;
 
 import it.polimi.ingsw.is25am33.client.controller.CallableOnClientController;
+import it.polimi.ingsw.is25am33.client.controller.ClientController;
 import it.polimi.ingsw.is25am33.controller.GameController;
 import it.polimi.ingsw.is25am33.model.enumFiles.PlayerColor;
 import it.polimi.ingsw.is25am33.model.game.GameInfo;
@@ -112,24 +113,41 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
     }
 
 
-    private void handleDisconnection(String nickname) {
-            clients.remove(nickname);
+    public void handleDisconnection(String nickname) {
 
-            // Atomic remove-and-check: if was in game, get controller, otherwise null
+        synchronized (this) {  // Sincronizza sulla GameController instance per evitare race condition
             GameController gameController = clientGame.remove(nickname);
-            
-            if (gameController != null) {
-                // Was in game, handle disconnection
-                leaveGameAfterCreation(gameController, nickname, true);
-            } else {
-                // Was not in game, handle lobby disconnection
-                leaveGameBeforeCreation(nickname);
-            }
-    }
 
-    public void leaveGameAfterCreation(GameController gameController, String nickname, Boolean isFirst){
-        clients.remove(nickname);
-        gameController.leaveGameAfterCreation(nickname, isFirst);
+            if (gameController == null) {
+                System.out.println("Player " + nickname + " left.");
+                return;
+            }
+
+            clients.remove(nickname);
+            gameController.getClientControllers().remove(nickname);
+            Set<String> playerLeft = new HashSet<>(gameController.getClientControllers().keySet());
+
+            gameController.getGameModel().getGameClientNotifier().notifyClients(
+                    playerLeft,
+                    (nicknameToNotify, controller) -> controller.notifyPlayerDisconnected(nicknameToNotify, nickname)
+            );
+
+            String gameInfoId = gameController.getGameInfo().getGameId();
+
+            serverPingPongManager.stop(nickname);
+            System.out.println("[" + gameInfoId + "] Player " + nickname + " left the game");
+
+            playerLeft.forEach(player -> {
+                serverPingPongManager.stop(player);
+                clients.remove(player);
+                clientGame.remove(player);
+                System.out.println("[" + gameInfoId + "] Player " + player + " left the game");
+            });
+
+            gameControllers.remove(gameInfoId);
+            System.out.println("[" + gameInfoId + "] Deleted!");
+        }
+
     }
 
     public List<GameInfo> getAvailableGames() {
@@ -168,31 +186,31 @@ public class DNS extends UnicastRemoteObject implements CallableOnDNS {
         return newGameController.getGameInfo();
     }
 
-    public void removeGame(String gameId) {
-        gameControllers.remove(gameId);
-        // Notifica tutti i client in attesa che una partita è stata rimossa
-        notifyAvailableGamesToWaitingClients();
-    }
-
-    public void pingToClientFromServer(String nickname) throws IOException{
-       clients.get(nickname).pingToClientFromServer(nickname);
+    public void pingToClientFromServer(String nickname) throws IOException {
+        CallableOnClientController clientController = clients.get(nickname);
+        if (clientController == null) return;
+        clientController.pingToClientFromServer(nickname);
     }
 
     public void pongToServerFromClient(String nickname) throws IOException{
         //System.out.println("Pong ricevuto da " + nickname);
-        serverPingPongManager.onPongReceived(nickname, ()->handleDisconnection(nickname));
+        serverPingPongManager.onPongReceived(nickname, ()-> {
+            synchronized (DNS.this) {
+                if (clientGame.get(nickname) == null) return;
+            }
+            handleDisconnection(nickname);
+        });
     }
 
     public void pingToServerFromClient(String nickname) throws IOException{
-        //System.out.println("Ping ricevuto da " + nickname);
-        clients.get(nickname).pongToClientFromServer(nickname);
+        CallableOnClientController clientController = clients.get(nickname);
+        if (clientController == null) return;
+        clientController.pongToClientFromServer(nickname);
     }
 
-    public void leaveGameBeforeCreation(String nickname){
-        clients.remove(nickname);
-        System.out.println(nickname + " left the lobby");
+    public void leaveGameBeforeCreation(String nickname) {
+        handleDisconnection(nickname);
     }
-
 
     @Override
     public boolean joinGame(String gameId, String nickname, PlayerColor color) throws IOException {

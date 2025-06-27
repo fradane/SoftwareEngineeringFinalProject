@@ -34,6 +34,12 @@ public class EndGameController extends GuiController implements Initializable {
 
     private boolean gameEnded = false;
 
+    /**
+     * Initializes the end game controller, called automatically by JavaFX.
+     *
+     * @param location the location used to resolve relative paths for the root object
+     * @param resources the resources used to localize the root object
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (centerStackPane == null) {
@@ -41,13 +47,22 @@ public class EndGameController extends GuiController implements Initializable {
         }
     }
 
+    /**
+     * Shows a message to the user in the end game view.
+     *
+     * @param message the message to display
+     * @param isPermanent whether the message should persist or fade out
+     */
     @Override
     public void showMessage(String message, boolean isPermanent) {
         System.out.println("EndGame message: " + message);
     }
 
     /**
-     * Shows the final game information
+     * Shows the final game information with ranking and results.
+     *
+     * @param finalRanking the final ranking of all players
+     * @param playersNicknamesWithPrettiestShip the list of players with the prettiest ships
      */
     public void showEndGameInfoMenu(List<PlayerFinalData> finalRanking, List<String> playersNicknamesWithPrettiestShip) {
         Platform.runLater(() -> {

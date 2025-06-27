@@ -62,11 +62,23 @@ public class Level2BoardsController extends BoardsController {
             Map.entry(23, new Pair<>(12, 8))
     );
 
+    /**
+     * Gets the relative positions for the Level 2 flying board.
+     *
+     * @return a map of position indices to coordinate pairs for Level 2
+     */
     @Override
     protected Map<Integer, Pair<Integer, Integer>> getFlyingBoardRelativePositions() {
         return flyingBoardRelativePositions;
     }
 
+    /**
+     * Binds the Level 2 boards controller to the model and event handlers.
+     *
+     * @param modelFxAdapter the adapter for reactive UI updates
+     * @param boardsEventHandler the handler for board interaction events
+     * @param clientModel the client-side game model
+     */
     @Override
     public void bindBoards(ModelFxAdapter modelFxAdapter, BoardsEventHandler boardsEventHandler, ClientModel clientModel) {
         this.modelFxAdapter = modelFxAdapter;
@@ -82,10 +94,17 @@ public class Level2BoardsController extends BoardsController {
         clientModel.getPlayerClientData().forEach((nickname, _) -> clientModel.refreshShipBoardOf(nickname));
     }
 
+    /**
+     * Initializes the Level 2 boards controller, called automatically by JavaFX.
+     */
     public void initialize() {
 
     }
 
+    /**
+     * Initializes the mapping between coordinates and UI buttons for Level 2.
+     * Maps Level 2 ship board positions to their corresponding FXML button references.
+     */
     @Override
     protected void initializeButtonMap() {
 
@@ -173,6 +192,12 @@ public class Level2BoardsController extends BoardsController {
 
     }
 
+    /**
+     * Sets up binding for other players' booked components display.
+     *
+     * @param nickname the nickname of the player
+     * @param imageViewImageViewPair the pair of image views for displaying booked components
+     */
     protected void setupOthersBookedComponentBinding(String nickname, Pair<ImageView, ImageView> imageViewImageViewPair) {
         // reserved components binding
         Pair<ObjectProperty<Component>, ObjectProperty<Component>> reservedComponents = modelFxAdapter.getObservableBookedComponentsOf(nickname);

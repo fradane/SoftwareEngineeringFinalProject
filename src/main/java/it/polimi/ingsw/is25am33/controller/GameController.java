@@ -23,6 +23,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class GameController extends UnicastRemoteObject implements CallableOnGameController {
     private final GameModel gameModel;
@@ -49,6 +50,10 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     public void addPlayer(String nickname, PlayerColor color, CallableOnClientController clientController) {
         clientControllers.put(nickname, clientController);
         gameModel.addPlayer(nickname, color, clientController);
+    }
+
+    public ConcurrentHashMap<String, CallableOnClientController> getClientControllers() {
+        return clientControllers;
     }
 
     public void removePlayer(String nickname) {
@@ -84,23 +89,8 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
     }
 
     @Override
-    public void leaveGameAfterCreation(String nickname, Boolean isFirst) {
-        //se voglio uscire notifico a tutti gli altri giocatori nel game che mi sto disconnettendo ed esco.
-        // a quel punto loro si disconnetteranno tramite il game context
-        dns.getClientGame().remove(nickname);
-        
-        synchronized (this) {  // Sincronizza sulla GameController instance per evitare race condition
-            clientControllers.remove(nickname);
-            System.out.println("[" + getGameInfo().getGameId() + "] Player " + nickname + " left the game");
-            //se sono il primo a chiamare e ci sono altri client notifico e chiudo altrimenti se ho rimosso gia tutti i client chiudo il gioco
-            if(isFirst && !gameModel.getGameClientNotifier().getClientControllers().isEmpty()) {
-                gameModel.getGameClientNotifier().notifyDisconnection(nickname);
-            } else if(clientControllers.isEmpty()) {
-                dns.removeGame(getGameInfo().getGameId());
-                System.out.println("[" + getGameInfo().getGameId() + "] Deleted!");
-            }
-        }
-        //se un client è crashato lo stato del gioco viene settato a false in automatico alla ricezione della disconnessione
+    public void leaveGameAfterCreation(String nickname) {
+        dns.handleDisconnection(nickname);
     }
 
     @Override
@@ -126,24 +116,36 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
      */
     @Override
     public void playerWantsToPlaceFocusedComponent(String nickname, Coordinates coordinates, int rotation) {
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+        Player player = gameModel.getPlayers().get(nickname);
+
+        ShipBoard shipBoard = player.getPersonalBoard();
         for (int i = 0; i < rotation; i++)
             shipBoard.getFocusedComponent().rotate();
         shipBoard.placeComponentWithFocus(coordinates.getX(), coordinates.getY());
+
+
     }
 
     @Override
     public void playerWantsToReserveFocusedComponent(String nickname) {
-        ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
+        Player player = gameModel.getPlayers().get(nickname);
+
+
+        ShipBoard shipBoard = player.getPersonalBoard();
         ((Level2ShipBoard) shipBoard).book();
+
     }
 
     @Override
     public void playerWantsToReleaseFocusedComponent(String nickname){
+        Player player = gameModel.getPlayers().get(nickname);
+
+
         ShipBoard shipBoard = gameModel.getPlayers().get(nickname).getPersonalBoard();
         Component component = shipBoard.releaseFocusedComponent();
-        if(!shipBoard.getNotActiveComponents().contains(component))
+        if (!shipBoard.getNotActiveComponents().contains(component))
             gameModel.getComponentTable().addVisibleComponent(component);
+
     }
 
     @Override

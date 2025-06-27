@@ -283,31 +283,30 @@ public abstract class ShipBoard implements Serializable, ShipBoardClient {
      * @throws IllegalArgumentException If the position is invalid or violates placement rules.
      */
     public void placeComponentWithFocus(int x, int y) throws IllegalArgumentException {
-        synchronized (shipMatrix) {
 
-            checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
+        checkPosition(x, y); // throws an exception if is not allowed to place the component in that position
 
-            shipMatrix[x][y] = focusedComponent;
+        shipMatrix[x][y] = focusedComponent;
 
-            focusedComponent.insertInComponentsMap(componentsPerType);
+        focusedComponent.insertInComponentsMap(componentsPerType);
 
-            if(notActiveComponents.contains(focusedComponent))
-                removeComponentByReference(notActiveComponents, focusedComponent);
+        if(notActiveComponents.contains(focusedComponent))
+            removeComponentByReference(notActiveComponents, focusedComponent);
 
-            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                    clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
-            });
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+                clientController.notifyComponentPlaced(nicknameToNotify, player.getNickname(), focusedComponent, new Coordinates(x, y));
+        });
 
-            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyComponentPerType(nicknameToNotify,player.getNickname(),componentsPerType);
-            });
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyComponentPerType(nicknameToNotify,player.getNickname(),componentsPerType);
+        });
 
-            gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
-                clientController.notifyNotActiveComponents(nicknameToNotify,player.getNickname(),notActiveComponents);
-            });
+        gameClientNotifier.notifyAllClients((nicknameToNotify, clientController) -> {
+            clientController.notifyNotActiveComponents(nicknameToNotify,player.getNickname(),notActiveComponents);
+        });
 
-            focusedComponent = null;
-        }
+        focusedComponent = null;
+
     }
 
     private void removeComponentByReference(List<Component> list, Component target) {

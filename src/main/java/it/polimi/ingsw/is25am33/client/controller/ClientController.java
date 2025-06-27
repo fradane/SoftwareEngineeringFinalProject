@@ -699,8 +699,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
 
     @Override
     public void notifyPlayerDisconnected(String nicknameToNotify, String disconnectedPlayerNickname) {
-        view.showMessage(disconnectedPlayerNickname + " disconnected.", ERROR);
-        view.showMessage("GAME ENDED", STANDARD);
+        view.notifyPlayerDisconnected(disconnectedPlayerNickname);
     }
 
     //TODO probabilmente sarà da cancellare quando la fase di gioco funzionerà

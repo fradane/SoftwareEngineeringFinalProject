@@ -56,12 +56,32 @@ public abstract class BoardsController {
 
     private int landedPlayers = 0;
 
+    /**
+     * Binds the boards controller to the model and event handlers.
+     *
+     * @param modelFxAdapter the adapter for reactive UI updates
+     * @param boardsEventHandler the handler for board interaction events
+     * @param clientModel the client-side game model
+     */
     abstract void bindBoards(ModelFxAdapter modelFxAdapter, BoardsEventHandler boardsEventHandler, ClientModel clientModel);
 
+    /**
+     * Initializes the mapping between coordinates and UI buttons.
+     * Each subclass defines its own coordinate-to-button mapping.
+     */
     protected abstract void initializeButtonMap();
 
+    /**
+     * Gets the relative positions for the flying board based on the game level.
+     *
+     * @return a map of position indices to coordinate pairs
+     */
     protected abstract Map<Integer, Pair<Integer, Integer>> getFlyingBoardRelativePositions();
 
+    /**
+     * Removes all highlight effects from the ship board buttons.
+     * Thread-safe method that clears visual effects and styling.
+     */
     public void removeHighlightColor() {
         Set<Button> buttonsToRemove;
 
@@ -117,6 +137,12 @@ public abstract class BoardsController {
 //        });
 //    }
 
+    /**
+     * Applies a highlight effect to a specific button on the ship board.
+     *
+     * @param coordinates the coordinates of the button to highlight
+     * @param color the color of the highlight effect
+     */
     public void applyHighlightEffect(Coordinates coordinates, Color color) {
         String buttonId = fromCoordsToButtonId(coordinates);
         Button button = buttonMap.get(buttonId);
@@ -209,6 +235,10 @@ public abstract class BoardsController {
         image.setEffect(dropShadow);
     }
 
+    /**
+     * Handles the UI event when user clicks the flying board button.
+     * Switches the view to show the flying board.
+     */
     @FXML
     protected void handleShowFlyingBoardButton() {
         Platform.runLater(() -> {
@@ -354,6 +384,10 @@ public abstract class BoardsController {
         });
     }
 
+    /**
+     * Handles the UI event when user clicks the my ship board button.
+     * Switches the view to show the player's own ship board.
+     */
     @FXML
     public void handleMyShipBoardButton() {
         Platform.runLater(() -> {
@@ -367,6 +401,12 @@ public abstract class BoardsController {
         });
     }
 
+    /**
+     * Handles clicks on ship board grid buttons.
+     * Parses button coordinates and delegates to the event handler.
+     *
+     * @param actionEvent the JavaFX action event from the button click
+     */
     @FXML
     public void handleGridButtonClick(ActionEvent actionEvent) {
         Button clickedButton = (Button) actionEvent.getSource();
@@ -380,6 +420,14 @@ public abstract class BoardsController {
         boardsEventHandler.onGridButtonClick(row, column);
     }
 
+    /**
+     * Updates the visual appearance of ship boards when components change.
+     *
+     * @param nickname the player whose ship board to update
+     * @param row the row coordinate of the changed component
+     * @param column the column coordinate of the changed component
+     * @param newComponent the new component to display
+     */
     public void updateShipBoards(String nickname, int row, int column, Component newComponent) {
         if (nickname.equals(clientModel.getMyNickname())) {
             String buttonId = fromCoordsToButtonId(new Coordinates(row, column));
