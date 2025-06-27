@@ -1822,7 +1822,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
                     showMessage("You can use a double or single cannon to destroy it or let it hit your ship (reminder " + bigMeteorite.getDirection() + " " + (bigMeteorite.getCoordinate() + 1) + ")", true);
 
                     highlightDoubleCannon();
-                    createAndAddButton("Skip double engine selection",
+                    createAndAddButton("Skip double cannon selection",
                             () -> {
                         boardsController.removeHighlightColor();
                         bottomHBox.getChildren().clear();
