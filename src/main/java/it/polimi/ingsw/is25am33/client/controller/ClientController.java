@@ -1063,7 +1063,7 @@ public class ClientController extends UnicastRemoteObject implements CallableOnC
      * about network connectivity issues.
      */
     public void handleDisconnection() {
-        view.showDisconnectMessage("DISCONNECTION: No pong received from server");
+        notifyPlayerDisconnected(clientModel.getMyNickname(), clientModel.getMyNickname());
     }
 
     /**

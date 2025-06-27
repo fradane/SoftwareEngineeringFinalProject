@@ -190,6 +190,14 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    /**
+     * Handles a player's request to reserve a focused component during the game.
+     * The method verifies the game's current state and ensures the request is processed
+     * only if the game is in the appropriate state. If the game is not in the expected state,
+     * an error message is logged.
+     *
+     * @param nickname the nickname of the player who wants to reserve the focused component
+     */
     @Override
     public void playerWantsToReserveFocusedComponent(String nickname) {
 
@@ -205,6 +213,12 @@ public class GameController extends UnicastRemoteObject implements CallableOnGam
 
     }
 
+    /**
+     * Handles the player's request to release the currently focused component on their shipboard.
+     * Ensures the action is performed only during the appropriate game state and updates the game model accordingly.
+     *
+     * @param nickname the nickname of the player requesting to release the focused component
+     */
     @Override
     public void playerWantsToReleaseFocusedComponent(String nickname) {
         synchronized (gameModel.getPlayers().get(nickname)) {

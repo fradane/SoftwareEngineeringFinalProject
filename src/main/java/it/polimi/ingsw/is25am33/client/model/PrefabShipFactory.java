@@ -554,7 +554,6 @@ public class PrefabShipFactory {
         addComponent(shipBoard, doubleCannon7, 7, 5, "GT-new_tiles_16_for_web131.jpg");
         addComponent(shipBoard, new BatteryBox(createCustomConnectors(EMPTY, EMPTY, UNIVERSAL, UNIVERSAL), 2), 7, 6, "GT-new_tiles_16_for_web10.jpg");
         SpecialStorage storage1 = new SpecialStorage(createCustomConnectors(SINGLE, SINGLE, SINGLE, UNIVERSAL), 1);
-        storage1.addCube(CargoCube.RED);
         addComponent(shipBoard, storage1 , 7, 8, "GT-new_tiles_16_for_web64.jpg");
         addComponent(shipBoard, new Shield(createCustomConnectors(SINGLE, SINGLE, EMPTY, SINGLE)), 7, 9, "GT-new_tiles_16_for_web150.jpg");
 

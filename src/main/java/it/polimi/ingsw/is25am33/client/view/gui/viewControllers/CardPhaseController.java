@@ -37,6 +37,8 @@ import java.util.stream.IntStream;
 
 public class CardPhaseController extends GuiController implements BoardsEventHandler {
     @FXML
+    public Button skipToLastCardButton;
+    @FXML
     private Button exitGameButton;
     @FXML
     private Button landButton;
@@ -116,6 +118,7 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
 
     @FXML
     private void handleSkipToLastCart() {
+        Platform.runLater(() -> skipToLastCardButton.setVisible(false));
         clientController.skipToLastCard();
     }
 
@@ -1292,7 +1295,16 @@ public class CardPhaseController extends GuiController implements BoardsEventHan
         if (boardsController != null) {
             boardsController.removeHighlightColor();
         }
-        Platform.runLater(() -> bottomHBox.getChildren().clear());
+        Platform.runLater(() -> {
+            bottomHBox.getChildren().clear();
+            // Remove cube selection column by restoring original layout
+            if (!centerStackPane.getChildren().isEmpty() && centerStackPane.getChildren().getFirst() instanceof HBox mainLayout) {
+                if (mainLayout.getChildren().size() > 1) {
+                    centerStackPane.getChildren().clear();
+                    centerStackPane.getChildren().add(mainLayout.getChildren().get(1));
+                }
+            }
+        });
     }
 
     private boolean isThereAvailableBattery() {
