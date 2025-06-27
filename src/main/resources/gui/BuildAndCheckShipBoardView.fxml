@@ -8,9 +8,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="borderPane" minWidth="-Infinity"
-            styleClass="game-background" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.BuildAndCheckShipBoardController">
+<BorderPane fx:id="borderPane" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" styleClass="game-background" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.is25am33.client.view.gui.viewControllers.BuildAndCheckShipBoardController">
     <stylesheets>
         <URL value="@/galaxy-truckers.css" />
     </stylesheets>
@@ -21,21 +19,16 @@
                 <Label styleClass="screen-title" text="Galaxy Truckers" />
                 <Region HBox.hgrow="ALWAYS" />
                 <!-- VBox per impilare i bottoni con larghezza uniforme -->
-                <VBox alignment="CENTER_RIGHT" spacing="5" minWidth="120">
-                    <Button fx:id="goBackButton" onAction="#handleGoBackButton"
-                            styleClass="nav-button" text="Go Back"
-                            prefWidth="120" maxWidth="120" visible="false" />
-                    <Button fx:id="exitGameButton" onAction="#handleExitGame"
-                            styleClass="menu-button-secondary" text="EXIT GAME"
-                            prefWidth="120" maxWidth="120" />
+                <VBox alignment="CENTER_RIGHT" minWidth="120" spacing="5">
+                    <Button fx:id="goBackButton" maxWidth="120" onAction="#handleGoBackButton" prefWidth="120" styleClass="nav-button" text="Go Back" visible="false" />
+                    <Button fx:id="exitGameButton" maxWidth="120" onAction="#handleExitGame" prefWidth="120" styleClass="menu-button-secondary" text="EXIT GAME" />
                 </VBox>
             </HBox>
 
             <VBox alignment="CENTER_LEFT" spacing="5" styleClass="timer-container">
                 <HBox>
                     <Label fx:id="timerLabel" styleClass="timer-label" />
-                    <Button fx:id="flipHourglassButton" minHeight="-Infinity" minWidth="-Infinity"
-                            onAction="#handleFlipHourglassButton" styleClass="action-button" text="Flip Hourglass" />
+                    <Button fx:id="flipHourglassButton" minHeight="-Infinity" minWidth="-Infinity" onAction="#handleFlipHourglassButton" styleClass="action-button" text="Flip Hourglass" />
 
                     <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
                         <Label fx:id="messageLabel" alignment="CENTER" contentDisplay="CENTER" styleClass="timer-label" />
@@ -89,8 +82,7 @@
                 </ScrollPane>
 
                 <HBox alignment="CENTER" spacing="20.0">
-                    <Button fx:id="cancelPrefabSelectionButton" onAction="#handleCancelPrefabSelection"
-                            styleClass="action-button" text="Cancel" />
+                    <Button fx:id="cancelPrefabSelectionButton" onAction="#handleCancelPrefabSelection" styleClass="action-button" text="Cancel" />
                     <VBox.margin>
                         <Insets top="20.0" />
                     </VBox.margin>
@@ -124,9 +116,7 @@
             </FlowPane>
 
             <StackPane fx:id="pawnButtonPane" managed="false" styleClass="little-deck-container" visible="false">
-                <Button fx:id="placePawnButton" onAction="#handlePlacePawnButton" styleClass="place-pawn-button"
-                        text="Press the button to place your pawn, FAST!!!" StackPane.alignment="CENTER"
-                        prefWidth="600.0" prefHeight="100.0" style="-fx-font-size: 18pt;" visible="false" />
+                <Button fx:id="placePawnButton" onAction="#handlePlacePawnButton" prefHeight="100.0" prefWidth="600.0" style="-fx-font-size: 18pt;" styleClass="place-pawn-button" text="Press the button to place your pawn, FAST!!!" visible="false" StackPane.alignment="CENTER" />
             </StackPane>
 
         </StackPane>
@@ -136,7 +126,7 @@
         <!-- Pannello destro con componente e controlli -->
         <VBox fx:id="componentsBoxV" maxWidth="350" minWidth="300" spacing="20.0">
             <!-- Pannello dei controlli componente -->
-            <VBox fx:id="componentControlsPanel" alignment="CENTER"  spacing="20.0" styleClass="component-controls"  visible="false" managed="false">
+            <VBox fx:id="componentControlsPanel" alignment="CENTER" managed="false" spacing="20.0" styleClass="component-controls" visible="false">
 
                 <Button fx:id="rotateComponentButton" onAction="#handleRotateComponentButton" styleClass="component-control-button" text="Rotate Component" />
                 <Button fx:id="releaseComponentButton" onAction="#handleReleaseComponentButton" styleClass="component-control-button" text="Release Component" />
@@ -157,17 +147,20 @@
     </right>
 
     <bottom>
-        <HBox fx:id="bottomBox" styleClass="action-bar">
+        <HBox fx:id="bottomBox" maxHeight="95.0" minHeight="140" prefHeight="150.0" prefWidth="993.0" styleClass="action-bar">
             <!-- Spacer sinistro con larghezza fissa -->
-            <Region prefWidth="200.0" />
+            <Region prefWidth="200.0">
+            <padding>
+               <Insets bottom="50.0" />
+            </padding></Region>
 
             <!-- Container centrale per i bottoni principali -->
             <HBox alignment="CENTER" spacing="15.0" HBox.hgrow="ALWAYS">
                 <Button fx:id="pickRandomComponentButton" onAction="#handlePickRandomComponentButton" styleClass="action-button" text="Random Component" />
                 <Button fx:id="prefabShipBoardButton" onAction="#handleGenerateShipBoardButton" styleClass="action-button" text="Load a prebuilt ship board" />
-                <Button fx:id="confirmCrewMemberButton" onAction="#handleConfirmCrewMemberButton" styleClass="action-button" text="CONFIRM" visible="false" managed="false"/>
+                <Button fx:id="confirmCrewMemberButton" managed="false" onAction="#handleConfirmCrewMemberButton" styleClass="action-button" text="CONFIRM" visible="false" />
 
-                <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box" >
+                <ComboBox fx:id="littleDeckComboBox" onAction="#handleLittleDeck" promptText="Watch a little deck" styleClass="game-combo-box">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
                             <Integer fx:value="1" />
@@ -184,7 +177,7 @@
             </HBox>
 
             <padding>
-                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                <Insets bottom="70.0" left="20.0" right="20.0" top="20.0" />
             </padding>
         </HBox>
     </bottom>

@@ -66,6 +66,9 @@ public class ClientGuiController extends Application implements ClientView {
     private static final String CARD_PHASE_CONTROLLER = "CardPhaseController";
     private static final String END_GAME_CONTROLLER = "EndGameController";
 
+    private ControllerState currentControllerState = ControllerState.START_CONTROLLER;
+
+
     public static ClientGuiController getInstance() {
         return instance;
     }
@@ -433,24 +436,6 @@ public class ClientGuiController extends Application implements ClientView {
         return new String[0];
     }
 
-//    @Override
-//    public void showMainMenu() {
-//
-//        javafx.application.Platform.runLater(() -> {
-//            try {
-//                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/MainMenuView.fxml"));
-//                Parent root = loader.load();
-//                mainMenuViewController = loader.getController();
-//                mainMenuViewController.setAvailableGames();
-//                primaryStage.setScene(new Scene(root));
-//                primaryStage.show();
-//            } catch (IOException e) {
-//                System.out.println("Error while loading the main menu view.");
-//                e.printStackTrace();
-//            }
-//        });
-//
-//    }
 
     @Override
     public int showGameMenu() {
@@ -786,16 +771,16 @@ public class ClientGuiController extends Application implements ClientView {
      * Executes a task with a specific controller, queueing if necessary
      */
     private void executeWithController(String controllerType, Runnable task) {
+        ControllerState state = ControllerState.fromString(controllerType);
 
-        String fxmlPath = "";
-
-        switch (controllerType) {
-            case START_CONTROLLER -> fxmlPath = "/gui/StartView.fxml";
-            case MAIN_MENU_CONTROLLER -> fxmlPath = "/gui/MainMenuView.fxml";
-            case BUILD_SHIPBOARD_CONTROLLER -> fxmlPath = "/gui/BuildShipBoardView.fxml";
-            case CARD_PHASE_CONTROLLER ->  fxmlPath = "/gui/CardPhaseView.fxml";
-            case END_GAME_CONTROLLER -> fxmlPath = "/gui/EndGameView.fxml";
+        if(state.getOrder() < currentControllerState.getOrder()){
+            System.err.println("Error: Trying to execute task with controller in wrong order: " + controllerType);
+            return;
         }
+
+        currentControllerState = state;
+
+        String fxmlPath = state.getFxmlPath();
 
         synchronized (loaderLock) {
             // Check if the controller is ready for immediate execution

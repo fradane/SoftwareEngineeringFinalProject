@@ -4,7 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17.0.12"
+<BorderPane
+        xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1"
             styleClass="game-background"
             style="-fx-background-color: #0e0e0e;"
@@ -208,13 +209,11 @@
 
     <!-- Footer con informazioni versione (opzionale) -->
     <bottom>
-        <HBox alignment="CENTER" styleClass="action-bar" minHeight="50">
+        <HBox alignment="CENTER" styleClass="action-bar" minHeight="80" prefHeight="100">
             <padding>
                 <Insets top="10" right="15" bottom="10" left="15" />
             </padding>
 
-            <Label styleClass="version-label"
-                   text="Galaxy Truckers © 2024 - Space Adventure Game" />
         </HBox>
     </bottom>
 
