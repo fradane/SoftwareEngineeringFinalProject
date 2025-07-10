@@ -1,5 +1,6 @@
 # Progetto Finale di Ingegneria del Software / Final Project for Software Engineering
-**Corso di Laurea in Ingegneria Informatica – Politecnico di Milano (A.A. 2024/2025)**
+**Corso di Laurea in Ingegneria Informatica – Politecnico di Milano (A.A. 2024/2025)**  
+**Valutazione / Grade:** 30L/30
 
 ---
 
